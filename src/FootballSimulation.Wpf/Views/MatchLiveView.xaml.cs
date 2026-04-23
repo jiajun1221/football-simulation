@@ -138,7 +138,6 @@ public partial class MatchLiveView : UserControl
         SetScore(0, 0);
 
         _state.CurrentMatch = _gameSessionService.SimulateSelectedTeamFirstHalf(_state.League, _state.SelectedTeam);
-        RefreshFatiguePanel(_state.CurrentMatch);
 
         var completed = await ShowEventsAsync(_state.CurrentMatch.Events, _state.CurrentMatch, _playbackCancellation.Token);
         if (completed && !_hasNavigated)
@@ -164,7 +163,6 @@ public partial class MatchLiveView : UserControl
             _state.CurrentFixture,
             _state.CurrentMatch,
             _state.SelectedTeam);
-        RefreshFatiguePanel(_state.CurrentMatch);
 
         var completed = await ShowEventsAsync(_state.CurrentMatch.Events.Skip(existingEventCount), _state.CurrentMatch, _playbackCancellation.Token);
         if (completed && !_hasNavigated)
@@ -188,8 +186,6 @@ public partial class MatchLiveView : UserControl
                 {
                     SetScore(matchEvent.HomeScore.Value, matchEvent.AwayScore.Value);
                 }
-
-                RefreshFatiguePanel(match);
 
                 if (feedItem.IsGoal)
                 {
@@ -235,54 +231,6 @@ public partial class MatchLiveView : UserControl
     {
         HomeScoreTextBlock.Text = homeScore.ToString();
         AwayScoreTextBlock.Text = awayScore.ToString();
-    }
-
-    private void RefreshFatiguePanel(Match match)
-    {
-        var tiredPlayers = match.HomeTeam.Players
-            .Concat(match.AwayTeam.Players)
-            .Select(player => new
-            {
-                TeamName = match.HomeTeam.Players.Contains(player) ? match.HomeTeam.Name : match.AwayTeam.Name,
-                Player = player,
-                Fatigue = GetFatiguePercentage(player)
-            })
-            .Where(item => item.Fatigue >= 55)
-            .OrderByDescending(item => item.Fatigue)
-            .Take(5)
-            .ToList();
-
-        var substitutions = match.Substitutions
-            .OrderByDescending(substitution => substitution.Minute)
-            .Take(3)
-            .Select(substitution => $"{substitution.Minute}' {substitution.PlayerOnName} on for {substitution.PlayerOffName}");
-
-        var fatigueText = tiredPlayers.Count == 0
-            ? "Fatigue watch: no major tired players yet."
-            : "Fatigue watch: " + string.Join(" | ", tiredPlayers.Select(item =>
-                $"{item.Player.Name} ({item.TeamName}) {item.Fatigue}%"));
-
-        var substitutionText = match.Substitutions.Count == 0
-            ? "AI substitutions: none yet."
-            : "Recent substitutions: " + string.Join(" | ", substitutions);
-
-        FatigueStatusTextBlock.Text = $"{fatigueText}\n{substitutionText}";
-    }
-
-    private static int GetFatiguePercentage(Player player)
-    {
-        if (player.Fatigue > 0)
-        {
-            return Math.Clamp(player.Fatigue, 0, 100);
-        }
-
-        if (player.Stamina <= 0)
-        {
-            return 100;
-        }
-
-        var staminaRatio = Math.Clamp(player.CurrentStamina / player.Stamina, 0.0, 1.0);
-        return (int)Math.Round((1.0 - staminaRatio) * 100);
     }
 
     private async Task PlayGoalEffectAsync(string scoringTeamName, CancellationToken cancellationToken)

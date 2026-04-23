@@ -91,7 +91,6 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
@@ -140,23 +139,8 @@
                     </StackPanel>
                 </Grid>
 
-                <!-- <Border Grid.Row="1"
-                        Background="#FFF7E7"
-                        BorderBrush="#EAB95C"
-                        BorderThickness="1"
-                        CornerRadius="12"
-                        Padding="12"
-                        Margin="0,0,0,14">
-                    <TextBlock x:Name="FatigueStatusTextBlock"
-                               Text="Fatigue watch will update as the match develops."
-                               Foreground="#694900"
-                               FontSize="13"
-                               FontWeight="SemiBold"
-                               TextWrapping="Wrap" />
-                </Border> -->
-
                 <ListBox x:Name="MatchEventsListBox"
-                         Grid.Row="2"
+                         Grid.Row="1"
                          Background="#F3F6FA"
                          BorderThickness="0"
                          Padding="8"
