@@ -1,0 +1,546 @@
+{
+  "season": "2025-26",
+  "sourceLastChecked": "2026-04-23",
+  "teams": [
+    {
+      "teamId": "afc-bournemouth",
+      "name": "AFC Bournemouth",
+      "formation": "4-3-3",
+      "startingXI": [
+        { "name": "Djorde Petrovic", "squadNumber": 1, "position": "GK", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Adam Smith", "squadNumber": 2, "position": "DEF", "overallRating": 74, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "James Hill", "squadNumber": 3, "position": "DEF", "overallRating": 72, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Marcos Senesi", "squadNumber": 5, "position": "DEF", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Adrien Truffert", "squadNumber": 6, "position": "DEF", "overallRating": 77, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Tyler Adams", "squadNumber": 8, "position": "MID", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Lewis Cook", "squadNumber": 10, "position": "MID", "overallRating": 76, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Ryan Christie", "squadNumber": 11, "position": "MID", "overallRating": 76, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Justin Kluivert", "squadNumber": 19, "position": "FWD", "overallRating": 79, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Antoine Semenyo", "squadNumber": 24, "position": "FWD", "overallRating": 80, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Evanilson", "squadNumber": 9, "position": "FWD", "overallRating": 79, "fatigue": 0, "form": "Average", "isStarter": true }
+      ],
+      "substitutes": [
+        { "name": "Neto", "squadNumber": 13, "position": "GK", "overallRating": 77, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Julian Araujo", "squadNumber": 22, "position": "DEF", "overallRating": 76, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Max Aarons", "squadNumber": 37, "position": "DEF", "overallRating": 75, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Alex Scott", "squadNumber": 14, "position": "MID", "overallRating": 77, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Marcus Tavernier", "squadNumber": 16, "position": "MID", "overallRating": 77, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "David Brooks", "squadNumber": 7, "position": "FWD", "overallRating": 76, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Luis Sinisterra", "squadNumber": 17, "position": "FWD", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": false }
+      ]
+    },
+    {
+      "teamId": "arsenal",
+      "name": "Arsenal",
+      "formation": "4-3-3",
+      "startingXI": [
+        { "name": "David Raya", "squadNumber": 1, "position": "GK", "overallRating": 84, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Benjamin White", "squadNumber": 4, "position": "DEF", "overallRating": 84, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "William Saliba", "squadNumber": 2, "position": "DEF", "overallRating": 87, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Gabriel Magalhaes", "squadNumber": 6, "position": "DEF", "overallRating": 86, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Riccardo Calafiori", "squadNumber": 33, "position": "DEF", "overallRating": 81, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Declan Rice", "squadNumber": 41, "position": "MID", "overallRating": 87, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Martin Odegaard", "squadNumber": 8, "position": "MID", "overallRating": 88, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Mikel Merino", "squadNumber": 23, "position": "MID", "overallRating": 84, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Bukayo Saka", "squadNumber": 7, "position": "FWD", "overallRating": 89, "fatigue": 0, "form": "Hot", "isStarter": true },
+        { "name": "Viktor Gyokeres", "squadNumber": 14, "position": "FWD", "overallRating": 86, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Gabriel Martinelli", "squadNumber": 11, "position": "FWD", "overallRating": 84, "fatigue": 0, "form": "Average", "isStarter": true }
+      ],
+      "substitutes": [
+        { "name": "Kepa Arrizabalaga", "squadNumber": 13, "position": "GK", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Jurrien Timber", "squadNumber": 12, "position": "DEF", "overallRating": 84, "fatigue": 0, "form": "Good", "isStarter": false },
+        { "name": "Oleksandr Zinchenko", "squadNumber": 35, "position": "DEF", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Christian Norgaard", "squadNumber": 16, "position": "MID", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Ethan Nwaneri", "squadNumber": 53, "position": "MID", "overallRating": 77, "fatigue": 0, "form": "Good", "isStarter": false },
+        { "name": "Kai Havertz", "squadNumber": 29, "position": "FWD", "overallRating": 84, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Leandro Trossard", "squadNumber": 19, "position": "FWD", "overallRating": 82, "fatigue": 0, "form": "Average", "isStarter": false }
+      ]
+    },
+    {
+      "teamId": "aston-villa",
+      "name": "Aston Villa",
+      "formation": "4-4-2",
+      "startingXI": [
+        { "name": "Emiliano Martinez", "squadNumber": 1, "position": "GK", "overallRating": 85, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Matthew Cash", "squadNumber": 2, "position": "DEF", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Pau Torres", "squadNumber": 14, "position": "DEF", "overallRating": 83, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Ezri Konsa", "squadNumber": 4, "position": "DEF", "overallRating": 82, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Lucas Digne", "squadNumber": 12, "position": "DEF", "overallRating": 81, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "John McGinn", "squadNumber": 7, "position": "MID", "overallRating": 82, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Youri Tielemans", "squadNumber": 8, "position": "MID", "overallRating": 82, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Boubacar Kamara", "squadNumber": 44, "position": "MID", "overallRating": 81, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Morgan Rogers", "squadNumber": 27, "position": "FWD", "overallRating": 80, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Oliver Watkins", "squadNumber": 11, "position": "FWD", "overallRating": 84, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Donyell Malen", "squadNumber": 17, "position": "FWD", "overallRating": 81, "fatigue": 0, "form": "Average", "isStarter": true }
+      ],
+      "substitutes": [
+        { "name": "Marco Bizot", "squadNumber": 25, "position": "GK", "overallRating": 76, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Tyrone Mings", "squadNumber": 5, "position": "DEF", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Ian Maatsen", "squadNumber": 22, "position": "DEF", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Amadou Onana", "squadNumber": 24, "position": "MID", "overallRating": 82, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Jacob Ramsey", "squadNumber": 41, "position": "MID", "overallRating": 79, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Leon Bailey", "squadNumber": 31, "position": "FWD", "overallRating": 81, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Jadon Sancho", "squadNumber": 19, "position": "FWD", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": false }
+      ]
+    },
+    {
+      "teamId": "brentford",
+      "name": "Brentford",
+      "formation": "3-5-2",
+      "startingXI": [
+        { "name": "Caoimhin Kelleher", "squadNumber": 1, "position": "GK", "overallRating": 79, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Nathan Collins", "squadNumber": 22, "position": "DEF", "overallRating": 79, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Ethan Pinnock", "squadNumber": 5, "position": "DEF", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Sepp van den Berg", "squadNumber": 4, "position": "DEF", "overallRating": 76, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Rico Henry", "squadNumber": 3, "position": "DEF", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Jordan Henderson", "squadNumber": 14, "position": "MID", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Vitaly Janelt", "squadNumber": 27, "position": "MID", "overallRating": 77, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Mathias Jensen", "squadNumber": 8, "position": "MID", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Kevin Schade", "squadNumber": 7, "position": "FWD", "overallRating": 77, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Igor Thiago", "squadNumber": 9, "position": "FWD", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Dango Ouattara", "squadNumber": 11, "position": "FWD", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": true }
+      ],
+      "substitutes": [
+        { "name": "Hakon Valdimarsson", "squadNumber": 12, "position": "GK", "overallRating": 74, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Kristoffer Ajer", "squadNumber": 20, "position": "DEF", "overallRating": 77, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Aaron Hickey", "squadNumber": 2, "position": "DEF", "overallRating": 77, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Mikkel Damsgaard", "squadNumber": 24, "position": "MID", "overallRating": 77, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Yegor Yarmolyuk", "squadNumber": 18, "position": "MID", "overallRating": 74, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Fabio Carvalho", "squadNumber": 10, "position": "FWD", "overallRating": 76, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Keane Lewis-Potter", "squadNumber": 23, "position": "FWD", "overallRating": 76, "fatigue": 0, "form": "Average", "isStarter": false }
+      ]
+    },
+    {
+      "teamId": "brighton-and-hove-albion",
+      "name": "Brighton & Hove Albion",
+      "formation": "4-3-3",
+      "startingXI": [
+        { "name": "Bart Verbruggen", "squadNumber": 1, "position": "GK", "overallRating": 81, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Joel Veltman", "squadNumber": 2, "position": "DEF", "overallRating": 79, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Lewis Dunk", "squadNumber": 5, "position": "DEF", "overallRating": 82, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Jan Paul van Hecke", "squadNumber": 29, "position": "DEF", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Maxim De Cuyper", "squadNumber": 3, "position": "DEF", "overallRating": 79, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Carlos Baleba", "squadNumber": 20, "position": "MID", "overallRating": 80, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Mats Wieffer", "squadNumber": 27, "position": "MID", "overallRating": 79, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "James Milner", "squadNumber": 6, "position": "MID", "overallRating": 77, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Kaoru Mitoma", "squadNumber": 22, "position": "FWD", "overallRating": 82, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Georginio Rutter", "squadNumber": 14, "position": "FWD", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Danny Welbeck", "squadNumber": 18, "position": "FWD", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": true }
+      ],
+      "substitutes": [
+        { "name": "Jason Steele", "squadNumber": 23, "position": "GK", "overallRating": 76, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Adam Webster", "squadNumber": 4, "position": "DEF", "overallRating": 77, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Igor Julio", "squadNumber": 6, "position": "DEF", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Jack Hinshelwood", "squadNumber": 41, "position": "MID", "overallRating": 77, "fatigue": 0, "form": "Good", "isStarter": false },
+        { "name": "Yasin Ayari", "squadNumber": 26, "position": "MID", "overallRating": 76, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Yankuba Minteh", "squadNumber": 17, "position": "FWD", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Brajan Gruda", "squadNumber": 8, "position": "FWD", "overallRating": 76, "fatigue": 0, "form": "Average", "isStarter": false }
+      ]
+    },
+    {
+      "teamId": "burnley",
+      "name": "Burnley",
+      "formation": "4-4-2",
+      "startingXI": [
+        { "name": "Martin Dubravka", "squadNumber": 1, "position": "GK", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Kyle Walker", "squadNumber": 2, "position": "DEF", "overallRating": 81, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Connor Roberts", "squadNumber": 14, "position": "DEF", "overallRating": 75, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Maxime Esteve", "squadNumber": 5, "position": "DEF", "overallRating": 77, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Quilindschy Hartman", "squadNumber": 3, "position": "DEF", "overallRating": 77, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Josh Cullen", "squadNumber": 24, "position": "MID", "overallRating": 76, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Hannibal Mejbri", "squadNumber": 28, "position": "MID", "overallRating": 75, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Josh Laurent", "squadNumber": 29, "position": "MID", "overallRating": 74, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Armando Broja", "squadNumber": 9, "position": "FWD", "overallRating": 77, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Lyle Foster", "squadNumber": 17, "position": "FWD", "overallRating": 76, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Jaidon Anthony", "squadNumber": 11, "position": "FWD", "overallRating": 75, "fatigue": 0, "form": "Average", "isStarter": true }
+      ],
+      "substitutes": [
+        { "name": "Vaclav Hladky", "squadNumber": 13, "position": "GK", "overallRating": 73, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Jordan Beyer", "squadNumber": 36, "position": "DEF", "overallRating": 76, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "CJ Egan-Riley", "squadNumber": 6, "position": "DEF", "overallRating": 74, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Lesley Ugochukwu", "squadNumber": 8, "position": "MID", "overallRating": 76, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Zian Flemming", "squadNumber": 19, "position": "MID", "overallRating": 75, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Luca Koleosho", "squadNumber": 30, "position": "FWD", "overallRating": 75, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Jacob Bruun Larsen", "squadNumber": 34, "position": "FWD", "overallRating": 75, "fatigue": 0, "form": "Average", "isStarter": false }
+      ]
+    },
+    {
+      "teamId": "chelsea",
+      "name": "Chelsea",
+      "formation": "4-3-3",
+      "startingXI": [
+        { "name": "Robert Sanchez", "squadNumber": 1, "position": "GK", "overallRating": 81, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Reece James", "squadNumber": 24, "position": "DEF", "overallRating": 84, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Levi Colwill", "squadNumber": 6, "position": "DEF", "overallRating": 81, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Marc Cucurella", "squadNumber": 3, "position": "DEF", "overallRating": 81, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Malo Gusto", "squadNumber": 27, "position": "DEF", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Moises Caicedo", "squadNumber": 25, "position": "MID", "overallRating": 85, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Enzo Fernandez", "squadNumber": 8, "position": "MID", "overallRating": 84, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Cole Palmer", "squadNumber": 20, "position": "MID", "overallRating": 88, "fatigue": 0, "form": "Hot", "isStarter": true },
+        { "name": "Joao Pedro", "squadNumber": 10, "position": "FWD", "overallRating": 83, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Liam Delap", "squadNumber": 9, "position": "FWD", "overallRating": 79, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Pedro Neto", "squadNumber": 7, "position": "FWD", "overallRating": 82, "fatigue": 0, "form": "Average", "isStarter": true }
+      ],
+      "substitutes": [
+        { "name": "Filip Jorgensen", "squadNumber": 12, "position": "GK", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Tosin Adarabioyo", "squadNumber": 4, "position": "DEF", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Benoit Badiashile", "squadNumber": 5, "position": "DEF", "overallRating": 79, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Romeo Lavia", "squadNumber": 45, "position": "MID", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Andrey Santos", "squadNumber": 17, "position": "MID", "overallRating": 79, "fatigue": 0, "form": "Good", "isStarter": false },
+        { "name": "Estevao", "squadNumber": 41, "position": "FWD", "overallRating": 78, "fatigue": 0, "form": "Good", "isStarter": false },
+        { "name": "Jamie Gittens", "squadNumber": 11, "position": "FWD", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": false }
+      ]
+    },
+    {
+      "teamId": "crystal-palace",
+      "name": "Crystal Palace",
+      "formation": "3-5-2",
+      "startingXI": [
+        { "name": "Dean Henderson", "squadNumber": 1, "position": "GK", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Daniel Munoz", "squadNumber": 12, "position": "DEF", "overallRating": 80, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Marc Guehi", "squadNumber": 6, "position": "DEF", "overallRating": 83, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Maxence Lacroix", "squadNumber": 5, "position": "DEF", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Tyrick Mitchell", "squadNumber": 3, "position": "DEF", "overallRating": 79, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Adam Wharton", "squadNumber": 20, "position": "MID", "overallRating": 81, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Cheick Doucoure", "squadNumber": 28, "position": "MID", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Eberechi Eze", "squadNumber": 10, "position": "MID", "overallRating": 85, "fatigue": 0, "form": "Hot", "isStarter": true },
+        { "name": "Ismaila Sarr", "squadNumber": 7, "position": "FWD", "overallRating": 79, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Jean-Philippe Mateta", "squadNumber": 14, "position": "FWD", "overallRating": 81, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Yeremy Pino", "squadNumber": 18, "position": "FWD", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": true }
+      ],
+      "substitutes": [
+        { "name": "Sam Johnstone", "squadNumber": 31, "position": "GK", "overallRating": 77, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Chris Richards", "squadNumber": 26, "position": "DEF", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Chadi Riad", "squadNumber": 34, "position": "DEF", "overallRating": 76, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Jefferson Lerma", "squadNumber": 8, "position": "MID", "overallRating": 79, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Will Hughes", "squadNumber": 19, "position": "MID", "overallRating": 76, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Daichi Kamada", "squadNumber": 18, "position": "FWD", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Eddie Nketiah", "squadNumber": 9, "position": "FWD", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": false }
+      ]
+    },
+    {
+      "teamId": "everton",
+      "name": "Everton",
+      "formation": "4-4-2",
+      "startingXI": [
+        { "name": "Jordan Pickford", "squadNumber": 1, "position": "GK", "overallRating": 83, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Jake O'Brien", "squadNumber": 15, "position": "DEF", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "James Tarkowski", "squadNumber": 6, "position": "DEF", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Jarrad Branthwaite", "squadNumber": 32, "position": "DEF", "overallRating": 82, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Vitalii Mykolenko", "squadNumber": 19, "position": "DEF", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Idrissa Gueye", "squadNumber": 27, "position": "MID", "overallRating": 79, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "James Garner", "squadNumber": 37, "position": "MID", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Iliman Ndiaye", "squadNumber": 10, "position": "MID", "overallRating": 79, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Dwight McNeil", "squadNumber": 7, "position": "FWD", "overallRating": 79, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Beto", "squadNumber": 14, "position": "FWD", "overallRating": 77, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Jack Grealish", "squadNumber": 18, "position": "FWD", "overallRating": 83, "fatigue": 0, "form": "Average", "isStarter": true }
+      ],
+      "substitutes": [
+        { "name": "Joao Virginia", "squadNumber": 12, "position": "GK", "overallRating": 73, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Seamus Coleman", "squadNumber": 23, "position": "DEF", "overallRating": 75, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Michael Keane", "squadNumber": 5, "position": "DEF", "overallRating": 76, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Tim Iroegbunam", "squadNumber": 42, "position": "MID", "overallRating": 74, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Carlos Alcaraz", "squadNumber": 24, "position": "MID", "overallRating": 76, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Dominic Calvert-Lewin", "squadNumber": 9, "position": "FWD", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Youssef Chermiti", "squadNumber": 28, "position": "FWD", "overallRating": 72, "fatigue": 0, "form": "Average", "isStarter": false }
+      ]
+    },
+    {
+      "teamId": "fulham",
+      "name": "Fulham",
+      "formation": "4-3-3",
+      "startingXI": [
+        { "name": "Bernd Leno", "squadNumber": 1, "position": "GK", "overallRating": 82, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Kenny Tete", "squadNumber": 2, "position": "DEF", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Joachim Andersen", "squadNumber": 5, "position": "DEF", "overallRating": 81, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Calvin Bassey", "squadNumber": 3, "position": "DEF", "overallRating": 79, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Antonee Robinson", "squadNumber": 33, "position": "DEF", "overallRating": 81, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Sander Berge", "squadNumber": 16, "position": "MID", "overallRating": 79, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Andreas Pereira", "squadNumber": 18, "position": "MID", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Emile Smith Rowe", "squadNumber": 32, "position": "MID", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Alex Iwobi", "squadNumber": 17, "position": "FWD", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Rodrigo Muniz", "squadNumber": 9, "position": "FWD", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Harry Wilson", "squadNumber": 8, "position": "FWD", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": true }
+      ],
+      "substitutes": [
+        { "name": "Steven Sessegnon", "squadNumber": 43, "position": "GK", "overallRating": 70, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Issa Diop", "squadNumber": 31, "position": "DEF", "overallRating": 77, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Timothy Castagne", "squadNumber": 21, "position": "DEF", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Tom Cairney", "squadNumber": 10, "position": "MID", "overallRating": 76, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Harrison Reed", "squadNumber": 6, "position": "MID", "overallRating": 76, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Adama Traore", "squadNumber": 11, "position": "FWD", "overallRating": 77, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Raul Jimenez", "squadNumber": 7, "position": "FWD", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": false }
+      ]
+    },
+    {
+      "teamId": "leeds-united",
+      "name": "Leeds United",
+      "formation": "4-3-3",
+      "startingXI": [
+        { "name": "Lucas Perri", "squadNumber": 1, "position": "GK", "overallRating": 79, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Jayden Bogle", "squadNumber": 2, "position": "DEF", "overallRating": 76, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Joe Rodon", "squadNumber": 6, "position": "DEF", "overallRating": 77, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Pascal Struijk", "squadNumber": 5, "position": "DEF", "overallRating": 77, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Gabriel Gudmundsson", "squadNumber": 3, "position": "DEF", "overallRating": 76, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Ethan Ampadu", "squadNumber": 4, "position": "MID", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Anton Stach", "squadNumber": 8, "position": "MID", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Sean Longstaff", "squadNumber": 36, "position": "MID", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Daniel James", "squadNumber": 20, "position": "FWD", "overallRating": 77, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Joel Piroe", "squadNumber": 10, "position": "FWD", "overallRating": 77, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Wilfried Gnonto", "squadNumber": 29, "position": "FWD", "overallRating": 78, "fatigue": 0, "form": "Good", "isStarter": true }
+      ],
+      "substitutes": [
+        { "name": "Karl Darlow", "squadNumber": 26, "position": "GK", "overallRating": 73, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Sam Byram", "squadNumber": 25, "position": "DEF", "overallRating": 74, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Junior Firpo", "squadNumber": 21, "position": "DEF", "overallRating": 75, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Ao Tanaka", "squadNumber": 22, "position": "MID", "overallRating": 76, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Ilia Gruev", "squadNumber": 44, "position": "MID", "overallRating": 75, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Largie Ramazani", "squadNumber": 17, "position": "FWD", "overallRating": 76, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Dominic Calvert-Lewin", "squadNumber": 9, "position": "FWD", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": false }
+      ]
+    },
+    {
+      "teamId": "liverpool",
+      "name": "Liverpool",
+      "formation": "4-3-3",
+      "startingXI": [
+        { "name": "Alisson Becker", "squadNumber": 1, "position": "GK", "overallRating": 88, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Trent Alexander-Arnold", "squadNumber": 66, "position": "DEF", "overallRating": 86, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Ibrahima Konate", "squadNumber": 5, "position": "DEF", "overallRating": 84, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Virgil van Dijk", "squadNumber": 4, "position": "DEF", "overallRating": 89, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Andy Robertson", "squadNumber": 26, "position": "DEF", "overallRating": 84, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Ryan Gravenberch", "squadNumber": 38, "position": "MID", "overallRating": 83, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Alexis Mac Allister", "squadNumber": 10, "position": "MID", "overallRating": 86, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Dominik Szoboszlai", "squadNumber": 8, "position": "MID", "overallRating": 84, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Mohamed Salah", "squadNumber": 11, "position": "FWD", "overallRating": 89, "fatigue": 0, "form": "Hot", "isStarter": true },
+        { "name": "Hugo Ekitike", "squadNumber": 22, "position": "FWD", "overallRating": 81, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Cody Gakpo", "squadNumber": 18, "position": "FWD", "overallRating": 84, "fatigue": 0, "form": "Average", "isStarter": true }
+      ],
+      "substitutes": [
+        { "name": "Giorgi Mamardashvili", "squadNumber": 25, "position": "GK", "overallRating": 84, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Joe Gomez", "squadNumber": 2, "position": "DEF", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Jeremie Frimpong", "squadNumber": 30, "position": "DEF", "overallRating": 83, "fatigue": 0, "form": "Good", "isStarter": false },
+        { "name": "Wataru Endo", "squadNumber": 3, "position": "MID", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Curtis Jones", "squadNumber": 17, "position": "MID", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Darwin Nunez", "squadNumber": 9, "position": "FWD", "overallRating": 82, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Federico Chiesa", "squadNumber": 14, "position": "FWD", "overallRating": 81, "fatigue": 0, "form": "Average", "isStarter": false }
+      ]
+    },
+    {
+      "teamId": "manchester-city",
+      "name": "Manchester City",
+      "formation": "4-3-3",
+      "startingXI": [
+        { "name": "Gianluigi Donnarumma", "squadNumber": 99, "position": "GK", "overallRating": 88, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Rico Lewis", "squadNumber": 82, "position": "DEF", "overallRating": 81, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Ruben Dias", "squadNumber": 3, "position": "DEF", "overallRating": 88, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Josko Gvardiol", "squadNumber": 24, "position": "DEF", "overallRating": 86, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Rayan Ait-Nouri", "squadNumber": 21, "position": "DEF", "overallRating": 82, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Rodri", "squadNumber": 16, "position": "MID", "overallRating": 91, "fatigue": 0, "form": "Hot", "isStarter": true },
+        { "name": "Phil Foden", "squadNumber": 47, "position": "MID", "overallRating": 88, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Tijjani Reijnders", "squadNumber": 4, "position": "MID", "overallRating": 84, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Jeremy Doku", "squadNumber": 11, "position": "FWD", "overallRating": 84, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Erling Haaland", "squadNumber": 9, "position": "FWD", "overallRating": 92, "fatigue": 0, "form": "Hot", "isStarter": true },
+        { "name": "Omar Marmoush", "squadNumber": 7, "position": "FWD", "overallRating": 84, "fatigue": 0, "form": "Good", "isStarter": true }
+      ],
+      "substitutes": [
+        { "name": "James Trafford", "squadNumber": 1, "position": "GK", "overallRating": 79, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "John Stones", "squadNumber": 5, "position": "DEF", "overallRating": 84, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Nathan Ake", "squadNumber": 6, "position": "DEF", "overallRating": 83, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Bernardo Silva", "squadNumber": 20, "position": "MID", "overallRating": 87, "fatigue": 0, "form": "Good", "isStarter": false },
+        { "name": "Mateo Kovacic", "squadNumber": 8, "position": "MID", "overallRating": 84, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Savinho", "squadNumber": 26, "position": "FWD", "overallRating": 82, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Oscar Bobb", "squadNumber": 52, "position": "FWD", "overallRating": 79, "fatigue": 0, "form": "Average", "isStarter": false }
+      ]
+    },
+    {
+      "teamId": "manchester-united",
+      "name": "Manchester United",
+      "formation": "3-5-2",
+      "startingXI": [
+        { "name": "Altay Bayindir", "squadNumber": 1, "position": "GK", "overallRating": 79, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Diogo Dalot", "squadNumber": 20, "position": "DEF", "overallRating": 81, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Matthijs de Ligt", "squadNumber": 4, "position": "DEF", "overallRating": 84, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Lisandro Martinez", "squadNumber": 6, "position": "DEF", "overallRating": 84, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Luke Shaw", "squadNumber": 23, "position": "DEF", "overallRating": 81, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Casemiro", "squadNumber": 18, "position": "MID", "overallRating": 84, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Bruno Fernandes", "squadNumber": 8, "position": "MID", "overallRating": 88, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Manuel Ugarte", "squadNumber": 25, "position": "MID", "overallRating": 82, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Bryan Mbeumo", "squadNumber": 19, "position": "FWD", "overallRating": 84, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Benjamin Sesko", "squadNumber": 30, "position": "FWD", "overallRating": 83, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Matheus Cunha", "squadNumber": 10, "position": "FWD", "overallRating": 84, "fatigue": 0, "form": "Good", "isStarter": true }
+      ],
+      "substitutes": [
+        { "name": "Tom Heaton", "squadNumber": 22, "position": "GK", "overallRating": 74, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Harry Maguire", "squadNumber": 5, "position": "DEF", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Noussair Mazraoui", "squadNumber": 3, "position": "DEF", "overallRating": 81, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Kobbie Mainoo", "squadNumber": 37, "position": "MID", "overallRating": 80, "fatigue": 0, "form": "Good", "isStarter": false },
+        { "name": "Mason Mount", "squadNumber": 7, "position": "MID", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Amad Diallo", "squadNumber": 16, "position": "FWD", "overallRating": 80, "fatigue": 0, "form": "Good", "isStarter": false },
+        { "name": "Joshua Zirkzee", "squadNumber": 11, "position": "FWD", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": false }
+      ]
+    },
+    {
+      "teamId": "newcastle-united",
+      "name": "Newcastle United",
+      "formation": "4-3-3",
+      "startingXI": [
+        { "name": "Nick Pope", "squadNumber": 22, "position": "GK", "overallRating": 82, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Kieran Trippier", "squadNumber": 2, "position": "DEF", "overallRating": 82, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Sven Botman", "squadNumber": 4, "position": "DEF", "overallRating": 83, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Dan Burn", "squadNumber": 33, "position": "DEF", "overallRating": 79, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Tino Livramento", "squadNumber": 21, "position": "DEF", "overallRating": 80, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Bruno Guimaraes", "squadNumber": 39, "position": "MID", "overallRating": 86, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Sandro Tonali", "squadNumber": 8, "position": "MID", "overallRating": 84, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Joelinton", "squadNumber": 7, "position": "MID", "overallRating": 82, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Anthony Gordon", "squadNumber": 10, "position": "FWD", "overallRating": 83, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Yoane Wissa", "squadNumber": 11, "position": "FWD", "overallRating": 81, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Nick Woltemade", "squadNumber": 9, "position": "FWD", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": true }
+      ],
+      "substitutes": [
+        { "name": "Aaron Ramsdale", "squadNumber": 1, "position": "GK", "overallRating": 82, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Fabian Schar", "squadNumber": 5, "position": "DEF", "overallRating": 81, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Lewis Hall", "squadNumber": 20, "position": "DEF", "overallRating": 79, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Joe Willock", "squadNumber": 28, "position": "MID", "overallRating": 79, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Sean Longstaff", "squadNumber": 36, "position": "MID", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Harvey Barnes", "squadNumber": 15, "position": "FWD", "overallRating": 81, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Jacob Murphy", "squadNumber": 23, "position": "FWD", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": false }
+      ]
+    },
+    {
+      "teamId": "nottingham-forest",
+      "name": "Nottingham Forest",
+      "formation": "4-4-2",
+      "startingXI": [
+        { "name": "Matz Sels", "squadNumber": 1, "position": "GK", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Neco Williams", "squadNumber": 7, "position": "DEF", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Murillo", "squadNumber": 5, "position": "DEF", "overallRating": 82, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Nikola Milenkovic", "squadNumber": 31, "position": "DEF", "overallRating": 81, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Oleksandr Zinchenko", "squadNumber": 17, "position": "DEF", "overallRating": 81, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Morgan Gibbs-White", "squadNumber": 10, "position": "MID", "overallRating": 83, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Elliot Anderson", "squadNumber": 8, "position": "MID", "overallRating": 80, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Douglas Luiz", "squadNumber": 6, "position": "MID", "overallRating": 83, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Callum Hudson-Odoi", "squadNumber": 14, "position": "FWD", "overallRating": 79, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Chris Wood", "squadNumber": 11, "position": "FWD", "overallRating": 80, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Dan Ndoye", "squadNumber": 22, "position": "FWD", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": true }
+      ],
+      "substitutes": [
+        { "name": "Angus Gunn", "squadNumber": 13, "position": "GK", "overallRating": 76, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Willy Boly", "squadNumber": 30, "position": "DEF", "overallRating": 77, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Ola Aina", "squadNumber": 34, "position": "DEF", "overallRating": 79, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Ibrahim Sangare", "squadNumber": 8, "position": "MID", "overallRating": 79, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Ryan Yates", "squadNumber": 22, "position": "MID", "overallRating": 76, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Taiwo Awoniyi", "squadNumber": 9, "position": "FWD", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Anthony Elanga", "squadNumber": 21, "position": "FWD", "overallRating": 79, "fatigue": 0, "form": "Average", "isStarter": false }
+      ]
+    },
+    {
+      "teamId": "sunderland",
+      "name": "Sunderland",
+      "formation": "4-4-2",
+      "startingXI": [
+        { "name": "Anthony Patterson", "squadNumber": 1, "position": "GK", "overallRating": 76, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Trai Hume", "squadNumber": 2, "position": "DEF", "overallRating": 75, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Dan Ballard", "squadNumber": 5, "position": "DEF", "overallRating": 76, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Omar Alderete", "squadNumber": 6, "position": "DEF", "overallRating": 77, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Dennis Cirkin", "squadNumber": 3, "position": "DEF", "overallRating": 75, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Granit Xhaka", "squadNumber": 34, "position": "MID", "overallRating": 84, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Enzo Le Fee", "squadNumber": 8, "position": "MID", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Daniel Neil", "squadNumber": 24, "position": "MID", "overallRating": 76, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Simon Adingra", "squadNumber": 11, "position": "FWD", "overallRating": 79, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Brian Brobbey", "squadNumber": 9, "position": "FWD", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Wilson Isidor", "squadNumber": 18, "position": "FWD", "overallRating": 77, "fatigue": 0, "form": "Average", "isStarter": true }
+      ],
+      "substitutes": [
+        { "name": "Robin Roefs", "squadNumber": 22, "position": "GK", "overallRating": 74, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Luke O'Nien", "squadNumber": 13, "position": "DEF", "overallRating": 75, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Aji Alese", "squadNumber": 42, "position": "DEF", "overallRating": 73, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Chris Rigg", "squadNumber": 7, "position": "MID", "overallRating": 75, "fatigue": 0, "form": "Good", "isStarter": false },
+        { "name": "Habib Diarra", "squadNumber": 19, "position": "MID", "overallRating": 76, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Eliezer Mayenda", "squadNumber": 12, "position": "FWD", "overallRating": 74, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Romaine Mundle", "squadNumber": 14, "position": "FWD", "overallRating": 74, "fatigue": 0, "form": "Average", "isStarter": false }
+      ]
+    },
+    {
+      "teamId": "tottenham-hotspur",
+      "name": "Tottenham Hotspur",
+      "formation": "4-3-3",
+      "startingXI": [
+        { "name": "Guglielmo Vicario", "squadNumber": 1, "position": "GK", "overallRating": 84, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Pedro Porro", "squadNumber": 23, "position": "DEF", "overallRating": 83, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Cristian Romero", "squadNumber": 17, "position": "DEF", "overallRating": 85, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Micky van de Ven", "squadNumber": 37, "position": "DEF", "overallRating": 84, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Destiny Udogie", "squadNumber": 13, "position": "DEF", "overallRating": 82, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Joao Palhinha", "squadNumber": 6, "position": "MID", "overallRating": 84, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Rodrigo Bentancur", "squadNumber": 30, "position": "MID", "overallRating": 82, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "James Maddison", "squadNumber": 10, "position": "MID", "overallRating": 84, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Mohammed Kudus", "squadNumber": 20, "position": "FWD", "overallRating": 83, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Dominic Solanke", "squadNumber": 9, "position": "FWD", "overallRating": 82, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Xavi Simons", "squadNumber": 7, "position": "FWD", "overallRating": 84, "fatigue": 0, "form": "Good", "isStarter": true }
+      ],
+      "substitutes": [
+        { "name": "Antonin Kinsky", "squadNumber": 31, "position": "GK", "overallRating": 76, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Kevin Danso", "squadNumber": 4, "position": "DEF", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Ben Davies", "squadNumber": 33, "position": "DEF", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Pape Matar Sarr", "squadNumber": 29, "position": "MID", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Yves Bissouma", "squadNumber": 8, "position": "MID", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Brennan Johnson", "squadNumber": 22, "position": "FWD", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Richarlison", "squadNumber": 9, "position": "FWD", "overallRating": 81, "fatigue": 0, "form": "Average", "isStarter": false }
+      ]
+    },
+    {
+      "teamId": "west-ham-united",
+      "name": "West Ham United",
+      "formation": "4-2-3-1",
+      "startingXI": [
+        { "name": "Alphonse Areola", "squadNumber": 1, "position": "GK", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Aaron Wan-Bissaka", "squadNumber": 29, "position": "DEF", "overallRating": 81, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Max Kilman", "squadNumber": 26, "position": "DEF", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Jean-Clair Todibo", "squadNumber": 25, "position": "DEF", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Kyle Walker-Peters", "squadNumber": 2, "position": "DEF", "overallRating": 79, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Tomas Soucek", "squadNumber": 28, "position": "MID", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "James Ward-Prowse", "squadNumber": 8, "position": "MID", "overallRating": 82, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Lucas Paqueta", "squadNumber": 10, "position": "MID", "overallRating": 84, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Jarrod Bowen", "squadNumber": 20, "position": "FWD", "overallRating": 84, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Niclas Fullkrug", "squadNumber": 11, "position": "FWD", "overallRating": 81, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Callum Wilson", "squadNumber": 9, "position": "FWD", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": true }
+      ],
+      "substitutes": [
+        { "name": "Lukasz Fabianski", "squadNumber": 1, "position": "GK", "overallRating": 76, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Konstantinos Mavropanos", "squadNumber": 15, "position": "DEF", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Emerson Palmieri", "squadNumber": 33, "position": "DEF", "overallRating": 79, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Edson Alvarez", "squadNumber": 19, "position": "MID", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Guido Rodriguez", "squadNumber": 24, "position": "MID", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Crysencio Summerville", "squadNumber": 7, "position": "FWD", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Luis Guilherme", "squadNumber": 17, "position": "FWD", "overallRating": 74, "fatigue": 0, "form": "Average", "isStarter": false }
+      ]
+    },
+    {
+      "teamId": "wolverhampton-wanderers",
+      "name": "Wolverhampton Wanderers",
+      "formation": "3-5-2",
+      "startingXI": [
+        { "name": "Sam Johnstone", "squadNumber": 1, "position": "GK", "overallRating": 79, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Matt Doherty", "squadNumber": 2, "position": "DEF", "overallRating": 77, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Emmanuel Agbadou", "squadNumber": 4, "position": "DEF", "overallRating": 79, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Toti Gomes", "squadNumber": 24, "position": "DEF", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Hugo Bueno", "squadNumber": 3, "position": "DEF", "overallRating": 76, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Joao Gomes", "squadNumber": 8, "position": "MID", "overallRating": 80, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Andre", "squadNumber": 7, "position": "MID", "overallRating": 79, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Marshall Munetsi", "squadNumber": 5, "position": "MID", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Hwang Hee-Chan", "squadNumber": 11, "position": "FWD", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Jorgen Strand Larsen", "squadNumber": 9, "position": "FWD", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Jean-Ricner Bellegarde", "squadNumber": 10, "position": "FWD", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": true }
+      ],
+      "substitutes": [
+        { "name": "Jose Sa", "squadNumber": 1, "position": "GK", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Santiago Bueno", "squadNumber": 4, "position": "DEF", "overallRating": 76, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Rayan Ait-Nouri", "squadNumber": 3, "position": "DEF", "overallRating": 82, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Boubacar Traore", "squadNumber": 6, "position": "MID", "overallRating": 75, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Tommy Doyle", "squadNumber": 20, "position": "MID", "overallRating": 76, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Rodrigo Gomes", "squadNumber": 19, "position": "FWD", "overallRating": 75, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Sasa Kalajdzic", "squadNumber": 18, "position": "FWD", "overallRating": 77, "fatigue": 0, "form": "Average", "isStarter": false }
+      ]
+    }
+  ]
+}
