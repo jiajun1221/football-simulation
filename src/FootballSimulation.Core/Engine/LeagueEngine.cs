@@ -91,6 +91,32 @@ public class LeagueEngine
         return _matchEngine.SimulateFirstHalf(fixture.HomeTeam, fixture.AwayTeam, matchSeed, CreateOptions(options));
     }
 
+    public Match CreateLiveFixtureMatch(League league, Fixture fixture, MatchSimulationOptions? options = null)
+    {
+        ValidateFixtureIsPlayable(league, fixture);
+        return _matchEngine.CreateLiveMatch(fixture.HomeTeam, fixture.AwayTeam, CreateOptions(options));
+    }
+
+    public Match AdvanceLiveFixture(
+        League league,
+        Fixture fixture,
+        Match match,
+        int startMinute,
+        int endMinute,
+        bool includeFulltime,
+        int? seed = null,
+        MatchSimulationOptions? options = null)
+    {
+        ValidateFixtureIsPlayable(league, fixture);
+
+        var fixtureIndex = league.Fixtures.IndexOf(fixture);
+        int? matchSeed = seed.HasValue
+            ? seed.Value + fixture.RoundNumber * 100 + fixtureIndex
+            : null;
+
+        return _matchEngine.AdvanceMatch(match, startMinute, endMinute, includeFulltime, matchSeed, CreateOptions(options));
+    }
+
     public Match SimulateFixtureSecondHalf(League league, Fixture fixture, Match match, int? seed = null, MatchSimulationOptions? options = null)
     {
         ValidateFixtureIsPlayable(league, fixture);
@@ -108,6 +134,17 @@ public class LeagueEngine
         league.Table = _tableService.SortTable(league.Table);
 
         return result;
+    }
+
+    public void CompleteLiveFixture(League league, Fixture fixture, Match match)
+    {
+        ValidateFixtureIsPlayable(league, fixture);
+
+        fixture.Result = match;
+        fixture.IsPlayed = true;
+
+        _tableService.ApplyMatchResult(league.Table, match);
+        league.Table = _tableService.SortTable(league.Table);
     }
 
     public List<Match> SimulateRemainingFixturesInRound(League league, int roundNumber, int? seed = null, MatchSimulationOptions? options = null)

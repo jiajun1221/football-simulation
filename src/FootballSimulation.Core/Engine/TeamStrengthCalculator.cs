@@ -1,4 +1,5 @@
 using FootballSimulation.Models;
+using FootballSimulation.Services;
 
 namespace FootballSimulation.Engine;
 
@@ -61,25 +62,25 @@ public class TeamStrengthCalculator
     public double GetEffectiveAttack(Player player)
     {
         var traitModifier = GetTraitModifier(player, PlayerTrait.PaceMerchant, PlayerTrait.BigMatchPlayer);
-        return player.Attack * GetStaminaModifier(player) * GetStatusModifier(player) * traitModifier;
+        return player.Attack * GetStaminaModifier(player) * GetStatusModifier(player) * traitModifier * PositionSuitabilityService.GetEffectivenessMultiplier(player);
     }
 
     public double GetEffectiveDefense(Player player)
     {
         var traitModifier = GetTraitModifier(player, PlayerTrait.AggressiveTackler, PlayerTrait.AerialThreat);
-        return player.Defense * GetStaminaModifier(player) * GetStatusModifier(player) * traitModifier;
+        return player.Defense * GetStaminaModifier(player) * GetStatusModifier(player) * traitModifier * PositionSuitabilityService.GetEffectivenessMultiplier(player);
     }
 
     public double GetEffectivePassing(Player player)
     {
         var traitModifier = GetTraitModifier(player, PlayerTrait.Playmaker, PlayerTrait.PressResistant, PlayerTrait.SetPieceSpecialist);
-        return player.Passing * GetStaminaModifier(player) * GetStatusModifier(player) * traitModifier;
+        return player.Passing * GetStaminaModifier(player) * GetStatusModifier(player) * traitModifier * PositionSuitabilityService.GetEffectivenessMultiplier(player);
     }
 
     public double GetEffectiveFinishing(Player player)
     {
         var traitModifier = GetTraitModifier(player, PlayerTrait.ClinicalFinisher, PlayerTrait.LongShotTaker, PlayerTrait.AerialThreat);
-        return player.Finishing * GetStaminaModifier(player) * GetStatusModifier(player) * traitModifier;
+        return player.Finishing * GetStaminaModifier(player) * GetStatusModifier(player) * traitModifier * PositionSuitabilityService.GetEffectivenessMultiplier(player);
     }
 
     public double GetPlaymakerWeight(Player player)
@@ -134,8 +135,9 @@ public class TeamStrengthCalculator
         var moraleModifier = Math.Clamp(0.85 + (player.Morale / 300.0), 0.85, 1.15);
         var injuryModifier = player.IsInjured ? 0.55 : 1.00;
         var suspensionModifier = player.IsSuspended ? 0.40 : 1.00;
+        var liveMatchModifier = Math.Clamp(player.LiveMatchModifier, 0.75, 1.15);
 
-        return fatigueModifier * formModifier * moraleModifier * injuryModifier * suspensionModifier;
+        return fatigueModifier * formModifier * moraleModifier * injuryModifier * suspensionModifier * liveMatchModifier;
     }
 
     private static double GetFatiguePerformanceModifier(int fatigue)

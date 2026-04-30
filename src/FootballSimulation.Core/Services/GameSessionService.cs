@@ -46,6 +46,31 @@ public class GameSessionService
         return _leagueEngine.SimulateFixtureFirstHalf(league, fixture, options: CreateUserMatchOptions(selectedTeam));
     }
 
+    public Match CreateSelectedTeamLiveMatch(League league, Team selectedTeam)
+    {
+        var fixture = FindNextFixtureForTeam(league, selectedTeam);
+        return _leagueEngine.CreateLiveFixtureMatch(league, fixture, CreateUserMatchOptions(selectedTeam));
+    }
+
+    public Match AdvanceSelectedTeamLiveMatch(
+        League league,
+        Fixture fixture,
+        Match match,
+        Team selectedTeam,
+        int startMinute,
+        int endMinute,
+        bool includeFulltime)
+    {
+        return _leagueEngine.AdvanceLiveFixture(
+            league,
+            fixture,
+            match,
+            startMinute,
+            endMinute,
+            includeFulltime,
+            options: CreateUserMatchOptions(selectedTeam));
+    }
+
     public Match SimulateSelectedTeamSecondHalf(League league, Fixture fixture, Match match, Team? selectedTeam = null)
     {
         var humanTeam = selectedTeam ?? fixture.HomeTeam;
@@ -53,6 +78,12 @@ public class GameSessionService
         _leagueEngine.SimulateRemainingFixturesInRound(league, fixture.RoundNumber);
 
         return result;
+    }
+
+    public void CompleteSelectedTeamLiveMatch(League league, Fixture fixture, Match match)
+    {
+        _leagueEngine.CompleteLiveFixture(league, fixture, match);
+        _leagueEngine.SimulateRemainingFixturesInRound(league, fixture.RoundNumber);
     }
 
     public List<Match> SimulateRemainingRoundFixtures(League league, int roundNumber)

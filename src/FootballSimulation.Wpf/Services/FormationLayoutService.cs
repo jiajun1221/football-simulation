@@ -6,45 +6,45 @@ public class FormationLayoutService
     {
         return formation switch
         {
-            "4-2-3-1" => Build([1, 4, 2, 3, 1]),
-            "4-4-2" => Build([1, 4, 4, 2]),
-            "3-5-2" => Build([1, 3, 5, 2]),
-            _ => Build([1, 4, 3, 3])
+            "4-2-3-1" => FourTwoThreeOne,
+            "4-4-2" => FourFourTwo,
+            "3-5-2" => ThreeFiveTwo,
+            _ => FourThreeThree
         };
     }
 
-    private static IReadOnlyList<PitchPosition> Build(IReadOnlyList<int> lines)
-    {
-        var positions = new List<PitchPosition>();
-        var yValues = GetLineYValues(lines.Count);
+    private static readonly IReadOnlyList<PitchPosition> FourThreeThree =
+    [
+        new(0.50, 0.93, "GK"),
+        new(0.12, 0.67, "LB"), new(0.37, 0.70, "CB"), new(0.63, 0.70, "CB"), new(0.88, 0.67, "RB"),
+        new(0.23, 0.43, "CM"), new(0.50, 0.36, "CAM"), new(0.77, 0.43, "CM"),
+        new(0.16, 0.16, "LW"), new(0.50, 0.09, "ST"), new(0.84, 0.16, "RW")
+    ];
 
-        for (var lineIndex = 0; lineIndex < lines.Count; lineIndex++)
-        {
-            var playersInLine = lines[lineIndex];
-            var y = yValues[lineIndex];
+    private static readonly IReadOnlyList<PitchPosition> FourTwoThreeOne =
+    [
+        new(0.50, 0.93, "GK"),
+        new(0.12, 0.67, "LB"), new(0.37, 0.70, "CB"), new(0.63, 0.70, "CB"), new(0.88, 0.67, "RB"),
+        new(0.36, 0.50, "CDM"), new(0.64, 0.50, "CDM"),
+        new(0.16, 0.30, "LW"), new(0.84, 0.30, "RW"), new(0.50, 0.25, "CAM"),
+        new(0.50, 0.09, "ST")
+    ];
 
-            for (var playerIndex = 0; playerIndex < playersInLine; playerIndex++)
-            {
-                var x = playersInLine == 1
-                    ? 0.50
-                    : 0.16 + (playerIndex * (0.68 / (playersInLine - 1)));
+    private static readonly IReadOnlyList<PitchPosition> FourFourTwo =
+    [
+        new(0.50, 0.93, "GK"),
+        new(0.12, 0.67, "LB"), new(0.37, 0.70, "CB"), new(0.63, 0.70, "CB"), new(0.88, 0.67, "RB"),
+        new(0.14, 0.43, "CM"), new(0.38, 0.43, "CM"), new(0.62, 0.43, "CM"), new(0.86, 0.43, "CM"),
+        new(0.36, 0.12, "ST"), new(0.64, 0.12, "ST")
+    ];
 
-                positions.Add(new PitchPosition(x, y));
-            }
-        }
-
-        return positions;
-    }
-
-    private static double[] GetLineYValues(int lineCount)
-    {
-        return lineCount switch
-        {
-            4 => [0.88, 0.66, 0.42, 0.18],
-            5 => [0.88, 0.68, 0.50, 0.32, 0.16],
-            _ => [0.88, 0.66, 0.42, 0.18]
-        };
-    }
+    private static readonly IReadOnlyList<PitchPosition> ThreeFiveTwo =
+    [
+        new(0.50, 0.93, "GK"),
+        new(0.24, 0.69, "CB"), new(0.50, 0.72, "CB"), new(0.76, 0.69, "CB"),
+        new(0.08, 0.43, "LB"), new(0.29, 0.49, "CM"), new(0.50, 0.42, "CDM"), new(0.71, 0.49, "CM"), new(0.92, 0.43, "RB"),
+        new(0.36, 0.12, "ST"), new(0.64, 0.12, "ST")
+    ];
 }
 
-public sealed record PitchPosition(double X, double Y);
+public sealed record PitchPosition(double X, double Y, string ExactPosition = "");

@@ -70,14 +70,16 @@ public class MatchEngine
         ValidateTeam(match.HomeTeam, nameof(match.HomeTeam));
         ValidateTeam(match.AwayTeam, nameof(match.AwayTeam));
 
-        var homePossessionMoments = EstimatePossessionMoments(match.HomeStats.PossessionPercentage, MatchConstants.HalftimeMinute);
-        var awayPossessionMoments = MatchConstants.HalftimeMinute - homePossessionMoments;
         var simulationState = new MatchSimulationState(
             match,
             CreateMatchLog(match),
             new MatchEventFactory(),
-            homePossessionMoments,
-            awayPossessionMoments,
+            match.HomePossessionMoments > 0 || match.AwayPossessionMoments > 0
+                ? match.HomePossessionMoments
+                : EstimatePossessionMoments(match.HomeStats.PossessionPercentage, MatchConstants.HalftimeMinute),
+            match.HomePossessionMoments > 0 || match.AwayPossessionMoments > 0
+                ? match.AwayPossessionMoments
+                : MatchConstants.HalftimeMinute - EstimatePossessionMoments(match.HomeStats.PossessionPercentage, MatchConstants.HalftimeMinute),
             CreateOptions(options));
         EnsurePlayerPerformances(match);
 
@@ -89,6 +91,56 @@ public class MatchEngine
             includeFulltime: true);
 
         FinalizeSimulationState(simulationState);
+        return match;
+    }
+
+    public Match CreateLiveMatch(Team homeTeam, Team awayTeam, MatchSimulationOptions? options = null)
+    {
+        ValidateTeam(homeTeam, nameof(homeTeam));
+        ValidateTeam(awayTeam, nameof(awayTeam));
+
+        ResetTeamStamina(homeTeam);
+        ResetTeamStamina(awayTeam);
+
+        var match = CreateMatch(homeTeam, awayTeam);
+        match.CurrentPhase = MatchPhase.NotStarted;
+        match.CurrentMinute = 0;
+        return match;
+    }
+
+    public Match AdvanceMatch(
+        Match match,
+        int startMinute,
+        int endMinute,
+        bool includeFulltime,
+        int? seed = null,
+        MatchSimulationOptions? options = null)
+    {
+        ValidateTeam(match.HomeTeam, nameof(match.HomeTeam));
+        ValidateTeam(match.AwayTeam, nameof(match.AwayTeam));
+
+        if (startMinute < 1 || endMinute < startMinute)
+        {
+            throw new ArgumentOutOfRangeException(nameof(startMinute), "Minute range is invalid.");
+        }
+
+        var simulationState = new MatchSimulationState(
+            match,
+            CreateMatchLog(match),
+            new MatchEventFactory(),
+            match.HomePossessionMoments,
+            match.AwayPossessionMoments,
+            CreateOptions(options));
+
+        foreach (var boost in match.SuperSubBoosts)
+        {
+            simulationState.SuperSubBoosts[boost.Key] = boost.Value;
+        }
+
+        EnsurePlayerPerformances(match);
+        RunMatchMinutes(simulationState, CreateRandom(seed), startMinute, endMinute, includeFulltime);
+        FinalizeSimulationState(simulationState);
+
         return match;
     }
 
@@ -257,6 +309,11 @@ public class MatchEngine
             simulationState.AwayPossessionMoments);
         SetPassingStats(simulationState.Match);
 
+        simulationState.Match.HomePossessionMoments = simulationState.HomePossessionMoments;
+        simulationState.Match.AwayPossessionMoments = simulationState.AwayPossessionMoments;
+        simulationState.Match.SuperSubBoosts = simulationState.SuperSubBoosts.ToDictionary(
+            entry => entry.Key,
+            entry => entry.Value);
         simulationState.Match.Events = simulationState.MatchLog.GetEvents();
         UpdateFinalPlayerFatigue(simulationState.Match);
         NormalizePlayerRatings(simulationState.Match);
@@ -275,7 +332,10 @@ public class MatchEngine
             AwayTeam = awayTeam,
             HomeStats = new MatchTeamStats(),
             AwayStats = new MatchTeamStats(),
-            CurrentPhase = MatchPhase.NotStarted
+            CurrentPhase = MatchPhase.NotStarted,
+            HomePossessionMoments = 0,
+            AwayPossessionMoments = 0,
+            SuperSubBoosts = []
         };
 
         EnsurePlayerPerformances(match);
@@ -480,6 +540,7 @@ public class MatchEngine
 
         if (!ShouldCreateAttack(attackingTeamStrength, defendingTeamStrength, random))
         {
+            TrackDefensiveStop(match, defendingTeam, random);
             return;
         }
 
@@ -493,6 +554,7 @@ public class MatchEngine
 
         if (!ShouldCreateShot(shooter, playmaker, attackingTeamStrength, defendingTeamStrength, random, shooterHasSuperSubBoost))
         {
+            TrackDefensiveStop(match, defendingTeam, random);
             return;
         }
 
@@ -621,6 +683,7 @@ public class MatchEngine
         }
 
         shooterPerformance.Rating -= goalProbability >= 0.20 ? 0.12 : 0.04;
+        TrackShotBlockOrClearance(match, defendingTeam, random);
         if (random.NextDouble() < 0.12)
         {
             attackingStats.Corners++;
@@ -699,6 +762,7 @@ public class MatchEngine
                 {
                     var performance = GetOrCreatePerformance(match, dramaResult.Team, player);
                     performance.Saves++;
+                    performance.Blocks++;
                     performance.Rating += 0.50;
                 }
 
@@ -749,6 +813,38 @@ public class MatchEngine
 
                 break;
         }
+    }
+
+    private void TrackDefensiveStop(Match match, Team defendingTeam, Random random)
+    {
+        var defender = ChooseDefendingPlayer(defendingTeam, random);
+        var performance = GetOrCreatePerformance(match, defendingTeam, defender);
+
+        if (random.NextDouble() < 0.55)
+        {
+            performance.Interceptions++;
+            performance.Rating += 0.06;
+            return;
+        }
+
+        performance.Tackles++;
+        performance.Rating += 0.07;
+    }
+
+    private void TrackShotBlockOrClearance(Match match, Team defendingTeam, Random random)
+    {
+        var defender = ChooseDefendingPlayer(defendingTeam, random);
+        var performance = GetOrCreatePerformance(match, defendingTeam, defender);
+
+        if (random.NextDouble() < 0.45)
+        {
+            performance.Blocks++;
+            performance.Rating += 0.10;
+            return;
+        }
+
+        performance.Clearances++;
+        performance.Rating += 0.06;
     }
 
     private static void EnsurePlayerPerformances(Match match)
@@ -1066,10 +1162,11 @@ public class MatchEngine
 
     private static void ResetTeamStamina(Team team)
     {
-        foreach (var player in team.Players)
+        foreach (var player in team.Players.Concat(team.Substitutes))
         {
             player.Fatigue = Math.Clamp(player.Fatigue, 0, 100);
             player.CurrentStamina = Math.Clamp(player.Stamina * ((100 - player.Fatigue) / 100.0), 0, player.Stamina);
+            player.LiveMatchModifier = 1.0;
             player.YellowCards = 0;
             player.IsSentOff = false;
         }

@@ -12,6 +12,10 @@ public class PlayerMatchPerformance
     public int ShotsOnTarget { get; set; }
     public int Saves { get; set; }
     public int KeyPasses { get; set; }
+    public int Tackles { get; set; }
+    public int Interceptions { get; set; }
+    public int Blocks { get; set; }
+    public int Clearances { get; set; }
     public int Fouls { get; set; }
     public int YellowCards { get; set; }
     public int RedCards { get; set; }

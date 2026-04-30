@@ -7,9 +7,12 @@ public class PitchPlayerCard
 {
     public required Player Player { get; init; }
     public string ShirtNumberText { get; init; } = string.Empty;
+    public string ShirtNumberValue { get; init; } = string.Empty;
+    public string PlayerImagePath { get; init; } = string.Empty;
     public string PlayerName { get; init; } = string.Empty;
     public string PositionText { get; init; } = string.Empty;
     public string OverallText { get; init; } = string.Empty;
+    public string OverallForeground { get; init; } = "#071A2E";
     public string RatingText { get; init; } = string.Empty;
     public string MatchStatsText { get; init; } = string.Empty;
     public string FatigueText { get; init; } = string.Empty;

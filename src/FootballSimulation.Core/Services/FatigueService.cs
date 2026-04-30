@@ -14,7 +14,8 @@ public class FatigueService
                 * GetTempoMultiplier(team.Tactics.Tempo)
                 * GetPressingMultiplier(team.Tactics.PressingIntensity)
                 * GetPositionMultiplier(player.Position)
-                * GetStaminaResistanceMultiplier(player.Stamina);
+                * GetStaminaResistanceMultiplier(player.Stamina)
+                * GetPositionSuitabilityFatigueMultiplier(player);
 
             player.Fatigue = Math.Clamp((int)Math.Round(player.Fatigue + fatigueGain), 0, 100);
             player.CurrentStamina = CalculateCurrentStamina(player);
@@ -72,6 +73,16 @@ public class FatigueService
     private static double GetStaminaResistanceMultiplier(int stamina)
     {
         return Math.Clamp(1.30 - stamina / 100.0, 0.45, 1.20);
+    }
+
+    private static double GetPositionSuitabilityFatigueMultiplier(Player player)
+    {
+        return PositionSuitabilityService.GetEffectivenessMultiplier(player) switch
+        {
+            >= 1.0 => 1.00,
+            >= 0.90 => 1.08,
+            _ => 1.18
+        };
     }
 
     private static double CalculateCurrentStamina(Player player)

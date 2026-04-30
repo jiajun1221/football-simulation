@@ -7,7 +7,11 @@ public class PlayerDataRecord
     public string Name { get; set; } = string.Empty;
     public int SquadNumber { get; set; }
     public string Position { get; set; } = string.Empty;
+    public string? PreferredPosition { get; set; }
+    public List<string> NaturalPositions { get; set; } = [];
+    public List<string> SecondaryPositions { get; set; } = [];
     public int OverallRating { get; set; }
+    public int? Stamina { get; set; }
     public bool IsStarter { get; set; }
     public string? Form { get; set; }
     public List<string> Traits { get; set; } = [];

@@ -2,256 +2,860 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:models="clr-namespace:FootballSimulation.Wpf.Models">
-    <Grid Margin="24">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+    <UserControl.Resources>
+        <DataTemplate x:Key="PitchPlayerIconTemplate" DataType="{x:Type models:LivePlayerIconViewModel}">
+            <Grid Width="74"
+                  Height="74"
+                  Cursor="Hand"
+                  AllowDrop="True"
+                  MouseLeftButtonUp="PitchPlayerIcon_MouseLeftButtonUp"
+                  Drop="PitchPlayerIcon_Drop"
+                  ToolTip="{Binding DetailText}">
+                <Ellipse Width="58"
+                         Height="58"
+                         Stroke="{Binding SelectionBrush}"
+                         StrokeThickness="{Binding SelectionThickness}"
+                         HorizontalAlignment="Center"
+                         VerticalAlignment="Center" />
 
-        <Border Grid.Row="0"
-                Background="#0F1B2D"
-                CornerRadius="18"
-                Padding="22"
-                Margin="0,0,0,18">
-            <StackPanel>
-                <TextBlock x:Name="PhaseTextBlock"
-                           Foreground="#AFC1D8"
-                           FontWeight="SemiBold"
-                           TextAlignment="Center" />
+                <Border Width="46"
+                        Height="46"
+                        CornerRadius="23"
+                        Background="{Binding IconBrush}"
+                        BorderBrush="{Binding BorderBrush}"
+                        BorderThickness="2"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                    <TextBlock Foreground="White"
+                               FontSize="13"
+                               FontWeight="Bold"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               TextAlignment="Center">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Text" Value="{Binding ShirtNumberText}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ShirtNumberText}" Value="">
+                                        <Setter Property="Text" Value="{Binding Initials}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Border>
 
-                <Grid Margin="0,14,0,0"
-                      RenderTransformOrigin="0.5,0.5">
-                    <Grid.RenderTransform>
-                        <ScaleTransform x:Name="ScoreboardScaleTransform" ScaleX="1" ScaleY="1" />
-                    </Grid.RenderTransform>
+                <Border Background="#102033"
+                        CornerRadius="8"
+                        Padding="5,2"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Top">
+                    <TextBlock Text="{Binding RatingText}"
+                               Foreground="White"
+                               FontSize="9"
+                               FontWeight="Bold" />
+                </Border>
 
+                <Border Width="42"
+                        Height="5"
+                        Background="#DDE5EF"
+                        CornerRadius="3"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Bottom"
+                        Margin="0,0,0,8">
+                    <Border Width="{Binding FatigueBarWidth}"
+                            Background="{Binding FatigueBrush}"
+                            CornerRadius="3"
+                            HorizontalAlignment="Left" />
+                </Border>
+
+                <WrapPanel HorizontalAlignment="Right"
+                           VerticalAlignment="Bottom"
+                           Width="58"
+                           Margin="0,0,0,0"
+                           ItemHeight="15">
+                    <Border Background="#0B5D1E" CornerRadius="7" Padding="3,0" Margin="1">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding GoalBadgeText}" Value="">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <TextBlock Text="{Binding GoalBadgeText}" FontFamily="Segoe UI Emoji" FontSize="9" FontWeight="Bold" Foreground="White" />
+                    </Border>
+                    <Border Background="#F28C28" CornerRadius="7" Padding="3,0" Margin="1">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding AssistBadgeText}" Value="">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <TextBlock Text="{Binding AssistBadgeText}" FontFamily="Segoe UI Emoji" FontSize="9" FontWeight="Bold" Foreground="White" />
+                    </Border>
+                    <Border Background="#1E5AA8" CornerRadius="7" Padding="3,0" Margin="1">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding DefensiveBadgeText}" Value="">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <TextBlock Text="{Binding DefensiveBadgeText}" FontFamily="Segoe UI Emoji" FontSize="9" FontWeight="Bold" Foreground="White" />
+                    </Border>
+                    <Border Background="#009688" CornerRadius="7" Padding="3,0" Margin="1">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SaveBadgeText}" Value="">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <TextBlock Text="{Binding SaveBadgeText}" FontFamily="Segoe UI Emoji" FontSize="9" FontWeight="Bold" Foreground="White" />
+                    </Border>
+                    <Border Background="#F7C948" CornerRadius="7" Padding="3,0" Margin="1">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding YellowBadgeText}" Value="">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <TextBlock Text="{Binding YellowBadgeText}" FontFamily="Segoe UI Emoji" FontSize="9" FontWeight="Bold" Foreground="#102033" />
+                    </Border>
+                    <Border Background="#D94343" CornerRadius="7" Padding="3,0" Margin="1">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding RedBadgeText}" Value="">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <TextBlock Text="{Binding RedBadgeText}" FontFamily="Segoe UI Emoji" FontSize="9" FontWeight="Bold" Foreground="White" />
+                    </Border>
+                    <Border Background="#E85D88" CornerRadius="7" Padding="3,0" Margin="1">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding InjuryBadgeText}" Value="">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <TextBlock Text="{Binding InjuryBadgeText}" FontFamily="Segoe UI Emoji" FontSize="9" FontWeight="Bold" Foreground="White" />
+                    </Border>
+                </WrapPanel>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="SubstitutionPlayerTemplate">
+            <Border Margin="0,0,0,8"
+                    Padding="10"
+                    CornerRadius="8"
+                    Background="White"
+                    BorderBrush="#D6DFEA"
+                    BorderThickness="1"
+                    PreviewMouseMove="BenchPlayerCard_PreviewMouseMove">
+                <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <Border x:Name="HomeScorePanel"
-                            Grid.Column="0"
-                            Background="#172A45"
-                            CornerRadius="14"
-                            Padding="18">
-                        <StackPanel>
-                            <TextBlock x:Name="HomeTeamNameTextBlock"
-                                       Foreground="#DCE8F7"
-                                       FontSize="15"
-                                       FontWeight="SemiBold"
-                                       TextAlignment="Center"
-                                       TextWrapping="Wrap" />
-                            <TextBlock x:Name="HomeScoreTextBlock"
-                                       Foreground="White"
-                                       FontSize="46"
-                                       FontWeight="Bold"
-                                       TextAlignment="Center"
-                                       Margin="0,8,0,0" />
-                        </StackPanel>
-                    </Border>
+                    <StackPanel>
+                        <TextBlock Text="{Binding Name}"
+                                   Foreground="#102033"
+                                   FontWeight="Bold"
+                                   TextTrimming="CharacterEllipsis" />
+                        <TextBlock Text="{Binding Position}"
+                                   Foreground="#607187"
+                                   FontSize="10"
+                                   FontWeight="SemiBold" />
+                    </StackPanel>
 
-                    <TextBlock Grid.Column="1"
-                               Text="-"
-                               Foreground="#E2EAF5"
-                               FontSize="42"
-                               FontWeight="Bold"
-                               VerticalAlignment="Center"
-                               Margin="20,0" />
-
-                    <Border x:Name="AwayScorePanel"
-                            Grid.Column="2"
-                            Background="#172A45"
-                            CornerRadius="14"
-                            Padding="18">
-                        <StackPanel>
-                            <TextBlock x:Name="AwayTeamNameTextBlock"
-                                       Foreground="#DCE8F7"
-                                       FontSize="15"
-                                       FontWeight="SemiBold"
-                                       TextAlignment="Center"
-                                       TextWrapping="Wrap" />
-                            <TextBlock x:Name="AwayScoreTextBlock"
-                                       Foreground="White"
-                                       FontSize="46"
-                                       FontWeight="Bold"
-                                       TextAlignment="Center"
-                                       Margin="0,8,0,0" />
-                        </StackPanel>
+                    <Border Grid.Column="1"
+                            Background="#102033"
+                            CornerRadius="8"
+                            Padding="8,3"
+                            Margin="10,0,0,0">
+                        <TextBlock Text="{Binding OverallRating}"
+                                   Foreground="White"
+                                   FontSize="10"
+                                   FontWeight="Bold" />
                     </Border>
                 </Grid>
-            </StackPanel>
-        </Border>
+            </Border>
+        </DataTemplate>
+    </UserControl.Resources>
 
-        <Border Grid.Row="1"
-                Background="White"
-                CornerRadius="18"
-                Padding="22">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
+    <Grid Margin="20">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="320" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
 
-                <Grid Margin="0,0,0,14">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
+        <Grid Grid.Column="0"
+              Margin="0,0,16,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Column="0"
-                               Text="Live Match Feed"
-                               FontSize="22"
-                               FontWeight="Bold"
-                               Foreground="#14233A"
-                               VerticalAlignment="Center" />
+            <Border Background="#0F1B2D"
+                    CornerRadius="12"
+                    Padding="12"
+                    Margin="0,0,0,12">
+                <StackPanel>
+                    <TextBlock x:Name="PhaseTextBlock"
+                               Foreground="#AFC1D8"
+                               FontSize="12"
+                               FontWeight="SemiBold"
+                               TextAlignment="Center" />
 
-                    <StackPanel Grid.Column="1"
-                                Orientation="Horizontal"
-                                VerticalAlignment="Center">
-                        <TextBlock Text="Speed"
-                                   Foreground="#607187"
-                                   FontSize="12"
-                                   FontWeight="SemiBold"
+                    <Grid Margin="0,8,0,0"
+                          RenderTransformOrigin="0.5,0.5">
+                        <Grid.RenderTransform>
+                            <ScaleTransform x:Name="ScoreboardScaleTransform" ScaleX="1" ScaleY="1" />
+                        </Grid.RenderTransform>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border x:Name="HomeScorePanel"
+                                Grid.RowSpan="2"
+                                Grid.Column="0"
+                                Background="#172A45"
+                                CornerRadius="9"
+                                Padding="8">
+                            <StackPanel>
+                                <TextBlock x:Name="HomeTeamNameTextBlock"
+                                           Foreground="#DCE8F7"
+                                           FontSize="12"
+                                           FontWeight="SemiBold"
+                                           TextAlignment="Center"
+                                           TextTrimming="CharacterEllipsis" />
+                                <TextBlock x:Name="HomeScoreTextBlock"
+                                           Foreground="White"
+                                           FontSize="26"
+                                           FontWeight="Bold"
+                                           TextAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+
+                        <TextBlock Grid.Column="1"
+                                   Text="-"
+                                   Foreground="#E2EAF5"
+                                   FontSize="24"
+                                   FontWeight="Bold"
                                    VerticalAlignment="Center"
-                                   Margin="0,0,8,0" />
-                        <ComboBox x:Name="SpeedComboBox"
-                                  Width="150"
-                                  Height="32"
-                                  Margin="0,0,10,0"
-                                  SelectionChanged="SpeedComboBox_SelectionChanged" />
+                                   Margin="10,0" />
 
-                        <Button x:Name="SkipButton"
-                                Content="Skip"
-                                Width="82"
+                        <Border x:Name="AwayScorePanel"
+                                Grid.RowSpan="2"
+                                Grid.Column="2"
+                                Background="#172A45"
+                                CornerRadius="9"
+                                Padding="8">
+                            <StackPanel>
+                                <TextBlock x:Name="AwayTeamNameTextBlock"
+                                           Foreground="#DCE8F7"
+                                           FontSize="12"
+                                           FontWeight="SemiBold"
+                                           TextAlignment="Center"
+                                           TextTrimming="CharacterEllipsis" />
+                                <TextBlock x:Name="AwayScoreTextBlock"
+                                           Foreground="White"
+                                           FontSize="26"
+                                           FontWeight="Bold"
+                                           TextAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Row="1"
+                    Background="White"
+                    CornerRadius="12"
+                    Padding="12">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Text="Live Match Feed"
+                                   Foreground="#14233A"
+                                   FontSize="18"
+                                   FontWeight="Bold"
+                                   VerticalAlignment="Center" />
+
+                    </Grid>
+
+                    <ListBox x:Name="MatchEventsListBox"
+                             Grid.Row="1"
+                             Background="#F3F6FA"
+                             BorderThickness="0"
+                             Padding="6"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                <Setter Property="HorizontalAlignment" Value="Stretch" />
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="Margin" Value="0" />
+                                <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="BorderThickness" Value="0" />
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate DataType="{x:Type models:MatchFeedItem}">
+                                <Border Margin="0,0,0,8"
+                                        Padding="10"
+                                        CornerRadius="9"
+                                        Background="{Binding RowBackground}"
+                                        BorderBrush="{Binding RowBorderBrush}"
+                                        BorderThickness="1"
+                                        HorizontalAlignment="Stretch">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="38" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <Border Grid.Column="0"
+                                                Width="30"
+                                                Height="30"
+                                                CornerRadius="15"
+                                                Background="{Binding IconBackground}"
+                                                VerticalAlignment="Top">
+                                            <TextBlock Text="{Binding Icon}"
+                                                       FontFamily="Segoe UI Emoji"
+                                                       FontSize="17"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center" />
+                                        </Border>
+
+                                        <StackPanel Grid.Column="1">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding MinuteText}"
+                                                           Foreground="#14233A"
+                                                           FontSize="11"
+                                                           FontWeight="Bold"
+                                                           Margin="0,0,8,0" />
+                                                <TextBlock Text="{Binding EventLabel}"
+                                                           Foreground="{Binding LabelForeground}"
+                                                           FontSize="10"
+                                                           FontWeight="Bold" />
+                                            </StackPanel>
+
+                                            <TextBlock Text="{Binding Title}"
+                                                       Foreground="#102033"
+                                                       FontSize="13"
+                                                       FontWeight="Bold"
+                                                       TextWrapping="Wrap"
+                                                       Margin="0,3,0,0" />
+
+                                            <TextBlock Text="{Binding Description}"
+                                                       Foreground="#34465C"
+                                                       FontSize="11"
+                                                       LineHeight="16"
+                                                       TextWrapping="Wrap"
+                                                       Margin="0,3,0,0" />
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="7*" />
+                <RowDefinition Height="3*" />
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0"
+                    Background="#08783F"
+                    CornerRadius="14"
+                    Padding="10">
+                <Grid ClipToBounds="True">
+                    <Rectangle Fill="#0BA956"
+                               RadiusX="12"
+                               RadiusY="12" />
+                    <Line X1="0" Y1="0" X2="0" Y2="900"
+                          Stroke="#B6F2CC"
+                          StrokeThickness="2"
+                          Opacity="0.65"
+                          HorizontalAlignment="Center" />
+                    <Ellipse Width="150"
+                             Height="150"
+                             Stroke="#B6F2CC"
+                             StrokeThickness="2"
+                             Opacity="0.55"
+                             HorizontalAlignment="Center"
+                             VerticalAlignment="Center" />
+                    <Rectangle Width="120"
+                               Height="260"
+                               Stroke="#B6F2CC"
+                               StrokeThickness="2"
+                               Opacity="0.45"
+                               HorizontalAlignment="Left"
+                               VerticalAlignment="Center"
+                               Margin="0,0,0,0" />
+                    <Rectangle Width="120"
+                               Height="260"
+                               Stroke="#B6F2CC"
+                               StrokeThickness="2"
+                               Opacity="0.45"
+                               HorizontalAlignment="Right"
+                               VerticalAlignment="Center"
+                               Margin="0,0,0,0" />
+
+                    <ItemsControl x:Name="PitchPlayersItemsControl"
+                                  ItemsSource="{Binding}"
+                                  HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Stretch"
+                                  SizeChanged="LivePitchCanvas_SizeChanged">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Canvas />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemContainerStyle>
+                            <Style TargetType="ContentPresenter">
+                                <Setter Property="Canvas.Left" Value="{Binding X}" />
+                                <Setter Property="Canvas.Top" Value="{Binding Y}" />
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
+                        <ItemsControl.ItemTemplate>
+                            <StaticResource ResourceKey="PitchPlayerIconTemplate" />
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <StackPanel HorizontalAlignment="Right"
+                                VerticalAlignment="Top"
+                                Orientation="Horizontal"
+                                Margin="0,8,8,0"
+                                Background="#66102033"
+                                Opacity="0.82">
+                        <StackPanel.Resources>
+                            <Style TargetType="Button">
+                                <Setter Property="Width" Value="32" />
+                                <Setter Property="Height" Value="28" />
+                                <Setter Property="Margin" Value="2" />
+                                <Setter Property="Background" Value="#AA1A2D44" />
+                                <Setter Property="Foreground" Value="White" />
+                                <Setter Property="BorderBrush" Value="#66FFFFFF" />
+                                <Setter Property="BorderThickness" Value="1" />
+                                <Setter Property="FontFamily" Value="Segoe UI Symbol" />
+                                <Setter Property="FontSize" Value="14" />
+                                <Setter Property="FontWeight" Value="Bold" />
+                            </Style>
+                        </StackPanel.Resources>
+                        <Button x:Name="PauseResumeButton"
+                                Content="&#x23F8;"
+                                Click="PauseResumeButton_Click">
+                            <Button.Resources>
+                                <Style TargetType="Border">
+                                    <Setter Property="CornerRadius" Value="12" />
+                                </Style>
+                            </Button.Resources>
+                        </Button>
+                        <Button x:Name="DecreaseSpeedButton"
+                                Content="&#x23EA;"
+                                Click="DecreaseSpeedButton_Click" />
+                        <Border Width="42"
                                 Height="32"
-                                Margin="0,0,10,0"
-                                Click="SkipButton_Click" />
-
+                                CornerRadius="10"
+                                Background="#F7C948"
+                                Margin="3"
+                                VerticalAlignment="Center">
+                            <TextBlock x:Name="SpeedLevelTextBlock"
+                                       Text="1x"
+                                       Foreground="#102033"
+                                       FontSize="13"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                        </Border>
+                        <Button x:Name="IncreaseSpeedButton"
+                                Content="&#x23E9;"
+                                Click="IncreaseSpeedButton_Click" />
                         <Button x:Name="ContinueButton"
                                 Content="Continue"
-                                Width="128"
-                                Height="32"
+                                Width="84"
+                                Height="28"
+                                Margin="2"
                                 Visibility="Collapsed"
                                 IsEnabled="False"
                                 Click="ContinueButton_Click" />
                     </StackPanel>
                 </Grid>
+            </Border>
 
-                <ListBox x:Name="MatchEventsListBox"
-                         Grid.Row="1"
-                         Background="#F3F6FA"
-                         BorderThickness="0"
-                         Padding="8"
-                         ScrollViewer.VerticalScrollBarVisibility="Auto">
-                    <ListBox.ItemContainerStyle>
-                        <Style TargetType="ListBoxItem">
-                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                            <Setter Property="Padding" Value="0" />
-                            <Setter Property="Margin" Value="0" />
-                            <Setter Property="Background" Value="Transparent" />
-                            <Setter Property="BorderThickness" Value="0" />
-                        </Style>
-                    </ListBox.ItemContainerStyle>
-                    <ListBox.ItemTemplate>
-                        <DataTemplate DataType="{x:Type models:MatchFeedItem}">
-                            <Border Margin="0,0,0,10"
-                                    Padding="16"
-                                    CornerRadius="14"
-                                    Background="{Binding RowBackground}"
-                                    BorderBrush="{Binding RowBorderBrush}"
-                                    BorderThickness="1.5">
+            <Grid Grid.Row="1"
+                  Margin="0,8,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.05*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="0.95*" />
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0"
+                        Background="White"
+                        CornerRadius="12"
+                        Padding="10"
+                        Margin="0,0,8,0">
+                    <Grid>
+                        <TextBlock x:Name="SelectedPlayerPlaceholderTextBlock"
+                                   Text="Select a player on the pitch to view details."
+                                   Foreground="#607187"
+                                   FontSize="13"
+                                   FontWeight="SemiBold"
+                                   TextWrapping="Wrap"
+                                   VerticalAlignment="Center"
+                                   TextAlignment="Center" />
+
+                        <StackPanel x:Name="SelectedPlayerStatsPanel"
+                                    Visibility="Collapsed">
+                            <TextBlock x:Name="SelectedPlayerNameTextBlock"
+                                       Foreground="#102033"
+                                       FontSize="15"
+                                       FontWeight="Bold"
+                                       TextWrapping="Wrap" />
+                            <TextBlock x:Name="SelectedPlayerMetaTextBlock"
+                                       Foreground="#607187"
+                                       FontSize="10"
+                                       FontWeight="SemiBold"
+                                       Margin="0,1,0,6" />
+
+                            <UniformGrid Columns="2">
+                                <StackPanel Margin="0,0,6,4">
+                                    <TextBlock Text="Rating" Foreground="#607187" FontSize="10" FontWeight="Bold" />
+                                    <TextBlock x:Name="SelectedPlayerRatingTextBlock" Foreground="#102033" FontSize="13" FontWeight="Bold" />
+                                </StackPanel>
+                                <StackPanel Margin="0,0,0,4">
+                                    <TextBlock Text="Fatigue" Foreground="#607187" FontSize="10" FontWeight="Bold" />
+                                    <TextBlock x:Name="SelectedPlayerFatigueTextBlock" Foreground="#102033" FontSize="13" FontWeight="Bold" />
+                                </StackPanel>
+                                <StackPanel Margin="0,0,6,4">
+                                    <TextBlock Text="Goals" Foreground="#607187" FontSize="10" FontWeight="Bold" />
+                                    <TextBlock x:Name="SelectedPlayerGoalsTextBlock" Foreground="#102033" FontSize="12" FontWeight="Bold" />
+                                </StackPanel>
+                                <StackPanel Margin="0,0,0,4">
+                                    <TextBlock Text="Assists" Foreground="#607187" FontSize="10" FontWeight="Bold" />
+                                    <TextBlock x:Name="SelectedPlayerAssistsTextBlock" Foreground="#102033" FontSize="12" FontWeight="Bold" />
+                                </StackPanel>
+                                <StackPanel Margin="0,0,6,4">
+                                    <TextBlock Text="Defensive" Foreground="#607187" FontSize="10" FontWeight="Bold" />
+                                    <TextBlock x:Name="SelectedPlayerDefensiveTextBlock" Foreground="#102033" FontSize="12" FontWeight="Bold" />
+                                </StackPanel>
+                                <StackPanel Margin="0,0,0,4">
+                                    <TextBlock Text="Cards" Foreground="#607187" FontSize="10" FontWeight="Bold" />
+                                    <TextBlock x:Name="SelectedPlayerCardsTextBlock" Foreground="#102033" FontSize="12" FontWeight="Bold" />
+                                </StackPanel>
+                            </UniformGrid>
+
+                            <Border Height="8"
+                                    Background="#DDE5EF"
+                                    CornerRadius="4"
+                                    Margin="0,0,0,5">
+                                <Border x:Name="SelectedPlayerStaminaBar"
+                                        Height="8"
+                                        Background="#2FA84F"
+                                        CornerRadius="4"
+                                        HorizontalAlignment="Left" />
+                            </Border>
+
+                            <TextBlock x:Name="SelectedPlayerStatusTextBlock"
+                                       Foreground="#34465C"
+                                       FontSize="10"
+                                       TextWrapping="Wrap"
+                                       Margin="0,0,0,0" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Column="1"
+                        Background="White"
+                        CornerRadius="12"
+                        Padding="10"
+                        Margin="0,0,8,0">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock x:Name="ActionLockedTextBlock"
+                                   Text="Pause the match to make tactical adjustments or substitutions."
+                                   Foreground="#607187"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"
+                                   TextWrapping="Wrap"
+                                   Margin="0,0,0,4" />
+
+                        <Grid x:Name="PausedActionPanel"
+                              Grid.Row="1"
+                              Margin="0">
+                            <StackPanel>
+                                <TextBlock Text="Tactical Adjustment"
+                                           Foreground="#102033"
+                                           FontSize="13"
+                                           FontWeight="Bold"
+                                           Margin="0,0,0,4" />
+
                                 <Grid>
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="58" />
+                                        <ColumnDefinition Width="86" />
                                         <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
 
-                                    <Border Grid.Column="0"
-                                            Width="46"
-                                            Height="46"
-                                            CornerRadius="23"
-                                            Background="{Binding IconBackground}"
-                                            VerticalAlignment="Top">
-                                        <TextBlock Text="{Binding Icon}"
-                                                   FontFamily="Segoe UI Emoji"
-                                                   FontSize="25"
-                                                   HorizontalAlignment="Center"
-                                                   VerticalAlignment="Center"
-                                                   TextAlignment="Center" />
-                                    </Border>
+                                    <TextBlock Text="Mentality" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                    <ComboBox x:Name="ActionMentalityComboBox" Grid.Column="1" Height="24" Margin="0,0,0,2" />
 
-                                    <StackPanel Grid.Column="1">
-                                        <StackPanel Orientation="Horizontal">
-                                            <Border Background="#E9EEF5"
-                                                    CornerRadius="10"
-                                                    Padding="8,4"
-                                                    Margin="0,0,8,0">
-                                                <TextBlock Text="{Binding MinuteText}"
-                                                           Foreground="#14233A"
-                                                           FontSize="12"
-                                                           FontWeight="Bold" />
-                                            </Border>
+                                    <TextBlock Grid.Row="1" Text="Pressing" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                    <Slider x:Name="ActionPressingSlider" Grid.Row="1" Grid.Column="1" Minimum="1" Maximum="100" />
 
-                                            <Border Background="{Binding LabelBackground}"
-                                                    CornerRadius="10"
-                                                    Padding="9,4">
-                                                <TextBlock Text="{Binding EventLabel}"
-                                                           Foreground="{Binding LabelForeground}"
-                                                           FontSize="11"
-                                                           FontWeight="Bold" />
-                                            </Border>
-                                        </StackPanel>
+                                    <TextBlock Grid.Row="2" Text="Width" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                    <Slider x:Name="ActionWidthSlider" Grid.Row="2" Grid.Column="1" Minimum="1" Maximum="100" />
 
-                                        <TextBlock Text="{Binding TeamName}"
-                                                   Foreground="#607187"
-                                                   FontSize="12"
-                                                   FontWeight="SemiBold"
-                                                   Margin="0,8,0,0" />
+                                    <TextBlock Grid.Row="3" Text="Tempo" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                    <Slider x:Name="ActionTempoSlider" Grid.Row="3" Grid.Column="1" Minimum="1" Maximum="100" />
 
-                                        <TextBlock Text="{Binding Title}"
-                                                   Foreground="#102033"
-                                                   FontSize="17"
-                                                   FontWeight="Bold"
-                                                   TextWrapping="Wrap"
-                                                   Margin="0,3,0,0" />
-
-                                        <TextBlock Text="{Binding Description}"
-                                                   Foreground="#34465C"
-                                                   FontSize="14"
-                                                   LineHeight="20"
-                                                   TextWrapping="Wrap"
-                                                   Margin="0,5,0,0" />
-                                    </StackPanel>
-
-                                    <Border Grid.Column="2"
-                                            Background="#102033"
-                                            CornerRadius="12"
-                                            Padding="12,7"
-                                            VerticalAlignment="Top"
-                                            Margin="14,0,0,0">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Setter Property="Visibility" Value="Collapsed" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsGoal}" Value="True">
-                                                        <Setter Property="Visibility" Value="Visible" />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                        <TextBlock Text="{Binding ScoreText}"
-                                                   Foreground="White"
-                                                   FontWeight="Bold" />
-                                    </Border>
+                                    <TextBlock Grid.Row="4" Text="Defensive Line" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                    <Slider x:Name="ActionDefensiveLineSlider" Grid.Row="4" Grid.Column="1" Minimum="1" Maximum="100" />
                                 </Grid>
-                            </Border>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
+
+                                <TextBlock x:Name="PausedActionStatusTextBlock"
+                                           Foreground="#607187"
+                                           FontSize="10"
+                                           TextWrapping="Wrap"
+                                           Margin="0,3,0,0" />
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Column="2"
+                        Background="White"
+                        CornerRadius="12"
+                        Padding="10">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Foreground="#102033"
+                                   FontSize="13"
+                                   FontWeight="Bold"
+                                   Margin="0,0,0,4">
+                            <TextBlock.Inlines>
+                                <Run Text="Substitutes" />
+                                <Run Text="   " />
+                                <Run x:Name="SubsLeftTextBlock"
+                                     Foreground="#607187"
+                                     FontSize="11"
+                                     FontWeight="SemiBold" />
+                            </TextBlock.Inlines>
+                        </TextBlock>
+                        <TextBlock Grid.Row="1"
+                                   Text="Select a starter, then choose or drag a bench player."
+                                   Foreground="#607187"
+                                   FontSize="10"
+                                   TextWrapping="Wrap"
+                                   Margin="0,0,0,5" />
+                        <ListBox x:Name="PausedBenchListBox"
+                                 Grid.Row="2"
+                                 SelectionChanged="PausedBenchListBox_SelectionChanged"
+                                 ItemTemplate="{StaticResource SubstitutionPlayerTemplate}"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled" />
+                    </Grid>
+                </Border>
             </Grid>
-        </Border>
+
+            <Grid x:Name="SubstitutionOverlay"
+                  Grid.RowSpan="2"
+                  Background="#A6112233"
+                  Visibility="Collapsed">
+                <Border Width="760"
+                        Background="#F8FAFC"
+                        CornerRadius="14"
+                        Padding="22"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Text="Make Substitution"
+                                   Foreground="#102033"
+                                   FontSize="24"
+                                   FontWeight="Bold" />
+
+                        <TextBlock x:Name="SubstitutionOverlayStatusTextBlock"
+                                   Grid.Row="1"
+                                   Foreground="#607187"
+                                   FontSize="13"
+                                   TextWrapping="Wrap"
+                                   Margin="0,8,0,18" />
+
+                        <Grid Grid.Row="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Margin="0,0,14,0">
+                                <TextBlock Text="Current Starters"
+                                           Foreground="#102033"
+                                           FontSize="18"
+                                           FontWeight="Bold"
+                                           Margin="0,0,0,10" />
+                                <ListBox x:Name="LiveStarterListBox"
+                                         Height="290"
+                                         SelectionChanged="LiveStarterListBox_SelectionChanged"
+                                         ItemTemplate="{StaticResource SubstitutionPlayerTemplate}" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Margin="14,0,0,0">
+                                <TextBlock Text="Available Substitutes"
+                                           Foreground="#102033"
+                                           FontSize="18"
+                                           FontWeight="Bold"
+                                           Margin="0,0,0,10" />
+                                <ListBox x:Name="LiveBenchListBox"
+                                         Height="290"
+                                         SelectionChanged="LiveBenchListBox_SelectionChanged"
+                                         ItemTemplate="{StaticResource SubstitutionPlayerTemplate}" />
+                            </StackPanel>
+                        </Grid>
+
+                        <StackPanel Grid.Row="3"
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Right"
+                                    Margin="0,18,0,0">
+                            <Button Content="Cancel"
+                                    Width="110"
+                                    Height="36"
+                                    Margin="0,0,10,0"
+                                    Click="CancelSubstitutionButton_Click" />
+                            <Button x:Name="ConfirmSubstitutionButton"
+                                    Content="Confirm Substitution"
+                                    Width="170"
+                                    Height="36"
+                                    IsEnabled="False"
+                                    Click="ConfirmSubstitutionButton_Click" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <Grid x:Name="TacticalAdjustmentOverlay"
+                  Grid.RowSpan="2"
+                  Background="#A6112233"
+                  Visibility="Collapsed">
+                <Border Width="480"
+                        Background="#F8FAFC"
+                        CornerRadius="14"
+                        Padding="22"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                    <StackPanel>
+                        <TextBlock Text="Tactical Adjustment"
+                                   Foreground="#102033"
+                                   FontSize="24"
+                                   FontWeight="Bold" />
+                        <TextBlock x:Name="TacticalOverlayStatusTextBlock"
+                                   Foreground="#607187"
+                                   FontSize="13"
+                                   Margin="0,8,0,18" />
+
+                        <TextBlock Text="Mentality" FontWeight="SemiBold" Foreground="#102033" />
+                        <ComboBox x:Name="TacticalMentalityComboBox"
+                                  Height="34"
+                                  Margin="0,4,0,12" />
+
+                        <TextBlock Text="Pressing" FontWeight="SemiBold" Foreground="#102033" />
+                        <Slider x:Name="TacticalPressingSlider" Minimum="1" Maximum="100" />
+
+                        <TextBlock Text="Width" FontWeight="SemiBold" Foreground="#102033" Margin="0,8,0,0" />
+                        <Slider x:Name="TacticalWidthSlider" Minimum="1" Maximum="100" />
+
+                        <TextBlock Text="Tempo" FontWeight="SemiBold" Foreground="#102033" Margin="0,8,0,0" />
+                        <Slider x:Name="TacticalTempoSlider" Minimum="1" Maximum="100" />
+
+                        <TextBlock Text="Defensive Line" FontWeight="SemiBold" Foreground="#102033" Margin="0,8,0,0" />
+                        <Slider x:Name="TacticalDefensiveLineSlider" Minimum="1" Maximum="100" />
+
+                        <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Right"
+                                    Margin="0,18,0,0">
+                            <Button Content="Cancel"
+                                    Width="110"
+                                    Height="36"
+                                    Margin="0,0,10,0"
+                                    Click="CancelTacticalAdjustmentButton_Click" />
+                            <Button Content="Apply Tactics"
+                                    Width="140"
+                                    Height="36"
+                                    Click="ConfirmTacticalAdjustmentButton_Click" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Grid>
     </Grid>
 </UserControl>

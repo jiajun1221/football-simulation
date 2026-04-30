@@ -167,28 +167,33 @@
     {
       "teamId": "chelsea",
       "name": "Chelsea",
-      "formation": "4-3-3",
+      "formation": "4-2-3-1",
       "startingXI": [
-        { "name": "Robert Sanchez", "squadNumber": 1, "position": "GK", "overallRating": 81, "fatigue": 0, "form": "Average", "isStarter": true },
-        { "name": "Reece James", "squadNumber": 24, "position": "DEF", "overallRating": 84, "fatigue": 0, "form": "Good", "isStarter": true },
-        { "name": "Levi Colwill", "squadNumber": 6, "position": "DEF", "overallRating": 81, "fatigue": 0, "form": "Average", "isStarter": true },
-        { "name": "Marc Cucurella", "squadNumber": 3, "position": "DEF", "overallRating": 81, "fatigue": 0, "form": "Average", "isStarter": true },
-        { "name": "Malo Gusto", "squadNumber": 27, "position": "DEF", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": true },
-        { "name": "Moises Caicedo", "squadNumber": 25, "position": "MID", "overallRating": 85, "fatigue": 0, "form": "Good", "isStarter": true },
-        { "name": "Enzo Fernandez", "squadNumber": 8, "position": "MID", "overallRating": 84, "fatigue": 0, "form": "Average", "isStarter": true },
-        { "name": "Cole Palmer", "squadNumber": 20, "position": "MID", "overallRating": 88, "fatigue": 0, "form": "Hot", "isStarter": true },
-        { "name": "Joao Pedro", "squadNumber": 10, "position": "FWD", "overallRating": 83, "fatigue": 0, "form": "Good", "isStarter": true },
-        { "name": "Liam Delap", "squadNumber": 9, "position": "FWD", "overallRating": 79, "fatigue": 0, "form": "Average", "isStarter": true },
-        { "name": "Pedro Neto", "squadNumber": 7, "position": "FWD", "overallRating": 82, "fatigue": 0, "form": "Average", "isStarter": true }
+        { "name": "Robert Sanchez", "squadNumber": 1, "position": "GK", "preferredPosition": "GK", "secondaryPositions": [], "overallRating": 81, "stamina": 76, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Marc Cucurella", "squadNumber": 3, "position": "LB", "preferredPosition": "LB", "secondaryPositions": ["CB"], "overallRating": 81, "stamina": 83, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Levi Colwill", "squadNumber": 6, "position": "CB", "preferredPosition": "CB", "secondaryPositions": ["LB"], "overallRating": 82, "stamina": 81, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Trevoh Chalobah", "squadNumber": 23, "position": "CB", "preferredPosition": "CB", "secondaryPositions": ["RB"], "overallRating": 80, "stamina": 80, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Reece James", "squadNumber": 24, "position": "RB", "preferredPosition": "RB", "secondaryPositions": ["CB"], "overallRating": 84, "stamina": 82, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Moises Caicedo", "squadNumber": 25, "position": "CDM", "preferredPosition": "CDM", "secondaryPositions": ["CM"], "overallRating": 86, "stamina": 88, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Enzo Fernandez", "squadNumber": 8, "position": "CM", "preferredPosition": "CM", "naturalPositions": ["CDM"], "secondaryPositions": ["CAM"], "overallRating": 84, "stamina": 84, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Pedro Neto", "squadNumber": 7, "position": "LW", "preferredPosition": "LW", "secondaryPositions": ["RW"], "overallRating": 82, "stamina": 84, "fatigue": 0, "form": "Average", "isStarter": true },
+        { "name": "Cole Palmer", "squadNumber": 10, "position": "CAM", "preferredPosition": "CAM", "naturalPositions": ["RW"], "secondaryPositions": [], "overallRating": 88, "stamina": 83, "fatigue": 0, "form": "Hot", "isStarter": true },
+        { "name": "Joao Pedro", "squadNumber": 20, "position": "ST", "preferredPosition": "ST", "naturalPositions": ["CAM"], "secondaryPositions": [], "overallRating": 84, "stamina": 82, "fatigue": 0, "form": "Good", "isStarter": true },
+        { "name": "Liam Delap", "squadNumber": 9, "position": "ST", "preferredPosition": "ST", "secondaryPositions": [], "overallRating": 80, "stamina": 84, "fatigue": 0, "form": "Average", "isStarter": true }
       ],
       "substitutes": [
-        { "name": "Filip Jorgensen", "squadNumber": 12, "position": "GK", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": false },
-        { "name": "Tosin Adarabioyo", "squadNumber": 4, "position": "DEF", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": false },
-        { "name": "Benoit Badiashile", "squadNumber": 5, "position": "DEF", "overallRating": 79, "fatigue": 0, "form": "Average", "isStarter": false },
-        { "name": "Romeo Lavia", "squadNumber": 45, "position": "MID", "overallRating": 78, "fatigue": 0, "form": "Average", "isStarter": false },
-        { "name": "Andrey Santos", "squadNumber": 17, "position": "MID", "overallRating": 79, "fatigue": 0, "form": "Good", "isStarter": false },
-        { "name": "Estevao", "squadNumber": 41, "position": "FWD", "overallRating": 78, "fatigue": 0, "form": "Good", "isStarter": false },
-        { "name": "Jamie Gittens", "squadNumber": 11, "position": "FWD", "overallRating": 80, "fatigue": 0, "form": "Average", "isStarter": false }
+        { "name": "Filip Jorgensen", "squadNumber": 12, "position": "GK", "preferredPosition": "GK", "secondaryPositions": [], "overallRating": 78, "stamina": 74, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Tosin Adarabioyo", "squadNumber": 4, "position": "CB", "preferredPosition": "CB", "secondaryPositions": [], "overallRating": 80, "stamina": 79, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Benoit Badiashile", "squadNumber": 5, "position": "CB", "preferredPosition": "CB", "secondaryPositions": ["LB"], "overallRating": 79, "stamina": 78, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Jorrel Hato", "squadNumber": 21, "position": "LB", "preferredPosition": "LB", "secondaryPositions": ["CB"], "overallRating": 79, "stamina": 82, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Malo Gusto", "squadNumber": 27, "position": "RB", "preferredPosition": "RB", "secondaryPositions": ["LB"], "overallRating": 80, "stamina": 84, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Josh Acheampong", "squadNumber": 34, "position": "RB", "preferredPosition": "RB", "secondaryPositions": ["CB"], "overallRating": 74, "stamina": 78, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Dario Essugo", "squadNumber": 14, "position": "CDM", "preferredPosition": "CDM", "secondaryPositions": ["CM"], "overallRating": 76, "stamina": 82, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Andrey Santos", "squadNumber": 17, "position": "CM", "preferredPosition": "CM", "secondaryPositions": ["CDM"], "overallRating": 79, "stamina": 83, "fatigue": 0, "form": "Good", "isStarter": false },
+        { "name": "Romeo Lavia", "squadNumber": 45, "position": "CDM", "preferredPosition": "CDM", "secondaryPositions": ["CM"], "overallRating": 78, "stamina": 79, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Jamie Gittens", "squadNumber": 11, "position": "LW", "preferredPosition": "LW", "secondaryPositions": ["RW"], "overallRating": 80, "stamina": 83, "fatigue": 0, "form": "Average", "isStarter": false },
+        { "name": "Estevao", "squadNumber": 41, "position": "RW", "preferredPosition": "RW", "secondaryPositions": ["CAM"], "overallRating": 78, "stamina": 81, "fatigue": 0, "form": "Good", "isStarter": false },
+        { "name": "Alejandro Garnacho", "squadNumber": 49, "position": "LW", "preferredPosition": "LW", "secondaryPositions": ["RW"], "overallRating": 81, "stamina": 84, "fatigue": 0, "form": "Average", "isStarter": false }
       ]
     },
     {

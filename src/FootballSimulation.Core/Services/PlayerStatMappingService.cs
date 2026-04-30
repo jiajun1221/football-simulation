@@ -10,7 +10,7 @@ public class PlayerStatMappingService
         var position = MapPosition(record.Position);
         var overall = ClampStat(record.OverallRating);
         var fatigue = Math.Clamp(record.Fatigue ?? 0, 0, 100);
-        var stamina = CalculateStamina(position, overall);
+        var stamina = ClampStat(record.Stamina ?? CalculateStamina(position, overall));
         var form = NormalizeForm(record.Form);
 
         return new Player
@@ -18,6 +18,10 @@ public class PlayerStatMappingService
             Name = record.Name,
             SquadNumber = record.SquadNumber,
             Position = position,
+            PreferredPosition = GetPreferredPosition(record.Position, record.PreferredPosition),
+            NaturalPositions = MapExactPositions(record.NaturalPositions),
+            SecondaryPositions = MapSecondaryPositions(record.SecondaryPositions),
+            AssignedPosition = GetPreferredPosition(record.Position, record.PreferredPosition),
             OverallRating = overall,
             Form = form,
             IsStarter = record.IsStarter,
@@ -42,7 +46,7 @@ public class PlayerStatMappingService
         var position = MapPosition(record.Position);
         var overall = ClampStat(record.OverallRating);
         var fatigue = Math.Clamp(record.Fatigue, 0, 100);
-        var stamina = CalculateStamina(position, overall);
+        var stamina = ClampStat(record.Stamina ?? CalculateStamina(position, overall));
         var form = NormalizeForm(record.Form);
 
         return new Player
@@ -50,6 +54,10 @@ public class PlayerStatMappingService
             Name = record.Name,
             SquadNumber = record.SquadNumber,
             Position = position,
+            PreferredPosition = GetPreferredPosition(record.Position, record.PreferredPosition),
+            NaturalPositions = MapExactPositions(record.NaturalPositions),
+            SecondaryPositions = MapSecondaryPositions(record.SecondaryPositions),
+            AssignedPosition = GetPreferredPosition(record.Position, record.PreferredPosition),
             OverallRating = overall,
             Form = form,
             IsStarter = isStarter,
@@ -79,6 +87,32 @@ public class PlayerStatMappingService
             .ToList();
     }
 
+    private static List<string> MapSecondaryPositions(IEnumerable<string> positions)
+    {
+        return MapExactPositions(positions);
+    }
+
+    private static List<string> MapExactPositions(IEnumerable<string> positions)
+    {
+        return positions
+            .Select(PositionSuitabilityService.NormalizeExactPosition)
+            .Where(position => position.Length > 0)
+            .Distinct()
+            .ToList();
+    }
+
+    private static string GetPreferredPosition(string sourcePosition, string? preferredPosition)
+    {
+        var explicitPreferred = PositionSuitabilityService.NormalizeExactPosition(preferredPosition);
+        if (explicitPreferred.Length > 0)
+        {
+            return explicitPreferred;
+        }
+
+        var exactSourcePosition = PositionSuitabilityService.NormalizeExactPosition(sourcePosition);
+        return exactSourcePosition;
+    }
+
     private static string NormalizeTraitName(string trait)
     {
         return trait.Replace(" ", string.Empty).Replace("-", string.Empty).Trim();
@@ -89,9 +123,9 @@ public class PlayerStatMappingService
         return position.Trim().ToLowerInvariant() switch
         {
             "goalkeeper" or "gk" => Position.Goalkeeper,
-            "defender" or "defence" or "defense" or "df" or "def" => Position.Defender,
-            "midfielder" or "midfield" or "mf" or "mid" => Position.Midfielder,
-            "forward" or "striker" or "winger" or "fw" or "fwd" => Position.Forward,
+            "defender" or "defence" or "defense" or "df" or "def" or "lb" or "rb" or "cb" => Position.Defender,
+            "midfielder" or "midfield" or "mf" or "mid" or "cm" or "cam" or "cdm" => Position.Midfielder,
+            "forward" or "striker" or "winger" or "fw" or "fwd" or "lw" or "rw" or "st" => Position.Forward,
             _ => Position.Midfielder
         };
     }
