@@ -56,25 +56,24 @@
                                FontWeight="Bold" />
                 </Border>
 
-                <Border Width="42"
-                        Height="5"
-                        Background="#DDE5EF"
-                        CornerRadius="3"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Bottom"
-                        Margin="0,0,0,8">
-                    <Border Width="{Binding FatigueBarWidth}"
-                            Background="{Binding FatigueBrush}"
-                            CornerRadius="3"
-                            HorizontalAlignment="Left" />
-                </Border>
+                <ProgressBar Width="42"
+                             Height="5"
+                             Minimum="0"
+                             Maximum="100"
+                             Value="{Binding Stamina}"
+                             Foreground="{Binding StaminaBrush}"
+                             Background="#DDE5EF"
+                             BorderThickness="0"
+                             HorizontalAlignment="Center"
+                             VerticalAlignment="Bottom"
+                             Margin="0,0,0,8" />
 
                 <WrapPanel HorizontalAlignment="Right"
                            VerticalAlignment="Bottom"
                            Width="58"
                            Margin="0,0,0,0"
                            ItemHeight="15">
-                    <Border Background="#0B5D1E" CornerRadius="7" Padding="3,0" Margin="1">
+                    <Border Background="#76ff96" CornerRadius="7" Padding="3,0" Margin="1">
                         <Border.Style>
                             <Style TargetType="Border">
                                 <Setter Property="Visibility" Value="Visible" />
@@ -87,7 +86,7 @@
                         </Border.Style>
                         <TextBlock Text="{Binding GoalBadgeText}" FontFamily="Segoe UI Emoji" FontSize="9" FontWeight="Bold" Foreground="White" />
                     </Border>
-                    <Border Background="#F28C28" CornerRadius="7" Padding="3,0" Margin="1">
+                    <Border Background="#ffc68e" CornerRadius="7" Padding="3,0" Margin="1">
                         <Border.Style>
                             <Style TargetType="Border">
                                 <Setter Property="Visibility" Value="Visible" />
@@ -100,7 +99,7 @@
                         </Border.Style>
                         <TextBlock Text="{Binding AssistBadgeText}" FontFamily="Segoe UI Emoji" FontSize="9" FontWeight="Bold" Foreground="White" />
                     </Border>
-                    <Border Background="#1E5AA8" CornerRadius="7" Padding="3,0" Margin="1">
+                    <Border Background="#6ca5f0" CornerRadius="7" Padding="3,0" Margin="1">
                         <Border.Style>
                             <Style TargetType="Border">
                                 <Setter Property="Visibility" Value="Visible" />
@@ -170,40 +169,85 @@
         </DataTemplate>
 
         <DataTemplate x:Key="SubstitutionPlayerTemplate">
-            <Border Margin="0,0,0,8"
-                    Padding="10"
+            <Border Width="128"
+                    Height="78"
+                    Margin="0,0,0,7"
+                    Padding="6"
                     CornerRadius="8"
                     Background="White"
                     BorderBrush="#D6DFEA"
                     BorderThickness="1"
                     PreviewMouseMove="BenchPlayerCard_PreviewMouseMove">
                 <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
 
-                    <StackPanel>
-                        <TextBlock Text="{Binding Name}"
-                                   Foreground="#102033"
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Text="{Binding ShirtNumberText}"
+                                   Foreground="#143052"
+                                   FontSize="10"
                                    FontWeight="Bold"
-                                   TextTrimming="CharacterEllipsis" />
-                        <TextBlock Text="{Binding Position}"
-                                   Foreground="#607187"
-                                   FontSize="10"
-                                   FontWeight="SemiBold" />
-                    </StackPanel>
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,4,0" />
 
-                    <Border Grid.Column="1"
-                            Background="#102033"
-                            CornerRadius="8"
-                            Padding="8,3"
-                            Margin="10,0,0,0">
-                        <TextBlock Text="{Binding OverallRating}"
-                                   Foreground="White"
-                                   FontSize="10"
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding OverallText}"
+                                   Foreground="#071A2E"
+                                   FontSize="9.5"
+                                   FontWeight="Black"
+                                   VerticalAlignment="Center" />
+
+                        <Border Grid.Column="2"
+                                Background="#E7EEF8"
+                                CornerRadius="7"
+                                Padding="5,1">
+                            <TextBlock Text="{Binding Position}"
+                                       Foreground="#102033"
+                                       FontSize="7.5"
+                                       FontWeight="Black" />
+                        </Border>
+                    </Grid>
+
+                    <TextBlock Grid.Row="1"
+                               Text="{Binding Name}"
+                               Foreground="#102033"
+                               FontSize="9.2"
+                               FontWeight="Black"
+                               TextTrimming="CharacterEllipsis"
+                               TextWrapping="NoWrap"
+                               Margin="0,4,0,0" />
+
+                    <Border Grid.Row="2"
+                            Background="{Binding FormBadgeBackground}"
+                            CornerRadius="7"
+                            Padding="5,1"
+                            HorizontalAlignment="Left"
+                            Margin="0,3,0,0">
+                        <TextBlock Text="{Binding FormBadgeText}"
+                                   Foreground="{Binding FormBadgeForeground}"
+                                   FontSize="7"
                                    FontWeight="Bold" />
                     </Border>
+
+                    <ProgressBar Grid.Row="3"
+                                 Height="5"
+                                 Minimum="0"
+                                 Maximum="100"
+                                 Value="{Binding Stamina}"
+                                 Foreground="{Binding StaminaBrush}"
+                                 Background="#DDE5EF"
+                                 BorderThickness="0"
+                                 Margin="0,5,0,0" />
                 </Grid>
             </Border>
         </DataTemplate>
@@ -574,8 +618,8 @@
                                     <TextBlock x:Name="SelectedPlayerRatingTextBlock" Foreground="#102033" FontSize="13" FontWeight="Bold" />
                                 </StackPanel>
                                 <StackPanel Margin="0,0,0,4">
-                                    <TextBlock Text="Fatigue" Foreground="#607187" FontSize="10" FontWeight="Bold" />
-                                    <TextBlock x:Name="SelectedPlayerFatigueTextBlock" Foreground="#102033" FontSize="13" FontWeight="Bold" />
+                                    <TextBlock Text="Stamina" Foreground="#607187" FontSize="10" FontWeight="Bold" />
+                                    <TextBlock x:Name="SelectedPlayerStaminaTextBlock" Foreground="#102033" FontSize="13" FontWeight="Bold" />
                                 </StackPanel>
                                 <StackPanel Margin="0,0,6,4">
                                     <TextBlock Text="Goals" Foreground="#607187" FontSize="10" FontWeight="Bold" />
@@ -595,16 +639,15 @@
                                 </StackPanel>
                             </UniformGrid>
 
-                            <Border Height="8"
-                                    Background="#DDE5EF"
-                                    CornerRadius="4"
-                                    Margin="0,0,0,5">
-                                <Border x:Name="SelectedPlayerStaminaBar"
-                                        Height="8"
-                                        Background="#2FA84F"
-                                        CornerRadius="4"
-                                        HorizontalAlignment="Left" />
-                            </Border>
+                            <ProgressBar x:Name="SelectedPlayerStaminaBar"
+                                         Height="8"
+                                         Minimum="0"
+                                         Maximum="100"
+                                         Value="{Binding Stamina}"
+                                         Foreground="#2FA84F"
+                                         Background="#DDE5EF"
+                                         BorderThickness="0"
+                                         Margin="0,0,0,5" />
 
                             <TextBlock x:Name="SelectedPlayerStatusTextBlock"
                                        Foreground="#34465C"
@@ -691,6 +734,7 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
 
@@ -713,11 +757,56 @@
                                    FontSize="10"
                                    TextWrapping="Wrap"
                                    Margin="0,0,0,5" />
+                        <Border x:Name="PendingSubstitutionPanel"
+                                Grid.Row="2"
+                                Background="#FFF7D6"
+                                BorderBrush="#F2C94C"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Padding="6"
+                                Margin="0,0,0,6"
+                                Visibility="Collapsed">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock x:Name="PendingSubstitutionTextBlock"
+                                           Foreground="#5F4500"
+                                           FontSize="10"
+                                           FontWeight="SemiBold"
+                                           TextWrapping="Wrap" />
+                                <Button Grid.Column="1"
+                                        Content="Cancel"
+                                        FontSize="10"
+                                        Padding="8,2"
+                                        Margin="8,0,0,0"
+                                        Click="CancelPendingSubstitutionButton_Click" />
+                            </Grid>
+                        </Border>
                         <ListBox x:Name="PausedBenchListBox"
-                                 Grid.Row="2"
+                                 Grid.Row="3"
                                  SelectionChanged="PausedBenchListBox_SelectionChanged"
                                  ItemTemplate="{StaticResource SubstitutionPlayerTemplate}"
-                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled" />
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                 ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <Setter Property="Padding" Value="0" />
+                                    <Setter Property="Margin" Value="0,0,8,0" />
+                                    <Setter Property="HorizontalContentAlignment" Value="Left" />
+                                    <Setter Property="Background" Value="Transparent" />
+                                    <Setter Property="BorderThickness" Value="0" />
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                        </ListBox>
                     </Grid>
                 </Border>
             </Grid>
@@ -767,7 +856,16 @@
                                 <ListBox x:Name="LiveStarterListBox"
                                          Height="290"
                                          SelectionChanged="LiveStarterListBox_SelectionChanged"
-                                         ItemTemplate="{StaticResource SubstitutionPlayerTemplate}" />
+                                         ItemTemplate="{StaticResource SubstitutionPlayerTemplate}"
+                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                    <ListBox.ItemContainerStyle>
+                                        <Style TargetType="ListBoxItem">
+                                            <Setter Property="Padding" Value="0" />
+                                            <Setter Property="Margin" Value="0,0,0,6" />
+                                            <Setter Property="HorizontalContentAlignment" Value="Left" />
+                                        </Style>
+                                    </ListBox.ItemContainerStyle>
+                                </ListBox>
                             </StackPanel>
 
                             <StackPanel Grid.Column="1" Margin="14,0,0,0">
@@ -779,7 +877,16 @@
                                 <ListBox x:Name="LiveBenchListBox"
                                          Height="290"
                                          SelectionChanged="LiveBenchListBox_SelectionChanged"
-                                         ItemTemplate="{StaticResource SubstitutionPlayerTemplate}" />
+                                         ItemTemplate="{StaticResource SubstitutionPlayerTemplate}"
+                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                    <ListBox.ItemContainerStyle>
+                                        <Style TargetType="ListBoxItem">
+                                            <Setter Property="Padding" Value="0" />
+                                            <Setter Property="Margin" Value="0,0,0,6" />
+                                            <Setter Property="HorizontalContentAlignment" Value="Left" />
+                                        </Style>
+                                    </ListBox.ItemContainerStyle>
+                                </ListBox>
                             </StackPanel>
                         </Grid>
 

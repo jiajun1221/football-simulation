@@ -71,17 +71,15 @@
                         </Border>
                     </Grid>
 
-                    <Border Grid.Row="3"
-                            Height="5"
-                            Background="#DDE5EF"
-                            CornerRadius="3"
-                            Margin="0,5,0,0"
-                            HorizontalAlignment="Stretch">
-                        <Border Width="{Binding FatigueBarWidth}"
-                                Background="{Binding FatigueBrush}"
-                                CornerRadius="3"
-                                HorizontalAlignment="Left" />
-                    </Border>
+                    <ProgressBar Grid.Row="3"
+                                 Height="5"
+                                 Minimum="0"
+                                 Maximum="100"
+                                 Value="{Binding Stamina}"
+                                 Foreground="{Binding StaminaBrush}"
+                                 Background="#DDE5EF"
+                                 BorderThickness="0"
+                                 Margin="0,5,0,0" />
                 </Grid>
             </Border>
         </DataTemplate>
@@ -98,8 +96,6 @@
                     AllowDrop="True"
                     PreviewMouseLeftButtonDown="SubstituteCard_PreviewMouseLeftButtonDown"
                     MouseMove="SubstituteCard_MouseMove"
-                    GiveFeedback="PlayerCard_GiveFeedback"
-                    QueryContinueDrag="PlayerCard_QueryContinueDrag"
                     PreviewDragEnter="SubstituteCard_DragEnter"
                     PreviewDragOver="SubstituteCard_DragOver"
                     PreviewDragLeave="SubstituteCard_DragLeave"
@@ -165,17 +161,15 @@
                                    FontWeight="Bold" />
                     </Border>
 
-                    <Border Grid.Row="3"
-                            Height="5"
-                            Background="#DDE5EF"
-                            CornerRadius="3"
-                            Margin="0,5,0,0"
-                            HorizontalAlignment="Stretch">
-                        <Border Width="{Binding BenchFatigueBarWidth}"
-                                Background="{Binding BenchFatigueBrush}"
-                                CornerRadius="3"
-                                HorizontalAlignment="Left" />
-                    </Border>
+                    <ProgressBar Grid.Row="3"
+                                 Height="5"
+                                 Minimum="0"
+                                 Maximum="100"
+                                 Value="{Binding Stamina}"
+                                 Foreground="{Binding StaminaBrush}"
+                                 Background="#DDE5EF"
+                                 BorderThickness="0"
+                                 Margin="0,5,0,0" />
                 </Grid>
             </Border>
         </DataTemplate>
@@ -444,16 +438,15 @@
                                                    FontWeight="Bold" />
                                     </Grid>
 
-                                    <Border Height="7"
-                                            Background="#DDE5EF"
-                                            CornerRadius="4"
-                                            Margin="0,3,0,7">
-                                        <Border x:Name="SelectedPlayerStaminaFill"
-                                                Width="0"
-                                                Background="#2FA84F"
-                                                CornerRadius="4"
-                                                HorizontalAlignment="Left" />
-                                    </Border>
+                                    <ProgressBar x:Name="SelectedPlayerStaminaFill"
+                                                 Height="7"
+                                                 Minimum="0"
+                                                 Maximum="100"
+                                                 Value="{Binding Stamina}"
+                                                 Foreground="#2FA84F"
+                                                 Background="#DDE5EF"
+                                                 BorderThickness="0"
+                                                 Margin="0,3,0,7" />
 
                                     <UniformGrid Columns="2">
                                         <TextBlock x:Name="SelectedPlayerAttackTextBlock" FontSize="10" Foreground="#34465C" Margin="0,0,0,2" />

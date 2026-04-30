@@ -49,7 +49,7 @@ public class TacticalInsightService
 
     private static void AddWarnings(TacticalInsight insight, Team selectedTeam, Team opponent)
     {
-        var tiredStarters = selectedTeam.Players.Where(player => player.Fatigue >= 60 || player.CurrentStamina < player.Stamina * 0.55).ToList();
+        var tiredStarters = selectedTeam.Players.Where(player => player.Stamina < 55).ToList();
         if (tiredStarters.Count > 0)
         {
             insight.Warnings.Add($"{tiredStarters.Count} starter(s) look tired. High pressing may create second-half problems.");

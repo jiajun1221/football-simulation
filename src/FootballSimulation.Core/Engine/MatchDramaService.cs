@@ -15,8 +15,7 @@ public class MatchDramaService
         var tiredPlayer = FindTiredPlayer(context);
         if (tiredPlayer is not null && context.Random.NextDouble() < 0.24)
         {
-            tiredPlayer.CurrentStamina = Math.Max(0, tiredPlayer.CurrentStamina - 18);
-            tiredPlayer.Fatigue = Math.Clamp(tiredPlayer.Fatigue + 18, 0, 100);
+            tiredPlayer.Stamina = Math.Max(0, tiredPlayer.Stamina - 18);
 
             return new MatchDramaResult
             {
@@ -29,10 +28,10 @@ public class MatchDramaService
         }
 
         var injuryCandidate = FindInjuryCandidate(context);
-        if (injuryCandidate is not null && context.Random.NextDouble() < 0.16)
+        if (injuryCandidate is not null && context.Random.NextDouble() < GetInjuryProbability(injuryCandidate))
         {
             injuryCandidate.IsInjured = true;
-            injuryCandidate.Fatigue = 100;
+            injuryCandidate.Stamina = 0;
 
             return new MatchDramaResult
             {
@@ -93,7 +92,7 @@ public class MatchDramaService
 
     private static double CalculateDramaChance(MatchEventContext context)
     {
-        var averageFatigue = context.HomeTeam.Players.Concat(context.AwayTeam.Players).Average(player => player.Fatigue);
+        var averageFatigue = context.HomeTeam.Players.Concat(context.AwayTeam.Players).Average(player => 100 - player.Stamina);
         var averagePressing = (context.HomeTeam.Tactics.PressingIntensity + context.AwayTeam.Tactics.PressingIntensity) / 2.0;
         var lateGameBonus = context.Minute >= 70 ? 0.03 : 0.0;
 
@@ -104,8 +103,8 @@ public class MatchDramaService
     {
         return context.HomeTeam.Players
             .Concat(context.AwayTeam.Players)
-            .Where(player => player.CurrentStamina < player.Stamina * 0.45 || player.Fatigue >= 70)
-            .OrderByDescending(player => player.Fatigue)
+            .Where(player => player.Stamina < 45)
+            .OrderBy(player => player.Stamina)
             .FirstOrDefault();
     }
 
@@ -113,9 +112,42 @@ public class MatchDramaService
     {
         return context.HomeTeam.Players
             .Concat(context.AwayTeam.Players)
-            .Where(player => !player.IsInjured && (player.Traits.Contains(PlayerTrait.InjuryProne) || player.Fatigue >= 75 || player.MatchesPlayedRecently >= 4))
-            .OrderByDescending(player => player.Fatigue + player.MatchesPlayedRecently * 8)
+            .Where(player => !player.IsInjured &&
+                (player.Traits.Contains(PlayerTrait.InjuryProne) ||
+                player.Stamina <= 25 ||
+                GetStaminaRatio(player) < 0.30 ||
+                player.MatchesPlayedRecently >= 4))
+            .OrderByDescending(player => (100.0 - player.Stamina) + (1.0 - GetStaminaRatio(player)) * 30 + player.MatchesPlayedRecently * 8)
             .FirstOrDefault();
+    }
+
+    private static double GetInjuryProbability(Player player)
+    {
+        var lowStaminaBonus = GetStaminaRatio(player) switch
+        {
+            < 0.18 => 0.08,
+            < 0.30 => 0.04,
+            _ => 0.0
+        };
+
+        var fatigueBonus = player.Stamina switch
+        {
+            <= 5 => 0.08,
+            <= 15 => 0.04,
+            _ => 0.0
+        };
+
+        return Math.Clamp(0.16 + lowStaminaBonus + fatigueBonus, 0.10, 0.32);
+    }
+
+    private static double GetStaminaRatio(Player player)
+    {
+        if (player.Stamina <= 0)
+        {
+            return 0;
+        }
+
+        return Math.Clamp(player.Stamina / 100.0, 0.0, 1.0);
     }
 
     private static bool ShouldCreateWonderGoal(MatchEventContext context)

@@ -1,6 +1,6 @@
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -23,13 +23,11 @@ public partial class PreMatchView : UserControl
     private readonly SquadSelectionService _squadSelectionService = new();
     private const double PitchCardWidth = 112;
     private const double PitchCardHeight = 72;
-    private const double FatigueBarWidth = 102;
-    private const double SelectedPlayerStaminaBarWidth = 238;
 
     private Player? _selectedStarter;
     private List<Player> _pitchSlots = [];
     private Point _dragStartPoint;
-    private Popup? _dragPreviewPopup;
+    private bool _isDraggingPlayer;
     private bool _isLoadingSetup;
     private bool _areTacticsEventsWired;
 
@@ -181,22 +179,20 @@ public partial class PreMatchView : UserControl
 
         button.Click += PlayerButton_Click;
         button.PreviewMouseLeftButtonDown += StarterButton_PreviewMouseLeftButtonDown;
+        button.PreviewMouseMove += StarterButton_MouseMove;
         button.MouseMove += StarterButton_MouseMove;
-        button.GiveFeedback += PlayerCard_GiveFeedback;
-        button.QueryContinueDrag += PlayerCard_QueryContinueDrag;
         button.PreviewDragEnter += PlayerCard_DragEnter;
         button.PreviewDragLeave += PlayerCard_DragLeave;
-        button.PreviewDragOver += PlayerCard_DragOver;
-        button.PreviewDrop += PlayerCard_Drop;
-        button.DragOver += PlayerCard_DragOver;
-        button.Drop += PlayerCard_Drop;
+        button.AddHandler(DragDrop.PreviewDragOverEvent, new DragEventHandler(PlayerCard_DragOver), true);
+        button.AddHandler(DragDrop.DragOverEvent, new DragEventHandler(PlayerCard_DragOver), true);
+        button.AddHandler(DragDrop.PreviewDropEvent, new DragEventHandler(PlayerCard_Drop), true);
+        button.AddHandler(DragDrop.DropEvent, new DragEventHandler(PlayerCard_Drop), true);
         return button;
     }
 
     private PitchPlayerCard CreatePitchPlayerCard(Player player)
     {
         PositionSuitabilityService.EnsurePositionMetadata(player);
-        var fatigue = GetFatiguePercentage(player);
         var form = GetFormBadge(player.CurrentForm);
         var isOutOfPosition = PositionSuitabilityService.IsOutOfPosition(player);
         var suitability = PositionSuitabilityService.GetEffectivenessMultiplier(player);
@@ -212,8 +208,8 @@ public partial class PreMatchView : UserControl
             PositionText = player.AssignedPosition,
             OverallText = $"OVR {ratingVisual.Rating}",
             OverallForeground = ratingVisual.Foreground,
-            FatigueBarWidth = GetFatigueBarWidth(fatigue),
-            FatigueBrush = GetFatigueBrush(fatigue),
+            Stamina = GetStaminaPercentage(player),
+            StaminaBrush = GetStaminaBrush(player),
             FormBadgeText = form.Text,
             FormBadgeBackground = form.Background,
             FormBadgeForeground = form.Foreground,
@@ -286,6 +282,9 @@ public partial class PreMatchView : UserControl
         PositionSuitabilityService.EnsurePositionMetadata(substitute, incomingAssignedPosition);
 
         _pitchSlots = _state.SelectedTeam.Players.ToList();
+        Debug.WriteLine(
+            $"[PreMatchDrag] Swapped Sub<->StartingXI: {substitute.Name} -> slot {_pitchSlots.IndexOf(substitute)} ({substitute.AssignedPosition}); " +
+            $"{starter.Name} -> substitute index {_state.SelectedTeam.Substitutes.IndexOf(starter)}");
         _selectedStarter = substitute;
         RefreshSubstitutes();
         UpdateSelectedPlayerDetails();
@@ -312,7 +311,6 @@ public partial class PreMatchView : UserControl
     private static BenchPlayerCard CreateBenchPlayerCard(Player player)
     {
         PositionSuitabilityService.EnsurePositionMetadata(player);
-        var fatigue = GetFatiguePercentage(player);
         var form = GetFormBadge(player.CurrentForm);
 
         return new BenchPlayerCard
@@ -324,8 +322,8 @@ public partial class PreMatchView : UserControl
             Position = player.PreferredPosition,
             OverallText = $"OVR {GetOverallRating(player)}",
             OverallRating = GetOverallRating(player),
-            BenchFatigueBarWidth = GetBenchFatigueBarWidth(fatigue),
-            BenchFatigueBrush = GetFatigueBrush(fatigue),
+            Stamina = GetStaminaPercentage(player),
+            StaminaBrush = GetStaminaBrush(player),
             BenchFormBadgeText = form.Text,
             BenchFormBadgeBackground = form.Background,
             BenchFormBadgeForeground = form.Foreground
@@ -338,17 +336,18 @@ public partial class PreMatchView : UserControl
         {
             SelectedPlayerEmptyTextBlock.Visibility = Visibility.Visible;
             SelectedPlayerCard.Visibility = Visibility.Collapsed;
+            SelectedPlayerCard.DataContext = null;
             return;
         }
 
         PositionSuitabilityService.EnsurePositionMetadata(_selectedStarter);
         var suitability = PositionSuitabilityService.GetEffectivenessMultiplier(_selectedStarter);
-        var fatigue = GetFatiguePercentage(_selectedStarter);
         var form = GetFormBadge(_selectedStarter.CurrentForm);
         var ratingVisual = GetRatingVisual(_selectedStarter, suitability);
 
         SelectedPlayerEmptyTextBlock.Visibility = Visibility.Collapsed;
         SelectedPlayerCard.Visibility = Visibility.Visible;
+        SelectedPlayerCard.DataContext = _selectedStarter;
 
         SelectedPlayerImage.Source = CreateImageSource(GetPlayerImagePath(_selectedStarter));
         SelectedPlayerNumberTextBlock.Text = _selectedStarter.SquadNumber > 0 ? $"#{_selectedStarter.SquadNumber}" : "No squad number";
@@ -363,9 +362,8 @@ public partial class PreMatchView : UserControl
         SelectedPlayerInjuryChip.Text = _selectedStarter.IsInjured ? "Injured" : "Fit";
         SelectedPlayerInjuryChip.Foreground = ToBrush(_selectedStarter.IsInjured ? "#8F1F1F" : "#236B39");
         SelectedPlayerInjuryChipBorder.Background = ToBrush(_selectedStarter.IsInjured ? "#FFD1D1" : "#D9F1E1");
-        SelectedPlayerStaminaTextBlock.Text = $"{100 - fatigue}% fresh | {fatigue}% fatigue";
-        SelectedPlayerStaminaFill.Width = SelectedPlayerStaminaBarWidth * (100 - fatigue) / 100.0;
-        SelectedPlayerStaminaFill.Background = ToBrush(GetFatigueBrush(fatigue));
+        SelectedPlayerStaminaTextBlock.Text = $"{GetStaminaPercentage(_selectedStarter)}% stamina";
+        SelectedPlayerStaminaFill.Foreground = ToBrush(GetStaminaBrush(_selectedStarter));
 
         SelectedPlayerAttackTextBlock.Text = $"Attack {_selectedStarter.Attack}";
         SelectedPlayerDefenseTextBlock.Text = $"Defense {_selectedStarter.Defense}";
@@ -443,43 +441,18 @@ public partial class PreMatchView : UserControl
         };
     }
 
-    private static int GetFatiguePercentage(Player player)
+    private static int GetStaminaPercentage(Player player)
     {
-        if (player.Fatigue > 0)
-        {
-            return Math.Clamp(player.Fatigue, 0, 100);
-        }
-
-        if (player.Stamina <= 0)
-        {
-            return 100;
-        }
-
-        var staminaRatio = Math.Clamp(player.CurrentStamina / player.Stamina, 0.0, 1.0);
-        return (int)Math.Round((1.0 - staminaRatio) * 100);
+        return Math.Clamp((int)Math.Round(player.Stamina), 0, 100);
     }
 
-    private static double GetFatigueBarWidth(int fatiguePercentage)
+    private static string GetStaminaBrush(Player player)
     {
-        var freshnessPercentage = 100 - Math.Clamp(fatiguePercentage, 0, 100);
-
-        return FatigueBarWidth * freshnessPercentage / 100.0;
-    }
-
-    private static double GetBenchFatigueBarWidth(int fatiguePercentage)
-    {
-        var freshnessPercentage = 100 - Math.Clamp(fatiguePercentage, 0, 100);
-
-        return FatigueBarWidth * freshnessPercentage / 100.0;
-    }
-
-    private static string GetFatigueBrush(int fatiguePercentage)
-    {
-        return fatiguePercentage switch
+        return GetStaminaPercentage(player) switch
         {
-            <= 25 => "#2FA84F",
-            <= 50 => "#E3BC26",
-            <= 75 => "#E8872E",
+            >= 75 => "#2FA84F",
+            >= 50 => "#E3BC26",
+            >= 25 => "#E8872E",
             _ => "#D94343"
         };
     }
@@ -593,6 +566,7 @@ public partial class PreMatchView : UserControl
             return;
         }
 
+        e.Handled = true;
         StartPlayerDrag(button, player, DragSource.StartingXi, _pitchSlots.IndexOf(player));
     }
 
@@ -613,6 +587,7 @@ public partial class PreMatchView : UserControl
             return;
         }
 
+        e.Handled = true;
         StartPlayerDrag(
             (DependencyObject)sender,
             benchCard.Player,
@@ -628,7 +603,13 @@ public partial class PreMatchView : UserControl
 
     private void StartPlayerDrag(DependencyObject source, Player player, DragSource dragSource, int sourceIndex)
     {
-        ShowDragPreview(player);
+        if (_isDraggingPlayer)
+        {
+            return;
+        }
+
+        _isDraggingPlayer = true;
+        Debug.WriteLine($"[PreMatchDrag] Start: {player.Name}; source={dragSource}; slot/index={sourceIndex}");
 
         var dataObject = new DataObject();
         dataObject.SetData(typeof(DraggedPlayerInfo), new DraggedPlayerInfo(player, dragSource, sourceIndex));
@@ -640,80 +621,8 @@ public partial class PreMatchView : UserControl
         }
         finally
         {
-            HideDragPreview();
+            _isDraggingPlayer = false;
         }
-    }
-
-    private void PlayerCard_GiveFeedback(object sender, GiveFeedbackEventArgs e)
-    {
-        UpdateDragPreviewPosition();
-        e.UseDefaultCursors = false;
-        Mouse.SetCursor(Cursors.Hand);
-        e.Handled = true;
-    }
-
-    private void PlayerCard_QueryContinueDrag(object sender, QueryContinueDragEventArgs e)
-    {
-        if (e.Action != DragAction.Continue)
-        {
-            HideDragPreview();
-        }
-    }
-
-    private void ShowDragPreview(Player player)
-    {
-        var preview = new ContentControl
-        {
-            Content = CreatePitchPlayerCard(player),
-            ContentTemplate = (DataTemplate)FindResource("PitchPlayerCardTemplate"),
-            Opacity = 0.78,
-            IsHitTestVisible = false
-        };
-
-        _dragPreviewPopup = new Popup
-        {
-            AllowsTransparency = true,
-            IsHitTestVisible = false,
-            PlacementTarget = MainRootGrid,
-            Placement = PlacementMode.Relative,
-            Child = preview
-        };
-
-        _dragPreviewPopup.IsOpen = true;
-        UpdateDragPreviewPosition();
-    }
-
-    private void UpdateDragPreviewPosition()
-    {
-        if (_dragPreviewPopup is null)
-        {
-            return;
-        }
-
-        UpdateDragPreviewPosition(Mouse.GetPosition(MainRootGrid));
-    }
-
-    private void UpdateDragPreviewPosition(Point position)
-    {
-        if (_dragPreviewPopup is null)
-        {
-            return;
-        }
-
-        _dragPreviewPopup.HorizontalOffset = position.X + 12;
-        _dragPreviewPopup.VerticalOffset = position.Y + 12;
-    }
-
-    private void HideDragPreview()
-    {
-        if (_dragPreviewPopup is null)
-        {
-            return;
-        }
-
-        _dragPreviewPopup.IsOpen = false;
-        _dragPreviewPopup.Child = null;
-        _dragPreviewPopup = null;
     }
 
     private void PlayerCard_DragEnter(object sender, DragEventArgs e)
@@ -726,7 +635,6 @@ public partial class PreMatchView : UserControl
 
     private void PlayerCard_DragOver(object sender, DragEventArgs e)
     {
-        UpdateDragPreviewPosition(e.GetPosition(MainRootGrid));
         var canDrop = GetDraggedPlayer(e) is not null;
         e.Effects = canDrop ? DragDropEffects.Move : DragDropEffects.None;
         e.Handled = true;
@@ -756,6 +664,10 @@ public partial class PreMatchView : UserControl
             return;
         }
 
+        Debug.WriteLine(
+            $"[PreMatchDrag] Drop: dragged={draggedPlayer.Player.Name}; source={draggedPlayer.Source}; source slot/index={draggedPlayer.SourceIndex}; " +
+            $"target={targetPlayer.Name}; target slot={_pitchSlots.IndexOf(targetPlayer)}");
+
         if (draggedPlayer.Source == DragSource.StartingXi)
         {
             SwapPitchPlayers(draggedPlayer.Player, targetPlayer);
@@ -778,7 +690,6 @@ public partial class PreMatchView : UserControl
 
     private void SubstituteCard_DragOver(object sender, DragEventArgs e)
     {
-        UpdateDragPreviewPosition(e.GetPosition(MainRootGrid));
         var canDrop = CanDropOnSubstituteCard(e);
         e.Effects = canDrop ? DragDropEffects.Move : DragDropEffects.None;
         e.Handled = true;
@@ -810,6 +721,10 @@ public partial class PreMatchView : UserControl
             return;
         }
 
+        Debug.WriteLine(
+            $"[PreMatchDrag] Drop: dragged={draggedPlayer.Player.Name}; source={draggedPlayer.Source}; source slot/index={draggedPlayer.SourceIndex}; " +
+            $"target={benchCard.Player.Name}; target substitute index={_state.SelectedTeam?.Substitutes.IndexOf(benchCard.Player) ?? -1}");
+
         if (draggedPlayer.Source == DragSource.StartingXi)
         {
             ExecuteSwap(draggedPlayer.Player, benchCard.Player);
@@ -829,7 +744,6 @@ public partial class PreMatchView : UserControl
 
     private void SubstituteListBox_DragOver(object sender, DragEventArgs e)
     {
-        UpdateDragPreviewPosition(e.GetPosition(MainRootGrid));
         var canDrop = GetDraggedPlayer(e)?.Source == DragSource.StartingXi;
         e.Effects = canDrop ? DragDropEffects.Move : DragDropEffects.None;
         e.Handled = true;
@@ -885,12 +799,18 @@ public partial class PreMatchView : UserControl
         var targetIndex = _pitchSlots.IndexOf(targetPlayer);
         if (draggedIndex < 0 || targetIndex < 0)
         {
+            Debug.WriteLine(
+                $"[PreMatchDrag] Swap failed: {draggedPlayer.Name} index={draggedIndex}; {targetPlayer.Name} index={targetIndex}");
             return;
         }
 
         (_pitchSlots[draggedIndex], _pitchSlots[targetIndex]) = (_pitchSlots[targetIndex], _pitchSlots[draggedIndex]);
         _state.SelectedTeam.Players = _pitchSlots.ToList();
         AssignFormationPositions();
+
+        Debug.WriteLine(
+            $"[PreMatchDrag] Swapped StartingXI: {draggedPlayer.Name} -> slot {targetIndex} ({draggedPlayer.AssignedPosition}); " +
+            $"{targetPlayer.Name} -> slot {draggedIndex} ({targetPlayer.AssignedPosition})");
 
         _selectedStarter = draggedPlayer;
         UpdateSelectedPlayerDetails();
@@ -914,6 +834,9 @@ public partial class PreMatchView : UserControl
 
         (_state.SelectedTeam.Substitutes[draggedIndex], _state.SelectedTeam.Substitutes[targetIndex]) =
             (_state.SelectedTeam.Substitutes[targetIndex], _state.SelectedTeam.Substitutes[draggedIndex]);
+
+        Debug.WriteLine(
+            $"[PreMatchDrag] Swapped substitutes: {draggedPlayer.Name} -> index {targetIndex}; {targetPlayer.Name} -> index {draggedIndex}");
 
         RefreshSubstitutes();
     }
@@ -1083,8 +1006,8 @@ public partial class PreMatchView : UserControl
         public string Position { get; init; } = string.Empty;
         public string OverallText { get; init; } = string.Empty;
         public int OverallRating { get; init; }
-        public double BenchFatigueBarWidth { get; init; }
-        public string BenchFatigueBrush { get; init; } = "#2FA84F";
+        public double Stamina { get; init; }
+        public string StaminaBrush { get; init; } = "#2FA84F";
         public string BenchFormBadgeText { get; init; } = string.Empty;
         public string BenchFormBadgeBackground { get; init; } = "#E1E5EA";
         public string BenchFormBadgeForeground { get; init; } = "#465364";

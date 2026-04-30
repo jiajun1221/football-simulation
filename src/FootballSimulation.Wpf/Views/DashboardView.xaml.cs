@@ -48,6 +48,11 @@ public partial class DashboardView : UserControl
             return;
         }
 
+        if (_state.League is not null && _state.SelectedTeam is not null)
+        {
+            _state.CurrentMatch ??= _gameSessionService.CreateSelectedTeamLiveMatch(_state.League, _state.SelectedTeam);
+        }
+
         _navigate(new PreMatchView(_state, _navigate));
     }
 

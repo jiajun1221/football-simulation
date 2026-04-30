@@ -16,9 +16,8 @@ public class LivePlayerIconViewModel
     public string SelectionBrush { get; init; } = "Transparent";
     public double SelectionThickness { get; init; }
     public string RatingText { get; init; } = "6.0";
-    public int FatiguePercent { get; init; }
-    public double FatigueBarWidth { get; init; }
-    public string FatigueBrush { get; init; } = "#2FA84F";
+    public double Stamina { get; init; }
+    public string StaminaBrush { get; init; } = "#2FA84F";
     public int Goals { get; init; }
     public int Assists { get; init; }
     public int DefensiveContributions { get; init; }

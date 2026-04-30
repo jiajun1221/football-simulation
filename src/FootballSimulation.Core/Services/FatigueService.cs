@@ -4,38 +4,45 @@ namespace FootballSimulation.Services;
 
 public class FatigueService
 {
-    private const double BaseFatiguePerMinute = 0.20;
+    private const double BaseStaminaLossPerMinute = 0.45;
+    private const int MinimumMatchStartRecoveryPoints = 50;
+    private const int MaximumMatchStartRecoveryPoints = 60;
 
-    public void ApplyMinuteFatigue(Team team)
+    public void RecoverTeamForNewMatch(Team team, int? recoveryPoints = null)
+    {
+        foreach (var player in team.Players.Concat(team.Substitutes))
+        {
+            var recovery = recoveryPoints ?? Random.Shared.Next(
+                MinimumMatchStartRecoveryPoints,
+                MaximumMatchStartRecoveryPoints + 1);
+            player.Stamina = Math.Clamp(player.Stamina + recovery, 0, 100);
+        }
+    }
+
+    public void ApplyMinuteFatigue(Team team, Match? match = null)
     {
         foreach (var player in team.Players.Where(player => !player.IsSentOff))
         {
-            var fatigueGain = BaseFatiguePerMinute
+            var staminaLoss = BaseStaminaLossPerMinute
                 * GetTempoMultiplier(team.Tactics.Tempo)
                 * GetPressingMultiplier(team.Tactics.PressingIntensity)
                 * GetPositionMultiplier(player.Position)
                 * GetStaminaResistanceMultiplier(player.Stamina)
-                * GetPositionSuitabilityFatigueMultiplier(player);
+                * GetPositionSuitabilityFatigueMultiplier(player)
+                * GetActivityMultiplier(match, team, player);
 
-            player.Fatigue = Math.Clamp((int)Math.Round(player.Fatigue + fatigueGain), 0, 100);
-            player.CurrentStamina = CalculateCurrentStamina(player);
+            player.Stamina = Math.Clamp(player.Stamina - staminaLoss, 0, 100);
         }
     }
 
     public int GetFatiguePercentage(Player player)
     {
-        if (player.Fatigue > 0)
-        {
-            return Math.Clamp(player.Fatigue, 0, 100);
-        }
+        return 100 - GetStaminaPercentage(player);
+    }
 
-        if (player.Stamina <= 0)
-        {
-            return 100;
-        }
-
-        var staminaRatio = Math.Clamp(player.CurrentStamina / player.Stamina, 0.0, 1.0);
-        return (int)Math.Round((1.0 - staminaRatio) * 100);
+    public int GetStaminaPercentage(Player player)
+    {
+        return Math.Clamp((int)Math.Round(player.Stamina), 0, 100);
     }
 
     private static double GetTempoMultiplier(int tempo)
@@ -70,7 +77,7 @@ public class FatigueService
         };
     }
 
-    private static double GetStaminaResistanceMultiplier(int stamina)
+    private static double GetStaminaResistanceMultiplier(double stamina)
     {
         return Math.Clamp(1.30 - stamina / 100.0, 0.45, 1.20);
     }
@@ -85,13 +92,32 @@ public class FatigueService
         };
     }
 
-    private static double CalculateCurrentStamina(Player player)
+    private static double GetActivityMultiplier(Match? match, Team team, Player player)
     {
-        if (player.Stamina <= 0)
+        if (match is null)
         {
-            return 0;
+            return 1.0;
         }
 
-        return Math.Clamp(player.Stamina * ((100 - player.Fatigue) / 100.0), 0, player.Stamina);
+        var performance = match.PlayerPerformances.FirstOrDefault(existing =>
+            existing.PlayerName == player.Name &&
+            existing.TeamName == team.Name);
+
+        if (performance is null)
+        {
+            return 1.0;
+        }
+
+        var defensiveActions = performance.Tackles + performance.Interceptions + performance.Blocks + performance.Clearances;
+        var activityScore =
+            performance.Shots +
+            performance.KeyPasses +
+            performance.Fouls +
+            performance.Offsides +
+            performance.Saves +
+            defensiveActions;
+
+        return Math.Clamp(1.0 + activityScore * 0.015, 1.0, 1.18);
     }
+
 }

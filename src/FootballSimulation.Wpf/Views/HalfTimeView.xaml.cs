@@ -1,6 +1,10 @@
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using FootballSimulation.Engine;
 using FootballSimulation.Models;
 using FootballSimulation.Services;
 using FootballSimulation.Wpf.Models;
@@ -16,10 +20,17 @@ public partial class HalfTimeView : UserControl
     private readonly GameFlowState _state;
     private readonly Action<UserControl> _navigate;
     private readonly FormationLayoutService _formationLayoutService = new();
+    private readonly TacticalInsightService _tacticalInsightService = new();
     private readonly SquadSelectionService _squadSelectionService = new();
+    private const double PitchCardWidth = 112;
+    private const double PitchCardHeight = 72;
 
     private Player? _selectedStarter;
-    private Player? _selectedSubstitute;
+    private List<Player> _pitchSlots = [];
+    private Point _dragStartPoint;
+    private bool _isDraggingPlayer;
+    private bool _isLoadingSetup;
+    private bool _areTacticsEventsWired;
 
     public HalfTimeView(GameFlowState state, Action<UserControl> navigate)
     {
@@ -43,10 +54,30 @@ public partial class HalfTimeView : UserControl
             return;
         }
 
+        _isLoadingSetup = true;
+
         LoadFormationSelector(_state.SelectedTeam);
         LoadTactics(_state.SelectedTeam.Tactics);
+        WireTacticsEvents();
+        InitializePitchSlots();
         RefreshSubstitutes();
         RenderPitch();
+
+        _isLoadingSetup = false;
+        RefreshTacticalInsight();
+    }
+
+    private void InitializePitchSlots()
+    {
+        if (_state.SelectedTeam is null)
+        {
+            _pitchSlots = [];
+            return;
+        }
+
+        _pitchSlots = OrderPlayersForPitch(_state.SelectedTeam.Players, _state.SelectedTeam.Formation).ToList();
+        _state.SelectedTeam.Players = _pitchSlots.ToList();
+        AssignFormationPositions();
     }
 
     private void LoadFormationSelector(Team team)
@@ -67,6 +98,20 @@ public partial class HalfTimeView : UserControl
         DefensiveLineSlider.Value = tactics.DefensiveLine;
     }
 
+    private void WireTacticsEvents()
+    {
+        if (_areTacticsEventsWired)
+        {
+            return;
+        }
+
+        PressingSlider.ValueChanged += TacticsSlider_Changed;
+        WidthSlider.ValueChanged += TacticsSlider_Changed;
+        TempoSlider.ValueChanged += TacticsSlider_Changed;
+        DefensiveLineSlider.ValueChanged += TacticsSlider_Changed;
+        _areTacticsEventsWired = true;
+    }
+
     private void RenderPitch()
     {
         if (_state.SelectedTeam is null || PitchCanvas.ActualWidth <= 0 || PitchCanvas.ActualHeight <= 0)
@@ -74,61 +119,107 @@ public partial class HalfTimeView : UserControl
             return;
         }
 
+        if (_pitchSlots.Count != _state.SelectedTeam.Players.Count)
+        {
+            InitializePitchSlots();
+        }
+
         PitchCanvas.Children.Clear();
 
         var formation = FormationComboBox.SelectedItem as string ?? _state.SelectedTeam.Formation;
         var positions = _formationLayoutService.GetPositions(formation);
-        var players = OrderPlayersForPitch(_state.SelectedTeam.Players).ToList();
+        AssignFormationPositions(positions);
 
-        for (var index = 0; index < players.Count && index < positions.Count; index++)
+        for (var index = 0; index < _pitchSlots.Count && index < positions.Count; index++)
         {
-            var player = players[index];
+            var player = _pitchSlots[index];
             var position = positions[index];
             var button = CreatePlayerButton(player);
 
-            Canvas.SetLeft(button, (PitchCanvas.ActualWidth * position.X) - 64);
-            Canvas.SetTop(button, (PitchCanvas.ActualHeight * position.Y) - 38);
+            Canvas.SetLeft(button, GetClampedCanvasPosition(PitchCanvas.ActualWidth, position.X, PitchCardWidth));
+            Canvas.SetTop(button, GetClampedCanvasPosition(PitchCanvas.ActualHeight, position.Y, PitchCardHeight));
             PitchCanvas.Children.Add(button);
         }
     }
 
+    private void AssignFormationPositions(IReadOnlyList<PitchPosition>? positions = null)
+    {
+        if (_state.SelectedTeam is null)
+        {
+            return;
+        }
+
+        positions ??= _formationLayoutService.GetPositions(FormationComboBox.SelectedItem as string ?? _state.SelectedTeam.Formation);
+
+        for (var index = 0; index < _pitchSlots.Count && index < positions.Count; index++)
+        {
+            PositionSuitabilityService.EnsurePositionMetadata(_pitchSlots[index], positions[index].ExactPosition);
+        }
+    }
+
+    private static double GetClampedCanvasPosition(double canvasSize, double normalizedPosition, double elementSize)
+    {
+        var rawPosition = (canvasSize * normalizedPosition) - (elementSize / 2);
+        return Math.Clamp(rawPosition, 4, Math.Max(4, canvasSize - elementSize - 4));
+    }
+
     private Button CreatePlayerButton(Player player)
     {
+        var card = CreatePitchPlayerCard(player);
         var button = new Button
         {
-            Width = 128,
-            Height = 76,
+            Width = PitchCardWidth,
+            Height = PitchCardHeight,
             Tag = player,
-            Content = CreatePitchPlayerCard(player),
-            ContentTemplate = (DataTemplate)FindResource("HalfTimePlayerCardTemplate"),
+            DataContext = card,
+            ToolTip = "Drag this player or drop another player here.",
+            Content = card,
+            ContentTemplate = (DataTemplate)FindResource("PitchPlayerCardTemplate"),
             Background = Brushes.Transparent,
             BorderBrush = Brushes.Transparent,
             BorderThickness = new Thickness(0),
-            Padding = new Thickness(0)
+            Padding = new Thickness(0),
+            AllowDrop = true
         };
 
         button.Click += PlayerButton_Click;
+        button.PreviewMouseLeftButtonDown += StarterButton_PreviewMouseLeftButtonDown;
+        button.PreviewMouseMove += StarterButton_MouseMove;
+        button.MouseMove += StarterButton_MouseMove;
+        button.PreviewDragEnter += PlayerCard_DragEnter;
+        button.PreviewDragLeave += PlayerCard_DragLeave;
+        button.AddHandler(DragDrop.PreviewDragOverEvent, new DragEventHandler(PlayerCard_DragOver), true);
+        button.AddHandler(DragDrop.DragOverEvent, new DragEventHandler(PlayerCard_DragOver), true);
+        button.AddHandler(DragDrop.PreviewDropEvent, new DragEventHandler(PlayerCard_Drop), true);
+        button.AddHandler(DragDrop.DropEvent, new DragEventHandler(PlayerCard_Drop), true);
         return button;
     }
 
     private PitchPlayerCard CreatePitchPlayerCard(Player player)
     {
-        var fatigue = GetFatiguePercentage(player);
-        var performance = GetPerformance(player);
+        PositionSuitabilityService.EnsurePositionMetadata(player);
+        var form = GetFormBadge(player.CurrentForm);
+        var isOutOfPosition = PositionSuitabilityService.IsOutOfPosition(player);
+        var suitability = PositionSuitabilityService.GetEffectivenessMultiplier(player);
+        var ratingVisual = GetRatingVisual(player, suitability);
 
         return new PitchPlayerCard
         {
             Player = player,
-            PlayerName = player.SquadNumber > 0 ? $"{player.SquadNumber}. {player.Name}" : player.Name,
-            RatingText = performance is null ? "6.0" : performance.Rating.ToString("0.0"),
-            MatchStatsText = performance is null
-                ? $"{player.Position}"
-                : $"G {performance.Goals} A {performance.Assists} Sh {performance.Shots}",
-            FatigueText = $"{fatigue}%",
-            FatigueBarWidth = 86 * (100 - fatigue) / 100.0,
-            FatigueBrush = GetFatigueBrush(fatigue),
-            CardBackground = player == _selectedStarter ? "#FFF2B8" : "#FFFFFF",
-            CardBorderBrush = player == _selectedStarter ? "#F6C343" : "#102033",
+            ShirtNumberText = player.SquadNumber > 0 ? $"#{player.SquadNumber}" : string.Empty,
+            ShirtNumberValue = player.SquadNumber > 0 ? player.SquadNumber.ToString() : string.Empty,
+            PlayerImagePath = GetPlayerImagePath(player),
+            PlayerName = player.Name,
+            PositionText = player.AssignedPosition,
+            OverallText = $"OVR {ratingVisual.Rating}",
+            OverallForeground = ratingVisual.Foreground,
+            Stamina = GetStaminaPercentage(player),
+            StaminaBrush = GetStaminaBrush(player),
+            FormBadgeText = form.Text,
+            FormBadgeBackground = form.Background,
+            FormBadgeForeground = form.Foreground,
+            CardBackground = player == _selectedStarter ? "#FFF2B8" : isOutOfPosition ? "#FFF7EC" : "#FFFFFF",
+            CardBorderBrush = player == _selectedStarter ? "#F6C343" : isOutOfPosition ? ratingVisual.Foreground : "#102033",
             CardBorderThickness = player == _selectedStarter ? new Thickness(3) : new Thickness(1)
         };
     }
@@ -139,7 +230,6 @@ public partial class HalfTimeView : UserControl
         {
             _selectedStarter = player;
             UpdateSelectedPlayerDetails();
-            UpdateSwapButton();
             RenderPitch();
         }
     }
@@ -149,34 +239,50 @@ public partial class HalfTimeView : UserControl
         if (_state.SelectedTeam is not null && FormationComboBox.SelectedItem is string formation)
         {
             _state.SelectedTeam.Formation = formation;
+            if (!_isLoadingSetup)
+            {
+                _pitchSlots = OrderPlayersForPitch(_state.SelectedTeam.Players, formation).ToList();
+                _state.SelectedTeam.Players = _pitchSlots.ToList();
+            }
         }
 
         RenderPitch();
+        RefreshTacticalInsight();
     }
 
-    private void SubstituteListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    private void TacticsControl_Changed(object sender, SelectionChangedEventArgs e)
     {
-        _selectedSubstitute = SubstituteListBox.SelectedItem as Player;
-        UpdateSwapButton();
+        RefreshTacticalInsight();
     }
 
-    private void SwapButton_Click(object sender, RoutedEventArgs e)
+    private void TacticsSlider_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
-        if (_state.SelectedTeam is null || _selectedStarter is null || _selectedSubstitute is null)
+        RefreshTacticalInsight();
+    }
+
+    private void ExecuteHalftimeSwap(Player starter, Player substitute)
+    {
+        if (_state.SelectedTeam is null)
         {
             return;
         }
 
-        var starterIndex = _state.SelectedTeam.Players.IndexOf(_selectedStarter);
-        if (starterIndex < 0)
+        var usedSubstitutions = GetUsedSubstitutions();
+        if (usedSubstitutions >= MatchConstants.MaxSubstitutionsPerTeam)
         {
+            MessageBox.Show($"Maximum substitutions reached ({MatchConstants.MaxSubstitutionsPerTeam}/5).");
             return;
         }
+
+        _state.SelectedTeam.Players = _pitchSlots.ToList();
+        PositionSuitabilityService.EnsurePositionMetadata(starter);
+        PositionSuitabilityService.EnsurePositionMetadata(substitute);
+        var incomingAssignedPosition = starter.AssignedPosition;
 
         var swapResult = _squadSelectionService.SwapStarterWithSubstitute(
             _state.SelectedTeam,
-            _selectedStarter,
-            _selectedSubstitute,
+            starter,
+            substitute,
             _state.CurrentMatch,
             substitutionMinute: 45);
 
@@ -184,16 +290,21 @@ public partial class HalfTimeView : UserControl
         {
             MessageBox.Show(swapResult.Message);
             RefreshSubstitutes();
-            UpdateSwapButton();
             return;
         }
 
-        _selectedStarter = _selectedSubstitute;
-        _selectedSubstitute = null;
+        starter.AssignedPosition = starter.PreferredPosition;
+        PositionSuitabilityService.EnsurePositionMetadata(substitute, incomingAssignedPosition);
+
+        _pitchSlots = _state.SelectedTeam.Players.ToList();
+        Debug.WriteLine(
+            $"[HalfTimeDrag] Swapped Sub<->StartingXI: {substitute.Name} -> slot {_pitchSlots.IndexOf(substitute)} ({substitute.AssignedPosition}); " +
+            $"{starter.Name} -> substitute index {_state.SelectedTeam.Substitutes.IndexOf(starter)}");
+        _selectedStarter = substitute;
         RefreshSubstitutes();
         UpdateSelectedPlayerDetails();
-        UpdateSwapButton();
         RenderPitch();
+        RefreshTacticalInsight();
     }
 
     private void RefreshSubstitutes()
@@ -203,35 +314,114 @@ public partial class HalfTimeView : UserControl
             return;
         }
 
+        var benchCards = _state.SelectedTeam.Substitutes
+            .Select(CreateBenchPlayerCard)
+            .ToList();
+
         SubstituteListBox.ItemsSource = null;
-        SubstituteListBox.ItemsSource = _state.SelectedTeam.Substitutes;
-        SubstituteListBox.IsEnabled = _state.SelectedTeam.Substitutes.Count > 0;
-        var usedSubstitutions = _state.CurrentMatch is null
+        SubstituteListBox.ItemsSource = benchCards;
+        SubstituteListBox.IsEnabled = benchCards.Count > 0 && GetUsedSubstitutions() < MatchConstants.MaxSubstitutionsPerTeam;
+        SubstitutionStatusTextBlock.Text = $"{GetUsedSubstitutions()}/5 used";
+    }
+
+    private static BenchPlayerCard CreateBenchPlayerCard(Player player)
+    {
+        PositionSuitabilityService.EnsurePositionMetadata(player);
+        var form = GetFormBadge(player.CurrentForm);
+
+        return new BenchPlayerCard
+        {
+            Player = player,
+            Name = player.Name,
+            ShirtNumberText = player.SquadNumber > 0 ? $"#{player.SquadNumber}" : string.Empty,
+            PlayerImagePath = GetPlayerImagePath(player),
+            Position = player.PreferredPosition,
+            OverallText = $"OVR {GetOverallRating(player)}",
+            OverallRating = GetOverallRating(player),
+            Stamina = GetStaminaPercentage(player),
+            StaminaBrush = GetStaminaBrush(player),
+            BenchFormBadgeText = form.Text,
+            BenchFormBadgeBackground = form.Background,
+            BenchFormBadgeForeground = form.Foreground
+        };
+    }
+
+    private int GetUsedSubstitutions()
+    {
+        return _state.CurrentMatch is null || _state.SelectedTeam is null
             ? 0
             : _squadSelectionService.CountTeamSubstitutions(_state.CurrentMatch, _state.SelectedTeam.Name);
-
-        SubstituteStatusTextBlock.Text = _state.SelectedTeam.Substitutes.Count == 0
-            ? "No substitutes are available yet. Add JSON players with isStarter set to false to enable swaps."
-            : $"{usedSubstitutions}/5 substitutions used. Select a substitute, then choose a starter and click Swap.";
     }
 
     private void UpdateSelectedPlayerDetails()
     {
         if (_selectedStarter is null)
         {
-            SelectedPlayerTextBlock.Text = "Select a player on the pitch.";
+            SelectedPlayerEmptyTextBlock.Visibility = Visibility.Visible;
+            SelectedPlayerCard.Visibility = Visibility.Collapsed;
+            SelectedPlayerCard.DataContext = null;
             return;
         }
 
-        SelectedPlayerTextBlock.Text =
-            $"{_selectedStarter.Name}\n" +
-            $"Position: {_selectedStarter.Position}\n" +
-            $"Overall: {GetOverallRating(_selectedStarter)} | Match Rating: {GetPerformance(_selectedStarter)?.Rating.ToString("0.0") ?? "6.0"}\n" +
-            $"Fatigue: {GetFatiguePercentage(_selectedStarter)}% | Injured: {(_selectedStarter.IsInjured ? "Yes" : "No")}\n" +
-            $"Attack: {_selectedStarter.Attack} | Defense: {_selectedStarter.Defense}\n" +
-            $"Passing: {_selectedStarter.Passing} | Finishing: {_selectedStarter.Finishing}\n" +
-            $"Stamina: {_selectedStarter.CurrentStamina:0}/{_selectedStarter.Stamina}\n" +
-            $"{GetHalftimeAdvice(_selectedStarter)}";
+        PositionSuitabilityService.EnsurePositionMetadata(_selectedStarter);
+        var suitability = PositionSuitabilityService.GetEffectivenessMultiplier(_selectedStarter);
+        var form = GetFormBadge(_selectedStarter.CurrentForm);
+        var ratingVisual = GetRatingVisual(_selectedStarter, suitability);
+
+        SelectedPlayerEmptyTextBlock.Visibility = Visibility.Collapsed;
+        SelectedPlayerCard.Visibility = Visibility.Visible;
+        SelectedPlayerCard.DataContext = _selectedStarter;
+
+        SelectedPlayerImage.Source = CreateImageSource(GetPlayerImagePath(_selectedStarter));
+        SelectedPlayerNumberTextBlock.Text = _selectedStarter.SquadNumber > 0 ? $"#{_selectedStarter.SquadNumber}" : "No squad number";
+        SelectedPlayerNameTextBlock.Text = _selectedStarter.Name;
+        SelectedPlayerPositionChip.Text = $"Playing {_selectedStarter.AssignedPosition}";
+        SelectedPlayerPreferredChip.Text = GetPositionGroupText(_selectedStarter);
+        SelectedPlayerOvrBadgeTextBlock.Text = ratingVisual.Rating.ToString();
+        SelectedPlayerOvrBadgeBorder.Background = ToBrush(ratingVisual.Background);
+        SelectedPlayerFormChip.Text = form.Text;
+        SelectedPlayerFormChip.Foreground = ToBrush(form.Foreground);
+        SelectedPlayerFormChipBorder.Background = ToBrush(form.Background);
+        SelectedPlayerInjuryChip.Text = _selectedStarter.IsInjured ? "Injured" : "Fit";
+        SelectedPlayerInjuryChip.Foreground = ToBrush(_selectedStarter.IsInjured ? "#8F1F1F" : "#236B39");
+        SelectedPlayerInjuryChipBorder.Background = ToBrush(_selectedStarter.IsInjured ? "#FFD1D1" : "#D9F1E1");
+        SelectedPlayerStaminaTextBlock.Text = $"{GetStaminaPercentage(_selectedStarter)}% stamina";
+        SelectedPlayerStaminaFill.Foreground = ToBrush(GetStaminaBrush(_selectedStarter));
+
+        SelectedPlayerAttackTextBlock.Text = $"Attack {_selectedStarter.Attack}";
+        SelectedPlayerDefenseTextBlock.Text = $"Defense {_selectedStarter.Defense}";
+        SelectedPlayerPassingTextBlock.Text = $"Passing {_selectedStarter.Passing}";
+        SelectedPlayerFinishingTextBlock.Text = $"Finishing {_selectedStarter.Finishing}";
+    }
+
+    private void RefreshTacticalInsight()
+    {
+        if (_isLoadingSetup || _state.SelectedTeam is null || _state.CurrentFixture is null || TacticalInsightInfoIcon is null)
+        {
+            return;
+        }
+
+        SaveSetup(_state.SelectedTeam);
+
+        var opponent = _state.CurrentFixture.HomeTeam == _state.SelectedTeam
+            ? _state.CurrentFixture.AwayTeam
+            : _state.CurrentFixture.HomeTeam;
+        var insight = _tacticalInsightService.GenerateInsight(_state.SelectedTeam, opponent);
+
+        TacticalInsightInfoIcon.ToolTip =
+            $"Tactical Insight{Environment.NewLine}{Environment.NewLine}" +
+            $"Opponent threats{Environment.NewLine}{FormatInsightItems(insight.OpponentThreats)}{Environment.NewLine}{Environment.NewLine}" +
+            $"Likely tactics{Environment.NewLine}{FormatInsightItems(insight.LikelyTactics)}{Environment.NewLine}{Environment.NewLine}" +
+            $"Warnings{Environment.NewLine}{FormatInsightItems(insight.Warnings)}{Environment.NewLine}{Environment.NewLine}" +
+            $"Recommendations{Environment.NewLine}{FormatInsightItems(insight.Recommendations)}";
+    }
+
+    private static string FormatInsightItems(IEnumerable<string> items)
+    {
+        var itemList = items.ToList();
+        return itemList.Count == 0
+            ? "- No major issue identified."
+            : string.Join(Environment.NewLine, itemList.Select(item => $"- {item}"));
     }
 
     private static int GetOverallRating(Player player)
@@ -241,76 +431,455 @@ public partial class HalfTimeView : UserControl
             : (int)Math.Round((player.Attack + player.Defense + player.Passing + player.Stamina + player.Finishing) / 5.0);
     }
 
-    private PlayerMatchPerformance? GetPerformance(Player player)
+    private static int GetStaminaPercentage(Player player)
     {
-        return _state.CurrentMatch?.PlayerPerformances
-            .FirstOrDefault(performance => performance.PlayerName == player.Name);
+        return Math.Clamp((int)Math.Round(player.Stamina), 0, 100);
     }
 
-    private static int GetFatiguePercentage(Player player)
+    private static string GetStaminaBrush(Player player)
     {
-        if (player.Fatigue > 0)
+        return GetStaminaPercentage(player) switch
         {
-            return Math.Clamp(player.Fatigue, 0, 100);
-        }
-
-        if (player.Stamina <= 0)
-        {
-            return 100;
-        }
-
-        var staminaRatio = Math.Clamp(player.CurrentStamina / player.Stamina, 0.0, 1.0);
-        return (int)Math.Round((1.0 - staminaRatio) * 100);
-    }
-
-    private static string GetFatigueBrush(int fatiguePercentage)
-    {
-        return fatiguePercentage switch
-        {
-            <= 25 => "#2FA84F",
-            <= 50 => "#E3BC26",
-            <= 75 => "#E8872E",
+            >= 75 => "#2FA84F",
+            >= 50 => "#E3BC26",
+            >= 25 => "#E8872E",
             _ => "#D94343"
         };
     }
 
-    private string GetHalftimeAdvice(Player player)
+    private static string GetPlayerImagePath(Player player)
     {
-        var performance = GetPerformance(player);
-        var fatigue = GetFatiguePercentage(player);
-
-        if (fatigue >= 75)
+        var playerImage = $"pack://application:,,,/Assets/Players/{CreatePlayerImageSlug(player.Name)}.png";
+        if (ResourceExists(playerImage))
         {
-            return "Advice: exhausted. Consider substituting or lowering pressing.";
+            return playerImage;
         }
 
-        if (performance is not null && performance.Rating < 5.8)
-        {
-            return "Advice: struggling. Consider a role or formation adjustment.";
-        }
-
-        if (performance is not null && performance.Rating >= 7.2)
-        {
-            return "Advice: playing well. Keep them involved.";
-        }
-
-        return "Advice: stable option for the second half.";
+        const string defaultImage = "pack://application:,,,/Assets/Players/default.png";
+        return ResourceExists(defaultImage) ? defaultImage : string.Empty;
     }
 
-    private void UpdateSwapButton()
+    private static string CreatePlayerImageSlug(string playerName)
     {
-        var usedSubstitutions = _state.CurrentMatch is null || _state.SelectedTeam is null
-            ? 0
-            : _squadSelectionService.CountTeamSubstitutions(_state.CurrentMatch, _state.SelectedTeam.Name);
+        var slugCharacters = playerName
+            .Trim()
+            .ToLowerInvariant()
+            .Select(character => char.IsLetterOrDigit(character) ? character : '-')
+            .ToArray();
 
-        SwapButton.IsEnabled = _selectedStarter is not null &&
-            _selectedSubstitute is not null &&
-            usedSubstitutions < 5;
+        return string.Join("-", new string(slugCharacters)
+            .Split('-', StringSplitOptions.RemoveEmptyEntries));
+    }
+
+    private static bool ResourceExists(string packUri)
+    {
+        try
+        {
+            return Application.GetResourceStream(new Uri(packUri, UriKind.Absolute)) is not null;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static ImageSource? CreateImageSource(string imagePath)
+    {
+        return string.IsNullOrWhiteSpace(imagePath)
+            ? null
+            : new BitmapImage(new Uri(imagePath, UriKind.Absolute));
+    }
+
+    private static Brush ToBrush(string color)
+    {
+        return (Brush)new BrushConverter().ConvertFromString(color)!;
+    }
+
+    private static RatingVisual GetRatingVisual(Player player, double suitability)
+    {
+        if (suitability >= 1.0)
+        {
+            return new RatingVisual(GetOverallRating(player), "#071A2E", "#102033");
+        }
+
+        if (suitability >= 0.90)
+        {
+            return new RatingVisual(PositionSuitabilityService.GetEffectiveOverall(player), "#C96A00", "#C96A00");
+        }
+
+        return new RatingVisual(PositionSuitabilityService.GetEffectiveOverall(player), "#B42318", "#B42318");
+    }
+
+    private static string GetPositionGroupText(Player player)
+    {
+        var naturalPositions = player.NaturalPositions.Count == 0
+            ? string.Empty
+            : $"/{string.Join("/", player.NaturalPositions)}";
+        var secondaryPositions = player.SecondaryPositions.Count == 0
+            ? string.Empty
+            : $" | Sec {string.Join("/", player.SecondaryPositions)}";
+
+        return $"Pref {player.PreferredPosition}{naturalPositions}{secondaryPositions}";
+    }
+
+    private static FormBadge GetFormBadge(int currentForm)
+    {
+        return currentForm switch
+        {
+            >= 80 => new FormBadge("Hot", "#D9F1E1", "#236B39"),
+            >= 65 => new FormBadge("Good", "#E7F7EA", "#2F7D42"),
+            >= 40 => new FormBadge("Average", "#FFF0A3", "#5F4500"),
+            > 0 => new FormBadge("Poor", "#FFD1D1", "#8F1F1F"),
+            _ => new FormBadge("Inactive", "#E1E5EA", "#465364")
+        };
     }
 
     private void PitchCanvas_SizeChanged(object sender, SizeChangedEventArgs e)
     {
         RenderPitch();
+    }
+
+    private void StarterButton_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        _dragStartPoint = e.GetPosition(this);
+    }
+
+    private void StarterButton_MouseMove(object sender, MouseEventArgs e)
+    {
+        if (e.LeftButton != MouseButtonState.Pressed || sender is not Button { Tag: Player player } button)
+        {
+            return;
+        }
+
+        if (!HasMovedEnoughToDrag(e.GetPosition(this)))
+        {
+            return;
+        }
+
+        e.Handled = true;
+        StartPlayerDrag(button, player, DragSource.StartingXi, _pitchSlots.IndexOf(player));
+    }
+
+    private void SubstituteCard_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        _dragStartPoint = e.GetPosition(this);
+    }
+
+    private void SubstituteCard_MouseMove(object sender, MouseEventArgs e)
+    {
+        if (e.LeftButton != MouseButtonState.Pressed || sender is not FrameworkElement { DataContext: BenchPlayerCard benchCard })
+        {
+            return;
+        }
+
+        if (!HasMovedEnoughToDrag(e.GetPosition(this)))
+        {
+            return;
+        }
+
+        e.Handled = true;
+        StartPlayerDrag(
+            (DependencyObject)sender,
+            benchCard.Player,
+            DragSource.Substitute,
+            _state.SelectedTeam?.Substitutes.IndexOf(benchCard.Player) ?? -1);
+    }
+
+    private bool HasMovedEnoughToDrag(Point currentPosition)
+    {
+        return Math.Abs(currentPosition.X - _dragStartPoint.X) >= SystemParameters.MinimumHorizontalDragDistance ||
+            Math.Abs(currentPosition.Y - _dragStartPoint.Y) >= SystemParameters.MinimumVerticalDragDistance;
+    }
+
+    private void StartPlayerDrag(DependencyObject source, Player player, DragSource dragSource, int sourceIndex)
+    {
+        if (_isDraggingPlayer)
+        {
+            return;
+        }
+
+        _isDraggingPlayer = true;
+        Debug.WriteLine($"[HalfTimeDrag] Start: {player.Name}; source={dragSource}; slot/index={sourceIndex}");
+
+        var dataObject = new DataObject();
+        dataObject.SetData(typeof(DraggedPlayerInfo), new DraggedPlayerInfo(player, dragSource, sourceIndex));
+        dataObject.SetData(typeof(Player), player);
+
+        try
+        {
+            DragDrop.DoDragDrop(source, dataObject, DragDropEffects.Move);
+        }
+        finally
+        {
+            _isDraggingPlayer = false;
+        }
+    }
+
+    private void PlayerCard_DragEnter(object sender, DragEventArgs e)
+    {
+        if (sender is Button button)
+        {
+            ApplyDropTargetStyle(button, GetDraggedPlayer(e) is not null);
+        }
+    }
+
+    private void PlayerCard_DragOver(object sender, DragEventArgs e)
+    {
+        var canDrop = GetDraggedPlayer(e) is not null;
+        e.Effects = canDrop ? DragDropEffects.Move : DragDropEffects.None;
+        e.Handled = true;
+    }
+
+    private void PlayerCard_DragLeave(object sender, DragEventArgs e)
+    {
+        if (sender is Button button)
+        {
+            ResetDropTargetStyle(button);
+        }
+    }
+
+    private void PlayerCard_Drop(object sender, DragEventArgs e)
+    {
+        if (sender is not Button button)
+        {
+            return;
+        }
+
+        ResetDropTargetStyle(button);
+
+        var draggedPlayer = GetDraggedPlayer(e);
+        var targetPlayer = GetTargetPlayer(button);
+        if (draggedPlayer is null || targetPlayer is null)
+        {
+            return;
+        }
+
+        Debug.WriteLine(
+            $"[HalfTimeDrag] Drop: dragged={draggedPlayer.Player.Name}; source={draggedPlayer.Source}; source slot/index={draggedPlayer.SourceIndex}; " +
+            $"target={targetPlayer.Name}; target slot={_pitchSlots.IndexOf(targetPlayer)}");
+
+        if (draggedPlayer.Source == DragSource.StartingXi)
+        {
+            SwapPitchPlayers(draggedPlayer.Player, targetPlayer);
+        }
+        else
+        {
+            ExecuteHalftimeSwap(targetPlayer, draggedPlayer.Player);
+        }
+
+        e.Handled = true;
+    }
+
+    private void SubstituteCard_DragEnter(object sender, DragEventArgs e)
+    {
+        if (sender is Border border)
+        {
+            ApplySubstituteDropTargetStyle(border, CanDropOnSubstituteCard(e));
+        }
+    }
+
+    private void SubstituteCard_DragOver(object sender, DragEventArgs e)
+    {
+        var canDrop = CanDropOnSubstituteCard(e);
+        e.Effects = canDrop ? DragDropEffects.Move : DragDropEffects.None;
+        e.Handled = true;
+    }
+
+    private void SubstituteCard_DragLeave(object sender, DragEventArgs e)
+    {
+        if (sender is Border border)
+        {
+            ResetSubstituteDropTargetStyle(border);
+        }
+    }
+
+    private void SubstituteCard_Drop(object sender, DragEventArgs e)
+    {
+        if (sender is not FrameworkElement { DataContext: BenchPlayerCard benchCard } element)
+        {
+            return;
+        }
+
+        if (element is Border border)
+        {
+            ResetSubstituteDropTargetStyle(border);
+        }
+
+        var draggedPlayer = GetDraggedPlayer(e);
+        if (draggedPlayer is null)
+        {
+            return;
+        }
+
+        Debug.WriteLine(
+            $"[HalfTimeDrag] Drop: dragged={draggedPlayer.Player.Name}; source={draggedPlayer.Source}; source slot/index={draggedPlayer.SourceIndex}; " +
+            $"target={benchCard.Player.Name}; target substitute index={_state.SelectedTeam?.Substitutes.IndexOf(benchCard.Player) ?? -1}");
+
+        if (draggedPlayer.Source == DragSource.StartingXi)
+        {
+            ExecuteHalftimeSwap(draggedPlayer.Player, benchCard.Player);
+        }
+        else
+        {
+            SwapSubstitutes(draggedPlayer.Player, benchCard.Player);
+        }
+
+        e.Handled = true;
+    }
+
+    private void SubstituteListBox_DragEnter(object sender, DragEventArgs e)
+    {
+        ApplySubstituteListDropTargetStyle(GetDraggedPlayer(e)?.Source == DragSource.StartingXi);
+    }
+
+    private void SubstituteListBox_DragOver(object sender, DragEventArgs e)
+    {
+        var canDrop = GetDraggedPlayer(e)?.Source == DragSource.StartingXi;
+        e.Effects = canDrop ? DragDropEffects.Move : DragDropEffects.None;
+        e.Handled = true;
+    }
+
+    private void SubstituteListBox_DragLeave(object sender, DragEventArgs e)
+    {
+        ResetSubstituteListDropTargetStyle();
+    }
+
+    private void SubstituteListBox_Drop(object sender, DragEventArgs e)
+    {
+        ResetSubstituteListDropTargetStyle();
+
+        var draggedPlayer = GetDraggedPlayer(e);
+        var firstSubstitute = _state.SelectedTeam?.Substitutes.FirstOrDefault();
+        if (draggedPlayer is null || draggedPlayer.Source != DragSource.StartingXi || firstSubstitute is null)
+        {
+            return;
+        }
+
+        ExecuteHalftimeSwap(draggedPlayer.Player, firstSubstitute);
+        e.Handled = true;
+    }
+
+    private static bool CanDropOnSubstituteCard(DragEventArgs e)
+    {
+        return GetDraggedPlayer(e) is not null;
+    }
+
+    private static DraggedPlayerInfo? GetDraggedPlayer(DragEventArgs e)
+    {
+        return e.Data.GetDataPresent(typeof(DraggedPlayerInfo))
+            ? e.Data.GetData(typeof(DraggedPlayerInfo)) as DraggedPlayerInfo
+            : null;
+    }
+
+    private static Player? GetTargetPlayer(FrameworkElement element)
+    {
+        return element.DataContext is PitchPlayerCard pitchCard
+            ? pitchCard.Player
+            : element.Tag as Player;
+    }
+
+    private void SwapPitchPlayers(Player draggedPlayer, Player targetPlayer)
+    {
+        if (_state.SelectedTeam is null || draggedPlayer == targetPlayer)
+        {
+            return;
+        }
+
+        var draggedIndex = _pitchSlots.IndexOf(draggedPlayer);
+        var targetIndex = _pitchSlots.IndexOf(targetPlayer);
+        if (draggedIndex < 0 || targetIndex < 0)
+        {
+            Debug.WriteLine(
+                $"[HalfTimeDrag] Swap failed: {draggedPlayer.Name} index={draggedIndex}; {targetPlayer.Name} index={targetIndex}");
+            return;
+        }
+
+        (_pitchSlots[draggedIndex], _pitchSlots[targetIndex]) = (_pitchSlots[targetIndex], _pitchSlots[draggedIndex]);
+        _state.SelectedTeam.Players = _pitchSlots.ToList();
+        AssignFormationPositions();
+
+        Debug.WriteLine(
+            $"[HalfTimeDrag] Swapped StartingXI: {draggedPlayer.Name} -> slot {targetIndex} ({draggedPlayer.AssignedPosition}); " +
+            $"{targetPlayer.Name} -> slot {draggedIndex} ({targetPlayer.AssignedPosition})");
+
+        _selectedStarter = draggedPlayer;
+        UpdateSelectedPlayerDetails();
+        RenderPitch();
+        RefreshTacticalInsight();
+    }
+
+    private void SwapSubstitutes(Player draggedPlayer, Player targetPlayer)
+    {
+        if (_state.SelectedTeam is null || draggedPlayer == targetPlayer)
+        {
+            return;
+        }
+
+        var draggedIndex = _state.SelectedTeam.Substitutes.IndexOf(draggedPlayer);
+        var targetIndex = _state.SelectedTeam.Substitutes.IndexOf(targetPlayer);
+        if (draggedIndex < 0 || targetIndex < 0)
+        {
+            return;
+        }
+
+        (_state.SelectedTeam.Substitutes[draggedIndex], _state.SelectedTeam.Substitutes[targetIndex]) =
+            (_state.SelectedTeam.Substitutes[targetIndex], _state.SelectedTeam.Substitutes[draggedIndex]);
+
+        Debug.WriteLine(
+            $"[HalfTimeDrag] Swapped substitutes: {draggedPlayer.Name} -> index {targetIndex}; {targetPlayer.Name} -> index {draggedIndex}");
+
+        RefreshSubstitutes();
+    }
+
+    private static void ApplyDropTargetStyle(Button button, bool canDrop)
+    {
+        if (!canDrop)
+        {
+            return;
+        }
+
+        button.BorderBrush = new SolidColorBrush(Color.FromRgb(255, 224, 102));
+        button.BorderThickness = new Thickness(3);
+        button.Background = new SolidColorBrush(Color.FromArgb(52, 255, 255, 255));
+    }
+
+    private static void ResetDropTargetStyle(Button button)
+    {
+        button.BorderBrush = Brushes.Transparent;
+        button.BorderThickness = new Thickness(0);
+        button.Background = Brushes.Transparent;
+    }
+
+    private static void ApplySubstituteDropTargetStyle(Border border, bool canDrop)
+    {
+        if (!canDrop)
+        {
+            return;
+        }
+
+        border.BorderBrush = new SolidColorBrush(Color.FromRgb(255, 224, 102));
+        border.BorderThickness = new Thickness(3);
+        border.Background = new SolidColorBrush(Color.FromRgb(255, 248, 210));
+    }
+
+    private static void ResetSubstituteDropTargetStyle(Border border)
+    {
+        border.BorderBrush = new SolidColorBrush(Color.FromRgb(214, 223, 234));
+        border.BorderThickness = new Thickness(1);
+        border.Background = Brushes.White;
+    }
+
+    private void ApplySubstituteListDropTargetStyle(bool canDrop)
+    {
+        if (canDrop)
+        {
+            SubstituteListBox.Background = new SolidColorBrush(Color.FromArgb(48, 255, 224, 102));
+        }
+    }
+
+    private void ResetSubstituteListDropTargetStyle()
+    {
+        SubstituteListBox.Background = Brushes.Transparent;
     }
 
     private void StartSecondHalfButton_Click(object sender, RoutedEventArgs e)
@@ -341,18 +910,94 @@ public partial class HalfTimeView : UserControl
         team.Tactics.DefensiveLine = (int)Math.Round(DefensiveLineSlider.Value);
     }
 
-    private static IEnumerable<Player> OrderPlayersForPitch(IEnumerable<Player> players)
+    private IEnumerable<Player> OrderPlayersForPitch(IEnumerable<Player> players, string formation)
     {
-        return players
-            .OrderBy(player => player.Position switch
+        var remainingPlayers = players.ToList();
+        var orderedPlayers = new List<Player>();
+        var formationSlots = _formationLayoutService.GetPositions(formation);
+
+        foreach (var slot in formationSlots)
+        {
+            var selectedPlayer = remainingPlayers
+                .OrderByDescending(player => GetSlotFitScore(player, slot.ExactPosition))
+                .ThenByDescending(GetOverallRating)
+                .ThenBy(player => player.SquadNumber)
+                .ThenBy(player => player.Name)
+                .FirstOrDefault();
+
+            if (selectedPlayer is null)
             {
-                Position.Goalkeeper => 0,
-                Position.Defender => 1,
-                Position.Midfielder => 2,
-                Position.Forward => 3,
-                _ => 4
-            })
-            .ThenBy(player => player.SquadNumber)
-            .ThenBy(player => player.Name);
+                continue;
+            }
+
+            orderedPlayers.Add(selectedPlayer);
+            remainingPlayers.Remove(selectedPlayer);
+        }
+
+        orderedPlayers.AddRange(remainingPlayers);
+        return orderedPlayers;
+    }
+
+    private static int GetSlotFitScore(Player player, string exactPosition)
+    {
+        PositionSuitabilityService.EnsurePositionMetadata(player);
+        var normalizedSlot = PositionSuitabilityService.NormalizeExactPosition(exactPosition);
+
+        if (player.PreferredPosition == normalizedSlot)
+        {
+            return 1000;
+        }
+
+        if (player.NaturalPositions.Contains(normalizedSlot))
+        {
+            return 1000;
+        }
+
+        if (player.SecondaryPositions.Contains(normalizedSlot))
+        {
+            return 900;
+        }
+
+        return player.Position == GetGenericPositionForSlot(normalizedSlot) ? 600 : 100;
+    }
+
+    private static Position GetGenericPositionForSlot(string exactPosition)
+    {
+        return exactPosition switch
+        {
+            "GK" => Position.Goalkeeper,
+            "LB" or "CB" or "RB" => Position.Defender,
+            "CDM" or "CM" or "CAM" => Position.Midfielder,
+            "LW" or "RW" or "ST" => Position.Forward,
+            _ => Position.Midfielder
+        };
+    }
+
+    private sealed record FormBadge(string Text, string Background, string Foreground);
+
+    private sealed record RatingVisual(int Rating, string Foreground, string Background);
+
+    private enum DragSource
+    {
+        StartingXi,
+        Substitute
+    }
+
+    private sealed record DraggedPlayerInfo(Player Player, DragSource Source, int SourceIndex);
+
+    private sealed class BenchPlayerCard
+    {
+        public Player Player { get; init; } = new();
+        public string Name { get; init; } = string.Empty;
+        public string ShirtNumberText { get; init; } = string.Empty;
+        public string PlayerImagePath { get; init; } = string.Empty;
+        public string Position { get; init; } = string.Empty;
+        public string OverallText { get; init; } = string.Empty;
+        public int OverallRating { get; init; }
+        public double Stamina { get; init; }
+        public string StaminaBrush { get; init; } = "#2FA84F";
+        public string BenchFormBadgeText { get; init; } = string.Empty;
+        public string BenchFormBadgeBackground { get; init; } = "#E1E5EA";
+        public string BenchFormBadgeForeground { get; init; } = "#465364";
     }
 }

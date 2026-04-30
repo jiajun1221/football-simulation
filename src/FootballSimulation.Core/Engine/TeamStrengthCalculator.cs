@@ -118,19 +118,26 @@ public class TeamStrengthCalculator
             return MatchConstants.MinimumStaminaModifier;
         }
 
-        var staminaRatio = player.CurrentStamina / player.Stamina;
+        var staminaRatio = Math.Clamp(player.Stamina / 100.0, 0.0, 1.0);
+        var lowStaminaModifier = staminaRatio switch
+        {
+            < 0.15 => 0.55,
+            < 0.30 => 0.68,
+            < 0.50 => 0.82,
+            _ => 1.00
+        };
 
         const double fatigueModifier = 1.0;
 
         return Math.Clamp(
             staminaRatio,
             MatchConstants.MinimumStaminaModifier,
-            MatchConstants.MaximumStaminaModifier) * fatigueModifier;
+            MatchConstants.MaximumStaminaModifier) * fatigueModifier * lowStaminaModifier;
     }
 
     private static double GetStatusModifier(Player player)
     {
-        var fatigueModifier = GetFatiguePerformanceModifier(player.Fatigue);
+        var fatigueModifier = GetFatiguePerformanceModifier(100 - (int)Math.Round(player.Stamina));
         var formModifier = Math.Clamp(0.80 + (player.CurrentForm / 250.0), 0.80, 1.20);
         var moraleModifier = Math.Clamp(0.85 + (player.Morale / 300.0), 0.85, 1.15);
         var injuryModifier = player.IsInjured ? 0.55 : 1.00;

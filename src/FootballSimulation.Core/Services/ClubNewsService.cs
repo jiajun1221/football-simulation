@@ -57,7 +57,7 @@ public class ClubNewsService
     private static void AddRumours(List<ClubNewsItem> newsItems, Team team)
     {
         var tiredPlayers = team.Players
-            .Where(player => player.Fatigue >= 65 || player.MatchesPlayedRecently >= 4)
+            .Where(player => player.Stamina <= 35 || player.MatchesPlayedRecently >= 4)
             .Take(2)
             .ToList();
 

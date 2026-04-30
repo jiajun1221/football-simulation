@@ -24,7 +24,6 @@ public partial class MatchLiveView : UserControl
     private const int FirstHalfEndMinute = 45;
     private const int FullTimeMinute = 90;
     private const double PlayerIconSlotSize = 74;
-    private const double LiveIconFatigueBarWidth = 42;
 
     private readonly GameFlowState _state;
     private readonly Action<UserControl> _navigate;
@@ -45,6 +44,8 @@ public partial class MatchLiveView : UserControl
     private bool _fixtureCompleted;
     private Player? _selectedStarterForSubstitution;
     private Player? _selectedBenchForSubstitution;
+    private Player? _pendingStarterForSubstitution;
+    private Player? _pendingBenchForSubstitution;
     private string? _selectedPitchPlayerKey;
     private double _pitchWidth;
     private double _pitchHeight;
@@ -331,6 +332,12 @@ public partial class MatchLiveView : UserControl
 
     private void ResumeFromPausedActionPanel()
     {
+        if (!TryCommitPendingSubstitution())
+        {
+            UpdatePlaybackControls();
+            return;
+        }
+
         ApplyInlineTacticalSettings();
         _isPlaybackPaused = false;
         _isPausedForSubstitution = false;
@@ -347,10 +354,13 @@ public partial class MatchLiveView : UserControl
         ActionWidthSlider.Value = userTeam.Tactics.Width;
         ActionTempoSlider.Value = userTeam.Tactics.Tempo;
         ActionDefensiveLineSlider.Value = userTeam.Tactics.DefensiveLine;
-        PausedBenchListBox.ItemsSource = userTeam.Substitutes.ToList();
-        PausedActionStatusTextBlock.Text = _selectedPitchPlayerKey is null
-            ? "Select a player on the pitch before choosing a substitute."
-            : "Tactical and substitution changes will apply from the next played minute.";
+        PausedBenchListBox.ItemsSource = CreateSubstitutionPlayerCards(userTeam.Substitutes);
+        PausedActionStatusTextBlock.Text = HasPendingSubstitution()
+            ? "Pending substitution will be confirmed when you resume."
+            : _selectedPitchPlayerKey is null
+                ? "Select a player on the pitch before choosing a substitute."
+                : "Tactical and substitution changes will apply from the next played minute.";
+        UpdatePendingSubstitutionPanel();
     }
 
     private void ApplyInlineTacticalSettings()
@@ -383,8 +393,8 @@ public partial class MatchLiveView : UserControl
 
         var userTeam = GetUserTeam();
 
-        LiveStarterListBox.ItemsSource = userTeam.Players.ToList();
-        LiveBenchListBox.ItemsSource = userTeam.Substitutes.ToList();
+        LiveStarterListBox.ItemsSource = CreateSubstitutionPlayerCards(userTeam.Players);
+        LiveBenchListBox.ItemsSource = CreateSubstitutionPlayerCards(userTeam.Substitutes);
 
         var usedSubstitutions = _squadSelectionService.CountTeamSubstitutions(_state.CurrentMatch, userTeam.Name);
         SubstitutionOverlayStatusTextBlock.Text =
@@ -401,7 +411,9 @@ public partial class MatchLiveView : UserControl
         _selectedStarterForSubstitution = null;
         _selectedBenchForSubstitution = null;
         ConfirmSubstitutionButton.IsEnabled = false;
-        _ = ResumePlaybackAsync();
+        _isPausedForSubstitution = false;
+        _isPlaybackPaused = true;
+        UpdatePlaybackControls();
     }
 
     private void TacticalAdjustmentButton_Click(object sender, RoutedEventArgs e)
@@ -456,24 +468,24 @@ public partial class MatchLiveView : UserControl
 
     private void LiveStarterListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        _selectedStarterForSubstitution = LiveStarterListBox.SelectedItem as Player;
+        _selectedStarterForSubstitution = (LiveStarterListBox.SelectedItem as SubstitutionPlayerCard)?.Player;
         UpdateConfirmSubstitutionButton();
     }
 
     private void LiveBenchListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        _selectedBenchForSubstitution = LiveBenchListBox.SelectedItem as Player;
+        _selectedBenchForSubstitution = (LiveBenchListBox.SelectedItem as SubstitutionPlayerCard)?.Player;
         UpdateConfirmSubstitutionButton();
     }
 
     private void PausedBenchListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (!_isPlaybackPaused || PausedBenchListBox.SelectedItem is not Player substitute)
+        if (!_isPlaybackPaused || PausedBenchListBox.SelectedItem is not SubstitutionPlayerCard substituteCard)
         {
             return;
         }
 
-        TryApplyPausedSubstitution(substitute);
+        QueuePausedSubstitution(substituteCard.Player);
         PausedBenchListBox.SelectedItem = null;
     }
 
@@ -481,12 +493,12 @@ public partial class MatchLiveView : UserControl
     {
         if (!_isPlaybackPaused ||
             e.LeftButton != MouseButtonState.Pressed ||
-            sender is not FrameworkElement { DataContext: Player substitute })
+            sender is not FrameworkElement { DataContext: SubstitutionPlayerCard substituteCard })
         {
             return;
         }
 
-        DragDrop.DoDragDrop((DependencyObject)sender, substitute, DragDropEffects.Move);
+        DragDrop.DoDragDrop((DependencyObject)sender, substituteCard.Player, DragDropEffects.Move);
     }
 
     private void PitchPlayerIcon_Drop(object sender, DragEventArgs e)
@@ -499,7 +511,7 @@ public partial class MatchLiveView : UserControl
         }
 
         _selectedPitchPlayerKey = selectedPlayer.PlayerKey;
-        TryApplyPausedSubstitution(substitute);
+        QueuePausedSubstitution(substitute);
         e.Handled = true;
     }
 
@@ -510,43 +522,31 @@ public partial class MatchLiveView : UserControl
             return;
         }
 
-        var minute = Math.Max(1, _state.CurrentMatch.CurrentMinute);
-        var userTeam = GetUserTeam();
-        var swapResult = _squadSelectionService.SwapStarterWithSubstitute(
-            userTeam,
-            _selectedStarterForSubstitution,
-            _selectedBenchForSubstitution,
-            _state.CurrentMatch,
-            minute);
-
-        if (!swapResult.Success)
-        {
-            MessageBox.Show(swapResult.Message);
-            return;
-        }
-
-        ApplyManualSubstitutionImpact(_selectedStarterForSubstitution, _selectedBenchForSubstitution);
-        _state.CurrentMatch.SuperSubBoosts[_selectedBenchForSubstitution.Name] = minute + 10;
-
-        var substitutionEvent = _matchEventFactory.CreateSubstitution(
-            minute,
-            userTeam,
-            _selectedStarterForSubstitution,
-            _selectedBenchForSubstitution);
-
-        _state.CurrentMatch.Events.Add(substitutionEvent);
-        InsertFeedItemAtTop(CreateFeedItem(substitutionEvent, _state.CurrentMatch));
-        RefreshPlayerPanels();
+        _pendingStarterForSubstitution = _selectedStarterForSubstitution;
+        _pendingBenchForSubstitution = _selectedBenchForSubstitution;
+        _selectedPitchPlayerKey = CreatePlayerKey(GetUserTeam().Name, _selectedStarterForSubstitution.Name);
 
         SubstitutionOverlay.Visibility = Visibility.Collapsed;
         _selectedStarterForSubstitution = null;
         _selectedBenchForSubstitution = null;
         ConfirmSubstitutionButton.IsEnabled = false;
-
-        _ = ResumePlaybackAsync();
+        _isPausedForSubstitution = false;
+        _isPlaybackPaused = true;
+        PausedActionStatusTextBlock.Text = "Pending substitution will be confirmed when you resume.";
+        UpdatePendingSubstitutionPanel();
+        UpdatePlaybackControls();
     }
 
-    private void TryApplyPausedSubstitution(Player substitute)
+    private void CancelPendingSubstitutionButton_Click(object sender, RoutedEventArgs e)
+    {
+        ClearPendingSubstitution();
+        PausedActionStatusTextBlock.Text = _selectedPitchPlayerKey is null
+            ? "Select a player on the pitch before choosing a substitute."
+            : "Pending substitution cancelled. Choose another substitute or resume.";
+        UpdatePlaybackControls();
+    }
+
+    private void QueuePausedSubstitution(Player substitute)
     {
         if (_state.CurrentMatch is null || _selectedPitchPlayerKey is null)
         {
@@ -564,6 +564,45 @@ public partial class MatchLiveView : UserControl
             return;
         }
 
+        if (GetUserSubstitutionsLeft() <= 0)
+        {
+            PausedActionStatusTextBlock.Text = "No substitutions remaining.";
+            return;
+        }
+
+        _pendingStarterForSubstitution = starter;
+        _pendingBenchForSubstitution = substitute;
+        PausedActionStatusTextBlock.Text = $"Pending substitution: {substitute.Name} for {starter.Name}. Click Resume to confirm.";
+        UpdatePendingSubstitutionPanel();
+        UpdatePlaybackControls();
+    }
+
+    private bool TryCommitPendingSubstitution()
+    {
+        if (!HasPendingSubstitution())
+        {
+            return true;
+        }
+
+        if (_state.CurrentMatch is null || _pendingStarterForSubstitution is null || _pendingBenchForSubstitution is null)
+        {
+            ClearPendingSubstitution();
+            return true;
+        }
+
+        var userTeam = GetUserTeam();
+        var starter = userTeam.Players.FirstOrDefault(player =>
+            string.Equals(player.Name, _pendingStarterForSubstitution.Name, StringComparison.OrdinalIgnoreCase));
+        var substitute = userTeam.Substitutes.FirstOrDefault(player =>
+            string.Equals(player.Name, _pendingBenchForSubstitution.Name, StringComparison.OrdinalIgnoreCase));
+
+        if (starter is null || substitute is null)
+        {
+            PausedActionStatusTextBlock.Text = "Pending substitution is no longer valid. Choose another substitute.";
+            ClearPendingSubstitution();
+            return false;
+        }
+
         var minute = Math.Max(1, _state.CurrentMatch.CurrentMinute);
         var swapResult = _squadSelectionService.SwapStarterWithSubstitute(
             userTeam,
@@ -575,21 +614,52 @@ public partial class MatchLiveView : UserControl
         if (!swapResult.Success)
         {
             PausedActionStatusTextBlock.Text = swapResult.Message;
-            return;
+            return false;
         }
 
         ApplyManualSubstitutionImpact(starter, substitute);
         _state.CurrentMatch.SuperSubBoosts[substitute.Name] = minute + 10;
 
-        var substitutionEvent = _matchEventFactory.CreateSubstitution(minute, userTeam, starter, substitute);
+        var substitutionEvent = _matchEventFactory.CreateSubstitution(
+            minute,
+            userTeam,
+            starter,
+            substitute);
         _state.CurrentMatch.Events.Add(substitutionEvent);
         InsertFeedItemAtTop(CreateFeedItem(substitutionEvent, _state.CurrentMatch));
 
         _selectedPitchPlayerKey = CreatePlayerKey(userTeam.Name, substitute.Name);
-        PausedBenchListBox.ItemsSource = userTeam.Substitutes.ToList();
-        PausedActionStatusTextBlock.Text = $"{substitute.Name} replaces {starter.Name}. Fresh legs get a short performance boost after resume.";
+        PausedBenchListBox.ItemsSource = CreateSubstitutionPlayerCards(userTeam.Substitutes);
+        PausedActionStatusTextBlock.Text = $"{substitute.Name} replaces {starter.Name}. The substitute gets a short performance boost.";
+        ClearPendingSubstitution();
         RefreshPlayerPanels();
-        UpdatePlaybackControls();
+        return true;
+    }
+
+    private bool HasPendingSubstitution()
+    {
+        return _pendingStarterForSubstitution is not null && _pendingBenchForSubstitution is not null;
+    }
+
+    private void ClearPendingSubstitution()
+    {
+        _pendingStarterForSubstitution = null;
+        _pendingBenchForSubstitution = null;
+        UpdatePendingSubstitutionPanel();
+    }
+
+    private void UpdatePendingSubstitutionPanel()
+    {
+        if (!HasPendingSubstitution())
+        {
+            PendingSubstitutionPanel.Visibility = Visibility.Collapsed;
+            PendingSubstitutionTextBlock.Text = string.Empty;
+            return;
+        }
+
+        PendingSubstitutionPanel.Visibility = Visibility.Visible;
+        PendingSubstitutionTextBlock.Text =
+            $"Pending substitution: {_pendingBenchForSubstitution!.Name} for {_pendingStarterForSubstitution!.Name}";
     }
 
     private void ApplyManualSubstitutionImpact(Player playerOff, Player playerOn)
@@ -613,7 +683,7 @@ public partial class MatchLiveView : UserControl
 
         foreach (var player in team.Players)
         {
-            var fatiguePenalty = player.Fatigue >= 70 ? (player.Fatigue - 70) / 200.0 : 0.0;
+            var fatiguePenalty = player.Stamina <= 30 ? (30 - player.Stamina) / 200.0 : 0.0;
             var positionBonus = player.Position switch
             {
                 Position.Forward => attackingBonus,
@@ -768,7 +838,7 @@ public partial class MatchLiveView : UserControl
     {
         var performance = _state.CurrentMatch?.PlayerPerformances
             .FirstOrDefault(existing => existing.TeamName == team.Name && existing.PlayerName == player.Name);
-        var fatigue = GetFatiguePercentage(player);
+        var stamina = GetStaminaPercentage(player);
         var (xRatio, yRatio) = GetLivePitchPosition(formationPosition, isHomeTeam);
         var x = Math.Clamp((pitchWidth * xRatio) - (PlayerIconSlotSize / 2), 4, Math.Max(4, pitchWidth - PlayerIconSlotSize - 4));
         var y = Math.Clamp((pitchHeight * yRatio) - (PlayerIconSlotSize / 2), 4, Math.Max(4, pitchHeight - PlayerIconSlotSize - 4));
@@ -776,7 +846,7 @@ public partial class MatchLiveView : UserControl
         var isUserTeam = _state.SelectedTeam is not null &&
             string.Equals(team.Name, _state.SelectedTeam.Name, StringComparison.OrdinalIgnoreCase);
         var playerKey = CreatePlayerKey(team.Name, player.Name);
-        var status = GetPlayerStatus(player, fatigue);
+        var status = GetPlayerStatus(player, stamina);
         var yellowCards = Math.Max(player.YellowCards, performance?.YellowCards ?? 0);
         var redCards = Math.Max(player.IsSentOff ? 1 : 0, performance?.RedCards ?? 0);
         var isSelected = string.Equals(_selectedPitchPlayerKey, playerKey, StringComparison.OrdinalIgnoreCase);
@@ -797,9 +867,8 @@ public partial class MatchLiveView : UserControl
             SelectionBrush = isSelected ? "#F7C948" : "Transparent",
             SelectionThickness = isSelected ? 4 : 0,
             RatingText = (performance?.Rating ?? 6.0).ToString("0.0"),
-            FatiguePercent = fatigue,
-            FatigueBarWidth = LiveIconFatigueBarWidth * (100 - Math.Clamp(fatigue, 0, 100)) / 100.0,
-            FatigueBrush = GetFatigueBrush(fatigue),
+            Stamina = stamina,
+            StaminaBrush = GetStaminaBrush(stamina),
             Goals = performance?.Goals ?? 0,
             Assists = performance?.Assists ?? 0,
             DefensiveContributions = defensiveContributions,
@@ -815,11 +884,11 @@ public partial class MatchLiveView : UserControl
             YellowBadgeText = yellowCards > 0 ? YellowCardIcon() : string.Empty,
             RedBadgeText = redCards > 0 ? RedCardIcon() : string.Empty,
             InjuryBadgeText = player.IsInjured || performance?.Injuries > 0 ? InjuryIcon() : string.Empty,
-            DetailText = BuildPlayerDetailText(player, performance, fatigue, defensiveContributions),
+            DetailText = BuildPlayerDetailText(player, performance, stamina, defensiveContributions),
             CardsText = yellowCards == 0 && redCards == 0 ? "None" : $"Y{yellowCards} R{redCards}",
             InjuryStatusText = player.IsInjured || performance?.Injuries > 0 ? "Injured" : "Fit",
             FormText = string.IsNullOrWhiteSpace(player.Form) ? player.CurrentForm.ToString() : player.Form,
-            StaminaText = $"{Math.Round(player.CurrentStamina):0}/{player.Stamina}",
+            StaminaText = $"{Math.Round(player.Stamina):0}%",
             MatchStatusText = status.Text
         };
     }
@@ -861,18 +930,19 @@ public partial class MatchLiveView : UserControl
         {
             SelectedPlayerPlaceholderTextBlock.Visibility = Visibility.Visible;
             SelectedPlayerStatsPanel.Visibility = Visibility.Collapsed;
+            SelectedPlayerStatsPanel.DataContext = null;
             return;
         }
 
         SelectedPlayerPlaceholderTextBlock.Visibility = Visibility.Collapsed;
         SelectedPlayerStatsPanel.Visibility = Visibility.Visible;
+        SelectedPlayerStatsPanel.DataContext = selectedPlayer;
 
         SelectedPlayerNameTextBlock.Text = selectedPlayer.Name;
         SelectedPlayerMetaTextBlock.Text = $"{selectedPlayer.TeamName} | {selectedPlayer.PositionText}";
         SelectedPlayerRatingTextBlock.Text = selectedPlayer.RatingText;
-        SelectedPlayerFatigueTextBlock.Text = $"{selectedPlayer.FatiguePercent}%";
-        SelectedPlayerStaminaBar.Width = Math.Max(8, 270 * (100 - Math.Clamp(selectedPlayer.FatiguePercent, 0, 100)) / 100.0);
-        SelectedPlayerStaminaBar.Background = (Brush)new BrushConverter().ConvertFromString(selectedPlayer.FatigueBrush)!;
+        SelectedPlayerStaminaTextBlock.Text = $"{selectedPlayer.Stamina:0}%";
+        SelectedPlayerStaminaBar.Foreground = (Brush)new BrushConverter().ConvertFromString(selectedPlayer.StaminaBrush)!;
         SelectedPlayerGoalsTextBlock.Text = $"{SoccerBallIcon()} {selectedPlayer.Goals}";
         SelectedPlayerAssistsTextBlock.Text = $"{AssistIcon()} {selectedPlayer.Assists}";
         SelectedPlayerDefensiveTextBlock.Text = $"{ShieldIcon()} {selectedPlayer.DefensiveContributions} | {GloveIcon()} {selectedPlayer.Saves}";
@@ -1050,7 +1120,7 @@ public partial class MatchLiveView : UserControl
     private static string BuildPlayerDetailText(
         Player player,
         PlayerMatchPerformance? performance,
-        int fatigue,
+        int stamina,
         int defensiveContributions)
     {
         var yellowCards = Math.Max(player.YellowCards, performance?.YellowCards ?? 0);
@@ -1060,7 +1130,7 @@ public partial class MatchLiveView : UserControl
         return $"{player.Name}\n" +
             $"Position: {GetPositionText(player.Position)}\n" +
             $"Rating: {(performance?.Rating ?? 6.0):0.0}\n" +
-            $"Fatigue: {fatigue}%\n" +
+            $"Stamina: {stamina}%\n" +
             $"Goals: {performance?.Goals ?? 0} | Assists: {performance?.Assists ?? 0}\n" +
             $"Defensive: {defensiveContributions} | Saves: {performance?.Saves ?? 0}\n" +
             $"Cards: Y{yellowCards} R{redCards} | {injuryText}";
@@ -1312,7 +1382,7 @@ public partial class MatchLiveView : UserControl
             EventType.SetPieceDanger => $"{teamName} threaten from a set piece",
             EventType.Confrontation => "Players clash",
             EventType.CrowdMomentum => $"{teamName} ride the crowd momentum",
-            EventType.Exhaustion => "Fatigue is showing",
+            EventType.Exhaustion => "Stamina is dropping",
             EventType.Substitution => "Substitution",
             EventType.Halftime => "Halftime",
             EventType.Fulltime => "Fulltime",
@@ -1341,7 +1411,7 @@ public partial class MatchLiveView : UserControl
             EventType.Confrontation => $"{matchEvent.Description} The temperature of the match rises.",
             EventType.CrowdMomentum => $"{matchEvent.Description} The home crowd is starting to influence the rhythm.",
             EventType.Exhaustion => $"{matchEvent.Description} Legs are heavy and mistakes become more likely.",
-            EventType.Substitution => $"{matchEvent.Description} Fresh legs enter the match.",
+            EventType.Substitution => $"{matchEvent.Description} A substitute enters the match.",
             _ => matchEvent.Description
         };
     }
@@ -1517,30 +1587,76 @@ public partial class MatchLiveView : UserControl
         };
     }
 
-    private static int GetFatiguePercentage(Player player)
+    private static int GetStaminaPercentage(Player player)
     {
-        if (player.Fatigue > 0)
-        {
-            return Math.Clamp(player.Fatigue, 0, 100);
-        }
-
-        if (player.Stamina <= 0)
-        {
-            return 100;
-        }
-
-        var staminaRatio = Math.Clamp(player.CurrentStamina / player.Stamina, 0.0, 1.0);
-        return (int)Math.Round((1.0 - staminaRatio) * 100);
+        return Math.Clamp((int)Math.Round(player.Stamina), 0, 100);
     }
 
-    private static string GetFatigueBrush(int fatiguePercentage)
+    private static string GetStaminaBrush(int staminaPercentage)
     {
-        return fatiguePercentage switch
+        return staminaPercentage switch
         {
-            <= 40 => "#2FA84F",
-            <= 70 => "#E3BC26",
-            <= 85 => "#E8872E",
+            >= 75 => "#2FA84F",
+            >= 50 => "#E3BC26",
+            >= 25 => "#E8872E",
             _ => "#D94343"
+        };
+    }
+
+    private static List<SubstitutionPlayerCard> CreateSubstitutionPlayerCards(IEnumerable<Player> players)
+    {
+        return players
+            .Select(CreateSubstitutionPlayerCard)
+            .ToList();
+    }
+
+    private static SubstitutionPlayerCard CreateSubstitutionPlayerCard(Player player)
+    {
+        var stamina = GetStaminaPercentage(player);
+        var form = GetFormBadge(player.CurrentForm);
+        var exactPosition = PositionSuitabilityService.NormalizeExactPosition(player.AssignedPosition);
+
+        if (string.IsNullOrWhiteSpace(exactPosition))
+        {
+            exactPosition = PositionSuitabilityService.NormalizeExactPosition(player.PreferredPosition);
+        }
+
+        if (string.IsNullOrWhiteSpace(exactPosition))
+        {
+            exactPosition = GetPositionText(player.Position);
+        }
+
+        return new SubstitutionPlayerCard
+        {
+            Player = player,
+            Name = player.Name,
+            ShirtNumberText = player.SquadNumber > 0 ? $"#{player.SquadNumber}" : string.Empty,
+            Position = exactPosition,
+            OverallText = $"OVR {GetOverallRating(player)}",
+            Stamina = stamina,
+            StaminaBrush = GetStaminaBrush(stamina),
+            FormBadgeText = form.Text,
+            FormBadgeBackground = form.Background,
+            FormBadgeForeground = form.Foreground
+        };
+    }
+
+    private static int GetOverallRating(Player player)
+    {
+        return player.OverallRating > 0
+            ? player.OverallRating
+            : (int)Math.Round((player.Attack + player.Defense + player.Passing + player.Stamina + player.Finishing) / 5.0);
+    }
+
+    private static FormBadge GetFormBadge(int currentForm)
+    {
+        return currentForm switch
+        {
+            >= 80 => new FormBadge("Hot", "#D9F1E1", "#236B39"),
+            >= 65 => new FormBadge("Good", "#E7F7EA", "#2F7D42"),
+            >= 40 => new FormBadge("Average", "#FFF0A3", "#5F4500"),
+            > 0 => new FormBadge("Poor", "#FFD1D1", "#8F1F1F"),
+            _ => new FormBadge("Inactive", "#E1E5EA", "#465364")
         };
     }
 
@@ -1556,7 +1672,7 @@ public partial class MatchLiveView : UserControl
         };
     }
 
-    private static StatusBadge GetPlayerStatus(Player player, int fatiguePercentage)
+    private static StatusBadge GetPlayerStatus(Player player, int staminaPercentage)
     {
         if (player.IsSentOff)
         {
@@ -1573,12 +1689,12 @@ public partial class MatchLiveView : UserControl
             return new StatusBadge("Carded", "#FFF0A3", "#5F4500");
         }
 
-        return fatiguePercentage switch
+        return staminaPercentage switch
         {
-            <= 40 => new StatusBadge("Fresh", "#D9F1E1", "#236B39"),
-            <= 70 => new StatusBadge("Tired", "#FFF0A3", "#5F4500"),
-            <= 85 => new StatusBadge("Very Tired", "#FFE4BF", "#8A4E00"),
-            _ => new StatusBadge("Exhausted", "#FFD1D1", "#8F1F1F")
+            >= 75 => new StatusBadge("High Stamina", "#D9F1E1", "#236B39"),
+            >= 50 => new StatusBadge("Moderate Stamina", "#FFF0A3", "#5F4500"),
+            >= 25 => new StatusBadge("Low Stamina", "#FFE4BF", "#8A4E00"),
+            _ => new StatusBadge("Critical Stamina", "#FFD1D1", "#8F1F1F")
         };
     }
 
@@ -1613,5 +1729,21 @@ public partial class MatchLiveView : UserControl
         string LabelBackground,
         string LabelForeground);
 
+    private sealed record FormBadge(string Text, string Background, string Foreground);
+
     private sealed record StatusBadge(string Text, string Background, string Foreground);
+
+    private sealed class SubstitutionPlayerCard
+    {
+        public Player Player { get; init; } = new();
+        public string Name { get; init; } = string.Empty;
+        public string ShirtNumberText { get; init; } = string.Empty;
+        public string Position { get; init; } = string.Empty;
+        public string OverallText { get; init; } = string.Empty;
+        public double Stamina { get; init; }
+        public string StaminaBrush { get; init; } = "#2FA84F";
+        public string FormBadgeText { get; init; } = string.Empty;
+        public string FormBadgeBackground { get; init; } = "#E1E5EA";
+        public string FormBadgeForeground { get; init; } = "#465364";
+    }
 }

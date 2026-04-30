@@ -15,9 +15,8 @@ public class PitchPlayerCard
     public string OverallForeground { get; init; } = "#071A2E";
     public string RatingText { get; init; } = string.Empty;
     public string MatchStatsText { get; init; } = string.Empty;
-    public string FatigueText { get; init; } = string.Empty;
-    public double FatigueBarWidth { get; init; }
-    public string FatigueBrush { get; init; } = "#2FA84F";
+    public double Stamina { get; init; }
+    public string StaminaBrush { get; init; } = "#2FA84F";
     public string FormBadgeText { get; init; } = "Average";
     public string FormBadgeBackground { get; init; } = "#FFE36B";
     public string FormBadgeForeground { get; init; } = "#5F4500";

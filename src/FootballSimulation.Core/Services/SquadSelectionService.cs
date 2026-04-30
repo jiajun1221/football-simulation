@@ -101,18 +101,7 @@ public class SquadSelectionService
 
     private static int GetFatiguePercentage(Player player)
     {
-        if (player.Fatigue > 0)
-        {
-            return Math.Clamp(player.Fatigue, 0, 100);
-        }
-
-        if (player.Stamina <= 0)
-        {
-            return 100;
-        }
-
-        var staminaRatio = Math.Clamp(player.CurrentStamina / player.Stamina, 0.0, 1.0);
-        return (int)Math.Round((1.0 - staminaRatio) * 100);
+        return 100 - Math.Clamp((int)Math.Round(player.Stamina), 0, 100);
     }
 }
 

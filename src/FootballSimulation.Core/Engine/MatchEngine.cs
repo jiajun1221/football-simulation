@@ -252,10 +252,10 @@ public class MatchEngine
                 simulationState.MatchLog.AddEvent(simulationState.EventFactory.CreateFulltime(minute, match));
             }
 
-            if (minute < endMinute)
+            if (match.CurrentPhase != MatchPhase.Fulltime)
             {
-                ApplyMinuteFatigue(homeTeam, simulationState.Options);
-                ApplyMinuteFatigue(awayTeam, simulationState.Options);
+                ApplyMinuteFatigue(homeTeam, simulationState.Match, simulationState.Options);
+                ApplyMinuteFatigue(awayTeam, simulationState.Match, simulationState.Options);
             }
         }
     }
@@ -418,17 +418,9 @@ public class MatchEngine
 
     private static double CalculateFatiguePenalty(Team team)
     {
-        var averageStaminaRatio = team.Players.Average(player =>
-        {
-            if (player.Stamina <= 0)
-            {
-                return 0.0;
-            }
+        var averageStaminaRatio = team.Players.Average(player => Math.Clamp(player.Stamina / 100.0, 0.0, 1.0));
 
-            return Math.Clamp(player.CurrentStamina / player.Stamina, 0.0, 1.0);
-        });
-
-        var averageFatiguePenalty = team.Players.Average(player => player.Fatigue / 125.0);
+        var averageFatiguePenalty = team.Players.Average(player => (100.0 - player.Stamina) / 125.0);
 
         return Math.Clamp(1.0 - averageStaminaRatio + averageFatiguePenalty, 0.0, 0.75);
     }
@@ -910,18 +902,7 @@ public class MatchEngine
 
     private static int GetFatiguePercentage(Player player)
     {
-        if (player.Fatigue > 0)
-        {
-            return Math.Clamp(player.Fatigue, 0, 100);
-        }
-
-        if (player.Stamina <= 0)
-        {
-            return 100;
-        }
-
-        var staminaRatio = Math.Clamp(player.CurrentStamina / player.Stamina, 0.0, 1.0);
-        return (int)Math.Round((1.0 - staminaRatio) * 100);
+        return 100 - Math.Clamp((int)Math.Round(player.Stamina), 0, 100);
     }
 
     private static Team GetOpposingTeam(Match match, Team team)
@@ -1160,23 +1141,24 @@ public class MatchEngine
         return (random.NextDouble() * range) - (range / 2.0);
     }
 
-    private static void ResetTeamStamina(Team team)
+    private void ResetTeamStamina(Team team)
     {
+        _fatigueService.RecoverTeamForNewMatch(team);
+
         foreach (var player in team.Players.Concat(team.Substitutes))
         {
-            player.Fatigue = Math.Clamp(player.Fatigue, 0, 100);
-            player.CurrentStamina = Math.Clamp(player.Stamina * ((100 - player.Fatigue) / 100.0), 0, player.Stamina);
+            player.Stamina = Math.Clamp(player.Stamina, 0, 100);
             player.LiveMatchModifier = 1.0;
             player.YellowCards = 0;
             player.IsSentOff = false;
         }
     }
 
-    private void ApplyMinuteFatigue(Team team, MatchSimulationOptions options)
+    private void ApplyMinuteFatigue(Team team, Match match, MatchSimulationOptions options)
     {
         if (options.EnableDynamicFatigue)
         {
-            _fatigueService.ApplyMinuteFatigue(team);
+            _fatigueService.ApplyMinuteFatigue(team, match);
             return;
         }
 
@@ -1186,7 +1168,7 @@ public class MatchEngine
 
         foreach (var player in team.Players)
         {
-            player.CurrentStamina = Math.Max(0.0, player.CurrentStamina - staminaLoss);
+            player.Stamina = Math.Max(0.0, player.Stamina - staminaLoss);
         }
     }
 
