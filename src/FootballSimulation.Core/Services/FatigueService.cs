@@ -21,7 +21,7 @@ public class FatigueService
 
     public void ApplyMinuteFatigue(Team team, Match? match = null)
     {
-        foreach (var player in team.Players.Where(player => !player.IsSentOff))
+        foreach (var player in team.Players.Where(player => player.IsOnPitch && !player.IsSentOff))
         {
             var staminaLoss = BaseStaminaLossPerMinute
                 * GetTempoMultiplier(team.Tactics.Tempo)

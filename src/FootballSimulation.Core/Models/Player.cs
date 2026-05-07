@@ -6,6 +6,7 @@ namespace FootballSimulation.Models;
 public class Player : INotifyPropertyChanged
 {
     private double _stamina = 100;
+    private PlayerFormStatus _formStatus = PlayerFormStatus.Average;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -20,6 +21,21 @@ public class Player : INotifyPropertyChanged
     public string Form { get; set; } = "Average";
     public bool IsStarter { get; set; }
     public int CurrentForm { get; set; } = 50;
+    public PlayerFormStatus FormStatus
+    {
+        get => _formStatus;
+        set
+        {
+            if (_formStatus == value)
+            {
+                return;
+            }
+
+            _formStatus = value;
+            OnPropertyChanged();
+        }
+    }
+
     public int Morale { get; set; } = 50;
     public List<PlayerTrait> Traits { get; set; } = [];
     public int Attack { get; set; }
@@ -49,6 +65,8 @@ public class Player : INotifyPropertyChanged
     public int Finishing { get; set; }
     public int YellowCards { get; set; }
     public bool IsSentOff { get; set; }
+    public int? RedCardMinute { get; set; }
+    public bool IsOnPitch { get; set; } = true;
 
     private void SetStamina(double value)
     {

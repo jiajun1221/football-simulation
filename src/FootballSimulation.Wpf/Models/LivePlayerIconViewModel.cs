@@ -35,8 +35,8 @@ public class LivePlayerIconViewModel
     public string InjuryBadgeText { get; init; } = string.Empty;
     public string DetailText { get; init; } = string.Empty;
     public string CardsText { get; init; } = "None";
-    public string InjuryStatusText { get; init; } = "Fit";
-    public string FormText { get; init; } = "Average";
+    public string InjuryStatusText { get; init; } = string.Empty;
+    public string FormText { get; init; } = string.Empty;
     public string StaminaText { get; init; } = "0/0";
     public string MatchStatusText { get; init; } = "Fresh";
 }

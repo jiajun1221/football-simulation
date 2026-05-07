@@ -55,8 +55,12 @@ public class TeamStrengthCalculator
 
     public IEnumerable<Player> GetAvailablePlayers(Team team)
     {
-        var availablePlayers = team.Players.Where(player => !player.IsSentOff && !player.IsSuspended).ToList();
-        return availablePlayers.Count > 0 ? availablePlayers : team.Players;
+        var availablePlayers = team.Players
+            .Where(player => player.IsOnPitch && !player.IsSentOff && !player.IsSuspended)
+            .ToList();
+        return availablePlayers.Count > 0
+            ? availablePlayers
+            : team.Players.Where(player => !player.IsSentOff && !player.IsSuspended);
     }
 
     public double GetEffectiveAttack(Player player)
@@ -167,6 +171,12 @@ public class TeamStrengthCalculator
 
     private static double GetShortHandedModifier(int availablePlayerCount)
     {
-        return Math.Clamp(availablePlayerCount / 11.0, 0.60, 1.00);
+        return availablePlayerCount switch
+        {
+            >= 11 => 1.00,
+            10 => 0.78,
+            9 => 0.62,
+            _ => 0.50
+        };
     }
 }

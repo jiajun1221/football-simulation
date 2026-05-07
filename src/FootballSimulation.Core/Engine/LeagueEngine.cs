@@ -8,6 +8,7 @@ public class LeagueEngine
     private readonly MatchEngine _matchEngine;
     private readonly LeagueScheduleService _scheduleService;
     private readonly LeagueTableService _tableService;
+    private readonly PlayerFormStatusService _playerFormStatusService;
 
     public LeagueEngine()
         : this(new MatchEngine(), new LeagueScheduleService(), new LeagueTableService())
@@ -17,11 +18,13 @@ public class LeagueEngine
     public LeagueEngine(
         MatchEngine matchEngine,
         LeagueScheduleService scheduleService,
-        LeagueTableService tableService)
+        LeagueTableService tableService,
+        PlayerFormStatusService? playerFormStatusService = null)
     {
         _matchEngine = matchEngine;
         _scheduleService = scheduleService;
         _tableService = tableService;
+        _playerFormStatusService = playerFormStatusService ?? new PlayerFormStatusService();
     }
 
     public League SimulateLeague(string leagueName, List<Team> teams, int? seed = null)
@@ -69,6 +72,7 @@ public class LeagueEngine
             ? seed.Value + fixture.RoundNumber * 100 + fixtureIndex
             : null;
         var result = _matchEngine.SimulateMatch(fixture.HomeTeam, fixture.AwayTeam, matchSeed, options: CreateOptions(options));
+        _playerFormStatusService.UpdateMatchPlayerFormStatuses(result);
 
         fixture.Result = result;
         fixture.IsPlayed = true;
@@ -126,6 +130,7 @@ public class LeagueEngine
             ? seed.Value + fixture.RoundNumber * 100 + fixtureIndex
             : null;
         var result = _matchEngine.SimulateSecondHalf(match, matchSeed, CreateOptions(options));
+        _playerFormStatusService.UpdateMatchPlayerFormStatuses(result);
 
         fixture.Result = result;
         fixture.IsPlayed = true;
@@ -142,6 +147,7 @@ public class LeagueEngine
 
         fixture.Result = match;
         fixture.IsPlayed = true;
+        _playerFormStatusService.UpdateMatchPlayerFormStatuses(match);
 
         _tableService.ApplyMatchResult(league.Table, match);
         league.Table = _tableService.SortTable(league.Table);

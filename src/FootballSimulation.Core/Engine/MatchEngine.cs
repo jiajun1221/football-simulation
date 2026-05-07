@@ -81,6 +81,7 @@ public class MatchEngine
                 ? match.AwayPossessionMoments
                 : MatchConstants.HalftimeMinute - EstimatePossessionMoments(match.HomeStats.PossessionPercentage, MatchConstants.HalftimeMinute),
             CreateOptions(options));
+        InitializeAttackFlowState(simulationState);
         EnsurePlayerPerformances(match);
 
         RunMatchMinutes(
@@ -131,6 +132,7 @@ public class MatchEngine
             match.HomePossessionMoments,
             match.AwayPossessionMoments,
             CreateOptions(options));
+        InitializeAttackFlowState(simulationState);
 
         foreach (var boost in match.SuperSubBoosts)
         {
@@ -165,6 +167,7 @@ public class MatchEngine
 
         var match = CreateMatch(homeTeam, awayTeam);
         var simulationState = new MatchSimulationState(match, new MatchLogService(), new MatchEventFactory(), 0, 0, CreateOptions(options));
+        InitializeAttackFlowState(simulationState);
 
         RunMatchMinutes(simulationState, CreateRandom(seed), startMinute, endMinute, includeFulltime);
         FinalizeSimulationState(simulationState);
@@ -205,16 +208,20 @@ public class MatchEngine
                 TryApplyAiManagerDecisions(simulationState, random, minute);
             }
 
-            var strengthSnapshot = CreateStrengthSnapshot(homeTeam, awayTeam, random);
-            WriteStrengthDiagnostics(match, minute, strengthSnapshot);
-            strengthSnapshot = ApplyDramaEventIfAny(simulationState, random, strengthSnapshot, minute);
-
             if (minute == 1)
             {
                 simulationState.MatchLog.AddEvent(simulationState.EventFactory.CreateKickoff(minute, homeTeam));
+                SetPossession(simulationState, homeTeam, BallState.Kickoff, EventType.Kickoff);
             }
 
-            var attackingTeam = ChooseAttackingTeam(
+            var strengthSnapshot = CreateStrengthSnapshot(homeTeam, awayTeam, random);
+            WriteStrengthDiagnostics(match, minute, strengthSnapshot);
+            if (minute > 1)
+            {
+                strengthSnapshot = ApplyDramaEventIfAny(simulationState, random, strengthSnapshot, minute);
+            }
+
+            var attackingTeam = GetPossessionTeam(simulationState) ?? ChooseAttackingTeam(
                 homeTeam,
                 awayTeam,
                 strengthSnapshot.HomeAttackStrength,
@@ -232,12 +239,17 @@ public class MatchEngine
                 simulationState.AwayPossessionMoments++;
             }
 
-            ProcessAttack(
+            var nextPossessionTeam = ProcessAttack(
                 minute,
                 simulationState,
                 attackingTeam,
                 random,
                 strengthSnapshot);
+
+            if (nextPossessionTeam is not null)
+            {
+                SetPossession(simulationState, nextPossessionTeam, simulationState.BallState, simulationState.LastFeedEventType);
+            }
 
             if (minute == MatchConstants.HalftimeMinute)
             {
@@ -299,6 +311,196 @@ public class MatchEngine
         var matchLog = new MatchLogService();
         matchLog.AddEvents(match.Events);
         return matchLog;
+    }
+
+    private static void InitializeAttackFlowState(MatchSimulationState simulationState)
+    {
+        var lastEvent = simulationState.Match.Events.LastOrDefault();
+        if (lastEvent is null)
+        {
+            SetPossession(simulationState, simulationState.Match.HomeTeam, BallState.Kickoff, null);
+            return;
+        }
+
+        simulationState.LastFeedEventType = lastEvent.EventType;
+        simulationState.LastAttackingTeamName = lastEvent.EventType == EventType.Attack
+            ? FindEventTeamName(lastEvent, simulationState.Match)
+            : null;
+        var possessionTeam = InferPossessionAfterEvent(lastEvent, simulationState.Match);
+        SetPossession(simulationState, possessionTeam, GetBallStateAfterEvent(lastEvent.EventType), lastEvent.EventType);
+    }
+
+    private static Team? GetPossessionTeam(MatchSimulationState simulationState)
+    {
+        return simulationState.PossessionTeamName == simulationState.Match.HomeTeam.Name
+            ? simulationState.Match.HomeTeam
+            : simulationState.PossessionTeamName == simulationState.Match.AwayTeam.Name
+                ? simulationState.Match.AwayTeam
+                : null;
+    }
+
+    private static bool HasUnresolvedAttack(MatchSimulationState simulationState, Team attackingTeam)
+    {
+        return simulationState.LastFeedEventType == EventType.Attack &&
+            string.Equals(simulationState.LastAttackingTeamName, attackingTeam.Name, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static void MarkAttackStarted(MatchSimulationState simulationState, Team attackingTeam)
+    {
+        simulationState.LastAttackingTeamName = attackingTeam.Name;
+        SetPossession(simulationState, attackingTeam, BallState.Attack, EventType.Attack);
+    }
+
+    private static void MarkAttackResolved(MatchSimulationState simulationState, Team possessionTeam, BallState ballState, EventType outcomeType)
+    {
+        simulationState.LastAttackingTeamName = null;
+        SetPossession(simulationState, possessionTeam, ballState, outcomeType);
+    }
+
+    private static void SetPossession(MatchSimulationState simulationState, Team team, BallState ballState, EventType? eventType)
+    {
+        simulationState.PossessionTeamName = team.Name;
+        simulationState.BallState = ballState;
+        simulationState.LastActingTeamName = team.Name;
+        simulationState.LastFeedEventType = eventType;
+    }
+
+    private static Team InferPossessionAfterEvent(MatchEvent matchEvent, Match match)
+    {
+        var actingTeam = FindEventTeamName(matchEvent, match);
+        var actingTeamModel = actingTeam == match.AwayTeam.Name ? match.AwayTeam : match.HomeTeam;
+        var opposingTeam = actingTeamModel == match.HomeTeam ? match.AwayTeam : match.HomeTeam;
+
+        return matchEvent.EventType switch
+        {
+            EventType.Attack => actingTeamModel,
+            EventType.Foul => opposingTeam,
+            EventType.Turnover => opposingTeam,
+            EventType.DefensiveStop => actingTeamModel,
+            EventType.Save => actingTeamModel,
+            EventType.Goal => opposingTeam,
+            EventType.WonderGoal => opposingTeam,
+            EventType.Shot => opposingTeam,
+            EventType.Miss => opposingTeam,
+            EventType.Offside => opposingTeam,
+            EventType.CornerKick => actingTeamModel,
+            EventType.SetPieceDanger => actingTeamModel,
+            EventType.Kickoff => match.HomeTeam,
+            _ => actingTeamModel
+        };
+    }
+
+    private static BallState GetBallStateAfterEvent(EventType eventType)
+    {
+        return eventType switch
+        {
+            EventType.Kickoff => BallState.Kickoff,
+            EventType.Attack => BallState.AttackPending,
+            EventType.Shot or EventType.Save or EventType.Goal or EventType.Miss or EventType.WonderGoal => BallState.Chance,
+            EventType.CornerKick => BallState.CornerPending,
+            EventType.SetPieceDanger => BallState.SetPiecePending,
+            EventType.Foul or EventType.Offside or EventType.Penalty => BallState.SetPiece,
+            EventType.Turnover => BallState.Turnover,
+            EventType.DefensiveStop => BallState.Defending,
+            _ => BallState.BuildUp
+        };
+    }
+
+    private static string? FindEventTeamName(MatchEvent matchEvent, Match match)
+    {
+        var primaryPlayerTeam = FindPlayerTeamName(matchEvent.PrimaryPlayerName, match);
+        var secondaryPlayerTeam = FindPlayerTeamName(matchEvent.SecondaryPlayerName, match);
+
+        switch (matchEvent.EventType)
+        {
+            case EventType.Turnover:
+            case EventType.Attack:
+            case EventType.Shot:
+            case EventType.Miss:
+            case EventType.Goal:
+            case EventType.WonderGoal:
+            case EventType.Offside:
+            case EventType.CornerKick:
+            case EventType.SetPieceDanger:
+            case EventType.Penalty:
+            case EventType.PenaltyTaker:
+                return primaryPlayerTeam ?? FindMentionedTeamName(matchEvent, match);
+
+            case EventType.Save:
+                return secondaryPlayerTeam ?? FindSavingTeamName(matchEvent, match) ?? FindMentionedTeamName(matchEvent, match);
+
+            case EventType.Foul:
+            case EventType.YellowCard:
+            case EventType.RedCard:
+            case EventType.DefensiveStop:
+            case EventType.DefensiveError:
+                return primaryPlayerTeam ?? FindMentionedTeamName(matchEvent, match);
+        }
+
+        return FindMentionedTeamName(matchEvent, match);
+    }
+
+    private static string? FindMentionedTeamName(MatchEvent matchEvent, Match match)
+    {
+        if (EventMentionsTeam(matchEvent.Description, match.HomeTeam.Name))
+        {
+            return match.HomeTeam.Name;
+        }
+
+        if (EventMentionsTeam(matchEvent.Description, match.AwayTeam.Name))
+        {
+            return match.AwayTeam.Name;
+        }
+
+        return null;
+    }
+
+    private static string? FindSavingTeamName(MatchEvent matchEvent, Match match)
+    {
+        if (matchEvent.Description.Contains($"by {match.HomeTeam.Name}", StringComparison.OrdinalIgnoreCase) ||
+            matchEvent.Description.Contains($"for {match.HomeTeam.Name}", StringComparison.OrdinalIgnoreCase) ||
+            matchEvent.Description.Contains($"of {match.HomeTeam.Name}", StringComparison.OrdinalIgnoreCase))
+        {
+            return match.HomeTeam.Name;
+        }
+
+        if (matchEvent.Description.Contains($"by {match.AwayTeam.Name}", StringComparison.OrdinalIgnoreCase) ||
+            matchEvent.Description.Contains($"for {match.AwayTeam.Name}", StringComparison.OrdinalIgnoreCase) ||
+            matchEvent.Description.Contains($"of {match.AwayTeam.Name}", StringComparison.OrdinalIgnoreCase))
+        {
+            return match.AwayTeam.Name;
+        }
+
+        return null;
+    }
+
+    private static string? FindPlayerTeamName(string? playerName, Match match)
+    {
+        if (string.IsNullOrWhiteSpace(playerName))
+        {
+            return null;
+        }
+
+        if (match.HomeTeam.Players.Concat(match.HomeTeam.Substitutes).Any(player =>
+            string.Equals(player.Name, playerName, StringComparison.OrdinalIgnoreCase)))
+        {
+            return match.HomeTeam.Name;
+        }
+
+        if (match.AwayTeam.Players.Concat(match.AwayTeam.Substitutes).Any(player =>
+            string.Equals(player.Name, playerName, StringComparison.OrdinalIgnoreCase)))
+        {
+            return match.AwayTeam.Name;
+        }
+
+        return null;
+    }
+
+    private static bool EventMentionsTeam(string description, string teamName)
+    {
+        return description.StartsWith($"{teamName} ", StringComparison.OrdinalIgnoreCase) ||
+            description.Contains($" for {teamName}", StringComparison.OrdinalIgnoreCase) ||
+            description.Contains($" by {teamName}", StringComparison.OrdinalIgnoreCase);
     }
 
     private static void FinalizeSimulationState(MatchSimulationState simulationState)
@@ -394,7 +596,13 @@ public class MatchEngine
 
     private static double CalculateBaseAttack(Team team)
     {
-        return team.Players.Average(player => player.Position switch
+        var activePlayers = GetActivePitchPlayers(team).ToList();
+        if (activePlayers.Count == 0)
+        {
+            return 0;
+        }
+
+        return activePlayers.Average(player => player.Position switch
         {
             Position.Forward => (player.Attack + player.Finishing) / 2.0 * 1.30,
             Position.Midfielder => (player.Attack + player.Passing) / 2.0 * 1.10,
@@ -406,7 +614,13 @@ public class MatchEngine
 
     private static double CalculateBaseDefense(Team team)
     {
-        return team.Players.Average(player => player.Position switch
+        var activePlayers = GetActivePitchPlayers(team).ToList();
+        if (activePlayers.Count == 0)
+        {
+            return 0;
+        }
+
+        return activePlayers.Average(player => player.Position switch
         {
             Position.Goalkeeper => player.Defense * 1.40,
             Position.Defender => player.Defense * 1.20,
@@ -418,9 +632,15 @@ public class MatchEngine
 
     private static double CalculateFatiguePenalty(Team team)
     {
-        var averageStaminaRatio = team.Players.Average(player => Math.Clamp(player.Stamina / 100.0, 0.0, 1.0));
+        var activePlayers = GetActivePitchPlayers(team).ToList();
+        if (activePlayers.Count == 0)
+        {
+            return 0.75;
+        }
 
-        var averageFatiguePenalty = team.Players.Average(player => (100.0 - player.Stamina) / 125.0);
+        var averageStaminaRatio = activePlayers.Average(player => Math.Clamp(player.Stamina / 100.0, 0.0, 1.0));
+
+        var averageFatiguePenalty = activePlayers.Average(player => (100.0 - player.Stamina) / 125.0);
 
         return Math.Clamp(1.0 - averageStaminaRatio + averageFatiguePenalty, 0.0, 0.75);
     }
@@ -506,7 +726,7 @@ public class MatchEngine
         };
     }
 
-    private void ProcessAttack(
+    private Team? ProcessAttack(
         int minute,
         MatchSimulationState simulationState,
         Team attackingTeam,
@@ -529,30 +749,101 @@ public class MatchEngine
         var shooterHasSuperSubBoost = IsSuperSubBoostActive(simulationState, shooter, minute);
         var attackingStats = GetTeamStats(match, attackingTeam);
         var defendingStats = GetTeamStats(match, defendingTeam);
+        var attackOutcome = DetermineAttackOutcome(attackingTeamStrength, defendingTeamStrength, random);
+        var isResolvingPreviousAttack = HasUnresolvedAttack(simulationState, attackingTeam);
+        var isResolvingTurnover = simulationState.LastFeedEventType == EventType.Turnover;
 
-        if (!ShouldCreateAttack(attackingTeamStrength, defendingTeamStrength, random))
+        if (isResolvingTurnover)
         {
-            TrackDefensiveStop(match, defendingTeam, random);
-            return;
+            attackOutcome = AttackFlowOutcome.BuildUp;
         }
 
-        matchLog.AddEvent(eventFactory.CreateAttack(minute, attackingTeam, playmaker, shooter));
+        if (attackOutcome == AttackFlowOutcome.BuildUp)
+        {
+            if (isResolvingPreviousAttack)
+            {
+                attackOutcome = random.NextDouble() < 0.65
+                    ? AttackFlowOutcome.CreateChance
+                    : AttackFlowOutcome.LosePossession;
+            }
+            else
+            {
+                matchLog.AddEvent(eventFactory.CreateAttackBuildUp(minute, attackingTeam, playmaker, shooter, random));
+                MarkAttackStarted(simulationState, attackingTeam);
+                GetOrCreatePerformance(match, attackingTeam, playmaker).Rating += 0.04;
+                return attackingTeam;
+            }
+        }
+
+        if (attackOutcome == AttackFlowOutcome.LosePossession)
+        {
+            HandlePossessionLoss(minute, match, attackingTeam, defendingTeam, playmaker, shooter, random, matchLog, eventFactory);
+            MarkAttackResolved(simulationState, defendingTeam, BallState.Turnover, EventType.Turnover);
+            return defendingTeam;
+        }
+
+        if (attackOutcome == AttackFlowOutcome.ForcedReset)
+        {
+            var defender = ApplyDefensiveContribution(match, defendingTeam, random, ratingBoostOverride: 0.05);
+            matchLog.AddEvent(eventFactory.CreateAttackReset(minute, attackingTeam, defendingTeam, defender, random));
+            MarkAttackResolved(simulationState, defendingTeam, BallState.Defending, EventType.DefensiveStop);
+            return defendingTeam;
+        }
+
+        var chanceType = ChooseChanceType(random);
+        if (!isResolvingPreviousAttack)
+        {
+            matchLog.AddEvent(eventFactory.CreateAttackBuildUp(minute, attackingTeam, playmaker, shooter, random));
+            MarkAttackStarted(simulationState, attackingTeam);
+        }
+
+        if (chanceType == "through ball attempt" && random.NextDouble() < 0.18)
+        {
+            attackingStats.Offsides++;
+            var shooterPerformance = GetOrCreatePerformance(match, attackingTeam, shooter);
+            shooterPerformance.Offsides++;
+            shooterPerformance.Rating -= 0.08;
+            matchLog.AddEvent(eventFactory.CreateOffside(minute, attackingTeam, shooter, chanceType, random));
+            MarkAttackResolved(simulationState, defendingTeam, BallState.SetPiece, EventType.Offside);
+            return defendingTeam;
+        }
 
         if (ShouldCommitFoul(defendingTeam, attackingTeamStrength, defendingTeamStrength, random))
         {
-            HandleFoul(minute, match, defendingTeam, shooter, random, matchLog, eventFactory, defendingStats);
-            return;
+            var foulContext = CreateFoulContext(chanceType, attackingTeamStrength, defendingTeamStrength, random);
+            var possessionAfterFoul = HandleFoul(minute, match, attackingTeam, defendingTeam, shooter, random, matchLog, eventFactory, defendingStats, foulContext);
+            var finalEventType = GetLastEventType(matchLog, foulContext.IsPenalty
+                ? EventType.Penalty
+                : foulContext.CreatesDangerousSetPiece
+                    ? EventType.SetPieceDanger
+                    : EventType.Foul);
+            MarkAttackResolved(
+                simulationState,
+                possessionAfterFoul,
+                GetBallStateAfterEvent(finalEventType),
+                finalEventType);
+            return possessionAfterFoul;
         }
 
-        if (!ShouldCreateShot(shooter, playmaker, attackingTeamStrength, defendingTeamStrength, random, shooterHasSuperSubBoost))
+        var defensiveErrorBoost = 0.0;
+        if (random.NextDouble() < 0.12)
         {
-            TrackDefensiveStop(match, defendingTeam, random);
-            return;
+            var errorPlayer = ChooseDefendingPlayer(defendingTeam, random);
+            matchLog.AddEvent(eventFactory.CreateDefensiveError(minute, defendingTeam, errorPlayer));
+            GetOrCreatePerformance(match, defendingTeam, errorPlayer).Rating -= 0.30;
+            defensiveErrorBoost = 0.06;
+        }
+
+        if (random.NextDouble() < 0.14)
+        {
+            HandlePossessionLoss(minute, match, attackingTeam, defendingTeam, playmaker, shooter, random, matchLog, eventFactory);
+            MarkAttackResolved(simulationState, defendingTeam, BallState.Turnover, EventType.Turnover);
+            return defendingTeam;
         }
 
         attackingStats.TotalShots++;
-        matchLog.AddEvent(eventFactory.CreateShot(minute, attackingTeam, shooter, playmaker));
-        HandleShotOutcome(
+        matchLog.AddEvent(eventFactory.CreateShot(minute, attackingTeam, shooter, playmaker, chanceType, random));
+        var shotPossessionTeam = HandleShotOutcome(
             minute,
             match,
             attackingTeam,
@@ -565,18 +856,43 @@ public class MatchEngine
             attackingStats,
             attackingTeamStrength,
             defendingTeamStrength,
-            shooterHasSuperSubBoost);
+            shooterHasSuperSubBoost,
+            chanceType,
+            defensiveErrorBoost);
+        var shotFinalEventType = GetLastEventType(matchLog, EventType.Shot);
+        MarkAttackResolved(simulationState, shotPossessionTeam, GetBallStateAfterEvent(shotFinalEventType), shotFinalEventType);
+        return shotPossessionTeam;
     }
 
-    private void HandleFoul(
+    private void HandlePossessionLoss(
         int minute,
         Match match,
+        Team attackingTeam,
+        Team defendingTeam,
+        Player playmaker,
+        Player shooter,
+        Random random,
+        MatchLogService matchLog,
+        MatchEventFactory eventFactory)
+    {
+        var mistakePlayer = random.NextDouble() < 0.65 ? playmaker : shooter;
+        matchLog.AddEvent(eventFactory.CreateAttackMistake(minute, attackingTeam, defendingTeam, mistakePlayer, random));
+        GetOrCreatePerformance(match, attackingTeam, mistakePlayer).Rating -= 0.12;
+
+        ApplyDefensiveContribution(match, defendingTeam, random);
+    }
+
+    private Team HandleFoul(
+        int minute,
+        Match match,
+        Team attackingTeam,
         Team defendingTeam,
         Player fouledPlayer,
         Random random,
         MatchLogService matchLog,
         MatchEventFactory eventFactory,
-        MatchTeamStats defendingStats)
+        MatchTeamStats defendingStats,
+        FoulContext foulContext)
     {
         var defender = ChooseDefendingPlayer(defendingTeam, random);
         matchLog.AddEvent(eventFactory.CreateFoul(minute, defendingTeam, defender, fouledPlayer));
@@ -586,24 +902,159 @@ public class MatchEngine
         defenderPerformance.Rating -= 0.15;
         GetOrCreatePerformance(match, GetOpposingTeam(match, defendingTeam), fouledPlayer).Rating += 0.05;
 
-        if (!ShouldGiveYellowCard(defender, random))
+        var redCardReason = GetStraightRedReason(foulContext, defender, random);
+        if (redCardReason is not null)
         {
-            return;
+            ApplyRedCard(minute, match, defendingTeam, attackingTeam, defender, defenderPerformance, defendingStats, matchLog, eventFactory, redCardReason);
+        }
+        else if (ShouldGiveYellowCard(defender, random))
+        {
+            matchLog.AddEvent(eventFactory.CreateYellowCard(minute, defender));
+            defenderPerformance.YellowCards++;
+            defenderPerformance.Rating -= 0.35;
+
+            if (_disciplinaryService.ApplyYellowCard(defender, defendingStats))
+            {
+                ApplyRedCard(minute, match, defendingTeam, attackingTeam, defender, defenderPerformance, defendingStats, matchLog, eventFactory, "second yellow");
+            }
         }
 
-        matchLog.AddEvent(eventFactory.CreateYellowCard(minute, defender));
-        defenderPerformance.YellowCards++;
-        defenderPerformance.Rating -= 0.35;
-
-        if (_disciplinaryService.ApplyYellowCard(defender, defendingStats))
+        if (foulContext.IsPenalty)
         {
-            matchLog.AddEvent(eventFactory.CreateRedCard(minute, defender));
-            defenderPerformance.RedCards++;
-            defenderPerformance.Rating -= 1.0;
+            return HandlePenaltySequence(minute, match, attackingTeam, defendingTeam, defender, fouledPlayer, random, matchLog, eventFactory, foulContext);
         }
+
+        if (foulContext.CreatesDangerousSetPiece)
+        {
+            return HandleDangerousSetPieceSequence(minute, match, attackingTeam, defendingTeam, random, matchLog, eventFactory);
+        }
+
+        return attackingTeam;
     }
 
-    private void HandleShotOutcome(
+    private Team HandleDangerousSetPieceSequence(
+        int minute,
+        Match match,
+        Team attackingTeam,
+        Team defendingTeam,
+        Random random,
+        MatchLogService matchLog,
+        MatchEventFactory eventFactory)
+    {
+        var (primaryTaker, secondaryTaker) = ChooseSetPieceTakers(attackingTeam);
+        matchLog.AddEvent(eventFactory.CreateSetPieceThreat(minute, attackingTeam, primaryTaker, secondaryTaker));
+        matchLog.AddEvent(eventFactory.CreateSetPieceShot(minute, attackingTeam, primaryTaker));
+
+        var attackingStats = GetTeamStats(match, attackingTeam);
+        attackingStats.TotalShots++;
+        attackingStats.ExpectedGoals += 0.09;
+        var takerPerformance = GetOrCreatePerformance(match, attackingTeam, primaryTaker);
+        takerPerformance.Shots++;
+        takerPerformance.KeyPasses++;
+        takerPerformance.Rating += 0.12;
+
+        var goalProbability = Math.Clamp(0.04 + primaryTaker.Finishing / 950.0 +
+            (primaryTaker.Traits.Contains(PlayerTrait.SetPieceSpecialist) ? 0.04 : 0.0), 0.05, 0.16);
+        var roll = random.NextDouble();
+        if (roll < goalProbability)
+        {
+            attackingStats.ShotsOnTarget++;
+            UpdateScore(match, attackingTeam);
+            takerPerformance.ShotsOnTarget++;
+            takerPerformance.Goals++;
+            takerPerformance.Rating += 1.15;
+            matchLog.AddEvent(eventFactory.CreateGoal(minute, attackingTeam, primaryTaker, match, "direct free-kick strike", random));
+            return defendingTeam;
+        }
+
+        if (roll < goalProbability + 0.28)
+        {
+            attackingStats.ShotsOnTarget++;
+            takerPerformance.ShotsOnTarget++;
+            var goalkeeper = GetGoalkeeper(defendingTeam);
+            if (goalkeeper is not null)
+            {
+                var goalkeeperPerformance = GetOrCreatePerformance(match, defendingTeam, goalkeeper);
+                goalkeeperPerformance.Saves++;
+                goalkeeperPerformance.Rating += 0.35;
+                matchLog.AddEvent(eventFactory.CreateSave(minute, defendingTeam, primaryTaker, goalkeeper, ChooseSaveType(random), random));
+            }
+            else
+            {
+                matchLog.AddEvent(eventFactory.CreateSave(minute, defendingTeam, primaryTaker));
+            }
+
+            return defendingTeam;
+        }
+
+        if (roll < goalProbability + 0.55)
+        {
+            var defender = ApplyDefensiveContribution(match, defendingTeam, random, ratingBoostOverride: 0.08, allowBlocks: true);
+            matchLog.AddEvent(eventFactory.CreateDefensiveStop(minute, defendingTeam, defender, primaryTaker, random));
+            return random.NextDouble() < 0.25
+                ? HandleCornerSequence(minute, match, attackingTeam, defendingTeam, primaryTaker, random, matchLog, eventFactory)
+                : defendingTeam;
+        }
+
+        matchLog.AddEvent(eventFactory.CreateMiss(minute, attackingTeam, primaryTaker, "free-kick", random));
+        takerPerformance.Rating -= 0.04;
+        return defendingTeam;
+    }
+
+    private Team HandlePenaltySequence(
+        int minute,
+        Match match,
+        Team attackingTeam,
+        Team defendingTeam,
+        Player defender,
+        Player fouledPlayer,
+        Random random,
+        MatchLogService matchLog,
+        MatchEventFactory eventFactory,
+        FoulContext foulContext)
+    {
+        var taker = ChoosePenaltyTaker(attackingTeam);
+        var converted = random.NextDouble() < GetPenaltyConversionChance(taker);
+        var saved = !converted && random.NextDouble() < 0.62;
+
+        matchLog.AddEvent(eventFactory.CreatePenaltyDecision(minute, defendingTeam, defender, fouledPlayer, foulContext.PenaltyReason));
+        matchLog.AddEvent(eventFactory.CreatePenaltyTaker(minute, attackingTeam, taker));
+
+        var attackingStats = GetTeamStats(match, attackingTeam);
+        attackingStats.TotalShots++;
+        attackingStats.ExpectedGoals += 0.76;
+        var takerPerformance = GetOrCreatePerformance(match, attackingTeam, taker);
+        takerPerformance.Shots++;
+
+        if (converted)
+        {
+            attackingStats.ShotsOnTarget++;
+            UpdateScore(match, attackingTeam);
+            takerPerformance.ShotsOnTarget++;
+            takerPerformance.Goals++;
+            takerPerformance.Rating += 1.05;
+        }
+        else
+        {
+            takerPerformance.Rating -= 0.35;
+            if (saved)
+            {
+                attackingStats.ShotsOnTarget++;
+                var goalkeeper = GetGoalkeeper(defendingTeam);
+                if (goalkeeper is not null)
+                {
+                    var goalkeeperPerformance = GetOrCreatePerformance(match, defendingTeam, goalkeeper);
+                    goalkeeperPerformance.Saves++;
+                    goalkeeperPerformance.Rating += 0.80;
+                }
+            }
+        }
+
+        matchLog.AddEvent(eventFactory.CreatePenaltyResult(minute, attackingTeam, taker, converted, saved, match));
+        return defendingTeam;
+    }
+
+    private Team HandleShotOutcome(
         int minute,
         Match match,
         Team attackingTeam,
@@ -616,9 +1067,14 @@ public class MatchEngine
         MatchTeamStats attackingStats,
         double attackingTeamStrength,
         double defendingTeamStrength,
-        bool shooterHasSuperSubBoost)
+        bool shooterHasSuperSubBoost,
+        string chanceType,
+        double defensiveErrorBoost)
     {
-        var goalProbability = CalculateGoalProbability(shooter, attackingTeamStrength, defendingTeamStrength, random, shooterHasSuperSubBoost);
+        var goalProbability = Math.Clamp(
+            CalculateGoalProbability(shooter, attackingTeamStrength, defendingTeamStrength, random, shooterHasSuperSubBoost) + defensiveErrorBoost,
+            MatchConstants.MinimumGoalProbability,
+            0.72);
         attackingStats.ExpectedGoals += goalProbability;
 
         var shooterPerformance = GetOrCreatePerformance(match, attackingTeam, shooter);
@@ -636,6 +1092,19 @@ public class MatchEngine
             attackingStats.ShotsOnTarget++;
             UpdateScore(match, attackingTeam);
             shooterPerformance.ShotsOnTarget++;
+
+            var isOwnGoal = random.NextDouble() < 0.03;
+            if (isOwnGoal)
+            {
+                var ownGoalPlayer = ChooseDefendingPlayer(defendingTeam, random);
+                var ownGoalPerformance = GetOrCreatePerformance(match, defendingTeam, ownGoalPlayer);
+                ownGoalPerformance.Rating -= 0.80;
+                ownGoalPerformance.Clearances++;
+                shooterPerformance.Rating += 0.25;
+                matchLog.AddEvent(eventFactory.CreateOwnGoal(minute, attackingTeam, defendingTeam, ownGoalPlayer, match));
+                return defendingTeam;
+            }
+
             shooterPerformance.Goals++;
             shooterPerformance.Rating += 1.0 + goalProbability;
 
@@ -647,8 +1116,9 @@ public class MatchEngine
                 assisterPerformance.Rating += 0.75;
             }
 
-            matchLog.AddEvent(eventFactory.CreateGoal(minute, attackingTeam, shooter, match, assister));
-            return;
+            var goalTypeDescription = ChooseGoalTypeDescription(random, chanceType, chanceType.Contains("corner", StringComparison.OrdinalIgnoreCase));
+            matchLog.AddEvent(eventFactory.CreateGoal(minute, attackingTeam, shooter, match, goalTypeDescription, random, assister));
+            return defendingTeam;
         }
 
         var wasSaved = IsSaved(defendingTeam, random);
@@ -663,25 +1133,247 @@ public class MatchEngine
                 var goalkeeperPerformance = GetOrCreatePerformance(match, defendingTeam, goalkeeper);
                 goalkeeperPerformance.Saves++;
                 goalkeeperPerformance.Rating += 0.20 + goalProbability;
+                var saveType = ChooseSaveType(random);
+                matchLog.AddEvent(eventFactory.CreateSave(minute, defendingTeam, shooter, goalkeeper, saveType, random));
+            }
+            else
+            {
+                matchLog.AddEvent(eventFactory.CreateSave(minute, defendingTeam, shooter));
             }
 
             if (random.NextDouble() < 0.20)
             {
                 attackingStats.Corners++;
+                return HandleCornerSequence(minute, match, attackingTeam, defendingTeam, playmaker, random, matchLog, eventFactory);
             }
-
-            matchLog.AddEvent(eventFactory.CreateSave(minute, defendingTeam, shooter));
-            return;
+            return defendingTeam;
         }
 
         shooterPerformance.Rating -= goalProbability >= 0.20 ? 0.12 : 0.04;
-        TrackShotBlockOrClearance(match, defendingTeam, random);
+        var defender = ApplyDefensiveContribution(match, defendingTeam, random, ratingBoostOverride: 0.06, allowBlocks: true);
+        matchLog.AddEvent(eventFactory.CreateDefensiveStop(minute, defendingTeam, defender, shooter, random));
         if (random.NextDouble() < 0.12)
         {
             attackingStats.Corners++;
+            return HandleCornerSequence(minute, match, attackingTeam, defendingTeam, playmaker, random, matchLog, eventFactory);
         }
 
-        matchLog.AddEvent(eventFactory.CreateMiss(minute, attackingTeam, shooter));
+        var shotStyle = ChooseShotStyle(random, chanceType);
+        matchLog.AddEvent(eventFactory.CreateMiss(minute, attackingTeam, shooter, shotStyle, random));
+        return defendingTeam;
+    }
+
+    private Team HandleCornerSequence(
+        int minute,
+        Match match,
+        Team attackingTeam,
+        Team defendingTeam,
+        Player preferredTaker,
+        Random random,
+        MatchLogService matchLog,
+        MatchEventFactory eventFactory)
+    {
+        var taker = ChooseCornerTaker(attackingTeam, preferredTaker);
+        matchLog.AddEvent(eventFactory.CreateCornerKick(minute, attackingTeam, taker));
+        var target = ChooseShooter(attackingTeam, taker, random);
+        var attackingStats = GetTeamStats(match, attackingTeam);
+        var targetPerformance = GetOrCreatePerformance(match, attackingTeam, target);
+        var takerPerformance = GetOrCreatePerformance(match, attackingTeam, taker);
+
+        takerPerformance.KeyPasses++;
+        takerPerformance.Rating += 0.08;
+
+        var roll = random.NextDouble();
+        if (roll < 0.12)
+        {
+            attackingStats.TotalShots++;
+            attackingStats.ShotsOnTarget++;
+            attackingStats.ExpectedGoals += 0.12;
+            UpdateScore(match, attackingTeam);
+            targetPerformance.Shots++;
+            targetPerformance.ShotsOnTarget++;
+            targetPerformance.Goals++;
+            targetPerformance.Rating += 1.05;
+            if (target != taker)
+            {
+                takerPerformance.Assists++;
+                takerPerformance.Rating += 0.60;
+            }
+
+            matchLog.AddEvent(eventFactory.CreateGoal(minute, attackingTeam, target, match, "header from a corner", random, target == taker ? null : taker));
+            return defendingTeam;
+        }
+
+        if (roll < 0.34)
+        {
+            attackingStats.TotalShots++;
+            attackingStats.ShotsOnTarget++;
+            attackingStats.ExpectedGoals += 0.08;
+            targetPerformance.Shots++;
+            targetPerformance.ShotsOnTarget++;
+            matchLog.AddEvent(eventFactory.CreateShot(minute, attackingTeam, target, taker, "corner delivery", random));
+            var goalkeeper = GetGoalkeeper(defendingTeam);
+            if (goalkeeper is not null)
+            {
+                var goalkeeperPerformance = GetOrCreatePerformance(match, defendingTeam, goalkeeper);
+                goalkeeperPerformance.Saves++;
+                goalkeeperPerformance.Rating += 0.30;
+                matchLog.AddEvent(eventFactory.CreateSave(minute, defendingTeam, target, goalkeeper, ChooseSaveType(random), random));
+            }
+            else
+            {
+                matchLog.AddEvent(eventFactory.CreateSave(minute, defendingTeam, target));
+            }
+
+            return defendingTeam;
+        }
+
+        if (roll < 0.72)
+        {
+            var defender = ApplyDefensiveContribution(match, defendingTeam, random, ratingBoostOverride: 0.08, allowBlocks: false);
+            matchLog.AddEvent(eventFactory.CreateDefensiveStop(minute, defendingTeam, defender, target, random));
+            return defendingTeam;
+        }
+
+        attackingStats.TotalShots++;
+        attackingStats.ExpectedGoals += 0.05;
+        targetPerformance.Shots++;
+        matchLog.AddEvent(eventFactory.CreateShot(minute, attackingTeam, target, taker, "corner delivery", random));
+        matchLog.AddEvent(eventFactory.CreateMiss(minute, attackingTeam, target, "corner chance", random));
+        targetPerformance.Rating -= 0.04;
+        return defendingTeam;
+    }
+
+    private static EventType GetLastEventType(MatchLogService matchLog, EventType fallback)
+    {
+        return matchLog.GetEvents().LastOrDefault()?.EventType ?? fallback;
+    }
+
+    private static AttackFlowOutcome DetermineAttackOutcome(
+        double attackingTeamStrength,
+        double defendingTeamStrength,
+        Random random)
+    {
+        var attackBalance = attackingTeamStrength / Math.Max(1.0, attackingTeamStrength + defendingTeamStrength);
+        var chanceProbability = Math.Clamp(0.20 + attackBalance * 0.40 + GetProbabilitySwing(random, 0.06), 0.18, 0.62);
+        var buildupProbability = Math.Clamp(0.20 + (1.0 - attackBalance) * 0.18 + GetProbabilitySwing(random, 0.06), 0.14, 0.40);
+        var turnoverProbability = Math.Clamp(0.30 + (0.55 - attackBalance) * 0.25 + GetProbabilitySwing(random, 0.05), 0.16, 0.50);
+
+        var roll = random.NextDouble();
+        if (roll < chanceProbability)
+        {
+            return AttackFlowOutcome.CreateChance;
+        }
+
+        if (roll < chanceProbability + buildupProbability)
+        {
+            return AttackFlowOutcome.BuildUp;
+        }
+
+        if (roll < chanceProbability + buildupProbability + turnoverProbability)
+        {
+            return AttackFlowOutcome.LosePossession;
+        }
+
+        return AttackFlowOutcome.ForcedReset;
+    }
+
+    private static string ChooseChanceType(Random random)
+    {
+        return random.Next(5) switch
+        {
+            0 => "long-range attempt",
+            1 => "cross into box",
+            2 => "through ball attempt",
+            3 => "dribble run",
+            _ => "quick combination"
+        };
+    }
+
+    private static string ChooseSaveType(Random random)
+    {
+        return random.Next(3) switch
+        {
+            0 => "diving save",
+            1 => "reflex save",
+            _ => "parry"
+        };
+    }
+
+    private static string ChooseShotStyle(Random random, string chanceType)
+    {
+        var styles = new List<string>
+        {
+            "finesse shot",
+            "power shot",
+            "low driven effort",
+            "outside-foot strike"
+        };
+
+        if (chanceType == "cross into box")
+        {
+            styles.Add("header");
+            styles.Add("volley");
+            styles.Add("tap-in");
+        }
+        else if (chanceType == "through ball attempt")
+        {
+            styles.Add("chip shot");
+        }
+        else if (chanceType == "dribble run")
+        {
+            styles.Add("solo run finish");
+        }
+
+        if (random.NextDouble() < 0.08)
+        {
+            styles.Add("acrobatic attempt");
+        }
+
+        return styles[random.Next(styles.Count)];
+    }
+
+    private static string ChooseGoalTypeDescription(Random random, string chanceType, bool hasCornerPressure)
+    {
+        var options = new List<string>
+        {
+            "finesse shot from outside the box",
+            "power shot into the top corner",
+            "low driven finish across goal",
+            "outside-foot trivela finish",
+            "counterattack goal after a rapid break",
+            "solo run finish through the middle",
+            "scrappy rebound finish in the six-yard box"
+        };
+
+        if (chanceType == "cross into box")
+        {
+            options.Add("towering header from a cross");
+            options.Add("half-volley from a floated delivery");
+            options.Add("tap-in at the far post");
+        }
+
+        if (chanceType == "through ball attempt")
+        {
+            options.Add("chip shot over the goalkeeper");
+        }
+
+        if (hasCornerPressure || random.NextDouble() < 0.10)
+        {
+            options.Add("header from a corner");
+        }
+
+        if (random.NextDouble() < 0.06)
+        {
+            options.Add("direct free-kick strike");
+        }
+
+        if (random.NextDouble() < 0.03)
+        {
+            options.Add("acrobatic overhead effort");
+        }
+
+        return options[random.Next(options.Count)];
     }
 
     private static void UpdateScore(Match match, Team scoringTeam)
@@ -809,34 +1501,45 @@ public class MatchEngine
 
     private void TrackDefensiveStop(Match match, Team defendingTeam, Random random)
     {
-        var defender = ChooseDefendingPlayer(defendingTeam, random);
-        var performance = GetOrCreatePerformance(match, defendingTeam, defender);
-
-        if (random.NextDouble() < 0.55)
-        {
-            performance.Interceptions++;
-            performance.Rating += 0.06;
-            return;
-        }
-
-        performance.Tackles++;
-        performance.Rating += 0.07;
+        _ = ApplyDefensiveContribution(match, defendingTeam, random);
     }
 
-    private void TrackShotBlockOrClearance(Match match, Team defendingTeam, Random random)
+    private Player ApplyDefensiveContribution(
+        Match match,
+        Team defendingTeam,
+        Random random,
+        double? ratingBoostOverride = null,
+        bool allowBlocks = false)
     {
         var defender = ChooseDefendingPlayer(defendingTeam, random);
         var performance = GetOrCreatePerformance(match, defendingTeam, defender);
+        var ratingBoost = ratingBoostOverride ?? 0.07;
 
-        if (random.NextDouble() < 0.45)
+        var roll = random.NextDouble();
+        if (allowBlocks && roll < 0.22)
         {
             performance.Blocks++;
-            performance.Rating += 0.10;
-            return;
+            performance.Rating += ratingBoost + 0.03;
+            return defender;
+        }
+
+        if (roll < 0.52)
+        {
+            performance.Interceptions++;
+            performance.Rating += ratingBoost;
+            return defender;
+        }
+
+        if (roll < 0.82)
+        {
+            performance.Tackles++;
+            performance.Rating += ratingBoost + 0.01;
+            return defender;
         }
 
         performance.Clearances++;
-        performance.Rating += 0.06;
+        performance.Rating += Math.Max(0.05, ratingBoost - 0.01);
+        return defender;
     }
 
     private static void EnsurePlayerPerformances(Match match)
@@ -912,7 +1615,7 @@ public class MatchEngine
 
     private static Player? GetGoalkeeper(Team team)
     {
-        return team.Players.FirstOrDefault(player => player.Position == Position.Goalkeeper);
+        return GetActivePitchPlayers(team).FirstOrDefault(player => player.Position == Position.Goalkeeper);
     }
 
     private static void ValidateTeam(Team team, string parameterName)
@@ -949,7 +1652,8 @@ public class MatchEngine
         Random random)
     {
         var foulPressure = defendingTeamStrength - (attackingTeamStrength * 0.20);
-        var aggressionBonus = defendingTeam.Players.Count(player => player.Traits.Contains(PlayerTrait.AggressiveTackler)) * 0.015;
+        var aggressionBonus = GetActivePitchPlayers(defendingTeam)
+            .Count(player => player.Traits.Contains(PlayerTrait.AggressiveTackler)) * 0.015;
         var foulProbability = Math.Clamp(
             MatchConstants.BaseFoulChancePerAttack + aggressionBonus + (foulPressure / 400.0) + GetProbabilitySwing(random, 0.03),
             0.05,
@@ -962,6 +1666,139 @@ public class MatchEngine
     {
         var traitBonus = defender.Traits.Contains(PlayerTrait.AggressiveTackler) ? 0.18 : 0.0;
         return random.NextDouble() < MatchConstants.YellowCardChancePerFoul + traitBonus;
+    }
+
+    private static FoulContext CreateFoulContext(
+        string chanceType,
+        double attackingTeamStrength,
+        double defendingTeamStrength,
+        Random random)
+    {
+        var isBoxThreat = chanceType is "cross into box" or "through ball attempt" or "dribble run" or "quick combination";
+        var attackPressure = attackingTeamStrength / Math.Max(1.0, attackingTeamStrength + defendingTeamStrength);
+        var penaltyProbability = isBoxThreat
+            ? Math.Clamp(0.16 + attackPressure * 0.18, 0.12, 0.34)
+            : 0.0;
+        var handball = isBoxThreat && random.NextDouble() < 0.06;
+        var isPenalty = handball || random.NextDouble() < penaltyProbability;
+        var deniesClearChance = isBoxThreat && attackPressure > 0.52 && random.NextDouble() < 0.30;
+        var violentFoul = random.NextDouble() < 0.035;
+        var createsDangerousSetPiece = !isPenalty &&
+            (isBoxThreat || chanceType is "long-range effort" or "wide overload") &&
+            random.NextDouble() < 0.72;
+        var reason = handball ? "handles the ball near" : "fouls";
+
+        return new FoulContext(isPenalty, reason, deniesClearChance, violentFoul, createsDangerousSetPiece);
+    }
+
+    private static string? GetStraightRedReason(FoulContext foulContext, Player defender, Random random)
+    {
+        if (foulContext.ViolentFoul)
+        {
+            return "violent foul";
+        }
+
+        if (foulContext.DeniesClearChance && random.NextDouble() < (foulContext.IsPenalty ? 0.55 : 0.70))
+        {
+            return "denying a clear scoring chance";
+        }
+
+        return null;
+    }
+
+    private static void ApplyRedCard(
+        int minute,
+        Match match,
+        Team sentOffTeam,
+        Team opponentTeam,
+        Player player,
+        PlayerMatchPerformance performance,
+        MatchTeamStats sentOffTeamStats,
+        MatchLogService matchLog,
+        MatchEventFactory eventFactory,
+        string reason)
+    {
+        if (!player.IsSentOff)
+        {
+            player.IsSentOff = true;
+            sentOffTeamStats.RedCards++;
+        }
+
+        player.IsOnPitch = false;
+        player.RedCardMinute ??= minute;
+        matchLog.AddEvent(eventFactory.CreateRedCard(minute, player, reason));
+        performance.RedCards = Math.Max(performance.RedCards, 1);
+        performance.Rating -= reason == "second yellow" ? 1.0 : 1.35;
+        ApplyRedCardTacticalReaction(sentOffTeam, opponentTeam);
+    }
+
+    private static void ApplyRedCardTacticalReaction(Team sentOffTeam, Team opponentTeam)
+    {
+        sentOffTeam.Tactics.Mentality = Mentality.Defensive;
+        sentOffTeam.Tactics.PressingIntensity = Math.Max(25, sentOffTeam.Tactics.PressingIntensity - 15);
+        sentOffTeam.Tactics.Tempo = Math.Max(30, sentOffTeam.Tactics.Tempo - 12);
+        sentOffTeam.Tactics.DefensiveLine = Math.Max(25, sentOffTeam.Tactics.DefensiveLine - 12);
+
+        opponentTeam.Tactics.Mentality = Mentality.Attacking;
+        opponentTeam.Tactics.PressingIntensity = Math.Min(90, opponentTeam.Tactics.PressingIntensity + 12);
+        opponentTeam.Tactics.Tempo = Math.Min(90, opponentTeam.Tactics.Tempo + 10);
+    }
+
+    private static Player ChoosePenaltyTaker(Team team)
+    {
+        return GetActivePitchPlayers(team)
+            .Where(player => !player.IsInjured)
+            .OrderByDescending(player =>
+                player.Finishing +
+                player.CurrentForm * 0.25 +
+                (player.Traits.Contains(PlayerTrait.ClinicalFinisher) ? 8 : 0) +
+                (player.Traits.Contains(PlayerTrait.SetPieceSpecialist) ? 6 : 0))
+            .FirstOrDefault() ?? GetActivePitchPlayers(team).FirstOrDefault() ?? team.Players[0];
+    }
+
+    private static (Player Primary, Player Secondary) ChooseSetPieceTakers(Team team)
+    {
+        var activePlayers = GetActivePitchPlayers(team).ToList();
+        if (activePlayers.Count == 0)
+        {
+            return (team.Players[0], team.Players[0]);
+        }
+
+        var takers = activePlayers
+            .Where(player => !player.IsInjured)
+            .OrderByDescending(player =>
+                player.Passing * 1.10 +
+                player.Finishing * 0.85 +
+                player.CurrentForm * 0.25 +
+                (player.Traits.Contains(PlayerTrait.SetPieceSpecialist) ? 14 : 0) +
+                (player.Traits.Contains(PlayerTrait.LongShotTaker) ? 8 : 0))
+            .Take(2)
+            .ToList();
+
+        if (takers.Count == 0)
+        {
+            return (activePlayers[0], activePlayers[0]);
+        }
+
+        return (takers[0], takers.Count > 1 ? takers[1] : takers[0]);
+    }
+
+    private static Player ChooseCornerTaker(Team team, Player preferredTaker)
+    {
+        return GetActivePitchPlayers(team)
+            .Where(player => !player.IsInjured && player.Position is Position.Midfielder or Position.Forward)
+            .OrderByDescending(player =>
+                player.Passing * 1.15 +
+                player.CurrentForm * 0.25 +
+                (player.Traits.Contains(PlayerTrait.SetPieceSpecialist) ? 12 : 0))
+            .FirstOrDefault() ?? preferredTaker;
+    }
+
+    private static double GetPenaltyConversionChance(Player player)
+    {
+        var traitBonus = player.Traits.Contains(PlayerTrait.ClinicalFinisher) ? 0.08 : 0.0;
+        var setPieceBonus = player.Traits.Contains(PlayerTrait.SetPieceSpecialist) ? 0.04 : 0.0;
+        return Math.Clamp(0.66 + player.Finishing / 450.0 + traitBonus + setPieceBonus, 0.58, 0.90);
     }
 
     private static Team ChooseAttackingTeam(
@@ -1144,6 +1981,7 @@ public class MatchEngine
     private void ResetTeamStamina(Team team)
     {
         _fatigueService.RecoverTeamForNewMatch(team);
+        var starters = team.Players.ToHashSet();
 
         foreach (var player in team.Players.Concat(team.Substitutes))
         {
@@ -1151,6 +1989,8 @@ public class MatchEngine
             player.LiveMatchModifier = 1.0;
             player.YellowCards = 0;
             player.IsSentOff = false;
+            player.RedCardMinute = null;
+            player.IsOnPitch = starters.Contains(player);
         }
     }
 
@@ -1166,7 +2006,7 @@ public class MatchEngine
         var loadModifier = 1.0 + (Math.Max(0.0, tacticalLoad - 50.0) / 100.0);
         var staminaLoss = MatchConstants.StaminaLossPerMinute * loadModifier;
 
-        foreach (var player in team.Players)
+        foreach (var player in GetActivePitchPlayers(team))
         {
             player.Stamina = Math.Max(0.0, player.Stamina - staminaLoss);
         }
@@ -1175,6 +2015,11 @@ public class MatchEngine
     private IEnumerable<Player> GetAvailablePlayers(Team team)
     {
         return _teamStrengthCalculator.GetAvailablePlayers(team);
+    }
+
+    private static IEnumerable<Player> GetActivePitchPlayers(Team team)
+    {
+        return team.Players.Where(player => player.IsOnPitch && !player.IsSentOff);
     }
 
     private static MatchTeamStats GetTeamStats(Match match, Team team)
@@ -1217,6 +2062,35 @@ public class MatchEngine
         return Math.Round(Math.Clamp(65 + averagePassing * 0.24 - tempoPenalty, 62, 92), 1);
     }
 
+    private enum AttackFlowOutcome
+    {
+        BuildUp,
+        CreateChance,
+        LosePossession,
+        ForcedReset
+    }
+
+    private enum BallState
+    {
+        Kickoff,
+        BuildUp,
+        Attack,
+        AttackPending,
+        Chance,
+        Defending,
+        SetPiece,
+        SetPiecePending,
+        CornerPending,
+        Turnover
+    }
+
+    private sealed record FoulContext(
+        bool IsPenalty,
+        string PenaltyReason,
+        bool DeniesClearChance,
+        bool ViolentFoul,
+        bool CreatesDangerousSetPiece);
+
     private sealed record TeamStrengthSnapshot(
         double HomeAttackStrength,
         double AwayAttackStrength,
@@ -1250,5 +2124,10 @@ public class MatchEngine
         public Dictionary<string, int> SuperSubBoosts { get; } = [];
         public int HomePossessionMoments { get; set; } = homePossessionMoments;
         public int AwayPossessionMoments { get; set; } = awayPossessionMoments;
+        public string? PossessionTeamName { get; set; }
+        public BallState BallState { get; set; } = BallState.Kickoff;
+        public EventType? LastFeedEventType { get; set; }
+        public string? LastAttackingTeamName { get; set; }
+        public string? LastActingTeamName { get; set; }
     }
 }

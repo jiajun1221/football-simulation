@@ -338,133 +338,156 @@
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
 
-                            <Grid Grid.Row="0">
+                            <Grid Grid.Row="0"
+                                  Margin="0,0,0,1">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="46" />
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
 
-                                <Border Width="40"
-                                        Height="40"
-                                        Background="#E7EEF8"
-                                        BorderBrush="#D6DFEA"
-                                        BorderThickness="1"
-                                        CornerRadius="11"
-                                        VerticalAlignment="Top">
-                                    <Image x:Name="SelectedPlayerImage"
-                                           Stretch="UniformToFill"
-                                           Margin="4" />
-                                </Border>
+                                <TextBlock x:Name="SelectedPlayerNameTextBlock"
+                                           Foreground="#071A2E"
+                                           FontSize="14"
+                                           FontWeight="Black"
+                                           TextWrapping="Wrap"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,8,0" />
 
-                                <StackPanel Grid.Column="1"
-                                            Margin="7,0,0,0">
-                                    <TextBlock x:Name="SelectedPlayerNumberTextBlock"
-                                               Foreground="#607187"
+                                <Border x:Name="SelectedPlayerFormBadgeBorder"
+                                        Grid.Column="1"
+                                        CornerRadius="10"
+                                        Padding="8,3"
+                                        Background="#E1E5EA"
+                                        VerticalAlignment="Center">
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="#203B2D"
+                                                          BlurRadius="6"
+                                                          ShadowDepth="1"
+                                                          Opacity="0.18" />
+                                    </Border.Effect>
+                                    <TextBlock x:Name="SelectedPlayerFormBadgeTextBlock"
+                                               Foreground="#465364"
                                                FontSize="10"
                                                FontWeight="Bold" />
-                                    <TextBlock x:Name="SelectedPlayerNameTextBlock"
-                                               Foreground="#071A2E"
-                                               FontSize="14"
-                                               FontWeight="Black"
-                                               TextWrapping="Wrap" />
-                                </StackPanel>
-
-                                <Border x:Name="SelectedPlayerOvrBadgeBorder"
-                                        Grid.Column="2"
-                                        CornerRadius="10"
-                                        Padding="8,5"
-                                        Margin="6,0,0,0"
-                                        VerticalAlignment="Top">
-                                    <StackPanel>
-                                        <TextBlock Text="OVR"
-                                                   Foreground="White"
-                                                   FontSize="8"
-                                                   FontWeight="Bold"
-                                                   HorizontalAlignment="Center" />
-                                        <TextBlock x:Name="SelectedPlayerOvrBadgeTextBlock"
-                                                   Foreground="White"
-                                                   FontSize="16"
-                                                   FontWeight="Black"
-                                                   HorizontalAlignment="Center" />
-                                    </StackPanel>
                                 </Border>
                             </Grid>
 
-                            <WrapPanel Grid.Row="1"
-                                       Margin="0,7,0,0">
-                                <Border Background="#102033"
-                                        CornerRadius="8"
-                                        Padding="6,2"
-                                        Margin="0,0,4,4">
-                                    <TextBlock x:Name="SelectedPlayerPositionChip"
-                                               Foreground="White"
-                                               FontSize="9"
-                                               FontWeight="Bold" />
-                                </Border>
-                                <Border Background="#E7EEF8"
-                                        CornerRadius="8"
-                                        Padding="6,2"
-                                        Margin="0,0,4,4">
-                                    <TextBlock x:Name="SelectedPlayerPreferredChip"
-                                               Foreground="#102033"
-                                               FontSize="9"
-                                               FontWeight="Bold" />
-                                </Border>
-                                <Border x:Name="SelectedPlayerFormChipBorder"
-                                        CornerRadius="8"
-                                        Padding="6,2"
-                                        Margin="0,0,4,4">
-                                    <TextBlock x:Name="SelectedPlayerFormChip"
-                                               FontSize="9"
-                                               FontWeight="Bold" />
-                                </Border>
-                                <Border x:Name="SelectedPlayerInjuryChipBorder"
-                                        Background="#D9F1E1"
-                                        CornerRadius="8"
-                                        Padding="6,2"
-                                        Margin="0,0,4,4">
-                                    <TextBlock x:Name="SelectedPlayerInjuryChip"
-                                               Foreground="#236B39"
-                                               FontSize="9"
-                                               FontWeight="Bold" />
-                                </Border>
-                            </WrapPanel>
+                            <TextBlock x:Name="SelectedPlayerMetaTextBlock"
+                                       Grid.Row="1"
+                                       Foreground="#607187"
+                                       FontSize="10"
+                                       FontWeight="SemiBold"
+                                       Margin="0,1,0,6" />
 
-                            <StackPanel Grid.Row="2" Margin="0,4,0,0">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Text="Stamina"
-                                               Foreground="#607187"
-                                               FontSize="9"
-                                               FontWeight="Bold" />
-                                    <TextBlock x:Name="SelectedPlayerStaminaTextBlock"
-                                               Grid.Column="1"
-                                               Foreground="#34465C"
-                                               FontSize="9"
-                                               FontWeight="Bold" />
-                                </Grid>
+                            <Grid Grid.Row="2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="12" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
 
-                                <ProgressBar x:Name="SelectedPlayerStaminaFill"
-                                             Height="7"
-                                             Minimum="0"
-                                             Maximum="100"
-                                             Value="{Binding Stamina}"
-                                             Foreground="#2FA84F"
-                                             Background="#DDE5EF"
-                                             BorderThickness="0"
-                                             Margin="0,3,0,7" />
+                                <StackPanel Grid.Column="0">
+                                    <Grid Margin="0,0,0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock x:Name="SelectedPlayerLeftStat1Label" Foreground="#607187" FontSize="9" FontWeight="SemiBold" />
+                                        <TextBlock x:Name="SelectedPlayerLeftStat1Value" Grid.Column="1" Foreground="#102033" FontSize="10.5" FontWeight="Bold" />
+                                    </Grid>
+                                    <Grid Margin="0,0,0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock x:Name="SelectedPlayerLeftStat2Label" Foreground="#607187" FontSize="9" FontWeight="SemiBold" />
+                                        <TextBlock x:Name="SelectedPlayerLeftStat2Value" Grid.Column="1" Foreground="#102033" FontSize="10.5" FontWeight="Bold" />
+                                    </Grid>
+                                    <Grid Margin="0,0,0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock x:Name="SelectedPlayerLeftStat3Label" Foreground="#607187" FontSize="9" FontWeight="SemiBold" />
+                                        <TextBlock x:Name="SelectedPlayerLeftStat3Value" Grid.Column="1" Foreground="#102033" FontSize="10.5" FontWeight="Bold" />
+                                    </Grid>
+                                    <Grid Margin="0,0,0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock x:Name="SelectedPlayerLeftStat4Label" Foreground="#607187" FontSize="9" FontWeight="SemiBold" />
+                                        <TextBlock x:Name="SelectedPlayerLeftStat4Value" Grid.Column="1" Foreground="#102033" FontSize="10.5" FontWeight="Bold" />
+                                    </Grid>
+                                    <Grid Margin="0,0,0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock x:Name="SelectedPlayerLeftStat5Label" Foreground="#607187" FontSize="9" FontWeight="SemiBold" />
+                                        <TextBlock x:Name="SelectedPlayerLeftStat5Value" Grid.Column="1" Foreground="#102033" FontSize="10.5" FontWeight="Bold" />
+                                    </Grid>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock x:Name="SelectedPlayerLeftStat6Label" Foreground="#607187" FontSize="9" FontWeight="SemiBold" />
+                                        <TextBlock x:Name="SelectedPlayerLeftStat6Value" Grid.Column="1" Foreground="#102033" FontSize="10.5" FontWeight="Bold" />
+                                    </Grid>
+                                </StackPanel>
 
-                                <UniformGrid Columns="2">
-                                    <TextBlock x:Name="SelectedPlayerAttackTextBlock" FontSize="10" Foreground="#34465C" Margin="0,0,0,2" />
-                                    <TextBlock x:Name="SelectedPlayerDefenseTextBlock" FontSize="10" Foreground="#34465C" Margin="0,0,0,2" />
-                                    <TextBlock x:Name="SelectedPlayerPassingTextBlock" FontSize="10" Foreground="#34465C" />
-                                    <TextBlock x:Name="SelectedPlayerFinishingTextBlock" FontSize="10" Foreground="#34465C" />
-                                </UniformGrid>
-                            </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <Grid Margin="0,0,0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock x:Name="SelectedPlayerRightStat1Label" Foreground="#607187" FontSize="9" FontWeight="SemiBold" />
+                                        <TextBlock x:Name="SelectedPlayerRightStat1Value" Grid.Column="1" Foreground="#102033" FontSize="10.5" FontWeight="Bold" />
+                                    </Grid>
+                                    <Grid Margin="0,0,0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock x:Name="SelectedPlayerRightStat2Label" Foreground="#607187" FontSize="9" FontWeight="SemiBold" />
+                                        <TextBlock x:Name="SelectedPlayerRightStat2Value" Grid.Column="1" Foreground="#102033" FontSize="10.5" FontWeight="Bold" />
+                                    </Grid>
+                                    <Grid Margin="0,0,0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock x:Name="SelectedPlayerRightStat3Label" Foreground="#607187" FontSize="9" FontWeight="SemiBold" />
+                                        <TextBlock x:Name="SelectedPlayerRightStat3Value" Grid.Column="1" Foreground="#102033" FontSize="10.5" FontWeight="Bold" />
+                                    </Grid>
+                                    <Grid Margin="0,0,0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock x:Name="SelectedPlayerRightStat4Label" Foreground="#607187" FontSize="9" FontWeight="SemiBold" />
+                                        <TextBlock x:Name="SelectedPlayerRightStat4Value" Grid.Column="1" Foreground="#102033" FontSize="10.5" FontWeight="Bold" />
+                                    </Grid>
+                                    <Grid Margin="0,0,0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock x:Name="SelectedPlayerRightStat5Label" Foreground="#607187" FontSize="9" FontWeight="SemiBold" />
+                                        <TextBlock x:Name="SelectedPlayerRightStat5Value" Grid.Column="1" Foreground="#102033" FontSize="10.5" FontWeight="Bold" />
+                                    </Grid>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock x:Name="SelectedPlayerRightStat6Label" Foreground="#607187" FontSize="9" FontWeight="SemiBold" />
+                                        <TextBlock x:Name="SelectedPlayerRightStat6Value" Grid.Column="1" Foreground="#102033" FontSize="10.5" FontWeight="Bold" />
+                                    </Grid>
+                                </StackPanel>
+                            </Grid>
                         </Grid>
                     </Grid>
                 </Border>

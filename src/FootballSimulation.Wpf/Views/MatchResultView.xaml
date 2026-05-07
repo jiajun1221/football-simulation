@@ -6,6 +6,16 @@
             <Setter Property="Background" Value="White" />
             <Setter Property="CornerRadius" Value="18" />
             <Setter Property="Padding" Value="20" />
+            <Setter Property="BorderBrush" Value="#DCE5F0" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="16"
+                                      ShadowDepth="2"
+                                      Opacity="0.10"
+                                      Color="#102033" />
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <DataTemplate x:Key="PlayerPerformanceTemplate">
@@ -44,10 +54,19 @@
                                        Margin="0,0,8,0" />
                             <TextBlock Text="{Binding StatusText}"
                                        Foreground="#607187"
-                                       FontSize="10" />
+                                       FontSize="10"
+                                       Margin="0,0,8,0" />
+                            <Border Background="{Binding FormBadgeBackground}"
+                                    CornerRadius="7"
+                                    Padding="5,1">
+                                <TextBlock Text="{Binding FormBadgeText}"
+                                           Foreground="{Binding FormBadgeForeground}"
+                                           FontSize="9"
+                                           FontWeight="Bold" />
+                            </Border>
                         </StackPanel>
 
-                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                        <WrapPanel Margin="0,5,0,0">
                             <Border Background="#EAF8EF"
                                     CornerRadius="7"
                                     Padding="5,1"
@@ -59,13 +78,35 @@
                                            FontWeight="Bold" />
                             </Border>
 
-                            <Border Background="#E8F1FF"
+                            <Border Background="#FFF0D6"
                                     CornerRadius="7"
                                     Padding="5,1"
                                     Margin="0,0,5,0"
                                     Visibility="{Binding AssistVisibility}">
                                 <TextBlock Text="{Binding AssistText}"
+                                           Foreground="#9A4A00"
+                                           FontSize="10"
+                                           FontWeight="Bold" />
+                            </Border>
+
+                            <Border Background="#E8F1FF"
+                                    CornerRadius="7"
+                                    Padding="5,1"
+                                    Margin="0,0,5,0"
+                                    Visibility="{Binding DefensiveVisibility}">
+                                <TextBlock Text="{Binding DefensiveText}"
                                            Foreground="#1E528F"
+                                           FontSize="10"
+                                           FontWeight="Bold" />
+                            </Border>
+
+                            <Border Background="#EAF8EF"
+                                    CornerRadius="7"
+                                    Padding="5,1"
+                                    Margin="0,0,5,0"
+                                    Visibility="{Binding SaveVisibility}">
+                                <TextBlock Text="{Binding SaveText}"
+                                           Foreground="#1D5F34"
                                            FontSize="10"
                                            FontWeight="Bold" />
                             </Border>
@@ -90,11 +131,11 @@
                                            FontSize="9"
                                            FontWeight="Bold" />
                             </Border>
-                        </StackPanel>
+                        </WrapPanel>
                     </StackPanel>
 
                     <Border Grid.Column="1"
-                            Background="#102033"
+                            Background="{Binding RatingBackground}"
                             CornerRadius="10"
                             Padding="9,5"
                             Margin="10,0,0,0"
@@ -109,12 +150,23 @@
         </DataTemplate>
 
         <DataTemplate x:Key="ScorerTemplate">
-            <TextBlock Text="{Binding}"
-                       Foreground="#CFE3FF"
-                       FontSize="12"
-                       FontWeight="SemiBold"
-                       Margin="0,2"
-                       TextWrapping="Wrap" />
+            <Grid Margin="0,0,0,5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="42" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="{Binding MinuteText}"
+                           Foreground="#F7C948"
+                           FontSize="12"
+                           FontWeight="Black"
+                           VerticalAlignment="Top" />
+                <TextBlock Grid.Column="1"
+                           Text="{Binding PlayerName}"
+                           Foreground="#CFE3FF"
+                           FontSize="12"
+                           FontWeight="SemiBold"
+                           TextWrapping="Wrap" />
+            </Grid>
         </DataTemplate>
 
         <DataTemplate x:Key="StatComparisonTemplate">
@@ -158,20 +210,26 @@
         <Border Grid.Row="0"
                 Background="#102033"
                 CornerRadius="24"
-                Padding="26">
+                Padding="28"
+                BorderBrush="#1D3557"
+                BorderThickness="1">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="1.05*" />
+                    <ColumnDefinition Width="84" />
+                    <ColumnDefinition Width="1.25*" />
+                    <ColumnDefinition Width="210" />
+                    <ColumnDefinition Width="1.25*" />
+                    <ColumnDefinition Width="84" />
+                    <ColumnDefinition Width="1.05*" />
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Grid.Row="0"
-                           Grid.Column="1"
+                           Grid.Column="3"
                            Text="FULL TIME"
                            Foreground="#90A4BE"
                            FontSize="13"
@@ -179,45 +237,89 @@
                            HorizontalAlignment="Center"
                            Margin="0,0,0,8" />
 
-                <StackPanel Grid.Row="1"
-                            Grid.Column="0"
-                            VerticalAlignment="Center">
-                    <TextBlock x:Name="HomeTeamTextBlock"
-                               Foreground="#FFFFFF"
-                               FontSize="25"
-                               FontWeight="Bold"
-                               TextWrapping="Wrap"
-                               HorizontalAlignment="Right" />
-                    <ItemsControl x:Name="HomeScorersItemsControl"
-                                  ItemTemplate="{StaticResource ScorerTemplate}"
-                                  HorizontalAlignment="Right"
-                                  Margin="0,10,0,0" />
-                </StackPanel>
+                <ItemsControl x:Name="HomeScorersItemsControl"
+                              Grid.Row="1"
+                              Grid.Column="0"
+                              ItemTemplate="{StaticResource ScorerTemplate}"
+                              HorizontalAlignment="Stretch"
+                              VerticalAlignment="Center"
+                              Margin="0,0,14,0" />
 
-                <StackPanel Grid.Row="1"
-                            Grid.Column="1"
-                            Margin="38,0"
-                            HorizontalAlignment="Center">
-                    <TextBlock x:Name="ScoreTextBlock"
-                               Foreground="White"
-                               FontSize="66"
-                               FontWeight="Bold"
-                               HorizontalAlignment="Center"
-                               Margin="0,4,0,0" />
-                </StackPanel>
+                <Border Grid.Row="1"
+                        Grid.Column="1"
+                        Width="72"
+                        Height="72"
+                        CornerRadius="36"
+                        Background="#F3F6FA"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                    <Image x:Name="HomeTeamLogoImage"
+                           Width="54"
+                           Height="54"
+                           Stretch="Uniform"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center" />
+                </Border>
 
-                <StackPanel Grid.Row="1"
-                            Grid.Column="2"
-                            VerticalAlignment="Center">
-                    <TextBlock x:Name="AwayTeamTextBlock"
-                               Foreground="#FFFFFF"
-                               FontSize="25"
-                               FontWeight="Bold"
-                               TextWrapping="Wrap" />
-                    <ItemsControl x:Name="AwayScorersItemsControl"
-                                  ItemTemplate="{StaticResource ScorerTemplate}"
-                                  Margin="0,10,0,0" />
-                </StackPanel>
+                <TextBlock x:Name="HomeTeamTextBlock"
+                           Grid.Row="1"
+                           Grid.Column="2"
+                           Foreground="#FFFFFF"
+                           FontSize="25"
+                           FontWeight="Bold"
+                           TextWrapping="NoWrap"
+                           TextAlignment="Right"
+                           TextTrimming="CharacterEllipsis"
+                           HorizontalAlignment="Stretch"
+                           VerticalAlignment="Center"
+                           Margin="0,0,18,0" />
+
+                <TextBlock x:Name="ScoreTextBlock"
+                           Grid.Row="1"
+                           Grid.Column="3"
+                           Foreground="White"
+                           FontSize="66"
+                           FontWeight="Black"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           TextAlignment="Center" />
+
+                <TextBlock x:Name="AwayTeamTextBlock"
+                           Grid.Row="1"
+                           Grid.Column="4"
+                           Foreground="#FFFFFF"
+                           FontSize="25"
+                           FontWeight="Bold"
+                           TextWrapping="NoWrap"
+                           TextAlignment="Left"
+                           TextTrimming="CharacterEllipsis"
+                           HorizontalAlignment="Stretch"
+                           VerticalAlignment="Center"
+                           Margin="18,0,0,0" />
+
+                <Border Grid.Row="1"
+                        Grid.Column="5"
+                        Width="72"
+                        Height="72"
+                        CornerRadius="36"
+                        Background="#F3F6FA"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                    <Image x:Name="AwayTeamLogoImage"
+                           Width="54"
+                           Height="54"
+                           Stretch="Uniform"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center" />
+                </Border>
+
+                <ItemsControl x:Name="AwayScorersItemsControl"
+                              Grid.Row="1"
+                              Grid.Column="6"
+                              ItemTemplate="{StaticResource ScorerTemplate}"
+                              HorizontalAlignment="Stretch"
+                              VerticalAlignment="Center"
+                              Margin="14,0,0,0" />
             </Grid>
         </Border>
 
@@ -260,9 +362,12 @@
                                Foreground="#102033"
                                HorizontalAlignment="Center"
                                Margin="0,0,0,18" />
-                    <ItemsControl x:Name="StatsComparisonItemsControl"
-                                  Grid.Row="1"
-                                  ItemTemplate="{StaticResource StatComparisonTemplate}" />
+                    <ScrollViewer Grid.Row="1"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled">
+                        <ItemsControl x:Name="StatsComparisonItemsControl"
+                                      ItemTemplate="{StaticResource StatComparisonTemplate}" />
+                    </ScrollViewer>
                 </Grid>
             </Border>
 

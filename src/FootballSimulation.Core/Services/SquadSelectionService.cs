@@ -18,9 +18,19 @@ public class SquadSelectionService
             return SquadSwapResult.Failed("The selected starter is no longer in the starting XI.");
         }
 
+        if (starter.IsSentOff || !starter.IsOnPitch)
+        {
+            return SquadSwapResult.Failed("Sent-off players cannot be replaced.");
+        }
+
         if (!team.Substitutes.Contains(substitute))
         {
             return SquadSwapResult.Failed("The selected substitute is no longer on the bench.");
+        }
+
+        if (substitute.IsSentOff)
+        {
+            return SquadSwapResult.Failed("Sent-off players cannot be used as substitutes.");
         }
 
         if (match is not null && substitutionMinute.HasValue &&
@@ -34,7 +44,9 @@ public class SquadSelectionService
         team.Substitutes.Add(starter);
 
         starter.IsStarter = false;
+        starter.IsOnPitch = false;
         substitute.IsStarter = true;
+        substitute.IsOnPitch = true;
 
         if (match is not null && substitutionMinute.HasValue)
         {

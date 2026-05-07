@@ -7,6 +7,33 @@ namespace FootballSimulation.Wpf.Views;
 
 public partial class RoundResultView : UserControl
 {
+    private const string ClubsAssetPath = "Assets/Clubs";
+    private const string DefaultLogoPath = "pack://application:,,,/Assets/Clubs/default.png";
+
+    private static readonly Dictionary<string, string> ImportedLogoFileNames = new()
+    {
+        ["AFC Bournemouth"] = "AFC Bournemouth.png",
+        ["Arsenal"] = "Arsenal FC.png",
+        ["Aston Villa"] = "Aston Villa.png",
+        ["Brentford"] = "Brentford FC.png",
+        ["Brighton & Hove Albion"] = "Brighton Hove Albion.png",
+        ["Burnley"] = "Burnley FC.png",
+        ["Chelsea"] = "Chelsea FC.png",
+        ["Crystal Palace"] = "Crystal Palace.png",
+        ["Everton"] = "Everton FC.png",
+        ["Fulham"] = "Fulham FC.png",
+        ["Leeds United"] = "Leeds United.png",
+        ["Liverpool"] = "Liverpool FC.png",
+        ["Manchester City"] = "Manchester City.png",
+        ["Manchester United"] = "Manchester United.png",
+        ["Newcastle United"] = "Newcastle United.png",
+        ["Nottingham Forest"] = "Nottingham Forest.png",
+        ["Sunderland"] = "Sunderland AFC.png",
+        ["Tottenham Hotspur"] = "Tottenham Hotspur.png",
+        ["West Ham United"] = "West Ham United.png",
+        ["Wolverhampton Wanderers"] = "Wolverhampton Wanderers.png"
+    };
+
     private readonly GameFlowState _state;
     private readonly Action<UserControl> _navigate;
 
@@ -30,9 +57,9 @@ public partial class RoundResultView : UserControl
         TitleTextBlock.Text = $"Round {_state.CurrentFixture.RoundNumber} Results";
         RoundResultsListBox.ItemsSource = _state.League.Fixtures
             .Where(fixture => fixture.RoundNumber == _state.CurrentFixture.RoundNumber)
-            .Select(FormatRoundResult)
+            .Select(fixture => CreateRoundResultRow(fixture, _state.SelectedTeam))
             .ToList();
-        LeagueTableDataGrid.ItemsSource = _state.League.Table;
+        LeagueTableDataGrid.ItemsSource = CreateLeagueTableRows(_state.League, _state.SelectedTeam);
     }
 
     private void NextButton_Click(object sender, RoutedEventArgs e)
@@ -42,13 +69,115 @@ public partial class RoundResultView : UserControl
         _navigate(new DashboardView(_state, _navigate));
     }
 
-    private static string FormatRoundResult(Fixture fixture)
+    private static RoundResultRow CreateRoundResultRow(Fixture fixture, Team? selectedTeam)
     {
-        if (fixture.Result is null)
+        var isUserMatch = selectedTeam is not null &&
+            (string.Equals(fixture.HomeTeam.Name, selectedTeam.Name, StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(fixture.AwayTeam.Name, selectedTeam.Name, StringComparison.OrdinalIgnoreCase));
+
+        return new RoundResultRow
         {
-            return $"{fixture.HomeTeam.Name} vs {fixture.AwayTeam.Name}";
+            HomeTeamName = fixture.HomeTeam.Name,
+            AwayTeamName = fixture.AwayTeam.Name,
+            HomeLogoPath = GetClubLogoPath(fixture.HomeTeam.Name),
+            AwayLogoPath = GetClubLogoPath(fixture.AwayTeam.Name),
+            ScoreText = fixture.Result is null
+                ? "vs"
+                : $"{fixture.Result.HomeScore} - {fixture.Result.AwayScore}",
+            RowBackground = isUserMatch ? "#FFF3C4" : "#FFFFFF",
+            BorderBrush = isUserMatch ? "#F2B600" : "#DCE5F0",
+            BorderThickness = isUserMatch ? new Thickness(2) : new Thickness(1)
+        };
+    }
+
+    private static List<LeagueTableRow> CreateLeagueTableRows(League league, Team? selectedTeam)
+    {
+        return league.Table
+            .Select(entry => new LeagueTableRow
+            {
+                Club = entry.TeamName,
+                LogoPath = GetClubLogoPath(entry.TeamName),
+                Played = entry.Played,
+                Wins = entry.Wins,
+                Draws = entry.Draws,
+                Losses = entry.Losses,
+                GoalsFor = entry.GoalsFor,
+                GoalsAgainst = entry.GoalsAgainst,
+                GoalDifference = entry.GoalDifference,
+                Points = entry.Points,
+                IsSelectedTeam = selectedTeam is not null &&
+                    string.Equals(entry.TeamName, selectedTeam.Name, StringComparison.OrdinalIgnoreCase)
+            })
+            .ToList();
+    }
+
+    private static string GetClubLogoPath(string clubName)
+    {
+        foreach (var logoPath in GetLogoCandidatePaths(clubName))
+        {
+            if (ResourceExists(logoPath))
+            {
+                return logoPath;
+            }
         }
 
-        return $"{fixture.HomeTeam.Name} {fixture.Result.HomeScore} - {fixture.Result.AwayScore} {fixture.AwayTeam.Name}";
+        return string.Empty;
+    }
+
+    private static IEnumerable<string> GetLogoCandidatePaths(string clubName)
+    {
+        yield return TeamSelectionView.GetClubLogoPath(clubName);
+
+        if (ImportedLogoFileNames.TryGetValue(clubName, out var importedFileName))
+        {
+            yield return CreatePackPath(importedFileName);
+        }
+
+        yield return DefaultLogoPath;
+    }
+
+    private static string CreatePackPath(string fileName)
+    {
+        var escapedFileName = Uri.EscapeDataString(fileName);
+        return $"pack://application:,,,/{ClubsAssetPath}/{escapedFileName}";
+    }
+
+    private static bool ResourceExists(string packUri)
+    {
+        try
+        {
+            return Application.GetResourceStream(new Uri(packUri, UriKind.Absolute)) is not null;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private sealed class RoundResultRow
+    {
+        public string HomeTeamName { get; init; } = string.Empty;
+        public string AwayTeamName { get; init; } = string.Empty;
+        public string HomeLogoPath { get; init; } = string.Empty;
+        public string AwayLogoPath { get; init; } = string.Empty;
+        public string ScoreText { get; init; } = string.Empty;
+        public string RowBackground { get; init; } = "#FFFFFF";
+        public string BorderBrush { get; init; } = "#DCE5F0";
+        public Thickness BorderThickness { get; init; } = new(1);
+    }
+
+    private sealed class LeagueTableRow
+    {
+        public string Club { get; init; } = string.Empty;
+        public string LogoPath { get; init; } = string.Empty;
+        public int Played { get; init; }
+        public int Wins { get; init; }
+        public int Draws { get; init; }
+        public int Losses { get; init; }
+        public int GoalsFor { get; init; }
+        public int GoalsAgainst { get; init; }
+        public int GoalDifference { get; init; }
+        public int Points { get; init; }
+        public bool IsSelectedTeam { get; init; }
     }
 }

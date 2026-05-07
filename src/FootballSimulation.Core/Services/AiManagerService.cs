@@ -73,6 +73,7 @@ public class AiManagerService
     private Player? ChoosePlayerToRemove(Match match, Team team, int minute, Random random)
     {
         var candidates = team.Players
+            .Where(player => player.IsOnPitch && !player.IsSentOff)
             .Where(player => player.Position != Position.Goalkeeper || player.IsInjured || _fatigueService.GetFatiguePercentage(player) >= 85)
             .Select(player => new
             {
@@ -152,7 +153,7 @@ public class AiManagerService
     private Player? ChooseReplacement(Match match, Team team, Player outgoingPlayer, Random random)
     {
         var substitutes = team.Substitutes
-            .Where(player => !player.IsSuspended && !player.IsInjured)
+            .Where(player => !player.IsSuspended && !player.IsInjured && !player.IsSentOff)
             .ToList();
 
         if (substitutes.Count == 0)

@@ -6,6 +6,43 @@
             <Setter Property="Background" Value="White" />
             <Setter Property="CornerRadius" Value="18" />
             <Setter Property="Padding" Value="22" />
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="18"
+                                      ShadowDepth="2"
+                                      Direction="270"
+                                      Opacity="0.12"
+                                      Color="#233A55" />
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="PrimaryDashboardButton" TargetType="Button">
+            <Setter Property="Height" Value="50" />
+            <Setter Property="Background" Value="#102033" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="14"
+                                Padding="16,0">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="12"
+                                                  ShadowDepth="2"
+                                                  Direction="270"
+                                                  Opacity="0.20"
+                                                  Color="#102033" />
+                            </Border.Effect>
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <Style x:Key="ModernDataGrid" TargetType="DataGrid">
@@ -14,46 +51,96 @@
             <Setter Property="GridLinesVisibility" Value="Horizontal" />
             <Setter Property="HorizontalGridLinesBrush" Value="#E2E8F0" />
             <Setter Property="HeadersVisibility" Value="Column" />
-            <Setter Property="RowHeight" Value="42" />
-            <Setter Property="ColumnHeaderHeight" Value="36" />
+            <Setter Property="RowHeight" Value="48" />
+            <Setter Property="ColumnHeaderHeight" Value="38" />
             <Setter Property="CanUserResizeRows" Value="False" />
+            <Setter Property="FontSize" Value="13" />
         </Style>
 
         <Style x:Key="LeagueTableRowStyle" TargetType="DataGridRow">
             <Setter Property="Background" Value="{Binding RowBackground}" />
             <Setter Property="BorderBrush" Value="#E2E8F0" />
             <Setter Property="BorderThickness" Value="0,0,0,1" />
-            <Setter Property="FontWeight" Value="Normal" />
             <Setter Property="Foreground" Value="#102033" />
             <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#EEF5FF" />
+                </Trigger>
                 <DataTrigger Binding="{Binding IsSelectedTeam}" Value="True">
                     <Setter Property="Background" Value="#FFF4CC" />
                     <Setter Property="FontWeight" Value="Bold" />
-                    <Setter Property="BorderBrush" Value="#F2B705" />
-                    <Setter Property="BorderThickness" Value="0,0,0,2" />
                 </DataTrigger>
             </Style.Triggers>
         </Style>
 
         <DataTemplate x:Key="LastFiveBadgeTemplate">
-            <Border Width="22"
-                    Height="22"
-                    CornerRadius="11"
+            <Border Width="20"
+                    Height="20"
+                    CornerRadius="10"
                     Background="{Binding BadgeBrush}"
                     Margin="2,0">
                 <TextBlock Text="{Binding ResultType}"
                            Foreground="White"
-                           FontSize="11"
+                           FontSize="10"
                            FontWeight="Bold"
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center" />
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="FixtureRowTemplate">
+            <Border Background="#F7FAFF"
+                    BorderBrush="#DDE7F3"
+                    BorderThickness="1"
+                    CornerRadius="12"
+                    Padding="12"
+                    Margin="0,0,0,8">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="44" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <Border Background="{Binding HomeAwayBrush}"
+                            CornerRadius="10"
+                            Width="34"
+                            Height="34"
+                            VerticalAlignment="Center">
+                        <TextBlock Text="{Binding HomeAwayIcon}"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   FontSize="15" />
+                    </Border>
+
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding FixtureTitle}"
+                                   FontSize="13"
+                                   FontWeight="Bold"
+                                   Foreground="#102033"
+                                   TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding VenueText}"
+                                   FontSize="11"
+                                   Foreground="#607187"
+                                   Margin="0,2,0,0"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <Image Grid.Column="2"
+                           Source="{Binding OpponentLogoPath}"
+                           Width="28"
+                           Height="28"
+                           Stretch="Uniform"
+                           Margin="10,0,0,0"
+                           VerticalAlignment="Center" />
+                </Grid>
             </Border>
         </DataTemplate>
     </UserControl.Resources>
 
     <Grid Margin="24">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="360" />
+            <ColumnDefinition Width="390" />
             <ColumnDefinition Width="24" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
@@ -62,35 +149,96 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <StackPanel>
-                    <TextBlock Text="Club Dashboard"
-                               FontSize="28"
-                               FontWeight="Bold"
-                               Foreground="#102033"
-                               Margin="0,0,0,8" />
-                    <TextBlock x:Name="SelectedTeamTextBlock"
-                               FontSize="20"
-                               FontWeight="SemiBold"
-                               Foreground="#1E528F"
-                               Margin="0,0,0,24" />
+                <Grid Margin="0,0,0,18">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="62" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
 
+                    <Border Width="54"
+                            Height="54"
+                            CornerRadius="16"
+                            Background="#F1F5FA"
+                            HorizontalAlignment="Left">
+                        <Image x:Name="SelectedClubLogoImage"
+                               Width="42"
+                               Height="42"
+                               Stretch="Uniform"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center" />
+                    </Border>
+
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="Club Dashboard"
+                                   FontSize="15"
+                                   FontWeight="SemiBold"
+                                   Foreground="#607187" />
+                        <TextBlock x:Name="SelectedTeamTextBlock"
+                                   FontSize="30"
+                                   FontWeight="Bold"
+                                   Foreground="#102033"
+                                   Margin="0,2,0,0" />
+                        <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                            <TextBlock Text="Season 2025/26"
+                                       FontSize="12"
+                                       Foreground="#607187"
+                                       FontWeight="SemiBold"
+                                       Margin="0,0,10,0" />
+                            <ItemsControl x:Name="ClubFormItemsControl"
+                                          ItemTemplate="{StaticResource LastFiveBadgeTemplate}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                            </ItemsControl>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+
+                <UniformGrid Grid.Row="1"
+                             Columns="3"
+                             Margin="0,0,0,18">
+                    <Border Background="#F7FAFF" CornerRadius="12" Padding="10" Margin="0,0,8,0">
+                        <StackPanel>
+                            <TextBlock Text="Position" FontSize="11" Foreground="#607187" FontWeight="SemiBold" />
+                            <TextBlock x:Name="PositionStatTextBlock" FontSize="18" Foreground="#102033" FontWeight="Bold" />
+                        </StackPanel>
+                    </Border>
+                    <Border Background="#F7FAFF" CornerRadius="12" Padding="10" Margin="0,0,8,0">
+                        <StackPanel>
+                            <TextBlock Text="Points" FontSize="11" Foreground="#607187" FontWeight="SemiBold" />
+                            <TextBlock x:Name="PointsStatTextBlock" FontSize="18" Foreground="#102033" FontWeight="Bold" />
+                        </StackPanel>
+                    </Border>
+                    <Border Background="#F7FAFF" CornerRadius="12" Padding="10">
+                        <StackPanel>
+                            <TextBlock Text="Goal Diff" FontSize="11" Foreground="#607187" FontWeight="SemiBold" />
+                            <TextBlock x:Name="GoalDifferenceStatTextBlock" FontSize="18" Foreground="#102033" FontWeight="Bold" />
+                        </StackPanel>
+                    </Border>
+                </UniformGrid>
+
+                <StackPanel Grid.Row="2" Margin="0,0,0,24">
                     <Grid Margin="0,0,0,8">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="Upcoming Match"
-                                   FontSize="16"
+                                   FontSize="17"
                                    FontWeight="Bold"
                                    Foreground="#102033"
                                    VerticalAlignment="Center" />
                         <Border Grid.Column="1"
                                 x:Name="HomeAwayBadge"
-                                CornerRadius="10"
-                                Padding="10,4">
+                                CornerRadius="11"
+                                Padding="11,5">
                             <TextBlock x:Name="HomeAwayBadgeTextBlock"
                                        Foreground="White"
                                        FontSize="11"
@@ -101,43 +249,78 @@
                     <Border Background="#F4F7FB"
                             BorderBrush="#DDE7F3"
                             BorderThickness="1"
-                            CornerRadius="14"
+                            CornerRadius="16"
                             Padding="16"
-                            Margin="0,0,0,18">
+                            Margin="0,0,0,14">
                         <StackPanel>
-                            <TextBlock x:Name="UpcomingFixtureTextBlock"
-                                       Foreground="#102033"
-                                       FontSize="16"
-                                       FontWeight="Bold"
-                                       TextWrapping="Wrap" />
+                            <TextBlock x:Name="UpcomingRoundTextBlock"
+                                       Foreground="#607187"
+                                       FontSize="12"
+                                       FontWeight="SemiBold"
+                                       Margin="0,0,0,10" />
+
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="42" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel HorizontalAlignment="Center">
+                                    <Image x:Name="UpcomingHomeLogoImage" Width="44" Height="44" Stretch="Uniform" />
+                                    <TextBlock x:Name="UpcomingHomeNameTextBlock"
+                                               FontSize="12"
+                                               FontWeight="Bold"
+                                               Foreground="#102033"
+                                               TextAlignment="Center"
+                                               TextWrapping="Wrap"
+                                               Margin="0,6,0,0" />
+                                </StackPanel>
+
+                                <TextBlock Grid.Column="1"
+                                           Text="vs"
+                                           FontSize="17"
+                                           FontWeight="Bold"
+                                           Foreground="#607187"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center" />
+
+                                <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                                    <Image x:Name="UpcomingAwayLogoImage" Width="44" Height="44" Stretch="Uniform" />
+                                    <TextBlock x:Name="UpcomingAwayNameTextBlock"
+                                               FontSize="12"
+                                               FontWeight="Bold"
+                                               Foreground="#102033"
+                                               TextAlignment="Center"
+                                               TextWrapping="Wrap"
+                                               Margin="0,6,0,0" />
+                                </StackPanel>
+                            </Grid>
+
                             <TextBlock x:Name="VenueTextBlock"
                                        Foreground="#607187"
                                        FontSize="13"
                                        FontWeight="SemiBold"
-                                       Margin="0,10,0,0"
                                        TextWrapping="Wrap" />
                         </StackPanel>
                     </Border>
 
                     <Button x:Name="PrepareMatchButton"
+                            Style="{StaticResource PrimaryDashboardButton}"
                             Content="Prepare Match"
-                            Height="46"
-                            Background="#102033"
-                            Foreground="White"
-                            FontWeight="Bold"
-                            BorderThickness="0"
                             Click="PrepareMatchButton_Click" />
                 </StackPanel>
 
-                <StackPanel Grid.Row="1" Margin="0,28,0,0">
+                <StackPanel Grid.Row="3">
                     <TextBlock Text="Upcoming Club Fixtures"
-                               FontSize="16"
+                               FontSize="17"
                                FontWeight="Bold"
                                Foreground="#102033"
-                               Margin="0,0,0,10" />
+                               Margin="0,0,0,12" />
                     <ListBox x:Name="UpcomingFixturesListBox"
                              BorderThickness="0"
-                             Background="Transparent" />
+                             Background="Transparent"
+                             ItemTemplate="{StaticResource FixtureRowTemplate}" />
                 </StackPanel>
             </Grid>
         </Border>
@@ -157,7 +340,7 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Text="League Table"
-                               FontSize="24"
+                               FontSize="25"
                                FontWeight="Bold"
                                Foreground="#102033" />
 
@@ -182,7 +365,7 @@
 
                 <StackPanel Grid.Row="1"
                             Orientation="Horizontal"
-                            Margin="0,0,0,12">
+                            Margin="0,0,0,14">
                     <StackPanel Orientation="Horizontal" Margin="0,0,18,0">
                         <Border Width="10" Height="10" Background="#3B82F6" Margin="0,0,6,0" VerticalAlignment="Center" />
                         <TextBlock Text="Champions League" Foreground="#465364" FontSize="12" />
@@ -209,27 +392,49 @@
                           IsReadOnly="True"
                           CanUserAddRows="False">
                     <DataGrid.Columns>
-                        <DataGridTemplateColumn Width="8">
+                        <DataGridTemplateColumn Width="9">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Border Background="{Binding ZoneBrush}"
                                             Width="5"
                                             HorizontalAlignment="Left"
-                                            Margin="0,4" />
+                                            Margin="0,5" />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="#" Binding="{Binding Position}" Width="42" />
-                        <DataGridTextColumn Header="Club" Binding="{Binding Club}" Width="*" />
-                        <DataGridTextColumn Header="MP" Binding="{Binding Played}" Width="48" />
-                        <DataGridTextColumn Header="W" Binding="{Binding Wins}" Width="42" />
-                        <DataGridTextColumn Header="D" Binding="{Binding Draws}" Width="42" />
-                        <DataGridTextColumn Header="L" Binding="{Binding Losses}" Width="42" />
-                        <DataGridTextColumn Header="GF" Binding="{Binding GoalsFor}" Width="48" />
-                        <DataGridTextColumn Header="GA" Binding="{Binding GoalsAgainst}" Width="48" />
-                        <DataGridTextColumn Header="GD" Binding="{Binding GoalDifference}" Width="52" />
-                        <DataGridTextColumn Header="Pts" Binding="{Binding Points}" Width="56" />
-                        <DataGridTemplateColumn Header="Last 5" Width="135">
+                        <DataGridTextColumn Header="#" Binding="{Binding Position}" Width="38" />
+                        <DataGridTemplateColumn Header="" Width="40">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Image Source="{Binding LogoPath}"
+                                           Width="26"
+                                           Height="26"
+                                           Stretch="Uniform"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Club" Width="*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Club}"
+                                               FontWeight="Bold"
+                                               Foreground="#102033"
+                                               VerticalAlignment="Center"
+                                               TextTrimming="CharacterEllipsis" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="MP" Binding="{Binding Played}" Width="44" />
+                        <DataGridTextColumn Header="W" Binding="{Binding Wins}" Width="40" />
+                        <DataGridTextColumn Header="D" Binding="{Binding Draws}" Width="40" />
+                        <DataGridTextColumn Header="L" Binding="{Binding Losses}" Width="40" />
+                        <DataGridTextColumn Header="GF" Binding="{Binding GoalsFor}" Width="46" />
+                        <DataGridTextColumn Header="GA" Binding="{Binding GoalsAgainst}" Width="46" />
+                        <DataGridTextColumn Header="GD" Binding="{Binding GoalDifference}" Width="50" />
+                        <DataGridTextColumn Header="Pts" Binding="{Binding Points}" Width="52" />
+                        <DataGridTemplateColumn Header="Last 5" Width="122">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <ItemsControl ItemsSource="{Binding LastFive}"

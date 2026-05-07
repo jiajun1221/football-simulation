@@ -11,10 +11,11 @@ public class MatchEngineScoringTests
     {
         var seedDataService = new SeedDataService();
         var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+        var (secondHomeTeam, secondAwayTeam) = seedDataService.CreateDemoTeams();
         var engine = new MatchEngine();
 
         var firstResult = engine.SimulateMatch(homeTeam, awayTeam, seed: 99);
-        var secondResult = engine.SimulateMatch(homeTeam, awayTeam, seed: 99);
+        var secondResult = engine.SimulateMatch(secondHomeTeam, secondAwayTeam, seed: 99);
 
         Assert.Equal(firstResult.HomeScore, secondResult.HomeScore);
         Assert.Equal(firstResult.AwayScore, secondResult.AwayScore);
@@ -85,6 +86,128 @@ public class MatchEngineScoringTests
         Assert.True(fullMatch.AwayScore >= firstHalfAwayScore);
     }
 
+    [Fact]
+    public void SimulateMatch_DoesNotCreateConsecutiveAttackEventsForSameTeam()
+    {
+        var seedDataService = new SeedDataService();
+        var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+        var engine = new MatchEngine();
+
+        var result = engine.SimulateMatch(homeTeam, awayTeam, seed: 42);
+
+        for (var index = 1; index < result.Events.Count; index++)
+        {
+            var previousEvent = result.Events[index - 1];
+            var currentEvent = result.Events[index];
+            if (previousEvent.EventType != EventType.Attack || currentEvent.EventType != EventType.Attack)
+            {
+                continue;
+            }
+
+            var previousTeam = FindEventTeamName(previousEvent, result);
+            var currentTeam = FindEventTeamName(currentEvent, result);
+
+            Assert.False(
+                !string.IsNullOrWhiteSpace(previousTeam) &&
+                string.Equals(previousTeam, currentTeam, StringComparison.OrdinalIgnoreCase),
+                $"Consecutive ATTACK events found for {previousTeam} at {previousEvent.Minute}' and {currentEvent.Minute}'.");
+        }
+    }
+
+    [Fact]
+    public void SimulateMatch_FirstOpenPlayEventBelongsToKickoffTeam()
+    {
+        var seedDataService = new SeedDataService();
+        var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+        var engine = new MatchEngine();
+
+        var result = engine.SimulateMatch(homeTeam, awayTeam, seed: 42);
+        var firstOpenPlayEvent = result.Events.FirstOrDefault(IsPossessionFlowEvent);
+
+        Assert.NotNull(firstOpenPlayEvent);
+        Assert.Equal(homeTeam.Name, FindEventTeamName(firstOpenPlayEvent, result));
+    }
+
+    [Fact]
+    public void SimulateMatch_FoulingTeamDoesNotImmediatelyAttackAfterFoul()
+    {
+        var seedDataService = new SeedDataService();
+        var engine = new MatchEngine();
+
+        for (var seed = 1; seed <= 20; seed++)
+        {
+            var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+            var result = engine.SimulateMatch(homeTeam, awayTeam, seed: seed);
+
+            for (var index = 0; index < result.Events.Count - 1; index++)
+            {
+                var currentEvent = result.Events[index];
+                if (currentEvent.EventType != EventType.Foul)
+                {
+                    continue;
+                }
+
+                var foulingTeam = FindEventTeamName(currentEvent, result);
+                var nextEvent = result.Events[index + 1];
+                if (nextEvent.EventType != EventType.Attack)
+                {
+                    continue;
+                }
+
+                Assert.NotEqual(foulingTeam, FindEventTeamName(nextEvent, result));
+            }
+        }
+    }
+
+    [Fact]
+    public void SimulateMatch_DoesNotCreateConsecutiveTurnoverEvents()
+    {
+        var seedDataService = new SeedDataService();
+        var engine = new MatchEngine();
+
+        for (var seed = 1; seed <= 40; seed++)
+        {
+            var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+            var result = engine.SimulateMatch(homeTeam, awayTeam, seed: seed);
+
+            for (var index = 1; index < result.Events.Count; index++)
+            {
+                Assert.False(
+                    result.Events[index - 1].EventType == EventType.Turnover &&
+                    result.Events[index].EventType == EventType.Turnover,
+                    $"Consecutive TURNOVER events found at {result.Events[index - 1].Minute}' and {result.Events[index].Minute}' for seed {seed}.");
+            }
+        }
+    }
+
+    [Fact]
+    public void SimulateMatch_PenaltyResultHasDecisionAndTakerBuildUp()
+    {
+        var seedDataService = new SeedDataService();
+        var engine = new MatchEngine();
+
+        for (var seed = 1; seed <= 40; seed++)
+        {
+            var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+            var result = engine.SimulateMatch(homeTeam, awayTeam, seed: seed);
+            var events = result.Events;
+
+            for (var index = 0; index < events.Count; index++)
+            {
+                if (events[index].EventType != EventType.Penalty)
+                {
+                    continue;
+                }
+
+                Assert.True(index >= 2, "Penalty result must be preceded by decision and taker events.");
+                Assert.Equal(EventType.PenaltyDecision, events[index - 2].EventType);
+                Assert.Equal(EventType.PenaltyTaker, events[index - 1].EventType);
+                Assert.Equal(events[index].Minute, events[index - 2].Minute);
+                Assert.Equal(events[index].Minute, events[index - 1].Minute);
+            }
+        }
+    }
+
     private static string FormatEvent(MatchEvent matchEvent)
     {
         return $"{matchEvent.Minute}|{matchEvent.EventType}|{matchEvent.Description}";
@@ -96,5 +219,39 @@ public class MatchEngineScoringTests
             || matchEvent.EventType == EventType.WonderGoal
             || (matchEvent.EventType == EventType.Penalty
                 && matchEvent.Description.Contains("scores", StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static bool IsPossessionFlowEvent(MatchEvent matchEvent)
+    {
+        return matchEvent.EventType is EventType.Attack
+            or EventType.Turnover
+            or EventType.DefensiveStop
+            or EventType.Shot
+            or EventType.Save
+            or EventType.Goal
+            or EventType.Miss
+            or EventType.Offside;
+    }
+
+    private static string? FindEventTeamName(MatchEvent matchEvent, Match match)
+    {
+        if (EventMentionsTeam(matchEvent.Description, match.HomeTeam.Name))
+        {
+            return match.HomeTeam.Name;
+        }
+
+        if (EventMentionsTeam(matchEvent.Description, match.AwayTeam.Name))
+        {
+            return match.AwayTeam.Name;
+        }
+
+        return null;
+    }
+
+    private static bool EventMentionsTeam(string description, string teamName)
+    {
+        return description.StartsWith($"{teamName} ", StringComparison.OrdinalIgnoreCase) ||
+            description.Contains($" for {teamName}", StringComparison.OrdinalIgnoreCase) ||
+            description.Contains($" by {teamName}", StringComparison.OrdinalIgnoreCase);
     }
 }

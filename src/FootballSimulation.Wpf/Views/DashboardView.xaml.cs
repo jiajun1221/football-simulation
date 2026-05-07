@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using FootballSimulation.Models;
 using FootballSimulation.Services;
 using FootballSimulation.Wpf.State;
@@ -13,6 +14,32 @@ public partial class DashboardView : UserControl
     private readonly Action<UserControl> _navigate;
     private readonly GameSessionService _gameSessionService = new();
     private readonly RecentResultService _recentResultService = new();
+    private const string ClubsAssetPath = "Assets/Clubs";
+    private const string DefaultLogoPath = "pack://application:,,,/Assets/Clubs/default.png";
+
+    private static readonly Dictionary<string, string> ImportedLogoFileNames = new()
+    {
+        ["AFC Bournemouth"] = "AFC Bournemouth.png",
+        ["Arsenal"] = "Arsenal FC.png",
+        ["Aston Villa"] = "Aston Villa.png",
+        ["Brentford"] = "Brentford FC.png",
+        ["Brighton & Hove Albion"] = "Brighton Hove Albion.png",
+        ["Burnley"] = "Burnley FC.png",
+        ["Chelsea"] = "Chelsea FC.png",
+        ["Crystal Palace"] = "Crystal Palace.png",
+        ["Everton"] = "Everton FC.png",
+        ["Fulham"] = "Fulham FC.png",
+        ["Leeds United"] = "Leeds United.png",
+        ["Liverpool"] = "Liverpool FC.png",
+        ["Manchester City"] = "Manchester City.png",
+        ["Manchester United"] = "Manchester United.png",
+        ["Newcastle United"] = "Newcastle United.png",
+        ["Nottingham Forest"] = "Nottingham Forest.png",
+        ["Sunderland"] = "Sunderland AFC.png",
+        ["Tottenham Hotspur"] = "Tottenham Hotspur.png",
+        ["West Ham United"] = "West Ham United.png",
+        ["Wolverhampton Wanderers"] = "Wolverhampton Wanderers.png"
+    };
 
     public DashboardView(GameFlowState state, Action<UserControl> navigate)
     {
@@ -32,12 +59,14 @@ public partial class DashboardView : UserControl
         }
 
         SelectedTeamTextBlock.Text = _state.SelectedTeam.Name;
+        SelectedClubLogoImage.Source = CreateImageSource(GetClubLogoPath(_state.SelectedTeam.Name));
         LeagueTableDataGrid.ItemsSource = CreateLeagueTableRows(_state.League, _state.SelectedTeam);
+        LoadSelectedClubStats(_state.League, _state.SelectedTeam);
 
         var nextFixture = _gameSessionService.FindNextFixtureForTeam(_state.League, _state.SelectedTeam);
         _state.CurrentFixture = nextFixture;
         LoadUpcomingMatch(nextFixture, _state.SelectedTeam);
-        UpcomingFixturesListBox.ItemsSource = CreateUpcomingFixtureRows(_state.League, _state.SelectedTeam);
+        UpcomingFixturesListBox.ItemsSource = CreateUpcomingFixtureRows(_state.League, _state.SelectedTeam, nextFixture);
     }
 
     private void PrepareMatchButton_Click(object sender, RoutedEventArgs e)
@@ -74,6 +103,7 @@ public partial class DashboardView : UserControl
                 {
                     Position = position,
                     Club = entry.TeamName,
+                    LogoPath = GetClubLogoPath(entry.TeamName),
                     Played = entry.Played,
                     Wins = entry.Wins,
                     Draws = entry.Draws,
@@ -97,7 +127,11 @@ public partial class DashboardView : UserControl
         var opponent = isHome ? fixture.AwayTeam : fixture.HomeTeam;
         var venue = isHome ? GetVenueName(selectedTeam) : GetVenueName(opponent);
 
-        UpcomingFixtureTextBlock.Text = $"Round {fixture.RoundNumber}: {selectedTeam.Name} vs {opponent.Name}";
+        UpcomingRoundTextBlock.Text = $"Round {fixture.RoundNumber}";
+        UpcomingHomeNameTextBlock.Text = fixture.HomeTeam.Name;
+        UpcomingAwayNameTextBlock.Text = fixture.AwayTeam.Name;
+        UpcomingHomeLogoImage.Source = CreateImageSource(GetClubLogoPath(fixture.HomeTeam.Name));
+        UpcomingAwayLogoImage.Source = CreateImageSource(GetClubLogoPath(fixture.AwayTeam.Name));
         VenueTextBlock.Text = $"Venue: {venue}";
         HomeAwayBadgeTextBlock.Text = isHome ? "HOME" : "AWAY";
         HomeAwayBadge.Background = new SolidColorBrush(isHome
@@ -105,22 +139,57 @@ public partial class DashboardView : UserControl
             : Color.FromRgb(249, 115, 22));
     }
 
-    private static List<string> CreateUpcomingFixtureRows(League league, Team selectedTeam)
+    private void LoadSelectedClubStats(League league, Team selectedTeam)
+    {
+        var tableEntry = league.Table
+            .Select((entry, index) => new { Entry = entry, Position = index + 1 })
+            .FirstOrDefault(item => item.Entry.TeamName == selectedTeam.Name);
+
+        if (tableEntry is null)
+        {
+            PositionStatTextBlock.Text = "-";
+            PointsStatTextBlock.Text = "0";
+            GoalDifferenceStatTextBlock.Text = "0";
+            ClubFormItemsControl.ItemsSource = null;
+            return;
+        }
+
+        PositionStatTextBlock.Text = $"#{tableEntry.Position}";
+        PointsStatTextBlock.Text = tableEntry.Entry.Points.ToString();
+        GoalDifferenceStatTextBlock.Text = FormatGoalDifference(tableEntry.Entry.GoalDifference);
+        ClubFormItemsControl.ItemsSource = _recentResultService.GetRecentResults(league, selectedTeam)
+            .OrderBy(result => result.RoundNumber)
+            .Select(CreateResultBadge)
+            .ToList();
+    }
+
+    private static List<UpcomingFixtureRow> CreateUpcomingFixtureRows(League league, Team selectedTeam, Fixture upcomingMatch)
     {
         var fixtures = league.Fixtures
-            .Where(fixture => !fixture.IsPlayed && IsTeamInFixture(fixture, selectedTeam))
+            .Where(fixture =>
+                !fixture.IsPlayed &&
+                IsTeamInFixture(fixture, selectedTeam) &&
+                !IsSameFixture(fixture, upcomingMatch))
             .OrderBy(fixture => fixture.RoundNumber)
             .Take(5)
             .Select(fixture =>
             {
                 var isHome = fixture.HomeTeam == selectedTeam;
                 var opponent = isHome ? fixture.AwayTeam : fixture.HomeTeam;
-                var badge = isHome ? "HOME" : "AWAY";
-                return $"R{fixture.RoundNumber}: {badge} vs {opponent.Name}";
+                return new UpcomingFixtureRow
+                {
+                    FixtureTitle = $"R{fixture.RoundNumber}: {(isHome ? "HOME" : "AWAY")} vs {opponent.Name}",
+                    VenueText = isHome ? GetVenueName(selectedTeam) : GetVenueName(opponent),
+                    OpponentLogoPath = GetClubLogoPath(opponent.Name),
+                    HomeAwayIcon = isHome ? "H" : "A",
+                    HomeAwayBrush = isHome ? "#D9F1E1" : "#FFE4BF"
+                };
             })
             .ToList();
 
-        return fixtures.Count == 0 ? ["No upcoming fixtures."] : fixtures;
+        return fixtures.Count == 0
+            ? [new UpcomingFixtureRow { FixtureTitle = "No upcoming fixtures.", VenueText = "Season schedule is complete.", HomeAwayIcon = "-", HomeAwayBrush = "#E1E5EA" }]
+            : fixtures;
     }
 
     private static bool IsTeamInFixture(Fixture fixture, Team team)
@@ -128,9 +197,21 @@ public partial class DashboardView : UserControl
         return fixture.HomeTeam == team || fixture.AwayTeam == team;
     }
 
+    private static bool IsSameFixture(Fixture fixture, Fixture otherFixture)
+    {
+        return fixture.RoundNumber == otherFixture.RoundNumber &&
+            fixture.HomeTeam.Name == otherFixture.HomeTeam.Name &&
+            fixture.AwayTeam.Name == otherFixture.AwayTeam.Name;
+    }
+
     private static string GetVenueName(Team homeTeam)
     {
         return $"{homeTeam.Name} Stadium";
+    }
+
+    private static string FormatGoalDifference(int goalDifference)
+    {
+        return goalDifference > 0 ? $"+{goalDifference}" : goalDifference.ToString();
     }
 
     private static ResultBadge CreateResultBadge(RecentMatchResult result)
@@ -187,10 +268,71 @@ public partial class DashboardView : UserControl
         return position > tableSize - 3 ? "#FFF6F6" : "#FFFFFF";
     }
 
+    private static ImageSource? CreateImageSource(string logoPath)
+    {
+        if (string.IsNullOrWhiteSpace(logoPath))
+        {
+            return null;
+        }
+
+        try
+        {
+            return new BitmapImage(new Uri(logoPath, UriKind.Absolute));
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static string GetClubLogoPath(string clubName)
+    {
+        foreach (var logoPath in GetLogoCandidatePaths(clubName))
+        {
+            if (ResourceExists(logoPath))
+            {
+                return logoPath;
+            }
+        }
+
+        return string.Empty;
+    }
+
+    private static IEnumerable<string> GetLogoCandidatePaths(string clubName)
+    {
+        yield return TeamSelectionView.GetClubLogoPath(clubName);
+
+        if (ImportedLogoFileNames.TryGetValue(clubName, out var importedFileName))
+        {
+            yield return CreatePackPath(importedFileName);
+        }
+
+        yield return DefaultLogoPath;
+    }
+
+    private static string CreatePackPath(string fileName)
+    {
+        var escapedFileName = Uri.EscapeDataString(fileName);
+        return $"pack://application:,,,/{ClubsAssetPath}/{escapedFileName}";
+    }
+
+    private static bool ResourceExists(string packUri)
+    {
+        try
+        {
+            return Application.GetResourceStream(new Uri(packUri, UriKind.Absolute)) is not null;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     private sealed class LeagueTableRow
     {
         public int Position { get; init; }
         public string Club { get; init; } = string.Empty;
+        public string LogoPath { get; init; } = string.Empty;
         public int Played { get; init; }
         public int Wins { get; init; }
         public int Draws { get; init; }
@@ -209,5 +351,14 @@ public partial class DashboardView : UserControl
     {
         public string ResultType { get; init; } = string.Empty;
         public string BadgeBrush { get; init; } = "#9AA3AF";
+    }
+
+    private sealed class UpcomingFixtureRow
+    {
+        public string FixtureTitle { get; init; } = string.Empty;
+        public string VenueText { get; init; } = string.Empty;
+        public string OpponentLogoPath { get; init; } = string.Empty;
+        public string HomeAwayIcon { get; init; } = string.Empty;
+        public string HomeAwayBrush { get; init; } = "#E1E5EA";
     }
 }

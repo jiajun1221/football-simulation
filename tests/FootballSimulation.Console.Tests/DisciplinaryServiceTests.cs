@@ -29,6 +29,7 @@ public class DisciplinaryServiceTests
         Assert.True(secondYellowSentOff);
         Assert.Equal(2, player.YellowCards);
         Assert.True(player.IsSentOff);
+        Assert.False(player.IsOnPitch);
         Assert.Equal(2, teamStats.YellowCards);
         Assert.Equal(1, teamStats.RedCards);
     }

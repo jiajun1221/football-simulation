@@ -6,6 +6,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using FootballSimulation.Models;
 using FootballSimulation.Services;
+using FootballSimulation.Wpf.Helpers;
 using FootballSimulation.Wpf.Models;
 using FootballSimulation.Wpf.Services;
 using FootballSimulation.Wpf.State;
@@ -193,7 +194,7 @@ public partial class PreMatchView : UserControl
     private PitchPlayerCard CreatePitchPlayerCard(Player player)
     {
         PositionSuitabilityService.EnsurePositionMetadata(player);
-        var form = GetFormBadge(player.CurrentForm);
+        var form = PlayerFormBadgeHelper.Create(player.FormStatus);
         var isOutOfPosition = PositionSuitabilityService.IsOutOfPosition(player);
         var suitability = PositionSuitabilityService.GetEffectivenessMultiplier(player);
         var ratingVisual = GetRatingVisual(player, suitability);
@@ -311,7 +312,7 @@ public partial class PreMatchView : UserControl
     private static BenchPlayerCard CreateBenchPlayerCard(Player player)
     {
         PositionSuitabilityService.EnsurePositionMetadata(player);
-        var form = GetFormBadge(player.CurrentForm);
+        var form = PlayerFormBadgeHelper.Create(player.FormStatus);
 
         return new BenchPlayerCard
         {
@@ -342,7 +343,7 @@ public partial class PreMatchView : UserControl
 
         PositionSuitabilityService.EnsurePositionMetadata(_selectedStarter);
         var suitability = PositionSuitabilityService.GetEffectivenessMultiplier(_selectedStarter);
-        var form = GetFormBadge(_selectedStarter.CurrentForm);
+        var form = PlayerFormBadgeHelper.Create(_selectedStarter.FormStatus);
         var ratingVisual = GetRatingVisual(_selectedStarter, suitability);
 
         SelectedPlayerEmptyTextBlock.Visibility = Visibility.Collapsed;
@@ -359,7 +360,7 @@ public partial class PreMatchView : UserControl
         SelectedPlayerFormChip.Text = form.Text;
         SelectedPlayerFormChip.Foreground = ToBrush(form.Foreground);
         SelectedPlayerFormChipBorder.Background = ToBrush(form.Background);
-        SelectedPlayerInjuryChip.Text = _selectedStarter.IsInjured ? "Injured" : "Fit";
+        SelectedPlayerInjuryChip.Text = _selectedStarter.IsInjured ? "Injured" : "Available";
         SelectedPlayerInjuryChip.Foreground = ToBrush(_selectedStarter.IsInjured ? "#8F1F1F" : "#236B39");
         SelectedPlayerInjuryChipBorder.Background = ToBrush(_selectedStarter.IsInjured ? "#FFD1D1" : "#D9F1E1");
         SelectedPlayerStaminaTextBlock.Text = $"{GetStaminaPercentage(_selectedStarter)}% stamina";
@@ -530,18 +531,6 @@ public partial class PreMatchView : UserControl
             : $" | Sec {string.Join("/", player.SecondaryPositions)}";
 
         return $"Pref {player.PreferredPosition}{naturalPositions}{secondaryPositions}";
-    }
-
-    private static FormBadge GetFormBadge(int currentForm)
-    {
-        return currentForm switch
-        {
-            >= 80 => new FormBadge("Hot", "#D9F1E1", "#236B39"),
-            >= 65 => new FormBadge("Good", "#E7F7EA", "#2F7D42"),
-            >= 40 => new FormBadge("Average", "#FFF0A3", "#5F4500"),
-            > 0 => new FormBadge("Poor", "#FFD1D1", "#8F1F1F"),
-            _ => new FormBadge("Inactive", "#E1E5EA", "#465364")
-        };
     }
 
     private void PitchCanvas_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -984,8 +973,6 @@ public partial class PreMatchView : UserControl
             _ => Position.Midfielder
         };
     }
-
-    private sealed record FormBadge(string Text, string Background, string Foreground);
 
     private sealed record RatingVisual(int Rating, string Foreground, string Background);
 

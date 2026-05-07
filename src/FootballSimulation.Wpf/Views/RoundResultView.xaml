@@ -6,6 +6,16 @@
             <Setter Property="Background" Value="White" />
             <Setter Property="CornerRadius" Value="18" />
             <Setter Property="Padding" Value="24" />
+            <Setter Property="BorderBrush" Value="#DCE5F0" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="16"
+                                      ShadowDepth="2"
+                                      Opacity="0.10"
+                                      Color="#102033" />
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <Style x:Key="CleanDataGrid" TargetType="DataGrid">
@@ -13,9 +23,34 @@
             <Setter Property="GridLinesVisibility" Value="Horizontal" />
             <Setter Property="HorizontalGridLinesBrush" Value="#E2E8F0" />
             <Setter Property="HeadersVisibility" Value="Column" />
-            <Setter Property="RowHeight" Value="38" />
+            <Setter Property="RowHeight" Value="44" />
             <Setter Property="ColumnHeaderHeight" Value="34" />
             <Setter Property="CanUserResizeRows" Value="False" />
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+        </Style>
+
+        <Style x:Key="CenteredCellText" TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="LeagueRowStyle" TargetType="DataGridRow">
+            <Setter Property="Background" Value="White" />
+            <Setter Property="BorderBrush" Value="#E2E8F0" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsSelectedTeam}" Value="True">
+                    <Setter Property="Background" Value="#FFF3C4" />
+                    <Setter Property="BorderBrush" Value="#F2B600" />
+                    <Setter Property="BorderThickness" Value="4,0,0,1" />
+                    <Setter Property="FontWeight" Value="Bold" />
+                </DataTrigger>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#F3F6FA" />
+                </Trigger>
+            </Style.Triggers>
         </Style>
     </UserControl.Resources>
 
@@ -67,7 +102,104 @@
                              Grid.Row="1"
                              BorderThickness="0"
                              Background="Transparent"
-                             FontSize="15" />
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="Margin" Value="0" />
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="BorderThickness" Value="0" />
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border Margin="0,0,0,10"
+                                        Padding="12"
+                                        CornerRadius="13"
+                                        Background="{Binding RowBackground}"
+                                        BorderBrush="{Binding BorderBrush}"
+                                        BorderThickness="{Binding BorderThickness}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="34" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="112" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="34" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <Image Grid.Column="0"
+                                               Source="{Binding HomeLogoPath}"
+                                               Width="28"
+                                               Height="28"
+                                               Stretch="Uniform"
+                                               VerticalAlignment="Center" />
+
+                                        <StackPanel Grid.Column="1"
+                                                    Margin="10,0"
+                                                    VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding HomeTeamName}"
+                                                       Foreground="#102033"
+                                                       FontSize="13"
+                                                       FontWeight="Bold"
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <Border Background="#D9F1E1"
+                                                    CornerRadius="8"
+                                                    Padding="6,1"
+                                                    HorizontalAlignment="Left"
+                                                    Margin="0,4,0,0">
+                                                <TextBlock Text="HOME"
+                                                           Foreground="#236B39"
+                                                           FontSize="8"
+                                                           FontWeight="Black" />
+                                            </Border>
+                                        </StackPanel>
+
+                                        <Border Grid.Column="2"
+                                                Background="#102033"
+                                                CornerRadius="12"
+                                                Padding="10,6"
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding ScoreText}"
+                                                       Foreground="White"
+                                                       FontSize="18"
+                                                       FontWeight="Black"
+                                                       TextAlignment="Center" />
+                                        </Border>
+
+                                        <StackPanel Grid.Column="3"
+                                                    Margin="10,0"
+                                                    VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding AwayTeamName}"
+                                                       Foreground="#102033"
+                                                       FontSize="13"
+                                                       FontWeight="Bold"
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <Border Background="#FFE4BF"
+                                                    CornerRadius="8"
+                                                    Padding="6,1"
+                                                    HorizontalAlignment="Left"
+                                                    Margin="0,4,0,0">
+                                                <TextBlock Text="AWAY"
+                                                           Foreground="#8A4E00"
+                                                           FontSize="8"
+                                                           FontWeight="Black" />
+                                            </Border>
+                                        </StackPanel>
+
+                                        <Image Grid.Column="4"
+                                               Source="{Binding AwayLogoPath}"
+                                               Width="28"
+                                               Height="28"
+                                               Stretch="Uniform"
+                                               VerticalAlignment="Center" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
                 </Grid>
             </Border>
 
@@ -86,19 +218,32 @@
                     <DataGrid x:Name="LeagueTableDataGrid"
                               Grid.Row="1"
                               Style="{StaticResource CleanDataGrid}"
+                              RowStyle="{StaticResource LeagueRowStyle}"
                               AutoGenerateColumns="False"
                               IsReadOnly="True"
                               CanUserAddRows="False">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Club" Binding="{Binding TeamName}" Width="*" />
-                            <DataGridTextColumn Header="MP" Binding="{Binding Played}" Width="48" />
-                            <DataGridTextColumn Header="W" Binding="{Binding Wins}" Width="42" />
-                            <DataGridTextColumn Header="D" Binding="{Binding Draws}" Width="42" />
-                            <DataGridTextColumn Header="L" Binding="{Binding Losses}" Width="42" />
-                            <DataGridTextColumn Header="GF" Binding="{Binding GoalsFor}" Width="48" />
-                            <DataGridTextColumn Header="GA" Binding="{Binding GoalsAgainst}" Width="48" />
-                            <DataGridTextColumn Header="GD" Binding="{Binding GoalDifference}" Width="52" />
-                            <DataGridTextColumn Header="Pts" Binding="{Binding Points}" Width="56" />
+                            <DataGridTemplateColumn Header="" Width="42">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Image Source="{Binding LogoPath}"
+                                               Width="26"
+                                               Height="26"
+                                               Stretch="Uniform"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Club" Binding="{Binding Club}" Width="*" />
+                            <DataGridTextColumn Header="MP" Binding="{Binding Played}" Width="48" ElementStyle="{StaticResource CenteredCellText}" />
+                            <DataGridTextColumn Header="W" Binding="{Binding Wins}" Width="42" ElementStyle="{StaticResource CenteredCellText}" />
+                            <DataGridTextColumn Header="D" Binding="{Binding Draws}" Width="42" ElementStyle="{StaticResource CenteredCellText}" />
+                            <DataGridTextColumn Header="L" Binding="{Binding Losses}" Width="42" ElementStyle="{StaticResource CenteredCellText}" />
+                            <DataGridTextColumn Header="GF" Binding="{Binding GoalsFor}" Width="48" ElementStyle="{StaticResource CenteredCellText}" />
+                            <DataGridTextColumn Header="GA" Binding="{Binding GoalsAgainst}" Width="48" ElementStyle="{StaticResource CenteredCellText}" />
+                            <DataGridTextColumn Header="GD" Binding="{Binding GoalDifference}" Width="52" ElementStyle="{StaticResource CenteredCellText}" />
+                            <DataGridTextColumn Header="Pts" Binding="{Binding Points}" Width="56" ElementStyle="{StaticResource CenteredCellText}" />
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>

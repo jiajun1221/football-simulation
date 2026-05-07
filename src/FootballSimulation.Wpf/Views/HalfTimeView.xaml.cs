@@ -7,6 +7,7 @@ using System.Windows.Media.Imaging;
 using FootballSimulation.Engine;
 using FootballSimulation.Models;
 using FootballSimulation.Services;
+using FootballSimulation.Wpf.Helpers;
 using FootballSimulation.Wpf.Models;
 using FootballSimulation.Wpf.Services;
 using FootballSimulation.Wpf.State;
@@ -75,8 +76,13 @@ public partial class HalfTimeView : UserControl
             return;
         }
 
-        _pitchSlots = OrderPlayersForPitch(_state.SelectedTeam.Players, _state.SelectedTeam.Formation).ToList();
-        _state.SelectedTeam.Players = _pitchSlots.ToList();
+        _pitchSlots = OrderPlayersForPitch(GetActivePitchPlayers(_state.SelectedTeam), _state.SelectedTeam.Formation).ToList();
+        if (_selectedStarter is not null && !IsActivePitchPlayer(_selectedStarter))
+        {
+            _selectedStarter = null;
+            UpdateSelectedPlayerDetails();
+        }
+
         AssignFormationPositions();
     }
 
@@ -119,7 +125,7 @@ public partial class HalfTimeView : UserControl
             return;
         }
 
-        if (_pitchSlots.Count != _state.SelectedTeam.Players.Count)
+        if (_pitchSlots.Count != GetActivePitchPlayers(_state.SelectedTeam).Count())
         {
             InitializePitchSlots();
         }
@@ -198,7 +204,7 @@ public partial class HalfTimeView : UserControl
     private PitchPlayerCard CreatePitchPlayerCard(Player player)
     {
         PositionSuitabilityService.EnsurePositionMetadata(player);
-        var form = GetFormBadge(player.CurrentForm);
+        var form = PlayerFormBadgeHelper.Create(player.FormStatus);
         var isOutOfPosition = PositionSuitabilityService.IsOutOfPosition(player);
         var suitability = PositionSuitabilityService.GetEffectivenessMultiplier(player);
         var ratingVisual = GetRatingVisual(player, suitability);
@@ -241,8 +247,8 @@ public partial class HalfTimeView : UserControl
             _state.SelectedTeam.Formation = formation;
             if (!_isLoadingSetup)
             {
-                _pitchSlots = OrderPlayersForPitch(_state.SelectedTeam.Players, formation).ToList();
-                _state.SelectedTeam.Players = _pitchSlots.ToList();
+                _pitchSlots = OrderPlayersForPitch(GetActivePitchPlayers(_state.SelectedTeam), formation).ToList();
+                SyncActivePitchSlotsIntoTeamPlayers();
             }
         }
 
@@ -267,6 +273,12 @@ public partial class HalfTimeView : UserControl
             return;
         }
 
+        if (!starter.IsOnPitch || starter.IsSentOff)
+        {
+            MessageBox.Show("Sent-off players cannot be replaced.");
+            return;
+        }
+
         var usedSubstitutions = GetUsedSubstitutions();
         if (usedSubstitutions >= MatchConstants.MaxSubstitutionsPerTeam)
         {
@@ -274,7 +286,7 @@ public partial class HalfTimeView : UserControl
             return;
         }
 
-        _state.SelectedTeam.Players = _pitchSlots.ToList();
+        SyncActivePitchSlotsIntoTeamPlayers();
         PositionSuitabilityService.EnsurePositionMetadata(starter);
         PositionSuitabilityService.EnsurePositionMetadata(substitute);
         var incomingAssignedPosition = starter.AssignedPosition;
@@ -296,7 +308,7 @@ public partial class HalfTimeView : UserControl
         starter.AssignedPosition = starter.PreferredPosition;
         PositionSuitabilityService.EnsurePositionMetadata(substitute, incomingAssignedPosition);
 
-        _pitchSlots = _state.SelectedTeam.Players.ToList();
+        _pitchSlots = GetActivePitchPlayers(_state.SelectedTeam).ToList();
         Debug.WriteLine(
             $"[HalfTimeDrag] Swapped Sub<->StartingXI: {substitute.Name} -> slot {_pitchSlots.IndexOf(substitute)} ({substitute.AssignedPosition}); " +
             $"{starter.Name} -> substitute index {_state.SelectedTeam.Substitutes.IndexOf(starter)}");
@@ -315,6 +327,7 @@ public partial class HalfTimeView : UserControl
         }
 
         var benchCards = _state.SelectedTeam.Substitutes
+            .Where(player => !player.IsSentOff)
             .Select(CreateBenchPlayerCard)
             .ToList();
 
@@ -327,7 +340,7 @@ public partial class HalfTimeView : UserControl
     private static BenchPlayerCard CreateBenchPlayerCard(Player player)
     {
         PositionSuitabilityService.EnsurePositionMetadata(player);
-        var form = GetFormBadge(player.CurrentForm);
+        var form = PlayerFormBadgeHelper.Create(player.FormStatus);
 
         return new BenchPlayerCard
         {
@@ -364,34 +377,111 @@ public partial class HalfTimeView : UserControl
         }
 
         PositionSuitabilityService.EnsurePositionMetadata(_selectedStarter);
-        var suitability = PositionSuitabilityService.GetEffectivenessMultiplier(_selectedStarter);
-        var form = GetFormBadge(_selectedStarter.CurrentForm);
-        var ratingVisual = GetRatingVisual(_selectedStarter, suitability);
+        var team = FindSelectedPlayerTeam(_selectedStarter);
+        var performance = FindSelectedPlayerPerformance(_selectedStarter, team);
+        var rating = performance?.Rating ?? 6.0;
+        var passAccuracy = GetEstimatedPassAccuracy(team, rating, _selectedStarter.Stamina);
+        var formBadge = PlayerFormBadgeHelper.Create(_selectedStarter.FormStatus);
 
         SelectedPlayerEmptyTextBlock.Visibility = Visibility.Collapsed;
         SelectedPlayerCard.Visibility = Visibility.Visible;
         SelectedPlayerCard.DataContext = _selectedStarter;
 
-        SelectedPlayerImage.Source = CreateImageSource(GetPlayerImagePath(_selectedStarter));
-        SelectedPlayerNumberTextBlock.Text = _selectedStarter.SquadNumber > 0 ? $"#{_selectedStarter.SquadNumber}" : "No squad number";
         SelectedPlayerNameTextBlock.Text = _selectedStarter.Name;
-        SelectedPlayerPositionChip.Text = $"Playing {_selectedStarter.AssignedPosition}";
-        SelectedPlayerPreferredChip.Text = GetPositionGroupText(_selectedStarter);
-        SelectedPlayerOvrBadgeTextBlock.Text = ratingVisual.Rating.ToString();
-        SelectedPlayerOvrBadgeBorder.Background = ToBrush(ratingVisual.Background);
-        SelectedPlayerFormChip.Text = form.Text;
-        SelectedPlayerFormChip.Foreground = ToBrush(form.Foreground);
-        SelectedPlayerFormChipBorder.Background = ToBrush(form.Background);
-        SelectedPlayerInjuryChip.Text = _selectedStarter.IsInjured ? "Injured" : "Fit";
-        SelectedPlayerInjuryChip.Foreground = ToBrush(_selectedStarter.IsInjured ? "#8F1F1F" : "#236B39");
-        SelectedPlayerInjuryChipBorder.Background = ToBrush(_selectedStarter.IsInjured ? "#FFD1D1" : "#D9F1E1");
-        SelectedPlayerStaminaTextBlock.Text = $"{GetStaminaPercentage(_selectedStarter)}% stamina";
-        SelectedPlayerStaminaFill.Foreground = ToBrush(GetStaminaBrush(_selectedStarter));
+        SelectedPlayerMetaTextBlock.Text = $"{team?.Name ?? _state.SelectedTeam?.Name ?? "Team"} | {_selectedStarter.AssignedPosition}";
+        SelectedPlayerFormBadgeBorder.Background = ToBrush(formBadge.Background);
+        SelectedPlayerFormBadgeTextBlock.Foreground = ToBrush(formBadge.Foreground);
+        SelectedPlayerFormBadgeTextBlock.Text = formBadge.Text;
 
-        SelectedPlayerAttackTextBlock.Text = $"Attack {_selectedStarter.Attack}";
-        SelectedPlayerDefenseTextBlock.Text = $"Defense {_selectedStarter.Defense}";
-        SelectedPlayerPassingTextBlock.Text = $"Passing {_selectedStarter.Passing}";
-        SelectedPlayerFinishingTextBlock.Text = $"Finishing {_selectedStarter.Finishing}";
+        if (_selectedStarter.Position == Position.Goalkeeper)
+        {
+            SetSelectedPlayerStatRows(
+                [
+                    new("Rating", rating.ToString("0.0")),
+                    new("Saves", (performance?.Saves ?? 0).ToString()),
+                    new("Clean Sheet", IsCleanSheet(team) ? "Yes" : "No"),
+                    new("Claims", GetEstimatedClaims(performance).ToString()),
+                    new("Punches", GetEstimatedPunches(performance).ToString()),
+                    new("Pass Accuracy", $"{passAccuracy:0}%")
+                ],
+                [
+                    new("Stamina", $"{GetStaminaPercentage(_selectedStarter)}%"),
+                    new("Goals Conceded", GetGoalsConceded(team).ToString()),
+                    new("Fouls", (performance?.Fouls ?? 0).ToString()),
+                    new("Cards", GetCardsText(_selectedStarter, performance)),
+                    new("Status", GetMatchStatusText(_selectedStarter)),
+                    new("Injury", _selectedStarter.IsInjured || performance?.Injuries > 0 ? "Injured" : "None")
+                ]);
+            return;
+        }
+
+        SetSelectedPlayerStatRows(
+            [
+                new("Rating", rating.ToString("0.0")),
+                new("Goals", (performance?.Goals ?? 0).ToString()),
+                new("Assists", (performance?.Assists ?? 0).ToString()),
+                new("Shots", (performance?.Shots ?? 0).ToString()),
+                new("Successful Tackles", (performance?.Tackles ?? 0).ToString()),
+                new("Interceptions", (performance?.Interceptions ?? 0).ToString())
+            ],
+            [
+                new("Stamina", $"{GetStaminaPercentage(_selectedStarter)}%"),
+                new("Pass Accuracy", $"{passAccuracy:0}%"),
+                new("Duels Won", GetDuelsWon(performance).ToString()),
+                new("Fouls", (performance?.Fouls ?? 0).ToString()),
+                new("Cards", GetCardsText(_selectedStarter, performance)),
+                new("Status", GetMatchStatusText(_selectedStarter))
+            ]);
+    }
+
+    private Team? FindSelectedPlayerTeam(Player player)
+    {
+        if (_state.CurrentMatch is null)
+        {
+            return _state.SelectedTeam;
+        }
+
+        if (_state.CurrentMatch.HomeTeam.Players.Concat(_state.CurrentMatch.HomeTeam.Substitutes).Contains(player))
+        {
+            return _state.CurrentMatch.HomeTeam;
+        }
+
+        if (_state.CurrentMatch.AwayTeam.Players.Concat(_state.CurrentMatch.AwayTeam.Substitutes).Contains(player))
+        {
+            return _state.CurrentMatch.AwayTeam;
+        }
+
+        return _state.SelectedTeam;
+    }
+
+    private PlayerMatchPerformance? FindSelectedPlayerPerformance(Player player, Team? team)
+    {
+        return _state.CurrentMatch?.PlayerPerformances.FirstOrDefault(performance =>
+            string.Equals(performance.PlayerName, player.Name, StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(performance.TeamName, team?.Name, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private void SetSelectedPlayerStatRows(IReadOnlyList<PlayerStatRow> leftRows, IReadOnlyList<PlayerStatRow> rightRows)
+    {
+        SetPlayerStatRow(SelectedPlayerLeftStat1Label, SelectedPlayerLeftStat1Value, leftRows[0]);
+        SetPlayerStatRow(SelectedPlayerLeftStat2Label, SelectedPlayerLeftStat2Value, leftRows[1]);
+        SetPlayerStatRow(SelectedPlayerLeftStat3Label, SelectedPlayerLeftStat3Value, leftRows[2]);
+        SetPlayerStatRow(SelectedPlayerLeftStat4Label, SelectedPlayerLeftStat4Value, leftRows[3]);
+        SetPlayerStatRow(SelectedPlayerLeftStat5Label, SelectedPlayerLeftStat5Value, leftRows[4]);
+        SetPlayerStatRow(SelectedPlayerLeftStat6Label, SelectedPlayerLeftStat6Value, leftRows[5]);
+
+        SetPlayerStatRow(SelectedPlayerRightStat1Label, SelectedPlayerRightStat1Value, rightRows[0]);
+        SetPlayerStatRow(SelectedPlayerRightStat2Label, SelectedPlayerRightStat2Value, rightRows[1]);
+        SetPlayerStatRow(SelectedPlayerRightStat3Label, SelectedPlayerRightStat3Value, rightRows[2]);
+        SetPlayerStatRow(SelectedPlayerRightStat4Label, SelectedPlayerRightStat4Value, rightRows[3]);
+        SetPlayerStatRow(SelectedPlayerRightStat5Label, SelectedPlayerRightStat5Value, rightRows[4]);
+        SetPlayerStatRow(SelectedPlayerRightStat6Label, SelectedPlayerRightStat6Value, rightRows[5]);
+    }
+
+    private static void SetPlayerStatRow(TextBlock label, TextBlock value, PlayerStatRow row)
+    {
+        label.Text = row.Label;
+        value.Text = row.Value;
     }
 
     private void RefreshTacticalInsight()
@@ -445,6 +535,99 @@ public partial class HalfTimeView : UserControl
             >= 25 => "#E8872E",
             _ => "#D94343"
         };
+    }
+
+    private double GetEstimatedPassAccuracy(Team? team, double rating, double stamina)
+    {
+        if (_state.CurrentMatch is null || team is null)
+        {
+            return Math.Clamp(68 + rating * 2.0 + stamina / 12.0, 55, 96);
+        }
+
+        var teamStats = team == _state.CurrentMatch.HomeTeam
+            ? _state.CurrentMatch.HomeStats
+            : _state.CurrentMatch.AwayStats;
+        var baseline = teamStats.PassAccuracyPercentage > 0 ? teamStats.PassAccuracyPercentage : 78.0;
+
+        return Math.Round(Math.Clamp(baseline + (rating - 6.5) * 1.8 + (stamina - 70) * 0.04, 55, 96), 1);
+    }
+
+    private bool IsCleanSheet(Team? team)
+    {
+        return GetGoalsConceded(team) == 0;
+    }
+
+    private int GetGoalsConceded(Team? team)
+    {
+        if (_state.CurrentMatch is null || team is null)
+        {
+            return 0;
+        }
+
+        return team == _state.CurrentMatch.HomeTeam
+            ? _state.CurrentMatch.AwayScore
+            : _state.CurrentMatch.HomeScore;
+    }
+
+    private static int GetEstimatedPunches(PlayerMatchPerformance? performance)
+    {
+        return performance is null ? 0 : performance.Saves / 3;
+    }
+
+    private static int GetEstimatedClaims(PlayerMatchPerformance? performance)
+    {
+        return performance is null ? 0 : Math.Max(0, performance.Saves / 2 + performance.Clearances);
+    }
+
+    private static int GetDuelsWon(PlayerMatchPerformance? performance)
+    {
+        return performance is null
+            ? 0
+            : performance.Tackles + performance.Blocks + performance.Clearances;
+    }
+
+    private static string GetCardsText(Player player, PlayerMatchPerformance? performance)
+    {
+        var yellowCards = Math.Max(player.YellowCards, performance?.YellowCards ?? 0);
+        var redCards = Math.Max(player.IsSentOff ? 1 : 0, performance?.RedCards ?? 0);
+        var cards = new List<string>();
+
+        if (yellowCards > 0)
+        {
+            cards.Add($"{YellowCardIcon()} {yellowCards}");
+        }
+
+        if (redCards > 0)
+        {
+            cards.Add($"{RedCardIcon()} {redCards}");
+        }
+
+        return cards.Count == 0 ? "None" : string.Join(" ", cards);
+    }
+
+    private static string GetMatchStatusText(Player player)
+    {
+        if (player.IsSentOff)
+        {
+            return "Sent off";
+        }
+
+        if (player.IsInjured)
+        {
+            return "Injured";
+        }
+
+        return player.IsOnPitch ? "On pitch" : "Bench";
+    }
+
+    private static string YellowCardIcon()
+    {
+        return char.ConvertFromUtf32(0x1F7E8);
+    }
+
+    private static string RedCardIcon()
+    {
+        return char.ConvertFromUtf32(0x1F7E5);
     }
 
     private static string GetPlayerImagePath(Player player)
@@ -520,18 +703,6 @@ public partial class HalfTimeView : UserControl
             : $" | Sec {string.Join("/", player.SecondaryPositions)}";
 
         return $"Pref {player.PreferredPosition}{naturalPositions}{secondaryPositions}";
-    }
-
-    private static FormBadge GetFormBadge(int currentForm)
-    {
-        return currentForm switch
-        {
-            >= 80 => new FormBadge("Hot", "#D9F1E1", "#236B39"),
-            >= 65 => new FormBadge("Good", "#E7F7EA", "#2F7D42"),
-            >= 40 => new FormBadge("Average", "#FFF0A3", "#5F4500"),
-            > 0 => new FormBadge("Poor", "#FFD1D1", "#8F1F1F"),
-            _ => new FormBadge("Inactive", "#E1E5EA", "#465364")
-        };
     }
 
     private void PitchCanvas_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -795,7 +966,7 @@ public partial class HalfTimeView : UserControl
         }
 
         (_pitchSlots[draggedIndex], _pitchSlots[targetIndex]) = (_pitchSlots[targetIndex], _pitchSlots[draggedIndex]);
-        _state.SelectedTeam.Players = _pitchSlots.ToList();
+        SyncActivePitchSlotsIntoTeamPlayers();
         AssignFormationPositions();
 
         Debug.WriteLine(
@@ -910,9 +1081,41 @@ public partial class HalfTimeView : UserControl
         team.Tactics.DefensiveLine = (int)Math.Round(DefensiveLineSlider.Value);
     }
 
+    private void SyncActivePitchSlotsIntoTeamPlayers()
+    {
+        if (_state.SelectedTeam is null)
+        {
+            return;
+        }
+
+        var activeSlots = new Queue<Player>(_pitchSlots.Where(IsActivePitchPlayer));
+        for (var index = 0; index < _state.SelectedTeam.Players.Count && activeSlots.Count > 0; index++)
+        {
+            var currentPlayer = _state.SelectedTeam.Players[index];
+            if (!IsActivePitchPlayer(currentPlayer))
+            {
+                continue;
+            }
+
+            _state.SelectedTeam.Players[index] = activeSlots.Dequeue();
+        }
+    }
+
+    private static IEnumerable<Player> GetActivePitchPlayers(Team team)
+    {
+        return team.Players.Where(IsActivePitchPlayer);
+    }
+
+    private static bool IsActivePitchPlayer(Player player)
+    {
+        return player.IsOnPitch && !player.IsSentOff;
+    }
+
     private IEnumerable<Player> OrderPlayersForPitch(IEnumerable<Player> players, string formation)
     {
-        var remainingPlayers = players.ToList();
+        var remainingPlayers = players
+            .Where(IsActivePitchPlayer)
+            .ToList();
         var orderedPlayers = new List<Player>();
         var formationSlots = _formationLayoutService.GetPositions(formation);
 
@@ -973,9 +1176,9 @@ public partial class HalfTimeView : UserControl
         };
     }
 
-    private sealed record FormBadge(string Text, string Background, string Foreground);
-
     private sealed record RatingVisual(int Rating, string Foreground, string Background);
+
+    private sealed record PlayerStatRow(string Label, string Value);
 
     private enum DragSource
     {

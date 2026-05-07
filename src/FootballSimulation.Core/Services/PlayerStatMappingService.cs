@@ -11,7 +11,9 @@ public class PlayerStatMappingService
         var overall = ClampStat(record.OverallRating);
         var fatigue = Math.Clamp(record.Fatigue ?? 0, 0, 100);
         var stamina = ClampStat(record.Stamina ?? CalculateStamina(position, overall));
-        var form = NormalizeForm(record.Form);
+        var loadedStatus = PlayerFormStatusService.FromLoadedForm(record.FormStatus ?? record.Form, record.CurrentForm ?? 50);
+        var form = PlayerFormStatusService.ToDisplayText(loadedStatus);
+        var currentForm = PlayerFormStatusService.ToCurrentForm(loadedStatus);
 
         return new Player
         {
@@ -25,7 +27,9 @@ public class PlayerStatMappingService
             OverallRating = overall,
             Form = form,
             IsStarter = record.IsStarter,
-            CurrentForm = ClampStat(record.CurrentForm ?? MapFormToCurrentForm(form)),
+            IsOnPitch = record.IsStarter,
+            CurrentForm = currentForm,
+            FormStatus = loadedStatus,
             Morale = ClampStat(record.Morale ?? 50),
             Traits = MapTraits(record.Traits),
             Attack = CalculateAttack(position, overall),
@@ -47,7 +51,9 @@ public class PlayerStatMappingService
         var overall = ClampStat(record.OverallRating);
         var fatigue = Math.Clamp(record.Fatigue, 0, 100);
         var stamina = ClampStat(record.Stamina ?? CalculateStamina(position, overall));
-        var form = NormalizeForm(record.Form);
+        var loadedStatus = PlayerFormStatusService.FromLoadedForm(record.FormStatus ?? record.Form, MapFormToCurrentForm(record.Form));
+        var form = PlayerFormStatusService.ToDisplayText(loadedStatus);
+        var currentForm = PlayerFormStatusService.ToCurrentForm(loadedStatus);
 
         return new Player
         {
@@ -61,7 +67,9 @@ public class PlayerStatMappingService
             OverallRating = overall,
             Form = form,
             IsStarter = isStarter,
-            CurrentForm = MapFormToCurrentForm(form),
+            IsOnPitch = isStarter,
+            CurrentForm = currentForm,
+            FormStatus = loadedStatus,
             Morale = ClampStat(record.Morale ?? 50),
             Traits = MapTraits(record.Traits),
             Attack = CalculateAttack(position, overall),

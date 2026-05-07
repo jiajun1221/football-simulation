@@ -34,6 +34,7 @@ public class TeamStrengthCalculatorTests
         var reducedDefense = calculator.CalculateDefenseStrength(team);
 
         Assert.True(reducedDefense < fullStrengthDefense);
+        Assert.True(reducedDefense < fullStrengthDefense * 0.85);
     }
 
     [Fact]

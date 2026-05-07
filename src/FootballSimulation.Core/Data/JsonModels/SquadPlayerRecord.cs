@@ -12,6 +12,7 @@ public class SquadPlayerRecord
     public int? Stamina { get; set; }
     public int Fatigue { get; set; }
     public string Form { get; set; } = "Average";
+    public string? FormStatus { get; set; }
     public bool IsStarter { get; set; }
     public List<string> Traits { get; set; } = [];
     public int? Morale { get; set; }

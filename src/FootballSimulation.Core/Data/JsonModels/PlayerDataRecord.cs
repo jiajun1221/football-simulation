@@ -14,6 +14,7 @@ public class PlayerDataRecord
     public int? Stamina { get; set; }
     public bool IsStarter { get; set; }
     public string? Form { get; set; }
+    public string? FormStatus { get; set; }
     public List<string> Traits { get; set; } = [];
     public int? CurrentForm { get; set; }
     public int? Morale { get; set; }

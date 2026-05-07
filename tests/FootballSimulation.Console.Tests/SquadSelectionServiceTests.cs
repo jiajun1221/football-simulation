@@ -21,6 +21,8 @@ public class SquadSelectionServiceTests
         Assert.Contains(starter, team.Substitutes);
         Assert.True(substitute.IsStarter);
         Assert.False(starter.IsStarter);
+        Assert.True(substitute.IsOnPitch);
+        Assert.False(starter.IsOnPitch);
     }
 
     [Fact]
@@ -74,6 +76,25 @@ public class SquadSelectionServiceTests
         Assert.True(substitute.CurrentStamina > starter.CurrentStamina);
     }
 
+    [Fact]
+    public void SwapStarterWithSubstitute_RejectsSentOffStarter()
+    {
+        var service = new SquadSelectionService();
+        var team = CreateTeam();
+        var starter = team.Players[1];
+        var substitute = team.Substitutes[1];
+        starter.IsSentOff = true;
+        starter.IsOnPitch = false;
+
+        var result = service.SwapStarterWithSubstitute(team, starter, substitute);
+
+        Assert.False(result.Success);
+        Assert.Contains(starter, team.Players);
+        Assert.Contains(substitute, team.Substitutes);
+        Assert.False(substitute.IsStarter);
+        Assert.False(substitute.IsOnPitch);
+    }
+
     private static Team CreateTeam(string name = "Test FC", int substituteCount = 7)
     {
         var players = new List<Player>
@@ -114,6 +135,7 @@ public class SquadSelectionServiceTests
             OverallRating = 75,
             Form = "Average",
             IsStarter = isStarter,
+            IsOnPitch = isStarter,
             Attack = 75,
             Defense = 75,
             Passing = 75,

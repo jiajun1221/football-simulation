@@ -17,9 +17,9 @@ public class PitchPlayerCard
     public string MatchStatsText { get; init; } = string.Empty;
     public double Stamina { get; init; }
     public string StaminaBrush { get; init; } = "#2FA84F";
-    public string FormBadgeText { get; init; } = "Average";
-    public string FormBadgeBackground { get; init; } = "#FFE36B";
-    public string FormBadgeForeground { get; init; } = "#5F4500";
+    public string FormBadgeText { get; init; } = string.Empty;
+    public string FormBadgeBackground { get; init; } = "#E1E5EA";
+    public string FormBadgeForeground { get; init; } = "#465364";
     public string CardBackground { get; init; } = "#FFFFFF";
     public string CardBorderBrush { get; init; } = "#102033";
     public Thickness CardBorderThickness { get; init; } = new(1);

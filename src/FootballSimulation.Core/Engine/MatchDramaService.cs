@@ -57,22 +57,6 @@ public class MatchDramaService
             };
         }
 
-        if (ShouldCreatePenalty(context))
-        {
-            var team = ChooseStrongerAttack(context);
-            var taker = ChooseAttackingPlayer(team, context.Random);
-            var converted = context.Random.NextDouble() < GetPenaltyConversionChance(taker);
-
-            return new MatchDramaResult
-            {
-                EventType = EventType.Penalty,
-                Team = team,
-                Player = taker,
-                ScoresGoal = converted,
-                PenaltyConverted = converted
-            };
-        }
-
         if (ShouldCreateDefensiveError(context))
         {
             var defendingTeam = ChooseWeakerDefense(context);
@@ -92,7 +76,12 @@ public class MatchDramaService
 
     private static double CalculateDramaChance(MatchEventContext context)
     {
-        var averageFatigue = context.HomeTeam.Players.Concat(context.AwayTeam.Players).Average(player => 100 - player.Stamina);
+        var activePlayers = GetActivePlayers(context.HomeTeam)
+            .Concat(GetActivePlayers(context.AwayTeam))
+            .ToList();
+        var averageFatigue = activePlayers.Count == 0
+            ? 0
+            : activePlayers.Average(player => 100 - player.Stamina);
         var averagePressing = (context.HomeTeam.Tactics.PressingIntensity + context.AwayTeam.Tactics.PressingIntensity) / 2.0;
         var lateGameBonus = context.Minute >= 70 ? 0.03 : 0.0;
 
@@ -103,6 +92,7 @@ public class MatchDramaService
     {
         return context.HomeTeam.Players
             .Concat(context.AwayTeam.Players)
+            .Where(IsActivePlayer)
             .Where(player => player.Stamina < 45)
             .OrderBy(player => player.Stamina)
             .FirstOrDefault();
@@ -112,7 +102,7 @@ public class MatchDramaService
     {
         return context.HomeTeam.Players
             .Concat(context.AwayTeam.Players)
-            .Where(player => !player.IsInjured &&
+            .Where(player => IsActivePlayer(player) && !player.IsInjured &&
                 (player.Traits.Contains(PlayerTrait.InjuryProne) ||
                 player.Stamina <= 25 ||
                 GetStaminaRatio(player) < 0.30 ||
@@ -152,17 +142,9 @@ public class MatchDramaService
 
     private static bool ShouldCreateWonderGoal(MatchEventContext context)
     {
-        var players = context.HomeTeam.Players.Concat(context.AwayTeam.Players);
+        var players = GetActivePlayers(context.HomeTeam).Concat(GetActivePlayers(context.AwayTeam));
         return players.Any(player => player.Traits.Contains(PlayerTrait.LongShotTaker) || player.Traits.Contains(PlayerTrait.BigMatchPlayer))
             && context.Random.NextDouble() < 0.22;
-    }
-
-    private static bool ShouldCreatePenalty(MatchEventContext context)
-    {
-        var aggressiveDefenders = context.HomeTeam.Players.Concat(context.AwayTeam.Players)
-            .Count(player => player.Traits.Contains(PlayerTrait.AggressiveTackler));
-
-        return context.Random.NextDouble() < 0.12 + aggressiveDefenders * 0.015;
     }
 
     private static bool ShouldCreateDefensiveError(MatchEventContext context)
@@ -186,13 +168,7 @@ public class MatchDramaService
             return new MatchDramaResult { EventType = EventType.GoalkeeperHeroics, Team = defendingTeam, Player = ChooseGoalkeeper(defendingTeam) };
         }
 
-        if (roll < 0.52)
-        {
-            var attackingTeam = ChooseStrongerAttack(context);
-            return new MatchDramaResult { EventType = EventType.SetPieceDanger, Team = attackingTeam, Player = ChooseSetPiecePlayer(attackingTeam, context.Random), HomeAttackModifier = 1.06, AwayAttackModifier = 1.06 };
-        }
-
-        if (roll < 0.70)
+        if (roll < 0.64)
         {
             var team = context.HomeTeam.Tactics.PressingIntensity >= context.AwayTeam.Tactics.PressingIntensity ? context.HomeTeam : context.AwayTeam;
             return new MatchDramaResult { EventType = EventType.Confrontation, Team = team, Player = ChooseDefensivePlayer(team, context.Random) };
@@ -219,29 +195,31 @@ public class MatchDramaService
 
     private static Player ChooseAttackingPlayer(Team team, Random random)
     {
-        var players = team.Players
+        var players = GetActivePlayers(team)
             .Where(player => player.Position is Position.Forward or Position.Midfielder)
             .OrderByDescending(player => player.Attack + player.Finishing + player.CurrentForm)
             .Take(4)
             .ToList();
 
-        return players.Count == 0 ? team.Players[random.Next(team.Players.Count)] : players[random.Next(players.Count)];
+        var activePlayers = GetActivePlayers(team);
+        return players.Count == 0 ? activePlayers[random.Next(activePlayers.Count)] : players[random.Next(players.Count)];
     }
 
     private static Player ChooseDefensivePlayer(Team team, Random random)
     {
-        var players = team.Players
+        var players = GetActivePlayers(team)
             .Where(player => player.Position is Position.Defender or Position.Midfielder)
             .OrderByDescending(player => player.Defense)
             .Take(5)
             .ToList();
 
-        return players.Count == 0 ? team.Players[random.Next(team.Players.Count)] : players[random.Next(players.Count)];
+        var activePlayers = GetActivePlayers(team);
+        return players.Count == 0 ? activePlayers[random.Next(activePlayers.Count)] : players[random.Next(players.Count)];
     }
 
     private static Player ChooseSetPiecePlayer(Team team, Random random)
     {
-        var player = team.Players
+        var player = GetActivePlayers(team)
             .Where(candidate => candidate.Traits.Contains(PlayerTrait.SetPieceSpecialist) || candidate.Traits.Contains(PlayerTrait.AerialThreat))
             .OrderByDescending(candidate => candidate.Passing + candidate.Finishing)
             .FirstOrDefault();
@@ -251,18 +229,31 @@ public class MatchDramaService
 
     private static Player ChooseGoalkeeper(Team team)
     {
-        return team.Players.FirstOrDefault(player => player.Position == Position.Goalkeeper) ?? team.Players[0];
-    }
-
-    private static double GetPenaltyConversionChance(Player player)
-    {
-        var traitBonus = player.Traits.Contains(PlayerTrait.ClinicalFinisher) ? 0.08 : 0.0;
-        return Math.Clamp(0.68 + player.Finishing / 450.0 + traitBonus, 0.60, 0.88);
+        var activePlayers = GetActivePlayers(team);
+        return activePlayers.FirstOrDefault(player => player.Position == Position.Goalkeeper) ??
+            activePlayers.FirstOrDefault() ??
+            team.Players.First();
     }
 
     private static Team GetTeamForPlayer(MatchEventContext context, Player player)
     {
         return context.HomeTeam.Players.Contains(player) ? context.HomeTeam : context.AwayTeam;
+    }
+
+    private static List<Player> GetActivePlayers(Team team)
+    {
+        var activePlayers = team.Players
+            .Where(IsActivePlayer)
+            .ToList();
+
+        return activePlayers.Count > 0
+            ? activePlayers
+            : team.Players.Where(player => !player.IsSentOff).ToList();
+    }
+
+    private static bool IsActivePlayer(Player player)
+    {
+        return player.IsOnPitch && !player.IsSentOff;
     }
 }
 

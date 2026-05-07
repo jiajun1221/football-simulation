@@ -66,15 +66,43 @@ public class PremierLeagueDataServiceTests
     }
 
     [Fact]
-    public void LoadTeams_MapsFormStringIntoCurrentForm()
+    public void LoadTeams_MapsLegacyFormStringIntoFormStatus()
     {
         var dataService = new PremierLeagueDataService();
 
         var teams = dataService.LoadTeams();
-        var hotPlayer = teams
+        var excellentPlayer = teams
             .SelectMany(team => team.Players.Concat(team.Substitutes))
-            .First(player => player.Form == "Hot");
+            .First(player => player.FormStatus == PlayerFormStatus.Excellent);
 
-        Assert.Equal(85, hotPlayer.CurrentForm);
+        Assert.Equal("Excellent", excellentPlayer.Form);
+        Assert.Equal(85, excellentPlayer.CurrentForm);
+    }
+
+    [Theory]
+    [InlineData(9.2, PlayerFormStatus.Excellent)]
+    [InlineData(8.0, PlayerFormStatus.Good)]
+    [InlineData(7.0, PlayerFormStatus.Average)]
+    [InlineData(5.9, PlayerFormStatus.Poor)]
+    [InlineData(5.2, PlayerFormStatus.Poor)]
+    [InlineData(4.9, PlayerFormStatus.VeryPoor)]
+    public void CalculateFormStatus_UsesLiveThresholds(double rating, PlayerFormStatus expectedStatus)
+    {
+        var player = new Player
+        {
+            Name = "Test Player",
+            Stamina = 100
+        };
+
+        var performance = new PlayerMatchPerformance
+        {
+            PlayerName = player.Name,
+            TeamName = "Chelsea",
+            Rating = rating
+        };
+
+        var status = PlayerFormStatusService.CalculateFormStatus(player, performance);
+
+        Assert.Equal(expectedStatus, status);
     }
 }

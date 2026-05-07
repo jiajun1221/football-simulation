@@ -8,15 +8,19 @@ public class GameSessionService
     public const string PremierLeagueName = "Premier League";
 
     private readonly LeagueEngine _leagueEngine;
+    private readonly PlayerFormPersistenceService _playerFormPersistenceService;
 
     public GameSessionService()
-        : this(new LeagueEngine())
+        : this(new LeagueEngine(), new PlayerFormPersistenceService())
     {
     }
 
-    public GameSessionService(LeagueEngine leagueEngine)
+    public GameSessionService(
+        LeagueEngine leagueEngine,
+        PlayerFormPersistenceService? playerFormPersistenceService = null)
     {
         _leagueEngine = leagueEngine;
+        _playerFormPersistenceService = playerFormPersistenceService ?? new PlayerFormPersistenceService();
     }
 
     public League CreatePremierLeague(List<Team> teams)
@@ -36,6 +40,7 @@ public class GameSessionService
         var fixture = FindNextFixtureForTeam(league, selectedTeam);
         var result = _leagueEngine.SimulateFixture(league, fixture, options: CreateUserMatchOptions(selectedTeam));
         _leagueEngine.SimulateRemainingFixturesInRound(league, fixture.RoundNumber);
+        _playerFormPersistenceService.SaveActiveSquadFormStatuses(league.Teams);
 
         return result;
     }
@@ -76,6 +81,7 @@ public class GameSessionService
         var humanTeam = selectedTeam ?? fixture.HomeTeam;
         var result = _leagueEngine.SimulateFixtureSecondHalf(league, fixture, match, options: CreateUserMatchOptions(humanTeam));
         _leagueEngine.SimulateRemainingFixturesInRound(league, fixture.RoundNumber);
+        _playerFormPersistenceService.SaveActiveSquadFormStatuses(league.Teams);
 
         return result;
     }
@@ -84,11 +90,14 @@ public class GameSessionService
     {
         _leagueEngine.CompleteLiveFixture(league, fixture, match);
         _leagueEngine.SimulateRemainingFixturesInRound(league, fixture.RoundNumber);
+        _playerFormPersistenceService.SaveActiveSquadFormStatuses(league.Teams);
     }
 
     public List<Match> SimulateRemainingRoundFixtures(League league, int roundNumber)
     {
-        return _leagueEngine.SimulateRemainingFixturesInRound(league, roundNumber);
+        var results = _leagueEngine.SimulateRemainingFixturesInRound(league, roundNumber);
+        _playerFormPersistenceService.SaveActiveSquadFormStatuses(league.Teams);
+        return results;
     }
 
     private static bool IsTeamInFixture(Fixture fixture, Team team)
