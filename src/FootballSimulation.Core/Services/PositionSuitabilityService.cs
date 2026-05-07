@@ -42,12 +42,6 @@ public static class PositionSuitabilityService
             .Where(position => position.Length > 0 && position != player.PreferredPosition)
             .Distinct()
             .ToList();
-
-        player.NaturalPositions = player.NaturalPositions
-            .Select(NormalizeExactPosition)
-            .Where(position => position.Length > 0 && position != player.PreferredPosition)
-            .Distinct()
-            .ToList();
     }
 
     public static string NormalizeExactPosition(string? position)
@@ -78,14 +72,12 @@ public static class PositionSuitabilityService
         EnsurePositionMetadata(player);
 
         if (player.AssignedPosition == player.PreferredPosition ||
-            player.NaturalPositions.Contains(player.AssignedPosition))
+            player.SecondaryPositions.Contains(player.AssignedPosition))
         {
             return 1.0;
         }
 
-        return player.SecondaryPositions.Contains(player.AssignedPosition)
-            ? 0.90
-            : 0.70;
+        return 0.70;
     }
 
     public static int GetEffectiveOverall(Player player)

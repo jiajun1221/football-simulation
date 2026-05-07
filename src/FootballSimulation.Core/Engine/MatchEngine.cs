@@ -315,7 +315,7 @@ public class MatchEngine
 
     private static void InitializeAttackFlowState(MatchSimulationState simulationState)
     {
-        var lastEvent = simulationState.Match.Events.LastOrDefault();
+        var lastEvent = simulationState.Match.Events.LastOrDefault(IsPossessionStateEvent);
         if (lastEvent is null)
         {
             SetPossession(simulationState, simulationState.Match.HomeTeam, BallState.Kickoff, null);
@@ -328,6 +328,32 @@ public class MatchEngine
             : null;
         var possessionTeam = InferPossessionAfterEvent(lastEvent, simulationState.Match);
         SetPossession(simulationState, possessionTeam, GetBallStateAfterEvent(lastEvent.EventType), lastEvent.EventType);
+    }
+
+    private static bool IsPossessionStateEvent(MatchEvent matchEvent)
+    {
+        return matchEvent.EventType is EventType.Kickoff
+            or EventType.Attack
+            or EventType.Foul
+            or EventType.Shot
+            or EventType.Goal
+            or EventType.Miss
+            or EventType.Save
+            or EventType.PenaltyDecision
+            or EventType.PenaltyTaker
+            or EventType.Penalty
+            or EventType.Offside
+            or EventType.BadPass
+            or EventType.Miscontrol
+            or EventType.Tackle
+            or EventType.Interception
+            or EventType.Pressure
+            or EventType.BlockedPass
+            or EventType.Turnover
+            or EventType.DefensiveStop
+            or EventType.WonderGoal
+            or EventType.CornerKick
+            or EventType.SetPieceDanger;
     }
 
     private static Team? GetPossessionTeam(MatchSimulationState simulationState)
@@ -375,7 +401,10 @@ public class MatchEngine
         {
             EventType.Attack => actingTeamModel,
             EventType.Foul => opposingTeam,
-            EventType.Turnover => opposingTeam,
+            EventType.PenaltyDecision => opposingTeam,
+            EventType.Turnover => actingTeamModel,
+            EventType.BadPass or EventType.Miscontrol => actingTeamModel,
+            EventType.Tackle or EventType.Interception or EventType.Pressure or EventType.BlockedPass => opposingTeam,
             EventType.DefensiveStop => actingTeamModel,
             EventType.Save => actingTeamModel,
             EventType.Goal => opposingTeam,
@@ -399,8 +428,9 @@ public class MatchEngine
             EventType.Shot or EventType.Save or EventType.Goal or EventType.Miss or EventType.WonderGoal => BallState.Chance,
             EventType.CornerKick => BallState.CornerPending,
             EventType.SetPieceDanger => BallState.SetPiecePending,
-            EventType.Foul or EventType.Offside or EventType.Penalty => BallState.SetPiece,
+            EventType.Foul or EventType.Offside or EventType.PenaltyDecision or EventType.PenaltyTaker or EventType.Penalty => BallState.SetPiece,
             EventType.Turnover => BallState.Turnover,
+            EventType.BadPass or EventType.Miscontrol or EventType.Tackle or EventType.Interception or EventType.Pressure or EventType.BlockedPass => BallState.Turnover,
             EventType.DefensiveStop => BallState.Defending,
             _ => BallState.BuildUp
         };
@@ -420,6 +450,8 @@ public class MatchEngine
             case EventType.Goal:
             case EventType.WonderGoal:
             case EventType.Offside:
+            case EventType.BadPass:
+            case EventType.Miscontrol:
             case EventType.CornerKick:
             case EventType.SetPieceDanger:
             case EventType.Penalty:
@@ -430,10 +462,15 @@ public class MatchEngine
                 return secondaryPlayerTeam ?? FindSavingTeamName(matchEvent, match) ?? FindMentionedTeamName(matchEvent, match);
 
             case EventType.Foul:
+            case EventType.PenaltyDecision:
             case EventType.YellowCard:
             case EventType.RedCard:
             case EventType.DefensiveStop:
             case EventType.DefensiveError:
+            case EventType.Tackle:
+            case EventType.Interception:
+            case EventType.Pressure:
+            case EventType.BlockedPass:
                 return primaryPlayerTeam ?? FindMentionedTeamName(matchEvent, match);
         }
 
@@ -667,6 +704,11 @@ public class MatchEngine
         TeamStrengthSnapshot strengthSnapshot,
         int minute)
     {
+        if (simulationState.LastFeedEventType == EventType.Turnover)
+        {
+            return strengthSnapshot;
+        }
+
         var match = simulationState.Match;
         var dramaContext = new MatchEventContext
         {
@@ -777,6 +819,13 @@ public class MatchEngine
 
         if (attackOutcome == AttackFlowOutcome.LosePossession)
         {
+            if (!isResolvingPreviousAttack)
+            {
+                matchLog.AddEvent(eventFactory.CreateAttackBuildUp(minute, attackingTeam, playmaker, shooter, random));
+                MarkAttackStarted(simulationState, attackingTeam);
+                GetOrCreatePerformance(match, attackingTeam, playmaker).Rating += 0.04;
+            }
+
             HandlePossessionLoss(minute, match, attackingTeam, defendingTeam, playmaker, shooter, random, matchLog, eventFactory);
             MarkAttackResolved(simulationState, defendingTeam, BallState.Turnover, EventType.Turnover);
             return defendingTeam;
@@ -875,11 +924,80 @@ public class MatchEngine
         MatchLogService matchLog,
         MatchEventFactory eventFactory)
     {
-        var mistakePlayer = random.NextDouble() < 0.65 ? playmaker : shooter;
-        matchLog.AddEvent(eventFactory.CreateAttackMistake(minute, attackingTeam, defendingTeam, mistakePlayer, random));
-        GetOrCreatePerformance(match, attackingTeam, mistakePlayer).Rating -= 0.12;
+        var reasonType = ChoosePossessionLossReason(random);
+        var attacker = random.NextDouble() < 0.65 ? playmaker : shooter;
+        Player? defender = null;
 
-        ApplyDefensiveContribution(match, defendingTeam, random);
+        if (IsDefenderPossessionWin(reasonType))
+        {
+            defender = ChooseDefendingPlayer(defendingTeam, random);
+            ApplyPossessionWinContribution(match, defendingTeam, defender, reasonType);
+        }
+        else
+        {
+            GetOrCreatePerformance(match, attackingTeam, attacker).Rating -= 0.08;
+        }
+
+        matchLog.AddEvent(eventFactory.CreatePossessionLossReason(
+            minute,
+            attackingTeam,
+            defendingTeam,
+            attacker,
+            defender,
+            reasonType,
+            random));
+
+        var possessionPlayer = defender ?? ChooseDefendingPlayer(defendingTeam, random);
+        matchLog.AddEvent(eventFactory.CreateTurnover(minute, defendingTeam, possessionPlayer, random));
+    }
+
+    private static EventType ChoosePossessionLossReason(Random random)
+    {
+        var roll = random.NextDouble();
+        return roll switch
+        {
+            < 0.22 => EventType.BadPass,
+            < 0.40 => EventType.Miscontrol,
+            < 0.58 => EventType.Tackle,
+            < 0.76 => EventType.Interception,
+            < 0.90 => EventType.Pressure,
+            _ => EventType.BlockedPass
+        };
+    }
+
+    private static bool IsDefenderPossessionWin(EventType eventType)
+    {
+        return eventType is EventType.Tackle
+            or EventType.Interception
+            or EventType.Pressure
+            or EventType.BlockedPass;
+    }
+
+    private static void ApplyPossessionWinContribution(Match match, Team defendingTeam, Player defender, EventType reasonType)
+    {
+        var performance = GetOrCreatePerformance(match, defendingTeam, defender);
+        switch (reasonType)
+        {
+            case EventType.Tackle:
+                performance.Tackles++;
+                performance.Rating += 0.08;
+                break;
+
+            case EventType.Interception:
+                performance.Interceptions++;
+                performance.Rating += 0.08;
+                break;
+
+            case EventType.BlockedPass:
+                performance.Blocks++;
+                performance.Rating += 0.09;
+                break;
+
+            case EventType.Pressure:
+                performance.Tackles++;
+                performance.Rating += 0.06;
+                break;
+        }
     }
 
     private Team HandleFoul(

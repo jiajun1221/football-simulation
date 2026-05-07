@@ -14,7 +14,6 @@ public class Player : INotifyPropertyChanged
     public int SquadNumber { get; set; }
     public Position Position { get; set; }
     public string PreferredPosition { get; set; } = string.Empty;
-    public List<string> NaturalPositions { get; set; } = [];
     public List<string> SecondaryPositions { get; set; } = [];
     public string AssignedPosition { get; set; } = string.Empty;
     public int OverallRating { get; set; }

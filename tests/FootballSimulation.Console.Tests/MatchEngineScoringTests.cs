@@ -181,6 +181,84 @@ public class MatchEngineScoringTests
     }
 
     [Fact]
+    public void SimulateMatch_TurnoverEventsHaveCauseAndCleanPossessionText()
+    {
+        var seedDataService = new SeedDataService();
+        var engine = new MatchEngine();
+
+        for (var seed = 1; seed <= 40; seed++)
+        {
+            var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+            var result = engine.SimulateMatch(homeTeam, awayTeam, seed: seed);
+            var events = result.Events;
+
+            for (var index = 1; index < events.Count; index++)
+            {
+                if (events[index].EventType != EventType.Turnover)
+                {
+                    continue;
+                }
+
+                var causeEvent = events[index - 1];
+                Assert.True(
+                    IsTurnoverCauseEvent(causeEvent),
+                    $"TURNOVER at {events[index].Minute}' for seed {seed} was not preceded by a cause event.");
+
+                Assert.DoesNotContain("bad pass", events[index].Description, StringComparison.OrdinalIgnoreCase);
+                Assert.DoesNotContain("miscontrol", events[index].Description, StringComparison.OrdinalIgnoreCase);
+                Assert.DoesNotContain("dispossessed", events[index].Description, StringComparison.OrdinalIgnoreCase);
+
+                var turnoverTeam = FindEventTeamName(events[index], result);
+                Assert.False(string.IsNullOrWhiteSpace(turnoverTeam));
+                Assert.False(string.IsNullOrWhiteSpace(events[index].PrimaryPlayerName));
+                Assert.Contains(events[index].PrimaryPlayerName!, events[index].Description, StringComparison.OrdinalIgnoreCase);
+
+                var nextPossessionEvent = events
+                    .Skip(index + 1)
+                    .FirstOrDefault(matchEvent => matchEvent.EventType is not EventType.Halftime and not EventType.Fulltime);
+
+                if (nextPossessionEvent is not null)
+                {
+                    Assert.Equal(EventType.Attack, nextPossessionEvent.EventType);
+                    var nextEventTeam = FindEventTeamName(nextPossessionEvent, result);
+                    Assert.True(
+                        string.Equals(turnoverTeam, nextEventTeam, StringComparison.OrdinalIgnoreCase),
+                        $"Seed {seed}: turnover '{events[index].Description}' should be followed by new possession team, but next event was '{nextPossessionEvent.Description}'.");
+                }
+            }
+        }
+    }
+
+    [Fact]
+    public void SimulateMatch_DefensiveTurnoverCauseCreditsDefender()
+    {
+        var seedDataService = new SeedDataService();
+        var engine = new MatchEngine();
+
+        for (var seed = 1; seed <= 40; seed++)
+        {
+            var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+            var result = engine.SimulateMatch(homeTeam, awayTeam, seed: seed);
+
+            foreach (var matchEvent in result.Events.Where(IsDefensiveTurnoverCauseEvent))
+            {
+                var performance = result.PlayerPerformances.Single(playerPerformance =>
+                    playerPerformance.PlayerName == matchEvent.PrimaryPlayerName);
+
+                if (matchEvent.EventType == EventType.Tackle)
+                {
+                    Assert.True(performance.Tackles > 0);
+                }
+
+                if (matchEvent.EventType == EventType.Interception)
+                {
+                    Assert.True(performance.Interceptions > 0);
+                }
+            }
+        }
+    }
+
+    [Fact]
     public void SimulateMatch_PenaltyResultHasDecisionAndTakerBuildUp()
     {
         var seedDataService = new SeedDataService();
@@ -231,6 +309,24 @@ public class MatchEngineScoringTests
             or EventType.Goal
             or EventType.Miss
             or EventType.Offside;
+    }
+
+    private static bool IsTurnoverCauseEvent(MatchEvent matchEvent)
+    {
+        return matchEvent.EventType is EventType.BadPass
+            or EventType.Miscontrol
+            or EventType.Tackle
+            or EventType.Interception
+            or EventType.Pressure
+            or EventType.BlockedPass;
+    }
+
+    private static bool IsDefensiveTurnoverCauseEvent(MatchEvent matchEvent)
+    {
+        return matchEvent.EventType is EventType.Tackle
+            or EventType.Interception
+            or EventType.Pressure
+            or EventType.BlockedPass;
     }
 
     private static string? FindEventTeamName(MatchEvent matchEvent, Match match)

@@ -39,6 +39,7 @@ public partial class MatchLiveView : UserControl
     private readonly ObservableCollection<MatchFeedItem> _visibleEvents = [];
     private readonly ObservableCollection<LivePlayerIconViewModel> _pitchPlayers = [];
     private readonly ObservableCollection<PendingSubstitutionViewModel> _pendingSubstitutions = [];
+    private readonly List<MatchEvent> _pendingPlaybackEvents = [];
 
     private CancellationTokenSource? _playbackCancellation;
     private int _speedLevel = DefaultSpeedLevel;
@@ -47,6 +48,7 @@ public partial class MatchLiveView : UserControl
     private bool _isPausedForSubstitution;
     private bool _isPausedForTacticalAdjustment;
     private bool _fixtureCompleted;
+    private bool _isCancellingPendingSubstitution;
     private Player? _selectedStarterForSubstitution;
     private Player? _selectedBenchForSubstitution;
     private Team? _currentPossessionTeam;
@@ -65,7 +67,6 @@ public partial class MatchLiveView : UserControl
 
         MatchEventsListBox.ItemsSource = _visibleEvents;
         PitchPlayersItemsControl.ItemsSource = _pitchPlayers;
-        PendingSubstitutionsItemsControl.ItemsSource = _pendingSubstitutions;
 
         InitializeSpeedControls();
         InitializeTacticalControls();
@@ -158,7 +159,7 @@ public partial class MatchLiveView : UserControl
             return;
         }
 
-        if (_state.CurrentMatch.CurrentMinute >= GetPhaseEndMinute())
+        if (_state.CurrentMatch.CurrentMinute >= GetPhaseEndMinute() && _pendingPlaybackEvents.Count == 0)
         {
             await CompletePhaseAsync();
             return;
@@ -178,9 +179,16 @@ public partial class MatchLiveView : UserControl
 
         try
         {
-            while (_state.CurrentMatch.CurrentMinute < GetPhaseEndMinute())
+            while (_pendingPlaybackEvents.Count > 0 || _state.CurrentMatch.CurrentMinute < GetPhaseEndMinute())
             {
                 cancellationToken.ThrowIfCancellationRequested();
+
+                if (_pendingPlaybackEvents.Count > 0)
+                {
+                    await PlayPendingEventsAsync(cancellationToken);
+                    RefreshPlayerPanels();
+                    continue;
+                }
 
                 var nextMinute = _state.CurrentMatch.CurrentMinute + 1;
                 var includeFulltime = _isSecondHalf && nextMinute == FullTimeMinute;
@@ -197,39 +205,12 @@ public partial class MatchLiveView : UserControl
 
                 PhaseTextBlock.Text = CreatePhaseLabel(_state.CurrentMatch.CurrentMinute);
 
-                var newEvents = _state.CurrentMatch.Events
+                _pendingPlaybackEvents.AddRange(_state.CurrentMatch.Events
                     .Skip(existingEventCount)
                     .OrderBy(matchEvent => matchEvent.Minute)
-                    .ToList();
+                    .ToList());
 
-                foreach (var matchEvent in newEvents)
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-
-                    var feedItem = CreateFeedItem(matchEvent, _state.CurrentMatch);
-                    InsertFeedItemAtTop(feedItem);
-                    UpdateLiveStatusFromEvent(matchEvent);
-
-                    await Task.Delay(GetRevealDelayMilliseconds(feedItem), cancellationToken);
-
-                    if (matchEvent.HomeScore.HasValue && matchEvent.AwayScore.HasValue)
-                    {
-                        SetScore(matchEvent.HomeScore.Value, matchEvent.AwayScore.Value);
-                    }
-
-                    if (ShouldRefreshPitchAfterEvent(matchEvent.EventType))
-                    {
-                        RefreshPlayerPanels();
-                    }
-
-                    if (feedItem.IsGoal)
-                    {
-                        await PlayGoalEffectAsync(feedItem.TeamName, cancellationToken);
-                    }
-
-                    await Task.Delay(GetDelayFor(feedItem), cancellationToken);
-                }
-
+                await PlayPendingEventsAsync(cancellationToken);
                 RefreshPlayerPanels();
             }
 
@@ -242,6 +223,49 @@ public partial class MatchLiveView : UserControl
         {
             UpdatePlaybackControls();
         }
+    }
+
+    private async Task PlayPendingEventsAsync(CancellationToken cancellationToken)
+    {
+        while (_pendingPlaybackEvents.Count > 0)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var matchEvent = _pendingPlaybackEvents[0];
+            _pendingPlaybackEvents.RemoveAt(0);
+            await PlayMatchEventAsync(matchEvent, cancellationToken);
+        }
+    }
+
+    private async Task PlayMatchEventAsync(MatchEvent matchEvent, CancellationToken cancellationToken)
+    {
+        if (_state.CurrentMatch is null)
+        {
+            return;
+        }
+
+        var feedItem = CreateFeedItem(matchEvent, _state.CurrentMatch);
+        InsertFeedItemAtTop(feedItem);
+        UpdateLiveStatusFromEvent(matchEvent);
+
+        if (matchEvent.HomeScore.HasValue && matchEvent.AwayScore.HasValue)
+        {
+            SetScore(matchEvent.HomeScore.Value, matchEvent.AwayScore.Value);
+        }
+
+        await Task.Delay(GetRevealDelayMilliseconds(feedItem), cancellationToken);
+
+        if (ShouldRefreshPitchAfterEvent(matchEvent.EventType))
+        {
+            RefreshPlayerPanels();
+        }
+
+        if (feedItem.IsGoal)
+        {
+            await PlayGoalEffectAsync(feedItem.TeamName, cancellationToken);
+        }
+
+        await Task.Delay(GetDelayFor(feedItem), cancellationToken);
     }
 
     private async Task CompletePhaseAsync()
@@ -285,6 +309,7 @@ public partial class MatchLiveView : UserControl
     private async void SkipButton_Click(object sender, RoutedEventArgs e)
     {
         CancelPlayback();
+        _pendingPlaybackEvents.Clear();
 
         if (_state.CurrentMatch is not null &&
             _state.League is not null &&
@@ -362,13 +387,12 @@ public partial class MatchLiveView : UserControl
         ActionWidthSlider.Value = userTeam.Tactics.Width;
         ActionTempoSlider.Value = userTeam.Tactics.Tempo;
         ActionDefensiveLineSlider.Value = userTeam.Tactics.DefensiveLine;
-        PausedBenchListBox.ItemsSource = CreateSubstitutionPlayerCards(userTeam.Substitutes.Where(player => !player.IsSentOff));
+        RefreshPausedSubstitutionViews();
         PausedActionStatusTextBlock.Text = HasPendingSubstitution()
             ? "Queued substitutions confirm on resume."
             : _selectedPitchPlayerKey is null
                 ? "Select a player on the pitch before choosing a substitute."
                 : "Tactical and substitution changes will apply from the next played minute.";
-        UpdatePendingSubstitutionPanel();
     }
 
     private void ApplyInlineTacticalSettings()
@@ -401,8 +425,8 @@ public partial class MatchLiveView : UserControl
 
         var userTeam = GetUserTeam();
 
-        LiveStarterListBox.ItemsSource = CreateSubstitutionPlayerCards(GetActivePitchPlayers(userTeam));
-        LiveBenchListBox.ItemsSource = CreateSubstitutionPlayerCards(userTeam.Substitutes.Where(player => !player.IsSentOff));
+        LiveStarterListBox.ItemsSource = CreateSubstitutionPlayerCards(GetActivePitchPlayers(userTeam), showPendingState: false);
+        LiveBenchListBox.ItemsSource = CreateSubstitutionPlayerCards(userTeam.Substitutes.Where(player => !player.IsSentOff), showPendingState: false);
 
         var usedSubstitutions = _squadSelectionService.CountTeamSubstitutions(_state.CurrentMatch, userTeam.Name);
         SubstitutionOverlayStatusTextBlock.Text =
@@ -488,6 +512,12 @@ public partial class MatchLiveView : UserControl
 
     private void PausedBenchListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        if (_isCancellingPendingSubstitution)
+        {
+            PausedBenchListBox.SelectedItem = null;
+            return;
+        }
+
         if (!_isPlaybackPaused || PausedBenchListBox.SelectedItem is not SubstitutionPlayerCard substituteCard)
         {
             return;
@@ -509,18 +539,146 @@ public partial class MatchLiveView : UserControl
         DragDrop.DoDragDrop((DependencyObject)sender, substituteCard.Player, DragDropEffects.Move);
     }
 
-    private void PitchPlayerIcon_Drop(object sender, DragEventArgs e)
+    private void CancelPendingSubstitutionButton_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        _isCancellingPendingSubstitution = true;
+    }
+
+    private void PitchPlayerIcon_PreviewMouseMove(object sender, MouseEventArgs e)
     {
         if (!_isPlaybackPaused ||
-            sender is not FrameworkElement { DataContext: LivePlayerIconViewModel selectedPlayer } ||
-            e.Data.GetData(typeof(Player)) is not Player substitute)
+            e.LeftButton != MouseButtonState.Pressed ||
+            sender is not FrameworkElement { DataContext: LivePlayerIconViewModel pitchPlayer } ||
+            !IsUserTeamPitchPlayer(pitchPlayer))
         {
             return;
         }
 
-        _selectedPitchPlayerKey = selectedPlayer.PlayerKey;
-        QueuePausedSubstitution(substitute);
+        _selectedPitchPlayerKey = pitchPlayer.PlayerKey;
+        DragDrop.DoDragDrop((DependencyObject)sender, pitchPlayer, DragDropEffects.Move);
+    }
+
+    private void PitchPlayerIcon_Drop(object sender, DragEventArgs e)
+    {
+        if (!_isPlaybackPaused ||
+            sender is not FrameworkElement { DataContext: LivePlayerIconViewModel selectedPlayer })
+        {
+            return;
+        }
+
+        if (e.Data.GetData(typeof(LivePlayerIconViewModel)) is LivePlayerIconViewModel draggedPitchPlayer)
+        {
+            SwapPausedPitchPlayers(draggedPitchPlayer, selectedPlayer);
+            e.Handled = true;
+            return;
+        }
+
+        if (e.Data.GetData(typeof(Player)) is Player substitute)
+        {
+            _selectedPitchPlayerKey = selectedPlayer.PlayerKey;
+            QueuePausedSubstitution(substitute);
+        }
+
         e.Handled = true;
+    }
+
+    private void SwapPausedPitchPlayers(LivePlayerIconViewModel draggedPitchPlayer, LivePlayerIconViewModel targetPitchPlayer)
+    {
+        if (_state.CurrentMatch is null ||
+            string.Equals(draggedPitchPlayer.PlayerKey, targetPitchPlayer.PlayerKey, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        if (!IsUserTeamPitchPlayer(draggedPitchPlayer) || !IsUserTeamPitchPlayer(targetPitchPlayer))
+        {
+            PausedActionStatusTextBlock.Text = "Only your on-pitch players can be swapped while paused.";
+            return;
+        }
+
+        var userTeam = GetUserTeam();
+        var draggedPlayer = FindActivePlayer(userTeam, draggedPitchPlayer.Name);
+        var targetPlayer = FindActivePlayer(userTeam, targetPitchPlayer.Name);
+        if (draggedPlayer is null || targetPlayer is null)
+        {
+            PausedActionStatusTextBlock.Text = "That player swap is no longer available.";
+            return;
+        }
+
+        var draggedSlot = PositionSuitabilityService.NormalizeExactPosition(draggedPitchPlayer.ExactPosition);
+        var targetSlot = PositionSuitabilityService.NormalizeExactPosition(targetPitchPlayer.ExactPosition);
+        var draggedIndex = userTeam.Players.IndexOf(draggedPlayer);
+        var targetIndex = userTeam.Players.IndexOf(targetPlayer);
+        if (draggedIndex < 0 || targetIndex < 0)
+        {
+            PausedActionStatusTextBlock.Text = "That player swap is no longer available.";
+            return;
+        }
+
+        (userTeam.Players[draggedIndex], userTeam.Players[targetIndex]) = (userTeam.Players[targetIndex], userTeam.Players[draggedIndex]);
+        PositionSuitabilityService.EnsurePositionMetadata(draggedPlayer, targetSlot);
+        PositionSuitabilityService.EnsurePositionMetadata(targetPlayer, draggedSlot);
+        var draggedOutOfPosition = ApplyPositionSwapImpact(userTeam, draggedPlayer);
+        var targetOutOfPosition = ApplyPositionSwapImpact(userTeam, targetPlayer);
+
+        _selectedPitchPlayerKey = CreatePlayerKey(userTeam.Name, draggedPlayer.Name);
+        PausedActionStatusTextBlock.Text = CreatePositionSwapStatus(
+            draggedPlayer,
+            targetPlayer,
+            targetSlot,
+            draggedSlot,
+            draggedOutOfPosition,
+            targetOutOfPosition);
+        RefreshPlayerPanels();
+        UpdatePlaybackControls();
+    }
+
+    private bool IsUserTeamPitchPlayer(LivePlayerIconViewModel pitchPlayer)
+    {
+        return _state.SelectedTeam is not null &&
+            string.Equals(pitchPlayer.TeamName, _state.SelectedTeam.Name, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static Player? FindActivePlayer(Team team, string playerName)
+    {
+        return GetActivePitchPlayers(team).FirstOrDefault(player =>
+            string.Equals(player.Name, playerName, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static string CreatePositionSwapStatus(
+        Player draggedPlayer,
+        Player targetPlayer,
+        string targetSlot,
+        string draggedSlot,
+        bool draggedOutOfPosition,
+        bool targetOutOfPosition)
+    {
+        var baseMessage = $"{draggedPlayer.Name} moved to {targetSlot}; {targetPlayer.Name} moved to {draggedSlot}.";
+        var penalizedPlayers = new[]
+            {
+                draggedOutOfPosition ? draggedPlayer.Name : string.Empty,
+                targetOutOfPosition ? targetPlayer.Name : string.Empty
+            }
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .ToList();
+
+        return penalizedPlayers.Count == 0
+            ? baseMessage
+            : $"{baseMessage} Warning: {string.Join(", ", penalizedPlayers)} out of position, OVR and performance reduced.";
+    }
+
+    private bool ApplyPositionSwapImpact(Team team, Player player)
+    {
+        var suitability = PositionSuitabilityService.GetEffectivenessMultiplier(player);
+        if (suitability >= 1.0)
+        {
+            player.LiveMatchModifier = Math.Max(player.LiveMatchModifier, 1.0);
+            return false;
+        }
+
+        player.LiveMatchModifier = Math.Clamp(player.LiveMatchModifier * suitability, 0.75, 1.15);
+        GetOrCreateLivePerformance(team, player).Rating -= 0.15;
+        return true;
     }
 
     private void ConfirmSubstitutionButton_Click(object sender, RoutedEventArgs e)
@@ -543,15 +701,19 @@ public partial class MatchLiveView : UserControl
         _isPausedForSubstitution = false;
         _isPlaybackPaused = true;
         PausedActionStatusTextBlock.Text = "Queued substitutions confirm on resume.";
-        UpdatePendingSubstitutionPanel();
         UpdatePlaybackControls();
     }
 
     private void CancelPendingSubstitutionButton_Click(object sender, RoutedEventArgs e)
     {
+        _isCancellingPendingSubstitution = true;
         if (sender is FrameworkElement { DataContext: PendingSubstitutionViewModel pendingSubstitution })
         {
             _pendingSubstitutions.Remove(pendingSubstitution);
+        }
+        else if (sender is FrameworkElement { DataContext: SubstitutionPlayerCard { PendingSubstitution: not null } substituteCard })
+        {
+            _pendingSubstitutions.Remove(substituteCard.PendingSubstitution);
         }
         else
         {
@@ -561,7 +723,10 @@ public partial class MatchLiveView : UserControl
         PausedActionStatusTextBlock.Text = _pendingSubstitutions.Count == 0
             ? "No pending substitutions."
             : "Queued substitutions confirm on resume.";
-        UpdatePendingSubstitutionPanel();
+        PausedBenchListBox.SelectedItem = null;
+        RefreshPausedSubstitutionViews();
+        _isCancellingPendingSubstitution = false;
+        e.Handled = true;
         UpdatePlaybackControls();
     }
 
@@ -616,7 +781,7 @@ public partial class MatchLiveView : UserControl
 
         _pendingSubstitutions.Add(new PendingSubstitutionViewModel(substitute, starter));
         PausedActionStatusTextBlock.Text = "Queued substitutions confirm on resume.";
-        UpdatePendingSubstitutionPanel();
+        RefreshPausedSubstitutionViews();
         UpdatePlaybackControls();
         return true;
     }
@@ -664,6 +829,8 @@ public partial class MatchLiveView : UserControl
 
         foreach (var (starter, substitute) in validatedSubstitutions)
         {
+            PositionSuitabilityService.EnsurePositionMetadata(starter);
+            var incomingAssignedPosition = starter.AssignedPosition;
             var swapResult = _squadSelectionService.SwapStarterWithSubstitute(
                 userTeam,
                 starter,
@@ -677,6 +844,8 @@ public partial class MatchLiveView : UserControl
                 return false;
             }
 
+            starter.AssignedPosition = starter.PreferredPosition;
+            PositionSuitabilityService.EnsurePositionMetadata(substitute, incomingAssignedPosition);
             ApplyManualSubstitutionImpact(starter, substitute);
             _state.CurrentMatch.SuperSubBoosts[substitute.Name] = minute + 10;
 
@@ -692,7 +861,7 @@ public partial class MatchLiveView : UserControl
             _selectedPitchPlayerKey = CreatePlayerKey(userTeam.Name, substitute.Name);
         }
 
-        PausedBenchListBox.ItemsSource = CreateSubstitutionPlayerCards(userTeam.Substitutes.Where(player => !player.IsSentOff));
+        PausedBenchListBox.ItemsSource = CreateSubstitutionPlayerCards(userTeam.Substitutes.Where(player => !player.IsSentOff), showPendingState: true);
         PausedActionStatusTextBlock.Text = $"{validatedSubstitutions.Count} substitution(s) confirmed.";
         ClearPendingSubstitutions();
         RefreshPlayerPanels();
@@ -707,23 +876,86 @@ public partial class MatchLiveView : UserControl
     private void ClearPendingSubstitutions()
     {
         _pendingSubstitutions.Clear();
-        UpdatePendingSubstitutionPanel();
     }
 
-    private void UpdatePendingSubstitutionPanel()
+    private void RefreshPausedSubstitutionViews()
     {
-        if (!HasPendingSubstitution())
+        if (_state.CurrentMatch is null)
         {
-            PendingSubstitutionPanel.Visibility = Visibility.Collapsed;
             return;
         }
 
-        PendingSubstitutionPanel.Visibility = Visibility.Visible;
+        var userTeam = GetUserTeam();
+        var benchPlayers = GetFilteredPausedBenchPlayers(userTeam).ToList();
+        PausedBenchListBox.ItemsSource = CreateSubstitutionPlayerCards(
+            benchPlayers,
+            showPendingState: true);
+        var shouldShowEmptyState = _selectedPitchPlayerKey is not null && benchPlayers.Count == 0;
+        PausedBenchListBox.Visibility = shouldShowEmptyState ? Visibility.Collapsed : Visibility.Visible;
+        NoAvailableSubstituteTextBlock.Visibility = shouldShowEmptyState ? Visibility.Visible : Visibility.Collapsed;
+        RefreshPitchPlayers();
+    }
+
+    private IEnumerable<Player> GetFilteredPausedBenchPlayers(Team userTeam)
+    {
+        var availableSubstitutes = userTeam.Substitutes.Where(player => !player.IsSentOff).ToList();
+        var selectedPlayer = GetSelectedActiveUserPlayer(userTeam);
+        if (selectedPlayer is null)
+        {
+            return availableSubstitutes;
+        }
+
+        PositionSuitabilityService.EnsurePositionMetadata(selectedPlayer);
+        var selectedPosition = PositionSuitabilityService.NormalizeExactPosition(selectedPlayer.AssignedPosition);
+        if (string.IsNullOrWhiteSpace(selectedPosition))
+        {
+            selectedPosition = PositionSuitabilityService.NormalizeExactPosition(selectedPlayer.PreferredPosition);
+        }
+
+        if (string.IsNullOrWhiteSpace(selectedPosition))
+        {
+            return availableSubstitutes;
+        }
+
+        return availableSubstitutes.Where(substitute => CanPlayerCoverPosition(substitute, selectedPosition));
+    }
+
+    private Player? GetSelectedActiveUserPlayer(Team userTeam)
+    {
+        if (string.IsNullOrWhiteSpace(_selectedPitchPlayerKey))
+        {
+            return null;
+        }
+
+        return GetActivePitchPlayers(userTeam).FirstOrDefault(player =>
+            string.Equals(CreatePlayerKey(userTeam.Name, player.Name), _selectedPitchPlayerKey, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static bool CanPlayerCoverPosition(Player player, string exactPosition)
+    {
+        var normalizedPosition = PositionSuitabilityService.NormalizeExactPosition(exactPosition);
+        if (string.IsNullOrWhiteSpace(normalizedPosition))
+        {
+            return false;
+        }
+
+        PositionSuitabilityService.EnsurePositionMetadata(player);
+        return string.Equals(player.PreferredPosition, normalizedPosition, StringComparison.OrdinalIgnoreCase) ||
+            player.SecondaryPositions.Any(position =>
+                string.Equals(PositionSuitabilityService.NormalizeExactPosition(position), normalizedPosition, StringComparison.OrdinalIgnoreCase));
     }
 
     private void ApplyManualSubstitutionImpact(Player playerOff, Player playerOn)
     {
         playerOff.LiveMatchModifier = 1.0;
+
+        var suitability = PositionSuitabilityService.GetEffectivenessMultiplier(playerOn);
+        if (suitability < 1.0)
+        {
+            playerOn.LiveMatchModifier = Math.Clamp(0.92 * suitability, 0.75, 1.15);
+            GetOrCreateLivePerformance(GetUserTeam(), playerOn).Rating -= 0.15;
+            return;
+        }
 
         if (playerOn.Position == playerOff.Position)
         {
@@ -732,6 +964,34 @@ public partial class MatchLiveView : UserControl
         }
 
         playerOn.LiveMatchModifier = 1.02;
+    }
+
+    private PlayerMatchPerformance GetOrCreateLivePerformance(Team team, Player player)
+    {
+        if (_state.CurrentMatch is null)
+        {
+            return new PlayerMatchPerformance { PlayerName = player.Name, TeamName = team.Name, Position = player.Position };
+        }
+
+        var performance = _state.CurrentMatch.PlayerPerformances.FirstOrDefault(existing =>
+            string.Equals(existing.TeamName, team.Name, StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(existing.PlayerName, player.Name, StringComparison.OrdinalIgnoreCase));
+
+        if (performance is not null)
+        {
+            return performance;
+        }
+
+        performance = new PlayerMatchPerformance
+        {
+            PlayerName = player.Name,
+            TeamName = team.Name,
+            Position = player.Position,
+            FatigueAtStart = 100 - GetStaminaPercentage(player),
+            FatigueAtEnd = 100 - GetStaminaPercentage(player)
+        };
+        _state.CurrentMatch.PlayerPerformances.Add(performance);
+        return performance;
     }
 
     private static void ApplyTacticalLiveModifiers(Team team)
@@ -899,8 +1159,11 @@ public partial class MatchLiveView : UserControl
         double pitchWidth,
         double pitchHeight)
     {
+        PositionSuitabilityService.EnsurePositionMetadata(player, formationPosition.ExactPosition);
         var performance = _state.CurrentMatch?.PlayerPerformances
             .FirstOrDefault(existing => existing.TeamName == team.Name && existing.PlayerName == player.Name);
+        var suitability = PositionSuitabilityService.GetEffectivenessMultiplier(player);
+        var displayRating = (performance?.Rating ?? 6.0) * suitability;
         var stamina = GetStaminaPercentage(player);
         var (xRatio, yRatio) = GetLivePitchPosition(formationPosition, isHomeTeam);
         var x = Math.Clamp((pitchWidth * xRatio) - (PlayerIconSlotWidth / 2), 4, Math.Max(4, pitchWidth - PlayerIconSlotWidth - 4));
@@ -921,7 +1184,8 @@ public partial class MatchLiveView : UserControl
             PlayerKey = playerKey,
             ShirtNumberText = player.SquadNumber > 0 ? player.SquadNumber.ToString() : string.Empty,
             Initials = GetInitials(player.Name),
-            PositionText = GetPositionText(player.Position),
+            PositionText = player.AssignedPosition,
+            ExactPosition = formationPosition.ExactPosition,
             TeamSide = isHomeTeam ? "Home" : "Away",
             X = x,
             Y = y,
@@ -929,7 +1193,7 @@ public partial class MatchLiveView : UserControl
             BorderBrush = isUserTeam ? "#DCEBFF" : "#FFE0E0",
             SelectionBrush = isSelected ? "#F7C948" : "Transparent",
             SelectionThickness = isSelected ? 4 : 0,
-            RatingText = (performance?.Rating ?? 6.0).ToString("0.0"),
+            RatingText = displayRating.ToString("0.0"),
             Stamina = stamina,
             StaminaBrush = GetStaminaBrush(stamina),
             Goals = performance?.Goals ?? 0,
@@ -947,6 +1211,7 @@ public partial class MatchLiveView : UserControl
             YellowBadgeText = yellowCards > 0 ? YellowCardIcon() : string.Empty,
             RedBadgeText = redCards > 0 ? RedCardIcon() : string.Empty,
             InjuryBadgeText = player.IsInjured || performance?.Injuries > 0 ? InjuryIcon() : string.Empty,
+            PendingSubOutBadgeText = IsPendingSubOut(team, player) ? "↓" : string.Empty,
             DetailText = BuildPlayerDetailText(player, performance, stamina, defensiveContributions),
             CardsText = yellowCards == 0 && redCards == 0 ? "None" : $"Y{yellowCards} R{redCards}",
             InjuryStatusText = player.IsInjured || performance?.Injuries > 0 ? "Injured" : "Fit",
@@ -967,6 +1232,14 @@ public partial class MatchLiveView : UserControl
         return (Math.Clamp(x, 0.06, 0.94), y);
     }
 
+    private bool IsPendingSubOut(Team team, Player player)
+    {
+        return _state.SelectedTeam is not null &&
+            string.Equals(team.Name, _state.SelectedTeam.Name, StringComparison.OrdinalIgnoreCase) &&
+            _pendingSubstitutions.Any(pending =>
+                string.Equals(pending.PlayerOut.Name, player.Name, StringComparison.OrdinalIgnoreCase));
+    }
+
     private void PitchPlayerIcon_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
         if (sender is not FrameworkElement { DataContext: LivePlayerIconViewModel selectedPlayer })
@@ -978,7 +1251,8 @@ public partial class MatchLiveView : UserControl
         RefreshPitchPlayers();
         if (_isPlaybackPaused)
         {
-            PausedActionStatusTextBlock.Text = $"Selected {selectedPlayer.Name}. Choose a substitute to replace him.";
+            PausedActionStatusTextBlock.Text = $"Selected {selectedPlayer.Name}. Choose a substitute or drag him onto a valid position swap.";
+            RefreshPausedSubstitutionViews();
         }
 
         e.Handled = true;
@@ -1505,10 +1779,26 @@ public partial class MatchLiveView : UserControl
                 break;
 
             case EventType.Turnover:
-                defendingTeam = eventTeam ?? ResolvePlayerTeam(matchEvent.PrimaryPlayerName);
-                attackingTeam = GetOpposingTeam(defendingTeam);
+                attackingTeam = eventTeam ?? ResolvePlayerTeam(matchEvent.PrimaryPlayerName);
+                defendingTeam = GetOpposingTeam(attackingTeam);
                 _currentPossessionTeam = attackingTeam;
                 status = LiveMatchStatus.Turnover;
+                break;
+
+            case EventType.BadPass:
+            case EventType.Miscontrol:
+                attackingTeam = eventTeam ?? ResolvePlayerTeam(matchEvent.PrimaryPlayerName) ?? _currentPossessionTeam;
+                defendingTeam = GetOpposingTeam(attackingTeam);
+                status = LiveMatchStatus.Turnover;
+                break;
+
+            case EventType.Tackle:
+            case EventType.Interception:
+            case EventType.Pressure:
+            case EventType.BlockedPass:
+                defendingTeam = eventTeam ?? ResolvePlayerTeam(matchEvent.PrimaryPlayerName);
+                attackingTeam = GetOpposingTeam(defendingTeam);
+                status = LiveMatchStatus.Defending;
                 break;
 
             case EventType.DefensiveStop:
@@ -1881,6 +2171,8 @@ public partial class MatchLiveView : UserControl
             case EventType.Goal:
             case EventType.WonderGoal:
             case EventType.Offside:
+            case EventType.BadPass:
+            case EventType.Miscontrol:
             case EventType.CornerKick:
             case EventType.SetPieceDanger:
             case EventType.Penalty:
@@ -1895,6 +2187,10 @@ public partial class MatchLiveView : UserControl
             case EventType.RedCard:
             case EventType.DefensiveStop:
             case EventType.DefensiveError:
+            case EventType.Tackle:
+            case EventType.Interception:
+            case EventType.Pressure:
+            case EventType.BlockedPass:
                 return primaryPlayerTeam ?? FindMentionedTeamName(matchEvent, match);
         }
 
@@ -1988,7 +2284,13 @@ public partial class MatchLiveView : UserControl
             EventType.PenaltyTaker => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "steps up", $"{teamName} penalty taker"),
             EventType.Penalty => CreatePenaltyHeadline(matchEvent, teamName),
             EventType.Offside => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "caught offside", $"{teamName} offside"),
-            EventType.Turnover => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "loses possession", $"{teamName} lose possession"),
+            EventType.BadPass => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "misplaces pass", "Bad pass"),
+            EventType.Miscontrol => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "miscontrols", "Miscontrol"),
+            EventType.Tackle => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "wins tackle", "Tackle won"),
+            EventType.Interception => CreateInterceptionHeadline(matchEvent),
+            EventType.Pressure => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "forces pressure", "Pressure forces error"),
+            EventType.BlockedPass => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "blocks pass", "Blocked pass"),
+            EventType.Turnover => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "gets the ball", $"{teamName} regain possession"),
             EventType.DefensiveStop => CreateDefensiveHeadline(matchEvent),
             EventType.DefensiveError => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "makes defensive error", $"{teamName} make error"),
             EventType.WonderGoal => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "scores wonder goal", $"Wonder goal for {teamName}"),
@@ -2023,7 +2325,7 @@ public partial class MatchLiveView : UserControl
             EventType.PenaltyTaker => "Pressure from the spot.",
             EventType.Penalty => "Pressure from the spot.",
             EventType.Offside => "The line holds.",
-            EventType.Turnover => "Possession changes hands.",
+            EventType.Turnover => string.Empty,
             EventType.DefensiveStop => "Strong defending.",
             EventType.DefensiveError => "Pressure is on.",
             EventType.WonderGoal => "Top-class finish.",
@@ -2104,6 +2406,20 @@ public partial class MatchLiveView : UserControl
         }
 
         return CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "intercepts the attack", "Defense stop the move");
+    }
+
+    private static string CreateInterceptionHeadline(MatchEvent matchEvent)
+    {
+        var defenderName = GetHeadlinePlayerName(matchEvent.PrimaryPlayerName);
+        var attackerName = GetHeadlinePlayerName(matchEvent.SecondaryPlayerName);
+        if (string.IsNullOrWhiteSpace(defenderName))
+        {
+            return "Interception";
+        }
+
+        return string.IsNullOrWhiteSpace(attackerName)
+            ? $"{defenderName} intercepts"
+            : $"{defenderName} intercepts {attackerName}'s pass";
     }
 
     private static string CreateSaveHeadline(MatchEvent matchEvent)
@@ -2188,6 +2504,12 @@ public partial class MatchLiveView : UserControl
             EventType.PenaltyTaker => new FeedEventStyle(TargetIcon(), "PENALTY TAKER", "#F1F8FF", "#9CC9EE", "#DCEEFF", "#DCEEFF", "#225D86"),
             EventType.Penalty => new FeedEventStyle(GoalNetIcon(), "PENALTY", "#E4FAEC", "#1FA45A", "#C9F2D8", "#1FA45A", "#005807"),
             EventType.Offside => new FeedEventStyle(FlagIcon(), "OFFSIDE", "#F1F3F5", "#C9D0D8", "#E1E5EA", "#DDE2E8", "#465364"),
+            EventType.BadPass => new FeedEventStyle(WarningIcon(), "BAD PASS", "#FFF4E7", "#F2A65A", "#FFE4BF", "#FFE0AF", "#8A4E00"),
+            EventType.Miscontrol => new FeedEventStyle(WarningIcon(), "MISCONTROL", "#FFF4E7", "#F2A65A", "#FFE4BF", "#FFE0AF", "#8A4E00"),
+            EventType.Tackle => new FeedEventStyle(ShieldIcon(), "TACKLE", "#EAF3FF", "#9EC1F2", "#DBE9FF", "#CFE2FF", "#1A4D8F"),
+            EventType.Interception => new FeedEventStyle(ShieldIcon(), "INTERCEPTION", "#EAF3FF", "#9EC1F2", "#DBE9FF", "#CFE2FF", "#1A4D8F"),
+            EventType.Pressure => new FeedEventStyle(ShieldIcon(), "PRESSURE", "#EAF3FF", "#9EC1F2", "#DBE9FF", "#CFE2FF", "#1A4D8F"),
+            EventType.BlockedPass => new FeedEventStyle(ShieldIcon(), "BLOCKED PASS", "#EAF3FF", "#9EC1F2", "#DBE9FF", "#CFE2FF", "#1A4D8F"),
             EventType.Turnover => new FeedEventStyle(RotateIcon(),"TURNOVER","#F3E8FF",  "#C4B5FD", "#E9D5FF", "#DDD6FE", "#5B21B6" ),
             EventType.DefensiveStop => new FeedEventStyle(ShieldIcon(), "DEFENSE", "#EAF3FF", "#9EC1F2", "#DBE9FF", "#CFE2FF", "#1A4D8F"),
             EventType.DefensiveError => new FeedEventStyle(WarningIcon(), "DEFENSIVE ERROR", "#FFF4E7", "#F2A65A", "#FFE4BF", "#FFE0AF", "#8A4E00"),
@@ -2215,6 +2537,12 @@ public partial class MatchLiveView : UserControl
             or EventType.PenaltyDecision
             or EventType.PenaltyTaker
             or EventType.Penalty
+            or EventType.BadPass
+            or EventType.Miscontrol
+            or EventType.Tackle
+            or EventType.Interception
+            or EventType.Pressure
+            or EventType.BlockedPass
             or EventType.Turnover
             or EventType.DefensiveStop
             or EventType.DefensiveError
@@ -2241,6 +2569,13 @@ public partial class MatchLiveView : UserControl
             or EventType.RedCard
             or EventType.Injury
             or EventType.Offside
+            or EventType.BadPass
+            or EventType.Miscontrol
+            or EventType.Tackle
+            or EventType.Interception
+            or EventType.Pressure
+            or EventType.BlockedPass
+            or EventType.Turnover
             or EventType.DefensiveStop
             or EventType.DefensiveError
             or EventType.GoalkeeperHeroics
@@ -2294,9 +2629,9 @@ public partial class MatchLiveView : UserControl
         return eventType switch
         {
             nameof(EventType.Shot) or nameof(EventType.Save) => 500,
-            nameof(EventType.Foul) or nameof(EventType.Offside) or nameof(EventType.Exhaustion) or nameof(EventType.DefensiveStop) => 500,
+            nameof(EventType.Foul) or nameof(EventType.Offside) or nameof(EventType.Exhaustion) or nameof(EventType.DefensiveStop) or nameof(EventType.Tackle) or nameof(EventType.Interception) or nameof(EventType.Pressure) or nameof(EventType.BlockedPass) => 500,
             nameof(EventType.YellowCard) => 1000,
-            nameof(EventType.RedCard) or nameof(EventType.Miss) or nameof(EventType.Injury) or nameof(EventType.DefensiveError) or nameof(EventType.SetPieceDanger) or nameof(EventType.CornerKick) or nameof(EventType.Confrontation) => 1500,
+            nameof(EventType.RedCard) or nameof(EventType.Miss) or nameof(EventType.Injury) or nameof(EventType.BadPass) or nameof(EventType.Miscontrol) or nameof(EventType.DefensiveError) or nameof(EventType.SetPieceDanger) or nameof(EventType.CornerKick) or nameof(EventType.Confrontation) => 1500,
             nameof(EventType.Goal) or nameof(EventType.Penalty) or nameof(EventType.WonderGoal) or nameof(EventType.GoalkeeperHeroics) or nameof(EventType.CrowdMomentum) => 2000,
             nameof(EventType.Halftime) or nameof(EventType.Fulltime) => 1500,
             _ => 0
@@ -2319,18 +2654,24 @@ public partial class MatchLiveView : UserControl
         };
     }
 
-    private static List<SubstitutionPlayerCard> CreateSubstitutionPlayerCards(IEnumerable<Player> players)
+    private List<SubstitutionPlayerCard> CreateSubstitutionPlayerCards(IEnumerable<Player> players, bool showPendingState)
     {
         return players
-            .Select(CreateSubstitutionPlayerCard)
+            .Select(player => CreateSubstitutionPlayerCard(
+                player,
+                showPendingState
+                    ? _pendingSubstitutions.FirstOrDefault(pending =>
+                        string.Equals(pending.PlayerIn.Name, player.Name, StringComparison.OrdinalIgnoreCase))
+                    : null))
             .ToList();
     }
 
-    private static SubstitutionPlayerCard CreateSubstitutionPlayerCard(Player player)
+    private static SubstitutionPlayerCard CreateSubstitutionPlayerCard(Player player, PendingSubstitutionViewModel? pendingSubstitution)
     {
         var stamina = GetStaminaPercentage(player);
         var form = PlayerFormBadgeHelper.Create(player.FormStatus);
         var exactPosition = PositionSuitabilityService.NormalizeExactPosition(player.AssignedPosition);
+        var isPendingSubIn = pendingSubstitution is not null;
 
         if (string.IsNullOrWhiteSpace(exactPosition))
         {
@@ -2346,6 +2687,7 @@ public partial class MatchLiveView : UserControl
         {
             Player = player,
             Name = player.Name,
+            DisplayName = isPendingSubIn ? $"{player.Name} ↑" : player.Name,
             ShirtNumberText = player.SquadNumber > 0 ? $"#{player.SquadNumber}" : string.Empty,
             Position = exactPosition,
             OverallText = $"OVR {GetOverallRating(player)}",
@@ -2353,7 +2695,12 @@ public partial class MatchLiveView : UserControl
             StaminaBrush = GetStaminaBrush(stamina),
             FormBadgeText = form.Text,
             FormBadgeBackground = form.Background,
-            FormBadgeForeground = form.Foreground
+            FormBadgeForeground = form.Foreground,
+            CardBackground = isPendingSubIn ? "#ECFDF3" : "White",
+            CardBorderBrush = isPendingSubIn ? "#34A853" : "#D6DFEA",
+            NameForeground = isPendingSubIn ? "#137333" : "#102033",
+            PendingPlayerOutName = pendingSubstitution?.PlayerOut.Name ?? string.Empty,
+            PendingSubstitution = pendingSubstitution
         };
     }
 
@@ -2452,6 +2799,7 @@ public partial class MatchLiveView : UserControl
     {
         public Player Player { get; init; } = new();
         public string Name { get; init; } = string.Empty;
+        public string DisplayName { get; init; } = string.Empty;
         public string ShirtNumberText { get; init; } = string.Empty;
         public string Position { get; init; } = string.Empty;
         public string OverallText { get; init; } = string.Empty;
@@ -2460,6 +2808,11 @@ public partial class MatchLiveView : UserControl
         public string FormBadgeText { get; init; } = string.Empty;
         public string FormBadgeBackground { get; init; } = "#E1E5EA";
         public string FormBadgeForeground { get; init; } = "#465364";
+        public string CardBackground { get; init; } = "White";
+        public string CardBorderBrush { get; init; } = "#D6DFEA";
+        public string NameForeground { get; init; } = "#102033";
+        public string PendingPlayerOutName { get; init; } = string.Empty;
+        public PendingSubstitutionViewModel? PendingSubstitution { get; init; }
     }
 
     private sealed class PendingSubstitutionViewModel(Player playerIn, Player playerOut)

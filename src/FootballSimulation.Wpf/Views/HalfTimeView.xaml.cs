@@ -695,14 +695,11 @@ public partial class HalfTimeView : UserControl
 
     private static string GetPositionGroupText(Player player)
     {
-        var naturalPositions = player.NaturalPositions.Count == 0
-            ? string.Empty
-            : $"/{string.Join("/", player.NaturalPositions)}";
         var secondaryPositions = player.SecondaryPositions.Count == 0
             ? string.Empty
-            : $" | Sec {string.Join("/", player.SecondaryPositions)}";
+            : $" | Also {string.Join("/", player.SecondaryPositions)}";
 
-        return $"Pref {player.PreferredPosition}{naturalPositions}{secondaryPositions}";
+        return $"Pref {player.PreferredPosition}{secondaryPositions}";
     }
 
     private void PitchCanvas_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -1151,14 +1148,9 @@ public partial class HalfTimeView : UserControl
             return 1000;
         }
 
-        if (player.NaturalPositions.Contains(normalizedSlot))
-        {
-            return 1000;
-        }
-
         if (player.SecondaryPositions.Contains(normalizedSlot))
         {
-            return 900;
+            return 1000;
         }
 
         return player.Position == GetGenericPositionForSlot(normalizedSlot) ? 600 : 100;

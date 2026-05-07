@@ -8,6 +8,7 @@ public class LivePlayerIconViewModel
     public string ShirtNumberText { get; init; } = string.Empty;
     public string Initials { get; init; } = string.Empty;
     public string PositionText { get; init; } = string.Empty;
+    public string ExactPosition { get; init; } = string.Empty;
     public string TeamSide { get; init; } = string.Empty;
     public double X { get; init; }
     public double Y { get; init; }
@@ -33,6 +34,7 @@ public class LivePlayerIconViewModel
     public string YellowBadgeText { get; init; } = string.Empty;
     public string RedBadgeText { get; init; } = string.Empty;
     public string InjuryBadgeText { get; init; } = string.Empty;
+    public string PendingSubOutBadgeText { get; init; } = string.Empty;
     public string DetailText { get; init; } = string.Empty;
     public string CardsText { get; init; } = "None";
     public string InjuryStatusText { get; init; } = string.Empty;

@@ -61,14 +61,57 @@ public class MatchEventFactory
         return CreateEvent(minute, EventType.DefensiveStop, description, defender.Name, attacker.Name);
     }
 
-    public MatchEvent CreateAttackMistake(int minute, Team attackingTeam, Team defendingTeam, Player player, Random random)
+    public MatchEvent CreatePossessionLossReason(
+        int minute,
+        Team attackingTeam,
+        Team defendingTeam,
+        Player attacker,
+        Player? defender,
+        EventType reasonType,
+        Random random)
+    {
+        var attackerName = GetDisplayName(attacker.Name);
+        var defenderName = defender is null ? defendingTeam.Name : GetDisplayName(defender.Name);
+
+        var description = reasonType switch
+        {
+            EventType.BadPass => Pick(random,
+                $"{attackerName}'s pass is loose for {attackingTeam.Name}.",
+                $"{attackerName} tries a risky pass and {defendingTeam.Name} are alert.",
+                $"{attackingTeam.Name} rush the pass through {attackerName} and the ball breaks away."),
+            EventType.Miscontrol => Pick(random,
+                $"{attackerName} miscontrols for {attackingTeam.Name}.",
+                $"{attackerName}'s first touch gets away from him under pressure.",
+                $"{attackerName} cannot bring the pass under control for {attackingTeam.Name}."),
+            EventType.Tackle => Pick(random,
+                $"{defenderName} times the tackle well on {attackerName} for {defendingTeam.Name}.",
+                $"{defenderName} steps in strongly and takes the ball from {attackerName}."),
+            EventType.Interception => Pick(random,
+                $"{defenderName} reads {attackerName}'s pass well and steps in for {defendingTeam.Name}.",
+                $"{defenderName} intercepts {attackerName}'s pass for {defendingTeam.Name}."),
+            EventType.Pressure => Pick(random,
+                $"{defenderName} presses quickly and forces {attackerName} backward.",
+                $"{defendingTeam.Name} squeeze the space as {defenderName} puts pressure on {attackerName}."),
+            EventType.BlockedPass => Pick(random,
+                $"{defenderName} blocks {attackerName}'s pass for {defendingTeam.Name}.",
+                $"{defenderName} gets in the lane and stops {attackerName}'s pass."),
+            _ => $"{defendingTeam.Name} disrupt {attackingTeam.Name}'s attack."
+        };
+
+        var primaryPlayerName = IsDefenderPossessionWin(reasonType) ? defender?.Name : attacker.Name;
+        var secondaryPlayerName = IsDefenderPossessionWin(reasonType) ? attacker.Name : defender?.Name;
+
+        return CreateEvent(minute, reasonType, description, primaryPlayerName, secondaryPlayerName);
+    }
+
+    public MatchEvent CreateTurnover(int minute, Team possessionTeam, Player possessionPlayer, Random random)
     {
         var description = Pick(random,
-            $"Bad pass from {player.Name} for {attackingTeam.Name} and {defendingTeam.Name} win it back.",
-            $"{player.Name} miscontrols for {attackingTeam.Name}; possession turns over to {defendingTeam.Name}.",
-            $"{attackingTeam.Name} show poor positioning and {player.Name} is dispossessed by {defendingTeam.Name}.");
+            $"{possessionPlayer.Name} collects the ball for {possessionTeam.Name} and they look to build.",
+            $"{possessionPlayer.Name} takes possession for {possessionTeam.Name} and settles on the ball.",
+            $"{possessionPlayer.Name} comes away with it for {possessionTeam.Name} and looks forward.");
 
-        return CreateEvent(minute, EventType.Turnover, description, player.Name);
+        return CreateEvent(minute, EventType.Turnover, description, possessionPlayer.Name);
     }
 
     public MatchEvent CreateFoul(int minute, Team defendingTeam, Player defender, Player attacker)
@@ -393,6 +436,14 @@ public class MatchEventFactory
         }
 
         return options[random.Next(options.Length)];
+    }
+
+    private static bool IsDefenderPossessionWin(EventType eventType)
+    {
+        return eventType is EventType.Tackle
+            or EventType.Interception
+            or EventType.Pressure
+            or EventType.BlockedPass;
     }
 
     private static Player? ResolveDistinctTeammate(Team team, Player actor, Player? preferred, Random random)
