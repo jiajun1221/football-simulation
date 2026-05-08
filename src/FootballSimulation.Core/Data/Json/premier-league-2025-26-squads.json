@@ -1,6 +1,6 @@
 {
   "season": "2025-26",
-  "sourceLastChecked": "2026-04-23",
+  "sourceLastChecked": "2026-05-08",
   "teams": [
     {
       "teamId": "afc-bournemouth",
@@ -8,7 +8,7 @@
       "formation": "4-3-3",
       "startingXI": [
         {
-          "name": "Djorde Petrovic",
+          "name": "Djordje Petrovic",
           "squadNumber": 1,
           "position": "GK",
           "preferredPosition": null,
@@ -19,7 +19,9 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "OneOnOnes"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -37,7 +39,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -55,7 +59,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -73,7 +79,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -91,7 +99,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -109,7 +119,9 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -127,7 +139,9 @@
           "form": "Good",
           "formStatus": "Good",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -145,7 +159,9 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -163,25 +179,31 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
           "matchesPlayedRecently": null
         },
         {
-          "name": "Antoine Semenyo",
-          "squadNumber": 24,
+          "name": "Amine Adli",
+          "squadNumber": 7,
           "position": "FWD",
-          "preferredPosition": null,
+          "preferredPosition": "RW",
           "secondaryPositions": [],
-          "overallRating": 80,
+          "overallRating": 79,
           "stamina": null,
           "fatigue": 0,
           "form": "Good",
           "formStatus": "Good",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Flair",
+            "SpeedDribbler",
+            "Playmaker"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -199,7 +221,9 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -208,54 +232,63 @@
       ],
       "substitutes": [
         {
-          "name": "Neto",
+          "name": "Fraser Forster",
           "squadNumber": 13,
           "position": "GK",
-          "preferredPosition": null,
-          "secondaryPositions": [],
-          "overallRating": 77,
-          "stamina": null,
-          "fatigue": 0,
-          "form": "Average",
-          "formStatus": "Average",
-          "isStarter": false,
-          "traits": [],
-          "morale": null,
-          "isInjured": null,
-          "isSuspended": null,
-          "matchesPlayedRecently": null
-        },
-        {
-          "name": "Julian Araujo",
-          "squadNumber": 22,
-          "position": "DEF",
           "preferredPosition": null,
           "secondaryPositions": [],
           "overallRating": 76,
           "stamina": null,
           "fatigue": 0,
-          "form": "Poor",
-          "formStatus": "Poor",
+          "form": "Average",
+          "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "OneOnOnes",
+            "Leadership"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
           "matchesPlayedRecently": null
         },
         {
-          "name": "Max Aarons",
-          "squadNumber": 37,
+          "name": "Bafode Diakite",
+          "squadNumber": 18,
           "position": "DEF",
-          "preferredPosition": null,
+          "preferredPosition": "CB",
           "secondaryPositions": [],
-          "overallRating": 75,
+          "overallRating": 79,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Poor",
+          "formStatus": "Poor",
+          "isStarter": false,
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Ben Doak",
+          "squadNumber": 17,
+          "position": "FWD",
+          "preferredPosition": "RW",
+          "secondaryPositions": [],
+          "overallRating": 74,
           "stamina": null,
           "fatigue": 0,
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Rapid",
+            "SpeedDribbler"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -273,7 +306,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -291,7 +326,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -309,25 +346,30 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
           "matchesPlayedRecently": null
         },
         {
-          "name": "Luis Sinisterra",
-          "squadNumber": 17,
+          "name": "Enes Unal",
+          "squadNumber": 26,
           "position": "FWD",
-          "preferredPosition": null,
+          "preferredPosition": "ST",
           "secondaryPositions": [],
-          "overallRating": 78,
+          "overallRating": 77,
           "stamina": null,
           "fatigue": 0,
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "PowerHeader",
+            "ClinicalFinisher"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -352,7 +394,10 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "OneOnOnes",
+            "LongThrower"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -370,7 +415,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -388,7 +436,11 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "AerialThreat",
+            "Interceptor",
+            "PressResistant"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -406,7 +458,11 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "PowerHeader",
+            "AerialThreat",
+            "DivesIntoTackles"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -424,7 +480,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -442,7 +501,11 @@
           "form": "Good",
           "formStatus": "Good",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Leadership",
+            "Engine",
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -460,7 +523,11 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Playmaker",
+            "Flair",
+            "DeadBallSpecialist"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -478,7 +545,10 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "LongPasser",
+            "BoxToBox"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -496,7 +566,11 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Flair",
+            "TechnicalDribbler",
+            "FinesseShot"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -514,7 +588,11 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "PowerHeader",
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -532,7 +610,11 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Rapid",
+            "SpeedDribbler",
+            "Flair"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -552,7 +634,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "OneOnOnes"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -570,7 +654,10 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -588,7 +675,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -606,7 +696,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -624,7 +716,9 @@
           "form": "Good",
           "formStatus": "Good",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -642,7 +736,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -660,7 +757,120 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Eberechi Eze",
+          "squadNumber": 10,
+          "position": "MID",
+          "preferredPosition": "CAM",
+          "secondaryPositions": [],
+          "overallRating": 85,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "Flair",
+            "Playmaker",
+            "DeadBallSpecialist"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Noni Madueke",
+          "squadNumber": 20,
+          "position": "FWD",
+          "preferredPosition": "RW",
+          "secondaryPositions": [],
+          "overallRating": 82,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "Rapid",
+            "SpeedDribbler",
+            "Flair"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Martin Zubimendi",
+          "squadNumber": 36,
+          "position": "MID",
+          "preferredPosition": "CDM",
+          "secondaryPositions": [],
+          "overallRating": 86,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "LongPasser",
+            "PressResistant",
+            "Interceptor"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Piero Hincapie",
+          "squadNumber": 5,
+          "position": "DEF",
+          "preferredPosition": "CB",
+          "secondaryPositions": [],
+          "overallRating": 82,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "Interceptor",
+            "AerialThreat",
+            "DivesIntoTackles"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Gabriel Jesus",
+          "squadNumber": 9,
+          "position": "FWD",
+          "preferredPosition": "ST",
+          "secondaryPositions": [],
+          "overallRating": 83,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "Flair",
+            "TechnicalDribbler",
+            "ClinicalFinisher"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -685,7 +895,11 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "OneOnOnes",
+            "Leadership",
+            "RushesOutOfGoal"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -703,7 +917,10 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -721,7 +938,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -739,7 +959,10 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -757,7 +980,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -775,7 +1001,11 @@
           "form": "Good",
           "formStatus": "Good",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "BoxToBox",
+            "Engine",
+            "TeamPlayer"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -793,7 +1023,10 @@
           "form": "Good",
           "formStatus": "Good",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "LongPasser",
+            "BoxToBox"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -811,7 +1044,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -829,7 +1064,10 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -847,25 +1085,33 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap",
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
           "matchesPlayedRecently": null
         },
         {
-          "name": "Donyell Malen",
-          "squadNumber": 17,
+          "name": "Tammy Abraham",
+          "squadNumber": 9,
           "position": "FWD",
-          "preferredPosition": null,
+          "preferredPosition": "ST",
           "secondaryPositions": [],
-          "overallRating": 81,
+          "overallRating": 80,
           "stamina": null,
           "fatigue": 0,
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "PowerHeader",
+            "ClinicalFinisher",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -885,7 +1131,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "OneOnOnes"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -903,7 +1151,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -921,7 +1172,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -939,25 +1193,32 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "LongPasser",
+            "BoxToBox"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
           "matchesPlayedRecently": null
         },
         {
-          "name": "Jacob Ramsey",
-          "squadNumber": 41,
+          "name": "Harvey Elliott",
+          "squadNumber": 19,
           "position": "MID",
-          "preferredPosition": null,
+          "preferredPosition": "CAM",
           "secondaryPositions": [],
-          "overallRating": 79,
+          "overallRating": 80,
           "stamina": null,
           "fatigue": 0,
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Playmaker",
+            "FinesseShot",
+            "TechnicalDribbler"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -975,7 +1236,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -993,7 +1257,95 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Victor Lindelof",
+          "squadNumber": 2,
+          "position": "DEF",
+          "preferredPosition": "CB",
+          "secondaryPositions": [],
+          "overallRating": 79,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "LongPasser",
+            "Interceptor"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Andres Garcia",
+          "squadNumber": 16,
+          "position": "DEF",
+          "preferredPosition": "RB",
+          "secondaryPositions": [],
+          "overallRating": 76,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "Engine",
+            "EarlyCrosser"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Douglas Luiz",
+          "squadNumber": 6,
+          "position": "MID",
+          "preferredPosition": "CM",
+          "secondaryPositions": [],
+          "overallRating": 84,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "LongPasser",
+            "Playmaker",
+            "PressResistant"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Emiliano Buendia",
+          "squadNumber": 10,
+          "position": "MID",
+          "preferredPosition": "CAM",
+          "secondaryPositions": [],
+          "overallRating": 79,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "Playmaker",
+            "Flair"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1018,7 +1370,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "OneOnOnes",
+            "LongThrower"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1036,7 +1391,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1054,7 +1411,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1072,7 +1431,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1090,7 +1451,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1108,7 +1471,11 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Leadership",
+            "LongPasser",
+            "TeamPlayer"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1126,7 +1493,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1144,7 +1513,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1162,7 +1533,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1180,7 +1553,9 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1198,7 +1573,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1218,7 +1595,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "OneOnOnes"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1236,7 +1615,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1254,7 +1635,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1272,7 +1655,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1290,7 +1675,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1308,7 +1695,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1326,7 +1715,93 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Reiss Nelson",
+          "squadNumber": 24,
+          "position": "FWD",
+          "preferredPosition": "RW",
+          "secondaryPositions": [],
+          "overallRating": 78,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "Rapid",
+            "SpeedDribbler",
+            "Flair"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Joshua Dasilva",
+          "squadNumber": 10,
+          "position": "MID",
+          "preferredPosition": "CM",
+          "secondaryPositions": [],
+          "overallRating": 76,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "BoxToBox",
+            "Engine"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Ellery Balcombe",
+          "squadNumber": 12,
+          "position": "GK",
+          "preferredPosition": null,
+          "secondaryPositions": [],
+          "overallRating": 74,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "OneOnOnes"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Frank Onyeka",
+          "squadNumber": 15,
+          "position": "MID",
+          "preferredPosition": "CDM",
+          "secondaryPositions": [],
+          "overallRating": 76,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "Engine",
+            "DivesIntoTackles"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1351,7 +1826,9 @@
           "form": "Good",
           "formStatus": "Good",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "OneOnOnes"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1369,7 +1846,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1387,7 +1866,10 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1405,7 +1887,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1423,7 +1908,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1441,7 +1928,11 @@
           "form": "Good",
           "formStatus": "Good",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "BoxToBox",
+            "Interceptor",
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1459,7 +1950,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1477,7 +1970,11 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Leadership",
+            "Engine",
+            "TeamPlayer"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1495,7 +1992,11 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "SpeedDribbler",
+            "Flair",
+            "TechnicalDribbler"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1513,7 +2014,10 @@
           "form": "Good",
           "formStatus": "Good",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1531,7 +2035,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1551,7 +2057,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "OneOnOnes"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1569,7 +2077,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1587,7 +2097,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1605,7 +2117,10 @@
           "form": "Good",
           "formStatus": "Good",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "BoxToBox",
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1623,7 +2138,9 @@
           "form": "Good",
           "formStatus": "Good",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1641,7 +2158,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1659,7 +2178,114 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Olivier Boscagli",
+          "squadNumber": 21,
+          "position": "DEF",
+          "preferredPosition": "CB",
+          "secondaryPositions": [],
+          "overallRating": 79,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "LongPasser",
+            "Interceptor"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Diego Gomez",
+          "squadNumber": 8,
+          "position": "MID",
+          "preferredPosition": "CM",
+          "secondaryPositions": [],
+          "overallRating": 78,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "BoxToBox",
+            "LongShotTaker"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Matt O\u0027Riley",
+          "squadNumber": 33,
+          "position": "MID",
+          "preferredPosition": "CM",
+          "secondaryPositions": [],
+          "overallRating": 80,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "Playmaker",
+            "LongPasser"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Solly March",
+          "squadNumber": 7,
+          "position": "FWD",
+          "preferredPosition": "RW",
+          "secondaryPositions": [],
+          "overallRating": 78,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "EarlyCrosser",
+            "Engine"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Diego Coppola",
+          "squadNumber": 42,
+          "position": "DEF",
+          "preferredPosition": "CB",
+          "secondaryPositions": [],
+          "overallRating": 77,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "AerialThreat",
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1684,7 +2310,9 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "OneOnOnes"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1702,7 +2330,10 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1720,7 +2351,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1738,7 +2371,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1756,7 +2391,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1774,7 +2411,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1792,7 +2431,9 @@
           "form": "Good",
           "formStatus": "Good",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1810,7 +2451,9 @@
           "form": "Good",
           "formStatus": "Good",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1828,7 +2471,9 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1846,7 +2491,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1864,7 +2511,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1884,17 +2533,19 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "OneOnOnes"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
           "matchesPlayedRecently": null
         },
         {
-          "name": "Jordan Beyer",
-          "squadNumber": 36,
+          "name": "Axel Tuanzebe",
+          "squadNumber": 4,
           "position": "DEF",
-          "preferredPosition": null,
+          "preferredPosition": "CB",
           "secondaryPositions": [],
           "overallRating": 76,
           "stamina": null,
@@ -1902,17 +2553,20 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "DivesIntoTackles"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
           "matchesPlayedRecently": null
         },
         {
-          "name": "CJ Egan-Riley",
-          "squadNumber": 6,
+          "name": "Oliver Sonne",
+          "squadNumber": 2,
           "position": "DEF",
-          "preferredPosition": null,
+          "preferredPosition": "RB",
           "secondaryPositions": [],
           "overallRating": 74,
           "stamina": null,
@@ -1920,7 +2574,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Engine",
+            "EarlyCrosser"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1938,7 +2595,9 @@
           "form": "Very Poor",
           "formStatus": "Very Poor",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1956,25 +2615,31 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
           "matchesPlayedRecently": null
         },
         {
-          "name": "Luca Koleosho",
-          "squadNumber": 30,
+          "name": "Marcus Edwards",
+          "squadNumber": 21,
           "position": "FWD",
-          "preferredPosition": null,
+          "preferredPosition": "RW",
           "secondaryPositions": [],
-          "overallRating": 75,
+          "overallRating": 77,
           "stamina": null,
           "fatigue": 0,
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Flair",
+            "TechnicalDribbler",
+            "SpeedDribbler"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -1992,7 +2657,72 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Ashley Barnes",
+          "squadNumber": 10,
+          "position": "FWD",
+          "preferredPosition": "ST",
+          "secondaryPositions": [],
+          "overallRating": 74,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "PowerHeader",
+            "Leadership"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Florentino Luis",
+          "squadNumber": 16,
+          "position": "MID",
+          "preferredPosition": "CDM",
+          "secondaryPositions": [],
+          "overallRating": 79,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "Interceptor",
+            "Engine"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Mike Tresor",
+          "squadNumber": 31,
+          "position": "FWD",
+          "preferredPosition": "LW",
+          "secondaryPositions": [],
+          "overallRating": 76,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "Flair",
+            "EarlyCrosser"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2017,7 +2747,10 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Puncher",
+            "RushesOutOfGoal"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2037,7 +2770,11 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Engine",
+            "DivesIntoTackles",
+            "TeamPlayer"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2057,7 +2794,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2077,7 +2817,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2098,7 +2841,11 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "EarlyCrosser",
+            "Leadership",
+            "PowerHeader"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2118,7 +2865,11 @@
           "form": "Good",
           "formStatus": "Good",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "BoxToBox",
+            "Interceptor",
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2139,7 +2890,11 @@
           "form": "Good",
           "formStatus": "Good",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "LongPasser",
+            "Playmaker",
+            "Leadership"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2159,7 +2914,11 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Rapid",
+            "SpeedDribbler",
+            "Flair"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2179,7 +2938,12 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Flair",
+            "Playmaker",
+            "FinesseShot",
+            "DeadBallSpecialist"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2199,7 +2963,11 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Flair",
+            "TechnicalDribbler",
+            "FinesseShot"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2217,7 +2985,11 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "PowerHeader",
+            "AerialThreat",
+            "TriesToBeatOffsideTrap"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2237,7 +3009,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "OneOnOnes"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2255,7 +3029,10 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2275,7 +3052,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2295,7 +3074,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2315,7 +3096,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Engine",
+            "EarlyCrosser"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2335,7 +3119,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2355,7 +3141,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2376,7 +3165,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2396,7 +3187,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2416,7 +3210,11 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Rapid",
+            "SpeedDribbler",
+            "Flair"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2436,7 +3234,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Rapid",
+            "SpeedDribbler"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2456,7 +3257,11 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Rapid",
+            "SpeedDribbler",
+            "Flair"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2481,7 +3286,9 @@
           "form": "Good",
           "formStatus": "Good",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "OneOnOnes"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2499,25 +3306,31 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
           "matchesPlayedRecently": null
         },
         {
-          "name": "Marc Guehi",
-          "squadNumber": 6,
+          "name": "Borna Sosa",
+          "squadNumber": 24,
           "position": "DEF",
-          "preferredPosition": null,
+          "preferredPosition": "LB",
           "secondaryPositions": [],
-          "overallRating": 83,
+          "overallRating": 78,
           "stamina": null,
           "fatigue": 0,
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "EarlyCrosser",
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2535,7 +3348,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2553,7 +3369,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2571,7 +3389,9 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2589,25 +3409,31 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
           "matchesPlayedRecently": null
         },
         {
-          "name": "Eberechi Eze",
-          "squadNumber": 10,
-          "position": "MID",
-          "preferredPosition": null,
+          "name": "Evann Guessand",
+          "squadNumber": 29,
+          "position": "FWD",
+          "preferredPosition": "ST",
           "secondaryPositions": [],
-          "overallRating": 85,
+          "overallRating": 80,
           "stamina": null,
           "fatigue": 0,
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Rapid",
+            "ClinicalFinisher",
+            "Flair"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2625,7 +3451,9 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2643,7 +3471,10 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "PowerHeader",
+            "ClinicalFinisher"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2661,7 +3492,10 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2681,7 +3515,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "OneOnOnes"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2699,7 +3535,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2717,7 +3555,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2735,7 +3575,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2753,7 +3595,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2771,7 +3615,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2789,7 +3635,93 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Walter Benitez",
+          "squadNumber": 1,
+          "position": "GK",
+          "preferredPosition": null,
+          "secondaryPositions": [],
+          "overallRating": 78,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "OneOnOnes",
+            "Puncher"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Brennan Johnson",
+          "squadNumber": 22,
+          "position": "FWD",
+          "preferredPosition": "RW",
+          "secondaryPositions": [],
+          "overallRating": 80,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "Rapid",
+            "TriesToBeatOffsideTrap"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Jorgen Strand Larsen",
+          "squadNumber": 19,
+          "position": "FWD",
+          "preferredPosition": "ST",
+          "secondaryPositions": [],
+          "overallRating": 80,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "PowerHeader",
+            "ClinicalFinisher"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Christantus Uche",
+          "squadNumber": 8,
+          "position": "MID",
+          "preferredPosition": "CAM",
+          "secondaryPositions": [],
+          "overallRating": 77,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "BoxToBox",
+            "Flair"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2814,7 +3746,11 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "OneOnOnes",
+            "LongThrower",
+            "Leadership"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2832,7 +3768,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2850,7 +3788,10 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2868,7 +3809,10 @@
           "form": "Very Poor",
           "formStatus": "Very Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2886,7 +3830,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2904,7 +3850,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2922,7 +3870,9 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2940,7 +3890,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2958,7 +3910,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2976,7 +3930,9 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -2994,7 +3950,11 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Flair",
+            "TechnicalDribbler",
+            "Playmaker"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3003,18 +3963,20 @@
       ],
       "substitutes": [
         {
-          "name": "Joao Virginia",
+          "name": "Mark Travers",
           "squadNumber": 12,
           "position": "GK",
           "preferredPosition": null,
           "secondaryPositions": [],
-          "overallRating": 73,
+          "overallRating": 76,
           "stamina": null,
           "fatigue": 0,
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "OneOnOnes"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3032,7 +3994,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3050,7 +4014,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3068,7 +4034,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3086,43 +4054,94 @@
           "form": "Very Poor",
           "formStatus": "Very Poor",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
           "matchesPlayedRecently": null
         },
         {
-          "name": "Dominic Calvert-Lewin",
-          "squadNumber": 9,
+          "name": "Thierno Barry",
+          "squadNumber": 11,
           "position": "FWD",
-          "preferredPosition": null,
+          "preferredPosition": "ST",
           "secondaryPositions": [],
-          "overallRating": 78,
+          "overallRating": 77,
           "stamina": null,
           "fatigue": 0,
           "form": "Good",
           "formStatus": "Good",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "PowerHeader",
+            "AerialThreat",
+            "ClinicalFinisher"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
           "matchesPlayedRecently": null
         },
         {
-          "name": "Youssef Chermiti",
-          "squadNumber": 28,
-          "position": "FWD",
-          "preferredPosition": null,
+          "name": "Merlin Rohl",
+          "squadNumber": 20,
+          "position": "MID",
+          "preferredPosition": "CM",
           "secondaryPositions": [],
-          "overallRating": 72,
+          "overallRating": 76,
           "stamina": null,
           "fatigue": 0,
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "BoxToBox",
+            "Engine"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Kiernan Dewsbury-Hall",
+          "squadNumber": 22,
+          "position": "MID",
+          "preferredPosition": "CM",
+          "secondaryPositions": [],
+          "overallRating": 79,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "BoxToBox",
+            "Playmaker"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Norberto Beto",
+          "squadNumber": 14,
+          "position": "FWD",
+          "preferredPosition": "ST",
+          "secondaryPositions": [],
+          "overallRating": 77,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "PowerHeader",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3147,7 +4166,10 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "OneOnOnes",
+            "Leadership"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3165,7 +4187,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3183,7 +4207,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3201,7 +4228,9 @@
           "form": "Very Poor",
           "formStatus": "Very Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3219,7 +4248,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3237,17 +4269,19 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
           "matchesPlayedRecently": null
         },
         {
-          "name": "Andreas Pereira",
-          "squadNumber": 18,
-          "position": "MID",
-          "preferredPosition": null,
+          "name": "Samuel Chukwueze",
+          "squadNumber": 17,
+          "position": "FWD",
+          "preferredPosition": "RW",
           "secondaryPositions": [],
           "overallRating": 80,
           "stamina": null,
@@ -3255,7 +4289,11 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "SpeedDribbler",
+            "Flair",
+            "TechnicalDribbler"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3273,7 +4311,9 @@
           "form": "Very Poor",
           "formStatus": "Very Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3291,7 +4331,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3309,7 +4352,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3327,7 +4372,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3336,18 +4383,20 @@
       ],
       "substitutes": [
         {
-          "name": "Steven Sessegnon",
-          "squadNumber": 43,
+          "name": "Benjamin Lecomte",
+          "squadNumber": 40,
           "position": "GK",
           "preferredPosition": null,
           "secondaryPositions": [],
-          "overallRating": 70,
+          "overallRating": 77,
           "stamina": null,
           "fatigue": 0,
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "OneOnOnes"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3365,7 +4414,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3383,7 +4434,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3401,7 +4454,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3419,7 +4474,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3437,7 +4494,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3455,7 +4514,52 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Kevin Macedo",
+          "squadNumber": 20,
+          "position": "FWD",
+          "preferredPosition": "LW",
+          "secondaryPositions": [],
+          "overallRating": 77,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "Rapid",
+            "SpeedDribbler"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Oscar Bobb",
+          "squadNumber": 52,
+          "position": "MID",
+          "preferredPosition": "CAM",
+          "secondaryPositions": [],
+          "overallRating": 78,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "Flair",
+            "TechnicalDribbler",
+            "Playmaker"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3480,7 +4584,9 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "OneOnOnes"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3498,7 +4604,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3516,7 +4624,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3534,7 +4644,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3552,7 +4664,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3570,7 +4684,9 @@
           "form": "Good",
           "formStatus": "Good",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3588,7 +4704,9 @@
           "form": "Good",
           "formStatus": "Good",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3606,7 +4724,9 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3624,7 +4744,9 @@
           "form": "Good",
           "formStatus": "Good",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3642,7 +4764,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3660,7 +4784,9 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3680,7 +4806,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "OneOnOnes"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3698,25 +4826,30 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
           "matchesPlayedRecently": null
         },
         {
-          "name": "Junior Firpo",
-          "squadNumber": 21,
+          "name": "James Justin",
+          "squadNumber": 2,
           "position": "DEF",
-          "preferredPosition": null,
+          "preferredPosition": "RB",
           "secondaryPositions": [],
-          "overallRating": 75,
+          "overallRating": 78,
           "stamina": null,
           "fatigue": 0,
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Engine",
+            "EarlyCrosser"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3734,7 +4867,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3752,25 +4887,30 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
           "matchesPlayedRecently": null
         },
         {
-          "name": "Largie Ramazani",
-          "squadNumber": 17,
+          "name": "Noah Okafor",
+          "squadNumber": 11,
           "position": "FWD",
-          "preferredPosition": null,
+          "preferredPosition": "LW",
           "secondaryPositions": [],
-          "overallRating": 76,
+          "overallRating": 78,
           "stamina": null,
           "fatigue": 0,
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Rapid",
+            "ClinicalFinisher"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3788,7 +4928,93 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Jaka Bijol",
+          "squadNumber": 5,
+          "position": "DEF",
+          "preferredPosition": "CB",
+          "secondaryPositions": [],
+          "overallRating": 79,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "AerialThreat",
+            "Interceptor"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Sebastiaan Bornauw",
+          "squadNumber": 6,
+          "position": "DEF",
+          "preferredPosition": "CB",
+          "secondaryPositions": [],
+          "overallRating": 77,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "PowerHeader",
+            "AerialThreat"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Lukas Nmecha",
+          "squadNumber": 9,
+          "position": "FWD",
+          "preferredPosition": "ST",
+          "secondaryPositions": [],
+          "overallRating": 76,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Jack Harrison",
+          "squadNumber": 22,
+          "position": "FWD",
+          "preferredPosition": "LW",
+          "secondaryPositions": [],
+          "overallRating": 78,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "EarlyCrosser",
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3813,25 +5039,33 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "OneOnOnes",
+            "LongThrower",
+            "RushesOutOfGoal"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
           "matchesPlayedRecently": null
         },
         {
-          "name": "Trent Alexander-Arnold",
-          "squadNumber": 66,
+          "name": "Conor Bradley",
+          "squadNumber": 84,
           "position": "DEF",
-          "preferredPosition": null,
+          "preferredPosition": "RB",
           "secondaryPositions": [],
-          "overallRating": 86,
+          "overallRating": 80,
           "stamina": null,
           "fatigue": 0,
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Engine",
+            "EarlyCrosser",
+            "DivesIntoTackles"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3849,7 +5083,10 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3867,7 +5104,11 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Leadership",
+            "PowerHeader",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3885,7 +5126,11 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "EarlyCrosser",
+            "Engine",
+            "TeamPlayer"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3903,7 +5148,10 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "LongPasser",
+            "BoxToBox"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3921,7 +5169,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "LongPasser",
+            "BoxToBox"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3939,7 +5190,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "LongPasser",
+            "BoxToBox"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3957,7 +5211,12 @@
           "form": "Good",
           "formStatus": "Good",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "FinesseShot",
+            "Flair",
+            "SpeedDribbler",
+            "ClinicalFinisher"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3975,7 +5234,10 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -3993,7 +5255,10 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4013,7 +5278,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "OneOnOnes",
+            "LongThrower"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4031,7 +5299,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4049,7 +5320,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4067,7 +5341,9 @@
           "form": "Good",
           "formStatus": "Good",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4085,25 +5361,31 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
           "matchesPlayedRecently": null
         },
         {
-          "name": "Darwin Nunez",
+          "name": "Alexander Isak",
           "squadNumber": 9,
           "position": "FWD",
-          "preferredPosition": null,
+          "preferredPosition": "ST",
           "secondaryPositions": [],
-          "overallRating": 82,
+          "overallRating": 86,
           "stamina": null,
           "fatigue": 0,
           "form": "Good",
           "formStatus": "Good",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "ClinicalFinisher",
+            "Flair",
+            "TriesToBeatOffsideTrap"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4121,7 +5403,73 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Florian Wirtz",
+          "squadNumber": 7,
+          "position": "MID",
+          "preferredPosition": "CAM",
+          "secondaryPositions": [],
+          "overallRating": 88,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "Playmaker",
+            "Flair",
+            "TechnicalDribbler"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Milos Kerkez",
+          "squadNumber": 6,
+          "position": "DEF",
+          "preferredPosition": "LB",
+          "secondaryPositions": [],
+          "overallRating": 80,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "Engine",
+            "EarlyCrosser"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Freddie Woodman",
+          "squadNumber": 28,
+          "position": "GK",
+          "preferredPosition": null,
+          "secondaryPositions": [],
+          "overallRating": 75,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "OneOnOnes"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4146,7 +5494,11 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "OneOnOnes",
+            "Puncher",
+            "Leadership"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4164,7 +5516,10 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4182,7 +5537,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4200,7 +5558,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4218,7 +5579,10 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4236,7 +5600,11 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Leadership",
+            "LongPasser",
+            "PressResistant"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4254,7 +5622,11 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Flair",
+            "TechnicalDribbler",
+            "FinesseShot"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4272,7 +5644,10 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "LongPasser",
+            "BoxToBox"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4290,7 +5665,11 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Rapid",
+            "SpeedDribbler",
+            "Flair"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4308,7 +5687,11 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "PowerHeader",
+            "ClinicalFinisher",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4326,7 +5709,11 @@
           "form": "Good",
           "formStatus": "Good",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Rapid",
+            "SpeedDribbler",
+            "FinesseShot"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4346,7 +5733,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "OneOnOnes"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4364,7 +5753,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4382,7 +5774,10 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4400,7 +5795,11 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Playmaker",
+            "PressResistant",
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4418,7 +5817,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "LongPasser",
+            "BoxToBox"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4436,7 +5838,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4454,7 +5859,75 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Rayan Cherki",
+          "squadNumber": 18,
+          "position": "MID",
+          "preferredPosition": "CAM",
+          "secondaryPositions": [],
+          "overallRating": 84,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "Flair",
+            "Playmaker",
+            "TechnicalDribbler"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Marc Guehi",
+          "squadNumber": 6,
+          "position": "DEF",
+          "preferredPosition": "CB",
+          "secondaryPositions": [],
+          "overallRating": 84,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "Leadership",
+            "Interceptor",
+            "AerialThreat"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Antoine Semenyo",
+          "squadNumber": 24,
+          "position": "FWD",
+          "preferredPosition": "RW",
+          "secondaryPositions": [],
+          "overallRating": 82,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "Rapid",
+            "PowerHeader",
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4478,8 +5951,10 @@
           "fatigue": 0,
           "form": "Excellent",
           "formStatus": "Excellent",
-          "isStarter": true,
-          "traits": [],
+          "isStarter": false,
+          "traits": [
+            "OneOnOnes"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4497,7 +5972,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4515,7 +5993,11 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "PowerHeader",
+            "AerialThreat",
+            "Leadership"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4533,7 +6015,11 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Leadership",
+            "LongPasser",
+            "DivesIntoTackles"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4551,7 +6037,10 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4569,7 +6058,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "LongPasser",
+            "BoxToBox"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4587,7 +6079,11 @@
           "form": "Good",
           "formStatus": "Good",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Playmaker",
+            "LongShotTaker",
+            "DeadBallSpecialist"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4605,7 +6101,11 @@
           "form": "Very Poor",
           "formStatus": "Very Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "DivesIntoTackles",
+            "Interceptor",
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4623,7 +6123,11 @@
           "form": "Good",
           "formStatus": "Good",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "FinesseShot",
+            "Engine",
+            "ClinicalFinisher"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4641,7 +6145,11 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "PowerHeader",
+            "ClinicalFinisher",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4659,7 +6167,11 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Flair",
+            "TechnicalDribbler",
+            "FinesseShot"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4679,7 +6191,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "OneOnOnes"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4697,7 +6211,10 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4715,7 +6232,10 @@
           "form": "Very Poor",
           "formStatus": "Very Poor",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4733,7 +6253,11 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "PressResistant",
+            "BoxToBox",
+            "TechnicalDribbler"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4751,7 +6275,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4769,7 +6295,11 @@
           "form": "Good",
           "formStatus": "Good",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "SpeedDribbler",
+            "Flair",
+            "TechnicalDribbler"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4787,7 +6317,73 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Senne Lammens",
+          "squadNumber": 31,
+          "position": "GK",
+          "preferredPosition": null,
+          "secondaryPositions": [],
+          "overallRating": 77,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": true,
+          "traits": [
+            "OneOnOnes"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Patrick Dorgu",
+          "squadNumber": 13,
+          "position": "DEF",
+          "preferredPosition": "LB",
+          "secondaryPositions": [],
+          "overallRating": 78,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "Rapid",
+            "EarlyCrosser",
+            "Engine"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Leny Yoro",
+          "squadNumber": 15,
+          "position": "DEF",
+          "preferredPosition": "CB",
+          "secondaryPositions": [],
+          "overallRating": 80,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4812,7 +6408,10 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "OneOnOnes",
+            "LongThrower"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4830,7 +6429,11 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "EarlyCrosser",
+            "DeadBallSpecialist",
+            "Leadership"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4848,7 +6451,10 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4866,7 +6472,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4884,7 +6492,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4902,7 +6513,11 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Playmaker",
+            "LongPasser",
+            "BoxToBox"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4920,7 +6535,11 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "BoxToBox",
+            "Engine",
+            "LongPasser"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4938,7 +6557,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "LongPasser",
+            "BoxToBox"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4956,7 +6578,11 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Rapid",
+            "SpeedDribbler",
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4974,7 +6600,10 @@
           "form": "Good",
           "formStatus": "Good",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -4992,7 +6621,10 @@
           "form": "Good",
           "formStatus": "Good",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5012,7 +6644,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "OneOnOnes",
+            "LongThrower"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5030,7 +6665,10 @@
           "form": "Very Poor",
           "formStatus": "Very Poor",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5048,7 +6686,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5066,25 +6706,31 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
           "matchesPlayedRecently": null
         },
         {
-          "name": "Sean Longstaff",
-          "squadNumber": 36,
+          "name": "Jacob Ramsey",
+          "squadNumber": 41,
           "position": "MID",
-          "preferredPosition": null,
+          "preferredPosition": "CM",
           "secondaryPositions": [],
-          "overallRating": 78,
+          "overallRating": 79,
           "stamina": null,
           "fatigue": 0,
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "BoxToBox",
+            "Engine",
+            "TechnicalDribbler"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5102,7 +6748,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5120,7 +6769,51 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Anthony Elanga",
+          "squadNumber": 20,
+          "position": "FWD",
+          "preferredPosition": "RW",
+          "secondaryPositions": [],
+          "overallRating": 81,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "Rapid",
+            "SpeedDribbler"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Malick Thiaw",
+          "squadNumber": 12,
+          "position": "DEF",
+          "preferredPosition": "CB",
+          "secondaryPositions": [],
+          "overallRating": 80,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "AerialThreat",
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5145,7 +6838,9 @@
           "form": "Good",
           "formStatus": "Good",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "OneOnOnes"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5163,7 +6858,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5181,7 +6878,10 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5199,7 +6899,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5217,7 +6920,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5235,7 +6941,10 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "LongPasser",
+            "BoxToBox"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5253,7 +6962,9 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5271,7 +6982,10 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "LongPasser",
+            "BoxToBox"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5289,7 +7003,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5307,7 +7023,11 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "PowerHeader",
+            "ClinicalFinisher",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5325,7 +7045,10 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5345,7 +7068,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "OneOnOnes"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5363,7 +7088,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5381,7 +7108,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5399,7 +7128,9 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5417,7 +7148,9 @@
           "form": "Good",
           "formStatus": "Good",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5435,25 +7168,93 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
           "matchesPlayedRecently": null
         },
         {
-          "name": "Anthony Elanga",
-          "squadNumber": 21,
+          "name": "Igor Jesus",
+          "squadNumber": 9,
           "position": "FWD",
-          "preferredPosition": null,
+          "preferredPosition": "ST",
           "secondaryPositions": [],
-          "overallRating": 79,
+          "overallRating": 80,
           "stamina": null,
           "fatigue": 0,
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "ClinicalFinisher",
+            "PowerHeader"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "James McAtee",
+          "squadNumber": 10,
+          "position": "MID",
+          "preferredPosition": "CAM",
+          "secondaryPositions": [],
+          "overallRating": 80,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "Playmaker",
+            "Flair"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Omari Hutchinson",
+          "squadNumber": 7,
+          "position": "FWD",
+          "preferredPosition": "RW",
+          "secondaryPositions": [],
+          "overallRating": 80,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "SpeedDribbler",
+            "Flair"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Lorenzo Lucca",
+          "squadNumber": 17,
+          "position": "FWD",
+          "preferredPosition": "ST",
+          "secondaryPositions": [],
+          "overallRating": 79,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "PowerHeader",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5478,7 +7279,9 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "OneOnOnes"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5496,7 +7299,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5514,7 +7319,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5532,7 +7339,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5550,7 +7359,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5568,7 +7379,11 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Leadership",
+            "LongPasser",
+            "DivesIntoTackles"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5586,7 +7401,9 @@
           "form": "Good",
           "formStatus": "Good",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5604,7 +7421,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5622,7 +7441,9 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5640,7 +7461,10 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5658,7 +7482,9 @@
           "form": "Good",
           "formStatus": "Good",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5678,7 +7504,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "OneOnOnes"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5696,7 +7524,9 @@
           "form": "Very Poor",
           "formStatus": "Very Poor",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5714,7 +7544,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5732,7 +7564,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5750,7 +7584,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5768,7 +7604,9 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5786,7 +7624,93 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Lutsharel Geertruida",
+          "squadNumber": 2,
+          "position": "DEF",
+          "preferredPosition": "RB",
+          "secondaryPositions": [],
+          "overallRating": 80,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "Interceptor",
+            "Engine"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Nordi Mukiele",
+          "squadNumber": 19,
+          "position": "DEF",
+          "preferredPosition": "CB",
+          "secondaryPositions": [],
+          "overallRating": 79,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "AerialThreat",
+            "DivesIntoTackles"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Reinildo Mandava",
+          "squadNumber": 23,
+          "position": "DEF",
+          "preferredPosition": "LB",
+          "secondaryPositions": [],
+          "overallRating": 78,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "DivesIntoTackles",
+            "Engine"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Bertrand Traore",
+          "squadNumber": 10,
+          "position": "FWD",
+          "preferredPosition": "RW",
+          "secondaryPositions": [],
+          "overallRating": 77,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "Flair",
+            "FinesseShot"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5811,7 +7735,10 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "OneOnOnes",
+            "LongThrower"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5829,7 +7756,10 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5847,7 +7777,11 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "DivesIntoTackles",
+            "AerialThreat",
+            "Leadership"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5865,7 +7799,11 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Rapid",
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5883,7 +7821,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5901,7 +7842,10 @@
           "form": "Good",
           "formStatus": "Good",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "LongPasser",
+            "BoxToBox"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5919,7 +7863,10 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "LongPasser",
+            "BoxToBox"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5937,7 +7884,11 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Playmaker",
+            "DeadBallSpecialist",
+            "Flair"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5955,7 +7906,11 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "SpeedDribbler",
+            "Flair",
+            "TechnicalDribbler"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5973,7 +7928,10 @@
           "form": "Good",
           "formStatus": "Good",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "ClinicalFinisher",
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -5991,7 +7949,11 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Playmaker",
+            "Flair",
+            "TechnicalDribbler"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -6011,7 +7973,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "OneOnOnes"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -6029,7 +7993,10 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -6047,7 +8014,9 @@
           "form": "Very Poor",
           "formStatus": "Very Poor",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -6065,7 +8034,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -6083,7 +8054,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -6101,7 +8074,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -6119,7 +8095,74 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Randal Kolo Muani",
+          "squadNumber": 39,
+          "position": "FWD",
+          "preferredPosition": "ST",
+          "secondaryPositions": [],
+          "overallRating": 84,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "Rapid",
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Mathys Tel",
+          "squadNumber": 11,
+          "position": "FWD",
+          "preferredPosition": "LW",
+          "secondaryPositions": [],
+          "overallRating": 80,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "Rapid",
+            "FinesseShot"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Archie Gray",
+          "squadNumber": 14,
+          "position": "MID",
+          "preferredPosition": "CM",
+          "secondaryPositions": [],
+          "overallRating": 78,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "BoxToBox",
+            "PressResistant"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -6144,7 +8187,9 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "OneOnOnes"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -6162,7 +8207,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -6180,7 +8228,10 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -6198,7 +8249,10 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "AerialThreat"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -6216,7 +8270,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -6234,7 +8290,9 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -6252,7 +8310,11 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "DeadBallSpecialist",
+            "LongPasser",
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -6270,7 +8332,11 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Flair",
+            "Playmaker",
+            "TechnicalDribbler"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -6288,7 +8354,11 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "FinesseShot",
+            "Engine",
+            "ClinicalFinisher"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -6306,7 +8376,10 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -6324,7 +8397,10 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -6344,7 +8420,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "OneOnOnes"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -6362,43 +8440,50 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
           "matchesPlayedRecently": null
         },
         {
-          "name": "Emerson Palmieri",
-          "squadNumber": 33,
-          "position": "DEF",
+          "name": "Mads Hermansen",
+          "squadNumber": 1,
+          "position": "GK",
           "preferredPosition": null,
           "secondaryPositions": [],
-          "overallRating": 79,
+          "overallRating": 78,
           "stamina": null,
           "fatigue": 0,
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "OneOnOnes"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
           "matchesPlayedRecently": null
         },
         {
-          "name": "Edson Alvarez",
-          "squadNumber": 19,
+          "name": "Soungoutou Magassa",
+          "squadNumber": 27,
           "position": "MID",
-          "preferredPosition": null,
+          "preferredPosition": "CDM",
           "secondaryPositions": [],
-          "overallRating": 80,
+          "overallRating": 77,
           "stamina": null,
           "fatigue": 0,
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Interceptor",
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -6416,7 +8501,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -6434,25 +8521,72 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
           "matchesPlayedRecently": null
         },
         {
-          "name": "Luis Guilherme",
-          "squadNumber": 17,
+          "name": "Adama Traore",
+          "squadNumber": 11,
           "position": "FWD",
-          "preferredPosition": null,
+          "preferredPosition": "RW",
           "secondaryPositions": [],
-          "overallRating": 74,
+          "overallRating": 78,
           "stamina": null,
           "fatigue": 0,
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Rapid",
+            "SpeedDribbler"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Axel Disasi",
+          "squadNumber": 3,
+          "position": "DEF",
+          "preferredPosition": "CB",
+          "secondaryPositions": [],
+          "overallRating": 80,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "AerialThreat",
+            "Interceptor"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Valentin Castellanos",
+          "squadNumber": 19,
+          "position": "FWD",
+          "preferredPosition": "ST",
+          "secondaryPositions": [],
+          "overallRating": 80,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -6477,7 +8611,9 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "OneOnOnes"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -6495,7 +8631,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -6513,7 +8651,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -6531,7 +8671,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -6549,7 +8691,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -6567,7 +8711,11 @@
           "form": "Good",
           "formStatus": "Good",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "DivesIntoTackles",
+            "BoxToBox",
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -6585,7 +8733,9 @@
           "form": "Poor",
           "formStatus": "Poor",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -6603,7 +8753,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -6621,7 +8773,10 @@
           "form": "Good",
           "formStatus": "Good",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -6639,7 +8794,10 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -6657,7 +8815,9 @@
           "form": "Excellent",
           "formStatus": "Excellent",
           "isStarter": true,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -6677,7 +8837,9 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "OneOnOnes"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -6695,25 +8857,30 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Interceptor"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
           "matchesPlayedRecently": null
         },
         {
-          "name": "Rayan Ait-Nouri",
-          "squadNumber": 3,
+          "name": "Jackson Tchatchoua",
+          "squadNumber": 22,
           "position": "DEF",
-          "preferredPosition": null,
+          "preferredPosition": "RB",
           "secondaryPositions": [],
-          "overallRating": 82,
+          "overallRating": 77,
           "stamina": null,
           "fatigue": 0,
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Rapid",
+            "EarlyCrosser"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -6731,25 +8898,30 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Engine"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
           "matchesPlayedRecently": null
         },
         {
-          "name": "Tommy Doyle",
-          "squadNumber": 20,
-          "position": "MID",
-          "preferredPosition": null,
+          "name": "Ladislav Krejci",
+          "squadNumber": 6,
+          "position": "DEF",
+          "preferredPosition": "CB",
           "secondaryPositions": [],
-          "overallRating": 76,
+          "overallRating": 78,
           "stamina": null,
           "fatigue": 0,
           "form": "Good",
           "formStatus": "Good",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "AerialThreat",
+            "LongPasser"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
@@ -6767,25 +8939,72 @@
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "Rapid"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,
           "matchesPlayedRecently": null
         },
         {
-          "name": "Sasa Kalajdzic",
-          "squadNumber": 18,
+          "name": "Tolu Arokodare",
+          "squadNumber": 9,
           "position": "FWD",
-          "preferredPosition": null,
+          "preferredPosition": "ST",
           "secondaryPositions": [],
-          "overallRating": 77,
+          "overallRating": 78,
           "stamina": null,
           "fatigue": 0,
           "form": "Average",
           "formStatus": "Average",
           "isStarter": false,
-          "traits": [],
+          "traits": [
+            "PowerHeader",
+            "ClinicalFinisher"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "Jhon Arias",
+          "squadNumber": 10,
+          "position": "FWD",
+          "preferredPosition": "RW",
+          "secondaryPositions": [],
+          "overallRating": 79,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "Flair",
+            "SpeedDribbler"
+          ],
+          "morale": null,
+          "isInjured": null,
+          "isSuspended": null,
+          "matchesPlayedRecently": null
+        },
+        {
+          "name": "David Moller Wolfe",
+          "squadNumber": 3,
+          "position": "DEF",
+          "preferredPosition": "LB",
+          "secondaryPositions": [],
+          "overallRating": 76,
+          "stamina": null,
+          "fatigue": 0,
+          "form": "Average",
+          "formStatus": "Average",
+          "isStarter": false,
+          "traits": [
+            "Engine",
+            "EarlyCrosser"
+          ],
           "morale": null,
           "isInjured": null,
           "isSuspended": null,

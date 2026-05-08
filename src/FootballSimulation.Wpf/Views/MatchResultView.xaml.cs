@@ -4,6 +4,7 @@ using System.Windows.Media.Imaging;
 using FootballSimulation.Models;
 using FootballSimulation.Services;
 using FootballSimulation.Wpf.Helpers;
+using FootballSimulation.Wpf.Models;
 using FootballSimulation.Wpf.State;
 
 namespace FootballSimulation.Wpf.Views;
@@ -204,6 +205,7 @@ public partial class MatchResultView : UserControl
             FormBadgeText = formBadge.Text,
             FormBadgeBackground = formBadge.Background,
             FormBadgeForeground = formBadge.Foreground,
+            TraitBadges = PlayerTraitBadgeHelper.Create(player?.Traits ?? []),
             GoalVisibility = performance.Goals > 0 ? Visibility.Visible : Visibility.Collapsed,
             AssistVisibility = performance.Assists > 0 ? Visibility.Visible : Visibility.Collapsed,
             DefensiveVisibility = defensiveContributions > 0 ? Visibility.Visible : Visibility.Collapsed,
@@ -317,6 +319,7 @@ public partial class MatchResultView : UserControl
         public string FormBadgeText { get; init; } = string.Empty;
         public string FormBadgeBackground { get; init; } = "#FACC15";
         public string FormBadgeForeground { get; init; } = "#1F2937";
+        public IReadOnlyList<PlayerTraitBadge> TraitBadges { get; init; } = [];
         public Visibility GoalVisibility { get; init; }
         public Visibility AssistVisibility { get; init; }
         public Visibility DefensiveVisibility { get; init; }

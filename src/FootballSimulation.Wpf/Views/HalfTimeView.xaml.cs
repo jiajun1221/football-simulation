@@ -23,8 +23,8 @@ public partial class HalfTimeView : UserControl
     private readonly FormationLayoutService _formationLayoutService = new();
     private readonly TacticalInsightService _tacticalInsightService = new();
     private readonly SquadSelectionService _squadSelectionService = new();
-    private const double PitchCardWidth = 112;
-    private const double PitchCardHeight = 72;
+    private const double PitchCardWidth = 128;
+    private const double PitchCardHeight = 94;
 
     private Player? _selectedStarter;
     private List<Player> _pitchSlots = [];
@@ -175,7 +175,7 @@ public partial class HalfTimeView : UserControl
         var button = new Button
         {
             Width = PitchCardWidth,
-            Height = PitchCardHeight,
+            MinHeight = PitchCardHeight,
             Tag = player,
             DataContext = card,
             ToolTip = "Drag this player or drop another player here.",
@@ -224,6 +224,7 @@ public partial class HalfTimeView : UserControl
             FormBadgeText = form.Text,
             FormBadgeBackground = form.Background,
             FormBadgeForeground = form.Foreground,
+            TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits),
             CardBackground = player == _selectedStarter ? "#FFF2B8" : isOutOfPosition ? "#FFF7EC" : "#FFFFFF",
             CardBorderBrush = player == _selectedStarter ? "#F6C343" : isOutOfPosition ? ratingVisual.Foreground : "#102033",
             CardBorderThickness = player == _selectedStarter ? new Thickness(3) : new Thickness(1)
@@ -355,7 +356,8 @@ public partial class HalfTimeView : UserControl
             StaminaBrush = GetStaminaBrush(player),
             BenchFormBadgeText = form.Text,
             BenchFormBadgeBackground = form.Background,
-            BenchFormBadgeForeground = form.Foreground
+            BenchFormBadgeForeground = form.Foreground,
+            TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits)
         };
     }
 
@@ -389,6 +391,11 @@ public partial class HalfTimeView : UserControl
 
         SelectedPlayerNameTextBlock.Text = _selectedStarter.Name;
         SelectedPlayerMetaTextBlock.Text = $"{team?.Name ?? _state.SelectedTeam?.Name ?? "Team"} | {_selectedStarter.AssignedPosition}";
+        var selectedTraitBadges = PlayerTraitBadgeHelper.Create(_selectedStarter.Traits);
+        SelectedPlayerTraitItemsControl.ItemsSource = selectedTraitBadges;
+        SelectedPlayerTraitItemsControl.Visibility = selectedTraitBadges.Count == 0
+            ? Visibility.Collapsed
+            : Visibility.Visible;
         SelectedPlayerFormBadgeBorder.Background = ToBrush(formBadge.Background);
         SelectedPlayerFormBadgeTextBlock.Foreground = ToBrush(formBadge.Foreground);
         SelectedPlayerFormBadgeTextBlock.Text = formBadge.Text;
@@ -1194,5 +1201,6 @@ public partial class HalfTimeView : UserControl
         public string BenchFormBadgeText { get; init; } = string.Empty;
         public string BenchFormBadgeBackground { get; init; } = "#E1E5EA";
         public string BenchFormBadgeForeground { get; init; } = "#465364";
+        public IReadOnlyList<PlayerTraitBadge> TraitBadges { get; init; } = [];
     }
 }

@@ -2,6 +2,24 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <UserControl.Resources>
+        <DataTemplate x:Key="TraitIconBadgeTemplate">
+            <Border Width="14"
+                    Height="14"
+                    Background="{Binding Background}"
+                    CornerRadius="7"
+                    Margin="2,0,0,0"
+                    ToolTip="{Binding TooltipText}">
+                <TextBlock Text="{Binding Icon}"
+                           Foreground="{Binding Foreground}"
+                           FontFamily="{Binding FontFamily}"
+                           FontSize="8"
+                           FontWeight="Black"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           TextAlignment="Center" />
+            </Border>
+        </DataTemplate>
+
         <Style x:Key="SummaryCard" TargetType="Border">
             <Setter Property="Background" Value="White" />
             <Setter Property="CornerRadius" Value="18" />
@@ -58,12 +76,31 @@
                                        Margin="0,0,8,0" />
                             <Border Background="{Binding FormBadgeBackground}"
                                     CornerRadius="7"
-                                    Padding="5,1">
+                                    Padding="5,1"
+                                    Margin="0,0,3,0">
                                 <TextBlock Text="{Binding FormBadgeText}"
                                            Foreground="{Binding FormBadgeForeground}"
                                            FontSize="9"
                                            FontWeight="Bold" />
                             </Border>
+                            <ItemsControl ItemsSource="{Binding TraitBadges}"
+                                          ItemTemplate="{StaticResource TraitIconBadgeTemplate}">
+                                <ItemsControl.Style>
+                                    <Style TargetType="ItemsControl">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding TraitBadges.Count}" Value="0">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ItemsControl.Style>
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                            </ItemsControl>
                         </StackPanel>
 
                         <WrapPanel Margin="0,5,0,0">

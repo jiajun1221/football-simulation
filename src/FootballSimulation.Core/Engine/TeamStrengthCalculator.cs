@@ -65,25 +65,25 @@ public class TeamStrengthCalculator
 
     public double GetEffectiveAttack(Player player)
     {
-        var traitModifier = GetTraitModifier(player, PlayerTrait.PaceMerchant, PlayerTrait.BigMatchPlayer);
+        var traitModifier = GetTraitModifier(player, PlayerTrait.Rapid, PlayerTrait.SpeedDribbler, PlayerTrait.TechnicalDribbler, PlayerTrait.Flair, PlayerTrait.Leadership);
         return player.Attack * GetStaminaModifier(player) * GetStatusModifier(player) * traitModifier * PositionSuitabilityService.GetEffectivenessMultiplier(player);
     }
 
     public double GetEffectiveDefense(Player player)
     {
-        var traitModifier = GetTraitModifier(player, PlayerTrait.AggressiveTackler, PlayerTrait.AerialThreat);
+        var traitModifier = GetTraitModifier(player, PlayerTrait.DivesIntoTackles, PlayerTrait.Interceptor, PlayerTrait.PowerHeader, PlayerTrait.AerialThreat, PlayerTrait.Engine, PlayerTrait.Leadership);
         return player.Defense * GetStaminaModifier(player) * GetStatusModifier(player) * traitModifier * PositionSuitabilityService.GetEffectivenessMultiplier(player);
     }
 
     public double GetEffectivePassing(Player player)
     {
-        var traitModifier = GetTraitModifier(player, PlayerTrait.Playmaker, PlayerTrait.PressResistant, PlayerTrait.SetPieceSpecialist);
+        var traitModifier = GetTraitModifier(player, PlayerTrait.Playmaker, PlayerTrait.LongPasser, PlayerTrait.PressResistant, PlayerTrait.DeadBallSpecialist, PlayerTrait.EarlyCrosser, PlayerTrait.TeamPlayer, PlayerTrait.Leadership);
         return player.Passing * GetStaminaModifier(player) * GetStatusModifier(player) * traitModifier * PositionSuitabilityService.GetEffectivenessMultiplier(player);
     }
 
     public double GetEffectiveFinishing(Player player)
     {
-        var traitModifier = GetTraitModifier(player, PlayerTrait.ClinicalFinisher, PlayerTrait.LongShotTaker, PlayerTrait.AerialThreat);
+        var traitModifier = GetTraitModifier(player, PlayerTrait.ClinicalFinisher, PlayerTrait.FinesseShot, PlayerTrait.LongShotTaker, PlayerTrait.PowerHeader, PlayerTrait.AerialThreat, PlayerTrait.OutsideFootShot);
         return player.Finishing * GetStaminaModifier(player) * GetStatusModifier(player) * traitModifier * PositionSuitabilityService.GetEffectivenessMultiplier(player);
     }
 
@@ -98,7 +98,13 @@ public class TeamStrengthCalculator
             _ => 1.00
         };
 
-        return (GetEffectivePassing(player) * 0.60 + GetEffectiveAttack(player) * 0.40) * positionModifier;
+        var decisionModifier =
+            (player.Traits.Contains(PlayerTrait.Playmaker) ? 1.16 : 1.0) *
+            (player.Traits.Contains(PlayerTrait.LongPasser) ? 1.08 : 1.0) *
+            (player.Traits.Contains(PlayerTrait.PressResistant) ? 1.06 : 1.0) *
+            (player.Traits.Contains(PlayerTrait.TeamPlayer) ? 1.06 : 1.0);
+
+        return (GetEffectivePassing(player) * 0.60 + GetEffectiveAttack(player) * 0.40) * positionModifier * decisionModifier;
     }
 
     public double GetShooterWeight(Player player)
@@ -112,7 +118,14 @@ public class TeamStrengthCalculator
             _ => 1.00
         };
 
-        return (GetEffectiveAttack(player) * 0.45 + GetEffectiveFinishing(player) * 0.55) * positionModifier;
+        var decisionModifier =
+            (player.Traits.Contains(PlayerTrait.ClinicalFinisher) ? 1.14 : 1.0) *
+            (player.Traits.Contains(PlayerTrait.LongShotTaker) ? 1.08 : 1.0) *
+            (player.Traits.Contains(PlayerTrait.Rapid) ? 1.06 : 1.0) *
+            (player.Traits.Contains(PlayerTrait.SpeedDribbler) ? 1.05 : 1.0) *
+            (player.Traits.Contains(PlayerTrait.PowerHeader) ? 1.04 : 1.0);
+
+        return (GetEffectiveAttack(player) * 0.45 + GetEffectiveFinishing(player) * 0.55) * positionModifier * decisionModifier;
     }
 
     private static double GetStaminaModifier(Player player)
@@ -166,7 +179,8 @@ public class TeamStrengthCalculator
     private static double GetTraitModifier(Player player, params PlayerTrait[] matchingTraits)
     {
         var traitCount = matchingTraits.Count(player.Traits.Contains);
-        return 1.0 + traitCount * 0.05;
+        var moraleBonus = player.Traits.Contains(PlayerTrait.Leadership) ? 0.02 : 0.0;
+        return 1.0 + traitCount * 0.05 + moraleBonus;
     }
 
     private static double GetShortHandedModifier(int availablePlayerCount)

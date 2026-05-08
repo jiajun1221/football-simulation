@@ -1217,7 +1217,8 @@ public partial class MatchLiveView : UserControl
             InjuryStatusText = player.IsInjured || performance?.Injuries > 0 ? "Injured" : "Fit",
             FormText = PlayerFormStatusService.ToDisplayText(player.FormStatus),
             StaminaText = $"{Math.Round(player.Stamina):0}%",
-            MatchStatusText = status.Text
+            MatchStatusText = status.Text,
+            TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits)
         };
     }
 
@@ -1277,6 +1278,10 @@ public partial class MatchLiveView : UserControl
 
         SelectedPlayerNameTextBlock.Text = selectedPlayer.Name;
         SelectedPlayerMetaTextBlock.Text = $"{selectedPlayer.TeamName} | {selectedPlayer.PositionText}";
+        SelectedPlayerTraitItemsControl.ItemsSource = selectedPlayer.TraitBadges;
+        SelectedPlayerTraitItemsControl.Visibility = selectedPlayer.TraitBadges.Count == 0
+            ? Visibility.Collapsed
+            : Visibility.Visible;
 
         var playerContext = FindSelectedPlayerContext(selectedPlayer);
         var player = playerContext?.Player;
@@ -2700,6 +2705,7 @@ public partial class MatchLiveView : UserControl
             CardBorderBrush = isPendingSubIn ? "#34A853" : "#D6DFEA",
             NameForeground = isPendingSubIn ? "#137333" : "#102033",
             PendingPlayerOutName = pendingSubstitution?.PlayerOut.Name ?? string.Empty,
+            TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits),
             PendingSubstitution = pendingSubstitution
         };
     }
@@ -2812,6 +2818,7 @@ public partial class MatchLiveView : UserControl
         public string CardBorderBrush { get; init; } = "#D6DFEA";
         public string NameForeground { get; init; } = "#102033";
         public string PendingPlayerOutName { get; init; } = string.Empty;
+        public IReadOnlyList<PlayerTraitBadge> TraitBadges { get; init; } = [];
         public PendingSubstitutionViewModel? PendingSubstitution { get; init; }
     }
 

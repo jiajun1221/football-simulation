@@ -137,19 +137,33 @@ public class MatchEventFactory
         string description = chanceType switch
         {
             "long-range attempt" => Pick(random,
-                $"{attackerName} tries a long-range effort for {attackingTeam.Name}.",
-                $"{attackerName} lets fly from distance for {attackingTeam.Name}."),
+                attacker.Traits.Contains(PlayerTrait.LongShotTaker)
+                    ? $"{attackerName} spots the keeper and lets fly early from distance for {attackingTeam.Name}."
+                    : $"{attackerName} tries a long-range effort for {attackingTeam.Name}.",
+                attacker.Traits.Contains(PlayerTrait.FinesseShot)
+                    ? $"{attackerName} shapes a curled effort from range for {attackingTeam.Name}."
+                    : $"{attackerName} lets fly from distance for {attackingTeam.Name}."),
             "cross into box" => Pick(random,
-                $"{attackingTeam.Name} whip a cross in and {attackerName} attacks it.",
+                safePlaymaker?.Traits.Contains(PlayerTrait.EarlyCrosser) == true
+                    ? $"{playmakerName} sends an early cross in and {attackerName} attacks it for {attackingTeam.Name}."
+                    : $"{attackingTeam.Name} whip a cross in and {attackerName} attacks it.",
                 $"{attackerName} meets the delivery for {attackingTeam.Name} inside the area."),
             "through ball attempt" => safePlaymaker is not null
-                ? $"{playmakerName} slips a through ball and {attackerName} gets the shot away for {attackingTeam.Name}."
+                ? safePlaymaker.Traits.Contains(PlayerTrait.LongPasser)
+                    ? $"{playmakerName} opens the pitch with a long pass and {attackerName} gets the shot away for {attackingTeam.Name}."
+                    : $"{playmakerName} slips a through ball and {attackerName} gets the shot away for {attackingTeam.Name}."
                 : $"{attackingTeam.Name} find a lane through the middle and {attackerName} pulls the trigger.",
             "dribble run" => Pick(random,
-                $"{attackerName} beats a marker and shoots for {attackingTeam.Name}.",
+                attacker.Traits.Contains(PlayerTrait.Rapid) || attacker.Traits.Contains(PlayerTrait.SpeedDribbler)
+                    ? $"{attackerName} bursts past a marker at pace and shoots for {attackingTeam.Name}."
+                    : attacker.Traits.Contains(PlayerTrait.TechnicalDribbler) || attacker.Traits.Contains(PlayerTrait.Flair)
+                        ? $"{attackerName} uses quick feet to beat a marker and shoot for {attackingTeam.Name}."
+                        : $"{attackerName} beats a marker and shoots for {attackingTeam.Name}.",
                 $"{attackerName} dribbles into space and strikes for {attackingTeam.Name}."),
             _ => safePlaymaker is not null
-                ? $"{attackerName} shoots for {attackingTeam.Name} after a pass from {playmakerName}."
+                ? safePlaymaker.Traits.Contains(PlayerTrait.Playmaker)
+                    ? $"{playmakerName} dictates the move and tees up {attackerName} for {attackingTeam.Name}."
+                    : $"{attackerName} shoots for {attackingTeam.Name} after a pass from {playmakerName}."
                 : $"{attackerName} takes a shot for {attackingTeam.Name}."
         };
 

@@ -61,12 +61,12 @@ public class TacticalInsightService
             insight.Warnings.Add("One or more selected starters are injured or suspended and will perform poorly.");
         }
 
-        if (opponent.Players.Any(player => player.Traits.Contains(PlayerTrait.ClinicalFinisher)) && selectedTeam.Tactics.DefensiveLine >= 65)
+        if (opponent.Players.Any(player => player.Traits.Contains(PlayerTrait.ClinicalFinisher) || player.Traits.Contains(PlayerTrait.TriesToBeatOffsideTrap)) && selectedTeam.Tactics.DefensiveLine >= 65)
         {
             insight.Warnings.Add("A high defensive line is risky against clinical finishers.");
         }
 
-        if (opponent.Players.Any(player => player.Traits.Contains(PlayerTrait.AggressiveTackler)) || opponent.Tactics.PressingIntensity >= 70)
+        if (opponent.Players.Any(player => player.Traits.Contains(PlayerTrait.DivesIntoTackles) || player.Traits.Contains(PlayerTrait.Interceptor)) || opponent.Tactics.PressingIntensity >= 70)
         {
             insight.Warnings.Add("Expect physical pressure and possible card-heavy moments.");
         }

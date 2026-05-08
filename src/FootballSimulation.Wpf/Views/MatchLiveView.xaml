@@ -3,6 +3,24 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:models="clr-namespace:FootballSimulation.Wpf.Models">
     <UserControl.Resources>
+        <DataTemplate x:Key="TraitIconBadgeTemplate">
+            <Border Width="14"
+                    Height="14"
+                    Background="{Binding Background}"
+                    CornerRadius="7"
+                    Margin="1,0,0,0"
+                    ToolTip="{Binding TooltipText}">
+                <TextBlock Text="{Binding Icon}"
+                           Foreground="{Binding Foreground}"
+                           FontFamily="{Binding FontFamily}"
+                           FontSize="8"
+                           FontWeight="Black"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           TextAlignment="Center" />
+            </Border>
+        </DataTemplate>
+
         <DataTemplate x:Key="PitchPlayerIconTemplate" DataType="{x:Type models:LivePlayerIconViewModel}">
             <Grid Width="72"
                   Height="76"
@@ -252,7 +270,7 @@
                             Click="CancelPendingSubstitutionButton_Click" />
                 </Grid>
 
-                <Border Height="72"
+                <Border MinHeight="70"
                         Padding="6"
                         CornerRadius="8"
                         Background="{Binding CardBackground}"
@@ -308,17 +326,38 @@
                             </Border>
                         </Grid>
 
-                        <Border Grid.Row="2"
-                                Background="{Binding FormBadgeBackground}"
-                                CornerRadius="7"
-                                Padding="5,1"
-                                HorizontalAlignment="Left"
-                                Margin="0,4,0,0">
-                            <TextBlock Text="{Binding FormBadgeText}"
-                                       Foreground="{Binding FormBadgeForeground}"
-                                       FontSize="7"
-                                       FontWeight="Bold" />
-                        </Border>
+                        <StackPanel Grid.Row="2"
+                                    Orientation="Horizontal"
+                                    Margin="0,4,0,0">
+                            <Border Background="{Binding FormBadgeBackground}"
+                                    CornerRadius="7"
+                                    Padding="5,1"
+                                    HorizontalAlignment="Left"
+                                    Margin="0,0,2,0">
+                                <TextBlock Text="{Binding FormBadgeText}"
+                                           Foreground="{Binding FormBadgeForeground}"
+                                           FontSize="7"
+                                           FontWeight="Bold" />
+                            </Border>
+                            <ItemsControl ItemsSource="{Binding TraitBadges}"
+                                          ItemTemplate="{StaticResource TraitIconBadgeTemplate}">
+                                <ItemsControl.Style>
+                                    <Style TargetType="ItemsControl">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding TraitBadges.Count}" Value="0">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ItemsControl.Style>
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                            </ItemsControl>
+                        </StackPanel>
 
                         <ProgressBar Grid.Row="3"
                                      Height="5"
@@ -767,23 +806,35 @@
                                            VerticalAlignment="Center"
                                            Margin="0,0,8,0" />
 
-                                <Border x:Name="SelectedPlayerFormBadgeBorder"
-                                        Grid.Column="1"
-                                        CornerRadius="10"
-                                        Padding="8,3"
-                                        Background="#E1E5EA"
-                                        VerticalAlignment="Center">
-                                    <Border.Effect>
-                                        <DropShadowEffect Color="#203B2D"
-                                                          BlurRadius="6"
-                                                          ShadowDepth="1"
-                                                          Opacity="0.18" />
-                                    </Border.Effect>
-                                    <TextBlock x:Name="SelectedPlayerFormBadgeTextBlock"
-                                               Foreground="#465364"
-                                               FontSize="10"
-                                               FontWeight="Bold" />
-                                </Border>
+                                <StackPanel Grid.Column="1"
+                                            Orientation="Horizontal"
+                                            VerticalAlignment="Center">
+                                    <ItemsControl x:Name="SelectedPlayerTraitItemsControl"
+                                                  ItemTemplate="{StaticResource TraitIconBadgeTemplate}"
+                                                  Margin="0,0,4,0">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                    </ItemsControl>
+                                    <Border x:Name="SelectedPlayerFormBadgeBorder"
+                                            CornerRadius="10"
+                                            Padding="8,3"
+                                            Background="#E1E5EA"
+                                            VerticalAlignment="Center">
+                                        <Border.Effect>
+                                            <DropShadowEffect Color="#203B2D"
+                                                              BlurRadius="6"
+                                                              ShadowDepth="1"
+                                                              Opacity="0.18" />
+                                        </Border.Effect>
+                                        <TextBlock x:Name="SelectedPlayerFormBadgeTextBlock"
+                                                   Foreground="#465364"
+                                                   FontSize="10"
+                                                   FontWeight="Bold" />
+                                    </Border>
+                                </StackPanel>
                             </Grid>
 
                             <TextBlock x:Name="SelectedPlayerMetaTextBlock"

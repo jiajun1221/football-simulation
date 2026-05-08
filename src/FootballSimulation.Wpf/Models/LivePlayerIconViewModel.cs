@@ -41,4 +41,5 @@ public class LivePlayerIconViewModel
     public string FormText { get; init; } = string.Empty;
     public string StaminaText { get; init; } = "0/0";
     public string MatchStatusText { get; init; } = "Fresh";
+    public IReadOnlyList<PlayerTraitBadge> TraitBadges { get; init; } = [];
 }

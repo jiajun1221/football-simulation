@@ -29,6 +29,7 @@ public class FatigueService
                 * GetPositionMultiplier(player.Position)
                 * GetStaminaResistanceMultiplier(player.Stamina)
                 * GetPositionSuitabilityFatigueMultiplier(player)
+                * GetTraitFatigueMultiplier(player)
                 * GetActivityMultiplier(match, team, player);
 
             player.Stamina = Math.Clamp(player.Stamina - staminaLoss, 0, 100);
@@ -118,6 +119,13 @@ public class FatigueService
             defensiveActions;
 
         return Math.Clamp(1.0 + activityScore * 0.015, 1.0, 1.18);
+    }
+
+    private static double GetTraitFatigueMultiplier(Player player)
+    {
+        return player.Traits.Contains(PlayerTrait.Engine) || player.Traits.Contains(PlayerTrait.BoxToBox)
+            ? 0.88
+            : 1.0;
     }
 
 }

@@ -113,6 +113,11 @@ public class MatchDramaService
 
     private static double GetInjuryProbability(Player player)
     {
+        var traitModifier = player.Traits.Contains(PlayerTrait.InjuryProne)
+            ? 1.45
+            : player.Traits.Contains(PlayerTrait.Engine)
+                ? 0.55
+                : 1.0;
         var lowStaminaBonus = GetStaminaRatio(player) switch
         {
             < 0.18 => 0.08,
@@ -127,7 +132,7 @@ public class MatchDramaService
             _ => 0.0
         };
 
-        return Math.Clamp(0.16 + lowStaminaBonus + fatigueBonus, 0.10, 0.32);
+        return Math.Clamp((0.16 + lowStaminaBonus + fatigueBonus) * traitModifier, 0.05, 0.42);
     }
 
     private static double GetStaminaRatio(Player player)
@@ -143,7 +148,12 @@ public class MatchDramaService
     private static bool ShouldCreateWonderGoal(MatchEventContext context)
     {
         var players = GetActivePlayers(context.HomeTeam).Concat(GetActivePlayers(context.AwayTeam));
-        return players.Any(player => player.Traits.Contains(PlayerTrait.LongShotTaker) || player.Traits.Contains(PlayerTrait.BigMatchPlayer))
+        return players.Any(player =>
+                player.Traits.Contains(PlayerTrait.LongShotTaker) ||
+                player.Traits.Contains(PlayerTrait.FinesseShot) ||
+                player.Traits.Contains(PlayerTrait.ClinicalFinisher) ||
+                player.Traits.Contains(PlayerTrait.OutsideFootShot) ||
+                player.Traits.Contains(PlayerTrait.Leadership))
             && context.Random.NextDouble() < 0.22;
     }
 
@@ -220,7 +230,7 @@ public class MatchDramaService
     private static Player ChooseSetPiecePlayer(Team team, Random random)
     {
         var player = GetActivePlayers(team)
-            .Where(candidate => candidate.Traits.Contains(PlayerTrait.SetPieceSpecialist) || candidate.Traits.Contains(PlayerTrait.AerialThreat))
+            .Where(candidate => candidate.Traits.Contains(PlayerTrait.DeadBallSpecialist) || candidate.Traits.Contains(PlayerTrait.AerialThreat))
             .OrderByDescending(candidate => candidate.Passing + candidate.Finishing)
             .FirstOrDefault();
 

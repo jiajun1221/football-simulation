@@ -22,8 +22,8 @@ public partial class PreMatchView : UserControl
     private readonly FormationLayoutService _formationLayoutService = new();
     private readonly TacticalInsightService _tacticalInsightService = new();
     private readonly SquadSelectionService _squadSelectionService = new();
-    private const double PitchCardWidth = 112;
-    private const double PitchCardHeight = 72;
+    private const double PitchCardWidth = 128;
+    private const double PitchCardHeight = 94;
 
     private Player? _selectedStarter;
     private List<Player> _pitchSlots = [];
@@ -165,7 +165,7 @@ public partial class PreMatchView : UserControl
         var button = new Button
         {
             Width = PitchCardWidth,
-            Height = PitchCardHeight,
+            MinHeight = PitchCardHeight,
             Tag = player,
             DataContext = card,
             ToolTip = "Drag this player or drop another player here.",
@@ -214,6 +214,7 @@ public partial class PreMatchView : UserControl
             FormBadgeText = form.Text,
             FormBadgeBackground = form.Background,
             FormBadgeForeground = form.Foreground,
+            TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits),
             CardBackground = player == _selectedStarter ? "#FFF2B8" : isOutOfPosition ? "#FFF7EC" : "#FFFFFF",
             CardBorderBrush = player == _selectedStarter ? "#F6C343" : isOutOfPosition ? ratingVisual.Foreground : "#102033",
             CardBorderThickness = player == _selectedStarter ? new Thickness(3) : new Thickness(1)
@@ -327,7 +328,8 @@ public partial class PreMatchView : UserControl
             StaminaBrush = GetStaminaBrush(player),
             BenchFormBadgeText = form.Text,
             BenchFormBadgeBackground = form.Background,
-            BenchFormBadgeForeground = form.Foreground
+            BenchFormBadgeForeground = form.Foreground,
+            TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits)
         };
     }
 
@@ -360,6 +362,11 @@ public partial class PreMatchView : UserControl
         SelectedPlayerFormChip.Text = form.Text;
         SelectedPlayerFormChip.Foreground = ToBrush(form.Foreground);
         SelectedPlayerFormChipBorder.Background = ToBrush(form.Background);
+        var selectedTraitBadges = PlayerTraitBadgeHelper.Create(_selectedStarter.Traits);
+        SelectedPlayerTraitItemsControl.ItemsSource = selectedTraitBadges;
+        SelectedPlayerTraitItemsControl.Visibility = selectedTraitBadges.Count == 0
+            ? Visibility.Collapsed
+            : Visibility.Visible;
         SelectedPlayerInjuryChip.Text = _selectedStarter.IsInjured ? "Injured" : "Available";
         SelectedPlayerInjuryChip.Foreground = ToBrush(_selectedStarter.IsInjured ? "#8F1F1F" : "#236B39");
         SelectedPlayerInjuryChipBorder.Background = ToBrush(_selectedStarter.IsInjured ? "#FFD1D1" : "#D9F1E1");
@@ -990,5 +997,6 @@ public partial class PreMatchView : UserControl
         public string BenchFormBadgeText { get; init; } = string.Empty;
         public string BenchFormBadgeBackground { get; init; } = "#E1E5EA";
         public string BenchFormBadgeForeground { get; init; } = "#465364";
+        public IReadOnlyList<PlayerTraitBadge> TraitBadges { get; init; } = [];
     }
 }

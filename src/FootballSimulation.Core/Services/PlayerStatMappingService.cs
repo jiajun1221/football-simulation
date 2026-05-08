@@ -14,15 +14,16 @@ public class PlayerStatMappingService
         var loadedStatus = PlayerFormStatusService.FromLoadedForm(record.FormStatus ?? record.Form, record.CurrentForm ?? 50);
         var form = PlayerFormStatusService.ToDisplayText(loadedStatus);
         var currentForm = PlayerFormStatusService.ToCurrentForm(loadedStatus);
+        var preferredPosition = GetPreferredPosition(record.Position, record.PreferredPosition);
 
         return new Player
         {
             Name = record.Name,
             SquadNumber = record.SquadNumber,
             Position = position,
-            PreferredPosition = GetPreferredPosition(record.Position, record.PreferredPosition),
+            PreferredPosition = preferredPosition,
             SecondaryPositions = MapSecondaryPositions(record.SecondaryPositions),
-            AssignedPosition = GetPreferredPosition(record.Position, record.PreferredPosition),
+            AssignedPosition = preferredPosition,
             OverallRating = overall,
             Form = form,
             IsStarter = record.IsStarter,
@@ -53,15 +54,16 @@ public class PlayerStatMappingService
         var loadedStatus = PlayerFormStatusService.FromLoadedForm(record.FormStatus ?? record.Form, MapFormToCurrentForm(record.Form));
         var form = PlayerFormStatusService.ToDisplayText(loadedStatus);
         var currentForm = PlayerFormStatusService.ToCurrentForm(loadedStatus);
+        var preferredPosition = GetPreferredPosition(record.Position, record.PreferredPosition);
 
         return new Player
         {
             Name = record.Name,
             SquadNumber = record.SquadNumber,
             Position = position,
-            PreferredPosition = GetPreferredPosition(record.Position, record.PreferredPosition),
+            PreferredPosition = preferredPosition,
             SecondaryPositions = MapSecondaryPositions(record.SecondaryPositions),
-            AssignedPosition = GetPreferredPosition(record.Position, record.PreferredPosition),
+            AssignedPosition = preferredPosition,
             OverallRating = overall,
             Form = form,
             IsStarter = isStarter,
@@ -121,7 +123,12 @@ public class PlayerStatMappingService
 
     private static string NormalizeTraitName(string trait)
     {
-        return trait.Replace(" ", string.Empty).Replace("-", string.Empty).Trim();
+        return trait
+            .Replace(" ", string.Empty)
+            .Replace("-", string.Empty)
+            .Replace("(", string.Empty)
+            .Replace(")", string.Empty)
+            .Trim();
     }
 
     private static Position MapPosition(string position)

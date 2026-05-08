@@ -12,6 +12,7 @@ public class MatchEngine
     private readonly MatchDramaService _matchDramaService = new();
     private readonly FatigueService _fatigueService = new();
     private readonly AiManagerService _aiManagerService = new();
+    private readonly HashSet<string> _secondWindAppliedPlayerKeys = [];
     private readonly Random _random;
 
     public MatchEngine()
@@ -839,14 +840,15 @@ public class MatchEngine
             return defendingTeam;
         }
 
-        var chanceType = ChooseChanceType(random);
+        var chanceType = ChooseChanceType(playmaker, shooter, random);
         if (!isResolvingPreviousAttack)
         {
             matchLog.AddEvent(eventFactory.CreateAttackBuildUp(minute, attackingTeam, playmaker, shooter, random));
             MarkAttackStarted(simulationState, attackingTeam);
         }
 
-        if (chanceType == "through ball attempt" && random.NextDouble() < 0.18)
+        var offsideChance = 0.18 + (shooter.Traits.Contains(PlayerTrait.TriesToBeatOffsideTrap) ? 0.16 : 0.0);
+        if (chanceType == "through ball attempt" && random.NextDouble() < offsideChance)
         {
             attackingStats.Offsides++;
             var shooterPerformance = GetOrCreatePerformance(match, attackingTeam, shooter);
@@ -1072,7 +1074,8 @@ public class MatchEngine
         takerPerformance.Rating += 0.12;
 
         var goalProbability = Math.Clamp(0.04 + primaryTaker.Finishing / 950.0 +
-            (primaryTaker.Traits.Contains(PlayerTrait.SetPieceSpecialist) ? 0.04 : 0.0), 0.05, 0.16);
+            (primaryTaker.Traits.Contains(PlayerTrait.DeadBallSpecialist) ? 0.04 : 0.0) +
+            (primaryTaker.Traits.Contains(PlayerTrait.FinesseShot) ? 0.02 : 0.0), 0.05, 0.16);
         var roll = random.NextDouble();
         if (roll < goalProbability)
         {
@@ -1095,7 +1098,7 @@ public class MatchEngine
                 var goalkeeperPerformance = GetOrCreatePerformance(match, defendingTeam, goalkeeper);
                 goalkeeperPerformance.Saves++;
                 goalkeeperPerformance.Rating += 0.35;
-                matchLog.AddEvent(eventFactory.CreateSave(minute, defendingTeam, primaryTaker, goalkeeper, ChooseSaveType(random), random));
+                matchLog.AddEvent(eventFactory.CreateSave(minute, defendingTeam, primaryTaker, goalkeeper, ChooseSaveType(goalkeeper, "free-kick", random), random));
             }
             else
             {
@@ -1190,7 +1193,7 @@ public class MatchEngine
         double defensiveErrorBoost)
     {
         var goalProbability = Math.Clamp(
-            CalculateGoalProbability(shooter, attackingTeamStrength, defendingTeamStrength, random, shooterHasSuperSubBoost) + defensiveErrorBoost,
+            CalculateGoalProbability(shooter, chanceType, attackingTeamStrength, defendingTeamStrength, random, shooterHasSuperSubBoost) + defensiveErrorBoost,
             MatchConstants.MinimumGoalProbability,
             0.72);
         attackingStats.ExpectedGoals += goalProbability;
@@ -1234,12 +1237,12 @@ public class MatchEngine
                 assisterPerformance.Rating += 0.75;
             }
 
-            var goalTypeDescription = ChooseGoalTypeDescription(random, chanceType, chanceType.Contains("corner", StringComparison.OrdinalIgnoreCase));
+            var goalTypeDescription = ChooseGoalTypeDescription(shooter, random, chanceType, chanceType.Contains("corner", StringComparison.OrdinalIgnoreCase));
             matchLog.AddEvent(eventFactory.CreateGoal(minute, attackingTeam, shooter, match, goalTypeDescription, random, assister));
             return defendingTeam;
         }
 
-        var wasSaved = IsSaved(defendingTeam, random);
+        var wasSaved = IsSaved(defendingTeam, shooter, chanceType, random);
         if (wasSaved)
         {
             attackingStats.ShotsOnTarget++;
@@ -1251,7 +1254,7 @@ public class MatchEngine
                 var goalkeeperPerformance = GetOrCreatePerformance(match, defendingTeam, goalkeeper);
                 goalkeeperPerformance.Saves++;
                 goalkeeperPerformance.Rating += 0.20 + goalProbability;
-                var saveType = ChooseSaveType(random);
+                var saveType = ChooseSaveType(goalkeeper, chanceType, random);
                 matchLog.AddEvent(eventFactory.CreateSave(minute, defendingTeam, shooter, goalkeeper, saveType, random));
             }
             else
@@ -1276,7 +1279,7 @@ public class MatchEngine
             return HandleCornerSequence(minute, match, attackingTeam, defendingTeam, playmaker, random, matchLog, eventFactory);
         }
 
-        var shotStyle = ChooseShotStyle(random, chanceType);
+        var shotStyle = ChooseShotStyle(shooter, random, chanceType);
         matchLog.AddEvent(eventFactory.CreateMiss(minute, attackingTeam, shooter, shotStyle, random));
         return defendingTeam;
     }
@@ -1302,7 +1305,10 @@ public class MatchEngine
         takerPerformance.Rating += 0.08;
 
         var roll = random.NextDouble();
-        if (roll < 0.12)
+        var goalChance = 0.12 +
+            (target.Traits.Contains(PlayerTrait.PowerHeader) ? 0.06 : 0.0) +
+            (target.Traits.Contains(PlayerTrait.AerialThreat) ? 0.04 : 0.0);
+        if (roll < goalChance)
         {
             attackingStats.TotalShots++;
             attackingStats.ShotsOnTarget++;
@@ -1318,11 +1324,16 @@ public class MatchEngine
                 takerPerformance.Rating += 0.60;
             }
 
-            matchLog.AddEvent(eventFactory.CreateGoal(minute, attackingTeam, target, match, "header from a corner", random, target == taker ? null : taker));
+            var goalTypeDescription = target.Traits.Contains(PlayerTrait.PowerHeader)
+                ? "power header from a corner"
+                : "header from a corner";
+            matchLog.AddEvent(eventFactory.CreateGoal(minute, attackingTeam, target, match, goalTypeDescription, random, target == taker ? null : taker));
             return defendingTeam;
         }
 
-        if (roll < 0.34)
+        var goalkeeper = GetGoalkeeper(defendingTeam);
+        var puncherAdjustment = goalkeeper?.Traits.Contains(PlayerTrait.Puncher) == true ? 0.06 : 0.0;
+        if (roll < 0.34 + puncherAdjustment)
         {
             attackingStats.TotalShots++;
             attackingStats.ShotsOnTarget++;
@@ -1330,13 +1341,12 @@ public class MatchEngine
             targetPerformance.Shots++;
             targetPerformance.ShotsOnTarget++;
             matchLog.AddEvent(eventFactory.CreateShot(minute, attackingTeam, target, taker, "corner delivery", random));
-            var goalkeeper = GetGoalkeeper(defendingTeam);
             if (goalkeeper is not null)
             {
                 var goalkeeperPerformance = GetOrCreatePerformance(match, defendingTeam, goalkeeper);
                 goalkeeperPerformance.Saves++;
                 goalkeeperPerformance.Rating += 0.30;
-                matchLog.AddEvent(eventFactory.CreateSave(minute, defendingTeam, target, goalkeeper, ChooseSaveType(random), random));
+                matchLog.AddEvent(eventFactory.CreateSave(minute, defendingTeam, target, goalkeeper, ChooseSaveType(goalkeeper, "corner delivery", random), random));
             }
             else
             {
@@ -1396,20 +1406,43 @@ public class MatchEngine
         return AttackFlowOutcome.ForcedReset;
     }
 
-    private static string ChooseChanceType(Random random)
+    private static string ChooseChanceType(Player playmaker, Player shooter, Random random)
     {
-        return random.Next(5) switch
+        var weightedChanceTypes = new List<(string Type, double Weight)>
         {
-            0 => "long-range attempt",
-            1 => "cross into box",
-            2 => "through ball attempt",
-            3 => "dribble run",
-            _ => "quick combination"
+            ("long-range attempt", 1.0 + (shooter.Traits.Contains(PlayerTrait.LongShotTaker) ? 1.0 : 0.0)),
+            ("cross into box", 1.0 + (playmaker.Traits.Contains(PlayerTrait.EarlyCrosser) ? 1.0 : 0.0) + (playmaker.Traits.Contains(PlayerTrait.LongPasser) ? 0.35 : 0.0)),
+            ("through ball attempt", 1.0 + (playmaker.Traits.Contains(PlayerTrait.LongPasser) ? 0.9 : 0.0) + (shooter.Traits.Contains(PlayerTrait.TriesToBeatOffsideTrap) ? 0.8 : 0.0)),
+            ("dribble run", 1.0 + (shooter.Traits.Contains(PlayerTrait.Rapid) ? 0.8 : 0.0) + (shooter.Traits.Contains(PlayerTrait.SpeedDribbler) ? 1.0 : 0.0) + (shooter.Traits.Contains(PlayerTrait.TechnicalDribbler) ? 0.55 : 0.0) + (shooter.Traits.Contains(PlayerTrait.Flair) ? 0.45 : 0.0)),
+            ("quick combination", 1.0 + (playmaker.Traits.Contains(PlayerTrait.Playmaker) ? 0.9 : 0.0) + (playmaker.Traits.Contains(PlayerTrait.PressResistant) ? 0.4 : 0.0) + (playmaker.Traits.Contains(PlayerTrait.TeamPlayer) ? 0.45 : 0.0))
         };
+
+        var totalWeight = weightedChanceTypes.Sum(chance => chance.Weight);
+        var roll = random.NextDouble() * totalWeight;
+        var runningWeight = 0.0;
+
+        foreach (var chanceType in weightedChanceTypes)
+        {
+            runningWeight += chanceType.Weight;
+            if (roll <= runningWeight)
+            {
+                return chanceType.Type;
+            }
+        }
+
+        return "quick combination";
     }
 
-    private static string ChooseSaveType(Random random)
+    private static string ChooseSaveType(Player? goalkeeper, string chanceType, Random random)
     {
+        if (goalkeeper?.Traits.Contains(PlayerTrait.Puncher) == true &&
+            (chanceType.Contains("cross", StringComparison.OrdinalIgnoreCase) ||
+             chanceType.Contains("corner", StringComparison.OrdinalIgnoreCase) ||
+             random.NextDouble() < 0.35))
+        {
+            return "punch clear";
+        }
+
         return random.Next(3) switch
         {
             0 => "diving save",
@@ -1418,7 +1451,7 @@ public class MatchEngine
         };
     }
 
-    private static string ChooseShotStyle(Random random, string chanceType)
+    private static string ChooseShotStyle(Player shooter, Random random, string chanceType)
     {
         var styles = new List<string>
         {
@@ -1443,6 +1476,28 @@ public class MatchEngine
             styles.Add("solo run finish");
         }
 
+        if (shooter.Traits.Contains(PlayerTrait.FinesseShot))
+        {
+            styles.Add("curling finesse shot");
+            styles.Add("finesse shot");
+        }
+
+        if (shooter.Traits.Contains(PlayerTrait.OutsideFootShot))
+        {
+            styles.Add("outside-foot strike");
+            styles.Add("trivela attempt");
+        }
+
+        if (shooter.Traits.Contains(PlayerTrait.PowerHeader))
+        {
+            styles.Add("power header");
+        }
+
+        if (shooter.Traits.Contains(PlayerTrait.ClinicalFinisher))
+        {
+            styles.Add("clinical finish");
+        }
+
         if (random.NextDouble() < 0.08)
         {
             styles.Add("acrobatic attempt");
@@ -1451,7 +1506,7 @@ public class MatchEngine
         return styles[random.Next(styles.Count)];
     }
 
-    private static string ChooseGoalTypeDescription(Random random, string chanceType, bool hasCornerPressure)
+    private static string ChooseGoalTypeDescription(Player scorer, Random random, string chanceType, bool hasCornerPressure)
     {
         var options = new List<string>
         {
@@ -1481,6 +1536,33 @@ public class MatchEngine
             options.Add("header from a corner");
         }
 
+        if (scorer.Traits.Contains(PlayerTrait.FinesseShot))
+        {
+            options.Add("curling finesse shot");
+            options.Add("finesse shot into the far corner");
+        }
+
+        if (scorer.Traits.Contains(PlayerTrait.PowerHeader))
+        {
+            options.Add("power header");
+        }
+
+        if (scorer.Traits.Contains(PlayerTrait.OutsideFootShot))
+        {
+            options.Add("outside-foot trivela finish");
+            options.Add("outside-foot strike");
+        }
+
+        if (scorer.Traits.Contains(PlayerTrait.SpeedDribbler))
+        {
+            options.Add("solo run finish after a burst of pace");
+        }
+
+        if (scorer.Traits.Contains(PlayerTrait.ClinicalFinisher))
+        {
+            options.Add("clinical first-time finish");
+        }
+
         if (random.NextDouble() < 0.06)
         {
             options.Add("direct free-kick strike");
@@ -1496,6 +1578,7 @@ public class MatchEngine
 
     private static void UpdateScore(Match match, Team scoringTeam)
     {
+        var concedingTeam = scoringTeam == match.HomeTeam ? match.AwayTeam : match.HomeTeam;
         if (scoringTeam == match.HomeTeam)
         {
             match.HomeScore++;
@@ -1503,6 +1586,25 @@ public class MatchEngine
         else
         {
             match.AwayScore++;
+        }
+
+        ApplyGoalMoraleSwing(scoringTeam, concedingTeam);
+    }
+
+    private static void ApplyGoalMoraleSwing(Team scoringTeam, Team concedingTeam)
+    {
+        foreach (var player in GetActivePitchPlayers(scoringTeam))
+        {
+            player.Morale = Math.Clamp(player.Morale + 2, 0, 100);
+        }
+
+        var leadershipCount = GetActivePitchPlayers(concedingTeam)
+            .Count(player => player.Traits.Contains(PlayerTrait.Leadership) || player.Traits.Contains(PlayerTrait.TeamPlayer));
+        var moraleDrop = Math.Max(1, 4 - leadershipCount);
+
+        foreach (var player in GetActivePitchPlayers(concedingTeam))
+        {
+            player.Morale = Math.Clamp(player.Morale - moraleDrop, 0, 100);
         }
     }
 
@@ -1771,7 +1873,7 @@ public class MatchEngine
     {
         var foulPressure = defendingTeamStrength - (attackingTeamStrength * 0.20);
         var aggressionBonus = GetActivePitchPlayers(defendingTeam)
-            .Count(player => player.Traits.Contains(PlayerTrait.AggressiveTackler)) * 0.015;
+            .Count(player => player.Traits.Contains(PlayerTrait.DivesIntoTackles)) * 0.022;
         var foulProbability = Math.Clamp(
             MatchConstants.BaseFoulChancePerAttack + aggressionBonus + (foulPressure / 400.0) + GetProbabilitySwing(random, 0.03),
             0.05,
@@ -1782,7 +1884,7 @@ public class MatchEngine
 
     private static bool ShouldGiveYellowCard(Player defender, Random random)
     {
-        var traitBonus = defender.Traits.Contains(PlayerTrait.AggressiveTackler) ? 0.18 : 0.0;
+        var traitBonus = defender.Traits.Contains(PlayerTrait.DivesIntoTackles) ? 0.22 : 0.0;
         return random.NextDouble() < MatchConstants.YellowCardChancePerFoul + traitBonus;
     }
 
@@ -1869,8 +1971,9 @@ public class MatchEngine
             .OrderByDescending(player =>
                 player.Finishing +
                 player.CurrentForm * 0.25 +
-                (player.Traits.Contains(PlayerTrait.ClinicalFinisher) ? 8 : 0) +
-                (player.Traits.Contains(PlayerTrait.SetPieceSpecialist) ? 6 : 0))
+                (player.Traits.Contains(PlayerTrait.ClinicalFinisher) ? 10 : 0) +
+                (player.Traits.Contains(PlayerTrait.FinesseShot) ? 6 : 0) +
+                (player.Traits.Contains(PlayerTrait.DeadBallSpecialist) ? 6 : 0))
             .FirstOrDefault() ?? GetActivePitchPlayers(team).FirstOrDefault() ?? team.Players[0];
     }
 
@@ -1888,7 +1991,9 @@ public class MatchEngine
                 player.Passing * 1.10 +
                 player.Finishing * 0.85 +
                 player.CurrentForm * 0.25 +
-                (player.Traits.Contains(PlayerTrait.SetPieceSpecialist) ? 14 : 0) +
+                (player.Traits.Contains(PlayerTrait.DeadBallSpecialist) ? 16 : 0) +
+                (player.Traits.Contains(PlayerTrait.LongPasser) ? 12 : 0) +
+                (player.Traits.Contains(PlayerTrait.EarlyCrosser) ? 8 : 0) +
                 (player.Traits.Contains(PlayerTrait.LongShotTaker) ? 8 : 0))
             .Take(2)
             .ToList();
@@ -1908,15 +2013,18 @@ public class MatchEngine
             .OrderByDescending(player =>
                 player.Passing * 1.15 +
                 player.CurrentForm * 0.25 +
-                (player.Traits.Contains(PlayerTrait.SetPieceSpecialist) ? 12 : 0))
+                (player.Traits.Contains(PlayerTrait.DeadBallSpecialist) ? 14 : 0) +
+                (player.Traits.Contains(PlayerTrait.EarlyCrosser) ? 12 : 0) +
+                (player.Traits.Contains(PlayerTrait.LongPasser) ? 8 : 0))
             .FirstOrDefault() ?? preferredTaker;
     }
 
     private static double GetPenaltyConversionChance(Player player)
     {
         var traitBonus = player.Traits.Contains(PlayerTrait.ClinicalFinisher) ? 0.08 : 0.0;
-        var setPieceBonus = player.Traits.Contains(PlayerTrait.SetPieceSpecialist) ? 0.04 : 0.0;
-        return Math.Clamp(0.66 + player.Finishing / 450.0 + traitBonus + setPieceBonus, 0.58, 0.90);
+        var finesseBonus = player.Traits.Contains(PlayerTrait.FinesseShot) ? 0.04 : 0.0;
+        var setPieceBonus = player.Traits.Contains(PlayerTrait.DeadBallSpecialist) ? 0.04 : 0.0;
+        return Math.Clamp(0.66 + player.Finishing / 450.0 + traitBonus + finesseBonus + setPieceBonus, 0.58, 0.90);
     }
 
     private static Team ChooseAttackingTeam(
@@ -2059,6 +2167,7 @@ public class MatchEngine
 
     private double CalculateGoalProbability(
         Player attacker,
+        string chanceType,
         double attackingTeamStrength,
         double defendingTeamStrength,
         Random random,
@@ -2071,13 +2180,22 @@ public class MatchEngine
             attackingTeamStrength * 0.20 -
             defendingTeamStrength * 0.45;
 
+        var traitBonus =
+            (attacker.Traits.Contains(PlayerTrait.FinesseShot) && (chanceType is "long-range attempt" or "quick combination") ? 0.035 : 0.0) +
+            (attacker.Traits.Contains(PlayerTrait.LongShotTaker) && chanceType == "long-range attempt" ? 0.04 : 0.0) +
+            (attacker.Traits.Contains(PlayerTrait.PowerHeader) && chanceType.Contains("cross", StringComparison.OrdinalIgnoreCase) ? 0.04 : 0.0) +
+            (attacker.Traits.Contains(PlayerTrait.AerialThreat) && chanceType.Contains("cross", StringComparison.OrdinalIgnoreCase) ? 0.025 : 0.0) +
+            (attacker.Traits.Contains(PlayerTrait.ClinicalFinisher) ? 0.05 : 0.0) +
+            (attacker.Traits.Contains(PlayerTrait.OutsideFootShot) ? 0.018 : 0.0) +
+            (attacker.Traits.Contains(PlayerTrait.PressResistant) ? 0.008 : 0.0);
+
         return Math.Clamp(
-            MatchConstants.GoalProbabilityBase + (chanceScore / 130.0) + GetProbabilitySwing(random, 0.05),
+            MatchConstants.GoalProbabilityBase + (chanceScore / 130.0) + traitBonus + GetProbabilitySwing(random, 0.05),
             MatchConstants.MinimumGoalProbability,
             0.55);
     }
 
-    private bool IsSaved(Team defendingTeam, Random random)
+    private bool IsSaved(Team defendingTeam, Player shooter, string chanceType, Random random)
     {
         var goalkeeper = GetAvailablePlayers(defendingTeam)
             .FirstOrDefault(player => player.Position == Position.Goalkeeper);
@@ -2087,7 +2205,14 @@ public class MatchEngine
             return false;
         }
 
-        var saveProbability = Math.Clamp(_teamStrengthCalculator.GetEffectiveDefense(goalkeeper) / 100.0, 0.20, 0.85);
+        var traitBonus =
+            (goalkeeper.Traits.Contains(PlayerTrait.OneOnOnes) && chanceType is "through ball attempt" or "dribble run" ? 0.08 : 0.0) +
+            (goalkeeper.Traits.Contains(PlayerTrait.RushesOutOfGoal) && chanceType == "through ball attempt" ? 0.035 : 0.0) +
+            (goalkeeper.Traits.Contains(PlayerTrait.Puncher) && chanceType.Contains("cross", StringComparison.OrdinalIgnoreCase) ? 0.04 : 0.0);
+        var shooterPenalty = shooter.Traits.Contains(PlayerTrait.FinesseShot) || shooter.Traits.Contains(PlayerTrait.OutsideFootShot)
+            ? 0.025
+            : 0.0;
+        var saveProbability = Math.Clamp(_teamStrengthCalculator.GetEffectiveDefense(goalkeeper) / 100.0 + traitBonus - shooterPenalty, 0.20, 0.88);
         return random.NextDouble() < saveProbability;
     }
 
@@ -2117,6 +2242,7 @@ public class MatchEngine
         if (options.EnableDynamicFatigue)
         {
             _fatigueService.ApplyMinuteFatigue(team, match);
+            ApplySecondWindIfNeeded(team, match);
             return;
         }
 
@@ -2128,6 +2254,36 @@ public class MatchEngine
         {
             player.Stamina = Math.Max(0.0, player.Stamina - staminaLoss);
         }
+
+        ApplySecondWindIfNeeded(team, match);
+    }
+
+    private void ApplySecondWindIfNeeded(Team team, Match match)
+    {
+        if (match.CurrentMinute < 75 || !IsTeamLosing(match, team))
+        {
+            return;
+        }
+
+        foreach (var player in GetActivePitchPlayers(team)
+                     .Where(player => player.Traits.Contains(PlayerTrait.Engine) && !player.IsInjured))
+        {
+            var key = $"{match.HomeTeam.Name}|{match.AwayTeam.Name}|{team.Name}|{player.Name}";
+            if (!_secondWindAppliedPlayerKeys.Add(key))
+            {
+                continue;
+            }
+
+            player.Stamina = Math.Clamp(player.Stamina + 25, 0, 100);
+            player.LiveMatchModifier = Math.Clamp(player.LiveMatchModifier + 0.04, 0.75, 1.15);
+        }
+    }
+
+    private static bool IsTeamLosing(Match match, Team team)
+    {
+        return team == match.HomeTeam
+            ? match.HomeScore < match.AwayScore
+            : match.AwayScore < match.HomeScore;
     }
 
     private IEnumerable<Player> GetAvailablePlayers(Team team)
