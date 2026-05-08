@@ -33,6 +33,11 @@ public class SquadSelectionService
             return SquadSwapResult.Failed("Sent-off players cannot be used as substitutes.");
         }
 
+        if (substitute.IsInjured || substitute.IsSuspended)
+        {
+            return SquadSwapResult.Failed("Unavailable players cannot be used as substitutes.");
+        }
+
         if (match is not null && substitutionMinute.HasValue &&
             CountTeamSubstitutions(match, team.Name) >= MatchConstants.MaxSubstitutionsPerTeam)
         {

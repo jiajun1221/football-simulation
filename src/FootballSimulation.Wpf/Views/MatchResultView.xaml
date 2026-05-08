@@ -70,6 +70,27 @@
                                        FontSize="10"
                                        FontWeight="SemiBold"
                                        Margin="0,0,8,0" />
+                            <TextBlock Text="{Binding OverallText}"
+                                       Foreground="#102033"
+                                       FontSize="10"
+                                       FontWeight="Black"
+                                       Margin="0,0,8,0" />
+                            <TextBlock Text="{Binding GrowthText}"
+                                       Foreground="#16A34A"
+                                       FontSize="10"
+                                       FontWeight="Black"
+                                       Margin="0,0,8,0">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding GrowthText}" Value="">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
                             <TextBlock Text="{Binding StatusText}"
                                        Foreground="#607187"
                                        FontSize="10"

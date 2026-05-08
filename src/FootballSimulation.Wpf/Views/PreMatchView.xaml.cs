@@ -52,11 +52,13 @@ public partial class PreMatchView : UserControl
         _isLoadingSetup = true;
 
         FixtureTextBlock.Text = $"{_state.CurrentFixture.HomeTeam.Name} vs {_state.CurrentFixture.AwayTeam.Name}";
+        ReconcileUnavailablePlayers(_state.SelectedTeam);
         LoadFormationSelector(_state.SelectedTeam);
         LoadTactics(_state.SelectedTeam.Tactics);
         WireTacticsEvents();
         InitializePitchSlots();
         RefreshSubstitutes();
+        RefreshInjuredPlayers();
         RenderPitch();
 
         _isLoadingSetup = false;
@@ -74,6 +76,40 @@ public partial class PreMatchView : UserControl
         _pitchSlots = OrderPlayersForPitch(_state.SelectedTeam.Players, _state.SelectedTeam.Formation).ToList();
         _state.SelectedTeam.Players = _pitchSlots.ToList();
         AssignFormationPositions();
+    }
+
+    private static void ReconcileUnavailablePlayers(Team team)
+    {
+        var unavailableStarters = team.Players
+            .Where(player => !IsAvailableForSelection(player))
+            .ToList();
+        foreach (var player in unavailableStarters)
+        {
+            team.Players.Remove(player);
+            if (!team.Substitutes.Contains(player))
+            {
+                team.Substitutes.Add(player);
+            }
+            player.IsStarter = false;
+            player.IsOnPitch = false;
+        }
+
+        while (team.Players.Count < 11)
+        {
+            var replacement = team.Substitutes
+                .Where(IsAvailableForSelection)
+                .OrderByDescending(player => player.OverallRating)
+                .FirstOrDefault();
+            if (replacement is null)
+            {
+                break;
+            }
+
+            team.Substitutes.Remove(replacement);
+            team.Players.Add(replacement);
+            replacement.IsStarter = true;
+            replacement.IsOnPitch = true;
+        }
     }
 
     private void LoadFormationSelector(Team team)
@@ -175,7 +211,9 @@ public partial class PreMatchView : UserControl
             BorderBrush = Brushes.Transparent,
             BorderThickness = new Thickness(0),
             Padding = new Thickness(0),
-            AllowDrop = true
+            AllowDrop = IsAvailableForSelection(player),
+            IsEnabled = IsAvailableForSelection(player),
+            Opacity = IsAvailableForSelection(player) ? 1.0 : 0.55
         };
 
         button.Click += PlayerButton_Click;
@@ -209,21 +247,22 @@ public partial class PreMatchView : UserControl
             PositionText = player.AssignedPosition,
             OverallText = $"OVR {ratingVisual.Rating}",
             OverallForeground = ratingVisual.Foreground,
+            GrowthText = PlayerGrowthDisplayHelper.CreateGrowthText(player),
             Stamina = GetStaminaPercentage(player),
             StaminaBrush = GetStaminaBrush(player),
             FormBadgeText = form.Text,
             FormBadgeBackground = form.Background,
             FormBadgeForeground = form.Foreground,
             TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits),
-            CardBackground = player == _selectedStarter ? "#FFF2B8" : isOutOfPosition ? "#FFF7EC" : "#FFFFFF",
-            CardBorderBrush = player == _selectedStarter ? "#F6C343" : isOutOfPosition ? ratingVisual.Foreground : "#102033",
+            CardBackground = player.IsInjured ? "#FFE4E4" : player == _selectedStarter ? "#FFF2B8" : isOutOfPosition ? "#FFF7EC" : "#FFFFFF",
+            CardBorderBrush = player.IsInjured ? "#D92D20" : player == _selectedStarter ? "#F6C343" : isOutOfPosition ? ratingVisual.Foreground : "#102033",
             CardBorderThickness = player == _selectedStarter ? new Thickness(3) : new Thickness(1)
         };
     }
 
     private void PlayerButton_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button { Tag: Player player })
+        if (sender is Button { Tag: Player player } && IsAvailableForSelection(player))
         {
             _selectedStarter = player;
             UpdateSelectedPlayerDetails();
@@ -264,6 +303,12 @@ public partial class PreMatchView : UserControl
             return;
         }
 
+        if (!IsAvailableForSelection(starter) || !IsAvailableForSelection(substitute))
+        {
+            MessageBox.Show("Injured or suspended players cannot be selected.");
+            return;
+        }
+
         _state.SelectedTeam.Players = _pitchSlots.ToList();
         PositionSuitabilityService.EnsurePositionMetadata(starter);
         PositionSuitabilityService.EnsurePositionMetadata(substitute);
@@ -289,6 +334,7 @@ public partial class PreMatchView : UserControl
             $"{starter.Name} -> substitute index {_state.SelectedTeam.Substitutes.IndexOf(starter)}");
         _selectedStarter = substitute;
         RefreshSubstitutes();
+        RefreshInjuredPlayers();
         UpdateSelectedPlayerDetails();
         RenderPitch();
         RefreshTacticalInsight();
@@ -302,12 +348,32 @@ public partial class PreMatchView : UserControl
         }
 
         var benchCards = _state.SelectedTeam.Substitutes
+            .Where(IsAvailableForSelection)
             .Select(CreateBenchPlayerCard)
             .ToList();
 
         SubstituteListBox.ItemsSource = null;
         SubstituteListBox.ItemsSource = benchCards;
         SubstituteListBox.IsEnabled = benchCards.Count > 0;
+    }
+
+    private void RefreshInjuredPlayers()
+    {
+        if (_state.SelectedTeam is null)
+        {
+            return;
+        }
+
+        var injuredCards = _state.SelectedTeam.Players
+            .Concat(_state.SelectedTeam.Substitutes)
+            .Where(player => player.IsInjured)
+            .Distinct()
+            .Select(InjuredPlayerCard.Create)
+            .ToList();
+
+        InjuredPlayersListBox.ItemsSource = injuredCards;
+        InjuredPlayersTitleTextBlock.Visibility = injuredCards.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
+        InjuredPlayersListBox.Visibility = injuredCards.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
     }
 
     private static BenchPlayerCard CreateBenchPlayerCard(Player player)
@@ -324,6 +390,7 @@ public partial class PreMatchView : UserControl
             Position = player.PreferredPosition,
             OverallText = $"OVR {GetOverallRating(player)}",
             OverallRating = GetOverallRating(player),
+            GrowthText = PlayerGrowthDisplayHelper.CreateGrowthText(player),
             Stamina = GetStaminaPercentage(player),
             StaminaBrush = GetStaminaBrush(player),
             BenchFormBadgeText = form.Text,
@@ -359,6 +426,7 @@ public partial class PreMatchView : UserControl
         SelectedPlayerPreferredChip.Text = GetPositionGroupText(_selectedStarter);
         SelectedPlayerOvrBadgeTextBlock.Text = ratingVisual.Rating.ToString();
         SelectedPlayerOvrBadgeBorder.Background = ToBrush(ratingVisual.Background);
+        SelectedPlayerOvrBadgeBorder.ToolTip = PlayerGrowthDisplayHelper.CreateGrowthText(_selectedStarter);
         SelectedPlayerFormChip.Text = form.Text;
         SelectedPlayerFormChip.Foreground = ToBrush(form.Foreground);
         SelectedPlayerFormChipBorder.Background = ToBrush(form.Background);
@@ -367,7 +435,9 @@ public partial class PreMatchView : UserControl
         SelectedPlayerTraitItemsControl.Visibility = selectedTraitBadges.Count == 0
             ? Visibility.Collapsed
             : Visibility.Visible;
-        SelectedPlayerInjuryChip.Text = _selectedStarter.IsInjured ? "Injured" : "Available";
+        SelectedPlayerInjuryChip.Text = _selectedStarter.IsInjured
+            ? $"{_selectedStarter.InjuryType} | {(_selectedStarter.IsSeasonEndingInjury ? "Season" : $"{Math.Max(1, _selectedStarter.InjuryRecoveryMatches)} matches")}"
+            : "Available";
         SelectedPlayerInjuryChip.Foreground = ToBrush(_selectedStarter.IsInjured ? "#8F1F1F" : "#236B39");
         SelectedPlayerInjuryChipBorder.Background = ToBrush(_selectedStarter.IsInjured ? "#FFD1D1" : "#D9F1E1");
         SelectedPlayerStaminaTextBlock.Text = $"{GetStaminaPercentage(_selectedStarter)}% stamina";
@@ -601,6 +671,11 @@ public partial class PreMatchView : UserControl
             return;
         }
 
+        if (!IsAvailableForSelection(player))
+        {
+            return;
+        }
+
         _isDraggingPlayer = true;
         Debug.WriteLine($"[PreMatchDrag] Start: {player.Name}; source={dragSource}; slot/index={sourceIndex}");
 
@@ -788,6 +863,11 @@ public partial class PreMatchView : UserControl
             return;
         }
 
+        if (!IsAvailableForSelection(draggedPlayer) || !IsAvailableForSelection(targetPlayer))
+        {
+            return;
+        }
+
         var draggedIndex = _pitchSlots.IndexOf(draggedPlayer);
         var targetIndex = _pitchSlots.IndexOf(targetPlayer);
         if (draggedIndex < 0 || targetIndex < 0)
@@ -814,6 +894,11 @@ public partial class PreMatchView : UserControl
     private void SwapSubstitutes(Player draggedPlayer, Player targetPlayer)
     {
         if (_state.SelectedTeam is null || draggedPlayer == targetPlayer)
+        {
+            return;
+        }
+
+        if (!IsAvailableForSelection(draggedPlayer) || !IsAvailableForSelection(targetPlayer))
         {
             return;
         }
@@ -893,6 +978,7 @@ public partial class PreMatchView : UserControl
             return;
         }
 
+        ReconcileUnavailablePlayers(_state.SelectedTeam);
         SaveSetup(_state.SelectedTeam);
         _navigate(new MatchLiveView(_state, _navigate, isSecondHalf: false));
     }
@@ -973,6 +1059,35 @@ public partial class PreMatchView : UserControl
         };
     }
 
+    private static bool IsAvailableForSelection(Player player)
+    {
+        return !player.IsInjured && !player.IsSuspended && !player.IsSentOff;
+    }
+
+    private sealed class InjuredPlayerCard
+    {
+        public string Name { get; init; } = string.Empty;
+        public string InjuryType { get; init; } = string.Empty;
+        public string RecoveryText { get; init; } = string.Empty;
+
+        public static InjuredPlayerCard Create(Player player)
+        {
+            var severity = player.InjurySeverity?.ToString() ?? "Injury";
+            var recoveryText = player.IsSeasonEndingInjury
+                ? "Recovery: Season"
+                : $"Recovery: {Math.Max(1, player.InjuryRecoveryMatches)} Matches";
+
+            return new InjuredPlayerCard
+            {
+                Name = $"X {player.Name}",
+                InjuryType = string.IsNullOrWhiteSpace(player.InjuryType)
+                    ? severity
+                    : $"{player.InjuryType} | {severity}",
+                RecoveryText = recoveryText
+            };
+        }
+    }
+
     private sealed record RatingVisual(int Rating, string Foreground, string Background);
 
     private enum DragSource
@@ -992,6 +1107,7 @@ public partial class PreMatchView : UserControl
         public string Position { get; init; } = string.Empty;
         public string OverallText { get; init; } = string.Empty;
         public int OverallRating { get; init; }
+        public string GrowthText { get; init; } = string.Empty;
         public double Stamina { get; init; }
         public string StaminaBrush { get; init; } = "#2FA84F";
         public string BenchFormBadgeText { get; init; } = string.Empty;

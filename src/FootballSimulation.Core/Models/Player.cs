@@ -17,6 +17,12 @@ public class Player : INotifyPropertyChanged
     public List<string> SecondaryPositions { get; set; } = [];
     public string AssignedPosition { get; set; } = string.Empty;
     public int OverallRating { get; set; }
+    public int BaseOverallRating { get; set; }
+    public int GrowthPoints { get; set; }
+    public int LastMatchGrowthPoints { get; set; }
+    public int LastMatchOverallIncrease { get; set; }
+    public int? Age { get; set; }
+    public int? PotentialOverall { get; set; }
     public string Form { get; set; } = "Average";
     public bool IsStarter { get; set; }
     public int CurrentForm { get; set; } = 50;
@@ -59,6 +65,11 @@ public class Player : INotifyPropertyChanged
     }
     public double LiveMatchModifier { get; set; } = 1.0;
     public bool IsInjured { get; set; }
+    public string InjuryType { get; set; } = string.Empty;
+    public InjurySeverity? InjurySeverity { get; set; }
+    public int InjuryRecoveryMatches { get; set; }
+    public bool IsSeasonEndingInjury { get; set; }
+    public bool NewlyInjuredThisMatch { get; set; }
     public bool IsSuspended { get; set; }
     public int MatchesPlayedRecently { get; set; }
     public int Finishing { get; set; }

@@ -50,12 +50,30 @@
                                    VerticalAlignment="Center"
                                    Margin="0,0,4,0" />
 
-                        <TextBlock Grid.Column="1"
-                                   Text="{Binding OverallText}"
-                                   Foreground="{Binding OverallForeground}"
-                                   FontSize="9.5"
-                                   FontWeight="Black"
-                                   VerticalAlignment="Center" />
+                        <StackPanel Grid.Column="1"
+                                    Orientation="Horizontal"
+                                    VerticalAlignment="Center">
+                            <TextBlock Text="{Binding OverallText}"
+                                       Foreground="{Binding OverallForeground}"
+                                       FontSize="9.5"
+                                       FontWeight="Black" />
+                            <TextBlock Text="{Binding GrowthText}"
+                                       Foreground="#16A34A"
+                                       FontSize="7.5"
+                                       FontWeight="Black"
+                                       Margin="4,0,0,0">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding GrowthText}" Value="">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
 
                         <Border Grid.Column="2"
                                 Background="#E7EEF8"
@@ -161,12 +179,30 @@
                                    VerticalAlignment="Center"
                                    Margin="0,0,4,0" />
 
-                        <TextBlock Grid.Column="1"
-                                   Text="{Binding OverallText}"
-                                   Foreground="#071A2E"
-                                   FontSize="9.5"
-                                   FontWeight="Black"
-                                   VerticalAlignment="Center" />
+                        <StackPanel Grid.Column="1"
+                                    Orientation="Horizontal"
+                                    VerticalAlignment="Center">
+                            <TextBlock Text="{Binding OverallText}"
+                                       Foreground="#071A2E"
+                                       FontSize="9.5"
+                                       FontWeight="Black" />
+                            <TextBlock Text="{Binding GrowthText}"
+                                       Foreground="#16A34A"
+                                       FontSize="7.5"
+                                       FontWeight="Black"
+                                       Margin="4,0,0,0">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding GrowthText}" Value="">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
 
                         <Border Grid.Column="2"
                                 Background="#E7EEF8"
@@ -231,6 +267,35 @@
                                  BorderThickness="0"
                                  Margin="0,5,0,0" />
                 </Grid>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="InjuredPlayerCardTemplate">
+            <Border Width="128"
+                    Background="#FFE4E4"
+                    BorderBrush="#D92D20"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Padding="7"
+                    Margin="0,0,0,7"
+                    Opacity="0.72">
+                <StackPanel>
+                    <TextBlock Text="{Binding Name}"
+                               Foreground="#8F1F1F"
+                               FontSize="10"
+                               FontWeight="Black"
+                               TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding InjuryType}"
+                               Foreground="#8F1F1F"
+                               FontSize="9"
+                               FontWeight="SemiBold"
+                               Margin="0,3,0,0" />
+                    <TextBlock Text="{Binding RecoveryText}"
+                               Foreground="#8F1F1F"
+                               FontSize="9"
+                               FontWeight="Bold"
+                               Margin="0,2,0,0" />
+                </StackPanel>
             </Border>
         </DataTemplate>
     </UserControl.Resources>
@@ -298,6 +363,8 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
                         <Grid>
@@ -347,6 +414,21 @@
                                 <StaticResource ResourceKey="SubstituteCardTemplate" />
                             </ListBox.ItemTemplate>
                         </ListBox>
+                        <TextBlock x:Name="InjuredPlayersTitleTextBlock"
+                                   Grid.Row="2"
+                                   Text="Injured Players"
+                                   Foreground="#FFD1D1"
+                                   FontSize="14"
+                                   FontWeight="Bold"
+                                   Margin="0,12,0,6"
+                                   Visibility="Collapsed" />
+                        <ListBox x:Name="InjuredPlayersListBox"
+                                 Grid.Row="3"
+                                 ItemTemplate="{StaticResource InjuredPlayerCardTemplate}"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 IsHitTestVisible="False"
+                                 Visibility="Collapsed" />
                     </Grid>
                     </Border>
                 </Grid>

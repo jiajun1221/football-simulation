@@ -164,6 +164,19 @@
                         </Border.Style>
                         <TextBlock Text="{Binding DefensiveBadgeText}" FontFamily="Segoe UI Emoji" FontSize="8" FontWeight="Bold" Foreground="#174A8B" />
                     </Border>
+                    <Border Background="#FFE4BF" CornerRadius="6" Padding="3,0" Margin="1,0">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ErrorBadgeText}" Value="">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <TextBlock Text="{Binding ErrorBadgeText}" FontFamily="Segoe UI Emoji" FontSize="8" FontWeight="Bold" Foreground="#8A4E00" />
+                    </Border>
                     <Border Background="#D7F7F1" CornerRadius="6" Padding="3,0" Margin="1,0">
                         <Border.Style>
                             <Style TargetType="Border">
@@ -308,12 +321,30 @@
                                        VerticalAlignment="Center"
                                        Margin="0,0,4,0" />
 
-                            <TextBlock Grid.Column="1"
-                                       Text="{Binding OverallText}"
-                                       Foreground="#071A2E"
-                                       FontSize="9.5"
-                                       FontWeight="Black"
-                                       VerticalAlignment="Center" />
+                            <StackPanel Grid.Column="1"
+                                        Orientation="Horizontal"
+                                        VerticalAlignment="Center">
+                                <TextBlock Text="{Binding OverallText}"
+                                           Foreground="#071A2E"
+                                           FontSize="9.5"
+                                           FontWeight="Black" />
+                                <TextBlock Text="{Binding GrowthText}"
+                                           Foreground="#16A34A"
+                                           FontSize="7.5"
+                                           FontWeight="Black"
+                                           Margin="4,0,0,0">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding GrowthText}" Value="">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </StackPanel>
 
                             <Border Grid.Column="2"
                                     Background="#E7EEF8"
@@ -1024,8 +1055,11 @@
                     </Grid>
                 </Border>
 
-                <Border Grid.Column="2"
+                <Border x:Name="PausedSubstitutionPanelBorder"
+                        Grid.Column="2"
                         Background="White"
+                        BorderBrush="Transparent"
+                        BorderThickness="2"
                         CornerRadius="12"
                         Padding="10">
                     <Grid>

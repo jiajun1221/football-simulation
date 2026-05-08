@@ -193,6 +193,8 @@ public partial class MatchResultView : UserControl
         {
             PlayerName = performance.PlayerName,
             PositionText = GetPositionText(performance.Position),
+            OverallText = player is null ? string.Empty : $"OVR {GetOverallRating(player)}",
+            GrowthText = player is null ? string.Empty : PlayerGrowthDisplayHelper.CreateGrowthText(player),
             RatingText = performance.Rating.ToString("0.0"),
             RatingBackground = GetRatingBackground(performance.Rating),
             StatusText = GetSubStatus(performance),
@@ -265,6 +267,13 @@ public partial class MatchResultView : UserControl
         };
     }
 
+    private static int GetOverallRating(Player player)
+    {
+        return player.OverallRating > 0
+            ? player.OverallRating
+            : (int)Math.Round((player.Attack + player.Defense + player.Passing + player.Stamina + player.Finishing) / 5.0);
+    }
+
     private static string GetRatingBackground(double rating)
     {
         return rating switch
@@ -306,6 +315,8 @@ public partial class MatchResultView : UserControl
     {
         public string PlayerName { get; init; } = string.Empty;
         public string PositionText { get; init; } = string.Empty;
+        public string OverallText { get; init; } = string.Empty;
+        public string GrowthText { get; init; } = string.Empty;
         public string RatingText { get; init; } = string.Empty;
         public string RatingBackground { get; init; } = "#102033";
         public string StatusText { get; init; } = string.Empty;

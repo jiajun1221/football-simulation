@@ -117,9 +117,11 @@ public class PlayerFormPersistenceService
                 continue;
             }
 
-            var formText = PlayerFormStatusService.ToDisplayText(player.FormStatus);
-            record.FormStatus = formText;
-            record.Form = formText;
+            record.IsInjured = player.IsInjured;
+            record.InjuryType = string.IsNullOrWhiteSpace(player.InjuryType) ? null : player.InjuryType;
+            record.InjurySeverity = player.InjurySeverity?.ToString();
+            record.InjuryRecoveryMatches = player.IsInjured ? player.InjuryRecoveryMatches : null;
+            record.IsSeasonEndingInjury = player.IsSeasonEndingInjury ? true : null;
         }
     }
 }

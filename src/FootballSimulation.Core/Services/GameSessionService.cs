@@ -9,6 +9,8 @@ public class GameSessionService
 
     private readonly LeagueEngine _leagueEngine;
     private readonly PlayerFormPersistenceService _playerFormPersistenceService;
+    private readonly InjuryRecoveryService _injuryRecoveryService = new();
+    private readonly PlayerGrowthService _playerGrowthService = new();
 
     public GameSessionService()
         : this(new LeagueEngine(), new PlayerFormPersistenceService())
@@ -39,7 +41,9 @@ public class GameSessionService
     {
         var fixture = FindNextFixtureForTeam(league, selectedTeam);
         var result = _leagueEngine.SimulateFixture(league, fixture, options: CreateUserMatchOptions(selectedTeam));
-        _leagueEngine.SimulateRemainingFixturesInRound(league, fixture.RoundNumber);
+        var remainingResults = _leagueEngine.SimulateRemainingFixturesInRound(league, fixture.RoundNumber);
+        ApplyGrowthForCompletedMatches([result, .. remainingResults]);
+        _injuryRecoveryService.AdvanceRecoveryAfterCompletedRound(league.Teams);
         _playerFormPersistenceService.SaveActiveSquadFormStatuses(league.Teams);
 
         return result;
@@ -80,7 +84,9 @@ public class GameSessionService
     {
         var humanTeam = selectedTeam ?? fixture.HomeTeam;
         var result = _leagueEngine.SimulateFixtureSecondHalf(league, fixture, match, options: CreateUserMatchOptions(humanTeam));
-        _leagueEngine.SimulateRemainingFixturesInRound(league, fixture.RoundNumber);
+        var remainingResults = _leagueEngine.SimulateRemainingFixturesInRound(league, fixture.RoundNumber);
+        ApplyGrowthForCompletedMatches([result, .. remainingResults]);
+        _injuryRecoveryService.AdvanceRecoveryAfterCompletedRound(league.Teams);
         _playerFormPersistenceService.SaveActiveSquadFormStatuses(league.Teams);
 
         return result;
@@ -89,15 +95,27 @@ public class GameSessionService
     public void CompleteSelectedTeamLiveMatch(League league, Fixture fixture, Match match)
     {
         _leagueEngine.CompleteLiveFixture(league, fixture, match);
-        _leagueEngine.SimulateRemainingFixturesInRound(league, fixture.RoundNumber);
+        var remainingResults = _leagueEngine.SimulateRemainingFixturesInRound(league, fixture.RoundNumber);
+        ApplyGrowthForCompletedMatches([match, .. remainingResults]);
+        _injuryRecoveryService.AdvanceRecoveryAfterCompletedRound(league.Teams);
         _playerFormPersistenceService.SaveActiveSquadFormStatuses(league.Teams);
     }
 
     public List<Match> SimulateRemainingRoundFixtures(League league, int roundNumber)
     {
         var results = _leagueEngine.SimulateRemainingFixturesInRound(league, roundNumber);
+        ApplyGrowthForCompletedMatches(results);
+        _injuryRecoveryService.AdvanceRecoveryAfterCompletedRound(league.Teams);
         _playerFormPersistenceService.SaveActiveSquadFormStatuses(league.Teams);
         return results;
+    }
+
+    private void ApplyGrowthForCompletedMatches(IEnumerable<Match> matches)
+    {
+        foreach (var match in matches)
+        {
+            _playerGrowthService.ApplyMatchGrowth(match);
+        }
     }
 
     private static bool IsTeamInFixture(Fixture fixture, Team team)

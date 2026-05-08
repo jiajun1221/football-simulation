@@ -50,12 +50,30 @@
                                    VerticalAlignment="Center"
                                    Margin="0,0,4,0" />
 
-                        <TextBlock Grid.Column="1"
-                                   Text="{Binding OverallText}"
-                                   Foreground="{Binding OverallForeground}"
-                                   FontSize="9.5"
-                                   FontWeight="Black"
-                                   VerticalAlignment="Center" />
+                        <StackPanel Grid.Column="1"
+                                    Orientation="Horizontal"
+                                    VerticalAlignment="Center">
+                            <TextBlock Text="{Binding OverallText}"
+                                       Foreground="{Binding OverallForeground}"
+                                       FontSize="9.5"
+                                       FontWeight="Black" />
+                            <TextBlock Text="{Binding GrowthText}"
+                                       Foreground="#16A34A"
+                                       FontSize="7.5"
+                                       FontWeight="Black"
+                                       Margin="4,0,0,0">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding GrowthText}" Value="">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
 
                         <Border Grid.Column="2"
                                 Background="#E7EEF8"
@@ -161,12 +179,30 @@
                                    VerticalAlignment="Center"
                                    Margin="0,0,4,0" />
 
-                        <TextBlock Grid.Column="1"
-                                   Text="{Binding OverallText}"
-                                   Foreground="#071A2E"
-                                   FontSize="9.5"
-                                   FontWeight="Black"
-                                   VerticalAlignment="Center" />
+                        <StackPanel Grid.Column="1"
+                                    Orientation="Horizontal"
+                                    VerticalAlignment="Center">
+                            <TextBlock Text="{Binding OverallText}"
+                                       Foreground="#071A2E"
+                                       FontSize="9.5"
+                                       FontWeight="Black" />
+                            <TextBlock Text="{Binding GrowthText}"
+                                       Foreground="#16A34A"
+                                       FontSize="7.5"
+                                       FontWeight="Black"
+                                       Margin="4,0,0,0">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding GrowthText}" Value="">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
 
                         <Border Grid.Column="2"
                                 Background="#E7EEF8"

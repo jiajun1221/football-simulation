@@ -538,6 +538,7 @@ public class MatchEngine
     {
         return description.StartsWith($"{teamName} ", StringComparison.OrdinalIgnoreCase) ||
             description.Contains($" for {teamName}", StringComparison.OrdinalIgnoreCase) ||
+            description.Contains($" from {teamName}", StringComparison.OrdinalIgnoreCase) ||
             description.Contains($" by {teamName}", StringComparison.OrdinalIgnoreCase);
     }
 
@@ -705,7 +706,7 @@ public class MatchEngine
         TeamStrengthSnapshot strengthSnapshot,
         int minute)
     {
-        if (simulationState.LastFeedEventType == EventType.Turnover)
+        if (simulationState.LastFeedEventType is EventType.Turnover or EventType.Offside)
         {
             return strengthSnapshot;
         }
@@ -755,7 +756,7 @@ public class MatchEngine
     {
         return dramaResult.EventType switch
         {
-            EventType.Injury => eventFactory.CreateInjury(minute, dramaResult.Team, dramaResult.Player!),
+            EventType.Injury => eventFactory.CreateInjury(minute, dramaResult.Team, dramaResult.Player!, dramaResult.InjuryCause),
             EventType.Penalty => eventFactory.CreatePenalty(minute, dramaResult.Team, dramaResult.Player!, dramaResult.ScoresGoal, match),
             EventType.Offside => eventFactory.CreateOffside(minute, dramaResult.Team, dramaResult.Player!),
             EventType.DefensiveError => eventFactory.CreateDefensiveError(minute, dramaResult.Team, dramaResult.Player!),
@@ -795,8 +796,9 @@ public class MatchEngine
         var attackOutcome = DetermineAttackOutcome(attackingTeamStrength, defendingTeamStrength, random);
         var isResolvingPreviousAttack = HasUnresolvedAttack(simulationState, attackingTeam);
         var isResolvingTurnover = simulationState.LastFeedEventType == EventType.Turnover;
+        var isRestartingAfterOffside = simulationState.LastFeedEventType == EventType.Offside;
 
-        if (isResolvingTurnover)
+        if (isResolvingTurnover || isRestartingAfterOffside)
         {
             attackOutcome = AttackFlowOutcome.BuildUp;
         }
@@ -811,7 +813,10 @@ public class MatchEngine
             }
             else
             {
-                matchLog.AddEvent(eventFactory.CreateAttackBuildUp(minute, attackingTeam, playmaker, shooter, random));
+                var buildUpEvent = isRestartingAfterOffside
+                    ? eventFactory.CreateOffsideRestart(minute, attackingTeam, random)
+                    : eventFactory.CreateAttackBuildUp(minute, attackingTeam, playmaker, shooter, random);
+                matchLog.AddEvent(buildUpEvent);
                 MarkAttackStarted(simulationState, attackingTeam);
                 GetOrCreatePerformance(match, attackingTeam, playmaker).Rating += 0.04;
                 return attackingTeam;
@@ -855,7 +860,7 @@ public class MatchEngine
             shooterPerformance.Offsides++;
             shooterPerformance.Rating -= 0.08;
             matchLog.AddEvent(eventFactory.CreateOffside(minute, attackingTeam, shooter, chanceType, random));
-            MarkAttackResolved(simulationState, defendingTeam, BallState.SetPiece, EventType.Offside);
+            MarkAttackResolved(simulationState, defendingTeam, BallState.BuildUp, EventType.Offside);
             return defendingTeam;
         }
 
@@ -1208,6 +1213,17 @@ public class MatchEngine
             playmakerPerformance.Rating += goalProbability >= 0.18 ? 0.20 : 0.08;
         }
 
+        if (ShouldScoreWonderGoal(shooter, chanceType, random))
+        {
+            attackingStats.ShotsOnTarget++;
+            UpdateScore(match, attackingTeam);
+            shooterPerformance.ShotsOnTarget++;
+            shooterPerformance.Goals++;
+            shooterPerformance.Rating += 1.40 + goalProbability;
+            matchLog.AddEvent(eventFactory.CreateWonderGoal(minute, attackingTeam, shooter, match));
+            return defendingTeam;
+        }
+
         if (IsGoal(goalProbability, random))
         {
             attackingStats.ShotsOnTarget++;
@@ -1282,6 +1298,27 @@ public class MatchEngine
         var shotStyle = ChooseShotStyle(shooter, random, chanceType);
         matchLog.AddEvent(eventFactory.CreateMiss(minute, attackingTeam, shooter, shotStyle, random));
         return defendingTeam;
+    }
+
+    private static bool ShouldScoreWonderGoal(Player shooter, string chanceType, Random random)
+    {
+        var probability = chanceType switch
+        {
+            "long-range attempt" => 0.020,
+            "dribble run" => 0.018,
+            "quick combination" => 0.008,
+            _ => 0.004
+        };
+
+        probability +=
+            (shooter.Traits.Contains(PlayerTrait.LongShotTaker) ? 0.014 : 0.0) +
+            (shooter.Traits.Contains(PlayerTrait.FinesseShot) ? 0.010 : 0.0) +
+            (shooter.Traits.Contains(PlayerTrait.OutsideFootShot) ? 0.008 : 0.0) +
+            (shooter.Traits.Contains(PlayerTrait.Flair) ? 0.007 : 0.0) +
+            (shooter.Traits.Contains(PlayerTrait.TechnicalDribbler) ? 0.006 : 0.0) +
+            (shooter.Traits.Contains(PlayerTrait.ClinicalFinisher) ? 0.005 : 0.0);
+
+        return random.NextDouble() < Math.Clamp(probability, 0.004, 0.055);
     }
 
     private Team HandleCornerSequence(
@@ -1696,7 +1733,7 @@ public class MatchEngine
                 {
                     var performance = GetOrCreatePerformance(match, dramaResult.Team, player);
                     performance.Injuries++;
-                    performance.Rating -= 0.30;
+                    performance.Rating -= 1.40;
                 }
 
                 break;
@@ -2293,7 +2330,7 @@ public class MatchEngine
 
     private static IEnumerable<Player> GetActivePitchPlayers(Team team)
     {
-        return team.Players.Where(player => player.IsOnPitch && !player.IsSentOff);
+        return team.Players.Where(player => player.IsOnPitch && !player.IsSentOff && !player.IsInjured);
     }
 
     private static MatchTeamStats GetTeamStats(Match match, Team team)

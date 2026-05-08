@@ -286,6 +286,82 @@ public class MatchEngineScoringTests
         }
     }
 
+    [Fact]
+    public void SimulateMatch_WonderGoalOnlyComesAfterShot()
+    {
+        var seedDataService = new SeedDataService();
+        var engine = new MatchEngine();
+
+        for (var seed = 1; seed <= 80; seed++)
+        {
+            var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+            var result = engine.SimulateMatch(homeTeam, awayTeam, seed: seed);
+            var events = result.Events;
+
+            for (var index = 1; index < events.Count; index++)
+            {
+                if (events[index].EventType != EventType.WonderGoal)
+                {
+                    continue;
+                }
+
+                Assert.Equal(EventType.Shot, events[index - 1].EventType);
+                Assert.Equal(FindEventTeamName(events[index - 1], result), FindEventTeamName(events[index], result));
+                if (index >= 2)
+                {
+                    Assert.True(events[index - 2].EventType is not EventType.Offside and not EventType.Turnover);
+                }
+            }
+        }
+    }
+
+    [Fact]
+    public void SimulateMatch_OffsideGivesOpponentNextAttack()
+    {
+        var seedDataService = new SeedDataService();
+        var engine = new MatchEngine();
+
+        for (var seed = 1; seed <= 80; seed++)
+        {
+            var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+            var result = engine.SimulateMatch(homeTeam, awayTeam, seed: seed);
+            var events = result.Events;
+
+            for (var index = 0; index < events.Count - 1; index++)
+            {
+                if (events[index].EventType != EventType.Offside)
+                {
+                    continue;
+                }
+
+                var offsideTeam = FindEventTeamName(events[index], result);
+                var expectedRestartTeam = offsideTeam == homeTeam.Name ? awayTeam.Name : homeTeam.Name;
+                var nextOpenPlayEvent = events
+                    .Skip(index + 1)
+                    .FirstOrDefault(matchEvent => matchEvent.EventType is not EventType.Halftime and not EventType.Fulltime);
+
+                if (nextOpenPlayEvent is null)
+                {
+                    continue;
+                }
+
+                Assert.Equal(EventType.Attack, nextOpenPlayEvent.EventType);
+                var actualRestartTeam = FindEventTeamName(nextOpenPlayEvent, result);
+                Assert.True(
+                    string.Equals(expectedRestartTeam, actualRestartTeam, StringComparison.OrdinalIgnoreCase),
+                    $"Seed {seed}: offside '{events[index].Description}' should restart with {expectedRestartTeam}, but next event was '{nextOpenPlayEvent.Description}'.");
+                var restartDescriptions = new[]
+                {
+                    $"{expectedRestartTeam} restart play.",
+                    $"{expectedRestartTeam} build from the back.",
+                    $"{expectedRestartTeam} regain possession.",
+                    $"{expectedRestartTeam} look to settle on the ball."
+                };
+                Assert.True(restartDescriptions.Contains(nextOpenPlayEvent.Description));
+            }
+        }
+    }
+
     private static string FormatEvent(MatchEvent matchEvent)
     {
         return $"{matchEvent.Minute}|{matchEvent.EventType}|{matchEvent.Description}";
@@ -348,6 +424,7 @@ public class MatchEngineScoringTests
     {
         return description.StartsWith($"{teamName} ", StringComparison.OrdinalIgnoreCase) ||
             description.Contains($" for {teamName}", StringComparison.OrdinalIgnoreCase) ||
+            description.Contains($" from {teamName}", StringComparison.OrdinalIgnoreCase) ||
             description.Contains($" by {teamName}", StringComparison.OrdinalIgnoreCase);
     }
 }

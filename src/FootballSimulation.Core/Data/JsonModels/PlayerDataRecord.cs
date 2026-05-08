@@ -10,6 +10,8 @@ public class PlayerDataRecord
     public string? PreferredPosition { get; set; }
     public List<string> SecondaryPositions { get; set; } = [];
     public int OverallRating { get; set; }
+    public int? Age { get; set; }
+    public int? PotentialOverall { get; set; }
     public int? Stamina { get; set; }
     public bool IsStarter { get; set; }
     public string? Form { get; set; }
@@ -19,6 +21,10 @@ public class PlayerDataRecord
     public int? Morale { get; set; }
     public int? Fatigue { get; set; }
     public bool? IsInjured { get; set; }
+    public string? InjuryType { get; set; }
+    public string? InjurySeverity { get; set; }
+    public int? InjuryRecoveryMatches { get; set; }
+    public bool? IsSeasonEndingInjury { get; set; }
     public bool? IsSuspended { get; set; }
     public int? MatchesPlayedRecently { get; set; }
 }

@@ -66,17 +66,19 @@ public class PremierLeagueDataServiceTests
     }
 
     [Fact]
-    public void LoadTeams_MapsLegacyFormStringIntoFormStatus()
+    public void LoadTeams_ResetsLoadedFormToAverageForNewSession()
     {
         var dataService = new PremierLeagueDataService();
 
         var teams = dataService.LoadTeams();
-        var excellentPlayer = teams
-            .SelectMany(team => team.Players.Concat(team.Substitutes))
-            .First(player => player.FormStatus == PlayerFormStatus.Excellent);
+        var players = teams.SelectMany(team => team.Players.Concat(team.Substitutes));
 
-        Assert.Equal("Excellent", excellentPlayer.Form);
-        Assert.Equal(85, excellentPlayer.CurrentForm);
+        Assert.All(players, player =>
+        {
+            Assert.Equal(PlayerFormStatus.Average, player.FormStatus);
+            Assert.Equal("Average", player.Form);
+            Assert.Equal(50, player.CurrentForm);
+        });
     }
 
     [Theory]

@@ -274,9 +274,26 @@ public class MatchEventFactory
             playerOff.Name);
     }
 
-    public MatchEvent CreateInjury(int minute, Team team, Player player)
+    public MatchEvent CreateInjury(int minute, Team team, Player player, string injuryCause = "")
     {
-        return CreateEvent(minute, EventType.Injury, $"{player.Name} goes down injured for {team.Name}.", player.Name);
+        var playerName = GetDisplayName(player.Name);
+        var causeText = injuryCause switch
+        {
+            "dangerous tackle" => $"{playerName} looks in pain after a dangerous tackle.",
+            "goalkeeper collision" => $"{playerName} stays down after a heavy goalkeeper collision.",
+            "aerial duel impact" => $"{playerName} lands awkwardly after an aerial duel.",
+            "sprint muscle pull" => $"{playerName} pulls up suddenly after a sprint.",
+            "over exhaustion" => $"{playerName} drops to the turf after pushing through exhaustion.",
+            "awkward landing" => $"{playerName} goes down after an awkward landing.",
+            _ => $"{playerName} goes down after a heavy collision."
+        };
+        var treatmentText = Pick(
+            new Random(minute + player.Name.Length + team.Name.Length),
+            "Medical staff are called onto the pitch.",
+            "The referee waves the medical team on.",
+            $"{team.Name} look worried as treatment begins.");
+
+        return CreateEvent(minute, EventType.Injury, $"{causeText} {treatmentText}", player.Name);
     }
 
     public MatchEvent CreatePenalty(int minute, Team team, Player player, bool converted, Match match)
@@ -335,6 +352,17 @@ public class MatchEventFactory
             $"The {attackRoute} move from {team.Name} is halted as {player.Name} strays offside.");
 
         return CreateEvent(minute, EventType.Offside, description, player.Name);
+    }
+
+    public MatchEvent CreateOffsideRestart(int minute, Team team, Random random)
+    {
+        var description = Pick(random,
+            $"{team.Name} restart play.",
+            $"{team.Name} build from the back.",
+            $"{team.Name} regain possession.",
+            $"{team.Name} look to settle on the ball.");
+
+        return CreateEvent(minute, EventType.Attack, description);
     }
 
     public MatchEvent CreateDefensiveError(int minute, Team defendingTeam, Player player)

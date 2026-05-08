@@ -30,6 +30,7 @@ public class LivePlayerIconViewModel
     public string GoalBadgeText { get; init; } = string.Empty;
     public string AssistBadgeText { get; init; } = string.Empty;
     public string DefensiveBadgeText { get; init; } = string.Empty;
+    public string ErrorBadgeText { get; init; } = string.Empty;
     public string SaveBadgeText { get; init; } = string.Empty;
     public string YellowBadgeText { get; init; } = string.Empty;
     public string RedBadgeText { get; init; } = string.Empty;

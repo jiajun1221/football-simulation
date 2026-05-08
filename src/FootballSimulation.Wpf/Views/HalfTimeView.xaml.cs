@@ -219,6 +219,7 @@ public partial class HalfTimeView : UserControl
             PositionText = player.AssignedPosition,
             OverallText = $"OVR {ratingVisual.Rating}",
             OverallForeground = ratingVisual.Foreground,
+            GrowthText = PlayerGrowthDisplayHelper.CreateGrowthText(player),
             Stamina = GetStaminaPercentage(player),
             StaminaBrush = GetStaminaBrush(player),
             FormBadgeText = form.Text,
@@ -352,6 +353,7 @@ public partial class HalfTimeView : UserControl
             Position = player.PreferredPosition,
             OverallText = $"OVR {GetOverallRating(player)}",
             OverallRating = GetOverallRating(player),
+            GrowthText = PlayerGrowthDisplayHelper.CreateGrowthText(player),
             Stamina = GetStaminaPercentage(player),
             StaminaBrush = GetStaminaBrush(player),
             BenchFormBadgeText = form.Text,
@@ -399,6 +401,7 @@ public partial class HalfTimeView : UserControl
         SelectedPlayerFormBadgeBorder.Background = ToBrush(formBadge.Background);
         SelectedPlayerFormBadgeTextBlock.Foreground = ToBrush(formBadge.Foreground);
         SelectedPlayerFormBadgeTextBlock.Text = formBadge.Text;
+        SelectedPlayerCard.ToolTip = PlayerGrowthDisplayHelper.CreateGrowthText(_selectedStarter);
 
         if (_selectedStarter.Position == Position.Goalkeeper)
         {
@@ -1196,6 +1199,7 @@ public partial class HalfTimeView : UserControl
         public string Position { get; init; } = string.Empty;
         public string OverallText { get; init; } = string.Empty;
         public int OverallRating { get; init; }
+        public string GrowthText { get; init; } = string.Empty;
         public double Stamina { get; init; }
         public string StaminaBrush { get; init; } = "#2FA84F";
         public string BenchFormBadgeText { get; init; } = string.Empty;

@@ -13,6 +13,7 @@ public class PitchPlayerCard
     public string PositionText { get; init; } = string.Empty;
     public string OverallText { get; init; } = string.Empty;
     public string OverallForeground { get; init; } = "#071A2E";
+    public string GrowthText { get; init; } = string.Empty;
     public string RatingText { get; init; } = string.Empty;
     public string MatchStatsText { get; init; } = string.Empty;
     public double Stamina { get; init; }

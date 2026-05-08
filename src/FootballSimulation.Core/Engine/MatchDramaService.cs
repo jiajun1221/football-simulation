@@ -30,30 +30,19 @@ public class MatchDramaService
         var injuryCandidate = FindInjuryCandidate(context);
         if (injuryCandidate is not null && context.Random.NextDouble() < GetInjuryProbability(injuryCandidate))
         {
-            injuryCandidate.IsInjured = true;
-            injuryCandidate.Stamina = 0;
+            var injuryCause = ChooseInjuryCause(context, injuryCandidate);
+            ApplyMatchInjury(injuryCandidate, injuryCause, context.Random);
 
             return new MatchDramaResult
             {
                 EventType = EventType.Injury,
                 Team = GetTeamForPlayer(context, injuryCandidate),
                 Player = injuryCandidate,
-                HomeAttackModifier = injuryCandidate.TeamIs(context.HomeTeam) ? 0.88 : 1.0,
-                AwayAttackModifier = injuryCandidate.TeamIs(context.AwayTeam) ? 0.88 : 1.0,
-                HomeDefenseModifier = injuryCandidate.TeamIs(context.HomeTeam) ? 0.90 : 1.0,
-                AwayDefenseModifier = injuryCandidate.TeamIs(context.AwayTeam) ? 0.90 : 1.0
-            };
-        }
-
-        if (ShouldCreateWonderGoal(context))
-        {
-            var team = ChooseStrongerAttack(context);
-            return new MatchDramaResult
-            {
-                EventType = EventType.WonderGoal,
-                Team = team,
-                Player = ChooseAttackingPlayer(team, context.Random),
-                ScoresGoal = true
+                InjuryCause = injuryCause,
+                HomeAttackModifier = injuryCandidate.TeamIs(context.HomeTeam) ? 0.78 : 1.0,
+                AwayAttackModifier = injuryCandidate.TeamIs(context.AwayTeam) ? 0.78 : 1.0,
+                HomeDefenseModifier = injuryCandidate.TeamIs(context.HomeTeam) ? 0.80 : 1.0,
+                AwayDefenseModifier = injuryCandidate.TeamIs(context.AwayTeam) ? 0.80 : 1.0
             };
         }
 
@@ -100,14 +89,18 @@ public class MatchDramaService
 
     private static Player? FindInjuryCandidate(MatchEventContext context)
     {
+        var pressingRisk = Math.Max(context.HomeTeam.Tactics.PressingIntensity, context.AwayTeam.Tactics.PressingIntensity);
         return context.HomeTeam.Players
             .Concat(context.AwayTeam.Players)
-            .Where(player => IsActivePlayer(player) && !player.IsInjured &&
-                (player.Traits.Contains(PlayerTrait.InjuryProne) ||
-                player.Stamina <= 25 ||
-                GetStaminaRatio(player) < 0.30 ||
-                player.MatchesPlayedRecently >= 4))
-            .OrderByDescending(player => (100.0 - player.Stamina) + (1.0 - GetStaminaRatio(player)) * 30 + player.MatchesPlayedRecently * 8)
+            .Where(player => IsActivePlayer(player) && !player.IsInjured)
+            .Select(player => new
+            {
+                Player = player,
+                Risk = GetPlayerInjuryRisk(player) + Math.Max(0, pressingRisk - 62) * 0.18
+            })
+            .Where(candidate => candidate.Risk >= 18)
+            .OrderByDescending(candidate => candidate.Risk)
+            .Select(candidate => candidate.Player)
             .FirstOrDefault();
     }
 
@@ -132,7 +125,125 @@ public class MatchDramaService
             _ => 0.0
         };
 
-        return Math.Clamp((0.16 + lowStaminaBonus + fatigueBonus) * traitModifier, 0.05, 0.42);
+        var repeatedLoadBonus = player.MatchesPlayedRecently >= 4 ? 0.010 : 0.0;
+        return Math.Clamp((0.010 + lowStaminaBonus + fatigueBonus + repeatedLoadBonus) * traitModifier, 0.004, 0.085);
+    }
+
+    private static double GetPlayerInjuryRisk(Player player)
+    {
+        var lowStaminaRisk = Math.Max(0.0, 55.0 - player.Stamina) * 0.9;
+        var traitRisk = player.Traits.Contains(PlayerTrait.InjuryProne) ? 26.0 : 0.0;
+        var workloadRisk = Math.Max(0, player.MatchesPlayedRecently - 2) * 8.0;
+        var duelRisk =
+            (player.Traits.Contains(PlayerTrait.DivesIntoTackles) ? 5.0 : 0.0) +
+            (player.Traits.Contains(PlayerTrait.Rapid) || player.Traits.Contains(PlayerTrait.SpeedDribbler) ? 4.0 : 0.0) +
+            (player.Traits.Contains(PlayerTrait.PowerHeader) || player.Traits.Contains(PlayerTrait.AerialThreat) ? 3.0 : 0.0);
+
+        return lowStaminaRisk + traitRisk + workloadRisk + duelRisk;
+    }
+
+    private static string ChooseInjuryCause(MatchEventContext context, Player player)
+    {
+        if (player.Position == Position.Goalkeeper)
+        {
+            return "goalkeeper collision";
+        }
+
+        if (player.Stamina <= 20)
+        {
+            return context.Random.NextDouble() < 0.55 ? "over exhaustion" : "sprint muscle pull";
+        }
+
+        var opposingTeam = GetOpposingTeam(context, player);
+        var dangerousTackleRisk = opposingTeam.Players
+            .Count(candidate => IsActivePlayer(candidate) && candidate.Traits.Contains(PlayerTrait.DivesIntoTackles));
+
+        if (dangerousTackleRisk > 0 && context.Random.NextDouble() < 0.28)
+        {
+            return "dangerous tackle";
+        }
+
+        if (player.Traits.Contains(PlayerTrait.PowerHeader) || player.Traits.Contains(PlayerTrait.AerialThreat))
+        {
+            return "aerial duel impact";
+        }
+
+        return context.Random.NextDouble() switch
+        {
+            < 0.32 => "heavy collision",
+            < 0.54 => "awkward landing",
+            < 0.76 => "sprint muscle pull",
+            _ => "aerial duel impact"
+        };
+    }
+
+    private static Team GetOpposingTeam(MatchEventContext context, Player player)
+    {
+        return player.TeamIs(context.HomeTeam) ? context.AwayTeam : context.HomeTeam;
+    }
+
+    private static void ApplyMatchInjury(Player player, string injuryCause, Random random)
+    {
+        var severity = ChooseInjurySeverity(player, injuryCause, random);
+        player.IsInjured = true;
+        player.NewlyInjuredThisMatch = true;
+        player.InjurySeverity = severity;
+        player.InjuryType = ChooseInjuryType(injuryCause, severity, random);
+        player.IsSeasonEndingInjury = severity == InjurySeverity.SeasonEnding;
+        player.InjuryRecoveryMatches = severity switch
+        {
+            InjurySeverity.Minor => random.Next(1, 4),
+            InjurySeverity.Moderate => random.Next(4, 11),
+            InjurySeverity.Serious => random.Next(15, 31),
+            InjurySeverity.SeasonEnding => 99,
+            _ => 1
+        };
+        player.Stamina = 0;
+        player.LiveMatchModifier = 0.25;
+    }
+
+    private static InjurySeverity ChooseInjurySeverity(Player player, string injuryCause, Random random)
+    {
+        var seriousBonus =
+            (injuryCause is "dangerous tackle" or "goalkeeper collision" or "aerial duel impact" ? 0.06 : 0.0) +
+            (player.Traits.Contains(PlayerTrait.InjuryProne) ? 0.04 : 0.0);
+        var roll = random.NextDouble();
+
+        if (roll < 0.004 + seriousBonus / 10.0)
+        {
+            return InjurySeverity.SeasonEnding;
+        }
+
+        if (roll < 0.08 + seriousBonus)
+        {
+            return InjurySeverity.Serious;
+        }
+
+        if (roll < 0.34 + seriousBonus)
+        {
+            return InjurySeverity.Moderate;
+        }
+
+        return InjurySeverity.Minor;
+    }
+
+    private static string ChooseInjuryType(string injuryCause, InjurySeverity severity, Random random)
+    {
+        if (severity == InjurySeverity.SeasonEnding)
+        {
+            return random.NextDouble() < 0.5 ? "ACL Injury" : "Fracture";
+        }
+
+        return injuryCause switch
+        {
+            "dangerous tackle" => random.NextDouble() < 0.55 ? "Ankle Injury" : "Knee Injury",
+            "goalkeeper collision" => random.NextDouble() < 0.5 ? "Shoulder Injury" : "Head Injury",
+            "aerial duel impact" => random.NextDouble() < 0.5 ? "Head Injury" : "Back Injury",
+            "sprint muscle pull" => random.NextDouble() < 0.65 ? "Hamstring Injury" : "Calf Strain",
+            "over exhaustion" => random.NextDouble() < 0.5 ? "Muscle Fatigue" : "Groin Strain",
+            "awkward landing" => random.NextDouble() < 0.5 ? "Ankle Injury" : "Knee Injury",
+            _ => random.NextDouble() < 0.5 ? "Impact Injury" : "Knock"
+        };
     }
 
     private static double GetStaminaRatio(Player player)
@@ -145,18 +256,6 @@ public class MatchDramaService
         return Math.Clamp(player.Stamina / 100.0, 0.0, 1.0);
     }
 
-    private static bool ShouldCreateWonderGoal(MatchEventContext context)
-    {
-        var players = GetActivePlayers(context.HomeTeam).Concat(GetActivePlayers(context.AwayTeam));
-        return players.Any(player =>
-                player.Traits.Contains(PlayerTrait.LongShotTaker) ||
-                player.Traits.Contains(PlayerTrait.FinesseShot) ||
-                player.Traits.Contains(PlayerTrait.ClinicalFinisher) ||
-                player.Traits.Contains(PlayerTrait.OutsideFootShot) ||
-                player.Traits.Contains(PlayerTrait.Leadership))
-            && context.Random.NextDouble() < 0.22;
-    }
-
     private static bool ShouldCreateDefensiveError(MatchEventContext context)
     {
         var highLineRisk = Math.Max(context.HomeTeam.Tactics.DefensiveLine, context.AwayTeam.Tactics.DefensiveLine);
@@ -166,19 +265,13 @@ public class MatchDramaService
     private static MatchDramaResult CreateAtmosphereEvent(MatchEventContext context)
     {
         var roll = context.Random.NextDouble();
-        if (roll < 0.18)
-        {
-            var attackingTeam = ChooseStrongerAttack(context);
-            return new MatchDramaResult { EventType = EventType.Offside, Team = attackingTeam, Player = ChooseAttackingPlayer(attackingTeam, context.Random) };
-        }
-
-        if (roll < 0.34)
+        if (roll < 0.28)
         {
             var defendingTeam = ChooseWeakerDefense(context);
             return new MatchDramaResult { EventType = EventType.GoalkeeperHeroics, Team = defendingTeam, Player = ChooseGoalkeeper(defendingTeam) };
         }
 
-        if (roll < 0.64)
+        if (roll < 0.58)
         {
             var team = context.HomeTeam.Tactics.PressingIntensity >= context.AwayTeam.Tactics.PressingIntensity ? context.HomeTeam : context.AwayTeam;
             return new MatchDramaResult { EventType = EventType.Confrontation, Team = team, Player = ChooseDefensivePlayer(team, context.Random) };

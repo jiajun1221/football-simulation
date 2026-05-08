@@ -7,6 +7,7 @@ public class MatchDramaResult
     public required EventType EventType { get; init; }
     public required Team Team { get; init; }
     public Player? Player { get; init; }
+    public string InjuryCause { get; init; } = string.Empty;
     public bool ScoresGoal { get; init; }
     public bool PenaltyConverted { get; init; }
     public double HomeAttackModifier { get; init; } = 1.0;

@@ -56,7 +56,7 @@ public class TeamStrengthCalculator
     public IEnumerable<Player> GetAvailablePlayers(Team team)
     {
         var availablePlayers = team.Players
-            .Where(player => player.IsOnPitch && !player.IsSentOff && !player.IsSuspended)
+            .Where(player => player.IsOnPitch && !player.IsSentOff && !player.IsSuspended && !player.IsInjured)
             .ToList();
         return availablePlayers.Count > 0
             ? availablePlayers
@@ -157,7 +157,7 @@ public class TeamStrengthCalculator
         var fatigueModifier = GetFatiguePerformanceModifier(100 - (int)Math.Round(player.Stamina));
         var formModifier = Math.Clamp(0.80 + (player.CurrentForm / 250.0), 0.80, 1.20);
         var moraleModifier = Math.Clamp(0.85 + (player.Morale / 300.0), 0.85, 1.15);
-        var injuryModifier = player.IsInjured ? 0.55 : 1.00;
+        var injuryModifier = player.IsInjured ? 0.25 : 1.00;
         var suspensionModifier = player.IsSuspended ? 0.40 : 1.00;
         var liveMatchModifier = Math.Clamp(player.LiveMatchModifier, 0.75, 1.15);
 

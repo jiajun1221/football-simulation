@@ -11,10 +11,16 @@ public class PlayerStatMappingService
         var overall = ClampStat(record.OverallRating);
         var fatigue = Math.Clamp(record.Fatigue ?? 0, 0, 100);
         var stamina = ClampStat(record.Stamina ?? CalculateStamina(position, overall));
-        var loadedStatus = PlayerFormStatusService.FromLoadedForm(record.FormStatus ?? record.Form, record.CurrentForm ?? 50);
+        var loadedStatus = PlayerFormStatus.Average;
         var form = PlayerFormStatusService.ToDisplayText(loadedStatus);
         var currentForm = PlayerFormStatusService.ToCurrentForm(loadedStatus);
         var preferredPosition = GetPreferredPosition(record.Position, record.PreferredPosition);
+        var injuryState = CreateInjuryState(
+            record.IsInjured,
+            record.InjuryType,
+            record.InjurySeverity,
+            record.InjuryRecoveryMatches,
+            record.IsSeasonEndingInjury);
 
         return new Player
         {
@@ -25,6 +31,9 @@ public class PlayerStatMappingService
             SecondaryPositions = MapSecondaryPositions(record.SecondaryPositions),
             AssignedPosition = preferredPosition,
             OverallRating = overall,
+            BaseOverallRating = overall,
+            Age = record.Age,
+            PotentialOverall = record.PotentialOverall,
             Form = form,
             IsStarter = record.IsStarter,
             IsOnPitch = record.IsStarter,
@@ -38,7 +47,11 @@ public class PlayerStatMappingService
             Stamina = stamina,
             CurrentStamina = CalculateCurrentStamina(stamina, fatigue),
             Fatigue = fatigue,
-            IsInjured = record.IsInjured ?? false,
+            IsInjured = injuryState.IsInjured,
+            InjuryType = injuryState.Type,
+            InjurySeverity = injuryState.Severity,
+            InjuryRecoveryMatches = injuryState.RecoveryMatches,
+            IsSeasonEndingInjury = injuryState.IsSeasonEnding,
             IsSuspended = record.IsSuspended ?? false,
             MatchesPlayedRecently = Math.Max(0, record.MatchesPlayedRecently ?? 0),
             Finishing = CalculateFinishing(position, overall)
@@ -51,10 +64,16 @@ public class PlayerStatMappingService
         var overall = ClampStat(record.OverallRating);
         var fatigue = Math.Clamp(record.Fatigue, 0, 100);
         var stamina = ClampStat(record.Stamina ?? CalculateStamina(position, overall));
-        var loadedStatus = PlayerFormStatusService.FromLoadedForm(record.FormStatus ?? record.Form, MapFormToCurrentForm(record.Form));
+        var loadedStatus = PlayerFormStatus.Average;
         var form = PlayerFormStatusService.ToDisplayText(loadedStatus);
         var currentForm = PlayerFormStatusService.ToCurrentForm(loadedStatus);
         var preferredPosition = GetPreferredPosition(record.Position, record.PreferredPosition);
+        var injuryState = CreateInjuryState(
+            record.IsInjured,
+            record.InjuryType,
+            record.InjurySeverity,
+            record.InjuryRecoveryMatches,
+            record.IsSeasonEndingInjury);
 
         return new Player
         {
@@ -65,6 +84,9 @@ public class PlayerStatMappingService
             SecondaryPositions = MapSecondaryPositions(record.SecondaryPositions),
             AssignedPosition = preferredPosition,
             OverallRating = overall,
+            BaseOverallRating = overall,
+            Age = record.Age,
+            PotentialOverall = record.PotentialOverall,
             Form = form,
             IsStarter = isStarter,
             IsOnPitch = isStarter,
@@ -78,7 +100,11 @@ public class PlayerStatMappingService
             Stamina = stamina,
             CurrentStamina = CalculateCurrentStamina(stamina, fatigue),
             Fatigue = fatigue,
-            IsInjured = record.IsInjured ?? false,
+            IsInjured = injuryState.IsInjured,
+            InjuryType = injuryState.Type,
+            InjurySeverity = injuryState.Severity,
+            InjuryRecoveryMatches = injuryState.RecoveryMatches,
+            IsSeasonEndingInjury = injuryState.IsSeasonEnding,
             IsSuspended = record.IsSuspended ?? false,
             MatchesPlayedRecently = Math.Max(0, record.MatchesPlayedRecently ?? 0),
             Finishing = CalculateFinishing(position, overall)
@@ -129,6 +155,28 @@ public class PlayerStatMappingService
             .Replace("(", string.Empty)
             .Replace(")", string.Empty)
             .Trim();
+    }
+
+    private static InjuryState CreateInjuryState(
+        bool? isInjured,
+        string? injuryType,
+        string? injurySeverity,
+        int? recoveryMatches,
+        bool? isSeasonEnding)
+    {
+        var severity = Enum.TryParse<InjurySeverity>(injurySeverity, ignoreCase: true, out var parsedSeverity)
+            ? parsedSeverity
+            : (InjurySeverity?)null;
+        var seasonEnding = isSeasonEnding == true || severity == InjurySeverity.SeasonEnding;
+        var recovery = Math.Max(0, recoveryMatches ?? 0);
+        var unavailable = isInjured == true || seasonEnding || recovery > 0;
+
+        return new InjuryState(
+            unavailable,
+            injuryType ?? string.Empty,
+            severity,
+            seasonEnding ? Math.Max(recovery, 99) : recovery,
+            seasonEnding);
     }
 
     private static Position MapPosition(string position)
@@ -208,30 +256,15 @@ public class PlayerStatMappingService
         return Math.Clamp(value, 1, 100);
     }
 
-    private static string NormalizeForm(string? form)
-    {
-        return form?.Trim().ToLowerInvariant() switch
-        {
-            "hot" => "Hot",
-            "good" => "Good",
-            "poor" => "Poor",
-            _ => "Average"
-        };
-    }
-
-    private static int MapFormToCurrentForm(string form)
-    {
-        return form switch
-        {
-            "Hot" => 85,
-            "Good" => 70,
-            "Poor" => 30,
-            _ => 50
-        };
-    }
-
     private static double CalculateCurrentStamina(int stamina, int fatigue)
     {
         return Math.Clamp(stamina * ((100 - fatigue) / 100.0), 0, stamina);
     }
+
+    private sealed record InjuryState(
+        bool IsInjured,
+        string Type,
+        InjurySeverity? Severity,
+        int RecoveryMatches,
+        bool IsSeasonEnding);
 }
