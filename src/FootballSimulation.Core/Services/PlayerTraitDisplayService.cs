@@ -32,7 +32,8 @@ public static class PlayerTraitDisplayService
         [PlayerTrait.BoxToBox] = new("B2B", "🔄", "Box To Box", "More involved in attack and defense.", KeyPassBonus: 0.04, InterceptionBonus: 0.06),
         [PlayerTrait.AerialThreat] = new("AIR", "🦅", "Aerial Threat", "Dominant in aerial duels.", HeaderGoalBonus: 0.12),
         [PlayerTrait.Rapid] = new("RAP", "💨", "Rapid", "Makes more high-speed attacking runs.", DribbleEventBonus: 0.10),
-        [PlayerTrait.TechnicalDribbler] = new("TEC", "🕺", "Technical Dribbler", "Better close-control dribbling.", DribbleEventBonus: 0.12)
+        [PlayerTrait.TechnicalDribbler] = new("TEC", "🕺", "Technical Dribbler", "Better close-control dribbling.", DribbleEventBonus: 0.12),
+        [PlayerTrait.PenaltySpecialist] = new("PEN", "🎯", "Penalty Specialist", "More reliable from the spot.", ShotAccuracyBonus: 0.10)
     };
 
     public static PlayerTraitDefinition GetDefinition(PlayerTrait trait)

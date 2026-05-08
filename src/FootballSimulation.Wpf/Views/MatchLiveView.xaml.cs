@@ -488,8 +488,8 @@ public partial class MatchLiveView : UserControl
 
         var userTeam = GetUserTeam();
 
-        LiveStarterListBox.ItemsSource = CreateSubstitutionPlayerCards(GetActivePitchPlayers(userTeam), showPendingState: false);
-        LiveBenchListBox.ItemsSource = CreateSubstitutionPlayerCards(userTeam.Substitutes.Where(IsAvailableSubstitute), showPendingState: false);
+        LiveStarterListBox.ItemsSource = CreateSubstitutionPlayerCards(GetActivePitchPlayers(userTeam), showPendingState: false, userTeam);
+        LiveBenchListBox.ItemsSource = CreateSubstitutionPlayerCards(userTeam.Substitutes.Where(IsAvailableSubstitute), showPendingState: false, userTeam);
 
         var usedSubstitutions = _squadSelectionService.CountTeamSubstitutions(_state.CurrentMatch, userTeam.Name);
         SubstitutionOverlayStatusTextBlock.Text =
@@ -935,7 +935,7 @@ public partial class MatchLiveView : UserControl
             _selectedPitchPlayerKey = CreatePlayerKey(userTeam.Name, substitute.Name);
         }
 
-        PausedBenchListBox.ItemsSource = CreateSubstitutionPlayerCards(userTeam.Substitutes.Where(IsAvailableSubstitute), showPendingState: true);
+        PausedBenchListBox.ItemsSource = CreateSubstitutionPlayerCards(userTeam.Substitutes.Where(IsAvailableSubstitute), showPendingState: true, userTeam);
         PausedActionStatusTextBlock.Text = $"{validatedSubstitutions.Count} substitution(s) confirmed.";
         ClearPendingSubstitutions();
         RefreshPlayerPanels();
@@ -963,7 +963,8 @@ public partial class MatchLiveView : UserControl
         var benchPlayers = GetFilteredPausedBenchPlayers(userTeam).ToList();
         PausedBenchListBox.ItemsSource = CreateSubstitutionPlayerCards(
             benchPlayers,
-            showPendingState: true);
+            showPendingState: true,
+            userTeam);
         var shouldShowEmptyState = _selectedPitchPlayerKey is not null && benchPlayers.Count == 0;
         PausedBenchListBox.Visibility = shouldShowEmptyState ? Visibility.Collapsed : Visibility.Visible;
         NoAvailableSubstituteTextBlock.Visibility = shouldShowEmptyState ? Visibility.Visible : Visibility.Collapsed;
@@ -1351,14 +1352,13 @@ public partial class MatchLiveView : UserControl
         var (xRatio, yRatio) = GetLivePitchPosition(formationPosition, isHomeTeam);
         var x = Math.Clamp((pitchWidth * xRatio) - (PlayerIconSlotWidth / 2), 4, Math.Max(4, pitchWidth - PlayerIconSlotWidth - 4));
         var y = Math.Clamp((pitchHeight * yRatio) - (PlayerIconSlotHeight / 2), 4, Math.Max(4, pitchHeight - PlayerIconSlotHeight - 4));
-        var isUserTeam = _state.SelectedTeam is not null &&
-            string.Equals(team.Name, _state.SelectedTeam.Name, StringComparison.OrdinalIgnoreCase);
         var playerKey = CreatePlayerKey(team.Name, player.Name);
         var displayedStats = GetDisplayedPitchStats(playerKey);
         var status = GetPlayerStatus(stamina, displayedStats);
         var yellowCards = displayedStats.YellowCards;
         var redCards = displayedStats.RedCards;
         var isSelected = string.Equals(_selectedPitchPlayerKey, playerKey, StringComparison.OrdinalIgnoreCase);
+        var teamColors = TeamColorService.GetPalette(team);
 
         return new LivePlayerIconViewModel
         {
@@ -1372,9 +1372,10 @@ public partial class MatchLiveView : UserControl
             TeamSide = isHomeTeam ? "Home" : "Away",
             X = x,
             Y = y,
-            IconBrush = isUserTeam ? "#246BFE" : "#EF3333",
-            BorderBrush = isUserTeam ? "#DCEBFF" : "#FFE0E0",
-            SelectionBrush = isSelected ? "#F7C948" : "Transparent",
+            IconBrush = teamColors.PrimaryColor,
+            IconForeground = teamColors.TextColor,
+            BorderBrush = teamColors.BorderColor,
+            SelectionBrush = isSelected ? teamColors.SelectedGlowColor : "Transparent",
             SelectionThickness = isSelected ? 4 : 0,
             RatingText = displayRating.ToString("0.0"),
             Stamina = stamina,
@@ -1976,12 +1977,24 @@ public partial class MatchLiveView : UserControl
     {
         HomeTeamNameTextBlock.Text = homeTeam.Name;
         AwayTeamNameTextBlock.Text = awayTeam.Name;
+        ApplyScorePanelColors(HomeScorePanel, HomeTeamNameTextBlock, HomeScoreTextBlock, homeTeam, isPossessionTeam: false);
+        ApplyScorePanelColors(AwayScorePanel, AwayTeamNameTextBlock, AwayScoreTextBlock, awayTeam, isPossessionTeam: false);
     }
 
     private void SetScore(int homeScore, int awayScore)
     {
         HomeScoreTextBlock.Text = homeScore.ToString();
         AwayScoreTextBlock.Text = awayScore.ToString();
+    }
+
+    private void ApplyScorePanelColors(Border panel, TextBlock teamNameTextBlock, TextBlock scoreTextBlock, Team team, bool isPossessionTeam)
+    {
+        var colors = TeamColorService.GetPalette(team);
+        panel.Background = CreateBrush(colors.PrimaryColor);
+        panel.BorderBrush = CreateBrush(isPossessionTeam ? colors.SelectedGlowColor : colors.BorderColor);
+        panel.BorderThickness = isPossessionTeam ? new Thickness(3) : new Thickness(1);
+        teamNameTextBlock.Foreground = CreateBrush(colors.TextColor);
+        scoreTextBlock.Foreground = CreateBrush(colors.TextColor);
     }
 
     private void UpdateLiveStatusFromEvent(MatchEvent matchEvent)
@@ -2232,7 +2245,37 @@ public partial class MatchLiveView : UserControl
         LiveStatusIconTextBlock.Foreground = CreateBrush(foreground);
         LiveStatusBadge.Background = CreateBrush(background);
 
+        ApplyScoreboardPossessionColors(_currentPossessionTeam ?? attackingTeam);
+
         UpdatePitchStatusBadges(status, attackingTeam, defendingTeam);
+    }
+
+    private void ApplyScoreboardPossessionColors(Team? possessionTeam)
+    {
+        if (_state.CurrentMatch is null)
+        {
+            return;
+        }
+
+        ApplyScorePanelColors(
+            HomeScorePanel,
+            HomeTeamNameTextBlock,
+            HomeScoreTextBlock,
+            _state.CurrentMatch.HomeTeam,
+            IsSameTeam(possessionTeam, _state.CurrentMatch.HomeTeam));
+        ApplyScorePanelColors(
+            AwayScorePanel,
+            AwayTeamNameTextBlock,
+            AwayScoreTextBlock,
+            _state.CurrentMatch.AwayTeam,
+            IsSameTeam(possessionTeam, _state.CurrentMatch.AwayTeam));
+    }
+
+    private static bool IsSameTeam(Team? first, Team? second)
+    {
+        return first is not null &&
+            second is not null &&
+            string.Equals(first.Name, second.Name, StringComparison.OrdinalIgnoreCase);
     }
 
     private LiveMatchStatus GetHeaderPerspectiveStatus(LiveMatchStatus eventStatus, Team? attackingTeam, Team? defendingTeam)
@@ -2324,14 +2367,17 @@ public partial class MatchLiveView : UserControl
 
         if (scoringPanel is not null)
         {
-            FlashScorePanel(scoringPanel);
+            var scoringTeam = scoringTeamName == _state.CurrentMatch.HomeTeam.Name
+                ? _state.CurrentMatch.HomeTeam
+                : _state.CurrentMatch.AwayTeam;
+            FlashScorePanel(scoringPanel, TeamColorService.GetPalette(scoringTeam).PrimaryColor);
         }
 
         PulseScoreboard();
         await Task.Delay(450, cancellationToken);
     }
 
-    private static void FlashScorePanel(Border panel)
+    private static void FlashScorePanel(Border panel, string targetColor)
     {
         var brush = new SolidColorBrush(Color.FromRgb(31, 164, 90));
         panel.Background = brush;
@@ -2339,7 +2385,7 @@ public partial class MatchLiveView : UserControl
         var animation = new ColorAnimation
         {
             From = Color.FromRgb(31, 164, 90),
-            To = Color.FromRgb(23, 42, 69),
+            To = (Color)ColorConverter.ConvertFromString(targetColor),
             Duration = TimeSpan.FromMilliseconds(1100),
             EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
         };
@@ -2366,7 +2412,7 @@ public partial class MatchLiveView : UserControl
     {
         var teamName = FindTeamName(matchEvent, match);
         var displayTeamName = string.IsNullOrWhiteSpace(teamName) ? "Match" : teamName;
-        var eventStyle = GetEventStyle(matchEvent.EventType);
+        var eventStyle = GetEventStyle(matchEvent);
 
         return new MatchFeedItem
         {
@@ -2378,11 +2424,22 @@ public partial class MatchLiveView : UserControl
             Title = CreateEventTitle(matchEvent, displayTeamName),
             Description = CreateEventDescription(matchEvent),
             ScoreText = CreateScoreText(matchEvent, match),
+            TriggeredTrait = matchEvent.TriggeredTrait?.ToString() ?? string.Empty,
+            TriggeredTraitIcon = matchEvent.TriggeredTrait.HasValue ? PlayerTraitDisplayService.GetIcon(matchEvent.TriggeredTrait.Value) : string.Empty,
+            TriggeredTraitDescription = matchEvent.TriggeredTrait.HasValue
+                ? $"{PlayerTraitDisplayService.GetLabel(matchEvent.TriggeredTrait.Value)}: {PlayerTraitDisplayService.GetEffectDescription(matchEvent.TriggeredTrait.Value)}"
+                : string.Empty,
             RowBackground = eventStyle.RowBackground,
             RowBorderBrush = eventStyle.RowBorderBrush,
             IconBackground = eventStyle.IconBackground,
+            IconForeground = eventStyle.IconForeground,
             LabelBackground = eventStyle.LabelBackground,
             LabelForeground = eventStyle.LabelForeground,
+            MinuteForeground = eventStyle.MinuteForeground,
+            TitleForeground = eventStyle.TitleForeground,
+            DescriptionForeground = eventStyle.DescriptionForeground,
+            TraitBadgeBackground = eventStyle.TraitBadgeBackground,
+            TraitBadgeBorderBrush = eventStyle.TraitBadgeBorderBrush,
             IsGoal = IsScoringEvent(matchEvent),
             IsImportant = IsImportantEvent(matchEvent.EventType)
         };
@@ -2513,7 +2570,9 @@ public partial class MatchLiveView : UserControl
             EventType.Attack => CreateAttackHeadline(matchEvent, teamName),
             EventType.Shot => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "creates chance", $"{teamName} create chance"),
             EventType.Save => CreateSaveHeadline(matchEvent),
-            EventType.Goal => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "scores", $"GOAL for {teamName}"),
+            EventType.Goal => IsPenaltyResult(matchEvent)
+                ? CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "scores penalty", $"{teamName} score penalty")
+                : CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "scores", $"GOAL for {teamName}"),
             EventType.Foul => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "commits foul", "Foul given"),
             EventType.YellowCard => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "booked", "Yellow card shown"),
             EventType.RedCard => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "sent off", "Red card shown"),
@@ -2541,7 +2600,9 @@ public partial class MatchLiveView : UserControl
             EventType.Substitution => "Substitution",
             EventType.Halftime => "Halftime",
             EventType.Fulltime => "Fulltime",
-            EventType.Miss => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "misses chance", $"{teamName} miss chance"),
+            EventType.Miss => IsPenaltyResult(matchEvent)
+                ? CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "misses penalty", $"{teamName} miss penalty")
+                : CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "misses chance", $"{teamName} miss chance"),
             _ => "Match event"
         };
 
@@ -2553,8 +2614,8 @@ public partial class MatchLiveView : UserControl
         var suffix = matchEvent.EventType switch
         {
             EventType.Goal => "Crowd erupts.",
-            EventType.Save => "Huge stop.",
-            EventType.Miss => "Shot Off Target.",
+            EventType.Save => IsPenaltyResult(matchEvent) ? string.Empty : "Huge stop.",
+            EventType.Miss => IsPenaltyResult(matchEvent) ? string.Empty : "Shot Off Target.",
             EventType.Foul => "Play is stopped.",
             EventType.YellowCard => "He is on a booking.",
             EventType.RedCard => "They are down to ten.",
@@ -2662,6 +2723,11 @@ public partial class MatchLiveView : UserControl
 
     private static string CreateSaveHeadline(MatchEvent matchEvent)
     {
+        if (IsPenaltyResult(matchEvent))
+        {
+            return CreatePlayerHeadline(matchEvent.SecondaryPlayerName, "saves penalty", "Penalty saved");
+        }
+
         if (!string.IsNullOrWhiteSpace(matchEvent.SecondaryPlayerName))
         {
             return CreatePlayerHeadline(matchEvent.SecondaryPlayerName, "makes the save", "Important save");
@@ -2724,45 +2790,112 @@ public partial class MatchLiveView : UserControl
     }
 
 
-    private static FeedEventStyle GetEventStyle(EventType eventType)
+    private static bool IsPenaltyResult(MatchEvent matchEvent)
     {
-        return eventType switch
+        return matchEvent.Description.Contains("penalty", StringComparison.OrdinalIgnoreCase)
+            || matchEvent.Description.Contains("from the spot", StringComparison.OrdinalIgnoreCase)
+            || matchEvent.Description.Contains("spot kick", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static FeedEventStyle GetEventStyle(MatchEvent matchEvent)
+    {
+        if (matchEvent.EventType == EventType.Miss && IsPenaltyResult(matchEvent))
         {
-            EventType.Kickoff => new FeedEventStyle(FlagIcon(), "KICKOFF", "#FFFFFF", "#DCE5F0", "#EEF3FA", "#E9EEF5", "#14233A"),
-            EventType.Attack => new FeedEventStyle(SwordsIcon(), "ATTACK", "#EDF5FF", "#BFD9FF", "#DDEBFF", "#D7E8FF", "#1E528F"),
-            EventType.Shot => new FeedEventStyle(TargetIcon(), "SHOT", "#FFF4E7", "#F2C27C", "#FFE4BF", "#FFE0AF", "#8A4E00"),
-            EventType.Save => new FeedEventStyle(GloveIcon(), "SAVE", "#EAF8EF", "#95D5AA", "#D9F1E1", "#D9F1E1", "#236B39"),
-            EventType.Foul => new FeedEventStyle(StopIcon(), "FOUL", "#F1F3F5", "#C9D0D8", "#E1E5EA", "#DDE2E8", "#465364"),
-            EventType.Miss => new FeedEventStyle(WarningIcon(), "MISS", "#E4F0FF", "#a1bee0", "#CFE3FF", "#BCD8FF", "#41546e"),
-            EventType.Goal => new FeedEventStyle(SoccerBallIcon(), "GOAL", "#E4FAEC", "#1FA45A", "#C9F2D8", "#1FA45A", "#00690e"),
-            EventType.YellowCard => new FeedEventStyle(YellowCardIcon(), "YELLOW CARD", "#FFF7CD", "#E3BC26", "#FFF0A3", "#FFE36B", "#5F4500"),
-            EventType.RedCard => new FeedEventStyle(RedCardIcon(), "RED CARD", "#FFE6E6", "#D94343", "#FFD1D1", "#D94343", "#ff0000"),
-            EventType.Injury => new FeedEventStyle(InjuryIcon(), "INJURY", "#FFEFEF", "#E28585", "#FFDCDC", "#FFD1D1", "#8F1F1F"),
-            EventType.PenaltyDecision => new FeedEventStyle(GoalNetIcon(), "PENALTY DECISION", "#FFF7E7", "#EAB95C", "#FFEAC0", "#FFE2A1", "#694900"),
-            EventType.PenaltyTaker => new FeedEventStyle(TargetIcon(), "PENALTY TAKER", "#F1F8FF", "#9CC9EE", "#DCEEFF", "#DCEEFF", "#225D86"),
-            EventType.Penalty => new FeedEventStyle(GoalNetIcon(), "PENALTY", "#E4FAEC", "#1FA45A", "#C9F2D8", "#1FA45A", "#005807"),
-            EventType.Offside => new FeedEventStyle(FlagIcon(), "OFFSIDE", "#F1F3F5", "#C9D0D8", "#E1E5EA", "#DDE2E8", "#465364"),
-            EventType.BadPass => new FeedEventStyle(WarningIcon(), "BAD PASS", "#FFF4E7", "#F2A65A", "#FFE4BF", "#FFE0AF", "#8A4E00"),
-            EventType.Miscontrol => new FeedEventStyle(WarningIcon(), "MISCONTROL", "#FFF4E7", "#F2A65A", "#FFE4BF", "#FFE0AF", "#8A4E00"),
-            EventType.Tackle => new FeedEventStyle(ShieldIcon(), "TACKLE", "#EAF3FF", "#9EC1F2", "#DBE9FF", "#CFE2FF", "#1A4D8F"),
-            EventType.Interception => new FeedEventStyle(ShieldIcon(), "INTERCEPTION", "#EAF3FF", "#9EC1F2", "#DBE9FF", "#CFE2FF", "#1A4D8F"),
-            EventType.Pressure => new FeedEventStyle(ShieldIcon(), "PRESSURE", "#EAF3FF", "#9EC1F2", "#DBE9FF", "#CFE2FF", "#1A4D8F"),
-            EventType.BlockedPass => new FeedEventStyle(ShieldIcon(), "BLOCKED PASS", "#EAF3FF", "#9EC1F2", "#DBE9FF", "#CFE2FF", "#1A4D8F"),
-            EventType.Turnover => new FeedEventStyle(RotateIcon(),"TURNOVER","#F3E8FF",  "#C4B5FD", "#E9D5FF", "#DDD6FE", "#5B21B6" ),
-            EventType.DefensiveStop => new FeedEventStyle(ShieldIcon(), "DEFENSE", "#EAF3FF", "#9EC1F2", "#DBE9FF", "#CFE2FF", "#1A4D8F"),
-            EventType.DefensiveError => new FeedEventStyle(WarningIcon(), "DEFENSIVE ERROR", "#FFF4E7", "#F2A65A", "#FFE4BF", "#FFE0AF", "#8A4E00"),
-            EventType.WonderGoal => new FeedEventStyle(StarIcon(), "WONDER GOAL", "#E4FAEC", "#1FA45A", "#C9F2D8", "#1FA45A", "#29f500"),
-            EventType.GoalkeeperHeroics => new FeedEventStyle(GloveIcon(), "KEEPER HEROICS", "#EAF8EF", "#95D5AA", "#D9F1E1", "#D9F1E1", "#236B39"),
-            EventType.CornerKick => new FeedEventStyle(FlagIcon(), "CORNER KICK", "#FFF4E7", "#F2C27C", "#FFE4BF", "#FFE0AF", "#8A4E00"),
-            EventType.SetPieceDanger => new FeedEventStyle(TargetIcon(), "SET PIECE", "#FFF4E7", "#F2C27C", "#FFE4BF", "#FFE0AF", "#8A4E00"),
-            EventType.Confrontation => new FeedEventStyle(FireIcon(), "CONFRONTATION", "#FFE6E6", "#D94343", "#FFD1D1", "#D94343", "#7a0000"),
-            EventType.CrowdMomentum => new FeedEventStyle(MegaphoneIcon(), "CROWD MOMENTUM", "#EDF5FF", "#78AEEF", "#CFE3FF", "#BCD8FF", "#164B8F"),
-            EventType.Exhaustion => new FeedEventStyle(BatteryIcon(), "EXHAUSTION", "#F1F3F5", "#C9D0D8", "#E1E5EA", "#DDE2E8", "#465364"),
-            EventType.Substitution => new FeedEventStyle(RotateIcon(), "SUBSTITUTION", "#F1F8FF", "#9CC9EE", "#DCEEFF", "#DCEEFF", "#225D86"),
-            EventType.Halftime => new FeedEventStyle(PauseIcon(), "HALFTIME", "#FFF7E7", "#EAB95C", "#FFEAC0", "#FFE2A1", "#694900"),
-            EventType.Fulltime => new FeedEventStyle(CheckeredFlagIcon(), "FULLTIME", "#F2F0FF", "#A69BE8", "#E4E0FF", "#DCD7FF", "#3F367A"),
-            _ => new FeedEventStyle(BulletIcon(), "EVENT", "#FFFFFF", "#DCE5F0", "#EEF3FA", "#E9EEF5", "#14233A")
+            return MissStyle(WarningIcon(), "MISSED PENALTY");
+        }
+
+        return matchEvent.EventType switch
+        {
+            EventType.Kickoff => NeutralStyle(FlagIcon(), "KICKOFF"),
+            EventType.Attack => AttackStyle(SwordsIcon(), "ATTACK"),
+            EventType.Shot => ChanceStyle(TargetIcon(), "SHOT"),
+            EventType.Save => SaveStyle(GloveIcon(), "SAVE"),
+            EventType.Foul => FoulStyle(StopIcon(), "FOUL"),
+            EventType.Miss => MissStyle(WarningIcon(), "MISS"),
+            EventType.Goal => GoalStyle(SoccerBallIcon(), "GOAL"),
+            EventType.YellowCard => YellowCardStyle(YellowCardIcon(), "YELLOW CARD"),
+            EventType.RedCard => RedCardStyle(RedCardIcon(), "RED CARD"),
+            EventType.Injury => FoulStyle(InjuryIcon(), "INJURY"),
+            EventType.PenaltyDecision => ChanceStyle(GoalNetIcon(), "PENALTY DECISION"),
+            EventType.PenaltyTaker => ChanceStyle(TargetIcon(), "PENALTY TAKER"),
+            EventType.Penalty => ChanceStyle(GoalNetIcon(), "PENALTY"),
+            EventType.Offside => TurnoverStyle(FlagIcon(), "OFFSIDE"),
+            EventType.BadPass => TurnoverStyle(WarningIcon(), "BAD PASS"),
+            EventType.Miscontrol => TurnoverStyle(WarningIcon(), "MISCONTROL"),
+            EventType.Tackle => DefensiveStyle(ShieldIcon(), "TACKLE"),
+            EventType.Interception => DefensiveStyle(ShieldIcon(), "INTERCEPTION"),
+            EventType.Pressure => DefensiveStyle(ShieldIcon(), "PRESSURE"),
+            EventType.BlockedPass => DefensiveStyle(ShieldIcon(), "BLOCKED PASS"),
+            EventType.Turnover => TurnoverStyle(RotateIcon(), "TURNOVER"),
+            EventType.DefensiveStop => DefensiveStyle(ShieldIcon(), "DEFENSE"),
+            EventType.DefensiveError => DefensiveStyle(WarningIcon(), "DEFENSIVE ERROR"),
+            EventType.WonderGoal => GoalStyle(StarIcon(), "WONDER GOAL"),
+            EventType.GoalkeeperHeroics => SaveStyle(GloveIcon(), "KEEPER HEROICS"),
+            EventType.CornerKick => ChanceStyle(FlagIcon(), "CORNER KICK"),
+            EventType.SetPieceDanger => ChanceStyle(TargetIcon(), "SET PIECE"),
+            EventType.Confrontation => RedCardStyle(FireIcon(), "CONFRONTATION"),
+            EventType.CrowdMomentum => AttackStyle(MegaphoneIcon(), "CROWD MOMENTUM"),
+            EventType.Exhaustion => MissStyle(BatteryIcon(), "EXHAUSTION"),
+            EventType.Substitution => NeutralStyle(RotateIcon(), "SUBSTITUTION"),
+            EventType.Halftime => NeutralStyle(PauseIcon(), "HALFTIME"),
+            EventType.Fulltime => NeutralStyle(CheckeredFlagIcon(), "FULLTIME"),
+            _ => NeutralStyle(BulletIcon(), "EVENT")
         };
+    }
+
+    private static FeedEventStyle AttackStyle(string icon, string label)
+    {
+        return new FeedEventStyle(icon, label, "#FEF2F2", "#EF4444", "#FEE2E2", "#FEE2E2", "#B91C1C", IconForeground: "#B91C1C", TitleForeground: "#071A2E", DescriptionForeground: "#34465C");
+    }
+
+    private static FeedEventStyle DefensiveStyle(string icon, string label)
+    {
+        return new FeedEventStyle(icon, label, "#EFF6FF", "#3B82F6", "#DBEAFE", "#DBEAFE", "#1D4ED8", IconForeground: "#1D4ED8", TitleForeground: "#071A2E", DescriptionForeground: "#34465C");
+    }
+
+    private static FeedEventStyle TurnoverStyle(string icon, string label)
+    {
+        return new FeedEventStyle(icon, label, "#F5F3FF", "#8B5CF6", "#EDE9FE", "#EDE9FE", "#6D28D9", IconForeground: "#6D28D9", TitleForeground: "#071A2E", DescriptionForeground: "#34465C");
+    }
+
+    private static FeedEventStyle ChanceStyle(string icon, string label)
+    {
+        return new FeedEventStyle(icon, label, "#FFF7ED", "#F97316", "#FFEDD5", "#FFEDD5", "#C2410C", IconForeground: "#C2410C", TitleForeground: "#071A2E", DescriptionForeground: "#34465C");
+    }
+
+    private static FeedEventStyle FoulStyle(string icon, string label)
+    {
+        return new FeedEventStyle(icon, label, "#FEFCE8", "#EAB308", "#FEF9C3", "#FEF9C3", "#854D0E", IconForeground: "#854D0E", TitleForeground: "#071A2E", DescriptionForeground: "#34465C");
+    }
+
+    private static FeedEventStyle MissStyle(string icon, string label)
+    {
+        return new FeedEventStyle(icon, label, "#F3F4F6", "#6B7280", "#E5E7EB", "#E5E7EB", "#374151", IconForeground: "#374151", TitleForeground: "#071A2E", DescriptionForeground: "#34465C");
+    }
+
+    private static FeedEventStyle SaveStyle(string icon, string label)
+    {
+        return new FeedEventStyle(icon, label, "#1D4ED8", "#1E40AF", "#DBEAFE", "#1E40AF", "#FFFFFF", IconForeground: "#1D4ED8", MinuteForeground: "#FFFFFF", TitleForeground: "#FFFFFF", DescriptionForeground: "#DBEAFE", TraitBadgeBackground: "#DBEAFE", TraitBadgeBorderBrush: "#93C5FD");
+    }
+
+    private static FeedEventStyle GoalStyle(string icon, string label)
+    {
+        return new FeedEventStyle(icon, label, "#16A34A", "#15803D", "#DCFCE7", "#15803D", "#FFFFFF", IconForeground: "#166534", MinuteForeground: "#FFFFFF", TitleForeground: "#FFFFFF", DescriptionForeground: "#DCFCE7", TraitBadgeBackground: "#DCFCE7", TraitBadgeBorderBrush: "#86EFAC");
+    }
+
+    private static FeedEventStyle RedCardStyle(string icon, string label)
+    {
+        return new FeedEventStyle(icon, label, "#DC2626", "#991B1B", "#FEE2E2", "#991B1B", "#FFFFFF", IconForeground: "#991B1B", MinuteForeground: "#FFFFFF", TitleForeground: "#FFFFFF", DescriptionForeground: "#FEE2E2", TraitBadgeBackground: "#FEE2E2", TraitBadgeBorderBrush: "#FCA5A5");
+    }
+
+    private static FeedEventStyle YellowCardStyle(string icon, string label)
+    {
+        return new FeedEventStyle(icon, label, "#FACC15", "#CA8A04", "#FEF9C3", "#FDE047", "#713F12", IconForeground: "#713F12", MinuteForeground: "#422006", TitleForeground: "#422006", DescriptionForeground: "#713F12", TraitBadgeBackground: "#FEF9C3", TraitBadgeBorderBrush: "#CA8A04");
+    }
+
+    private static FeedEventStyle NeutralStyle(string icon, string label)
+    {
+        return new FeedEventStyle(icon, label, "#FFFFFF", "#CBD5E1", "#F1F5F9", "#E2E8F0", "#334155", IconForeground: "#334155", TitleForeground: "#102033", DescriptionForeground: "#34465C");
     }
 
     private static bool IsImportantEvent(EventType eventType)
@@ -2892,7 +3025,7 @@ public partial class MatchLiveView : UserControl
         };
     }
 
-    private List<SubstitutionPlayerCard> CreateSubstitutionPlayerCards(IEnumerable<Player> players, bool showPendingState)
+    private List<SubstitutionPlayerCard> CreateSubstitutionPlayerCards(IEnumerable<Player> players, bool showPendingState, Team? team)
     {
         return players
             .Select(player => CreateSubstitutionPlayerCard(
@@ -2900,16 +3033,18 @@ public partial class MatchLiveView : UserControl
                 showPendingState
                     ? _pendingSubstitutions.FirstOrDefault(pending =>
                         string.Equals(pending.PlayerIn.Name, player.Name, StringComparison.OrdinalIgnoreCase))
-                    : null))
+                    : null,
+                team))
             .ToList();
     }
 
-    private static SubstitutionPlayerCard CreateSubstitutionPlayerCard(Player player, PendingSubstitutionViewModel? pendingSubstitution)
+    private static SubstitutionPlayerCard CreateSubstitutionPlayerCard(Player player, PendingSubstitutionViewModel? pendingSubstitution, Team? team)
     {
         var stamina = GetStaminaPercentage(player);
         var form = PlayerFormBadgeHelper.Create(player.FormStatus);
         var exactPosition = PositionSuitabilityService.NormalizeExactPosition(player.AssignedPosition);
         var isPendingSubIn = pendingSubstitution is not null;
+        var teamColors = TeamColorService.GetPalette(team);
 
         if (string.IsNullOrWhiteSpace(exactPosition))
         {
@@ -2935,9 +3070,12 @@ public partial class MatchLiveView : UserControl
             FormBadgeText = form.Text,
             FormBadgeBackground = form.Background,
             FormBadgeForeground = form.Foreground,
-            CardBackground = isPendingSubIn ? "#ECFDF3" : "White",
-            CardBorderBrush = isPendingSubIn ? "#34A853" : "#D6DFEA",
-            NameForeground = isPendingSubIn ? "#137333" : "#102033",
+            CardBackground = isPendingSubIn ? "#ECFDF3" : teamColors.PrimaryColor,
+            CardBorderBrush = isPendingSubIn ? "#34A853" : teamColors.BorderColor,
+            NameForeground = isPendingSubIn ? "#137333" : teamColors.TextColor,
+            TextForeground = isPendingSubIn ? "#137333" : teamColors.TextColor,
+            PositionBackground = isPendingSubIn ? "#D9F1E1" : teamColors.SecondaryColor,
+            PositionForeground = TeamColorService.GetReadableTextColor(isPendingSubIn ? "#D9F1E1" : teamColors.SecondaryColor),
             PendingPlayerOutName = pendingSubstitution?.PlayerOut.Name ?? string.Empty,
             TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits),
             PendingSubstitution = pendingSubstitution
@@ -3018,7 +3156,13 @@ public partial class MatchLiveView : UserControl
         string RowBorderBrush,
         string IconBackground,
         string LabelBackground,
-        string LabelForeground);
+        string LabelForeground,
+        string IconForeground = "#14233A",
+        string MinuteForeground = "#14233A",
+        string TitleForeground = "#102033",
+        string DescriptionForeground = "#34465C",
+        string TraitBadgeBackground = "#FFFFFF",
+        string TraitBadgeBorderBrush = "#DCE5F0");
 
     private sealed record StatusBadge(string Text, string Background, string Foreground);
 
@@ -3066,6 +3210,9 @@ public partial class MatchLiveView : UserControl
         public string CardBackground { get; init; } = "White";
         public string CardBorderBrush { get; init; } = "#D6DFEA";
         public string NameForeground { get; init; } = "#102033";
+        public string TextForeground { get; init; } = "#102033";
+        public string PositionBackground { get; init; } = "#E7EEF8";
+        public string PositionForeground { get; init; } = "#102033";
         public string PendingPlayerOutName { get; init; } = string.Empty;
         public IReadOnlyList<PlayerTraitBadge> TraitBadges { get; init; } = [];
         public PendingSubstitutionViewModel? PendingSubstitution { get; init; }

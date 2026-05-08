@@ -1,10 +1,12 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using FootballSimulation.Models;
 using FootballSimulation.Services;
 using FootballSimulation.Wpf.Helpers;
 using FootballSimulation.Wpf.Models;
+using FootballSimulation.Wpf.Services;
 using FootballSimulation.Wpf.State;
 
 namespace FootballSimulation.Wpf.Views;
@@ -65,6 +67,8 @@ public partial class MatchResultView : UserControl
         HomeTeamTextBlock.Text = match.HomeTeam.Name;
         AwayTeamTextBlock.Text = match.AwayTeam.Name;
         ScoreTextBlock.Text = $"{match.HomeScore} - {match.AwayScore}";
+        ApplyTeamHeaderColors(match.HomeTeam, HomeTeamTextBlock, HomeTeamLogoBorder);
+        ApplyTeamHeaderColors(match.AwayTeam, AwayTeamTextBlock, AwayTeamLogoBorder);
         HomePlayersTitleTextBlock.Text = $"{match.HomeTeam.Name} Players";
         AwayPlayersTitleTextBlock.Text = $"{match.AwayTeam.Name} Players";
         HomeTeamLogoImage.Source = CreateLogoSource(match.HomeTeam.Name);
@@ -75,6 +79,19 @@ public partial class MatchResultView : UserControl
         HomePlayersItemsControl.ItemsSource = CreatePlayerRows(summary.PlayerPerformances, match.HomeTeam, summary.ManOfTheMatch);
         AwayPlayersItemsControl.ItemsSource = CreatePlayerRows(summary.PlayerPerformances, match.AwayTeam, summary.ManOfTheMatch);
         StatsComparisonItemsControl.ItemsSource = CreateStatComparisonRows(match);
+    }
+
+    private static void ApplyTeamHeaderColors(Team team, TextBlock teamTextBlock, Border logoBorder)
+    {
+        var colors = TeamColorService.GetPalette(team);
+        teamTextBlock.Foreground = ToBrush(colors.PrimaryColor);
+        logoBorder.Background = ToBrush(colors.PrimaryColor);
+        logoBorder.BorderBrush = ToBrush(colors.BorderColor);
+    }
+
+    private static Brush ToBrush(string color)
+    {
+        return (Brush)new BrushConverter().ConvertFromString(color)!;
     }
 
     private void NextButton_Click(object sender, RoutedEventArgs e)

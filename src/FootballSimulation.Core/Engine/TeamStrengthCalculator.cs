@@ -102,7 +102,8 @@ public class TeamStrengthCalculator
             (player.Traits.Contains(PlayerTrait.Playmaker) ? 1.16 : 1.0) *
             (player.Traits.Contains(PlayerTrait.LongPasser) ? 1.08 : 1.0) *
             (player.Traits.Contains(PlayerTrait.PressResistant) ? 1.06 : 1.0) *
-            (player.Traits.Contains(PlayerTrait.TeamPlayer) ? 1.06 : 1.0);
+            (player.Traits.Contains(PlayerTrait.TeamPlayer) ? 1.06 : 1.0) *
+            (player.Traits.Contains(PlayerTrait.LongThrower) ? 1.04 : 1.0);
 
         return (GetEffectivePassing(player) * 0.60 + GetEffectiveAttack(player) * 0.40) * positionModifier * decisionModifier;
     }
@@ -123,7 +124,9 @@ public class TeamStrengthCalculator
             (player.Traits.Contains(PlayerTrait.LongShotTaker) ? 1.08 : 1.0) *
             (player.Traits.Contains(PlayerTrait.Rapid) ? 1.06 : 1.0) *
             (player.Traits.Contains(PlayerTrait.SpeedDribbler) ? 1.05 : 1.0) *
-            (player.Traits.Contains(PlayerTrait.PowerHeader) ? 1.04 : 1.0);
+            (player.Traits.Contains(PlayerTrait.PowerHeader) ? 1.04 : 1.0) *
+            (player.Traits.Contains(PlayerTrait.TriesToBeatOffsideTrap) ? 1.04 : 1.0) *
+            (player.Traits.Contains(PlayerTrait.TechnicalDribbler) ? 1.03 : 1.0);
 
         return (GetEffectiveAttack(player) * 0.45 + GetEffectiveFinishing(player) * 0.55) * positionModifier * decisionModifier;
     }

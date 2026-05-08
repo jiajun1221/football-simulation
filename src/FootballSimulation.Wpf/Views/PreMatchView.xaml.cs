@@ -236,6 +236,16 @@ public partial class PreMatchView : UserControl
         var isOutOfPosition = PositionSuitabilityService.IsOutOfPosition(player);
         var suitability = PositionSuitabilityService.GetEffectivenessMultiplier(player);
         var ratingVisual = GetRatingVisual(player, suitability);
+        var teamColors = TeamColorService.GetPalette(_state.SelectedTeam);
+        var cardBackground = player.IsInjured ? "#FFE4E4" : teamColors.PrimaryColor;
+        var cardBorder = player.IsInjured
+            ? "#D92D20"
+            : player == _selectedStarter
+                ? teamColors.SelectedGlowColor
+                : isOutOfPosition
+                    ? ratingVisual.Foreground
+                    : teamColors.BorderColor;
+        var textForeground = player.IsInjured ? "#8F1F1F" : teamColors.TextColor;
 
         return new PitchPlayerCard
         {
@@ -246,7 +256,11 @@ public partial class PreMatchView : UserControl
             PlayerName = player.Name,
             PositionText = player.AssignedPosition,
             OverallText = $"OVR {ratingVisual.Rating}",
-            OverallForeground = ratingVisual.Foreground,
+            OverallForeground = player.IsInjured ? ratingVisual.Foreground : textForeground,
+            TextForeground = textForeground,
+            MutedForeground = textForeground,
+            PositionBackground = player.IsInjured ? "#FFD1D1" : teamColors.SecondaryColor,
+            PositionForeground = TeamColorService.GetReadableTextColor(player.IsInjured ? "#FFD1D1" : teamColors.SecondaryColor),
             GrowthText = PlayerGrowthDisplayHelper.CreateGrowthText(player),
             Stamina = GetStaminaPercentage(player),
             StaminaBrush = GetStaminaBrush(player),
@@ -254,8 +268,8 @@ public partial class PreMatchView : UserControl
             FormBadgeBackground = form.Background,
             FormBadgeForeground = form.Foreground,
             TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits),
-            CardBackground = player.IsInjured ? "#FFE4E4" : player == _selectedStarter ? "#FFF2B8" : isOutOfPosition ? "#FFF7EC" : "#FFFFFF",
-            CardBorderBrush = player.IsInjured ? "#D92D20" : player == _selectedStarter ? "#F6C343" : isOutOfPosition ? ratingVisual.Foreground : "#102033",
+            CardBackground = cardBackground,
+            CardBorderBrush = cardBorder,
             CardBorderThickness = player == _selectedStarter ? new Thickness(3) : new Thickness(1)
         };
     }
@@ -376,10 +390,11 @@ public partial class PreMatchView : UserControl
         InjuredPlayersListBox.Visibility = injuredCards.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
     }
 
-    private static BenchPlayerCard CreateBenchPlayerCard(Player player)
+    private BenchPlayerCard CreateBenchPlayerCard(Player player)
     {
         PositionSuitabilityService.EnsurePositionMetadata(player);
         var form = PlayerFormBadgeHelper.Create(player.FormStatus);
+        var teamColors = TeamColorService.GetPalette(_state.SelectedTeam);
 
         return new BenchPlayerCard
         {
@@ -396,6 +411,11 @@ public partial class PreMatchView : UserControl
             BenchFormBadgeText = form.Text,
             BenchFormBadgeBackground = form.Background,
             BenchFormBadgeForeground = form.Foreground,
+            CardBackground = teamColors.PrimaryColor,
+            CardBorderBrush = teamColors.BorderColor,
+            TextForeground = teamColors.TextColor,
+            PositionBackground = teamColors.SecondaryColor,
+            PositionForeground = TeamColorService.GetReadableTextColor(teamColors.SecondaryColor),
             TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits)
         };
     }
@@ -1113,6 +1133,11 @@ public partial class PreMatchView : UserControl
         public string BenchFormBadgeText { get; init; } = string.Empty;
         public string BenchFormBadgeBackground { get; init; } = "#E1E5EA";
         public string BenchFormBadgeForeground { get; init; } = "#465364";
+        public string CardBackground { get; init; } = "White";
+        public string CardBorderBrush { get; init; } = "#D6DFEA";
+        public string TextForeground { get; init; } = "#102033";
+        public string PositionBackground { get; init; } = "#E7EEF8";
+        public string PositionForeground { get; init; } = "#102033";
         public IReadOnlyList<PlayerTraitBadge> TraitBadges { get; init; } = [];
     }
 }

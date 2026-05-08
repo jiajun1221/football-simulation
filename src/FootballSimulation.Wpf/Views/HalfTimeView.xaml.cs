@@ -208,6 +208,9 @@ public partial class HalfTimeView : UserControl
         var isOutOfPosition = PositionSuitabilityService.IsOutOfPosition(player);
         var suitability = PositionSuitabilityService.GetEffectivenessMultiplier(player);
         var ratingVisual = GetRatingVisual(player, suitability);
+        var teamColors = TeamColorService.GetPalette(_state.SelectedTeam);
+        var textForeground = teamColors.TextColor;
+        var positionBackground = teamColors.SecondaryColor;
 
         return new PitchPlayerCard
         {
@@ -218,7 +221,11 @@ public partial class HalfTimeView : UserControl
             PlayerName = player.Name,
             PositionText = player.AssignedPosition,
             OverallText = $"OVR {ratingVisual.Rating}",
-            OverallForeground = ratingVisual.Foreground,
+            OverallForeground = textForeground,
+            TextForeground = textForeground,
+            MutedForeground = textForeground,
+            PositionBackground = positionBackground,
+            PositionForeground = TeamColorService.GetReadableTextColor(positionBackground),
             GrowthText = PlayerGrowthDisplayHelper.CreateGrowthText(player),
             Stamina = GetStaminaPercentage(player),
             StaminaBrush = GetStaminaBrush(player),
@@ -226,8 +233,12 @@ public partial class HalfTimeView : UserControl
             FormBadgeBackground = form.Background,
             FormBadgeForeground = form.Foreground,
             TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits),
-            CardBackground = player == _selectedStarter ? "#FFF2B8" : isOutOfPosition ? "#FFF7EC" : "#FFFFFF",
-            CardBorderBrush = player == _selectedStarter ? "#F6C343" : isOutOfPosition ? ratingVisual.Foreground : "#102033",
+            CardBackground = teamColors.PrimaryColor,
+            CardBorderBrush = player == _selectedStarter
+                ? teamColors.SelectedGlowColor
+                : isOutOfPosition
+                    ? ratingVisual.Foreground
+                    : teamColors.BorderColor,
             CardBorderThickness = player == _selectedStarter ? new Thickness(3) : new Thickness(1)
         };
     }
@@ -339,10 +350,11 @@ public partial class HalfTimeView : UserControl
         SubstitutionStatusTextBlock.Text = $"{GetUsedSubstitutions()}/5 used";
     }
 
-    private static BenchPlayerCard CreateBenchPlayerCard(Player player)
+    private BenchPlayerCard CreateBenchPlayerCard(Player player)
     {
         PositionSuitabilityService.EnsurePositionMetadata(player);
         var form = PlayerFormBadgeHelper.Create(player.FormStatus);
+        var teamColors = TeamColorService.GetPalette(_state.SelectedTeam);
 
         return new BenchPlayerCard
         {
@@ -359,6 +371,11 @@ public partial class HalfTimeView : UserControl
             BenchFormBadgeText = form.Text,
             BenchFormBadgeBackground = form.Background,
             BenchFormBadgeForeground = form.Foreground,
+            CardBackground = teamColors.PrimaryColor,
+            CardBorderBrush = teamColors.BorderColor,
+            TextForeground = teamColors.TextColor,
+            PositionBackground = teamColors.SecondaryColor,
+            PositionForeground = TeamColorService.GetReadableTextColor(teamColors.SecondaryColor),
             TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits)
         };
     }
@@ -1205,6 +1222,11 @@ public partial class HalfTimeView : UserControl
         public string BenchFormBadgeText { get; init; } = string.Empty;
         public string BenchFormBadgeBackground { get; init; } = "#E1E5EA";
         public string BenchFormBadgeForeground { get; init; } = "#465364";
+        public string CardBackground { get; init; } = "White";
+        public string CardBorderBrush { get; init; } = "#D6DFEA";
+        public string TextForeground { get; init; } = "#102033";
+        public string PositionBackground { get; init; } = "#E7EEF8";
+        public string PositionForeground { get; init; } = "#102033";
         public IReadOnlyList<PlayerTraitBadge> TraitBadges { get; init; } = [];
     }
 }

@@ -23,11 +23,19 @@ public class MatchEventFactory
         return CreateEvent(minute, EventType.Attack, description, playmaker.Name, safeShooter?.Name);
     }
 
-    public MatchEvent CreateAttackBuildUp(int minute, Team attackingTeam, Player playmaker, Player target, Random random)
+    public MatchEvent CreateAttackBuildUp(
+        int minute,
+        Team attackingTeam,
+        Player playmaker,
+        Player target,
+        Random random,
+        PlayerTrait? triggeredTrait = null)
     {
         var safeTarget = ResolveDistinctTeammate(attackingTeam, playmaker, target, random);
         var playmakerName = GetDisplayName(playmaker.Name);
-        var description = safeTarget is null
+        var description = triggeredTrait is not null
+            ? CreateTraitBuildUpDescription(attackingTeam, playmaker, safeTarget, triggeredTrait.Value, random)
+            : safeTarget is null
             ? Pick(random,
                 $"{attackingTeam.Name} build quickly and {playmakerName} finds space on the wing.",
                 $"{attackingTeam.Name} move the ball with intent through {playmakerName}.",
@@ -37,7 +45,7 @@ public class MatchEventFactory
                 $"{attackingTeam.Name} keep it moving and {playmakerName} links with {GetDisplayName(safeTarget.Name)}.",
                 $"{attackingTeam.Name} combine neatly, with {playmakerName} releasing {GetDisplayName(safeTarget.Name)}.");
 
-        return CreateEvent(minute, EventType.Attack, description, playmaker.Name, safeTarget?.Name);
+        return CreateEvent(minute, EventType.Attack, description, playmaker.Name, safeTarget?.Name, triggeredTrait: triggeredTrait);
     }
 
     public MatchEvent CreateAttackReset(int minute, Team attackingTeam, Team defendingTeam, Player defender, Random random)
@@ -68,12 +76,15 @@ public class MatchEventFactory
         Player attacker,
         Player? defender,
         EventType reasonType,
-        Random random)
+        Random random,
+        PlayerTrait? triggeredTrait = null)
     {
         var attackerName = GetDisplayName(attacker.Name);
         var defenderName = defender is null ? defendingTeam.Name : GetDisplayName(defender.Name);
 
-        var description = reasonType switch
+        var description = triggeredTrait is not null && defender is not null
+            ? CreateTraitPossessionWinDescription(attackerName, defenderName, defendingTeam, triggeredTrait.Value, reasonType, random)
+            : reasonType switch
         {
             EventType.BadPass => Pick(random,
                 $"{attackerName}'s pass is loose for {attackingTeam.Name}.",
@@ -101,7 +112,7 @@ public class MatchEventFactory
         var primaryPlayerName = IsDefenderPossessionWin(reasonType) ? defender?.Name : attacker.Name;
         var secondaryPlayerName = IsDefenderPossessionWin(reasonType) ? attacker.Name : defender?.Name;
 
-        return CreateEvent(minute, reasonType, description, primaryPlayerName, secondaryPlayerName);
+        return CreateEvent(minute, reasonType, description, primaryPlayerName, secondaryPlayerName, triggeredTrait: triggeredTrait);
     }
 
     public MatchEvent CreateTurnover(int minute, Team possessionTeam, Player possessionPlayer, Random random)
@@ -114,27 +125,43 @@ public class MatchEventFactory
         return CreateEvent(minute, EventType.Turnover, description, possessionPlayer.Name);
     }
 
-    public MatchEvent CreateFoul(int minute, Team defendingTeam, Player defender, Player attacker)
+    public MatchEvent CreateFoul(int minute, Team defendingTeam, Player defender, Player attacker, PlayerTrait? triggeredTrait = null)
     {
-        return CreateEvent(minute, EventType.Foul, $"{defender.Name} fouls {attacker.Name} for {defendingTeam.Name}.", defender.Name, attacker.Name);
+        var description = triggeredTrait == PlayerTrait.DivesIntoTackles
+            ? Pick(
+                new Random(minute + defender.Name.Length + attacker.Name.Length),
+                $"{defender.Name} flies into an aggressive challenge on {attacker.Name} for {defendingTeam.Name}.",
+                $"A crunching tackle from {defender.Name} stops {attacker.Name}, but the referee gives the foul.")
+            : $"{defender.Name} fouls {attacker.Name} for {defendingTeam.Name}.";
+
+        return CreateEvent(minute, EventType.Foul, description, defender.Name, attacker.Name, triggeredTrait: triggeredTrait);
     }
 
-    public MatchEvent CreateShot(int minute, Team attackingTeam, Player attacker, Player? playmaker = null)
+    public MatchEvent CreateShot(int minute, Team attackingTeam, Player attacker, Player? playmaker = null, PlayerTrait? triggeredTrait = null)
     {
         var description = playmaker is not null && playmaker != attacker
             ? $"{attacker.Name} takes a shot for {attackingTeam.Name} after a pass from {playmaker.Name}."
             : $"{attacker.Name} takes a shot for {attackingTeam.Name}.";
 
-        return CreateEvent(minute, EventType.Shot, description, attacker.Name, playmaker?.Name);
+        return CreateEvent(minute, EventType.Shot, description, attacker.Name, playmaker?.Name, triggeredTrait: triggeredTrait);
     }
 
-    public MatchEvent CreateShot(int minute, Team attackingTeam, Player attacker, Player? playmaker, string chanceType, Random random)
+    public MatchEvent CreateShot(
+        int minute,
+        Team attackingTeam,
+        Player attacker,
+        Player? playmaker,
+        string chanceType,
+        Random random,
+        PlayerTrait? triggeredTrait = null)
     {
         var safePlaymaker = ResolveDistinctTeammate(attackingTeam, attacker, playmaker, random);
         var attackerName = GetDisplayName(attacker.Name);
         var playmakerName = safePlaymaker is null ? string.Empty : GetDisplayName(safePlaymaker.Name);
 
-        string description = chanceType switch
+        string description = triggeredTrait is not null
+            ? CreateTraitShotDescription(attackingTeam, attacker, safePlaymaker, chanceType, triggeredTrait.Value, random)
+            : chanceType switch
         {
             "long-range attempt" => Pick(random,
                 attacker.Traits.Contains(PlayerTrait.LongShotTaker)
@@ -167,7 +194,7 @@ public class MatchEventFactory
                 : $"{attackerName} takes a shot for {attackingTeam.Name}."
         };
 
-        return CreateEvent(minute, EventType.Shot, description, attacker.Name, safePlaymaker?.Name);
+        return CreateEvent(minute, EventType.Shot, description, attacker.Name, safePlaymaker?.Name, triggeredTrait: triggeredTrait);
     }
 
     public MatchEvent CreateGoal(int minute, Team attackingTeam, Player scorer, Match match, Player? assister = null)
@@ -192,11 +219,14 @@ public class MatchEventFactory
         Match match,
         string goalTypeDescription,
         Random random,
-        Player? assister = null)
+        Player? assister = null,
+        PlayerTrait? triggeredTrait = null)
     {
         var safeAssister = ResolveDistinctTeammate(attackingTeam, scorer, assister, random);
         var scorerName = GetDisplayName(scorer.Name);
-        var baseLine = safeAssister is not null
+        var baseLine = triggeredTrait is not null
+            ? CreateTraitGoalLine(attackingTeam, scorer, safeAssister, goalTypeDescription, triggeredTrait.Value, random)
+            : safeAssister is not null
             ? Pick(random,
                 $"GOAL! {scorerName} finishes with a {goalTypeDescription} for {attackingTeam.Name}, set up by {GetDisplayName(safeAssister.Name)}.",
                 $"GOAL! {scorerName} scores for {attackingTeam.Name} with a {goalTypeDescription}. Assist from {GetDisplayName(safeAssister.Name)}.")
@@ -205,7 +235,7 @@ public class MatchEventFactory
                 $"GOAL! {scorerName} finds the net for {attackingTeam.Name} with a {goalTypeDescription}.");
 
         var description = $"{baseLine} Score: {match.HomeTeam.Name} {match.HomeScore} - {match.AwayScore} {match.AwayTeam.Name}";
-        return CreateEvent(minute, EventType.Goal, description, scorer.Name, safeAssister?.Name, match);
+        return CreateEvent(minute, EventType.Goal, description, scorer.Name, safeAssister?.Name, match, triggeredTrait);
     }
 
     public MatchEvent CreateOwnGoal(int minute, Team benefitingTeam, Team concedingTeam, Player ownGoalPlayer, Match match)
@@ -236,13 +266,22 @@ public class MatchEventFactory
         return CreateEvent(minute, EventType.Save, $"{attacker.Name}'s shot is saved by {defendingTeam.Name}.", attacker.Name);
     }
 
-    public MatchEvent CreateSave(int minute, Team defendingTeam, Player attacker, Player goalkeeper, string saveType, Random random)
+    public MatchEvent CreateSave(
+        int minute,
+        Team defendingTeam,
+        Player attacker,
+        Player goalkeeper,
+        string saveType,
+        Random random,
+        PlayerTrait? triggeredTrait = null)
     {
-        var description = Pick(random,
+        var description = triggeredTrait is not null
+            ? CreateTraitSaveDescription(defendingTeam, attacker, goalkeeper, triggeredTrait.Value, random)
+            : Pick(random,
             $"{goalkeeper.Name} makes a {saveType} to deny {attacker.Name} for {defendingTeam.Name}.",
             $"{attacker.Name} is stopped by a {saveType} from {goalkeeper.Name} of {defendingTeam.Name}.");
 
-        return CreateEvent(minute, EventType.Save, description, attacker.Name, goalkeeper.Name);
+        return CreateEvent(minute, EventType.Save, description, attacker.Name, goalkeeper.Name, triggeredTrait: triggeredTrait);
     }
 
     public MatchEvent CreateYellowCard(int minute, Player player)
@@ -302,7 +341,12 @@ public class MatchEventFactory
             ? $"{player.Name} scores from the penalty spot for {team.Name}."
             : $"{player.Name}'s penalty for {team.Name} is saved.";
 
-        return CreateEvent(minute, EventType.Penalty, $"{outcome} Score: {match.HomeTeam.Name} {match.HomeScore} - {match.AwayScore} {match.AwayTeam.Name}", player.Name, match: match);
+        return CreateEvent(
+            minute,
+            converted ? EventType.Goal : EventType.Save,
+            $"{outcome} Score: {match.HomeTeam.Name} {match.HomeScore} - {match.AwayScore} {match.AwayTeam.Name}",
+            player.Name,
+            match: match);
     }
 
     public MatchEvent CreatePenaltyDecision(int minute, Team defendingTeam, Player defender, Player attacker, string reason)
@@ -315,29 +359,55 @@ public class MatchEventFactory
             attacker.Name);
     }
 
-    public MatchEvent CreatePenaltyTaker(int minute, Team attackingTeam, Player taker)
+    public MatchEvent CreatePenaltyTaker(int minute, Team attackingTeam, Player taker, PlayerTrait? triggeredTrait = null)
     {
+        var description = triggeredTrait == PlayerTrait.PenaltySpecialist
+            ? Pick(
+                new Random(minute + taker.Name.Length),
+                $"{taker.Name} steps up calmly for {attackingTeam.Name}.",
+                $"{taker.Name} prepares for the penalty with total composure.")
+            : $"{taker.Name} steps up for {attackingTeam.Name}.";
+
         return CreateEvent(
             minute,
             EventType.PenaltyTaker,
-            $"{taker.Name} steps up for {attackingTeam.Name}.",
-            taker.Name);
+            description,
+            taker.Name,
+            triggeredTrait: triggeredTrait);
     }
 
-    public MatchEvent CreatePenaltyResult(int minute, Team attackingTeam, Player taker, bool converted, bool saved, Match match)
+    public MatchEvent CreatePenaltyResult(
+        int minute,
+        Team attackingTeam,
+        Player taker,
+        bool converted,
+        bool saved,
+        Match match,
+        PlayerTrait? triggeredTrait = null,
+        Team? defendingTeam = null,
+        Player? goalkeeper = null)
     {
-        var outcome = converted
+        var outcome = converted && triggeredTrait is not null
+            ? CreateTraitPenaltyScoreLine(attackingTeam, taker, triggeredTrait.Value, random: new Random(minute + taker.Name.Length))
+            : converted
             ? $"{taker.Name} scores from the penalty spot for {attackingTeam.Name}."
             : saved
-                ? $"{taker.Name}'s penalty for {attackingTeam.Name} is saved."
-                : $"{taker.Name} misses the penalty for {attackingTeam.Name}.";
+                ? CreatePenaltySaveLine(attackingTeam, defendingTeam, taker, goalkeeper)
+                : CreatePenaltyMissLine(attackingTeam, taker, new Random(minute + taker.Name.Length));
+        var eventType = converted
+            ? EventType.Goal
+            : saved
+                ? EventType.Save
+                : EventType.Miss;
 
         return CreateEvent(
             minute,
-            EventType.Penalty,
+            eventType,
             $"{outcome} Score: {match.HomeTeam.Name} {match.HomeScore} - {match.AwayScore} {match.AwayTeam.Name}",
             taker.Name,
-            match: match);
+            goalkeeper?.Name,
+            match: match,
+            triggeredTrait: triggeredTrait);
     }
 
     public MatchEvent CreateOffside(int minute, Team team, Player player)
@@ -370,14 +440,19 @@ public class MatchEventFactory
         return CreateEvent(minute, EventType.DefensiveError, $"{player.Name} makes a defensive error for {defendingTeam.Name}. Pressure builds immediately.", player.Name);
     }
 
-    public MatchEvent CreateWonderGoal(int minute, Team team, Player player, Match match)
+    public MatchEvent CreateWonderGoal(int minute, Team team, Player player, Match match, PlayerTrait? triggeredTrait = null)
     {
+        var description = triggeredTrait is not null
+            ? $"{CreateTraitWonderGoalLine(team, player, triggeredTrait.Value, new Random(minute + player.Name.Length))} Score: {match.HomeTeam.Name} {match.HomeScore} - {match.AwayScore} {match.AwayTeam.Name}"
+            : $"{player.Name} produces a wonder goal for {team.Name}. Score: {match.HomeTeam.Name} {match.HomeScore} - {match.AwayScore} {match.AwayTeam.Name}";
+
         return CreateEvent(
             minute,
             EventType.WonderGoal,
-            $"{player.Name} produces a wonder goal for {team.Name}. Score: {match.HomeTeam.Name} {match.HomeScore} - {match.AwayScore} {match.AwayTeam.Name}",
+            description,
             player.Name,
-            match: match);
+            match: match,
+            triggeredTrait: triggeredTrait);
     }
 
     public MatchEvent CreateGoalkeeperHeroics(int minute, Team team, Player goalkeeper)
@@ -385,9 +460,16 @@ public class MatchEventFactory
         return CreateEvent(minute, EventType.GoalkeeperHeroics, $"{goalkeeper.Name} keeps {team.Name} alive with a huge save.", goalkeeper.Name);
     }
 
-    public MatchEvent CreateSetPieceDanger(int minute, Team team, Player player)
+    public MatchEvent CreateSetPieceDanger(int minute, Team team, Player player, PlayerTrait? triggeredTrait = null)
     {
-        return CreateEvent(minute, EventType.SetPieceDanger, $"{team.Name} create danger from a set piece through {player.Name}.", player.Name);
+        return CreateEvent(
+            minute,
+            EventType.SetPieceDanger,
+            triggeredTrait == PlayerTrait.DeadBallSpecialist
+                ? Pick(new Random(minute + player.Name.Length), $"{player.Name} whips a superb free kick delivery into danger for {team.Name}.", $"{team.Name} lean on {player.Name}'s dead-ball quality and the delivery is dangerous.")
+                : $"{team.Name} create danger from a set piece through {player.Name}.",
+            player.Name,
+            triggeredTrait: triggeredTrait ?? (player.Traits.Contains(PlayerTrait.DeadBallSpecialist) ? PlayerTrait.DeadBallSpecialist : null));
     }
 
     public MatchEvent CreateSetPieceThreat(int minute, Team team, Player primaryTaker, Player secondaryTaker)
@@ -395,26 +477,46 @@ public class MatchEventFactory
         var secondaryText = string.Equals(primaryTaker.Name, secondaryTaker.Name, StringComparison.OrdinalIgnoreCase)
             ? "a teammate"
             : secondaryTaker.Name;
+        var triggeredTrait = primaryTaker.Traits.Contains(PlayerTrait.DeadBallSpecialist) ? PlayerTrait.DeadBallSpecialist : (PlayerTrait?)null;
+        var description = triggeredTrait == PlayerTrait.DeadBallSpecialist
+            ? Pick(new Random(minute + primaryTaker.Name.Length),
+                $"{team.Name} win a dangerous free kick. {primaryTaker.Name}'s set-piece reputation has everyone alert.",
+                $"{primaryTaker.Name} stands over it for {team.Name}, ready to bend a dangerous delivery.")
+            : $"{team.Name} win a dangerous free kick. {primaryTaker.Name} and {secondaryText} stand over it.";
+
         return CreateEvent(
             minute,
             EventType.SetPieceDanger,
-            $"{team.Name} win a dangerous free kick. {primaryTaker.Name} and {secondaryText} stand over it.",
+            description,
             primaryTaker.Name,
-            secondaryTaker.Name);
+            secondaryTaker.Name,
+            triggeredTrait: triggeredTrait);
     }
 
-    public MatchEvent CreateSetPieceShot(int minute, Team team, Player taker)
+    public MatchEvent CreateSetPieceShot(int minute, Team team, Player taker, PlayerTrait? triggeredTrait = null)
     {
-        return CreateEvent(minute, EventType.Shot, $"{taker.Name} takes the free kick for {team.Name}.", taker.Name);
+        var description = triggeredTrait == PlayerTrait.DeadBallSpecialist
+            ? Pick(new Random(minute + taker.Name.Length), $"{taker.Name} curls the free kick with real dead-ball quality for {team.Name}.", $"{taker.Name} strikes the set piece cleanly for {team.Name}.")
+            : $"{taker.Name} takes the free kick for {team.Name}.";
+
+        return CreateEvent(minute, EventType.Shot, description, taker.Name, triggeredTrait: triggeredTrait);
     }
 
-    public MatchEvent CreateCornerKick(int minute, Team team, Player taker)
+    public MatchEvent CreateCornerKick(int minute, Team team, Player taker, PlayerTrait? triggeredTrait = null)
     {
+        var description = triggeredTrait switch
+        {
+            PlayerTrait.DeadBallSpecialist => Pick(new Random(minute + taker.Name.Length), $"{team.Name} win a corner and {taker.Name} shapes a dangerous dead-ball delivery.", $"{taker.Name}'s corner delivery looks dangerous for {team.Name}."),
+            PlayerTrait.EarlyCrosser => $"{taker.Name} takes it quickly, whipping an early corner into the danger area for {team.Name}.",
+            _ => $"{team.Name} win a corner. {taker.Name} goes across to take it."
+        };
+
         return CreateEvent(
             minute,
             EventType.CornerKick,
-            $"{team.Name} win a corner. {taker.Name} goes across to take it.",
-            taker.Name);
+            description,
+            taker.Name,
+            triggeredTrait: triggeredTrait);
     }
 
     public MatchEvent CreateConfrontation(int minute, Team team, Player player)
@@ -450,13 +552,296 @@ public class MatchEventFactory
             match: match);
     }
 
+    private static string CreateTraitBuildUpDescription(
+        Team team,
+        Player playmaker,
+        Player? target,
+        PlayerTrait trait,
+        Random random)
+    {
+        var playerName = GetDisplayName(playmaker.Name);
+        var targetText = target is null ? "a teammate" : GetDisplayName(target.Name);
+
+        return trait switch
+        {
+            PlayerTrait.Playmaker => Pick(random,
+                $"{playerName} spots the run perfectly and unlocks space for {team.Name}.",
+                $"{playerName} shapes a defense-splitting pass toward {targetText} for {team.Name}."),
+            PlayerTrait.LongPasser => Pick(random,
+                $"{playerName} clips a superb long diagonal and switches the play for {team.Name}.",
+                $"Pinpoint long ball from {playerName} finds {targetText} instantly for {team.Name}."),
+            PlayerTrait.TeamPlayer => Pick(random,
+                $"{playerName} chooses the unselfish pass and {team.Name} work a better angle.",
+                $"Excellent teamwork from {playerName} keeps {team.Name} moving in the final third."),
+            PlayerTrait.PressResistant => Pick(random,
+                $"{playerName} stays calm under pressure and helps {team.Name} escape the press.",
+                $"Excellent composure from {playerName}; {team.Name} build cleanly through midfield."),
+            PlayerTrait.Leadership => Pick(random,
+                $"{playerName} rallies {team.Name} forward and lifts the squad intensity.",
+                $"Leadership from {playerName} settles {team.Name} on the ball."),
+            PlayerTrait.Engine => Pick(random,
+                $"{playerName} is still covering every blade of grass as {team.Name} push forward.",
+                $"Relentless energy from {playerName} keeps {team.Name}'s move alive."),
+            PlayerTrait.BoxToBox => Pick(random,
+                $"{playerName} wins it and drives forward immediately for {team.Name}.",
+                $"End-to-end contribution from {playerName} gives {team.Name} momentum."),
+            PlayerTrait.LongThrower => Pick(random,
+                $"{playerName} launches a quick long throw and {team.Name} break forward.",
+                $"A massive throw from {playerName} finds {targetText} and starts a counter for {team.Name}."),
+            _ => target is null
+                ? $"{team.Name} move the ball with intent through {playerName}."
+                : $"{team.Name} build quickly as {playerName} picks out {targetText}."
+        };
+    }
+
+    private static string CreateTraitPossessionWinDescription(
+        string attackerName,
+        string defenderName,
+        Team defendingTeam,
+        PlayerTrait trait,
+        EventType reasonType,
+        Random random)
+    {
+        return trait switch
+        {
+            PlayerTrait.Interceptor => Pick(random,
+                $"{defenderName} reads the pass brilliantly and cuts out the danger for {defendingTeam.Name}.",
+                $"Quick anticipation from {defenderName} turns {attackerName}'s pass into a {defendingTeam.Name} turnover."),
+            PlayerTrait.DivesIntoTackles => Pick(random,
+                $"{defenderName} launches into a crunching tackle and wins it from {attackerName}.",
+                $"Aggressive challenge from {defenderName} stops {attackerName}'s attack for {defendingTeam.Name}."),
+            PlayerTrait.BoxToBox => Pick(random,
+                $"{defenderName} tracks back, wins it, and immediately drives {defendingTeam.Name} forward.",
+                $"End-to-end work from {defenderName} breaks up {attackerName}'s move."),
+            _ => reasonType == EventType.Interception
+                ? $"{defenderName} intercepts {attackerName}'s pass for {defendingTeam.Name}."
+                : $"{defenderName} steps in strongly and takes the ball from {attackerName}."
+        };
+    }
+
+    private static string CreateTraitShotDescription(
+        Team team,
+        Player attacker,
+        Player? playmaker,
+        string chanceType,
+        PlayerTrait trait,
+        Random random)
+    {
+        var attackerName = GetDisplayName(attacker.Name);
+        var playmakerName = playmaker is null ? "a teammate" : GetDisplayName(playmaker.Name);
+
+        return trait switch
+        {
+            PlayerTrait.FinesseShot => Pick(random,
+                $"{attackerName} opens his body and bends a finesse effort for {team.Name}.",
+                $"{attackerName} shapes a curling shot toward the far corner for {team.Name}."),
+            PlayerTrait.LongShotTaker => Pick(random,
+                $"{attackerName} tries one from distance for {team.Name}.",
+                $"{attackerName} unleashes a rocket from outside the box for {team.Name}."),
+            PlayerTrait.OutsideFootShot => Pick(random,
+                $"{attackerName} goes outside-of-the-boot and surprises the defense for {team.Name}.",
+                $"{attackerName} tries a trivela-style effort for {team.Name}."),
+            PlayerTrait.PowerHeader => Pick(random,
+                $"{attackerName} rises highest and powers a header toward goal for {team.Name}.",
+                $"A thunderous header from {attackerName} beats everyone in the air."),
+            PlayerTrait.AerialThreat => Pick(random,
+                $"{attackerName} dominates in the air and heads at goal for {team.Name}.",
+                $"{attackerName}'s aerial presence causes chaos in the box."),
+            PlayerTrait.Flair => Pick(random,
+                $"A moment of magic from {attackerName} opens space and he shoots for {team.Name}.",
+                $"{attackerName} uses a clever flick to create the shooting lane for {team.Name}."),
+            PlayerTrait.SpeedDribbler => Pick(random,
+                $"{attackerName} bursts past defenders with raw pace and shoots for {team.Name}.",
+                $"Rapid acceleration from {attackerName} creates separation before the strike."),
+            PlayerTrait.Rapid => Pick(random,
+                $"{attackerName} explodes down the flank and gets the shot away for {team.Name}.",
+                $"{attackerName} is too quick to catch as he breaks into shooting range."),
+            PlayerTrait.TechnicalDribbler => Pick(random,
+                $"{attackerName} shows tight control through traffic before shooting for {team.Name}.",
+                $"Elegant dribbling from {attackerName} breaks the line and creates the chance."),
+            PlayerTrait.Playmaker => Pick(random,
+                $"{playmakerName} spots the run perfectly and {attackerName} gets the shot away for {team.Name}.",
+                $"A defense-splitting pass from {playmakerName} unlocks the backline for {attackerName}."),
+            PlayerTrait.LongPasser => Pick(random,
+                $"{playmakerName} picks a superb long diagonal and {attackerName} attacks the space for {team.Name}.",
+                $"Pinpoint long ball from {playmakerName} finds {attackerName} instantly."),
+            PlayerTrait.EarlyCrosser => Pick(random,
+                $"{playmakerName} delivers early and catches the defense sleeping for {team.Name}.",
+                $"Quick delivery from {playmakerName} flashes into the danger area for {attackerName}."),
+            PlayerTrait.TeamPlayer => Pick(random,
+                $"{playmakerName} chooses the unselfish option and {attackerName} has the better chance.",
+                $"Excellent teamwork in the final third sets up {attackerName} for {team.Name}."),
+            PlayerTrait.TriesToBeatOffsideTrap => Pick(random,
+                $"{attackerName} times the run perfectly, beats the line, and shoots for {team.Name}.",
+                $"{attackerName} bends the run cleverly before pulling the trigger for {team.Name}."),
+            _ => playmaker is null
+                ? $"{attackerName} takes a shot for {team.Name}."
+                : $"{attackerName} shoots for {team.Name} after a pass from {playmakerName}."
+        };
+    }
+
+    private static string CreateTraitGoalLine(
+        Team team,
+        Player scorer,
+        Player? assister,
+        string goalTypeDescription,
+        PlayerTrait trait,
+        Random random)
+    {
+        var scorerName = GetDisplayName(scorer.Name);
+        var assisterName = assister is null ? "a teammate" : GetDisplayName(assister.Name);
+
+        return trait switch
+        {
+            PlayerTrait.FinesseShot => Pick(random,
+                $"GOAL! {scorerName} bends a beautiful finesse effort into the corner for {team.Name}.",
+                $"GOAL! A curling finish from {scorerName} leaves the keeper stranded."),
+            PlayerTrait.PowerHeader => Pick(random,
+                $"GOAL! {scorerName} rises highest and powers the header home for {team.Name}.",
+                $"GOAL! A thunderous header from {scorerName} beats everyone in the air."),
+            PlayerTrait.AerialThreat => Pick(random,
+                $"GOAL! {scorerName} dominates in the air and heads {team.Name} in.",
+                $"GOAL! {scorerName}'s aerial presence causes chaos and he finishes the chance."),
+            PlayerTrait.Playmaker => Pick(random,
+                $"GOAL! {assisterName} spots the run perfectly and {scorerName} finishes for {team.Name}.",
+                $"GOAL! A defense-splitting pass from {assisterName} unlocks the backline for {scorerName}."),
+            PlayerTrait.TeamPlayer => Pick(random,
+                $"GOAL! Unselfish play from {assisterName} creates the finish for {scorerName}.",
+                $"GOAL! Excellent teamwork from {team.Name}, finished by {scorerName}."),
+            PlayerTrait.LongPasser => Pick(random,
+                $"GOAL! {assisterName}'s pinpoint long ball finds {scorerName}, who finishes for {team.Name}.",
+                $"GOAL! A superb long diagonal from {assisterName} opens the pitch for {scorerName}."),
+            PlayerTrait.EarlyCrosser => Pick(random,
+                $"GOAL! An early cross from {assisterName} catches the defense sleeping and {scorerName} finishes.",
+                $"GOAL! Quick delivery into the danger area, and {scorerName} converts for {team.Name}."),
+            PlayerTrait.OutsideFootShot => Pick(random,
+                $"GOAL! {scorerName}'s outside-of-the-boot finish curls beautifully for {team.Name}.",
+                $"GOAL! A trivela-style finish from {scorerName} surprises the keeper."),
+            PlayerTrait.ClinicalFinisher => Pick(random,
+                $"GOAL! One chance. One goal. {scorerName} is deadly for {team.Name}.",
+                $"GOAL! Calm, clinical finishing from {scorerName} inside the box."),
+            PlayerTrait.SpeedDribbler => Pick(random,
+                $"GOAL! {scorerName} bursts clear with raw pace and finishes for {team.Name}.",
+                $"GOAL! Rapid acceleration creates the gap and {scorerName} takes full advantage."),
+            PlayerTrait.Rapid => Pick(random,
+                $"GOAL! {scorerName} is too quick to catch and finishes the break for {team.Name}.",
+                $"GOAL! Explosive pace from {scorerName} turns the attack into a finish."),
+            PlayerTrait.TechnicalDribbler => Pick(random,
+                $"GOAL! Tight control through traffic from {scorerName}, then a composed finish.",
+                $"GOAL! Elegant dribbling from {scorerName} breaks the line for {team.Name}."),
+            PlayerTrait.Flair => Pick(random,
+                $"GOAL! A moment of magic from {scorerName} for {team.Name}.",
+                $"GOAL! {scorerName}'s flair opens the finish in style."),
+            PlayerTrait.DeadBallSpecialist => Pick(random,
+                $"GOAL! {scorerName} curls a superb dead-ball strike for {team.Name}.",
+                $"GOAL! Dangerous set-piece quality from {scorerName} finds the net."),
+            PlayerTrait.TriesToBeatOffsideTrap => Pick(random,
+                $"GOAL! {scorerName} times the run perfectly and finishes for {team.Name}.",
+                $"GOAL! {scorerName} bends the run cleverly, beats the line, and scores."),
+            _ => assister is not null
+                ? $"GOAL! {scorerName} finishes with a {goalTypeDescription} for {team.Name}, set up by {assisterName}."
+                : $"GOAL! {scorerName} scores a {goalTypeDescription} for {team.Name}."
+        };
+    }
+
+    private static string CreateTraitSaveDescription(
+        Team team,
+        Player attacker,
+        Player goalkeeper,
+        PlayerTrait trait,
+        Random random)
+    {
+        return trait switch
+        {
+            PlayerTrait.OneOnOnes => Pick(random,
+                $"Huge one-on-one save from {goalkeeper.Name} to deny {attacker.Name} for {team.Name}.",
+                $"{goalkeeper.Name} stays big and denies {attacker.Name} in a one-on-one."),
+            PlayerTrait.RushesOutOfGoal => Pick(random,
+                $"{goalkeeper.Name} rushes out aggressively and smothers {attacker.Name}'s chance for {team.Name}.",
+                $"Sweeper-keeper action from {goalkeeper.Name} prevents danger for {team.Name}."),
+            PlayerTrait.Puncher => Pick(random,
+                $"{goalkeeper.Name} punches clear under pressure for {team.Name}.",
+                $"Strong punch from {goalkeeper.Name} removes the aerial danger."),
+            PlayerTrait.LongThrower => Pick(random,
+                $"{goalkeeper.Name} saves and immediately launches a quick long throw for {team.Name}.",
+                $"Massive throw from {goalkeeper.Name} starts a counter after denying {attacker.Name}."),
+            _ => $"{goalkeeper.Name} makes a strong save to deny {attacker.Name} for {team.Name}."
+        };
+    }
+
+    private static string CreateTraitPenaltyScoreLine(Team team, Player taker, PlayerTrait trait, Random random)
+    {
+        return trait switch
+        {
+            PlayerTrait.DeadBallSpecialist => Pick(random,
+                $"{taker.Name} sends the keeper the wrong way with dead-ball precision for {team.Name}.",
+                $"{taker.Name}'s set-piece quality shows from the spot for {team.Name}."),
+            PlayerTrait.PenaltySpecialist => Pick(random,
+                $"{taker.Name} buries it from the spot for {team.Name}.",
+                $"{taker.Name} sends the keeper the wrong way for {team.Name}.",
+                $"{taker.Name} stays calm and converts the penalty for {team.Name}."),
+            PlayerTrait.ClinicalFinisher => Pick(random,
+                $"One chance. One goal. {taker.Name} stays clinical from the spot for {team.Name}.",
+                $"{taker.Name} finishes calmly from the penalty spot for {team.Name}."),
+            PlayerTrait.FinesseShot => $"{taker.Name} strokes a curled penalty beyond the keeper for {team.Name}.",
+            _ => $"{taker.Name} scores from the penalty spot for {team.Name}."
+        };
+    }
+
+    private static string CreatePenaltySaveLine(Team attackingTeam, Team? defendingTeam, Player taker, Player? goalkeeper)
+    {
+        if (goalkeeper is not null)
+        {
+            var teamText = defendingTeam is null ? string.Empty : $" for {defendingTeam.Name}";
+            return $"{goalkeeper.Name} saves the penalty from {taker.Name}{teamText}. Huge stop from the keeper.";
+        }
+
+        return $"{taker.Name}'s penalty for {attackingTeam.Name} is saved. Huge stop from the keeper.";
+    }
+
+    private static string CreatePenaltyMissLine(Team attackingTeam, Player taker, Random random)
+    {
+        return Pick(random,
+            $"{taker.Name} misses the penalty for {attackingTeam.Name}. The effort goes wide.",
+            $"{taker.Name} misses from the spot for {attackingTeam.Name}. Huge miss.",
+            $"{taker.Name}'s penalty for {attackingTeam.Name} clips the woodwork and stays out.");
+    }
+
+    private static string CreateTraitWonderGoalLine(Team team, Player player, PlayerTrait trait, Random random)
+    {
+        return trait switch
+        {
+            PlayerTrait.FinesseShot => Pick(random,
+                $"{player.Name} bends a stunning finesse effort into the top corner for {team.Name}.",
+                $"A curling wonder finish from {player.Name} leaves the keeper stranded."),
+            PlayerTrait.LongShotTaker => Pick(random,
+                $"{player.Name} launches a rocket from outside the box for {team.Name}.",
+                $"{player.Name} tries one from distance and it flies in for {team.Name}."),
+            PlayerTrait.OutsideFootShot => Pick(random,
+                $"{player.Name} curls a sensational outside-of-the-boot finish for {team.Name}.",
+                $"A trivela-style wonder goal from {player.Name} lights up the match."),
+            PlayerTrait.Flair => Pick(random,
+                $"A moment of magic from {player.Name} produces a wonder goal for {team.Name}.",
+                $"{player.Name} creates space with a brilliant flick and finishes spectacularly."),
+            PlayerTrait.SpeedDribbler => Pick(random,
+                $"{player.Name} bursts past defenders with raw pace and scores a wonder goal for {team.Name}.",
+                $"Rapid acceleration from {player.Name} creates the space for a brilliant finish."),
+            PlayerTrait.TechnicalDribbler => Pick(random,
+                $"{player.Name} glides through traffic with tight control and scores for {team.Name}.",
+                $"Elegant dribbling from {player.Name} breaks the line before a stunning finish."),
+            PlayerTrait.ClinicalFinisher => $"Deadly finishing from {player.Name}; the chance becomes a wonder goal for {team.Name}.",
+            _ => $"{player.Name} produces a wonder goal for {team.Name}."
+        };
+    }
+
     private static MatchEvent CreateEvent(
         int minute,
         EventType eventType,
         string description,
         string? primaryPlayerName = null,
         string? secondaryPlayerName = null,
-        Match? match = null)
+        Match? match = null,
+        PlayerTrait? triggeredTrait = null)
     {
         return new MatchEvent
         {
@@ -466,6 +851,7 @@ public class MatchEventFactory
             AwayScore = match?.AwayScore,
             PrimaryPlayerName = primaryPlayerName,
             SecondaryPlayerName = secondaryPlayerName,
+            TriggeredTrait = triggeredTrait,
             Description = description
         };
     }

@@ -13,6 +13,7 @@ public class LivePlayerIconViewModel
     public double X { get; init; }
     public double Y { get; init; }
     public string IconBrush { get; init; } = "#246BFE";
+    public string IconForeground { get; init; } = "#FFFFFF";
     public string BorderBrush { get; init; } = "#DCEBFF";
     public string SelectionBrush { get; init; } = "Transparent";
     public double SelectionThickness { get; init; }

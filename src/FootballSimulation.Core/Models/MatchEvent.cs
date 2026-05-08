@@ -8,5 +8,6 @@ public class MatchEvent
     public int? AwayScore { get; set; }
     public string? PrimaryPlayerName { get; set; }
     public string? SecondaryPlayerName { get; set; }
+    public PlayerTrait? TriggeredTrait { get; set; }
     public string Description { get; set; } = string.Empty;
 }

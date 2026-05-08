@@ -29,6 +29,7 @@ public enum PlayerTrait
     AerialThreat,
     Rapid,
     TechnicalDribbler,
+    PenaltySpecialist,
 
     PlayMaker = Playmaker,
     OneOnOnesGK = OneOnOnes,

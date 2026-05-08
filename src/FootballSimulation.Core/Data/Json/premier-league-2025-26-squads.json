@@ -727,7 +727,8 @@
           "traits": [
             "Flair",
             "TechnicalDribbler",
-            "FinesseShot"
+            "FinesseShot",
+            "PenaltySpecialist"
           ],
           "morale": null,
           "isInjured": false,
@@ -999,7 +1000,8 @@
           "traits": [
             "Flair",
             "Playmaker",
-            "DeadBallSpecialist"
+            "DeadBallSpecialist",
+            "PenaltySpecialist"
           ],
           "morale": null,
           "isInjured": false,
@@ -3766,7 +3768,8 @@
             "Flair",
             "Playmaker",
             "FinesseShot",
-            "DeadBallSpecialist"
+            "DeadBallSpecialist",
+            "PenaltySpecialist"
           ],
           "morale": null,
           "isInjured": false,
@@ -6681,7 +6684,8 @@
             "FinesseShot",
             "Flair",
             "SpeedDribbler",
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "PenaltySpecialist"
           ],
           "morale": null,
           "isInjured": false,
@@ -6898,7 +6902,8 @@
           "traits": [
             "ClinicalFinisher",
             "Flair",
-            "TriesToBeatOffsideTrap"
+            "TriesToBeatOffsideTrap",
+            "PenaltySpecialist"
           ],
           "morale": null,
           "isInjured": false,
@@ -7288,7 +7293,8 @@
           "traits": [
             "PowerHeader",
             "ClinicalFinisher",
-            "AerialThreat"
+            "AerialThreat",
+            "PenaltySpecialist"
           ],
           "morale": null,
           "isInjured": false,
@@ -7609,19 +7615,19 @@
       "formation": "3-5-2",
       "startingXI": [
         {
-          "name": "Altay Bayindir",
-          "squadNumber": 1,
+          "name": "Senne Lammens",
+          "squadNumber": 31,
           "position": "GK",
           "preferredPosition": null,
           "secondaryPositions": [],
-          "overallRating": 79,
+          "overallRating": 77,
           "age": null,
           "potentialOverall": null,
           "stamina": null,
           "fatigue": 0,
           "form": "Average",
           "formStatus": "Average",
-          "isStarter": false,
+          "isStarter": true,
           "traits": [
             "OneOnOnes"
           ],
@@ -7788,7 +7794,8 @@
           "traits": [
             "Playmaker",
             "LongShotTaker",
-            "DeadBallSpecialist"
+            "DeadBallSpecialist",
+            "PenaltySpecialist"
           ],
           "morale": null,
           "isInjured": false,
@@ -7844,7 +7851,8 @@
           "traits": [
             "FinesseShot",
             "Engine",
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "PenaltySpecialist"
           ],
           "morale": null,
           "isInjured": false,
@@ -8103,19 +8111,19 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Senne Lammens",
-          "squadNumber": 31,
+          "name": "Altay Bayindir",
+          "squadNumber": 1,
           "position": "GK",
           "preferredPosition": null,
           "secondaryPositions": [],
-          "overallRating": 77,
+          "overallRating": 79,
           "age": null,
           "potentialOverall": null,
           "stamina": null,
           "fatigue": 0,
           "form": "Average",
           "formStatus": "Average",
-          "isStarter": true,
+          "isStarter": false,
           "traits": [
             "OneOnOnes"
           ],
@@ -10158,7 +10166,8 @@
           "isStarter": true,
           "traits": [
             "ClinicalFinisher",
-            "Engine"
+            "Engine",
+            "PenaltySpecialist"
           ],
           "morale": null,
           "isInjured": false,
@@ -10649,7 +10658,8 @@
           "traits": [
             "DeadBallSpecialist",
             "LongPasser",
-            "Engine"
+            "Engine",
+            "PenaltySpecialist"
           ],
           "morale": null,
           "isInjured": false,
@@ -10705,7 +10715,8 @@
           "traits": [
             "FinesseShot",
             "Engine",
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "PenaltySpecialist"
           ],
           "morale": null,
           "isInjured": false,
