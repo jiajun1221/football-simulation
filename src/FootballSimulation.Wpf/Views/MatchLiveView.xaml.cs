@@ -116,6 +116,7 @@ public partial class MatchLiveView : UserControl
         SetScoreboardTeams(_state.CurrentMatch!.HomeTeam, _state.CurrentMatch.AwayTeam);
         SetScore(_state.CurrentMatch.HomeScore, _state.CurrentMatch.AwayScore);
         PhaseTextBlock.Text = CreatePhaseLabel(_state.CurrentMatch.CurrentMinute);
+        UpdateVenueLabel(_state.CurrentMatch);
         UpdateLiveStatusVisuals(LiveMatchStatus.Neutral, attackingTeam: null, defendingTeam: null);
         InitializeDisplayedPitchStats();
         LoadPausedActionPanel();
@@ -207,6 +208,7 @@ public partial class MatchLiveView : UserControl
                     includeFulltime);
 
                 PhaseTextBlock.Text = CreatePhaseLabel(_state.CurrentMatch.CurrentMinute);
+                UpdateVenueLabel(_state.CurrentMatch);
 
                 _pendingPlaybackEvents.AddRange(_state.CurrentMatch.Events
                     .Skip(existingEventCount)
@@ -1955,6 +1957,20 @@ public partial class MatchLiveView : UserControl
         return $"{phaseText} - {currentMinute}'";
     }
 
+    private void UpdateVenueLabel(Match match)
+    {
+        var selectedTeam = _state.SelectedTeam;
+        var isSelectedTeamHome = selectedTeam is not null &&
+            string.Equals(match.HomeTeam.Name, selectedTeam.Name, StringComparison.OrdinalIgnoreCase);
+        var homeAwayText = isSelectedTeamHome ? "Home" : "Away";
+        var venue = TeamVenueService.GetDisplayVenue(match.HomeTeam);
+
+        VenueTextBlock.Text = $"Venue: {venue} ({homeAwayText})";
+        VenueTextBlock.ToolTip = isSelectedTeamHome
+            ? $"{selectedTeam?.Name ?? match.HomeTeam.Name} are playing at home."
+            : $"{selectedTeam?.Name ?? match.AwayTeam.Name} are away at {venue}.";
+    }
+
     private void InsertFeedItemAtTop(MatchFeedItem feedItem)
     {
         var shouldKeepLatestEventVisible = IsViewingLatestEvents();
@@ -2017,10 +2033,12 @@ public partial class MatchLiveView : UserControl
 
             case EventType.Attack:
             case EventType.Shot:
+            case EventType.Woodwork:
             case EventType.Miss:
             case EventType.Goal:
             case EventType.WonderGoal:
             case EventType.CrowdMomentum:
+            case EventType.LateDrama:
                 attackingTeam = eventTeam ?? _currentPossessionTeam;
                 defendingTeam = GetOpposingTeam(attackingTeam);
                 _currentPossessionTeam = attackingTeam;
@@ -2053,6 +2071,7 @@ public partial class MatchLiveView : UserControl
             case EventType.DefensiveStop:
             case EventType.Save:
             case EventType.GoalkeeperHeroics:
+            case EventType.GoalkeeperMistake:
                 defendingTeam = eventTeam ?? ResolvePlayerTeam(matchEvent.PrimaryPlayerName);
                 attackingTeam = GetOpposingTeam(defendingTeam);
                 _currentPossessionTeam = defendingTeam;
@@ -2096,6 +2115,11 @@ public partial class MatchLiveView : UserControl
             case EventType.RedCard:
             case EventType.Injury:
             case EventType.Confrontation:
+            case EventType.RefereeControversy:
+            case EventType.VarCheck:
+            case EventType.VarDecision:
+            case EventType.RivalryAtmosphere:
+            case EventType.Weather:
             case EventType.Exhaustion:
                 attackingTeam = _currentPossessionTeam;
                 defendingTeam = GetOpposingTeam(attackingTeam);
@@ -2463,6 +2487,9 @@ public partial class MatchLiveView : UserControl
             case EventType.Miss:
             case EventType.Goal:
             case EventType.WonderGoal:
+            case EventType.Woodwork:
+            case EventType.LateDrama:
+            case EventType.CrowdMomentum:
             case EventType.Offside:
             case EventType.BadPass:
             case EventType.Miscontrol:
@@ -2480,10 +2507,12 @@ public partial class MatchLiveView : UserControl
             case EventType.RedCard:
             case EventType.DefensiveStop:
             case EventType.DefensiveError:
+            case EventType.GoalkeeperMistake:
             case EventType.Tackle:
             case EventType.Interception:
             case EventType.Pressure:
             case EventType.BlockedPass:
+            case EventType.RefereeControversy:
                 return primaryPlayerTeam ?? FindMentionedTeamName(matchEvent, match);
         }
 
@@ -2812,6 +2841,7 @@ public partial class MatchLiveView : UserControl
             EventType.Save => SaveStyle(GloveIcon(), "SAVE"),
             EventType.Foul => FoulStyle(StopIcon(), "FOUL"),
             EventType.Miss => MissStyle(WarningIcon(), "MISS"),
+            EventType.Woodwork => MissStyle(WarningIcon(), "WOODWORK"),
             EventType.Goal => GoalStyle(SoccerBallIcon(), "GOAL"),
             EventType.YellowCard => YellowCardStyle(YellowCardIcon(), "YELLOW CARD"),
             EventType.RedCard => RedCardStyle(RedCardIcon(), "RED CARD"),
@@ -2819,9 +2849,9 @@ public partial class MatchLiveView : UserControl
             EventType.PenaltyDecision => ChanceStyle(GoalNetIcon(), "PENALTY DECISION"),
             EventType.PenaltyTaker => ChanceStyle(TargetIcon(), "PENALTY TAKER"),
             EventType.Penalty => ChanceStyle(GoalNetIcon(), "PENALTY"),
-            EventType.Offside => TurnoverStyle(FlagIcon(), "OFFSIDE"),
-            EventType.BadPass => TurnoverStyle(WarningIcon(), "BAD PASS"),
-            EventType.Miscontrol => TurnoverStyle(WarningIcon(), "MISCONTROL"),
+            EventType.Offside => MissStyle(FlagIcon(), "OFFSIDE"),
+            EventType.BadPass => MissStyle(WarningIcon(), "BAD PASS"),
+            EventType.Miscontrol => MissStyle(WarningIcon(), "MISCONTROL"),
             EventType.Tackle => DefensiveStyle(ShieldIcon(), "TACKLE"),
             EventType.Interception => DefensiveStyle(ShieldIcon(), "INTERCEPTION"),
             EventType.Pressure => DefensiveStyle(ShieldIcon(), "PRESSURE"),
@@ -2833,6 +2863,13 @@ public partial class MatchLiveView : UserControl
             EventType.GoalkeeperHeroics => SaveStyle(GloveIcon(), "KEEPER HEROICS"),
             EventType.CornerKick => ChanceStyle(FlagIcon(), "CORNER KICK"),
             EventType.SetPieceDanger => ChanceStyle(TargetIcon(), "SET PIECE"),
+            EventType.Weather => NeutralStyle(FlagIcon(), "WEATHER"),
+            EventType.VarCheck => ChanceStyle(TargetIcon(), "VAR CHECK"),
+            EventType.VarDecision => ChanceStyle(CheckeredFlagIcon(), "VAR DECISION"),
+            EventType.RefereeControversy => FoulStyle(StopIcon(), "CONTROVERSY"),
+            EventType.GoalkeeperMistake => ChanceStyle(WarningIcon(), "KEEPER ERROR"),
+            EventType.LateDrama => AttackStyle(FireIcon(), "LATE DRAMA"),
+            EventType.RivalryAtmosphere => FoulStyle(FireIcon(), "RIVALRY"),
             EventType.Confrontation => RedCardStyle(FireIcon(), "CONFRONTATION"),
             EventType.CrowdMomentum => AttackStyle(MegaphoneIcon(), "CROWD MOMENTUM"),
             EventType.Exhaustion => MissStyle(BatteryIcon(), "EXHAUSTION"),

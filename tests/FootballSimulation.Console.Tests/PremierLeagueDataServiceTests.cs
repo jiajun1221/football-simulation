@@ -82,6 +82,22 @@ public class PremierLeagueDataServiceTests
     }
 
     [Theory]
+    [InlineData("Chelsea", "Stamford Bridge")]
+    [InlineData("Manchester United", "Old Trafford")]
+    [InlineData("Tottenham Hotspur", "Tottenham Hotspur Stadium")]
+    [InlineData("Everton", "Hill Dickinson Stadium")]
+    public void LoadTeams_PopulatesPremierLeagueVenueNames(string teamName, string expectedVenue)
+    {
+        var dataService = new PremierLeagueDataService();
+
+        var teams = dataService.LoadTeams();
+        var team = teams.Single(team => team.Name == teamName);
+
+        Assert.Equal(expectedVenue, team.Venue);
+        Assert.False(string.IsNullOrWhiteSpace(team.StadiumName));
+    }
+
+    [Theory]
     [InlineData(9.2, PlayerFormStatus.Excellent)]
     [InlineData(8.0, PlayerFormStatus.Good)]
     [InlineData(7.0, PlayerFormStatus.Average)]

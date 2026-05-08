@@ -338,7 +338,10 @@ public class MatchEngineScoringTests
                 var expectedRestartTeam = offsideTeam == homeTeam.Name ? awayTeam.Name : homeTeam.Name;
                 var nextOpenPlayEvent = events
                     .Skip(index + 1)
-                    .FirstOrDefault(matchEvent => matchEvent.EventType is not EventType.Halftime and not EventType.Fulltime);
+                    .FirstOrDefault(matchEvent => matchEvent.EventType is not EventType.Halftime
+                        and not EventType.Fulltime
+                        and not EventType.VarCheck
+                        and not EventType.VarDecision);
 
                 if (nextOpenPlayEvent is null)
                 {

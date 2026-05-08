@@ -521,17 +521,134 @@ public class MatchEventFactory
 
     public MatchEvent CreateConfrontation(int minute, Team team, Player player)
     {
-        return CreateEvent(minute, EventType.Confrontation, $"Tempers flare as {player.Name} gets involved for {team.Name}.", player.Name);
+        return CreateEvent(
+            minute,
+            EventType.Confrontation,
+            Pick(
+                new Random(minute + player.Name.Length + team.Name.Length),
+                $"Tempers flare as {player.Name} gets involved for {team.Name}.",
+                $"Players surround the referee and {player.Name} is right in the middle of it.",
+                $"The match is getting heated; {player.Name} has to be pulled away for {team.Name}."),
+            player.Name);
     }
 
     public MatchEvent CreateCrowdMomentum(int minute, Team team)
     {
-        return CreateEvent(minute, EventType.CrowdMomentum, $"The home crowd lifts {team.Name}. Momentum swings their way.");
+        return CreateEvent(
+            minute,
+            EventType.CrowdMomentum,
+            Pick(
+                new Random(minute + team.Name.Length),
+                $"The crowd erupts and the atmosphere lifts {team.Name}.",
+                $"Stadium noise surges. Momentum swings toward {team.Name}.",
+                $"{team.Name} feed off the noise as pressure builds around the stadium."));
     }
 
     public MatchEvent CreateExhaustion(int minute, Team team, Player player)
     {
         return CreateEvent(minute, EventType.Exhaustion, $"{player.Name} looks exhausted for {team.Name}. Their intensity drops.", player.Name);
+    }
+
+    public MatchEvent CreateWeatherAnnouncement(int minute, WeatherCondition weatherCondition)
+    {
+        var description = weatherCondition switch
+        {
+            WeatherCondition.Rainy => "Rain is falling and the surface is getting slick.",
+            WeatherCondition.HeavyRain => "Heavy rain makes conditions difficult. Players may struggle to keep their footing.",
+            WeatherCondition.Windy => "A swirling wind is affecting long balls and crosses.",
+            WeatherCondition.Foggy => "Fog rolls across the pitch and reactions could be a split second slower.",
+            WeatherCondition.Snow => "Snow is falling. The cold surface could drain legs quickly.",
+            _ => "Clear conditions tonight. The pitch looks quick and clean."
+        };
+
+        return CreateEvent(minute, EventType.Weather, description);
+    }
+
+    public MatchEvent CreateRivalryAtmosphere(int minute, Team homeTeam, Team awayTeam)
+    {
+        return CreateEvent(
+            minute,
+            EventType.RivalryAtmosphere,
+            Pick(
+                new Random(minute + homeTeam.Name.Length + awayTeam.Name.Length),
+                $"{homeTeam.Name} against {awayTeam.Name} has a derby edge already. Neither side is backing down.",
+                $"The atmosphere is fierce for {homeTeam.Name} versus {awayTeam.Name}. Every challenge is being cheered.",
+                $"This rivalry feels loud from the first whistle. The tempo is already rising."));
+    }
+
+    public MatchEvent CreateVarCheck(int minute, string reason)
+    {
+        var description = reason switch
+        {
+            "goal" => "VAR checking possible offside in the build-up...",
+            "penalty" => "VAR checking the penalty decision...",
+            "red card" => "VAR checking the red card decision...",
+            "offside" => "VAR checking a tight offside call...",
+            _ => "VAR review underway. The stadium waits."
+        };
+
+        return CreateEvent(minute, EventType.VarCheck, description);
+    }
+
+    public MatchEvent CreateVarDecision(int minute, Team team, string outcome, Match? match = null)
+    {
+        var description = outcome switch
+        {
+            "goal disallowed" => $"Goal disallowed after VAR review. {team.Name} are pulled back.",
+            "goal stands" => $"VAR confirms the goal for {team.Name}. The celebrations restart.",
+            "penalty overturned" => $"Penalty overturned after VAR review. No foul by {team.Name}.",
+            "red card cancelled" => $"Red card cancelled after VAR review. {team.Name} survive a huge moment.",
+            "offside confirmed" => "Tight offside confirmed by VAR. The restart stands.",
+            _ => "VAR review complete. Decision stands."
+        };
+
+        return CreateEvent(minute, EventType.VarDecision, description, match: match);
+    }
+
+    public MatchEvent CreateRefereeControversy(int minute, Team team, Player? player, Random random)
+    {
+        var description = Pick(random,
+            $"Players furious with the referee's decision. {team.Name} feel that looked harsh.",
+            $"Replay suggests there was very little contact. {team.Name} cannot believe the whistle.",
+            $"{team.Name} surround the referee as frustration spills over.");
+
+        return CreateEvent(minute, EventType.RefereeControversy, description, player?.Name);
+    }
+
+    public MatchEvent CreateWoodwork(int minute, Team attackingTeam, Player attacker, string reboundOutcome, Random random)
+    {
+        var description = Pick(random,
+            $"{attacker.Name} rattles the crossbar for {attackingTeam.Name}! {reboundOutcome}",
+            $"Shot crashes off the post from {attacker.Name}! {reboundOutcome}",
+            $"Woodwork denies {attacker.Name} for {attackingTeam.Name}. {reboundOutcome}");
+
+        return CreateEvent(minute, EventType.Woodwork, description, attacker.Name);
+    }
+
+    public MatchEvent CreateGoalkeeperMistake(int minute, Team defendingTeam, Player goalkeeper, Player attacker, Random random)
+    {
+        var description = Pick(random,
+            $"{goalkeeper.Name} spills the ball under pressure for {defendingTeam.Name}. {attacker.Name} reacts first.",
+            $"Terrible moment at the back as {goalkeeper.Name} cannot hold {attacker.Name}'s effort.",
+            $"{goalkeeper.Name} misjudges it and the ball breaks dangerously inside the box.");
+
+        return CreateEvent(minute, EventType.GoalkeeperMistake, description, goalkeeper.Name, attacker.Name);
+    }
+
+    public MatchEvent CreateLateDrama(int minute, Team team, Team opponentTeam, Match match)
+    {
+        var isLosing = team == match.HomeTeam ? match.HomeScore < match.AwayScore : match.AwayScore < match.HomeScore;
+        var description = isLosing
+            ? Pick(new Random(minute + team.Name.Length),
+                $"{team.Name} are throwing everyone forward. Late drama is unfolding.",
+                $"{team.Name} pile bodies into attack while {opponentTeam.Name} try to hang on.",
+                $"Urgency everywhere now. {team.Name} chase the match with the crowd roaring.")
+            : Pick(new Random(minute + team.Name.Length + opponentTeam.Name.Length),
+                $"{team.Name} sense a late chance to decide this.",
+                $"The final minutes are opening up. {team.Name} push for one more moment.",
+                $"Tension rises as {team.Name} look for a late breakthrough.");
+
+        return CreateEvent(minute, EventType.LateDrama, description);
     }
 
     public MatchEvent CreateHalftime(int minute, Match match)

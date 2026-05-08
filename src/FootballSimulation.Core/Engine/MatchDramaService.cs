@@ -73,8 +73,19 @@ public class MatchDramaService
             : activePlayers.Average(player => 100 - player.Stamina);
         var averagePressing = (context.HomeTeam.Tactics.PressingIntensity + context.AwayTeam.Tactics.PressingIntensity) / 2.0;
         var lateGameBonus = context.Minute >= 70 ? 0.03 : 0.0;
+        var rivalryBonus = context.IsRivalryMatch ? 0.018 : 0.0;
+        var weatherBonus = context.WeatherCondition switch
+        {
+            WeatherCondition.HeavyRain or WeatherCondition.Snow => 0.018,
+            WeatherCondition.Rainy or WeatherCondition.Foggy => 0.010,
+            WeatherCondition.Windy => 0.006,
+            _ => 0.0
+        };
 
-        return Math.Clamp(0.035 + averageFatigue / 900.0 + Math.Max(0, averagePressing - 60) / 700.0 + lateGameBonus, 0.02, 0.18);
+        return Math.Clamp(
+            0.035 + averageFatigue / 900.0 + Math.Max(0, averagePressing - 60) / 700.0 + lateGameBonus + rivalryBonus + weatherBonus,
+            0.02,
+            0.22);
     }
 
     private static Player? FindTiredPlayer(MatchEventContext context)
@@ -259,25 +270,69 @@ public class MatchDramaService
     private static bool ShouldCreateDefensiveError(MatchEventContext context)
     {
         var highLineRisk = Math.Max(context.HomeTeam.Tactics.DefensiveLine, context.AwayTeam.Tactics.DefensiveLine);
-        return context.Random.NextDouble() < 0.18 + Math.Max(0, highLineRisk - 65) / 300.0;
+        var weatherRisk = context.WeatherCondition switch
+        {
+            WeatherCondition.HeavyRain or WeatherCondition.Foggy => 0.08,
+            WeatherCondition.Rainy or WeatherCondition.Snow => 0.04,
+            _ => 0.0
+        };
+
+        return context.Random.NextDouble() < 0.18 + Math.Max(0, highLineRisk - 65) / 300.0 + weatherRisk;
     }
 
     private static MatchDramaResult CreateAtmosphereEvent(MatchEventContext context)
     {
         var roll = context.Random.NextDouble();
-        if (roll < 0.28)
+        if (context.Minute >= 85 && roll < 0.38)
+        {
+            var team = ChooseLatePressureTeam(context);
+            return new MatchDramaResult
+            {
+                EventType = EventType.LateDrama,
+                Team = team,
+                OpponentTeam = team == context.HomeTeam ? context.AwayTeam : context.HomeTeam,
+                HomeAttackModifier = team == context.HomeTeam ? 1.10 : 1.0,
+                AwayAttackModifier = team == context.AwayTeam ? 1.10 : 1.0
+            };
+        }
+
+        if (roll < 0.24)
         {
             var defendingTeam = ChooseWeakerDefense(context);
             return new MatchDramaResult { EventType = EventType.GoalkeeperHeroics, Team = defendingTeam, Player = ChooseGoalkeeper(defendingTeam) };
         }
 
-        if (roll < 0.58)
+        if (roll < 0.48)
         {
             var team = context.HomeTeam.Tactics.PressingIntensity >= context.AwayTeam.Tactics.PressingIntensity ? context.HomeTeam : context.AwayTeam;
-            return new MatchDramaResult { EventType = EventType.Confrontation, Team = team, Player = ChooseDefensivePlayer(team, context.Random) };
+            return new MatchDramaResult
+            {
+                EventType = context.IsRivalryMatch && context.Random.NextDouble() < 0.35
+                    ? EventType.RefereeControversy
+                    : EventType.Confrontation,
+                Team = team,
+                Player = ChooseDefensivePlayer(team, context.Random),
+                HomeDefenseModifier = team == context.HomeTeam ? 0.96 : 1.0,
+                AwayDefenseModifier = team == context.AwayTeam ? 0.96 : 1.0
+            };
         }
 
         return new MatchDramaResult { EventType = EventType.CrowdMomentum, Team = context.HomeTeam, HomeAttackModifier = 1.08 };
+    }
+
+    private static Team ChooseLatePressureTeam(MatchEventContext context)
+    {
+        if (context.Match.HomeScore < context.Match.AwayScore)
+        {
+            return context.HomeTeam;
+        }
+
+        if (context.Match.AwayScore < context.Match.HomeScore)
+        {
+            return context.AwayTeam;
+        }
+
+        return ChooseStrongerAttack(context);
     }
 
     private static Team ChooseStrongerAttack(MatchEventContext context)

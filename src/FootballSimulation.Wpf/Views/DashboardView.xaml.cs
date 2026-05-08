@@ -124,8 +124,7 @@ public partial class DashboardView : UserControl
     private void LoadUpcomingMatch(Fixture fixture, Team selectedTeam)
     {
         var isHome = fixture.HomeTeam == selectedTeam;
-        var opponent = isHome ? fixture.AwayTeam : fixture.HomeTeam;
-        var venue = isHome ? GetVenueName(selectedTeam) : GetVenueName(opponent);
+        var venue = GetVenueName(fixture.HomeTeam);
 
         UpcomingRoundTextBlock.Text = $"Round {fixture.RoundNumber}";
         UpcomingHomeNameTextBlock.Text = fixture.HomeTeam.Name;
@@ -179,7 +178,7 @@ public partial class DashboardView : UserControl
                 return new UpcomingFixtureRow
                 {
                     FixtureTitle = $"R{fixture.RoundNumber}: {(isHome ? "HOME" : "AWAY")} vs {opponent.Name}",
-                    VenueText = isHome ? GetVenueName(selectedTeam) : GetVenueName(opponent),
+                    VenueText = GetVenueName(fixture.HomeTeam),
                     OpponentLogoPath = GetClubLogoPath(opponent.Name),
                     HomeAwayIcon = isHome ? "H" : "A",
                     HomeAwayBrush = isHome ? "#D9F1E1" : "#FFE4BF"
@@ -206,7 +205,7 @@ public partial class DashboardView : UserControl
 
     private static string GetVenueName(Team homeTeam)
     {
-        return $"{homeTeam.Name} Stadium";
+        return TeamVenueService.GetDisplayVenue(homeTeam);
     }
 
     private static string FormatGoalDifference(int goalDifference)

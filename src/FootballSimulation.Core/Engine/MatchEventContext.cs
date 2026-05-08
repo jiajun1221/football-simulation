@@ -9,6 +9,8 @@ public class MatchEventContext
     public required Team AwayTeam { get; init; }
     public required Random Random { get; init; }
     public int Minute { get; init; }
+    public WeatherCondition WeatherCondition { get; init; }
+    public bool IsRivalryMatch { get; init; }
     public double HomeAttackStrength { get; init; }
     public double AwayAttackStrength { get; init; }
     public double HomeDefenseStrength { get; init; }

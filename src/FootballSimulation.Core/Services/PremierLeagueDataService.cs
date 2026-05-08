@@ -92,10 +92,13 @@ public class PremierLeagueDataService
             .ToList();
 
         ValidateSquad(teamRecord.Name, starters, substitutes);
+        var venue = TeamVenueService.GetVenue(teamRecord.Name, teamRecord.Venue, teamRecord.StadiumName);
 
         return new Team
         {
             Name = teamRecord.Name,
+            Venue = venue.Venue,
+            StadiumName = venue.StadiumName,
             Formation = teamRecord.Formation,
             Players = starters,
             Substitutes = substitutes
@@ -129,9 +132,13 @@ public class PremierLeagueDataService
             throw new InvalidOperationException($"{teamRecord.Name} must have a goalkeeper in the JSON data.");
         }
 
+        var venue = TeamVenueService.GetVenue(teamRecord.Name, teamRecord.Venue, teamRecord.StadiumName);
+
         return new Team
         {
             Name = teamRecord.Name,
+            Venue = venue.Venue,
+            StadiumName = venue.StadiumName,
             Formation = teamRecord.Formation,
             Players = teamPlayers,
             Substitutes = substitutes

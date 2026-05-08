@@ -5,6 +5,8 @@
     {
       "teamId": "afc-bournemouth",
       "name": "AFC Bournemouth",
+      "venue": "",
+      "stadiumName": "",
       "formation": "4-3-3",
       "startingXI": [
         {
@@ -488,6 +490,8 @@
     {
       "teamId": "arsenal",
       "name": "Arsenal",
+      "venue": "",
+      "stadiumName": "",
       "formation": "4-3-3",
       "startingXI": [
         {
@@ -1129,6 +1133,8 @@
     {
       "teamId": "aston-villa",
       "name": "Aston Villa",
+      "venue": "",
+      "stadiumName": "",
       "formation": "4-4-2",
       "startingXI": [
         {
@@ -1736,6 +1742,8 @@
     {
       "teamId": "brentford",
       "name": "Brentford",
+      "venue": "",
+      "stadiumName": "",
       "formation": "3-5-2",
       "startingXI": [
         {
@@ -2324,6 +2332,8 @@
     {
       "teamId": "brighton-and-hove-albion",
       "name": "Brighton \u0026 Hove Albion",
+      "venue": "",
+      "stadiumName": "",
       "formation": "4-3-3",
       "startingXI": [
         {
@@ -2946,6 +2956,8 @@
     {
       "teamId": "burnley",
       "name": "Burnley",
+      "venue": "",
+      "stadiumName": "",
       "formation": "4-4-2",
       "startingXI": [
         {
@@ -3509,6 +3521,8 @@
     {
       "teamId": "chelsea",
       "name": "Chelsea",
+      "venue": "",
+      "stadiumName": "",
       "formation": "4-2-3-1",
       "startingXI": [
         {
@@ -4187,6 +4201,8 @@
     {
       "teamId": "crystal-palace",
       "name": "Crystal Palace",
+      "venue": "",
+      "stadiumName": "",
       "formation": "3-5-2",
       "startingXI": [
         {
@@ -4779,6 +4795,8 @@
     {
       "teamId": "everton",
       "name": "Everton",
+      "venue": "",
+      "stadiumName": "",
       "formation": "4-4-2",
       "startingXI": [
         {
@@ -5319,6 +5337,8 @@
     {
       "teamId": "fulham",
       "name": "Fulham",
+      "venue": "",
+      "stadiumName": "",
       "formation": "4-3-3",
       "startingXI": [
         {
@@ -5857,6 +5877,8 @@
     {
       "teamId": "leeds-united",
       "name": "Leeds United",
+      "venue": "",
+      "stadiumName": "",
       "formation": "4-3-3",
       "startingXI": [
         {
@@ -6444,6 +6466,8 @@
     {
       "teamId": "liverpool",
       "name": "Liverpool",
+      "venue": "",
+      "stadiumName": "",
       "formation": "4-3-3",
       "startingXI": [
         {
@@ -7027,6 +7051,8 @@
     {
       "teamId": "manchester-city",
       "name": "Manchester City",
+      "venue": "",
+      "stadiumName": "",
       "formation": "4-3-3",
       "startingXI": [
         {
@@ -7612,6 +7638,8 @@
     {
       "teamId": "manchester-united",
       "name": "Manchester United",
+      "venue": "",
+      "stadiumName": "",
       "formation": "3-5-2",
       "startingXI": [
         {
@@ -8196,6 +8224,8 @@
     {
       "teamId": "newcastle-united",
       "name": "Newcastle United",
+      "venue": "",
+      "stadiumName": "",
       "formation": "4-3-3",
       "startingXI": [
         {
@@ -8746,6 +8776,8 @@
     {
       "teamId": "nottingham-forest",
       "name": "Nottingham Forest",
+      "venue": "",
+      "stadiumName": "",
       "formation": "4-4-2",
       "startingXI": [
         {
@@ -9313,6 +9345,8 @@
     {
       "teamId": "sunderland",
       "name": "Sunderland",
+      "venue": "",
+      "stadiumName": "",
       "formation": "4-4-2",
       "startingXI": [
         {
@@ -9901,6 +9935,8 @@
     {
       "teamId": "tottenham-hotspur",
       "name": "Tottenham Hotspur",
+      "venue": "",
+      "stadiumName": "",
       "formation": "4-3-3",
       "startingXI": [
         {
@@ -10480,6 +10516,8 @@
     {
       "teamId": "west-ham-united",
       "name": "West Ham United",
+      "venue": "",
+      "stadiumName": "",
       "formation": "4-2-3-1",
       "startingXI": [
         {
@@ -11026,6 +11064,8 @@
     {
       "teamId": "wolverhampton-wanderers",
       "name": "Wolverhampton Wanderers",
+      "venue": "",
+      "stadiumName": "",
       "formation": "3-5-2",
       "startingXI": [
         {

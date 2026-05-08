@@ -1,4 +1,5 @@
 using FootballSimulation.Models;
+using FootballSimulation.Services;
 
 namespace FootballSimulation.Data;
 
@@ -6,7 +7,7 @@ public class SeedDataService
 {
     public Team CreateHomeTeam()
     {
-        return new Team
+        var team = new Team
         {
             Name = "Blue Hawks",
             Formation = "4-3-3",
@@ -25,11 +26,14 @@ public class SeedDataService
                 DemoPlayerFactory.CreateForward("Caleb Murphy", attack: 82, defense: 34, passing: 66, stamina: 78, finishing: 84)
             ]
         };
+
+        TeamVenueService.ApplyVenue(team);
+        return team;
     }
 
     public Team CreateAwayTeam()
     {
-        return new Team
+        var team = new Team
         {
             Name = "Red Lions",
             Formation = "4-4-2",
@@ -48,6 +52,9 @@ public class SeedDataService
                 DemoPlayerFactory.CreateForward("Marcus Hale", attack: 79, defense: 34, passing: 64, stamina: 76, finishing: 82)
             ]
         };
+
+        TeamVenueService.ApplyVenue(team);
+        return team;
     }
 
     public (Team HomeTeam, Team AwayTeam) CreateDemoTeams()

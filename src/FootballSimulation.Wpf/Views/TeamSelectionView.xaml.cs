@@ -124,7 +124,7 @@ public partial class TeamSelectionView : UserControl
         {
             Team = team,
             Name = team.Name,
-            Stadium = $"{team.Name} Stadium",
+            Stadium = TeamVenueService.GetDisplayVenue(team),
             City = GetClubCity(team.Name),
             SquadRating = CalculateSquadRating(team),
             Description = CreateClubDescription(team),

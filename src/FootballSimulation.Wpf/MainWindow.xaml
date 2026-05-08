@@ -6,6 +6,7 @@
         Width="1280"
         MinHeight="700"
         MinWidth="1040"
+        Icon="Assets/App/FootballSimulator_AppIcon.ico"
         Background="#E9EEF4">
     <Grid>
         <Grid.RowDefinitions>

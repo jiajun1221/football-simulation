@@ -1,4 +1,5 @@
 using FootballSimulation.Models;
+using FootballSimulation.Services;
 
 namespace FootballSimulation.Data;
 
@@ -67,7 +68,7 @@ public class LeagueSeedDataService
         int staminaBoost,
         int finishingBoost)
     {
-        return new Team
+        var team = new Team
         {
             Name = teamName,
             Formation = formation,
@@ -86,5 +87,8 @@ public class LeagueSeedDataService
                 DemoPlayerFactory.CreateForward($"{forwardThree} Murphy", 82 + attackBoost, 34 + defenseBoost, 66 + passingBoost, 78 + staminaBoost, 84 + finishingBoost)
             ]
         };
+
+        TeamVenueService.ApplyVenue(team);
+        return team;
     }
 }

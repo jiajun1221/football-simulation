@@ -105,6 +105,7 @@ public class MatchEngine
         ResetTeamStamina(awayTeam);
 
         var match = CreateMatch(homeTeam, awayTeam);
+        AssignWeather(match, _random);
         match.CurrentPhase = MatchPhase.NotStarted;
         match.CurrentMinute = 0;
         return match;
@@ -166,11 +167,13 @@ public class MatchEngine
             ResetTeamStamina(awayTeam);
         }
 
+        var random = CreateRandom(seed);
         var match = CreateMatch(homeTeam, awayTeam);
+        AssignWeather(match, random);
         var simulationState = new MatchSimulationState(match, new MatchLogService(), new MatchEventFactory(), 0, 0, CreateOptions(options));
         InitializeAttackFlowState(simulationState);
 
-        RunMatchMinutes(simulationState, CreateRandom(seed), startMinute, endMinute, includeFulltime);
+        RunMatchMinutes(simulationState, random, startMinute, endMinute, includeFulltime);
         FinalizeSimulationState(simulationState);
 
         return match;
@@ -190,6 +193,38 @@ public class MatchEngine
         };
     }
 
+    private static void AssignWeather(Match match, Random random)
+    {
+        match.WeatherCondition = ChooseWeather(random);
+    }
+
+    private static WeatherCondition ChooseWeather(Random random)
+    {
+        var roll = random.NextDouble();
+        return roll switch
+        {
+            < 0.55 => WeatherCondition.Clear,
+            < 0.72 => WeatherCondition.Rainy,
+            < 0.82 => WeatherCondition.Windy,
+            < 0.90 => WeatherCondition.Foggy,
+            < 0.975 => WeatherCondition.HeavyRain,
+            _ => WeatherCondition.Snow
+        };
+    }
+
+    private static void EnsureMatchWeather(MatchSimulationState simulationState, int startMinute)
+    {
+        var match = simulationState.Match;
+        if (startMinute == 1 && !simulationState.MatchLog.GetEvents().Any(matchEvent => matchEvent.EventType == EventType.Weather))
+        {
+            simulationState.MatchLog.AddEvent(simulationState.EventFactory.CreateWeatherAnnouncement(0, match.WeatherCondition));
+            if (match.IsRivalryMatch)
+            {
+                simulationState.MatchLog.AddEvent(simulationState.EventFactory.CreateRivalryAtmosphere(0, match.HomeTeam, match.AwayTeam));
+            }
+        }
+    }
+
     private void RunMatchMinutes(
         MatchSimulationState simulationState,
         Random random,
@@ -200,6 +235,7 @@ public class MatchEngine
         var match = simulationState.Match;
         var homeTeam = match.HomeTeam;
         var awayTeam = match.AwayTeam;
+        EnsureMatchWeather(simulationState, startMinute);
 
         for (var minute = startMinute; minute <= endMinute; minute++)
         {
@@ -216,6 +252,7 @@ public class MatchEngine
             }
 
             var strengthSnapshot = CreateStrengthSnapshot(homeTeam, awayTeam, random);
+            strengthSnapshot = ApplyWeatherModifiers(strengthSnapshot, match.WeatherCondition);
             WriteStrengthDiagnostics(match, minute, strengthSnapshot);
             if (minute > 1)
             {
@@ -339,7 +376,9 @@ public class MatchEngine
             or EventType.Shot
             or EventType.Goal
             or EventType.Miss
+            or EventType.Woodwork
             or EventType.Save
+            or EventType.GoalkeeperMistake
             or EventType.PenaltyDecision
             or EventType.PenaltyTaker
             or EventType.Penalty
@@ -354,7 +393,9 @@ public class MatchEngine
             or EventType.DefensiveStop
             or EventType.WonderGoal
             or EventType.CornerKick
-            or EventType.SetPieceDanger;
+            or EventType.SetPieceDanger
+            or EventType.LateDrama
+            or EventType.CrowdMomentum;
     }
 
     private static Team? GetPossessionTeam(MatchSimulationState simulationState)
@@ -408,10 +449,14 @@ public class MatchEngine
             EventType.Tackle or EventType.Interception or EventType.Pressure or EventType.BlockedPass => opposingTeam,
             EventType.DefensiveStop => actingTeamModel,
             EventType.Save => actingTeamModel,
+            EventType.GoalkeeperMistake => opposingTeam,
             EventType.Goal => opposingTeam,
             EventType.WonderGoal => opposingTeam,
             EventType.Shot => opposingTeam,
             EventType.Miss => opposingTeam,
+            EventType.Woodwork => opposingTeam,
+            EventType.LateDrama => actingTeamModel,
+            EventType.CrowdMomentum => actingTeamModel,
             EventType.Offside => opposingTeam,
             EventType.CornerKick => actingTeamModel,
             EventType.SetPieceDanger => actingTeamModel,
@@ -426,7 +471,8 @@ public class MatchEngine
         {
             EventType.Kickoff => BallState.Kickoff,
             EventType.Attack => BallState.AttackPending,
-            EventType.Shot or EventType.Save or EventType.Goal or EventType.Miss or EventType.WonderGoal => BallState.Chance,
+            EventType.Shot or EventType.Save or EventType.Goal or EventType.Miss or EventType.WonderGoal or EventType.Woodwork => BallState.Chance,
+            EventType.GoalkeeperMistake => BallState.Turnover,
             EventType.CornerKick => BallState.CornerPending,
             EventType.SetPieceDanger => BallState.SetPiecePending,
             EventType.Foul or EventType.Offside or EventType.PenaltyDecision or EventType.PenaltyTaker or EventType.Penalty => BallState.SetPiece,
@@ -450,6 +496,9 @@ public class MatchEngine
             case EventType.Miss:
             case EventType.Goal:
             case EventType.WonderGoal:
+            case EventType.Woodwork:
+            case EventType.LateDrama:
+            case EventType.CrowdMomentum:
             case EventType.Offside:
             case EventType.BadPass:
             case EventType.Miscontrol:
@@ -468,10 +517,12 @@ public class MatchEngine
             case EventType.RedCard:
             case EventType.DefensiveStop:
             case EventType.DefensiveError:
+            case EventType.GoalkeeperMistake:
             case EventType.Tackle:
             case EventType.Interception:
             case EventType.Pressure:
             case EventType.BlockedPass:
+            case EventType.RefereeControversy:
                 return primaryPlayerTeam ?? FindMentionedTeamName(matchEvent, match);
         }
 
@@ -576,6 +627,7 @@ public class MatchEngine
             CurrentPhase = MatchPhase.NotStarted,
             HomePossessionMoments = 0,
             AwayPossessionMoments = 0,
+            IsRivalryMatch = IsRivalry(homeTeam.Name, awayTeam.Name),
             SuperSubBoosts = []
         };
 
@@ -626,6 +678,27 @@ public class MatchEngine
                 awayTacticalDefense,
                 CalculateFatiguePenalty(awayTeam),
                 awayDefenseSwing));
+    }
+
+    private static TeamStrengthSnapshot ApplyWeatherModifiers(TeamStrengthSnapshot snapshot, WeatherCondition weatherCondition)
+    {
+        var (attackModifier, defenseModifier) = weatherCondition switch
+        {
+            WeatherCondition.Rainy => (0.985, 0.99),
+            WeatherCondition.HeavyRain => (0.95, 0.94),
+            WeatherCondition.Windy => (0.965, 1.0),
+            WeatherCondition.Foggy => (0.975, 0.965),
+            WeatherCondition.Snow => (0.94, 0.955),
+            _ => (1.0, 1.0)
+        };
+
+        return snapshot with
+        {
+            HomeAttackStrength = snapshot.HomeAttackStrength * attackModifier,
+            AwayAttackStrength = snapshot.AwayAttackStrength * attackModifier,
+            HomeDefenseStrength = snapshot.HomeDefenseStrength * defenseModifier,
+            AwayDefenseStrength = snapshot.AwayDefenseStrength * defenseModifier
+        };
     }
 
     private static double GetRandomStrengthSwing(Random random)
@@ -719,6 +792,8 @@ public class MatchEngine
             AwayTeam = match.AwayTeam,
             Random = random,
             Minute = minute,
+            WeatherCondition = match.WeatherCondition,
+            IsRivalryMatch = match.IsRivalryMatch,
             HomeAttackStrength = strengthSnapshot.HomeAttackStrength,
             AwayAttackStrength = strengthSnapshot.AwayAttackStrength,
             HomeDefenseStrength = strengthSnapshot.HomeDefenseStrength,
@@ -763,6 +838,8 @@ public class MatchEngine
             EventType.WonderGoal => eventFactory.CreateWonderGoal(minute, dramaResult.Team, dramaResult.Player!, match),
             EventType.GoalkeeperHeroics => eventFactory.CreateGoalkeeperHeroics(minute, dramaResult.Team, dramaResult.Player!),
             EventType.SetPieceDanger => eventFactory.CreateSetPieceDanger(minute, dramaResult.Team, dramaResult.Player!),
+            EventType.RefereeControversy => eventFactory.CreateRefereeControversy(minute, dramaResult.Team, dramaResult.Player, new Random(minute + dramaResult.Team.Name.Length)),
+            EventType.LateDrama => eventFactory.CreateLateDrama(minute, dramaResult.Team, dramaResult.OpponentTeam ?? GetOpposingTeam(match, dramaResult.Team), match),
             EventType.Confrontation => eventFactory.CreateConfrontation(minute, dramaResult.Team, dramaResult.Player!),
             EventType.CrowdMomentum => eventFactory.CreateCrowdMomentum(minute, dramaResult.Team),
             EventType.Exhaustion => eventFactory.CreateExhaustion(minute, dramaResult.Team, dramaResult.Player!),
@@ -878,11 +955,12 @@ public class MatchEngine
             shooterPerformance.Offsides++;
             shooterPerformance.Rating -= 0.08;
             matchLog.AddEvent(eventFactory.CreateOffside(minute, attackingTeam, shooter, chanceType, random));
+            TryAddVarAfterOffside(minute, match, attackingTeam, random, matchLog, eventFactory);
             MarkAttackResolved(simulationState, defendingTeam, BallState.BuildUp, EventType.Offside);
             return defendingTeam;
         }
 
-        if (ShouldCommitFoul(defendingTeam, attackingTeamStrength, defendingTeamStrength, random))
+        if (ShouldCommitFoul(match, defendingTeam, attackingTeamStrength, defendingTeamStrength, random))
         {
             var foulContext = CreateFoulContext(chanceType, attackingTeamStrength, defendingTeamStrength, random);
             var possessionAfterFoul = HandleFoul(minute, match, attackingTeam, defendingTeam, shooter, random, matchLog, eventFactory, defendingStats, foulContext);
@@ -1099,11 +1177,19 @@ public class MatchEngine
         defenderPerformance.Fouls++;
         defenderPerformance.Rating -= 0.15;
         GetOrCreatePerformance(match, GetOpposingTeam(match, defendingTeam), fouledPlayer).Rating += 0.05;
+        TryAddRefereeControversy(minute, defendingTeam, defender, foulContext, random, matchLog, eventFactory);
 
         var redCardReason = GetStraightRedReason(foulContext, defender, random);
         if (redCardReason is not null)
         {
-            ApplyRedCard(minute, match, defendingTeam, attackingTeam, defender, defenderPerformance, defendingStats, matchLog, eventFactory, redCardReason);
+            if (TryCancelRedCardWithVar(minute, match, defendingTeam, defender, random, matchLog, eventFactory))
+            {
+                defenderPerformance.Rating += 0.12;
+            }
+            else
+            {
+                ApplyRedCard(minute, match, defendingTeam, attackingTeam, defender, defenderPerformance, defendingStats, matchLog, eventFactory, redCardReason);
+            }
         }
         else if (ShouldGiveYellowCard(defender, random))
         {
@@ -1240,6 +1326,12 @@ public class MatchEngine
         var goalkeeper = saved ? GetGoalkeeper(defendingTeam) : null;
 
         matchLog.AddEvent(eventFactory.CreatePenaltyDecision(minute, defendingTeam, defender, fouledPlayer, foulContext.PenaltyReason));
+        if (TryOverturnPenaltyWithVar(minute, match, defendingTeam, random, matchLog, eventFactory))
+        {
+            GetOrCreatePerformance(match, attackingTeam, fouledPlayer).Rating -= 0.05;
+            return defendingTeam;
+        }
+
         matchLog.AddEvent(eventFactory.CreatePenaltyTaker(
             minute,
             attackingTeam,
@@ -1329,6 +1421,15 @@ public class MatchEngine
             shooterPerformance.Goals++;
             shooterPerformance.Rating += 1.40 + goalProbability;
             matchLog.AddEvent(eventFactory.CreateWonderGoal(minute, attackingTeam, shooter, match, GetTriggeredWonderGoalTrait(shooter, chanceType)));
+            ApplyConfidenceBoost(shooter);
+            if (TryDisallowGoalWithVar(minute, match, attackingTeam, shooter, null, random, matchLog, eventFactory))
+            {
+                attackingStats.ShotsOnTarget = Math.Max(0, attackingStats.ShotsOnTarget - 1);
+                shooterPerformance.ShotsOnTarget = Math.Max(0, shooterPerformance.ShotsOnTarget - 1);
+                shooterPerformance.Goals = Math.Max(0, shooterPerformance.Goals - 1);
+                shooterPerformance.Rating -= 1.05;
+            }
+
             return defendingTeam;
         }
 
@@ -1371,6 +1472,50 @@ public class MatchEngine
                 random,
                 assister,
                 GetTriggeredGoalTrait(shooter, assister, chanceType, goalTypeDescription)));
+            ApplyConfidenceBoost(shooter);
+            if (TryDisallowGoalWithVar(minute, match, attackingTeam, shooter, assister, random, matchLog, eventFactory))
+            {
+                attackingStats.ShotsOnTarget = Math.Max(0, attackingStats.ShotsOnTarget - 1);
+                shooterPerformance.ShotsOnTarget = Math.Max(0, shooterPerformance.ShotsOnTarget - 1);
+                shooterPerformance.Goals = Math.Max(0, shooterPerformance.Goals - 1);
+                shooterPerformance.Rating -= 0.90;
+                if (assister is not null)
+                {
+                    var assisterPerformance = GetOrCreatePerformance(match, attackingTeam, assister);
+                    assisterPerformance.Assists = Math.Max(0, assisterPerformance.Assists - 1);
+                    assisterPerformance.Rating -= 0.25;
+                }
+            }
+
+            return defendingTeam;
+        }
+
+        if (ShouldHitWoodwork(goalProbability, match.WeatherCondition, random))
+        {
+            var reboundOutcome = ChooseWoodworkReboundOutcome(random);
+            matchLog.AddEvent(eventFactory.CreateWoodwork(minute, attackingTeam, shooter, reboundOutcome, random));
+            ApplyConfidenceDrop(shooter, goalProbability >= 0.20 ? 0.03 : 0.015);
+
+            if (reboundOutcome.Contains("cleared", StringComparison.OrdinalIgnoreCase))
+            {
+                var reboundDefender = ApplyDefensiveContribution(match, defendingTeam, random, ratingBoostOverride: 0.07, allowBlocks: true);
+                matchLog.AddEvent(eventFactory.CreateDefensiveStop(minute, defendingTeam, reboundDefender, shooter, random));
+            }
+            else if (reboundOutcome.Contains("keeper", StringComparison.OrdinalIgnoreCase))
+            {
+                var goalkeeper = GetGoalkeeper(defendingTeam);
+                if (goalkeeper is not null)
+                {
+                    GetOrCreatePerformance(match, defendingTeam, goalkeeper).Rating += 0.10;
+                    matchLog.AddEvent(eventFactory.CreateSave(minute, defendingTeam, shooter, goalkeeper, "follow-up claim", random));
+                }
+            }
+            else if (random.NextDouble() < 0.22)
+            {
+                attackingStats.Corners++;
+                return HandleCornerSequence(minute, match, attackingTeam, defendingTeam, playmaker, random, matchLog, eventFactory);
+            }
+
             return defendingTeam;
         }
 
@@ -1395,6 +1540,26 @@ public class MatchEngine
                     saveType,
                     random,
                     GetTriggeredSaveTrait(goalkeeper, chanceType)));
+                if (ShouldCreateGoalkeeperMistake(goalkeeper, match.WeatherCondition, random))
+                {
+                    matchLog.AddEvent(eventFactory.CreateGoalkeeperMistake(minute, defendingTeam, goalkeeper, shooter, random));
+                    goalkeeperPerformance.Rating -= 0.35;
+                    if (random.NextDouble() < 0.22)
+                    {
+                        UpdateScore(match, attackingTeam);
+                        shooterPerformance.Goals++;
+                        shooterPerformance.Rating += 0.75;
+                        matchLog.AddEvent(eventFactory.CreateGoal(
+                            minute,
+                            attackingTeam,
+                            shooter,
+                            match,
+                            "scrambled rebound after a goalkeeper mistake",
+                            random));
+                        ApplyConfidenceBoost(shooter);
+                        return defendingTeam;
+                    }
+                }
             }
             else
             {
@@ -1420,7 +1585,181 @@ public class MatchEngine
 
         var shotStyle = ChooseShotStyle(shooter, random, chanceType);
         matchLog.AddEvent(eventFactory.CreateMiss(minute, attackingTeam, shooter, shotStyle, random));
+        ApplyConfidenceDrop(shooter, goalProbability >= 0.20 ? 0.04 : 0.015);
         return defendingTeam;
+    }
+
+    private static bool TryDisallowGoalWithVar(
+        int minute,
+        Match match,
+        Team attackingTeam,
+        Player scorer,
+        Player? assister,
+        Random random,
+        MatchLogService matchLog,
+        MatchEventFactory eventFactory)
+    {
+        var checkChance = match.IsRivalryMatch ? 0.14 : 0.09;
+        if (random.NextDouble() > checkChance)
+        {
+            return false;
+        }
+
+        matchLog.AddEvent(eventFactory.CreateVarCheck(minute, "goal"));
+        var disallowed = random.NextDouble() < 0.14;
+        if (!disallowed)
+        {
+            matchLog.AddEvent(eventFactory.CreateVarDecision(minute, attackingTeam, "goal stands", match));
+            return false;
+        }
+
+        UndoScore(match, attackingTeam);
+        scorer.Morale = Math.Clamp(scorer.Morale - 2, 0, 100);
+        if (assister is not null)
+        {
+            assister.Morale = Math.Clamp(assister.Morale - 1, 0, 100);
+        }
+
+        matchLog.AddEvent(eventFactory.CreateVarDecision(minute, attackingTeam, "goal disallowed", match));
+        matchLog.AddEvent(eventFactory.CreateCrowdMomentum(minute, GetOpposingTeam(match, attackingTeam)));
+        return true;
+    }
+
+    private static void TryAddVarAfterOffside(
+        int minute,
+        Match match,
+        Team attackingTeam,
+        Random random,
+        MatchLogService matchLog,
+        MatchEventFactory eventFactory)
+    {
+        if (random.NextDouble() > 0.08)
+        {
+            return;
+        }
+
+        matchLog.AddEvent(eventFactory.CreateVarCheck(minute, "offside"));
+        matchLog.AddEvent(eventFactory.CreateVarDecision(minute, attackingTeam, "offside confirmed", match));
+    }
+
+    private static bool TryOverturnPenaltyWithVar(
+        int minute,
+        Match match,
+        Team defendingTeam,
+        Random random,
+        MatchLogService matchLog,
+        MatchEventFactory eventFactory)
+    {
+        if (random.NextDouble() > 0.07)
+        {
+            return false;
+        }
+
+        matchLog.AddEvent(eventFactory.CreateVarCheck(minute, "penalty"));
+        var overturned = random.NextDouble() < 0.28;
+        if (!overturned)
+        {
+            matchLog.AddEvent(eventFactory.CreateVarDecision(minute, defendingTeam, "decision stands", match));
+            return false;
+        }
+
+        matchLog.AddEvent(eventFactory.CreateVarDecision(minute, defendingTeam, "penalty overturned", match));
+        matchLog.AddEvent(eventFactory.CreateCrowdMomentum(minute, defendingTeam));
+        return true;
+    }
+
+    private static bool TryCancelRedCardWithVar(
+        int minute,
+        Match match,
+        Team defendingTeam,
+        Player defender,
+        Random random,
+        MatchLogService matchLog,
+        MatchEventFactory eventFactory)
+    {
+        if (random.NextDouble() > 0.10)
+        {
+            return false;
+        }
+
+        matchLog.AddEvent(eventFactory.CreateVarCheck(minute, "red card"));
+        var cancelled = random.NextDouble() < 0.25;
+        if (!cancelled)
+        {
+            matchLog.AddEvent(eventFactory.CreateVarDecision(minute, defendingTeam, "decision stands", match));
+            return false;
+        }
+
+        defender.Morale = Math.Clamp(defender.Morale + 2, 0, 100);
+        matchLog.AddEvent(eventFactory.CreateVarDecision(minute, defendingTeam, "red card cancelled", match));
+        return true;
+    }
+
+    private static void TryAddRefereeControversy(
+        int minute,
+        Team defendingTeam,
+        Player defender,
+        FoulContext foulContext,
+        Random random,
+        MatchLogService matchLog,
+        MatchEventFactory eventFactory)
+    {
+        var chance = foulContext.IsPenalty || foulContext.DeniesClearChance ? 0.12 : 0.045;
+        if (random.NextDouble() > chance)
+        {
+            return;
+        }
+
+        matchLog.AddEvent(eventFactory.CreateRefereeControversy(minute, defendingTeam, defender, random));
+        if (random.NextDouble() < 0.45)
+        {
+            matchLog.AddEvent(eventFactory.CreateConfrontation(minute, defendingTeam, defender));
+        }
+    }
+
+    private static bool ShouldHitWoodwork(double goalProbability, WeatherCondition weatherCondition, Random random)
+    {
+        var weatherBonus = weatherCondition is WeatherCondition.Windy or WeatherCondition.HeavyRain ? 0.01 : 0.0;
+        var probability = Math.Clamp(0.035 + goalProbability * 0.20 + weatherBonus, 0.035, 0.10);
+        return random.NextDouble() < probability;
+    }
+
+    private static string ChooseWoodworkReboundOutcome(Random random)
+    {
+        return random.NextDouble() switch
+        {
+            < 0.34 => "The rebound is cleared by the defense.",
+            < 0.62 => "The rebound drops safely to the keeper.",
+            < 0.82 => "It spins behind for a corner.",
+            _ => "It bounces back into traffic and chaos follows."
+        };
+    }
+
+    private static bool ShouldCreateGoalkeeperMistake(Player goalkeeper, WeatherCondition weatherCondition, Random random)
+    {
+        var weatherBonus = weatherCondition switch
+        {
+            WeatherCondition.HeavyRain => 0.075,
+            WeatherCondition.Rainy or WeatherCondition.Snow => 0.04,
+            WeatherCondition.Foggy => 0.025,
+            _ => 0.0
+        };
+        var ratingRisk = Math.Max(0, 78 - goalkeeper.OverallRating) / 500.0;
+        var fatigueRisk = Math.Max(0, 35 - goalkeeper.Stamina) / 700.0;
+
+        return random.NextDouble() < Math.Clamp(0.018 + weatherBonus + ratingRisk + fatigueRisk, 0.012, 0.12);
+    }
+
+    private static void ApplyConfidenceBoost(Player player)
+    {
+        player.Morale = Math.Clamp(player.Morale + 2, 0, 100);
+        player.LiveMatchModifier = Math.Clamp(player.LiveMatchModifier + 0.02, 0.70, 1.18);
+    }
+
+    private static void ApplyConfidenceDrop(Player player, double modifierDrop)
+    {
+        player.Morale = Math.Clamp(player.Morale - 1, 0, 100);
+        player.LiveMatchModifier = Math.Clamp(player.LiveMatchModifier - modifierDrop, 0.70, 1.18);
     }
 
     private static bool ShouldScoreWonderGoal(Player shooter, string chanceType, Random random)
@@ -2047,6 +2386,18 @@ public class MatchEngine
         ApplyGoalMoraleSwing(scoringTeam, concedingTeam);
     }
 
+    private static void UndoScore(Match match, Team scoringTeam)
+    {
+        if (scoringTeam == match.HomeTeam)
+        {
+            match.HomeScore = Math.Max(0, match.HomeScore - 1);
+        }
+        else
+        {
+            match.AwayScore = Math.Max(0, match.AwayScore - 1);
+        }
+    }
+
     private static void ApplyGoalMoraleSwing(Team scoringTeam, Team concedingTeam)
     {
         foreach (var player in GetActivePitchPlayers(scoringTeam))
@@ -2169,6 +2520,24 @@ public class MatchEngine
                 if (player is not null)
                 {
                     GetOrCreatePerformance(match, dramaResult.Team, player).Rating -= 0.10;
+                }
+
+                break;
+
+            case EventType.RefereeControversy:
+                foreach (var activePlayer in GetActivePitchPlayers(dramaResult.Team))
+                {
+                    activePlayer.Morale = Math.Clamp(activePlayer.Morale - 1, 0, 100);
+                }
+
+                break;
+
+            case EventType.CrowdMomentum:
+            case EventType.LateDrama:
+                foreach (var activePlayer in GetActivePitchPlayers(dramaResult.Team))
+                {
+                    activePlayer.Morale = Math.Clamp(activePlayer.Morale + 1, 0, 100);
+                    activePlayer.LiveMatchModifier = Math.Clamp(activePlayer.LiveMatchModifier + 0.01, 0.70, 1.16);
                 }
 
                 break;
@@ -2322,6 +2691,7 @@ public class MatchEngine
     }
 
     private static bool ShouldCommitFoul(
+        Match match,
         Team defendingTeam,
         double attackingTeamStrength,
         double defendingTeamStrength,
@@ -2330,10 +2700,12 @@ public class MatchEngine
         var foulPressure = defendingTeamStrength - (attackingTeamStrength * 0.20);
         var aggressionBonus = GetActivePitchPlayers(defendingTeam)
             .Count(player => player.Traits.Contains(PlayerTrait.DivesIntoTackles)) * 0.022;
+        var rivalryBonus = match.IsRivalryMatch ? 0.035 : 0.0;
+        var weatherBonus = match.WeatherCondition is WeatherCondition.HeavyRain or WeatherCondition.Snow ? 0.018 : 0.0;
         var foulProbability = Math.Clamp(
-            MatchConstants.BaseFoulChancePerAttack + aggressionBonus + (foulPressure / 400.0) + GetProbabilitySwing(random, 0.03),
+            MatchConstants.BaseFoulChancePerAttack + aggressionBonus + rivalryBonus + weatherBonus + (foulPressure / 400.0) + GetProbabilitySwing(random, 0.03),
             0.05,
-            0.32);
+            match.IsRivalryMatch ? 0.38 : 0.32);
 
         return random.NextDouble() < foulProbability;
     }
@@ -2724,6 +3096,13 @@ public class MatchEngine
 
         var tacticalLoad = (team.Tactics.PressingIntensity + team.Tactics.Tempo + team.Tactics.DefensiveLine) / 3.0;
         var loadModifier = 1.0 + (Math.Max(0.0, tacticalLoad - 50.0) / 100.0);
+        loadModifier *= match.WeatherCondition switch
+        {
+            WeatherCondition.HeavyRain => 1.10,
+            WeatherCondition.Snow => 1.14,
+            WeatherCondition.Rainy => 1.04,
+            _ => 1.0
+        };
         var staminaLoss = MatchConstants.StaminaLossPerMinute * loadModifier;
 
         foreach (var player in GetActivePitchPlayers(team))
@@ -2760,6 +3139,35 @@ public class MatchEngine
         return team == match.HomeTeam
             ? match.HomeScore < match.AwayScore
             : match.AwayScore < match.HomeScore;
+    }
+
+    private static bool IsRivalry(string homeTeamName, string awayTeamName)
+    {
+        var key = NormalizeRivalryPair(homeTeamName, awayTeamName);
+        return key is "arsenal|chelsea"
+            or "arsenal|tottenham"
+            or "chelsea|tottenham"
+            or "everton|liverpool"
+            or "liverpool|manchester united"
+            or "manchester city|manchester united"
+            or "newcastle|sunderland"
+            or "aston villa|wolves"
+            or "leeds|manchester united";
+    }
+
+    private static string NormalizeRivalryPair(string firstTeamName, string secondTeamName)
+    {
+        var teams = new[] { NormalizeTeamName(firstTeamName), NormalizeTeamName(secondTeamName) };
+        Array.Sort(teams, StringComparer.Ordinal);
+        return $"{teams[0]}|{teams[1]}";
+    }
+
+    private static string NormalizeTeamName(string teamName)
+    {
+        return teamName.Trim().ToLowerInvariant()
+            .Replace("fc", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("afc", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Trim();
     }
 
     private IEnumerable<Player> GetAvailablePlayers(Team team)
