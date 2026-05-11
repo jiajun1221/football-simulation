@@ -23,7 +23,7 @@ public partial class PreMatchView : UserControl
     private readonly TacticalInsightService _tacticalInsightService = new();
     private readonly SquadSelectionService _squadSelectionService = new();
     private const double PitchCardWidth = 128;
-    private const double PitchCardHeight = 94;
+    private const double PitchCardHeight = 70;
 
     private Player? _selectedStarter;
     private List<Player> _pitchSlots = [];
@@ -207,6 +207,7 @@ public partial class PreMatchView : UserControl
             ToolTip = "Drag this player or drop another player here.",
             Content = card,
             ContentTemplate = (DataTemplate)FindResource("PitchPlayerCardTemplate"),
+            Style = (Style)FindResource("PitchPlayerButtonStyle"),
             Background = Brushes.Transparent,
             BorderBrush = Brushes.Transparent,
             BorderThickness = new Thickness(0),
@@ -458,8 +459,13 @@ public partial class PreMatchView : UserControl
         SelectedPlayerInjuryChip.Text = _selectedStarter.IsInjured
             ? $"{_selectedStarter.InjuryType} | {(_selectedStarter.IsSeasonEndingInjury ? "Season" : $"{Math.Max(1, _selectedStarter.InjuryRecoveryMatches)} matches")}"
             : "Available";
-        SelectedPlayerInjuryChip.Foreground = ToBrush(_selectedStarter.IsInjured ? "#8F1F1F" : "#236B39");
-        SelectedPlayerInjuryChipBorder.Background = ToBrush(_selectedStarter.IsInjured ? "#FFD1D1" : "#D9F1E1");
+        var useDarkInjuryChip = ThemeManager.CurrentTheme == AppTheme.Dark;
+        SelectedPlayerInjuryChip.Foreground = ToBrush(_selectedStarter.IsInjured
+            ? (useDarkInjuryChip ? "#FCA5A5" : "#8F1F1F")
+            : (useDarkInjuryChip ? "#86EFAC" : "#236B39"));
+        SelectedPlayerInjuryChipBorder.Background = ToBrush(_selectedStarter.IsInjured
+            ? (useDarkInjuryChip ? ThemeManager.GetBrushHex("FeedAttackBackground", "#3B1115") : "#FFD1D1")
+            : (useDarkInjuryChip ? ThemeManager.GetBrushHex("AppSecondaryCardBackground", "#111827") : "#D9F1E1"));
         SelectedPlayerStaminaTextBlock.Text = $"{GetStaminaPercentage(_selectedStarter)}% stamina";
         SelectedPlayerStaminaFill.Foreground = ToBrush(GetStaminaBrush(_selectedStarter));
 
@@ -946,7 +952,7 @@ public partial class PreMatchView : UserControl
             return;
         }
 
-        button.BorderBrush = new SolidColorBrush(Color.FromRgb(255, 224, 102));
+        button.BorderBrush = ToBrush(ThemeManager.GetBrushHex("AppHighlightBrush", "#6B4A16"));
         button.BorderThickness = new Thickness(3);
         button.Background = new SolidColorBrush(Color.FromArgb(52, 255, 255, 255));
     }
@@ -965,16 +971,16 @@ public partial class PreMatchView : UserControl
             return;
         }
 
-        border.BorderBrush = new SolidColorBrush(Color.FromRgb(255, 224, 102));
+        border.BorderBrush = ToBrush(ThemeManager.GetBrushHex("AppHighlightBrush", "#6B4A16"));
         border.BorderThickness = new Thickness(3);
-        border.Background = new SolidColorBrush(Color.FromRgb(255, 248, 210));
+        border.Background = ToBrush(ThemeManager.GetBrushHex("TableCurrentClubBackground", "#5A3D12"));
     }
 
     private static void ResetSubstituteDropTargetStyle(Border border)
     {
-        border.BorderBrush = new SolidColorBrush(Color.FromRgb(214, 223, 234));
-        border.BorderThickness = new Thickness(1);
-        border.Background = Brushes.White;
+        border.ClearValue(Border.BorderBrushProperty);
+        border.ClearValue(Border.BorderThicknessProperty);
+        border.ClearValue(Border.BackgroundProperty);
     }
 
     private void ApplySubstituteListDropTargetStyle(bool canDrop)

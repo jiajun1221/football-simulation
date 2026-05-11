@@ -4,6 +4,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using FootballSimulation.Models;
 using FootballSimulation.Services;
+using FootballSimulation.Wpf.Services;
 using FootballSimulation.Wpf.State;
 
 namespace FootballSimulation.Wpf.Views;
@@ -47,8 +48,20 @@ public partial class DashboardView : UserControl
 
         _state = state;
         _navigate = navigate;
+        ThemeManager.ThemeChanged += ThemeManager_ThemeChanged;
+        Unloaded += DashboardView_Unloaded;
 
         LoadDashboard();
+    }
+
+    private void ThemeManager_ThemeChanged(object? sender, EventArgs e)
+    {
+        LoadDashboard();
+    }
+
+    private void DashboardView_Unloaded(object sender, RoutedEventArgs e)
+    {
+        ThemeManager.ThemeChanged -= ThemeManager_ThemeChanged;
     }
 
     private void LoadDashboard()
@@ -115,7 +128,7 @@ public partial class DashboardView : UserControl
                     LastFive = recentResults,
                     IsSelectedTeam = entry.TeamName == selectedTeam.Name,
                     ZoneBrush = GetZoneBrush(position, league.Table.Count),
-                    RowBackground = GetRowBackground(position, league.Table.Count)
+                    RowBackground = GetRowBackground(position)
                 };
             })
             .ToList();
@@ -181,14 +194,42 @@ public partial class DashboardView : UserControl
                     VenueText = GetVenueName(fixture.HomeTeam),
                     OpponentLogoPath = GetClubLogoPath(opponent.Name),
                     HomeAwayIcon = isHome ? "H" : "A",
-                    HomeAwayBrush = isHome ? "#D9F1E1" : "#FFE4BF"
+                    HomeAwayBrush = GetHomeAwayBadgeBackground(isHome),
+                    HomeAwayForeground = GetHomeAwayBadgeForeground(isHome)
                 };
             })
             .ToList();
 
         return fixtures.Count == 0
-            ? [new UpcomingFixtureRow { FixtureTitle = "No upcoming fixtures.", VenueText = "Season schedule is complete.", HomeAwayIcon = "-", HomeAwayBrush = "#E1E5EA" }]
+            ? [new UpcomingFixtureRow
+            {
+                FixtureTitle = "No upcoming fixtures.",
+                VenueText = "Season schedule is complete.",
+                HomeAwayIcon = "-",
+                HomeAwayBrush = ThemeManager.GetBrushHex("AppSecondaryCardBackground", "#111827"),
+                HomeAwayForeground = ThemeManager.GetBrushHex("AppMutedTextBrush", "#94A3B8")
+            }]
             : fixtures;
+    }
+
+    private static string GetHomeAwayBadgeBackground(bool isHome)
+    {
+        if (ThemeManager.CurrentTheme == AppTheme.Dark)
+        {
+            return isHome ? "#12351F" : "#3A2411";
+        }
+
+        return isHome ? "#D9F1E1" : "#FFE4BF";
+    }
+
+    private static string GetHomeAwayBadgeForeground(bool isHome)
+    {
+        if (ThemeManager.CurrentTheme == AppTheme.Dark)
+        {
+            return isHome ? "#86EFAC" : "#FDBA74";
+        }
+
+        return isHome ? "#236B39" : "#8A4E00";
     }
 
     private static bool IsTeamInFixture(Fixture fixture, Team team)
@@ -247,24 +288,11 @@ public partial class DashboardView : UserControl
         return position > tableSize - 3 ? "#EF4444" : "Transparent";
     }
 
-    private static string GetRowBackground(int position, int tableSize)
+    private static string GetRowBackground(int position)
     {
-        if (position <= 4)
-        {
-            return "#F7FAFF";
-        }
-
-        if (position == 5)
-        {
-            return "#FFF8F0";
-        }
-
-        if (position == 6)
-        {
-            return "#F4FFF7";
-        }
-
-        return position > tableSize - 3 ? "#FFF6F6" : "#FFFFFF";
+        return position % 2 == 0
+            ? ThemeManager.GetBrushHex("TableAlternateRowBackground", "#132033")
+            : ThemeManager.GetBrushHex("TableRowBackground", "#0F172A");
     }
 
     private static ImageSource? CreateImageSource(string logoPath)
@@ -359,5 +387,6 @@ public partial class DashboardView : UserControl
         public string OpponentLogoPath { get; init; } = string.Empty;
         public string HomeAwayIcon { get; init; } = string.Empty;
         public string HomeAwayBrush { get; init; } = "#E1E5EA";
+        public string HomeAwayForeground { get; init; } = "#64748B";
     }
 }

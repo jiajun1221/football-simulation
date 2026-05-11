@@ -74,6 +74,7 @@ public partial class MatchLiveView : UserControl
         InitializeTacticalControls();
         PrepareContinueButton();
 
+        ThemeManager.ThemeChanged += ThemeManager_ThemeChanged;
         Loaded += MatchLiveView_Loaded;
         Unloaded += MatchLiveView_Unloaded;
     }
@@ -94,7 +95,14 @@ public partial class MatchLiveView : UserControl
 
     private void MatchLiveView_Unloaded(object sender, RoutedEventArgs e)
     {
+        ThemeManager.ThemeChanged -= ThemeManager_ThemeChanged;
         CancelPlayback();
+    }
+
+    private void ThemeManager_ThemeChanged(object? sender, EventArgs e)
+    {
+        RefreshVisibleFeedTheme();
+        UpdatePlaybackControls();
     }
 
     private bool InitializeLiveMatchContext()
@@ -1122,8 +1130,17 @@ public partial class MatchLiveView : UserControl
         PausedActionPanel.Opacity = _isPlaybackPaused ? 1.0 : 0.48;
         PausedBenchListBox.IsEnabled = _isPlaybackPaused && substitutionsLeft > 0;
         SubsLeftTextBlock.Text = $"Subs left: {Math.Max(0, substitutionsLeft)}";
-        PausedSubstitutionPanelBorder.BorderBrush = ToBrush(isMandatoryInjurySubPending ? "#D92D20" : "Transparent");
-        PausedSubstitutionPanelBorder.Background = ToBrush(isMandatoryInjurySubPending ? "#FFF5F5" : "White");
+        PausedSubstitutionPanelBorder.BorderBrush = ToBrush(isMandatoryInjurySubPending
+            ? "#D92D20"
+            : ThemeManager.GetBrushHex("AppBorderBrush", "#243247"));
+        PausedSubstitutionPanelBorder.Background = ToBrush(isMandatoryInjurySubPending
+            ? ThemeManager.GetBrushHex("FeedAttackBackground", "#3B1115")
+            : GetLiveMatchCardBackground());
+    }
+
+    private static string GetLiveMatchCardBackground()
+    {
+        return ThemeManager.GetBrushHex("AppCardBackground", "#0F172A");
     }
 
     private void UpdateSpeedControls()
@@ -1983,6 +2000,25 @@ public partial class MatchLiveView : UserControl
         }
     }
 
+    private void RefreshVisibleFeedTheme()
+    {
+        if (_state.CurrentMatch is null || _visibleEvents.Count == 0)
+        {
+            return;
+        }
+
+        for (var index = 0; index < _visibleEvents.Count; index++)
+        {
+            var sourceEvent = _visibleEvents[index].SourceEvent;
+            if (sourceEvent is null)
+            {
+                continue;
+            }
+
+            _visibleEvents[index] = CreateFeedItem(sourceEvent, _state.CurrentMatch);
+        }
+    }
+
     private bool IsViewingLatestEvents()
     {
         var scrollViewer = FindVisualChild<ScrollViewer>(MatchEventsListBox);
@@ -2441,6 +2477,7 @@ public partial class MatchLiveView : UserControl
         return new MatchFeedItem
         {
             Minute = matchEvent.Minute,
+            SourceEvent = matchEvent,
             Type = matchEvent.EventType.ToString(),
             Icon = eventStyle.Icon,
             TeamName = displayTeamName,
@@ -2882,32 +2919,32 @@ public partial class MatchLiveView : UserControl
 
     private static FeedEventStyle AttackStyle(string icon, string label)
     {
-        return new FeedEventStyle(icon, label, "#FEF2F2", "#EF4444", "#FEE2E2", "#FEE2E2", "#B91C1C", IconForeground: "#B91C1C", TitleForeground: "#071A2E", DescriptionForeground: "#34465C");
+        return CreateThemedFeedStyle(icon, label, "FeedAttack", "#FEF2F2", "#EF4444", "#FEE2E2", "#B91C1C");
     }
 
     private static FeedEventStyle DefensiveStyle(string icon, string label)
     {
-        return new FeedEventStyle(icon, label, "#EFF6FF", "#3B82F6", "#DBEAFE", "#DBEAFE", "#1D4ED8", IconForeground: "#1D4ED8", TitleForeground: "#071A2E", DescriptionForeground: "#34465C");
+        return CreateThemedFeedStyle(icon, label, "FeedDefensive", "#EFF6FF", "#3B82F6", "#DBEAFE", "#1D4ED8");
     }
 
     private static FeedEventStyle TurnoverStyle(string icon, string label)
     {
-        return new FeedEventStyle(icon, label, "#F5F3FF", "#8B5CF6", "#EDE9FE", "#EDE9FE", "#6D28D9", IconForeground: "#6D28D9", TitleForeground: "#071A2E", DescriptionForeground: "#34465C");
+        return CreateThemedFeedStyle(icon, label, "FeedTurnover", "#F5F3FF", "#8B5CF6", "#EDE9FE", "#6D28D9");
     }
 
     private static FeedEventStyle ChanceStyle(string icon, string label)
     {
-        return new FeedEventStyle(icon, label, "#FFF7ED", "#F97316", "#FFEDD5", "#FFEDD5", "#C2410C", IconForeground: "#C2410C", TitleForeground: "#071A2E", DescriptionForeground: "#34465C");
+        return CreateThemedFeedStyle(icon, label, "FeedChance", "#FFF7ED", "#F97316", "#FFEDD5", "#C2410C");
     }
 
     private static FeedEventStyle FoulStyle(string icon, string label)
     {
-        return new FeedEventStyle(icon, label, "#FEFCE8", "#EAB308", "#FEF9C3", "#FEF9C3", "#854D0E", IconForeground: "#854D0E", TitleForeground: "#071A2E", DescriptionForeground: "#34465C");
+        return CreateThemedFeedStyle(icon, label, "FeedFoul", "#FEFCE8", "#EAB308", "#FEF9C3", "#854D0E");
     }
 
     private static FeedEventStyle MissStyle(string icon, string label)
     {
-        return new FeedEventStyle(icon, label, "#F3F4F6", "#6B7280", "#E5E7EB", "#E5E7EB", "#374151", IconForeground: "#374151", TitleForeground: "#071A2E", DescriptionForeground: "#34465C");
+        return CreateThemedFeedStyle(icon, label, "FeedMiss", "#F3F4F6", "#6B7280", "#E5E7EB", "#374151");
     }
 
     private static FeedEventStyle SaveStyle(string icon, string label)
@@ -2932,7 +2969,39 @@ public partial class MatchLiveView : UserControl
 
     private static FeedEventStyle NeutralStyle(string icon, string label)
     {
-        return new FeedEventStyle(icon, label, "#FFFFFF", "#CBD5E1", "#F1F5F9", "#E2E8F0", "#334155", IconForeground: "#334155", TitleForeground: "#102033", DescriptionForeground: "#34465C");
+        return CreateThemedFeedStyle(icon, label, "FeedNeutral", "#FFFFFF", "#CBD5E1", "#F1F5F9", "#334155");
+    }
+
+    private static FeedEventStyle CreateThemedFeedStyle(
+        string icon,
+        string label,
+        string keyPrefix,
+        string fallbackBackground,
+        string fallbackBorder,
+        string fallbackIconBackground,
+        string fallbackAccent)
+    {
+        var background = ThemeManager.GetBrushHex($"{keyPrefix}Background", fallbackBackground);
+        var border = ThemeManager.GetBrushHex($"{keyPrefix}Border", fallbackBorder);
+        var iconBackground = ThemeManager.GetBrushHex($"{keyPrefix}IconBackground", fallbackIconBackground);
+        var iconForeground = ThemeManager.GetBrushHex($"{keyPrefix}IconForeground", fallbackAccent);
+        var labelBackground = ThemeManager.GetBrushHex($"{keyPrefix}LabelBackground", fallbackIconBackground);
+        var labelForeground = ThemeManager.GetBrushHex($"{keyPrefix}LabelForeground", fallbackAccent);
+
+        return new FeedEventStyle(
+            icon,
+            label,
+            background,
+            border,
+            iconBackground,
+            labelBackground,
+            labelForeground,
+            IconForeground: iconForeground,
+            MinuteForeground: ThemeManager.GetBrushHex("FeedMinuteForeground", "#14233A"),
+            TitleForeground: ThemeManager.GetBrushHex("FeedTitleForeground", "#071A2E"),
+            DescriptionForeground: ThemeManager.GetBrushHex("FeedDescriptionForeground", "#34465C"),
+            TraitBadgeBackground: iconBackground,
+            TraitBadgeBorderBrush: border);
     }
 
     private static bool IsImportantEvent(EventType eventType)
@@ -3107,12 +3176,12 @@ public partial class MatchLiveView : UserControl
             FormBadgeText = form.Text,
             FormBadgeBackground = form.Background,
             FormBadgeForeground = form.Foreground,
-            CardBackground = isPendingSubIn ? "#ECFDF3" : teamColors.PrimaryColor,
+            CardBackground = isPendingSubIn ? GetThemedStatusBackground("positive") : teamColors.PrimaryColor,
             CardBorderBrush = isPendingSubIn ? "#34A853" : teamColors.BorderColor,
-            NameForeground = isPendingSubIn ? "#137333" : teamColors.TextColor,
-            TextForeground = isPendingSubIn ? "#137333" : teamColors.TextColor,
-            PositionBackground = isPendingSubIn ? "#D9F1E1" : teamColors.SecondaryColor,
-            PositionForeground = TeamColorService.GetReadableTextColor(isPendingSubIn ? "#D9F1E1" : teamColors.SecondaryColor),
+            NameForeground = isPendingSubIn ? GetThemedStatusForeground("positive") : teamColors.TextColor,
+            TextForeground = isPendingSubIn ? GetThemedStatusForeground("positive") : teamColors.TextColor,
+            PositionBackground = isPendingSubIn ? GetThemedStatusBackground("positive") : teamColors.SecondaryColor,
+            PositionForeground = isPendingSubIn ? GetThemedStatusForeground("positive") : TeamColorService.GetReadableTextColor(teamColors.SecondaryColor),
             PendingPlayerOutName = pendingSubstitution?.PlayerOut.Name ?? string.Empty,
             TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits),
             PendingSubstitution = pendingSubstitution
@@ -3142,25 +3211,69 @@ public partial class MatchLiveView : UserControl
     {
         if (displayedStats.RedCards > 0)
         {
-            return new StatusBadge("Red Card", "#FFD1D1", "#8F1F1F");
+            return new StatusBadge("Red Card", GetThemedStatusBackground("danger"), GetThemedStatusForeground("danger"));
         }
 
         if (displayedStats.Injuries > 0)
         {
-            return new StatusBadge("Injured", "#FFE6E6", "#8F1F1F");
+            return new StatusBadge("Injured", GetThemedStatusBackground("danger"), GetThemedStatusForeground("danger"));
         }
 
         if (displayedStats.YellowCards > 0)
         {
-            return new StatusBadge("Carded", "#FFF0A3", "#5F4500");
+            return new StatusBadge("Carded", GetThemedStatusBackground("warning"), GetThemedStatusForeground("warning"));
         }
 
         return staminaPercentage switch
         {
-            >= 75 => new StatusBadge("High Stamina", "#D9F1E1", "#236B39"),
-            >= 50 => new StatusBadge("Moderate Stamina", "#FFF0A3", "#5F4500"),
-            >= 25 => new StatusBadge("Low Stamina", "#FFE4BF", "#8A4E00"),
-            _ => new StatusBadge("Critical Stamina", "#FFD1D1", "#8F1F1F")
+            >= 75 => new StatusBadge("High Stamina", GetThemedStatusBackground("positive"), GetThemedStatusForeground("positive")),
+            >= 50 => new StatusBadge("Moderate Stamina", GetThemedStatusBackground("warning"), GetThemedStatusForeground("warning")),
+            >= 25 => new StatusBadge("Low Stamina", GetThemedStatusBackground("chance"), GetThemedStatusForeground("chance")),
+            _ => new StatusBadge("Critical Stamina", GetThemedStatusBackground("danger"), GetThemedStatusForeground("danger"))
+        };
+    }
+
+    private static string GetThemedStatusBackground(string statusType)
+    {
+        if (ThemeManager.CurrentTheme == AppTheme.Dark)
+        {
+            return statusType switch
+            {
+                "positive" => "#12351F",
+                "warning" => "#332B10",
+                "chance" => "#3A2411",
+                _ => "#3B1115"
+            };
+        }
+
+        return statusType switch
+        {
+            "positive" => "#D9F1E1",
+            "warning" => "#FFF0A3",
+            "chance" => "#FFE4BF",
+            _ => "#FFD1D1"
+        };
+    }
+
+    private static string GetThemedStatusForeground(string statusType)
+    {
+        if (ThemeManager.CurrentTheme == AppTheme.Dark)
+        {
+            return statusType switch
+            {
+                "positive" => "#86EFAC",
+                "warning" => "#FDE68A",
+                "chance" => "#FDBA74",
+                _ => "#FCA5A5"
+            };
+        }
+
+        return statusType switch
+        {
+            "positive" => "#236B39",
+            "warning" => "#5F4500",
+            "chance" => "#8A4E00",
+            _ => "#8F1F1F"
         };
     }
 

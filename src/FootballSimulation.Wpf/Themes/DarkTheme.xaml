@@ -1,0 +1,96 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Color x:Key="ThemeWindowChromeColor">#071226</Color>
+    <Color x:Key="ThemeWindowChromeTextColor">#F8FAFC</Color>
+    <Color x:Key="ThemeWindowChromeBorderColor">#111827</Color>
+
+    <SolidColorBrush x:Key="AppPageBackground" Color="#071226" />
+    <SolidColorBrush x:Key="AppCardBackground" Color="#0F172A" />
+    <SolidColorBrush x:Key="AppSecondaryCardBackground" Color="#111827" />
+    <SolidColorBrush x:Key="AppElevatedCardBackground" Color="#172033" />
+    <SolidColorBrush x:Key="AppPanelBackground" Color="#111827" />
+    <SolidColorBrush x:Key="AppPrimaryBrush" Color="#071226" />
+    <SolidColorBrush x:Key="AppSecondaryBrush" Color="#2563EB" />
+    <SolidColorBrush x:Key="AppAccentBrush" Color="#38BDF8" />
+    <SolidColorBrush x:Key="AppTextBrush" Color="#F8FAFC" />
+    <SolidColorBrush x:Key="AppMutedTextBrush" Color="#94A3B8" />
+    <SolidColorBrush x:Key="AppInverseTextBrush" Color="#F8FAFC" />
+    <SolidColorBrush x:Key="AppBorderBrush" Color="#243247" />
+    <SolidColorBrush x:Key="AppInputBackground" Color="#172033" />
+    <SolidColorBrush x:Key="AppButtonBackground" Color="#2563EB" />
+    <SolidColorBrush x:Key="AppButtonForeground" Color="#F8FAFC" />
+    <SolidColorBrush x:Key="AppButtonHoverBackground" Color="#1D4ED8" />
+    <SolidColorBrush x:Key="AppToggleBackground" Color="#0F172A" />
+    <SolidColorBrush x:Key="AppToggleForeground" Color="#F8FAFC" />
+    <SolidColorBrush x:Key="AppToggleBorderBrush" Color="#38BDF8" />
+    <SolidColorBrush x:Key="AppHighlightBrush" Color="#6B4A16" />
+
+    <SolidColorBrush x:Key="BackgroundBrush" Color="#071226" />
+    <SolidColorBrush x:Key="CardBrush" Color="#0F172A" />
+    <SolidColorBrush x:Key="SecondaryCardBrush" Color="#111827" />
+    <SolidColorBrush x:Key="TextBrush" Color="#F8FAFC" />
+    <SolidColorBrush x:Key="MutedTextBrush" Color="#94A3B8" />
+    <SolidColorBrush x:Key="BorderBrush" Color="#243247" />
+    <SolidColorBrush x:Key="PrimaryBrush" Color="#2563EB" />
+    <SolidColorBrush x:Key="HighlightBrush" Color="#6B4A16" />
+
+    <SolidColorBrush x:Key="TableHeaderBackground" Color="#111827" />
+    <SolidColorBrush x:Key="TableHeaderForeground" Color="#F8FAFC" />
+    <SolidColorBrush x:Key="TableRowBackground" Color="#0F172A" />
+    <SolidColorBrush x:Key="TableAlternateRowBackground" Color="#132033" />
+    <SolidColorBrush x:Key="TableCurrentClubBackground" Color="#5A3D12" />
+    <SolidColorBrush x:Key="TableCurrentClubForeground" Color="#FFF7D6" />
+
+    <SolidColorBrush x:Key="FeedAttackBackground" Color="#3B1115" />
+    <SolidColorBrush x:Key="FeedAttackBorder" Color="#EF4444" />
+    <SolidColorBrush x:Key="FeedAttackIconBackground" Color="#5F171B" />
+    <SolidColorBrush x:Key="FeedAttackIconForeground" Color="#FCA5A5" />
+    <SolidColorBrush x:Key="FeedAttackLabelBackground" Color="#5F171B" />
+    <SolidColorBrush x:Key="FeedAttackLabelForeground" Color="#FCA5A5" />
+
+    <SolidColorBrush x:Key="FeedDefensiveBackground" Color="#10213F" />
+    <SolidColorBrush x:Key="FeedDefensiveBorder" Color="#3B82F6" />
+    <SolidColorBrush x:Key="FeedDefensiveIconBackground" Color="#17315F" />
+    <SolidColorBrush x:Key="FeedDefensiveIconForeground" Color="#93C5FD" />
+    <SolidColorBrush x:Key="FeedDefensiveLabelBackground" Color="#17315F" />
+    <SolidColorBrush x:Key="FeedDefensiveLabelForeground" Color="#93C5FD" />
+
+    <SolidColorBrush x:Key="FeedChanceBackground" Color="#3A2411" />
+    <SolidColorBrush x:Key="FeedChanceBorder" Color="#F97316" />
+    <SolidColorBrush x:Key="FeedChanceIconBackground" Color="#5B3415" />
+    <SolidColorBrush x:Key="FeedChanceIconForeground" Color="#FDBA74" />
+    <SolidColorBrush x:Key="FeedChanceLabelBackground" Color="#5B3415" />
+    <SolidColorBrush x:Key="FeedChanceLabelForeground" Color="#FDBA74" />
+
+    <SolidColorBrush x:Key="FeedFoulBackground" Color="#332B10" />
+    <SolidColorBrush x:Key="FeedFoulBorder" Color="#EAB308" />
+    <SolidColorBrush x:Key="FeedFoulIconBackground" Color="#4B3D12" />
+    <SolidColorBrush x:Key="FeedFoulIconForeground" Color="#FDE68A" />
+    <SolidColorBrush x:Key="FeedFoulLabelBackground" Color="#4B3D12" />
+    <SolidColorBrush x:Key="FeedFoulLabelForeground" Color="#FDE68A" />
+
+    <SolidColorBrush x:Key="FeedMissBackground" Color="#1F2937" />
+    <SolidColorBrush x:Key="FeedMissBorder" Color="#64748B" />
+    <SolidColorBrush x:Key="FeedMissIconBackground" Color="#334155" />
+    <SolidColorBrush x:Key="FeedMissIconForeground" Color="#CBD5E1" />
+    <SolidColorBrush x:Key="FeedMissLabelBackground" Color="#334155" />
+    <SolidColorBrush x:Key="FeedMissLabelForeground" Color="#CBD5E1" />
+
+    <SolidColorBrush x:Key="FeedTurnoverBackground" Color="#24143F" />
+    <SolidColorBrush x:Key="FeedTurnoverBorder" Color="#8B5CF6" />
+    <SolidColorBrush x:Key="FeedTurnoverIconBackground" Color="#3B2166" />
+    <SolidColorBrush x:Key="FeedTurnoverIconForeground" Color="#C4B5FD" />
+    <SolidColorBrush x:Key="FeedTurnoverLabelBackground" Color="#3B2166" />
+    <SolidColorBrush x:Key="FeedTurnoverLabelForeground" Color="#DDD6FE" />
+
+    <SolidColorBrush x:Key="FeedNeutralBackground" Color="#111827" />
+    <SolidColorBrush x:Key="FeedNeutralBorder" Color="#334155" />
+    <SolidColorBrush x:Key="FeedNeutralIconBackground" Color="#1F2937" />
+    <SolidColorBrush x:Key="FeedNeutralIconForeground" Color="#CBD5E1" />
+    <SolidColorBrush x:Key="FeedNeutralLabelBackground" Color="#243044" />
+    <SolidColorBrush x:Key="FeedNeutralLabelForeground" Color="#CBD5E1" />
+
+    <SolidColorBrush x:Key="FeedTitleForeground" Color="#F8FAFC" />
+    <SolidColorBrush x:Key="FeedDescriptionForeground" Color="#CBD5E1" />
+    <SolidColorBrush x:Key="FeedMinuteForeground" Color="#E2E8F0" />
+</ResourceDictionary>

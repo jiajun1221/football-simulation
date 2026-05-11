@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using FootballSimulation.Models;
+using FootballSimulation.Wpf.Services;
 using FootballSimulation.Wpf.State;
 
 namespace FootballSimulation.Wpf.Views;
@@ -84,8 +85,12 @@ public partial class RoundResultView : UserControl
             ScoreText = fixture.Result is null
                 ? "vs"
                 : $"{fixture.Result.HomeScore} - {fixture.Result.AwayScore}",
-            RowBackground = isUserMatch ? "#FFF3C4" : "#FFFFFF",
-            BorderBrush = isUserMatch ? "#F2B600" : "#DCE5F0",
+            RowBackground = isUserMatch
+                ? ThemeManager.GetBrushHex("TableCurrentClubBackground", "#5A3D12")
+                : ThemeManager.GetBrushHex("AppSecondaryCardBackground", "#111827"),
+            BorderBrush = isUserMatch
+                ? ThemeManager.GetBrushHex("AppHighlightBrush", "#6B4A16")
+                : ThemeManager.GetBrushHex("AppBorderBrush", "#243247"),
             BorderThickness = isUserMatch ? new Thickness(2) : new Thickness(1)
         };
     }

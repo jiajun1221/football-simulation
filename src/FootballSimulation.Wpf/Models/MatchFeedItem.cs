@@ -1,8 +1,11 @@
+using FootballSimulation.Models;
+
 namespace FootballSimulation.Wpf.Models;
 
 public class MatchFeedItem
 {
     public int Minute { get; set; }
+    public MatchEvent? SourceEvent { get; set; }
     public string MinuteText => $"{Minute}'";
     public string Type { get; set; } = string.Empty;
     public string Icon { get; set; } = string.Empty;

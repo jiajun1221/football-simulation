@@ -233,8 +233,12 @@ public partial class MatchResultView : UserControl
             RedVisibility = performance.RedCards > 0 ? Visibility.Visible : Visibility.Collapsed,
             MotmIcon = StarIcon(),
             MotmVisibility = isMotm ? Visibility.Visible : Visibility.Collapsed,
-            RowBackground = isMotm ? "#FFF8D6" : "#F8FAFC",
-            BorderBrush = isMotm ? "#E3A500" : "#E2E8F0",
+            RowBackground = isMotm
+                ? ThemeManager.GetBrushHex("TableCurrentClubBackground", "#5A3D12")
+                : ThemeManager.GetBrushHex("AppSecondaryCardBackground", "#111827"),
+            BorderBrush = isMotm
+                ? ThemeManager.GetBrushHex("AppHighlightBrush", "#6B4A16")
+                : ThemeManager.GetBrushHex("AppBorderBrush", "#243247"),
             BorderThickness = isMotm ? new Thickness(2) : new Thickness(1)
         };
     }
