@@ -21,6 +21,25 @@
             </Border>
         </DataTemplate>
 
+        <DataTemplate x:Key="CardStatusBadgeTemplate">
+            <Border MinWidth="14"
+                    Height="14"
+                    Background="{Binding Background}"
+                    BorderBrush="{Binding BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="3"
+                    Margin="2,0,0,0"
+                    ToolTip="{Binding TooltipText}">
+                <TextBlock Text="{Binding Text}"
+                           Foreground="{Binding Foreground}"
+                           FontSize="7.5"
+                           FontWeight="Black"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           TextAlignment="Center" />
+            </Border>
+        </DataTemplate>
+
         <Style x:Key="SummaryCard" TargetType="Border">
             <Setter Property="Background" Value="{DynamicResource AppCardBackground}" />
             <Setter Property="CornerRadius" Value="18" />
@@ -51,7 +70,7 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel>
-                        <StackPanel Orientation="Horizontal">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <TextBlock Text="{Binding MotmIcon}"
                                        Foreground="#E3A500"
                                        FontSize="12"
@@ -62,7 +81,56 @@
                                        Foreground="{DynamicResource AppTextBrush}"
                                        FontSize="13"
                                        FontWeight="Bold"
-                                       TextTrimming="CharacterEllipsis" />
+                                       TextTrimming="CharacterEllipsis"
+                                       VerticalAlignment="Center" />
+                            <Border Background="{Binding FormBadgeBackground}"
+                                    CornerRadius="7"
+                                    Padding="5,1"
+                                    Margin="7,0,3,0"
+                                    VerticalAlignment="Center">
+                                <TextBlock Text="{Binding FormBadgeText}"
+                                           Foreground="{Binding FormBadgeForeground}"
+                                           FontSize="9"
+                                           FontWeight="Bold" />
+                            </Border>
+                            <ItemsControl ItemsSource="{Binding TraitBadges}"
+                                          ItemTemplate="{StaticResource TraitIconBadgeTemplate}"
+                                          VerticalAlignment="Center">
+                                <ItemsControl.Style>
+                                    <Style TargetType="ItemsControl">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding TraitBadges.Count}" Value="0">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ItemsControl.Style>
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                            </ItemsControl>
+                            <ItemsControl ItemsSource="{Binding CardStatusBadges}"
+                                          ItemTemplate="{StaticResource CardStatusBadgeTemplate}"
+                                          VerticalAlignment="Center">
+                                <ItemsControl.Style>
+                                    <Style TargetType="ItemsControl">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding CardStatusBadges.Count}" Value="0">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ItemsControl.Style>
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                            </ItemsControl>
                         </StackPanel>
 
                         <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
@@ -96,33 +164,6 @@
                                        Foreground="{DynamicResource AppMutedTextBrush}"
                                        FontSize="10"
                                        Margin="0,0,8,0" />
-                            <Border Background="{Binding FormBadgeBackground}"
-                                    CornerRadius="7"
-                                    Padding="5,1"
-                                    Margin="0,0,3,0">
-                                <TextBlock Text="{Binding FormBadgeText}"
-                                           Foreground="{Binding FormBadgeForeground}"
-                                           FontSize="9"
-                                           FontWeight="Bold" />
-                            </Border>
-                            <ItemsControl ItemsSource="{Binding TraitBadges}"
-                                          ItemTemplate="{StaticResource TraitIconBadgeTemplate}">
-                                <ItemsControl.Style>
-                                    <Style TargetType="ItemsControl">
-                                        <Setter Property="Visibility" Value="Visible" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding TraitBadges.Count}" Value="0">
-                                                <Setter Property="Visibility" Value="Collapsed" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </ItemsControl.Style>
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <StackPanel Orientation="Horizontal" />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                            </ItemsControl>
                         </StackPanel>
 
                         <WrapPanel Margin="0,5,0,0">
@@ -209,23 +250,73 @@
         </DataTemplate>
 
         <DataTemplate x:Key="ScorerTemplate">
-            <Grid Margin="0,0,0,5">
+            <Grid Margin="0,0,0,6"
+                  ToolTip="{Binding TooltipText}">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="42" />
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Text="{Binding MinuteText}"
-                           Foreground="#F7C948"
-                           FontSize="12"
-                           FontWeight="Black"
-                           VerticalAlignment="Top" />
-                <TextBlock Grid.Column="1"
-                           Text="{Binding PlayerName}"
-                           Foreground="{DynamicResource AppMutedTextBrush}"
-                           FontSize="12"
-                           FontWeight="SemiBold"
-                           TextWrapping="Wrap" />
+                <Border Background="{Binding BadgeBackground}"
+                        CornerRadius="8"
+                        Padding="5,1"
+                        Margin="0,0,6,0"
+                        VerticalAlignment="Top">
+                    <TextBlock Text="{Binding BadgeText}"
+                               Foreground="{Binding BadgeForeground}"
+                               FontFamily="Segoe UI Emoji"
+                               FontSize="9"
+                               FontWeight="Black" />
+                </Border>
+                <StackPanel Grid.Column="1">
+                    <TextBlock Text="{Binding SummaryText}"
+                               Foreground="#E6EEF8"
+                               FontSize="11"
+                               FontWeight="Bold"
+                               TextWrapping="Wrap"
+                               TextTrimming="CharacterEllipsis" />
+                    <TextBlock Text="{Binding MinuteText}"
+                               Foreground="#90A4BE"
+                               FontSize="10"
+                               FontWeight="SemiBold"
+                               TextWrapping="Wrap"
+                               Visibility="{Binding MinuteVisibility}" />
+                    <TextBlock Text="{Binding AchievementText}"
+                               Foreground="#F7C948"
+                               FontSize="9"
+                               FontWeight="Black"
+                               TextWrapping="Wrap"
+                               Visibility="{Binding AchievementVisibility}" />
+                </StackPanel>
             </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="ScorerPanelTemplate">
+            <Border Background="#1A2740"
+                    BorderBrush="#2D3B55"
+                    BorderThickness="1"
+                    CornerRadius="14"
+                    Padding="10"
+                    MaxHeight="126">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="{Binding Title}"
+                               Foreground="#E6EEF8"
+                               FontSize="11"
+                           FontWeight="Black"
+                               TextTrimming="CharacterEllipsis"
+                               Margin="0,0,0,7" />
+                    <ScrollViewer Grid.Row="1"
+                                  MaxHeight="92"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled">
+                        <ItemsControl ItemsSource="{Binding Scorers}"
+                                      ItemTemplate="{StaticResource ScorerTemplate}" />
+                    </ScrollViewer>
+                </Grid>
+            </Border>
         </DataTemplate>
 
         <DataTemplate x:Key="StatComparisonTemplate">
@@ -297,13 +388,13 @@
                            HorizontalAlignment="Center"
                            Margin="0,0,0,8" />
 
-                <ItemsControl x:Name="HomeScorersItemsControl"
-                              Grid.Row="1"
-                              Grid.Column="0"
-                              ItemTemplate="{StaticResource ScorerTemplate}"
-                              HorizontalAlignment="Stretch"
-                              VerticalAlignment="Center"
-                              Margin="0,0,14,0" />
+                <ContentControl x:Name="HomeScorersContentControl"
+                                Grid.Row="1"
+                                Grid.Column="0"
+                                ContentTemplate="{StaticResource ScorerPanelTemplate}"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Center"
+                                Margin="0,0,14,0" />
 
                 <Border x:Name="HomeTeamLogoBorder"
                         Grid.Row="1"
@@ -379,13 +470,13 @@
                            VerticalAlignment="Center" />
                 </Border>
 
-                <ItemsControl x:Name="AwayScorersItemsControl"
-                              Grid.Row="1"
-                              Grid.Column="6"
-                              ItemTemplate="{StaticResource ScorerTemplate}"
-                              HorizontalAlignment="Stretch"
-                              VerticalAlignment="Center"
-                              Margin="14,0,0,0" />
+                <ContentControl x:Name="AwayScorersContentControl"
+                                Grid.Row="1"
+                                Grid.Column="6"
+                                ContentTemplate="{StaticResource ScorerPanelTemplate}"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Center"
+                                Margin="14,0,0,0" />
             </Grid>
         </Border>
 

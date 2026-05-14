@@ -121,7 +121,10 @@ public class PlayerFormStatusService
         var defensiveContribution = performance.Tackles +
             performance.Interceptions +
             performance.Blocks +
-            performance.Clearances;
+            performance.Clearances +
+            performance.AerialDuelsWon +
+            performance.Recoveries +
+            performance.GoalLineClearances * 2;
         var positiveImpact = Math.Min(
             0.40,
             performance.Goals * 0.08 +
@@ -134,7 +137,10 @@ public class PlayerFormStatusService
             performance.Fouls +
             performance.YellowCards +
             performance.RedCards * 2 +
-            performance.Injuries;
+            performance.Injuries +
+            performance.ErrorsLeadingToShot +
+            performance.ErrorsLeadingToGoal * 2 +
+            performance.PenaltiesConceded;
         var negativeImpact = Math.Min(0.50, mistakes * 0.06);
 
         var staminaPenalty = player.Stamina switch

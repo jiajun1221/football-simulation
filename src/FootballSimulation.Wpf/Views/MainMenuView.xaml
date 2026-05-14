@@ -1,0 +1,209 @@
+<UserControl x:Class="FootballSimulation.Wpf.Views.MainMenuView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{DynamicResource AppPageBackground}"
+             SnapsToDevicePixels="True"
+             UseLayoutRounding="True">
+    <UserControl.Resources>
+        <Style x:Key="MainMenuPrimaryButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Height" Value="46" />
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="Background" Value="{DynamicResource MainMenuPrimaryButtonBackground}" />
+            <Setter Property="Foreground" Value="#FFFFFF" />
+            <Setter Property="BorderBrush" Value="{DynamicResource MainMenuPrimaryButtonBackground}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="12"
+                                Padding="{TemplateBinding Padding}">
+                            <TextBlock Text="{TemplateBinding Content}"
+                                       Foreground="{TemplateBinding Foreground}"
+                                       FontSize="{TemplateBinding FontSize}"
+                                       FontWeight="{TemplateBinding FontWeight}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       TextAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource MainMenuPrimaryButtonHoverBackground}" />
+                                <Setter Property="BorderBrush" Value="{DynamicResource MainMenuPrimaryButtonHoverBackground}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource MainMenuDisabledButtonBackground}" />
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="{DynamicResource AppBorderBrush}" />
+                                <Setter Property="Foreground" Value="{DynamicResource MainMenuDisabledButtonForeground}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="MainMenuSecondaryButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Height" Value="42" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Background" Value="{DynamicResource AppSecondaryCardBackground}" />
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}" />
+        </Style>
+
+        <Style x:Key="CarouselArrowButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Width" Value="38" />
+            <Setter Property="Height" Value="38" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="FontSize" Value="18" />
+            <Setter Property="Background" Value="{DynamicResource AppSecondaryCardBackground}" />
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}" />
+        </Style>
+
+        <Style x:Key="LeagueCardBorderStyle" TargetType="Border">
+            <Setter Property="Width" Value="178" />
+            <Setter Property="MinHeight" Value="128" />
+            <Setter Property="Background" Value="{DynamicResource AppSecondaryCardBackground}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AppAccentBrush}" />
+            <Setter Property="BorderThickness" Value="2" />
+            <Setter Property="CornerRadius" Value="20" />
+            <Setter Property="Padding" Value="14" />
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Background="{DynamicResource AppPageBackground}" ClipToBounds="True">
+        <Image Source="/Assets/Backgrounds/main-menu-stadium.png"
+               Stretch="UniformToFill"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch" />
+
+        <Border Background="{DynamicResource MainMenuOverlayBrush}" />
+
+        <Border Width="480"
+                Padding="26"
+                Background="{DynamicResource AppCardBackground}"
+                BorderBrush="{DynamicResource AppBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="30"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="28"
+                                  ShadowDepth="4"
+                                  Direction="270"
+                                  Opacity="0.20"
+                                  Color="#102033" />
+            </Border.Effect>
+
+            <StackPanel>
+                <Border Width="78"
+                        Height="78"
+                        CornerRadius="39"
+                        Background="Transparent"
+                        HorizontalAlignment="Center"
+                        Margin="0,0,0,14">
+                    <Image Source="/Assets/App/football-logo.png"
+                           Width="64"
+                           Height="64"
+                           Stretch="Uniform"
+                           RenderOptions.BitmapScalingMode="HighQuality"
+                           SnapsToDevicePixels="True"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center" />
+                </Border>
+
+                <TextBlock Text="Football Simulator"
+                           FontSize="31"
+                           FontWeight="Bold"
+                           Foreground="{DynamicResource AppTextBrush}"
+                           TextAlignment="Center"
+                           TextWrapping="Wrap" />
+
+                <TextBlock Text="By ScorpJJ"
+                           FontSize="13"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource AppAccentBrush}"
+                           TextAlignment="Center"
+                           Margin="0,4,0,0" />
+
+                <TextBlock Text="Choose a league, build your club career, and return to your saved season any time."
+                           FontSize="13"
+                           Foreground="{DynamicResource AppMutedTextBrush}"
+                           TextAlignment="Center"
+                           TextWrapping="Wrap"
+                           Margin="18,8,18,18" />
+
+                <TextBlock Text="Select League"
+                           FontSize="14"
+                           FontWeight="Bold"
+                           Foreground="{DynamicResource AppTextBrush}"
+                           HorizontalAlignment="Center"
+                           TextAlignment="Center"
+                           Margin="0,2,0,10" />
+
+                <Grid Margin="0,0,0,18">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <Button Style="{StaticResource CarouselArrowButton}"
+                            Content="&lt;"
+                            Click="PreviousLeagueButton_Click" />
+
+                    <Border Grid.Column="1"
+                            Style="{StaticResource LeagueCardBorderStyle}"
+                            HorizontalAlignment="Center"
+                            Opacity="{Binding SelectedLeague.CardOpacity, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                        <StackPanel>
+                            <Image Source="{Binding SelectedLeague.LogoPath, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                   Width="86"
+                                   Height="56"
+                                   Stretch="Uniform"
+                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                   SnapsToDevicePixels="True"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,0,0,10" />
+                            <TextBlock Text="{Binding SelectedLeague.Name, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                       FontSize="16"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource AppTextBrush}"
+                                       TextAlignment="Center"
+                                       TextWrapping="Wrap" />
+                            <TextBlock Text="{Binding SelectedLeague.StatusText, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                       FontSize="11"
+                                       FontWeight="SemiBold"
+                                       Foreground="{Binding SelectedLeague.StatusBrush, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                       TextAlignment="Center"
+                                       Margin="0,6,0,0" />
+                        </StackPanel>
+                    </Border>
+
+                    <Button Grid.Column="2"
+                            Style="{StaticResource CarouselArrowButton}"
+                            Content="&gt;"
+                            Click="NextLeagueButton_Click" />
+                </Grid>
+
+                <Button Content="New Game"
+                        x:Name="NewGameButton"
+                        Style="{StaticResource MainMenuPrimaryButton}"
+                        IsEnabled="{Binding SelectedLeague.IsAvailable, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                        Margin="0,0,0,10"
+                        Click="NewGameButton_Click" />
+
+                <Button Content="Load Game"
+                        Style="{StaticResource MainMenuPrimaryButton}"
+                        Margin="0,0,0,10"
+                        Click="LoadGameButton_Click" />
+
+                <Button Content="Exit"
+                        Style="{StaticResource MainMenuSecondaryButton}"
+                        Click="ExitButton_Click" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

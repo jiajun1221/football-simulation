@@ -31,9 +31,14 @@ public class TacticalInsightService
     {
         insight.LikelyTactics.Add($"{opponent.Name} are expected to start in a {opponent.Formation}.");
 
-        if (opponent.Tactics.Mentality == Mentality.Attacking || opponent.Tactics.Tempo >= 65)
+        if (opponent.Tactics.Mentality is Mentality.Attacking or Mentality.AllOutAttack || opponent.Tactics.Tempo >= 65)
         {
             insight.LikelyTactics.Add("Expect fast attacks and early forward passes.");
+        }
+
+        if (opponent.Tactics.Mentality == Mentality.UltraDefensive || opponent.Tactics.DefensiveLine <= 30)
+        {
+            insight.LikelyTactics.Add("They may defend in a deep block and force shots from distance.");
         }
 
         if (opponent.Tactics.PressingIntensity >= 65)
@@ -91,7 +96,12 @@ public class TacticalInsightService
 
         if (selectedTeam.Tactics.PressingIntensity >= 75)
         {
-            insight.Recommendations.Add("High pressing can work, but monitor fatigue before halftime.");
+            insight.Recommendations.Add("High pressing can work, but monitor fatigue and injury risk before halftime.");
+        }
+
+        if (selectedTeam.Tactics.Mentality == Mentality.AllOutAttack)
+        {
+            insight.Recommendations.Add("All-out attack creates chances, but expect counter-attack exposure.");
         }
 
         if (insight.Recommendations.Count == 0)

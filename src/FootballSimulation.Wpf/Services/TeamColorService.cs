@@ -47,20 +47,31 @@ public static class TeamColorService
             ? configured
             : (DefaultPrimaryColor, DefaultSecondaryColor);
 
-        var isLight = IsLightColor(colors.Primary);
-        var textColor = isLight ? "#0F172A" : "#FFFFFF";
-        var borderColor = isLight ? Darken(colors.Primary, 0.42) : Lighten(colors.Primary, 0.30);
-        var subtleBackground = isLight ? "#FFFFFF" : Lighten(colors.Primary, 0.82);
-        var selectedGlowColor = isLight ? colors.Secondary : Lighten(colors.Primary, 0.52);
+        return CreatePalette(colors.Primary, colors.Secondary);
+    }
 
-        return new TeamColorPalette(
-            PrimaryColor: colors.Primary,
-            SecondaryColor: colors.Secondary,
-            TextColor: textColor,
-            BorderColor: borderColor,
-            SubtleBackgroundColor: subtleBackground,
-            SelectedGlowColor: selectedGlowColor,
-            IsLight: isLight);
+    public static MatchTeamColorPalettes GetMatchPalettes(Team? homeTeam, Team? awayTeam)
+    {
+        var homeColors = GetConfiguredColors(homeTeam?.Name);
+        var awayColors = GetConfiguredColors(awayTeam?.Name);
+        var homePalette = CreatePalette(homeColors.Primary, homeColors.Secondary);
+        var awayPrimary = awayColors.Primary;
+        var awaySecondary = awayColors.Secondary;
+
+        if (AreTooSimilar(homePalette.PrimaryColor, awayPrimary))
+        {
+            awayPrimary = awaySecondary;
+        }
+
+        if (AreTooSimilar(homePalette.PrimaryColor, awayPrimary))
+        {
+            awayPrimary = ChooseFallbackContrastColor(homePalette.PrimaryColor);
+            awaySecondary = GetReadableTextColor(awayPrimary);
+        }
+
+        return new MatchTeamColorPalettes(
+            homePalette,
+            CreatePalette(awayPrimary, awaySecondary));
     }
 
     public static string GetReadableTextColor(string backgroundColor)
@@ -68,11 +79,71 @@ public static class TeamColorService
         return IsLightColor(backgroundColor) ? "#0F172A" : "#FFFFFF";
     }
 
+    private static (string Primary, string Secondary) GetConfiguredColors(string? teamName)
+    {
+        return !string.IsNullOrWhiteSpace(teamName) && TeamColors.TryGetValue(teamName, out var configured)
+            ? configured
+            : (DefaultPrimaryColor, DefaultSecondaryColor);
+    }
+
+    private static TeamColorPalette CreatePalette(string primaryColor, string secondaryColor)
+    {
+        var isLight = IsLightColor(primaryColor);
+        var textColor = isLight ? "#0F172A" : "#FFFFFF";
+        var borderColor = isLight ? Darken(primaryColor, 0.42) : Lighten(primaryColor, 0.30);
+        var subtleBackground = isLight ? "#FFFFFF" : Lighten(primaryColor, 0.82);
+        var selectedGlowColor = isLight ? Darken(primaryColor, 0.25) : Lighten(primaryColor, 0.52);
+
+        return new TeamColorPalette(
+            PrimaryColor: primaryColor,
+            SecondaryColor: secondaryColor,
+            TextColor: textColor,
+            BorderColor: borderColor,
+            SubtleBackgroundColor: subtleBackground,
+            SelectedGlowColor: selectedGlowColor,
+            IsLight: isLight);
+    }
+
+    private static bool AreTooSimilar(string firstColor, string secondColor)
+    {
+        var (firstRed, firstGreen, firstBlue) = ParseHex(firstColor);
+        var (secondRed, secondGreen, secondBlue) = ParseHex(secondColor);
+        var colorDistance = Math.Sqrt(
+            Math.Pow(firstRed - secondRed, 2) +
+            Math.Pow(firstGreen - secondGreen, 2) +
+            Math.Pow(firstBlue - secondBlue, 2));
+        var brightnessDifference = Math.Abs(GetBrightness(firstColor) - GetBrightness(secondColor));
+
+        return colorDistance < 115 || brightnessDifference < 0.16 && colorDistance < 150;
+    }
+
     private static bool IsLightColor(string hexColor)
     {
+        return GetBrightness(hexColor) > 0.66;
+    }
+
+    private static double GetBrightness(string hexColor)
+    {
         var (red, green, blue) = ParseHex(hexColor);
-        var luminance = (0.2126 * red + 0.7152 * green + 0.0722 * blue) / 255.0;
-        return luminance > 0.66;
+        return (0.2126 * red + 0.7152 * green + 0.0722 * blue) / 255.0;
+    }
+
+    private static string ChooseFallbackContrastColor(string homePrimaryColor)
+    {
+        var candidates = new[] { "#F59E0B", "#111827", "#F8FAFC", "#7C3AED", "#10B981" };
+        return candidates
+            .OrderByDescending(candidate => GetColorDistance(homePrimaryColor, candidate))
+            .First();
+    }
+
+    private static double GetColorDistance(string firstColor, string secondColor)
+    {
+        var (firstRed, firstGreen, firstBlue) = ParseHex(firstColor);
+        var (secondRed, secondGreen, secondBlue) = ParseHex(secondColor);
+        return Math.Sqrt(
+            Math.Pow(firstRed - secondRed, 2) +
+            Math.Pow(firstGreen - secondGreen, 2) +
+            Math.Pow(firstBlue - secondBlue, 2));
     }
 
     private static string Lighten(string hexColor, double amount)
@@ -123,3 +194,7 @@ public sealed record TeamColorPalette(
     string SubtleBackgroundColor,
     string SelectedGlowColor,
     bool IsLight);
+
+public sealed record MatchTeamColorPalettes(
+    TeamColorPalette Home,
+    TeamColorPalette Away);

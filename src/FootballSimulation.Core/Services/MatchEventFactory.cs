@@ -9,6 +9,11 @@ public class MatchEventFactory
         return CreateEvent(minute, EventType.Kickoff, $"{homeTeam.Name} kick off the match.");
     }
 
+    public MatchEvent CreateSecondHalfKickoff(int minute, Team team)
+    {
+        return CreateEvent(minute, EventType.Kickoff, $"{team.Name} get the second half underway.");
+    }
+
     public MatchEvent CreateAttack(int minute, Team attackingTeam, Player playmaker, Player shooter)
     {
         var safeShooter = !string.Equals(playmaker.Name, shooter.Name, StringComparison.OrdinalIgnoreCase)
@@ -33,9 +38,12 @@ public class MatchEventFactory
     {
         var safeTarget = ResolveDistinctTeammate(attackingTeam, playmaker, target, random);
         var playmakerName = GetDisplayName(playmaker.Name);
+        var tacticalDescription = triggeredTrait is null
+            ? CreateTacticalBuildUpDescription(attackingTeam, playmaker, safeTarget, random)
+            : null;
         var description = triggeredTrait is not null
             ? CreateTraitBuildUpDescription(attackingTeam, playmaker, safeTarget, triggeredTrait.Value, random)
-            : safeTarget is null
+            : tacticalDescription ?? (safeTarget is null
             ? Pick(random,
                 $"{attackingTeam.Name} build quickly and {playmakerName} finds space on the wing.",
                 $"{attackingTeam.Name} move the ball with intent through {playmakerName}.",
@@ -43,7 +51,7 @@ public class MatchEventFactory
             : Pick(random,
                 $"{attackingTeam.Name} build quickly as {playmakerName} picks out {GetDisplayName(safeTarget.Name)}.",
                 $"{attackingTeam.Name} keep it moving and {playmakerName} links with {GetDisplayName(safeTarget.Name)}.",
-                $"{attackingTeam.Name} combine neatly, with {playmakerName} releasing {GetDisplayName(safeTarget.Name)}.");
+                $"{attackingTeam.Name} combine neatly, with {playmakerName} releasing {GetDisplayName(safeTarget.Name)}."));
 
         return CreateEvent(minute, EventType.Attack, description, playmaker.Name, safeTarget?.Name, triggeredTrait: triggeredTrait);
     }
@@ -62,9 +70,22 @@ public class MatchEventFactory
     public MatchEvent CreateDefensiveStop(int minute, Team defendingTeam, Player defender, Player attacker, Random random)
     {
         var description = Pick(random,
-            $"Brilliant tackle by {defender.Name} for {defendingTeam.Name} on {attacker.Name}. D+1.",
-            $"Interception cuts out the attack as {defender.Name} steps in for {defendingTeam.Name}. D+1.",
-            $"Strong clearance under pressure by {defender.Name} for {defendingTeam.Name}. D+1.");
+            $"{defender.Name} reads the danger for {defendingTeam.Name} and stops {attacker.Name}.",
+            $"{defender.Name} blocks the shot for {defendingTeam.Name}.",
+            $"{defender.Name} breaks up the attack before {attacker.Name} can finish.",
+            $"{defender.Name} clears under pressure for {defendingTeam.Name}.",
+            $"Brilliant tackle by {defender.Name} for {defendingTeam.Name} on {attacker.Name}.",
+            $"Interception cuts out the attack as {defender.Name} steps in for {defendingTeam.Name}.");
+
+        return CreateEvent(minute, EventType.DefensiveStop, description, defender.Name, attacker.Name);
+    }
+
+    public MatchEvent CreateGoalLineClearance(int minute, Team defendingTeam, Player defender, Player attacker, Random random)
+    {
+        var description = Pick(random,
+            $"{defender.Name} makes a stunning goal-line clearance for {defendingTeam.Name} to deny {attacker.Name}.",
+            $"{defender.Name} somehow clears off the line for {defendingTeam.Name}.",
+            $"{defender.Name} reads the danger and hooks it off the line for {defendingTeam.Name}.");
 
         return CreateEvent(minute, EventType.DefensiveStop, description, defender.Name, attacker.Name);
     }
@@ -82,9 +103,12 @@ public class MatchEventFactory
         var attackerName = GetDisplayName(attacker.Name);
         var defenderName = defender is null ? defendingTeam.Name : GetDisplayName(defender.Name);
 
+        var tacticalDescription = triggeredTrait is null
+            ? CreateTacticalPossessionLossDescription(attackingTeam, defendingTeam, attackerName, defenderName, reasonType, random)
+            : null;
         var description = triggeredTrait is not null && defender is not null
             ? CreateTraitPossessionWinDescription(attackerName, defenderName, defendingTeam, triggeredTrait.Value, reasonType, random)
-            : reasonType switch
+            : tacticalDescription ?? (reasonType switch
         {
             EventType.BadPass => Pick(random,
                 $"{attackerName}'s pass is loose for {attackingTeam.Name}.",
@@ -96,18 +120,22 @@ public class MatchEventFactory
                 $"{attackerName} cannot bring the pass under control for {attackingTeam.Name}."),
             EventType.Tackle => Pick(random,
                 $"{defenderName} times the tackle well on {attackerName} for {defendingTeam.Name}.",
-                $"{defenderName} steps in strongly and takes the ball from {attackerName}."),
+                $"{defenderName} steps in strongly and takes the ball from {attackerName}.",
+                $"{defenderName} breaks up the attack with a clean challenge."),
             EventType.Interception => Pick(random,
                 $"{defenderName} reads {attackerName}'s pass well and steps in for {defendingTeam.Name}.",
-                $"{defenderName} intercepts {attackerName}'s pass for {defendingTeam.Name}."),
+                $"{defenderName} intercepts {attackerName}'s pass for {defendingTeam.Name}.",
+                $"{defenderName} reads the danger and cuts out the pass."),
             EventType.Pressure => Pick(random,
                 $"{defenderName} presses quickly and forces {attackerName} backward.",
-                $"{defendingTeam.Name} squeeze the space as {defenderName} puts pressure on {attackerName}."),
+                $"{defendingTeam.Name} squeeze the space as {defenderName} puts pressure on {attackerName}.",
+                $"{defenderName} breaks up the attack with sharp pressure."),
             EventType.BlockedPass => Pick(random,
                 $"{defenderName} blocks {attackerName}'s pass for {defendingTeam.Name}.",
-                $"{defenderName} gets in the lane and stops {attackerName}'s pass."),
+                $"{defenderName} gets in the lane and stops {attackerName}'s pass.",
+                $"{defenderName} steps across and shuts down the passing lane."),
             _ => $"{defendingTeam.Name} disrupt {attackingTeam.Name}'s attack."
-        };
+        });
 
         var primaryPlayerName = IsDefenderPossessionWin(reasonType) ? defender?.Name : attacker.Name;
         var secondaryPlayerName = IsDefenderPossessionWin(reasonType) ? attacker.Name : defender?.Name;
@@ -197,16 +225,17 @@ public class MatchEventFactory
         return CreateEvent(minute, EventType.Shot, description, attacker.Name, safePlaymaker?.Name, triggeredTrait: triggeredTrait);
     }
 
-    public MatchEvent CreateGoal(int minute, Team attackingTeam, Player scorer, Match match, Player? assister = null)
+    public MatchEvent CreateGoal(int minute, Team attackingTeam, Player scorer, Match match, Player? assister = null, int scorerMatchGoals = 0)
     {
         var assistText = assister is not null && assister != scorer
             ? $" Assisted by {assister.Name}."
             : string.Empty;
+        var milestoneText = CreateGoalMilestoneText(scorer, attackingTeam, scorerMatchGoals, new Random(minute + scorer.Name.Length));
 
         return CreateEvent(
             minute,
             EventType.Goal,
-            $"{scorer.Name} scores for {attackingTeam.Name}.{assistText} Score: {match.HomeTeam.Name} {match.HomeScore} - {match.AwayScore} {match.AwayTeam.Name}",
+            $"{scorer.Name} scores for {attackingTeam.Name}.{assistText}{milestoneText} Score: {match.HomeTeam.Name} {match.HomeScore} - {match.AwayScore} {match.AwayTeam.Name}",
             scorer.Name,
             assister?.Name,
             match);
@@ -220,7 +249,8 @@ public class MatchEventFactory
         string goalTypeDescription,
         Random random,
         Player? assister = null,
-        PlayerTrait? triggeredTrait = null)
+        PlayerTrait? triggeredTrait = null,
+        int scorerMatchGoals = 0)
     {
         var safeAssister = ResolveDistinctTeammate(attackingTeam, scorer, assister, random);
         var scorerName = GetDisplayName(scorer.Name);
@@ -234,7 +264,8 @@ public class MatchEventFactory
                 $"GOAL! {scorerName} scores a {goalTypeDescription} for {attackingTeam.Name}.",
                 $"GOAL! {scorerName} finds the net for {attackingTeam.Name} with a {goalTypeDescription}.");
 
-        var description = $"{baseLine} Score: {match.HomeTeam.Name} {match.HomeScore} - {match.AwayScore} {match.AwayTeam.Name}";
+        var milestoneText = CreateGoalMilestoneText(scorer, attackingTeam, scorerMatchGoals, random);
+        var description = $"{baseLine}{milestoneText} Score: {match.HomeTeam.Name} {match.HomeScore} - {match.AwayScore} {match.AwayTeam.Name}";
         return CreateEvent(minute, EventType.Goal, description, scorer.Name, safeAssister?.Name, match, triggeredTrait);
     }
 
@@ -284,9 +315,13 @@ public class MatchEventFactory
         return CreateEvent(minute, EventType.Save, description, attacker.Name, goalkeeper.Name, triggeredTrait: triggeredTrait);
     }
 
-    public MatchEvent CreateYellowCard(int minute, Player player)
+    public MatchEvent CreateYellowCard(int minute, Player player, string? reason = null)
     {
-        return CreateEvent(minute, EventType.YellowCard, $"Yellow card for {player.Name}.", player.Name);
+        var description = string.IsNullOrWhiteSpace(reason)
+            ? $"Yellow card for {player.Name}."
+            : $"The referee steps in and books {player.Name} {reason}.";
+
+        return CreateEvent(minute, EventType.YellowCard, description, player.Name);
     }
 
     public MatchEvent CreateRedCard(int minute, Player player)
@@ -313,6 +348,34 @@ public class MatchEventFactory
             playerOff.Name);
     }
 
+    public MatchEvent CreateHalftimeSubstitution(int minute, Team team, MatchSubstitution substitution)
+    {
+        return CreateEvent(
+            minute,
+            EventType.Substitution,
+            $"{team.Name} make a halftime change. {substitution.PlayerOnName} replaces {substitution.PlayerOffName}.",
+            substitution.PlayerOnName,
+            substitution.PlayerOffName);
+    }
+
+    public MatchEvent CreateGroupedHalftimeSubstitution(int minute, Team team, IReadOnlyList<MatchSubstitution> substitutions)
+    {
+        var count = substitutions.Count;
+        var description = count switch
+        {
+            0 => $"{team.Name} make a halftime change.",
+            1 => $"{team.Name} make a halftime change. {substitutions[0].PlayerOnName} replaces {substitutions[0].PlayerOffName}.",
+            _ => $"{team.Name} make {count} changes at halftime. Fresh legs introduced at the break."
+        };
+
+        return CreateEvent(
+            minute,
+            EventType.Substitution,
+            description,
+            substitutions.FirstOrDefault()?.PlayerOnName,
+            substitutions.FirstOrDefault()?.PlayerOffName);
+    }
+
     public MatchEvent CreateInjury(int minute, Team team, Player player, string injuryCause = "")
     {
         var playerName = GetDisplayName(player.Name);
@@ -335,10 +398,13 @@ public class MatchEventFactory
         return CreateEvent(minute, EventType.Injury, $"{causeText} {treatmentText}", player.Name);
     }
 
-    public MatchEvent CreatePenalty(int minute, Team team, Player player, bool converted, Match match)
+    public MatchEvent CreatePenalty(int minute, Team team, Player player, bool converted, Match match, int scorerMatchGoals = 0)
     {
+        var milestoneText = converted
+            ? CreateGoalMilestoneText(player, team, scorerMatchGoals, new Random(minute + player.Name.Length))
+            : string.Empty;
         var outcome = converted
-            ? $"{player.Name} scores from the penalty spot for {team.Name}."
+            ? $"{player.Name} scores from the penalty spot for {team.Name}.{milestoneText}"
             : $"{player.Name}'s penalty for {team.Name} is saved.";
 
         return CreateEvent(
@@ -385,12 +451,16 @@ public class MatchEventFactory
         Match match,
         PlayerTrait? triggeredTrait = null,
         Team? defendingTeam = null,
-        Player? goalkeeper = null)
+        Player? goalkeeper = null,
+        int scorerMatchGoals = 0)
     {
+        var milestoneText = converted
+            ? CreateGoalMilestoneText(taker, attackingTeam, scorerMatchGoals, new Random(minute + taker.Name.Length))
+            : string.Empty;
         var outcome = converted && triggeredTrait is not null
-            ? CreateTraitPenaltyScoreLine(attackingTeam, taker, triggeredTrait.Value, random: new Random(minute + taker.Name.Length))
+            ? $"{CreateTraitPenaltyScoreLine(attackingTeam, taker, triggeredTrait.Value, random: new Random(minute + taker.Name.Length))}{milestoneText}"
             : converted
-            ? $"{taker.Name} scores from the penalty spot for {attackingTeam.Name}."
+            ? $"{taker.Name} scores from the penalty spot for {attackingTeam.Name}.{milestoneText}"
             : saved
                 ? CreatePenaltySaveLine(attackingTeam, defendingTeam, taker, goalkeeper)
                 : CreatePenaltyMissLine(attackingTeam, taker, new Random(minute + taker.Name.Length));
@@ -424,6 +494,15 @@ public class MatchEventFactory
         return CreateEvent(minute, EventType.Offside, description, player.Name);
     }
 
+    public MatchEvent CreateDisallowedGoalOffside(int minute, Team team, Player scorer, Player? assister, Match match, Random random)
+    {
+        var description = Pick(random,
+            $"Goal ruled out. {scorer.Name} was offside and the score returns to {match.HomeTeam.Name} {match.HomeScore} - {match.AwayScore} {match.AwayTeam.Name}.",
+            $"OFFSIDE! {scorer.Name}'s goal is ruled out. The score returns to {match.HomeTeam.Name} {match.HomeScore} - {match.AwayScore} {match.AwayTeam.Name}.");
+
+        return CreateEvent(minute, EventType.Offside, description, scorer.Name, assister?.Name, match);
+    }
+
     public MatchEvent CreateOffsideRestart(int minute, Team team, Random random)
     {
         var description = Pick(random,
@@ -440,11 +519,55 @@ public class MatchEventFactory
         return CreateEvent(minute, EventType.DefensiveError, $"{player.Name} makes a defensive error for {defendingTeam.Name}. Pressure builds immediately.", player.Name);
     }
 
-    public MatchEvent CreateWonderGoal(int minute, Team team, Player player, Match match, PlayerTrait? triggeredTrait = null)
+    public MatchEvent CreateMistakeChance(
+        int minute,
+        Team attackingTeam,
+        Team defendingTeam,
+        Player attacker,
+        Player mistakePlayer,
+        string mistakeType,
+        Random random)
     {
+        var description = mistakeType == "keeper"
+            ? Pick(random,
+                $"{attacker.Name} reacts first to the loose ball for {attackingTeam.Name}.",
+                $"{attackingTeam.Name} smell danger as {attacker.Name} pounces on the keeper's mistake.",
+                $"The ball breaks loose in the box and {attacker.Name} is there for {attackingTeam.Name}.")
+            : Pick(random,
+                $"BIG CHANCE! {attacker.Name} pounces on {mistakePlayer.Name}'s mistake for {attackingTeam.Name}.",
+                $"{attackingTeam.Name} break immediately after the error and {attacker.Name} has space.",
+                $"{defendingTeam.Name} are exposed as {attacker.Name} seizes on the loose ball.");
+
+        return CreateEvent(minute, EventType.Attack, description, attacker.Name, mistakePlayer.Name);
+    }
+
+    public MatchEvent CreateMistakePunishmentShot(
+        int minute,
+        Team attackingTeam,
+        Player attacker,
+        Player mistakePlayer,
+        string mistakeType,
+        Random random)
+    {
+        var description = mistakeType == "keeper"
+            ? Pick(random,
+                $"REBOUND SHOT! {attacker.Name} reacts first and fires at goal for {attackingTeam.Name}.",
+                $"{attacker.Name} snaps at the loose ball after the keeper error for {attackingTeam.Name}.",
+                $"{attacker.Name} stabs a quick effort through the scramble for {attackingTeam.Name}.")
+            : Pick(random,
+                $"{attacker.Name} turns the defensive error into a quick shot for {attackingTeam.Name}.",
+                $"{attacker.Name} drives into the gap and shoots after the mistake for {attackingTeam.Name}.",
+                $"{attackingTeam.Name} punish the loose touch as {attacker.Name} gets the shot away.");
+
+        return CreateEvent(minute, EventType.Shot, description, attacker.Name, mistakePlayer.Name);
+    }
+
+    public MatchEvent CreateWonderGoal(int minute, Team team, Player player, Match match, PlayerTrait? triggeredTrait = null, int scorerMatchGoals = 0)
+    {
+        var random = new Random(minute + player.Name.Length);
         var description = triggeredTrait is not null
-            ? $"{CreateTraitWonderGoalLine(team, player, triggeredTrait.Value, new Random(minute + player.Name.Length))} Score: {match.HomeTeam.Name} {match.HomeScore} - {match.AwayScore} {match.AwayTeam.Name}"
-            : $"{player.Name} produces a wonder goal for {team.Name}. Score: {match.HomeTeam.Name} {match.HomeScore} - {match.AwayScore} {match.AwayTeam.Name}";
+            ? $"{CreateTraitWonderGoalLine(team, player, triggeredTrait.Value, random)}{CreateGoalMilestoneText(player, team, scorerMatchGoals, random)} Score: {match.HomeTeam.Name} {match.HomeScore} - {match.AwayScore} {match.AwayTeam.Name}"
+            : $"{player.Name} produces a wonder goal for {team.Name}.{CreateGoalMilestoneText(player, team, scorerMatchGoals, random)} Score: {match.HomeTeam.Name} {match.HomeScore} - {match.AwayScore} {match.AwayTeam.Name}";
 
         return CreateEvent(
             minute,
@@ -519,17 +642,56 @@ public class MatchEventFactory
             triggeredTrait: triggeredTrait);
     }
 
-    public MatchEvent CreateConfrontation(int minute, Team team, Player player)
+    public MatchEvent CreateConfrontation(int minute, Team team, Player player, Player? opponent = null, string reason = "")
     {
+        var playerText = opponent is null
+            ? player.Name
+            : $"{player.Name} and {opponent.Name}";
+        var reasonText = reason switch
+        {
+            "late tackle" => "after a late challenge",
+            "dangerous foul" => "after a dangerous foul",
+            "penalty incident" => "after the penalty incident",
+            "rivalry tension" => "as the rivalry tension boils over",
+            "aggressive player" => "after an aggressive challenge",
+            "frustration" => "after frustration spills over",
+            _ => "after a heated moment"
+        };
+
         return CreateEvent(
             minute,
             EventType.Confrontation,
             Pick(
                 new Random(minute + player.Name.Length + team.Name.Length),
-                $"Tempers flare as {player.Name} gets involved for {team.Name}.",
-                $"Players surround the referee and {player.Name} is right in the middle of it.",
-                $"The match is getting heated; {player.Name} has to be pulled away for {team.Name}."),
-            player.Name);
+                $"Players clash {reasonText}. {playerText} have to be separated.",
+                $"Tempers flare {reasonText}; {playerText} are right in the middle of it.",
+                $"The match is getting heated as {playerText} square up {reasonText}."),
+            player.Name,
+            opponent?.Name);
+    }
+
+    public MatchEvent CreateDoubleBooking(int minute, Player firstPlayer, Player secondPlayer)
+    {
+        return CreateEvent(
+            minute,
+            EventType.YellowCard,
+            $"Both players go into the book after the confrontation: {firstPlayer.Name} and {secondPlayer.Name}.",
+            firstPlayer.Name,
+            secondPlayer.Name);
+    }
+
+    public MatchEvent CreateRefereeWarning(int minute, Player firstPlayer, Player? secondPlayer = null)
+    {
+        var playerText = secondPlayer is null
+            ? firstPlayer.Name
+            : $"{firstPlayer.Name} and {secondPlayer.Name}";
+
+        return CreateEvent(
+            minute,
+            EventType.RefereeControversy,
+            $"The referee warns {playerText} after the confrontation. No cards this time.",
+            firstPlayer.Name,
+            secondPlayer?.Name);
     }
 
     public MatchEvent CreateCrowdMomentum(int minute, Team team)
@@ -553,15 +715,19 @@ public class MatchEventFactory
     {
         var description = weatherCondition switch
         {
+            WeatherCondition.Clear => "Clear skies tonight. Perfect football conditions.",
             WeatherCondition.Rainy => "Rain is falling and the surface is getting slick.",
             WeatherCondition.HeavyRain => "Heavy rain makes conditions difficult. Players may struggle to keep their footing.",
+            WeatherCondition.Storm => "Thunderstorms around the stadium are disrupting visibility and long passing.",
             WeatherCondition.Windy => "A swirling wind is affecting long balls and crosses.",
             WeatherCondition.Foggy => "Fog rolls across the pitch and reactions could be a split second slower.",
             WeatherCondition.Snow => "Snow is falling. The cold surface could drain legs quickly.",
-            _ => "Clear conditions tonight. The pitch looks quick and clean."
+            WeatherCondition.Hot => "Hot and humid conditions are draining energy early.",
+            WeatherCondition.Cold => "Cold air bites tonight. Players may need extra time to react sharply.",
+            _ => "Clear skies tonight. Perfect football conditions."
         };
 
-        return CreateEvent(minute, EventType.Weather, description);
+        return CreateEvent(minute, EventType.Weather, description, weatherCondition: weatherCondition);
     }
 
     public MatchEvent CreateRivalryAtmosphere(int minute, Team homeTeam, Team awayTeam)
@@ -581,8 +747,11 @@ public class MatchEventFactory
         var description = reason switch
         {
             "goal" => "VAR checking possible offside in the build-up...",
+            "foul buildup" => "VAR checking a possible foul in the build-up...",
+            "handball buildup" => "VAR checking a possible handball in the build-up...",
+            "handball penalty" => "VAR checking possible handball for a penalty...",
             "penalty" => "VAR checking the penalty decision...",
-            "red card" => "VAR checking the red card decision...",
+            "red card" => "VAR checking possible violent conduct...",
             "offside" => "VAR checking a tight offside call...",
             _ => "VAR review underway. The stadium waits."
         };
@@ -590,19 +759,32 @@ public class MatchEventFactory
         return CreateEvent(minute, EventType.VarCheck, description);
     }
 
-    public MatchEvent CreateVarDecision(int minute, Team team, string outcome, Match? match = null)
+    public MatchEvent CreateVarDecision(
+        int minute,
+        Team team,
+        string outcome,
+        Match? match = null,
+        Player? primaryPlayer = null,
+        Player? secondaryPlayer = null)
     {
         var description = outcome switch
         {
+            "goal disallowed offside" => $"Goal ruled out for offside. The score returns to {match?.HomeTeam.Name} {match?.HomeScore} - {match?.AwayScore} {match?.AwayTeam.Name}.",
+            "goal disallowed foul" => $"Goal ruled out. Foul in the build-up by {team.Name}; the score returns to {match?.HomeTeam.Name} {match?.HomeScore} - {match?.AwayScore} {match?.AwayTeam.Name}.",
+            "goal disallowed handball" => $"Goal ruled out. Handball in the build-up by {team.Name}; the score returns to {match?.HomeTeam.Name} {match?.HomeScore} - {match?.AwayScore} {match?.AwayTeam.Name}.",
             "goal disallowed" => $"Goal disallowed after VAR review. {team.Name} are pulled back.",
             "goal stands" => $"VAR confirms the goal for {team.Name}. The celebrations restart.",
+            "penalty stands" => "Penalty decision stands after VAR review.",
+            "no penalty" => "No penalty after review. Play continues.",
             "penalty overturned" => $"Penalty overturned after VAR review. No foul by {team.Name}.",
+            "red card upgraded" => "Referee upgrades yellow to red after VAR review.",
             "red card cancelled" => $"Red card cancelled after VAR review. {team.Name} survive a huge moment.",
+            "no red card" => "No red card. Play continues after VAR review.",
             "offside confirmed" => "Tight offside confirmed by VAR. The restart stands.",
             _ => "VAR review complete. Decision stands."
         };
 
-        return CreateEvent(minute, EventType.VarDecision, description, match: match);
+        return CreateEvent(minute, EventType.VarDecision, description, primaryPlayer?.Name, secondaryPlayer?.Name, match);
     }
 
     public MatchEvent CreateRefereeControversy(int minute, Team team, Player? player, Random random)
@@ -951,6 +1133,84 @@ public class MatchEventFactory
         };
     }
 
+    private static string? CreateTacticalBuildUpDescription(Team team, Player playmaker, Player? target, Random random)
+    {
+        var playmakerName = GetDisplayName(playmaker.Name);
+        var targetName = target is null ? "the front line" : GetDisplayName(target.Name);
+
+        if (team.Tactics.PressingIntensity >= 80 && random.NextDouble() < 0.45)
+        {
+            return Pick(random,
+                $"High pressing from {team.Name} wins territory and {playmakerName} immediately looks for {targetName}.",
+                $"{team.Name} counter-press aggressively, turning pressure into a quick attack through {playmakerName}.");
+        }
+
+        if (team.Tactics.Tempo >= 78 && random.NextDouble() < 0.45)
+        {
+            return Pick(random,
+                $"{team.Name} attack at a furious tempo as {playmakerName} releases {targetName} early.",
+                $"{team.Name} go direct, moving the ball forward before the defense can settle.");
+        }
+
+        if (team.Tactics.Width >= 75 && random.NextDouble() < 0.45)
+        {
+            return Pick(random,
+                $"{team.Name} stretch the pitch wide and {playmakerName} switches play toward {targetName}.",
+                $"{team.Name}'s wide shape opens the flank for {targetName}.");
+        }
+
+        if (team.Tactics.Width <= 30 && random.NextDouble() < 0.45)
+        {
+            return Pick(random,
+                $"{team.Name} overload the middle with narrow combinations around {playmakerName}.",
+                $"{team.Name} keep the shape compact and combine through central lanes.");
+        }
+
+        if (team.Tactics.Mentality == Mentality.AllOutAttack && random.NextDouble() < 0.50)
+        {
+            return $"{team.Name} flood players forward, chasing the next chance with all-out attacking intent.";
+        }
+
+        if (team.Tactics.Mentality == Mentality.UltraDefensive && random.NextDouble() < 0.45)
+        {
+            return $"{team.Name} break carefully from a deep block, with {playmakerName} choosing the safest forward pass.";
+        }
+
+        return null;
+    }
+
+    private static string? CreateTacticalPossessionLossDescription(
+        Team attackingTeam,
+        Team defendingTeam,
+        string attackerName,
+        string defenderName,
+        EventType reasonType,
+        Random random)
+    {
+        if (defendingTeam.Tactics.PressingIntensity >= 80 && reasonType is EventType.Pressure or EventType.Tackle or EventType.Interception)
+        {
+            return Pick(random,
+                $"{defendingTeam.Name}'s constant pressure traps {attackerName} and forces the turnover.",
+                $"{defendingTeam.Name} swarm the ball, with {defenderName} turning the press into possession.");
+        }
+
+        if (defendingTeam.Tactics.DefensiveLine <= 30 && reasonType is EventType.BlockedPass or EventType.Interception)
+        {
+            return Pick(random,
+                $"{defendingTeam.Name}'s deep block closes the lane and frustrates {attackingTeam.Name}.",
+                $"{defendingTeam.Name} stay compact, blocking {attackerName}'s route through.");
+        }
+
+        if (attackingTeam.Tactics.Tempo >= 80 && reasonType is EventType.BadPass or EventType.Miscontrol)
+        {
+            return Pick(random,
+                $"{attackingTeam.Name}'s very fast tempo becomes rushed as {attackerName} gives it away.",
+                $"{attackerName} cannot execute the high-speed move and {defendingTeam.Name} pounce.");
+        }
+
+        return null;
+    }
+
     private static MatchEvent CreateEvent(
         int minute,
         EventType eventType,
@@ -958,7 +1218,8 @@ public class MatchEventFactory
         string? primaryPlayerName = null,
         string? secondaryPlayerName = null,
         Match? match = null,
-        PlayerTrait? triggeredTrait = null)
+        PlayerTrait? triggeredTrait = null,
+        WeatherCondition? weatherCondition = null)
     {
         return new MatchEvent
         {
@@ -969,6 +1230,7 @@ public class MatchEventFactory
             PrimaryPlayerName = primaryPlayerName,
             SecondaryPlayerName = secondaryPlayerName,
             TriggeredTrait = triggeredTrait,
+            WeatherCondition = weatherCondition,
             Description = description
         };
     }
@@ -981,6 +1243,29 @@ public class MatchEventFactory
         }
 
         return options[random.Next(options.Length)];
+    }
+
+    private static string CreateGoalMilestoneText(Player scorer, Team team, int scorerMatchGoals, Random random)
+    {
+        if (scorerMatchGoals == 3)
+        {
+            return Pick(random,
+                $" HAT-TRICK! {GetDisplayName(scorer.Name)} completes his hat-trick for {team.Name}. That is his third goal of the match.",
+                $" That's three for {GetDisplayName(scorer.Name)}! A clinical hat-trick. That is his third goal of the match.",
+                $" The match ball is his - {GetDisplayName(scorer.Name)} has a hat-trick. That is his third goal of the match.");
+        }
+
+        if (scorerMatchGoals >= 4)
+        {
+            return $" {scorerMatchGoals} goals for {GetDisplayName(scorer.Name)}. What an extraordinary scoring display.";
+        }
+
+        if (scorerMatchGoals == 2 && random.NextDouble() < 0.55)
+        {
+            return $" That's a brace for {GetDisplayName(scorer.Name)}.";
+        }
+
+        return string.Empty;
     }
 
     private static bool IsDefenderPossessionWin(EventType eventType)

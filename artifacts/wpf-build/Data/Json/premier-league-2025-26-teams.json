@@ -1,0 +1,126 @@
+{
+  "leagueName": "Premier League",
+  "season": "2025-26",
+  "teams": [
+    {
+      "id": "afc-bournemouth",
+      "name": "AFC Bournemouth",
+      "shortName": "BOU",
+      "formation": "4-3-3"
+    },
+    {
+      "id": "arsenal",
+      "name": "Arsenal",
+      "shortName": "ARS",
+      "formation": "4-3-3"
+    },
+    {
+      "id": "aston-villa",
+      "name": "Aston Villa",
+      "shortName": "AVL",
+      "formation": "4-4-2"
+    },
+    {
+      "id": "brentford",
+      "name": "Brentford",
+      "shortName": "BRE",
+      "formation": "3-5-2"
+    },
+    {
+      "id": "brighton-and-hove-albion",
+      "name": "Brighton & Hove Albion",
+      "shortName": "BHA",
+      "formation": "4-3-3"
+    },
+    {
+      "id": "burnley",
+      "name": "Burnley",
+      "shortName": "BUR",
+      "formation": "4-4-2"
+    },
+    {
+      "id": "chelsea",
+      "name": "Chelsea",
+      "shortName": "CHE",
+      "formation": "4-3-3"
+    },
+    {
+      "id": "crystal-palace",
+      "name": "Crystal Palace",
+      "shortName": "CRY",
+      "formation": "3-5-2"
+    },
+    {
+      "id": "everton",
+      "name": "Everton",
+      "shortName": "EVE",
+      "formation": "4-4-2"
+    },
+    {
+      "id": "fulham",
+      "name": "Fulham",
+      "shortName": "FUL",
+      "formation": "4-3-3"
+    },
+    {
+      "id": "leeds-united",
+      "name": "Leeds United",
+      "shortName": "LEE",
+      "formation": "4-3-3"
+    },
+    {
+      "id": "liverpool",
+      "name": "Liverpool",
+      "shortName": "LIV",
+      "formation": "4-3-3"
+    },
+    {
+      "id": "manchester-city",
+      "name": "Manchester City",
+      "shortName": "MCI",
+      "formation": "4-3-3"
+    },
+    {
+      "id": "manchester-united",
+      "name": "Manchester United",
+      "shortName": "MUN",
+      "formation": "3-5-2"
+    },
+    {
+      "id": "newcastle-united",
+      "name": "Newcastle United",
+      "shortName": "NEW",
+      "formation": "4-3-3"
+    },
+    {
+      "id": "nottingham-forest",
+      "name": "Nottingham Forest",
+      "shortName": "NFO",
+      "formation": "4-4-2"
+    },
+    {
+      "id": "sunderland",
+      "name": "Sunderland",
+      "shortName": "SUN",
+      "formation": "4-4-2"
+    },
+    {
+      "id": "tottenham-hotspur",
+      "name": "Tottenham Hotspur",
+      "shortName": "TOT",
+      "formation": "4-3-3"
+    },
+    {
+      "id": "west-ham-united",
+      "name": "West Ham United",
+      "shortName": "WHU",
+      "formation": "4-2-3-1"
+    },
+    {
+      "id": "wolverhampton-wanderers",
+      "name": "Wolverhampton Wanderers",
+      "shortName": "WOL",
+      "formation": "3-5-2"
+    }
+  ]
+}

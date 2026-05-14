@@ -16,6 +16,12 @@ public class PlayerMatchPerformance
     public int Interceptions { get; set; }
     public int Blocks { get; set; }
     public int Clearances { get; set; }
+    public int AerialDuelsWon { get; set; }
+    public int Recoveries { get; set; }
+    public int GoalLineClearances { get; set; }
+    public int ErrorsLeadingToShot { get; set; }
+    public int ErrorsLeadingToGoal { get; set; }
+    public int PenaltiesConceded { get; set; }
     public int Fouls { get; set; }
     public int YellowCards { get; set; }
     public int RedCards { get; set; }

@@ -5,7 +5,10 @@ public enum WeatherCondition
     Clear,
     Rainy,
     HeavyRain,
+    Storm,
     Windy,
     Foggy,
-    Snow
+    Snow,
+    Hot,
+    Cold
 }

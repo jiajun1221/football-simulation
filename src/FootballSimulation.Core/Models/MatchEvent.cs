@@ -9,5 +9,6 @@ public class MatchEvent
     public string? PrimaryPlayerName { get; set; }
     public string? SecondaryPlayerName { get; set; }
     public PlayerTrait? TriggeredTrait { get; set; }
+    public WeatherCondition? WeatherCondition { get; set; }
     public string Description { get; set; } = string.Empty;
 }

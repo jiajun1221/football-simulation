@@ -8,7 +8,7 @@ internal static class PlayerFormBadgeHelper
     {
         return status switch
         {
-            PlayerFormStatus.Excellent => new PlayerFormBadge("Excellent", "#166534", "#FFFFFF"),
+            PlayerFormStatus.Excellent => new PlayerFormBadge("Excellent", "#10B981", "#FFFFFF"),
             PlayerFormStatus.Good => new PlayerFormBadge("Good", "#4ADE80", "#064E3B"),
             PlayerFormStatus.Poor => new PlayerFormBadge("Poor", "#FB923C", "#FFFFFF"),
             PlayerFormStatus.VeryPoor => new PlayerFormBadge("Very Poor", "#EF4444", "#FFFFFF"),

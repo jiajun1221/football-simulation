@@ -27,7 +27,7 @@ public static class PlayerTraitBadgeHelper
             badges.Add(new PlayerTraitBadge
             {
                 Icon = $"+{extraCount}",
-                TooltipText = string.Join(Environment.NewLine + Environment.NewLine, traitList.Skip(maxVisibleTraits).Select(CreateTooltipText)),
+                TooltipText = string.Join(Environment.NewLine + Environment.NewLine, traitList.Select(CreateTooltipText)),
                 Background = "#F1F5FF",
                 Foreground = "#1E528F",
                 FontFamily = "Segoe UI"

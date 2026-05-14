@@ -50,8 +50,10 @@ public class FatigueService
     {
         return tempo switch
         {
-            < 40 => 0.80,
-            > 70 => 1.30,
+            <= 25 => 0.72,
+            < 40 => 0.84,
+            >= 85 => 1.55,
+            > 70 => 1.34,
             _ => 1.00
         };
     }
@@ -60,8 +62,10 @@ public class FatigueService
     {
         return pressing switch
         {
-            < 40 => 0.70,
-            > 70 => 1.50,
+            <= 25 => 0.62,
+            < 40 => 0.78,
+            >= 85 => 1.85,
+            > 70 => 1.52,
             _ => 1.00
         };
     }
@@ -109,7 +113,13 @@ public class FatigueService
             return 1.0;
         }
 
-        var defensiveActions = performance.Tackles + performance.Interceptions + performance.Blocks + performance.Clearances;
+        var defensiveActions = performance.Tackles +
+            performance.Interceptions +
+            performance.Blocks +
+            performance.Clearances +
+            performance.AerialDuelsWon +
+            performance.Recoveries +
+            performance.GoalLineClearances;
         var activityScore =
             performance.Shots +
             performance.KeyPasses +

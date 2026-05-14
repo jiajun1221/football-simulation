@@ -2,6 +2,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:models="clr-namespace:FootballSimulation.Wpf.Models"
+             xmlns:controls="clr-namespace:FootballSimulation.Wpf.Controls"
              Background="{DynamicResource AppPageBackground}">
     <UserControl.Resources>
         <DataTemplate x:Key="TraitIconBadgeTemplate">
@@ -15,6 +16,25 @@
                            Foreground="{Binding Foreground}"
                            FontFamily="{Binding FontFamily}"
                            FontSize="8"
+                           FontWeight="Black"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           TextAlignment="Center" />
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="CardStatusBadgeTemplate">
+            <Border MinWidth="14"
+                    Height="14"
+                    Background="{Binding Background}"
+                    BorderBrush="{Binding BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="3"
+                    Margin="2,0,0,0"
+                    ToolTip="{Binding TooltipText}">
+                <TextBlock Text="{Binding Text}"
+                           Foreground="{Binding Foreground}"
+                           FontSize="7.5"
                            FontWeight="Black"
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"
@@ -39,13 +59,15 @@
                 </Grid.RowDefinitions>
 
                 <Border Grid.Row="0"
-                        Background="#102033"
+                        Background="{Binding RatingBadgeBackground}"
+                        BorderBrush="{Binding RatingBadgeBorderBrush}"
+                        BorderThickness="1"
                         CornerRadius="7"
                         Padding="5,0"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center">
-                    <TextBlock Text="{Binding RatingText}"
-                               Foreground="White"
+                    <TextBlock Text="{Binding LiveStats.RatingDisplay}"
+                               Foreground="{Binding RatingBadgeForeground}"
                                FontSize="8"
                                FontWeight="Bold" />
                 </Border>
@@ -126,7 +148,7 @@
                             HorizontalAlignment="Center"
                             VerticalAlignment="Top"
                             Margin="0,1,0,0">
-                    <Border Background="{DynamicResource FeedDefensiveIconBackground}" CornerRadius="6" Padding="3,0" Margin="1,0">
+                    <Border Background="#7CFC9A" CornerRadius="6" Padding="3,0" Margin="1,0">
                         <Border.Style>
                             <Style TargetType="Border">
                                 <Setter Property="Visibility" Value="Visible" />
@@ -137,7 +159,7 @@
                                 </Style.Triggers>
                             </Style>
                         </Border.Style>
-                        <TextBlock Text="{Binding GoalBadgeText}" FontFamily="Segoe UI Emoji" FontSize="8" FontWeight="Bold" Foreground="{DynamicResource FeedDefensiveIconForeground}" />
+                        <TextBlock Text="{Binding GoalBadgeText}" FontFamily="Segoe UI Emoji" FontSize="8" FontWeight="Bold" Foreground="#166534" />
                     </Border>
                     <Border Background="{DynamicResource FeedChanceIconBackground}" CornerRadius="6" Padding="3,0" Margin="1,0">
                         <Border.Style>
@@ -378,6 +400,24 @@
                                         <Setter Property="Visibility" Value="Visible" />
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding TraitBadges.Count}" Value="0">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ItemsControl.Style>
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                            </ItemsControl>
+                            <ItemsControl ItemsSource="{Binding CardStatusBadges}"
+                                          ItemTemplate="{StaticResource CardStatusBadgeTemplate}">
+                                <ItemsControl.Style>
+                                    <Style TargetType="ItemsControl">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding CardStatusBadges.Count}" Value="0">
                                                 <Setter Property="Visibility" Value="Collapsed" />
                                             </DataTrigger>
                                         </Style.Triggers>
@@ -895,6 +935,15 @@
                                             </ItemsPanelTemplate>
                                         </ItemsControl.ItemsPanel>
                                     </ItemsControl>
+                                    <ItemsControl x:Name="SelectedPlayerCardStatusItemsControl"
+                                                  ItemTemplate="{StaticResource CardStatusBadgeTemplate}"
+                                                  Margin="0,0,4,0">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                    </ItemsControl>
                                     <Border x:Name="SelectedPlayerFormBadgeBorder"
                                             CornerRadius="10"
                                             Padding="8,3"
@@ -1036,66 +1085,21 @@
                 <Border Grid.Column="1"
                         Background="{DynamicResource AppCardBackground}"
                         CornerRadius="12"
-                        Padding="10"
+                        Padding="8"
                         Margin="0,0,8,0">
                     <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
-
-                        <TextBlock x:Name="ActionLockedTextBlock"
-                                   Text="Pause the match to make tactical adjustments or substitutions."
-                                   Foreground="{DynamicResource AppMutedTextBrush}"
-                                   FontSize="12"
-                                   FontWeight="SemiBold"
-                                   TextWrapping="Wrap"
-                                   Margin="0,0,0,4" />
-
                         <Grid x:Name="PausedActionPanel"
-                              Grid.Row="1"
                               Margin="0">
                             <StackPanel>
-                                <TextBlock Text="Tactical Adjustment"
-                                           Foreground="{DynamicResource AppTextBrush}"
-                                           FontSize="13"
-                                           FontWeight="Bold"
-                                           Margin="0,0,0,4" />
-
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="86" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                    </Grid.RowDefinitions>
-
-                                    <TextBlock Text="Mentality" Foreground="{DynamicResource AppTextBrush}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" />
-                                    <ComboBox x:Name="ActionMentalityComboBox" Grid.Column="1" Height="24" Margin="0,0,0,2" />
-
-                                    <TextBlock Grid.Row="1" Text="Pressing" Foreground="{DynamicResource AppTextBrush}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" />
-                                    <Slider x:Name="ActionPressingSlider" Grid.Row="1" Grid.Column="1" Minimum="1" Maximum="100" />
-
-                                    <TextBlock Grid.Row="2" Text="Width" Foreground="{DynamicResource AppTextBrush}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" />
-                                    <Slider x:Name="ActionWidthSlider" Grid.Row="2" Grid.Column="1" Minimum="1" Maximum="100" />
-
-                                    <TextBlock Grid.Row="3" Text="Tempo" Foreground="{DynamicResource AppTextBrush}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" />
-                                    <Slider x:Name="ActionTempoSlider" Grid.Row="3" Grid.Column="1" Minimum="1" Maximum="100" />
-
-                                    <TextBlock Grid.Row="4" Text="Defensive Line" Foreground="{DynamicResource AppTextBrush}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" />
-                                    <Slider x:Name="ActionDefensiveLineSlider" Grid.Row="4" Grid.Column="1" Minimum="1" Maximum="100" />
-                                </Grid>
+                                <controls:TacticalSettingsPanel x:Name="ActionTacticalSettingsPanel"
+                                                                IsCompact="True"
+                                                                PanelMaxHeight="220" />
 
                                 <TextBlock x:Name="PausedActionStatusTextBlock"
                                            Foreground="{DynamicResource AppMutedTextBrush}"
-                                           FontSize="10"
+                                           FontSize="8.5"
                                            TextWrapping="Wrap"
-                                           Margin="0,3,0,0" />
+                                           Margin="0,2,0,0" />
                             </StackPanel>
                         </Grid>
                     </Grid>
@@ -1269,52 +1273,39 @@
                   Grid.RowSpan="2"
                   Background="#A6112233"
                   Visibility="Collapsed">
-                <Border Width="480"
+                <Border Width="560"
                         Background="{DynamicResource AppSecondaryCardBackground}"
                         CornerRadius="14"
-                        Padding="22"
+                        Padding="14"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center">
                     <StackPanel>
                         <TextBlock Text="Tactical Adjustment"
                                    Foreground="{DynamicResource AppTextBrush}"
-                                   FontSize="24"
+                                   FontSize="18"
                                    FontWeight="Bold" />
                         <TextBlock x:Name="TacticalOverlayStatusTextBlock"
                                    Foreground="{DynamicResource AppMutedTextBrush}"
-                                   FontSize="13"
-                                   Margin="0,8,0,18" />
+                                   FontSize="10"
+                                   Margin="0,4,0,8" />
 
-                        <TextBlock Text="Mentality" FontWeight="SemiBold" Foreground="{DynamicResource AppTextBrush}" />
-                        <ComboBox x:Name="TacticalMentalityComboBox"
-                                  Height="34"
-                                  Margin="0,4,0,12" />
-
-                        <TextBlock Text="Pressing" FontWeight="SemiBold" Foreground="{DynamicResource AppTextBrush}" />
-                        <Slider x:Name="TacticalPressingSlider" Minimum="1" Maximum="100" />
-
-                        <TextBlock Text="Width" FontWeight="SemiBold" Foreground="{DynamicResource AppTextBrush}" Margin="0,8,0,0" />
-                        <Slider x:Name="TacticalWidthSlider" Minimum="1" Maximum="100" />
-
-                        <TextBlock Text="Tempo" FontWeight="SemiBold" Foreground="{DynamicResource AppTextBrush}" Margin="0,8,0,0" />
-                        <Slider x:Name="TacticalTempoSlider" Minimum="1" Maximum="100" />
-
-                        <TextBlock Text="Defensive Line" FontWeight="SemiBold" Foreground="{DynamicResource AppTextBrush}" Margin="0,8,0,0" />
-                        <Slider x:Name="TacticalDefensiveLineSlider" Minimum="1" Maximum="100" />
+                        <controls:TacticalSettingsPanel x:Name="TacticalSettingsPanel"
+                                                        IsCompact="True"
+                                                        PanelMaxHeight="320" />
 
                         <StackPanel Orientation="Horizontal"
                                     HorizontalAlignment="Right"
-                                    Margin="0,18,0,0">
+                                    Margin="0,10,0,0">
                             <Button Content="Cancel"
                                     Style="{StaticResource PrimaryTextButton}"
-                                    Width="110"
-                                    Height="36"
+                                    Width="92"
+                                    Height="30"
                                     Margin="0,0,10,0"
                                     Click="CancelTacticalAdjustmentButton_Click" />
                             <Button Content="Apply Tactics"
                                     Style="{StaticResource PrimaryTextButton}"
-                                    Width="140"
-                                    Height="36"
+                                    Width="120"
+                                    Height="30"
                                     Click="ConfirmTacticalAdjustmentButton_Click" />
                         </StackPanel>
                     </StackPanel>

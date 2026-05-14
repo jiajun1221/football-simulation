@@ -30,7 +30,6 @@ public partial class PreMatchView : UserControl
     private Point _dragStartPoint;
     private bool _isDraggingPlayer;
     private bool _isLoadingSetup;
-    private bool _areTacticsEventsWired;
 
     public PreMatchView(GameFlowState state, Action<UserControl> navigate)
     {
@@ -55,7 +54,6 @@ public partial class PreMatchView : UserControl
         ReconcileUnavailablePlayers(_state.SelectedTeam);
         LoadFormationSelector(_state.SelectedTeam);
         LoadTactics(_state.SelectedTeam.Tactics);
-        WireTacticsEvents();
         InitializePitchSlots();
         RefreshSubstitutes();
         RefreshInjuredPlayers();
@@ -122,26 +120,7 @@ public partial class PreMatchView : UserControl
 
     private void LoadTactics(TeamTactics tactics)
     {
-        MentalityComboBox.ItemsSource = Enum.GetValues<Mentality>();
-        MentalityComboBox.SelectedItem = tactics.Mentality;
-        PressingSlider.Value = tactics.PressingIntensity;
-        WidthSlider.Value = tactics.Width;
-        TempoSlider.Value = tactics.Tempo;
-        DefensiveLineSlider.Value = tactics.DefensiveLine;
-    }
-
-    private void WireTacticsEvents()
-    {
-        if (_areTacticsEventsWired)
-        {
-            return;
-        }
-
-        PressingSlider.ValueChanged += TacticsSlider_Changed;
-        WidthSlider.ValueChanged += TacticsSlider_Changed;
-        TempoSlider.ValueChanged += TacticsSlider_Changed;
-        DefensiveLineSlider.ValueChanged += TacticsSlider_Changed;
-        _areTacticsEventsWired = true;
+        TacticalSettingsPanel.LoadTactics(tactics);
     }
 
     private void RenderPitch()
@@ -301,12 +280,7 @@ public partial class PreMatchView : UserControl
         RefreshTacticalInsight();
     }
 
-    private void TacticsControl_Changed(object sender, SelectionChangedEventArgs e)
-    {
-        RefreshTacticalInsight();
-    }
-
-    private void TacticsSlider_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
+    private void TacticalSettingsPanel_TacticsChanged(object? sender, EventArgs e)
     {
         RefreshTacticalInsight();
     }
@@ -443,8 +417,8 @@ public partial class PreMatchView : UserControl
         SelectedPlayerImage.Source = CreateImageSource(GetPlayerImagePath(_selectedStarter));
         SelectedPlayerNumberTextBlock.Text = _selectedStarter.SquadNumber > 0 ? $"#{_selectedStarter.SquadNumber}" : "No squad number";
         SelectedPlayerNameTextBlock.Text = _selectedStarter.Name;
-        SelectedPlayerPositionChip.Text = $"Playing {_selectedStarter.AssignedPosition}";
-        SelectedPlayerPreferredChip.Text = GetPositionGroupText(_selectedStarter);
+        SelectedPlayerPositionChip.Text = GetPlayablePositionsText(_selectedStarter);
+        SelectedPlayerPreferredChip.Text = _state.SelectedTeam?.Name ?? GetPositionGroupText(_selectedStarter);
         SelectedPlayerOvrBadgeTextBlock.Text = ratingVisual.Rating.ToString();
         SelectedPlayerOvrBadgeBorder.Background = ToBrush(ratingVisual.Background);
         SelectedPlayerOvrBadgeBorder.ToolTip = PlayerGrowthDisplayHelper.CreateGrowthText(_selectedStarter);
@@ -466,13 +440,20 @@ public partial class PreMatchView : UserControl
         SelectedPlayerInjuryChipBorder.Background = ToBrush(_selectedStarter.IsInjured
             ? (useDarkInjuryChip ? ThemeManager.GetBrushHex("FeedAttackBackground", "#3B1115") : "#FFD1D1")
             : (useDarkInjuryChip ? ThemeManager.GetBrushHex("AppSecondaryCardBackground", "#111827") : "#D9F1E1"));
-        SelectedPlayerStaminaTextBlock.Text = $"{GetStaminaPercentage(_selectedStarter)}% stamina";
+        var staminaText = $"{GetStaminaPercentage(_selectedStarter)}% stamina";
+        SelectedPlayerStaminaTextBlock.Text = staminaText;
+        SelectedPlayerStaminaPercentTextBlock.Text = $"{GetStaminaPercentage(_selectedStarter)}%";
         SelectedPlayerStaminaFill.Foreground = ToBrush(GetStaminaBrush(_selectedStarter));
 
-        SelectedPlayerAttackTextBlock.Text = $"Attack {_selectedStarter.Attack}";
-        SelectedPlayerDefenseTextBlock.Text = $"Defense {_selectedStarter.Defense}";
-        SelectedPlayerPassingTextBlock.Text = $"Passing {_selectedStarter.Passing}";
-        SelectedPlayerFinishingTextBlock.Text = $"Finishing {_selectedStarter.Finishing}";
+        SelectedPlayerAttackTextBlock.Text = _selectedStarter.Attack.ToString();
+        SelectedPlayerDefenseTextBlock.Text = _selectedStarter.Defense.ToString();
+        SelectedPlayerPassingTextBlock.Text = _selectedStarter.Passing.ToString();
+        SelectedPlayerFinishingTextBlock.Text = _selectedStarter.Finishing.ToString();
+        SelectedPlayerCard.ToolTip =
+            $"{_selectedStarter.Name}{Environment.NewLine}" +
+            $"{_selectedStarter.AssignedPosition} | OVR {ratingVisual.Rating} | {staminaText}{Environment.NewLine}" +
+            $"Attack {_selectedStarter.Attack}  Defense {_selectedStarter.Defense}{Environment.NewLine}" +
+            $"Passing {_selectedStarter.Passing}  Finishing {_selectedStarter.Finishing}";
     }
 
     private string GetRecentPlayerFormText(Player player)
@@ -528,9 +509,7 @@ public partial class PreMatchView : UserControl
 
     private static int GetOverallRating(Player player)
     {
-        return player.OverallRating > 0
-            ? player.OverallRating
-            : (int)Math.Round((player.Attack + player.Defense + player.Passing + player.Stamina + player.Finishing) / 5.0);
+        return PlayerOverallCalculator.CalculateOverall(player);
     }
 
     private static string GetPositionText(Position position)
@@ -631,6 +610,21 @@ public partial class PreMatchView : UserControl
             : $" | Also {string.Join("/", player.SecondaryPositions)}";
 
         return $"Pref {player.PreferredPosition}{secondaryPositions}";
+    }
+
+    private static string GetPlayablePositionsText(Player player)
+    {
+        var positions = new List<string>();
+        if (!string.IsNullOrWhiteSpace(player.PreferredPosition))
+        {
+            positions.Add(player.PreferredPosition);
+        }
+
+        positions.AddRange(player.SecondaryPositions.Where(position => !string.IsNullOrWhiteSpace(position)));
+
+        return positions.Count == 0
+            ? player.Position.ToString()
+            : string.Join("/", positions.Distinct(StringComparer.OrdinalIgnoreCase));
     }
 
     private void PitchCanvas_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -1016,15 +1010,7 @@ public partial class PreMatchView : UserControl
             team.Formation = formation;
         }
 
-        if (MentalityComboBox.SelectedItem is Mentality mentality)
-        {
-            team.Tactics.Mentality = mentality;
-        }
-
-        team.Tactics.PressingIntensity = (int)Math.Round(PressingSlider.Value);
-        team.Tactics.Width = (int)Math.Round(WidthSlider.Value);
-        team.Tactics.Tempo = (int)Math.Round(TempoSlider.Value);
-        team.Tactics.DefensiveLine = (int)Math.Round(DefensiveLineSlider.Value);
+        TacticalSettingsPanel.ApplyTo(team.Tactics);
     }
 
     private IEnumerable<Player> OrderPlayersForPitch(IEnumerable<Player> players, string formation)

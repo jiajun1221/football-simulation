@@ -22,8 +22,8 @@ public class TeamStrengthCalculator
         var availablePlayers = GetAvailablePlayers(team).ToList();
         var baseAttackStrength = availablePlayers.Average(player => player.Position switch
         {
-            Position.Forward => (GetEffectiveAttack(player) + GetEffectiveFinishing(player)) / 2.0 * 1.30,
-            Position.Midfielder => (GetEffectiveAttack(player) + GetEffectivePassing(player)) / 2.0 * 1.10,
+            Position.Forward => (GetEffectiveAttack(player) * 0.44 + GetEffectiveFinishing(player) * 0.56) * 1.34,
+            Position.Midfielder => (GetEffectiveAttack(player) * 0.42 + GetEffectivePassing(player) * 0.58) * 1.14,
             Position.Defender => GetEffectiveAttack(player) * 0.70,
             Position.Goalkeeper => GetEffectiveAttack(player) * 0.30,
             _ => GetEffectiveAttack(player)
@@ -105,7 +105,7 @@ public class TeamStrengthCalculator
             (player.Traits.Contains(PlayerTrait.TeamPlayer) ? 1.06 : 1.0) *
             (player.Traits.Contains(PlayerTrait.LongThrower) ? 1.04 : 1.0);
 
-        return (GetEffectivePassing(player) * 0.60 + GetEffectiveAttack(player) * 0.40) * positionModifier * decisionModifier;
+        return (GetEffectivePassing(player) * 0.72 + GetEffectiveAttack(player) * 0.28) * positionModifier * decisionModifier;
     }
 
     public double GetShooterWeight(Player player)
@@ -128,7 +128,7 @@ public class TeamStrengthCalculator
             (player.Traits.Contains(PlayerTrait.TriesToBeatOffsideTrap) ? 1.04 : 1.0) *
             (player.Traits.Contains(PlayerTrait.TechnicalDribbler) ? 1.03 : 1.0);
 
-        return (GetEffectiveAttack(player) * 0.45 + GetEffectiveFinishing(player) * 0.55) * positionModifier * decisionModifier;
+        return (GetEffectiveAttack(player) * 0.30 + GetEffectiveFinishing(player) * 0.70) * positionModifier * decisionModifier;
     }
 
     private static double GetStaminaModifier(Player player)

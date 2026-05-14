@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
 
 namespace FootballSimulation.Models;
 
@@ -58,6 +59,7 @@ public class Player : INotifyPropertyChanged
         set => SetStamina(value);
     }
 
+    [JsonIgnore]
     public int Fatigue
     {
         get => 100 - (int)Math.Round(Stamina);

@@ -1,0 +1,120 @@
+<UserControl x:Class="FootballSimulation.Wpf.Controls.TacticalSettingsPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <Style x:Key="TacticalPillButtonStyle" TargetType="Button">
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <ControlTemplate.Resources>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                            </Style>
+                            <Style TargetType="AccessText">
+                                <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                            </Style>
+                        </ControlTemplate.Resources>
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10"
+                                Padding="{TemplateBinding Padding}"
+                                TextElement.Foreground="{TemplateBinding Foreground}">
+                            <TextBlock Text="{TemplateBinding Content}"
+                                       Foreground="{TemplateBinding Foreground}"
+                                       FontSize="{TemplateBinding FontSize}"
+                                       FontWeight="{TemplateBinding FontWeight}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       TextAlignment="Center"
+                                        TextTrimming="CharacterEllipsis" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="{DynamicResource AppAccentBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.78" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="CompactTacticDropdownButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="21" />
+            <Setter Property="Padding" Value="7,0" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="FontSize" Value="8.8" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="9"
+                                Padding="{TemplateBinding Padding}"
+                                TextElement.Foreground="{TemplateBinding Foreground}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{TemplateBinding Content}"
+                                           Foreground="{TemplateBinding Foreground}"
+                                           FontSize="{TemplateBinding FontSize}"
+                                           FontWeight="{TemplateBinding FontWeight}"
+                                           VerticalAlignment="Center"
+                                           TextTrimming="CharacterEllipsis" />
+                                <TextBlock Grid.Column="1"
+                                           Text="▼"
+                                           Foreground="{TemplateBinding Foreground}"
+                                           FontSize="8"
+                                           FontWeight="Bold"
+                                           Margin="6,0,0,0"
+                                           VerticalAlignment="Center" />
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.92" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.72" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+    <StackPanel>
+        <TextBlock x:Name="CompactTitleTextBlock"
+                   Text="Tactics"
+                   Foreground="{DynamicResource AppTextBrush}"
+                   FontSize="11"
+                   FontWeight="Bold"
+                   Margin="0,0,0,3"
+                   Visibility="Collapsed" />
+
+        <TextBlock x:Name="SummaryTextBlock"
+                   Foreground="{DynamicResource AppMutedTextBrush}"
+                   FontSize="10"
+                   FontWeight="SemiBold"
+                   LineHeight="14"
+                   TextWrapping="Wrap"
+                   Margin="0,0,0,7" />
+
+        <WrapPanel x:Name="PresetPanel"
+                   Margin="0,0,0,6" />
+
+        <StackPanel x:Name="CardsPanel" />
+    </StackPanel>
+</UserControl>

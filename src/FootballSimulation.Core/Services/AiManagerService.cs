@@ -208,8 +208,24 @@ public class AiManagerService
     {
         if (IsLosing(match, team) && minute >= MatchConstants.HalftimeMinute)
         {
-            team.Tactics.Tempo = Math.Clamp(team.Tactics.Tempo + 8, 1, 100);
-            team.Tactics.PressingIntensity = Math.Clamp(team.Tactics.PressingIntensity + 8, 1, 100);
+            var presetKey = minute >= 78 ? "gegenpress" : "counter-attack";
+            var preset = TacticalProfileService.GetPresets().FirstOrDefault(existing => existing.Key == presetKey);
+            if (preset is not null)
+            {
+                TacticalProfileService.CopyTo(preset.Tactics, team.Tactics);
+                if (minute >= 78)
+                {
+                    team.Tactics.Mentality = Mentality.AllOutAttack;
+                    team.Tactics.Tempo = Math.Max(team.Tactics.Tempo, 90);
+                    team.Tactics.PressingIntensity = Math.Max(team.Tactics.PressingIntensity, 90);
+                }
+            }
+            else
+            {
+                team.Tactics.Tempo = Math.Clamp(team.Tactics.Tempo + 10, 1, 100);
+                team.Tactics.PressingIntensity = Math.Clamp(team.Tactics.PressingIntensity + 10, 1, 100);
+                team.Tactics.Mentality = minute >= 78 ? Mentality.AllOutAttack : Mentality.Attacking;
+            }
 
             if (minute == MatchConstants.HalftimeMinute && team.Formation != "4-3-3")
             {
@@ -219,8 +235,23 @@ public class AiManagerService
 
         if (IsWinning(match, team) && minute >= 70)
         {
-            team.Tactics.Tempo = Math.Clamp(team.Tactics.Tempo - 6, 1, 100);
-            team.Tactics.PressingIntensity = Math.Clamp(team.Tactics.PressingIntensity - 6, 1, 100);
+            var preset = TacticalProfileService.GetPresets().FirstOrDefault(existing => existing.Key == "park-the-bus");
+            if (preset is not null)
+            {
+                TacticalProfileService.CopyTo(preset.Tactics, team.Tactics);
+            }
+            else
+            {
+                team.Tactics.Tempo = Math.Clamp(team.Tactics.Tempo - 8, 1, 100);
+                team.Tactics.PressingIntensity = Math.Clamp(team.Tactics.PressingIntensity - 8, 1, 100);
+                team.Tactics.Mentality = Mentality.Defensive;
+            }
+        }
+
+        var opponent = team == match.HomeTeam ? match.AwayTeam : match.HomeTeam;
+        if (opponent.Players.Any(player => player.Traits.Contains(PlayerTrait.Rapid)) && team.Tactics.DefensiveLine >= 70)
+        {
+            team.Tactics.DefensiveLine = Math.Max(45, team.Tactics.DefensiveLine - 14);
         }
     }
 

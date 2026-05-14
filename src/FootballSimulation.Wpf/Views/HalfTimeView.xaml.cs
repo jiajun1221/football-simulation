@@ -31,7 +31,6 @@ public partial class HalfTimeView : UserControl
     private Point _dragStartPoint;
     private bool _isDraggingPlayer;
     private bool _isLoadingSetup;
-    private bool _areTacticsEventsWired;
 
     public HalfTimeView(GameFlowState state, Action<UserControl> navigate)
     {
@@ -59,7 +58,6 @@ public partial class HalfTimeView : UserControl
 
         LoadFormationSelector(_state.SelectedTeam);
         LoadTactics(_state.SelectedTeam.Tactics);
-        WireTacticsEvents();
         InitializePitchSlots();
         RefreshSubstitutes();
         RenderPitch();
@@ -96,26 +94,7 @@ public partial class HalfTimeView : UserControl
 
     private void LoadTactics(TeamTactics tactics)
     {
-        MentalityComboBox.ItemsSource = Enum.GetValues<Mentality>();
-        MentalityComboBox.SelectedItem = tactics.Mentality;
-        PressingSlider.Value = tactics.PressingIntensity;
-        WidthSlider.Value = tactics.Width;
-        TempoSlider.Value = tactics.Tempo;
-        DefensiveLineSlider.Value = tactics.DefensiveLine;
-    }
-
-    private void WireTacticsEvents()
-    {
-        if (_areTacticsEventsWired)
-        {
-            return;
-        }
-
-        PressingSlider.ValueChanged += TacticsSlider_Changed;
-        WidthSlider.ValueChanged += TacticsSlider_Changed;
-        TempoSlider.ValueChanged += TacticsSlider_Changed;
-        DefensiveLineSlider.ValueChanged += TacticsSlider_Changed;
-        _areTacticsEventsWired = true;
+        TacticalSettingsPanel.LoadTactics(tactics);
     }
 
     private void RenderPitch()
@@ -234,6 +213,7 @@ public partial class HalfTimeView : UserControl
             FormBadgeBackground = form.Background,
             FormBadgeForeground = form.Foreground,
             TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits),
+            CardStatusBadges = PlayerCardStatusBadgeHelper.Create(player, FindSelectedPlayerPerformance(player, _state.SelectedTeam)),
             CardBackground = teamColors.PrimaryColor,
             CardBorderBrush = player == _selectedStarter
                 ? teamColors.SelectedGlowColor
@@ -270,12 +250,7 @@ public partial class HalfTimeView : UserControl
         RefreshTacticalInsight();
     }
 
-    private void TacticsControl_Changed(object sender, SelectionChangedEventArgs e)
-    {
-        RefreshTacticalInsight();
-    }
-
-    private void TacticsSlider_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
+    private void TacticalSettingsPanel_TacticsChanged(object? sender, EventArgs e)
     {
         RefreshTacticalInsight();
     }
@@ -377,7 +352,8 @@ public partial class HalfTimeView : UserControl
             TextForeground = teamColors.TextColor,
             PositionBackground = teamColors.SecondaryColor,
             PositionForeground = TeamColorService.GetReadableTextColor(teamColors.SecondaryColor),
-            TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits)
+            TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits),
+            CardStatusBadges = PlayerCardStatusBadgeHelper.Create(player, FindSelectedPlayerPerformance(player, _state.SelectedTeam))
         };
     }
 
@@ -399,11 +375,13 @@ public partial class HalfTimeView : UserControl
         }
 
         PositionSuitabilityService.EnsurePositionMetadata(_selectedStarter);
+        var suitability = PositionSuitabilityService.GetEffectivenessMultiplier(_selectedStarter);
         var team = FindSelectedPlayerTeam(_selectedStarter);
         var performance = FindSelectedPlayerPerformance(_selectedStarter, team);
         var rating = performance?.Rating ?? 6.0;
         var passAccuracy = GetEstimatedPassAccuracy(team, rating, _selectedStarter.Stamina);
         var formBadge = PlayerFormBadgeHelper.Create(_selectedStarter.FormStatus);
+        var ratingVisual = GetRatingVisual(_selectedStarter, suitability);
 
         SelectedPlayerEmptyTextBlock.Visibility = Visibility.Collapsed;
         SelectedPlayerCard.Visibility = Visibility.Visible;
@@ -416,9 +394,16 @@ public partial class HalfTimeView : UserControl
         SelectedPlayerTraitItemsControl.Visibility = selectedTraitBadges.Count == 0
             ? Visibility.Collapsed
             : Visibility.Visible;
+        var selectedCardBadges = PlayerCardStatusBadgeHelper.Create(_selectedStarter, performance);
+        SelectedPlayerCardStatusItemsControl.ItemsSource = selectedCardBadges;
+        SelectedPlayerCardStatusItemsControl.Visibility = selectedCardBadges.Count == 0
+            ? Visibility.Collapsed
+            : Visibility.Visible;
         SelectedPlayerFormBadgeBorder.Background = ToBrush(formBadge.Background);
         SelectedPlayerFormBadgeTextBlock.Foreground = ToBrush(formBadge.Foreground);
         SelectedPlayerFormBadgeTextBlock.Text = formBadge.Text;
+        SelectedPlayerOvrBadgeTextBlock.Text = $"OVR {ratingVisual.Rating}";
+        SelectedPlayerOvrBadgeBorder.Background = ToBrush(ratingVisual.Background);
         SelectedPlayerCard.ToolTip = PlayerGrowthDisplayHelper.CreateGrowthText(_selectedStarter);
 
         if (_selectedStarter.Position == Position.Goalkeeper)
@@ -1095,15 +1080,7 @@ public partial class HalfTimeView : UserControl
             team.Formation = formation;
         }
 
-        if (MentalityComboBox.SelectedItem is Mentality mentality)
-        {
-            team.Tactics.Mentality = mentality;
-        }
-
-        team.Tactics.PressingIntensity = (int)Math.Round(PressingSlider.Value);
-        team.Tactics.Width = (int)Math.Round(WidthSlider.Value);
-        team.Tactics.Tempo = (int)Math.Round(TempoSlider.Value);
-        team.Tactics.DefensiveLine = (int)Math.Round(DefensiveLineSlider.Value);
+        TacticalSettingsPanel.ApplyTo(team.Tactics);
     }
 
     private void SyncActivePitchSlotsIntoTeamPlayers()
@@ -1229,5 +1206,6 @@ public partial class HalfTimeView : UserControl
         public string PositionBackground { get; init; } = "#E7EEF8";
         public string PositionForeground { get; init; } = "#102033";
         public IReadOnlyList<PlayerTraitBadge> TraitBadges { get; init; } = [];
+        public IReadOnlyList<PlayerCardStatusBadge> CardStatusBadges { get; init; } = [];
     }
 }

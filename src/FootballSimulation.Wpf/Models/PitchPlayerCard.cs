@@ -26,6 +26,7 @@ public class PitchPlayerCard
     public string FormBadgeBackground { get; init; } = "#E1E5EA";
     public string FormBadgeForeground { get; init; } = "#465364";
     public IReadOnlyList<PlayerTraitBadge> TraitBadges { get; init; } = [];
+    public IReadOnlyList<PlayerCardStatusBadge> CardStatusBadges { get; init; } = [];
     public string CardBackground { get; init; } = "#FFFFFF";
     public string CardBorderBrush { get; init; } = "#102033";
     public Thickness CardBorderThickness { get; init; } = new(1);

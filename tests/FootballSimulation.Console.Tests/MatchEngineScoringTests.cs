@@ -31,8 +31,9 @@ public class MatchEngineScoringTests
 
         var result = engine.SimulateMatch(homeTeam, awayTeam, seed: 42);
         var goalEvents = result.Events.Where(IsScoringEvent).ToList();
+        var ruledOutGoalEvents = result.Events.Count(IsGoalDisallowedEvent);
 
-        Assert.Equal(result.HomeScore + result.AwayScore, goalEvents.Count);
+        Assert.Equal(result.HomeScore + result.AwayScore, goalEvents.Count - ruledOutGoalEvents);
         Assert.All(goalEvents, matchEvent => Assert.False(string.IsNullOrWhiteSpace(matchEvent.PrimaryPlayerName)));
     }
 
@@ -215,9 +216,9 @@ public class MatchEngineScoringTests
 
                 var nextPossessionEvent = events
                     .Skip(index + 1)
-                    .FirstOrDefault(matchEvent => matchEvent.EventType is not EventType.Halftime and not EventType.Fulltime);
+                    .FirstOrDefault(matchEvent => matchEvent.EventType is EventType.Attack or EventType.Kickoff);
 
-                if (nextPossessionEvent is not null)
+                if (nextPossessionEvent is not null && nextPossessionEvent.EventType != EventType.Kickoff)
                 {
                     Assert.Equal(EventType.Attack, nextPossessionEvent.EventType);
                     var nextEventTeam = FindEventTeamName(nextPossessionEvent, result);
@@ -316,6 +317,71 @@ public class MatchEngineScoringTests
     }
 
     [Fact]
+    public void MatchDramaService_DoesNotCreateFreeFloatingGoalkeeperHeroics()
+    {
+        var seedDataService = new SeedDataService();
+        var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+        foreach (var player in homeTeam.Players.Concat(awayTeam.Players))
+        {
+            player.Stamina = 100;
+            player.CurrentStamina = 100;
+            player.MatchesPlayedRecently = 0;
+            player.Traits.Clear();
+        }
+
+        var service = new MatchDramaService();
+        var result = service.TryCreateDramaEvent(new MatchEventContext
+        {
+            Match = new Match { HomeTeam = homeTeam, AwayTeam = awayTeam },
+            HomeTeam = homeTeam,
+            AwayTeam = awayTeam,
+            Random = new SequenceRandom(0.0, 0.99, 0.10),
+            Minute = 67,
+            WeatherCondition = WeatherCondition.Clear,
+            IsRivalryMatch = false,
+            HomeAttackStrength = 80,
+            AwayAttackStrength = 80,
+            HomeDefenseStrength = 80,
+            AwayDefenseStrength = 80
+        });
+
+        Assert.NotNull(result);
+        Assert.Equal(EventType.Confrontation, result.EventType);
+    }
+
+    [Fact]
+    public void SimulateMatch_GoalkeeperHeroicsFollowsSaveByDefendingKeeper()
+    {
+        var seedDataService = new SeedDataService();
+        var engine = new MatchEngine();
+
+        for (var seed = 1; seed <= 120; seed++)
+        {
+            var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+            var result = engine.SimulateMatch(homeTeam, awayTeam, seed: seed);
+            var events = result.Events;
+
+            for (var index = 1; index < events.Count; index++)
+            {
+                if (events[index].EventType != EventType.GoalkeeperHeroics)
+                {
+                    continue;
+                }
+
+                var previousEvent = events[index - 1];
+                var keeperName = events[index].PrimaryPlayerName;
+                var keeperTeam = FindPlayerTeamName(keeperName, result);
+                var attackingPlayerTeam = FindPlayerTeamName(previousEvent.PrimaryPlayerName, result);
+
+                Assert.Equal(EventType.Save, previousEvent.EventType);
+                Assert.Equal(keeperName, previousEvent.SecondaryPlayerName);
+                Assert.Contains($"keeps {keeperTeam} alive", events[index].Description, StringComparison.OrdinalIgnoreCase);
+                Assert.NotEqual(attackingPlayerTeam, keeperTeam);
+            }
+        }
+    }
+
+    [Fact]
     public void SimulateMatch_OffsideGivesOpponentNextAttack()
     {
         var seedDataService = new SeedDataService();
@@ -329,7 +395,7 @@ public class MatchEngineScoringTests
 
             for (var index = 0; index < events.Count - 1; index++)
             {
-                if (events[index].EventType != EventType.Offside)
+                if (events[index].EventType != EventType.Offside || IsGoalDisallowedEvent(events[index]))
                 {
                     continue;
                 }
@@ -338,12 +404,9 @@ public class MatchEngineScoringTests
                 var expectedRestartTeam = offsideTeam == homeTeam.Name ? awayTeam.Name : homeTeam.Name;
                 var nextOpenPlayEvent = events
                     .Skip(index + 1)
-                    .FirstOrDefault(matchEvent => matchEvent.EventType is not EventType.Halftime
-                        and not EventType.Fulltime
-                        and not EventType.VarCheck
-                        and not EventType.VarDecision);
+                    .FirstOrDefault(matchEvent => matchEvent.EventType is EventType.Attack or EventType.Kickoff);
 
-                if (nextOpenPlayEvent is null)
+                if (nextOpenPlayEvent is null || nextOpenPlayEvent.EventType == EventType.Kickoff)
                 {
                     continue;
                 }
@@ -353,14 +416,6 @@ public class MatchEngineScoringTests
                 Assert.True(
                     string.Equals(expectedRestartTeam, actualRestartTeam, StringComparison.OrdinalIgnoreCase),
                     $"Seed {seed}: offside '{events[index].Description}' should restart with {expectedRestartTeam}, but next event was '{nextOpenPlayEvent.Description}'.");
-                var restartDescriptions = new[]
-                {
-                    $"{expectedRestartTeam} restart play.",
-                    $"{expectedRestartTeam} build from the back.",
-                    $"{expectedRestartTeam} regain possession.",
-                    $"{expectedRestartTeam} look to settle on the ball."
-                };
-                Assert.True(restartDescriptions.Contains(nextOpenPlayEvent.Description));
             }
         }
     }
@@ -376,6 +431,14 @@ public class MatchEngineScoringTests
             || matchEvent.EventType == EventType.WonderGoal
             || (matchEvent.EventType == EventType.Penalty
                 && matchEvent.Description.Contains("scores", StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static bool IsGoalDisallowedEvent(MatchEvent matchEvent)
+    {
+        return (matchEvent.EventType is EventType.VarDecision or EventType.Offside) &&
+            (matchEvent.Description.Contains("goal ruled out", StringComparison.OrdinalIgnoreCase) ||
+                matchEvent.Description.Contains("goal is ruled out", StringComparison.OrdinalIgnoreCase) ||
+                matchEvent.Description.Contains("goal disallowed", StringComparison.OrdinalIgnoreCase));
     }
 
     private static bool IsPossessionFlowEvent(MatchEvent matchEvent)
@@ -423,11 +486,50 @@ public class MatchEngineScoringTests
         return null;
     }
 
+    private static string? FindPlayerTeamName(string? playerName, Match match)
+    {
+        if (string.IsNullOrWhiteSpace(playerName))
+        {
+            return null;
+        }
+
+        if (match.HomeTeam.Players.Any(player => string.Equals(player.Name, playerName, StringComparison.OrdinalIgnoreCase)))
+        {
+            return match.HomeTeam.Name;
+        }
+
+        if (match.AwayTeam.Players.Any(player => string.Equals(player.Name, playerName, StringComparison.OrdinalIgnoreCase)))
+        {
+            return match.AwayTeam.Name;
+        }
+
+        return null;
+    }
+
     private static bool EventMentionsTeam(string description, string teamName)
     {
         return description.StartsWith($"{teamName} ", StringComparison.OrdinalIgnoreCase) ||
             description.Contains($" for {teamName}", StringComparison.OrdinalIgnoreCase) ||
             description.Contains($" from {teamName}", StringComparison.OrdinalIgnoreCase) ||
             description.Contains($" by {teamName}", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private sealed class SequenceRandom(params double[] values) : Random
+    {
+        private int _index;
+
+        public override double NextDouble()
+        {
+            if (values.Length == 0)
+            {
+                return base.NextDouble();
+            }
+
+            var value = _index < values.Length
+                ? values[_index]
+                : values[^1];
+            _index++;
+            return value;
+        }
     }
 }

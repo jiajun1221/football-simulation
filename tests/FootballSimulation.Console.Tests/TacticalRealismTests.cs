@@ -58,4 +58,67 @@ public class TacticalRealismTests
         Assert.NotEmpty(insight.LikelyTactics);
         Assert.NotEmpty(insight.Recommendations);
     }
+
+    [Fact]
+    public void TacticalPresets_WriteExpectedIdentityValues()
+    {
+        var gegenpress = TacticalProfileService.GetPresets().First(preset => preset.Key == "gegenpress");
+        var parkTheBus = TacticalProfileService.GetPresets().First(preset => preset.Key == "park-the-bus");
+
+        Assert.Equal(Mentality.Attacking, gegenpress.Tactics.Mentality);
+        Assert.True(gegenpress.Tactics.PressingIntensity >= 85);
+        Assert.True(gegenpress.Tactics.DefensiveLine >= 80);
+        Assert.Equal(Mentality.UltraDefensive, parkTheBus.Tactics.Mentality);
+        Assert.True(parkTheBus.Tactics.DefensiveLine <= 25);
+    }
+
+    [Fact]
+    public void TacticalImpact_HighPressRaisesTurnoverAndFatigueRisk()
+    {
+        var calculator = new TacticalImpactCalculator();
+        var attackingTeam = new Team
+        {
+            Name = "Build Up FC",
+            Formation = "4-3-3",
+            Tactics = new TeamTactics { Tempo = 82, Width = 40, PressingIntensity = 50, DefensiveLine = 50 }
+        };
+        var passiveTeam = new Team
+        {
+            Name = "Passive FC",
+            Formation = "4-3-3",
+            Tactics = new TeamTactics { PressingIntensity = 20, Tempo = 40, DefensiveLine = 35 }
+        };
+        var pressingTeam = new Team
+        {
+            Name = "Press FC",
+            Formation = "4-3-3",
+            Tactics = new TeamTactics { PressingIntensity = 90, Tempo = 82, DefensiveLine = 82 }
+        };
+
+        var passiveTurnoverRisk = calculator.GetTurnoverRiskModifier(attackingTeam, passiveTeam);
+        var highPressTurnoverRisk = calculator.GetTurnoverRiskModifier(attackingTeam, pressingTeam);
+
+        Assert.True(highPressTurnoverRisk > passiveTurnoverRisk);
+    }
+
+    [Fact]
+    public void TacticalImpact_AllOutAttackBoostsAttackButWeakensDefense()
+    {
+        var calculator = new TacticalImpactCalculator();
+        var balanced = new Team
+        {
+            Name = "Balanced FC",
+            Formation = "4-3-3",
+            Tactics = new TeamTactics { Mentality = Mentality.Balanced }
+        };
+        var allOut = new Team
+        {
+            Name = "All Out FC",
+            Formation = "4-3-3",
+            Tactics = new TeamTactics { Mentality = Mentality.AllOutAttack, Tempo = 90, PressingIntensity = 90, DefensiveLine = 88 }
+        };
+
+        Assert.True(calculator.GetAttackModifier(allOut) > calculator.GetAttackModifier(balanced));
+        Assert.True(calculator.GetDefenseModifier(allOut) < calculator.GetDefenseModifier(balanced));
+    }
 }

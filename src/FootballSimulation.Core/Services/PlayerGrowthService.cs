@@ -54,9 +54,10 @@ public class PlayerGrowthService
             return;
         }
 
+        var previousOverall = player.OverallRating;
         IncreaseOverall(player);
         player.GrowthPoints -= GrowthThreshold;
-        player.LastMatchOverallIncrease = 1;
+        player.LastMatchOverallIncrease = Math.Max(0, player.OverallRating - previousOverall);
     }
 
     private static int CalculateGrowthPoints(Match match, Team team, Player player, PlayerMatchPerformance performance)
@@ -102,7 +103,10 @@ public class PlayerGrowthService
         var defensiveContributions = performance.Tackles +
             performance.Interceptions +
             performance.Blocks +
-            performance.Clearances;
+            performance.Clearances +
+            performance.AerialDuelsWon +
+            performance.Recoveries +
+            performance.GoalLineClearances * 2;
 
         return Math.Min(20, performance.Goals * 10 + performance.Assists * 8 + Math.Min(10, defensiveContributions * 2));
     }
@@ -182,10 +186,7 @@ public class PlayerGrowthService
 
     private static void IncreaseOverall(Player player)
     {
-        player.OverallRating = Math.Min(99, player.OverallRating + 1);
-        player.Attack = Math.Min(99, player.Attack + 1);
-        player.Defense = Math.Min(99, player.Defense + 1);
-        player.Passing = Math.Min(99, player.Passing + 1);
-        player.Finishing = Math.Min(99, player.Finishing + 1);
+        var targetOverall = Math.Min(99, player.OverallRating + 1);
+        PlayerOverallCalculator.GrowAttributesTowardNextOverall(player, targetOverall);
     }
 }

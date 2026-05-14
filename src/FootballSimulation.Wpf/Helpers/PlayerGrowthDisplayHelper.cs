@@ -12,7 +12,7 @@ public static class PlayerGrowthDisplayHelper
         }
 
         return player.GrowthPoints > 0
-            ? $"Growth {Math.Min(player.GrowthPoints, 99)}/100"
+            ? $"{Math.Min(player.GrowthPoints, 99)}%"
             : string.Empty;
     }
 }

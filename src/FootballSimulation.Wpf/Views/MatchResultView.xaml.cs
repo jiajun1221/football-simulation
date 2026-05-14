@@ -74,8 +74,9 @@ public partial class MatchResultView : UserControl
         HomeTeamLogoImage.Source = CreateLogoSource(match.HomeTeam.Name);
         AwayTeamLogoImage.Source = CreateLogoSource(match.AwayTeam.Name);
 
-        HomeScorersItemsControl.ItemsSource = CreateGoalSummaryRows(match, match.HomeTeam);
-        AwayScorersItemsControl.ItemsSource = CreateGoalSummaryRows(match, match.AwayTeam);
+        var totalGoals = match.HomeScore + match.AwayScore;
+        HomeScorersContentControl.Content = CreateGoalSummaryPanel(match, match.HomeTeam, totalGoals, summary.ManOfTheMatch);
+        AwayScorersContentControl.Content = CreateGoalSummaryPanel(match, match.AwayTeam, totalGoals, summary.ManOfTheMatch);
         HomePlayersItemsControl.ItemsSource = CreatePlayerRows(summary.PlayerPerformances, match.HomeTeam, summary.ManOfTheMatch);
         AwayPlayersItemsControl.ItemsSource = CreatePlayerRows(summary.PlayerPerformances, match.AwayTeam, summary.ManOfTheMatch);
         StatsComparisonItemsControl.ItemsSource = CreateStatComparisonRows(match);
@@ -99,18 +100,116 @@ public partial class MatchResultView : UserControl
         _navigate(new RoundResultView(_state, _navigate));
     }
 
-    private static List<ScorerRow> CreateGoalSummaryRows(Match match, Team team)
+    private static ScorerPanel CreateGoalSummaryPanel(Match match, Team team, int totalGoals, PlayerMatchPerformance? manOfTheMatch)
     {
-        var scoringEvents = match.Events
-            .Where(IsScoringEvent)
+        var mode = totalGoals > 12
+            ? ScorerSummaryMode.UltraCompact
+            : totalGoals > 8
+                ? ScorerSummaryMode.Compact
+                : ScorerSummaryMode.Detailed;
+        var scoringEvents = CreateAllowedScoringEvents(match)
             .Where(matchEvent => FindScoringTeam(matchEvent, match) == team.Name)
-            .OrderBy(matchEvent => matchEvent.Minute)
-            .Select(matchEvent => new ScorerRow(
-                $"{matchEvent.Minute}'",
-                matchEvent.PrimaryPlayerName ?? "Unknown scorer"))
+            .GroupBy(matchEvent => matchEvent.PrimaryPlayerName ?? "Unknown scorer")
+            .Select(group => CreateScorerRow(
+                group.Key,
+                group.OrderBy(matchEvent => matchEvent.Minute).ToList(),
+                mode,
+                IsManOfTheMatch(group.Key, team, manOfTheMatch)))
+            .OrderByDescending(row => row.GoalCount)
+            .ThenBy(row => row.FirstMinute)
+            .ThenBy(row => row.PlayerName)
             .ToList();
 
-        return scoringEvents.Count == 0 ? [] : scoringEvents;
+        return new ScorerPanel($"{team.Name} scorers", scoringEvents);
+    }
+
+    private static List<MatchEvent> CreateAllowedScoringEvents(Match match)
+    {
+        var scoringEvents = new List<MatchEvent>();
+
+        foreach (var matchEvent in match.Events.OrderBy(matchEvent => matchEvent.Minute))
+        {
+            if (IsScoringEvent(matchEvent))
+            {
+                scoringEvents.Add(matchEvent);
+                continue;
+            }
+
+            if (IsGoalDisallowedEvent(matchEvent))
+            {
+                var index = scoringEvents.FindLastIndex(scoringEvent =>
+                    string.Equals(scoringEvent.PrimaryPlayerName, matchEvent.PrimaryPlayerName, StringComparison.OrdinalIgnoreCase));
+                if (index >= 0)
+                {
+                    scoringEvents.RemoveAt(index);
+                }
+            }
+        }
+
+        return scoringEvents;
+    }
+
+    private static ScorerRow CreateScorerRow(string playerName, List<MatchEvent> goals, ScorerSummaryMode mode, bool isManOfTheMatch)
+    {
+        var goalCount = goals.Count;
+        var minutes = goals.Select(matchEvent => $"{matchEvent.Minute}'").ToList();
+        var minuteList = string.Join(", ", minutes);
+        var achievement = CreateScorerAchievement(goalCount, isManOfTheMatch);
+        var badgeText = mode == ScorerSummaryMode.UltraCompact
+            ? $"x{goalCount}"
+            : CreateGoalBadgeText(goalCount);
+        var summary = mode switch
+        {
+            ScorerSummaryMode.Detailed => $"{playerName} ({minuteList})",
+            ScorerSummaryMode.Compact => $"{playerName} x{goalCount}",
+            _ => $"{playerName} x{goalCount}"
+        };
+
+        return new ScorerRow(
+            playerName,
+            summary,
+            mode == ScorerSummaryMode.Compact ? minuteList : string.Empty,
+            achievement,
+            badgeText,
+            goalCount >= 3 ? "#16A34A" : "#263754",
+            goalCount >= 3 ? "#FFFFFF" : "#F7C948",
+            goalCount,
+            goals.Min(matchEvent => matchEvent.Minute),
+            string.IsNullOrWhiteSpace(achievement)
+                ? $"{playerName}: {minuteList}"
+                : $"{playerName}: {minuteList} - {achievement}");
+    }
+
+    private static string CreateGoalBadgeText(int goalCount)
+    {
+        return goalCount switch
+        {
+            >= 4 => $"{FireIcon()} {goalCount}",
+            3 => $"{SoccerBallIcon()}{SoccerBallIcon()}{SoccerBallIcon()}",
+            2 => $"{SoccerBallIcon()}{SoccerBallIcon()}",
+            _ => SoccerBallIcon()
+        };
+    }
+
+    private static string CreateScorerAchievement(int goalCount, bool isManOfTheMatch)
+    {
+        var goalAchievement = goalCount switch
+        {
+            >= 4 => $"{FireIcon()} {goalCount} goals",
+            3 => $"{SoccerBallIcon()}{SoccerBallIcon()}{SoccerBallIcon()} Hat-trick",
+            2 => $"{SoccerBallIcon()}{SoccerBallIcon()} Brace",
+            _ => string.Empty
+        };
+        var motmAchievement = isManOfTheMatch ? $"{StarIcon()} Man of the Match" : string.Empty;
+
+        return string.Join("  ", new[] { goalAchievement, motmAchievement }.Where(text => !string.IsNullOrWhiteSpace(text)));
+    }
+
+    private static bool IsManOfTheMatch(string playerName, Team team, PlayerMatchPerformance? manOfTheMatch)
+    {
+        return manOfTheMatch is not null &&
+            string.Equals(manOfTheMatch.TeamName, team.Name, StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(manOfTheMatch.PlayerName, playerName, StringComparison.OrdinalIgnoreCase);
     }
 
     private static BitmapImage? CreateLogoSource(string teamName)
@@ -163,6 +262,14 @@ public partial class MatchResultView : UserControl
                 && matchEvent.Description.Contains("scores", StringComparison.OrdinalIgnoreCase));
     }
 
+    private static bool IsGoalDisallowedEvent(MatchEvent matchEvent)
+    {
+        return (matchEvent.EventType is EventType.VarDecision or EventType.Offside) &&
+            (matchEvent.Description.Contains("goal ruled out", StringComparison.OrdinalIgnoreCase) ||
+                matchEvent.Description.Contains("goal is ruled out", StringComparison.OrdinalIgnoreCase) ||
+                matchEvent.Description.Contains("goal disallowed", StringComparison.OrdinalIgnoreCase));
+    }
+
     private static string FindScoringTeam(MatchEvent matchEvent, Match match)
     {
         if (matchEvent.Description.Contains($"for {match.HomeTeam.Name}", StringComparison.OrdinalIgnoreCase))
@@ -212,8 +319,8 @@ public partial class MatchResultView : UserControl
             PositionText = GetPositionText(performance.Position),
             OverallText = player is null ? string.Empty : $"OVR {GetOverallRating(player)}",
             GrowthText = player is null ? string.Empty : PlayerGrowthDisplayHelper.CreateGrowthText(player),
-            RatingText = performance.Rating.ToString("0.0"),
-            RatingBackground = GetRatingBackground(performance.Rating),
+            RatingText = RatingDisplayHelper.CreateRatingText(performance.Rating),
+            RatingBackground = RatingDisplayHelper.GetRatingBrush(performance.Rating),
             StatusText = GetSubStatus(performance),
             GoalText = performance.Goals > 1 ? $"{SoccerBallIcon()} {performance.Goals}" : SoccerBallIcon(),
             AssistText = performance.Assists > 1 ? $"{AssistIcon()} {performance.Assists}" : AssistIcon(),
@@ -225,6 +332,9 @@ public partial class MatchResultView : UserControl
             FormBadgeBackground = formBadge.Background,
             FormBadgeForeground = formBadge.Foreground,
             TraitBadges = PlayerTraitBadgeHelper.Create(player?.Traits ?? []),
+            CardStatusBadges = player is null
+                ? PlayerCardStatusBadgeHelper.Create(performance.YellowCards, performance.RedCards)
+                : PlayerCardStatusBadgeHelper.Create(player, performance),
             GoalVisibility = performance.Goals > 0 ? Visibility.Visible : Visibility.Collapsed,
             AssistVisibility = performance.Assists > 0 ? Visibility.Visible : Visibility.Collapsed,
             DefensiveVisibility = defensiveContributions > 0 ? Visibility.Visible : Visibility.Collapsed,
@@ -295,18 +405,6 @@ public partial class MatchResultView : UserControl
             : (int)Math.Round((player.Attack + player.Defense + player.Passing + player.Stamina + player.Finishing) / 5.0);
     }
 
-    private static string GetRatingBackground(double rating)
-    {
-        return rating switch
-        {
-            >= 9.0 => "#166534",
-            >= 8.0 => "#22C55E",
-            >= 7.0 => "#FACC15",
-            >= 6.0 => "#FB923C",
-            _ => "#EF4444"
-        };
-    }
-
     private static string SoccerBallIcon()
     {
         return char.ConvertFromUtf32(0x26BD);
@@ -332,6 +430,11 @@ public partial class MatchResultView : UserControl
         return char.ConvertFromUtf32(0x2605);
     }
 
+    private static string FireIcon()
+    {
+        return char.ConvertFromUtf32(0x1F525);
+    }
+
     private sealed class PlayerPerformanceRow
     {
         public string PlayerName { get; init; } = string.Empty;
@@ -352,6 +455,7 @@ public partial class MatchResultView : UserControl
         public string FormBadgeBackground { get; init; } = "#FACC15";
         public string FormBadgeForeground { get; init; } = "#1F2937";
         public IReadOnlyList<PlayerTraitBadge> TraitBadges { get; init; } = [];
+        public IReadOnlyList<PlayerCardStatusBadge> CardStatusBadges { get; init; } = [];
         public Visibility GoalVisibility { get; init; }
         public Visibility AssistVisibility { get; init; }
         public Visibility DefensiveVisibility { get; init; }
@@ -366,5 +470,28 @@ public partial class MatchResultView : UserControl
 
     private sealed record StatComparisonRow(string Label, string HomeValue, string AwayValue);
 
-    private sealed record ScorerRow(string MinuteText, string PlayerName);
+    private sealed record ScorerPanel(string Title, List<ScorerRow> Scorers);
+
+    private sealed record ScorerRow(
+        string PlayerName,
+        string SummaryText,
+        string MinuteText,
+        string AchievementText,
+        string BadgeText,
+        string BadgeBackground,
+        string BadgeForeground,
+        int GoalCount,
+        int FirstMinute,
+        string TooltipText)
+    {
+        public Visibility MinuteVisibility => string.IsNullOrWhiteSpace(MinuteText) ? Visibility.Collapsed : Visibility.Visible;
+        public Visibility AchievementVisibility => string.IsNullOrWhiteSpace(AchievementText) ? Visibility.Collapsed : Visibility.Visible;
+    }
+
+    private enum ScorerSummaryMode
+    {
+        Detailed,
+        Compact,
+        UltraCompact
+    }
 }

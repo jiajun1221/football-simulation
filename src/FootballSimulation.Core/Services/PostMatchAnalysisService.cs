@@ -30,79 +30,15 @@ public class PostMatchAnalysisService
     private static PlayerMatchPerformance CreateAdjustedPerformance(Match match, PlayerMatchPerformance performance)
     {
         var adjusted = CopyPerformance(performance);
-        var goalsConceded = GetGoalsConceded(match, adjusted.TeamName);
-        var cleanSheet = goalsConceded == 0;
 
-        adjusted.Rating += GetPositionAdjustment(adjusted, goalsConceded, cleanSheet);
-        adjusted.Rating = ApplyGoalkeeperCap(adjusted, goalsConceded);
         adjusted.Rating = Math.Round(Math.Clamp(adjusted.Rating, 1.0, 10.0), 1);
 
         return adjusted;
     }
 
-    private static double GetPositionAdjustment(PlayerMatchPerformance performance, int goalsConceded, bool cleanSheet)
-    {
-        return performance.Position switch
-        {
-            Position.Goalkeeper => GetGoalkeeperAdjustment(performance, goalsConceded, cleanSheet),
-            Position.Defender => (cleanSheet ? 0.25 : 0.0) - goalsConceded * 0.18,
-            Position.Midfielder => -goalsConceded * 0.05,
-            _ => 0.0
-        };
-    }
-
-    private static double GetGoalkeeperAdjustment(PlayerMatchPerformance performance, int goalsConceded, bool cleanSheet)
-    {
-        var cleanSheetBonus = cleanSheet ? 0.75 : 0.0;
-        var saveBonus = Math.Min(performance.Saves * 0.08, 0.70);
-        var concessionPenalty = goalsConceded * 0.45;
-
-        return cleanSheetBonus + saveBonus - concessionPenalty;
-    }
-
-    private static double ApplyGoalkeeperCap(PlayerMatchPerformance performance, int goalsConceded)
-    {
-        if (performance.Position != Position.Goalkeeper)
-        {
-            return performance.Rating;
-        }
-
-        if (goalsConceded >= 3 && performance.Saves < 8)
-        {
-            return Math.Min(performance.Rating, 8.1);
-        }
-
-        if (goalsConceded >= 3)
-        {
-            return Math.Min(performance.Rating, 9.0);
-        }
-
-        if (goalsConceded >= 2 && performance.Saves < 5)
-        {
-            return Math.Min(performance.Rating, 8.4);
-        }
-
-        return performance.Rating;
-    }
-
-    private static int GetGoalsConceded(Match match, string teamName)
-    {
-        if (teamName == match.HomeTeam.Name)
-        {
-            return match.AwayScore;
-        }
-
-        if (teamName == match.AwayTeam.Name)
-        {
-            return match.HomeScore;
-        }
-
-        return 0;
-    }
-
     private static string CreateManOfTheMatchReason(PlayerMatchPerformance performance, Match match)
     {
-        var goalsConceded = GetGoalsConceded(match, performance.TeamName);
+        var goalsConceded = PlayerMatchRatingService.GetGoalsConceded(match, performance.TeamName);
 
         if (performance.Goals > 0 && performance.Assists > 0)
         {
@@ -155,6 +91,12 @@ public class PostMatchAnalysisService
             Interceptions = performance.Interceptions,
             Blocks = performance.Blocks,
             Clearances = performance.Clearances,
+            AerialDuelsWon = performance.AerialDuelsWon,
+            Recoveries = performance.Recoveries,
+            GoalLineClearances = performance.GoalLineClearances,
+            ErrorsLeadingToShot = performance.ErrorsLeadingToShot,
+            ErrorsLeadingToGoal = performance.ErrorsLeadingToGoal,
+            PenaltiesConceded = performance.PenaltiesConceded,
             Fouls = performance.Fouls,
             YellowCards = performance.YellowCards,
             RedCards = performance.RedCards,

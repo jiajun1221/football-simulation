@@ -1,3 +1,4 @@
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -15,6 +16,7 @@ public partial class DashboardView : UserControl
     private readonly Action<UserControl> _navigate;
     private readonly GameSessionService _gameSessionService = new();
     private readonly RecentResultService _recentResultService = new();
+    private readonly SaveGameService _saveGameService = new();
     private const string ClubsAssetPath = "Assets/Clubs";
     private const string DefaultLogoPath = "pack://application:,,,/Assets/Clubs/default.png";
 
@@ -76,10 +78,18 @@ public partial class DashboardView : UserControl
         LeagueTableDataGrid.ItemsSource = CreateLeagueTableRows(_state.League, _state.SelectedTeam);
         LoadSelectedClubStats(_state.League, _state.SelectedTeam);
 
-        var nextFixture = _gameSessionService.FindNextFixtureForTeam(_state.League, _state.SelectedTeam);
+        var nextFixture = FindNextFixtureForTeamOrDefault(_state.League, _state.SelectedTeam);
         _state.CurrentFixture = nextFixture;
-        LoadUpcomingMatch(nextFixture, _state.SelectedTeam);
-        UpcomingFixturesListBox.ItemsSource = CreateUpcomingFixtureRows(_state.League, _state.SelectedTeam, nextFixture);
+        if (nextFixture is null)
+        {
+            LoadNoUpcomingMatch();
+        }
+        else
+        {
+            LoadUpcomingMatch(nextFixture, _state.SelectedTeam);
+        }
+
+        UpcomingFixturesItemsControl.ItemsSource = CreateUpcomingFixtureRows(_state.League, _state.SelectedTeam);
     }
 
     private void PrepareMatchButton_Click(object sender, RoutedEventArgs e)
@@ -92,10 +102,47 @@ public partial class DashboardView : UserControl
 
         if (_state.League is not null && _state.SelectedTeam is not null)
         {
-            _state.CurrentMatch ??= _gameSessionService.CreateSelectedTeamLiveMatch(_state.League, _state.SelectedTeam);
+            if (_state.CurrentMatch is null || !IsCurrentMatchForFixture(_state.CurrentMatch, _state.CurrentFixture))
+            {
+                _state.CurrentMatch = _gameSessionService.CreateSelectedTeamLiveMatch(_state.League, _state.SelectedTeam);
+            }
         }
 
         _navigate(new PreMatchView(_state, _navigate));
+    }
+
+    public void SaveGame()
+    {
+        if (_state.League is null || _state.SelectedTeam is null)
+        {
+            MessageBox.Show("No active club dashboard was found.", "Save Game", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        var dialog = new SaveSlotDialog(_saveGameService.GetSaveSlots())
+        {
+            Owner = Window.GetWindow(this)
+        };
+
+        if (dialog.ShowDialog() != true || dialog.SelectedSlotNumber is not int slotNumber)
+        {
+            return;
+        }
+
+        try
+        {
+            var saveData = SaveGameService.CreateSaveData(_state.League, _state.SelectedTeam);
+            _saveGameService.SaveGame(slotNumber, saveData);
+            MessageBox.Show($"Game saved to slot {slotNumber}.", "Save Game", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException or System.Text.Json.JsonException)
+        {
+            MessageBox.Show(
+                $"The game could not be saved.{Environment.NewLine}{Environment.NewLine}{ex.Message}",
+                "Save Game",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
     }
 
     private List<LeagueTableRow> CreateLeagueTableRows(League league, Team selectedTeam)
@@ -151,6 +198,19 @@ public partial class DashboardView : UserControl
             : Color.FromRgb(249, 115, 22));
     }
 
+    private void LoadNoUpcomingMatch()
+    {
+        UpcomingRoundTextBlock.Text = "Season complete";
+        UpcomingHomeNameTextBlock.Text = "-";
+        UpcomingAwayNameTextBlock.Text = "-";
+        UpcomingHomeLogoImage.Source = null;
+        UpcomingAwayLogoImage.Source = null;
+        VenueTextBlock.Text = "No upcoming fixture was found.";
+        HomeAwayBadgeTextBlock.Text = "-";
+        HomeAwayBadge.Background = new SolidColorBrush(Color.FromRgb(100, 116, 139));
+        PrepareMatchButton.IsEnabled = false;
+    }
+
     private void LoadSelectedClubStats(League league, Team selectedTeam)
     {
         var tableEntry = league.Table
@@ -175,25 +235,25 @@ public partial class DashboardView : UserControl
             .ToList();
     }
 
-    private static List<UpcomingFixtureRow> CreateUpcomingFixtureRows(League league, Team selectedTeam, Fixture upcomingMatch)
+    private static List<UpcomingFixtureRow> CreateUpcomingFixtureRows(League league, Team selectedTeam)
     {
         var fixtures = league.Fixtures
             .Where(fixture =>
                 !fixture.IsPlayed &&
-                IsTeamInFixture(fixture, selectedTeam) &&
-                !IsSameFixture(fixture, upcomingMatch))
+                IsTeamInFixture(fixture, selectedTeam))
             .OrderBy(fixture => fixture.RoundNumber)
-            .Take(5)
+            .Take(3)
             .Select(fixture =>
             {
                 var isHome = fixture.HomeTeam == selectedTeam;
                 var opponent = isHome ? fixture.AwayTeam : fixture.HomeTeam;
                 return new UpcomingFixtureRow
                 {
-                    FixtureTitle = $"R{fixture.RoundNumber}: {(isHome ? "HOME" : "AWAY")} vs {opponent.Name}",
-                    VenueText = GetVenueName(fixture.HomeTeam),
+                    RoundText = $"R{fixture.RoundNumber}",
+                    HomeAwayText = isHome ? "HOME" : "AWAY",
+                    OpponentName = CreateTwoLineText(opponent.Name),
+                    VenueText = CreateTwoLineText(GetVenueName(fixture.HomeTeam)),
                     OpponentLogoPath = GetClubLogoPath(opponent.Name),
-                    HomeAwayIcon = isHome ? "H" : "A",
                     HomeAwayBrush = GetHomeAwayBadgeBackground(isHome),
                     HomeAwayForeground = GetHomeAwayBadgeForeground(isHome)
                 };
@@ -203,9 +263,10 @@ public partial class DashboardView : UserControl
         return fixtures.Count == 0
             ? [new UpcomingFixtureRow
             {
-                FixtureTitle = "No upcoming fixtures.",
+                OpponentName = "No upcoming fixtures",
                 VenueText = "Season schedule is complete.",
-                HomeAwayIcon = "-",
+                RoundText = "-",
+                HomeAwayText = "-",
                 HomeAwayBrush = ThemeManager.GetBrushHex("AppSecondaryCardBackground", "#111827"),
                 HomeAwayForeground = ThemeManager.GetBrushHex("AppMutedTextBrush", "#94A3B8")
             }]
@@ -214,22 +275,12 @@ public partial class DashboardView : UserControl
 
     private static string GetHomeAwayBadgeBackground(bool isHome)
     {
-        if (ThemeManager.CurrentTheme == AppTheme.Dark)
-        {
-            return isHome ? "#12351F" : "#3A2411";
-        }
-
-        return isHome ? "#D9F1E1" : "#FFE4BF";
+        return isHome ? "#2FA84F" : "#F97316";
     }
 
     private static string GetHomeAwayBadgeForeground(bool isHome)
     {
-        if (ThemeManager.CurrentTheme == AppTheme.Dark)
-        {
-            return isHome ? "#86EFAC" : "#FDBA74";
-        }
-
-        return isHome ? "#236B39" : "#8A4E00";
+        return "#FFFFFF";
     }
 
     private static bool IsTeamInFixture(Fixture fixture, Team team)
@@ -237,16 +288,49 @@ public partial class DashboardView : UserControl
         return fixture.HomeTeam == team || fixture.AwayTeam == team;
     }
 
-    private static bool IsSameFixture(Fixture fixture, Fixture otherFixture)
+    private static Fixture? FindNextFixtureForTeamOrDefault(League league, Team selectedTeam)
     {
-        return fixture.RoundNumber == otherFixture.RoundNumber &&
-            fixture.HomeTeam.Name == otherFixture.HomeTeam.Name &&
-            fixture.AwayTeam.Name == otherFixture.AwayTeam.Name;
+        return league.Fixtures
+            .Where(fixture => !fixture.IsPlayed && IsTeamInFixture(fixture, selectedTeam))
+            .OrderBy(fixture => fixture.RoundNumber)
+            .FirstOrDefault();
+    }
+
+    private static bool IsCurrentMatchForFixture(Match match, Fixture? fixture)
+    {
+        return fixture is not null &&
+            match.HomeTeam == fixture.HomeTeam &&
+            match.AwayTeam == fixture.AwayTeam;
     }
 
     private static string GetVenueName(Team homeTeam)
     {
         return TeamVenueService.GetDisplayVenue(homeTeam);
+    }
+
+    private static string CreateTwoLineText(string text)
+    {
+        var words = text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (words.Length <= 2)
+        {
+            return text;
+        }
+
+        var bestSplitIndex = 1;
+        var bestLineBalance = int.MaxValue;
+        for (var splitIndex = 1; splitIndex < words.Length; splitIndex++)
+        {
+            var firstLineLength = string.Join(" ", words.Take(splitIndex)).Length;
+            var secondLineLength = string.Join(" ", words.Skip(splitIndex)).Length;
+            var lineBalance = Math.Abs(firstLineLength - secondLineLength);
+            if (lineBalance < bestLineBalance)
+            {
+                bestSplitIndex = splitIndex;
+                bestLineBalance = lineBalance;
+            }
+        }
+
+        return $"{string.Join(" ", words.Take(bestSplitIndex))}{Environment.NewLine}{string.Join(" ", words.Skip(bestSplitIndex))}";
     }
 
     private static string FormatGoalDifference(int goalDifference)
@@ -382,10 +466,11 @@ public partial class DashboardView : UserControl
 
     private sealed class UpcomingFixtureRow
     {
-        public string FixtureTitle { get; init; } = string.Empty;
+        public string RoundText { get; init; } = string.Empty;
+        public string HomeAwayText { get; init; } = string.Empty;
+        public string OpponentName { get; init; } = string.Empty;
         public string VenueText { get; init; } = string.Empty;
         public string OpponentLogoPath { get; init; } = string.Empty;
-        public string HomeAwayIcon { get; init; } = string.Empty;
         public string HomeAwayBrush { get; init; } = "#E1E5EA";
         public string HomeAwayForeground { get; init; } = "#64748B";
     }

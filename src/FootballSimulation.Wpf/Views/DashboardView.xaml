@@ -132,55 +132,98 @@
             </Border>
         </DataTemplate>
 
-        <DataTemplate x:Key="FixtureRowTemplate">
+        <DataTemplate x:Key="FixtureCardTemplate">
             <Border Background="{DynamicResource AppSecondaryCardBackground}"
                     BorderBrush="{DynamicResource AppBorderBrush}"
                     BorderThickness="1"
-                    CornerRadius="12"
-                    Padding="12"
-                    Margin="0,0,0,8">
+                    CornerRadius="14"
+                    Padding="7"
+                    Margin="0,0,6,0"
+                    MinHeight="108"
+                    VerticalAlignment="Stretch">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="12"
+                                      ShadowDepth="1"
+                                      Direction="270"
+                                      Opacity="0.10"
+                                      Color="#233A55" />
+                </Border.Effect>
                 <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="44" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
 
-                    <Border Background="{Binding HomeAwayBrush}"
-                            CornerRadius="10"
-                            Width="34"
-                            Height="34"
-                            VerticalAlignment="Center">
-                        <TextBlock Text="{Binding HomeAwayIcon}"
-                                   Foreground="{Binding HomeAwayForeground}"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center"
-                                   FontSize="15" />
-                    </Border>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
 
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                        <TextBlock Text="{Binding FixtureTitle}"
-                                   FontSize="13"
+                        <Border Background="{Binding HomeAwayBrush}"
+                                CornerRadius="8"
+                                Padding="5,2"
+                                HorizontalAlignment="Left">
+                            <TextBlock Text="{Binding HomeAwayText}"
+                                       Foreground="{Binding HomeAwayForeground}"
+                                       FontSize="8"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                        </Border>
+
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding RoundText}"
+                                   FontSize="9"
                                    FontWeight="Bold"
                                    Foreground="{DynamicResource AppTextBrush}"
-                                   TextWrapping="Wrap" />
-                        <TextBlock Text="{Binding VenueText}"
-                                   FontSize="11"
-                                   Foreground="{DynamicResource AppMutedTextBrush}"
-                                   Margin="0,2,0,0"
-                                   TextWrapping="Wrap" />
-                    </StackPanel>
+                                   VerticalAlignment="Center" />
+                    </Grid>
 
-                    <Image Grid.Column="2"
-                           Source="{Binding OpponentLogoPath}"
-                           Width="28"
-                           Height="28"
-                           Stretch="Uniform"
-                           Margin="10,0,0,0"
-                           VerticalAlignment="Center" />
+                    <Grid Grid.Row="1"
+                          Margin="0,5,0,4"
+                          HorizontalAlignment="Stretch">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Image Source="{Binding OpponentLogoPath}"
+                               Width="28"
+                               Height="28"
+                               Stretch="Uniform"
+                               HorizontalAlignment="Center"
+                               Margin="0,0,0,4" />
+                        <TextBlock Grid.Row="1"
+                                   Text="{Binding OpponentName}"
+                                   FontSize="9"
+                                   FontWeight="Bold"
+                                   Foreground="{DynamicResource AppTextBrush}"
+                                   TextAlignment="Center"
+                                   TextWrapping="Wrap"
+                                   TextTrimming="CharacterEllipsis"
+                                   LineHeight="11"
+                                   HorizontalAlignment="Stretch" />
+                    </Grid>
+
+                    <TextBlock Grid.Row="2"
+                               Text="{Binding VenueText}"
+                               FontSize="8"
+                               Foreground="{DynamicResource AppMutedTextBrush}"
+                               TextAlignment="Center"
+                               TextWrapping="Wrap"
+                               TextTrimming="CharacterEllipsis"
+                               LineHeight="10"
+                               HorizontalAlignment="Stretch" />
                 </Grid>
             </Border>
         </DataTemplate>
+
+        <Style x:Key="FixtureCardItemStyle" TargetType="ContentPresenter">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="VerticalAlignment" Value="Stretch" />
+        </Style>
+
     </UserControl.Resources>
 
     <Grid Margin="24"
@@ -362,11 +405,17 @@
                                FontSize="17"
                                FontWeight="Bold"
                                Foreground="{DynamicResource AppTextBrush}"
-                               Margin="0,0,0,12" />
-                    <ListBox x:Name="UpcomingFixturesListBox"
-                             BorderThickness="0"
-                             Background="Transparent"
-                             ItemTemplate="{StaticResource FixtureRowTemplate}" />
+                               Margin="0,0,0,8" />
+                    <ItemsControl x:Name="UpcomingFixturesItemsControl"
+                                  ItemTemplate="{StaticResource FixtureCardTemplate}"
+                                  ItemContainerStyle="{StaticResource FixtureCardItemStyle}"
+                                  VerticalAlignment="Stretch">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Columns="3" Rows="1" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
                 </StackPanel>
             </Grid>
         </Border>

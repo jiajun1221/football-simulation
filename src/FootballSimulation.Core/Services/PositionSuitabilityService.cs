@@ -82,9 +82,7 @@ public static class PositionSuitabilityService
 
     public static int GetEffectiveOverall(Player player)
     {
-        var baseOverall = player.OverallRating > 0
-            ? player.OverallRating
-            : (int)Math.Round((player.Attack + player.Defense + player.Passing + player.Stamina + player.Finishing) / 5.0);
+        var baseOverall = PlayerOverallCalculator.CalculateOverall(player);
 
         return (int)Math.Round(baseOverall * GetEffectivenessMultiplier(player));
     }

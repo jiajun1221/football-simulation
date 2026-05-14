@@ -56,6 +56,50 @@ public class PlayerGrowthServiceTests
         Assert.True(player.GrowthPoints >= 50);
     }
 
+    [Fact]
+    public void PlayerOverallCalculator_UsesPositionSpecificAttributeWeights()
+    {
+        var striker = CreatePlayer("Striker", overall: 70, age: 22);
+        striker.PreferredPosition = "ST";
+        striker.Attack = 80;
+        striker.Finishing = 90;
+        striker.Passing = 65;
+        striker.Defense = 35;
+
+        var centreBack = CreatePlayer("Centre Back", overall: 70, age: 22);
+        centreBack.Position = Position.Defender;
+        centreBack.PreferredPosition = "CB";
+        centreBack.Attack = 35;
+        centreBack.Finishing = 30;
+        centreBack.Passing = 68;
+        centreBack.Defense = 88;
+
+        Assert.True(PlayerOverallCalculator.CalculateOverall(striker) > PlayerOverallCalculator.CalculateOverall(centreBack));
+        Assert.True(PlayerOverallCalculator.CalculateOverall(centreBack) >= 70);
+    }
+
+    [Fact]
+    public void ApplyMatchGrowth_StrikerGrowthPrioritizesAttackAndFinishing()
+    {
+        var service = new PlayerGrowthService();
+        var player = CreatePlayer("Striker", overall: 78, age: 20);
+        player.PreferredPosition = "ST";
+        player.Attack = 78;
+        player.Defense = 78;
+        player.Passing = 78;
+        player.Finishing = 78;
+        player.GrowthPoints = 95;
+        var opponent = CreatePlayer("Opponent", overall: 78, age: 25);
+        var team = CreateTeam("Chelsea", player);
+        var opponentTeam = CreateTeam("Liverpool", opponent);
+
+        service.ApplyMatchGrowth(CreateMatch(team, opponentTeam, player, rating: 9.0, goals: 2));
+
+        Assert.Equal(79, player.OverallRating);
+        Assert.True(player.Finishing > 78 || player.Attack > 78);
+        Assert.Equal(78, player.Defense);
+    }
+
     private static Match CreateMatch(Team team, Team opponentTeam, Player player, double rating, int goals = 0, int assists = 0)
     {
         return new Match

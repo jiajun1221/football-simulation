@@ -2,9 +2,11 @@ namespace FootballSimulation.Wpf.Models;
 
 public class LivePlayerIconViewModel
 {
+    public string PlayerId { get; init; } = string.Empty;
     public string Name { get; init; } = string.Empty;
     public string TeamName { get; init; } = string.Empty;
     public string PlayerKey { get; init; } = string.Empty;
+    public LivePlayerStats LiveStats { get; init; } = new();
     public string ShirtNumberText { get; init; } = string.Empty;
     public string Initials { get; init; } = string.Empty;
     public string PositionText { get; init; } = string.Empty;
@@ -17,7 +19,13 @@ public class LivePlayerIconViewModel
     public string BorderBrush { get; init; } = "#DCEBFF";
     public string SelectionBrush { get; init; } = "Transparent";
     public double SelectionThickness { get; init; }
-    public string RatingText { get; init; } = "6.0";
+    public string RatingText => LiveStats.RatingDisplay;
+    public string RatingBrush => LiveStats.RatingBrush;
+    public string RatingForeground => LiveStats.RatingForeground;
+    public string RatingFormBrush { get; init; } = "#FACC15";
+    public string RatingBadgeBackground { get; init; } = "#102033";
+    public string RatingBadgeForeground { get; init; } = "#FACC15";
+    public string RatingBadgeBorderBrush { get; init; } = "#FACC15";
     public double Stamina { get; init; }
     public string StaminaBrush { get; init; } = "#2FA84F";
     public int Goals { get; init; }
@@ -44,4 +52,5 @@ public class LivePlayerIconViewModel
     public string StaminaText { get; init; } = "0/0";
     public string MatchStatusText { get; init; } = "Fresh";
     public IReadOnlyList<PlayerTraitBadge> TraitBadges { get; init; } = [];
+    public IReadOnlyList<PlayerCardStatusBadge> CardStatusBadges { get; init; } = [];
 }

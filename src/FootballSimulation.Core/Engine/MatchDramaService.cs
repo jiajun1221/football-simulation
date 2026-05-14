@@ -76,9 +76,12 @@ public class MatchDramaService
         var rivalryBonus = context.IsRivalryMatch ? 0.018 : 0.0;
         var weatherBonus = context.WeatherCondition switch
         {
+            WeatherCondition.Storm => 0.022,
             WeatherCondition.HeavyRain or WeatherCondition.Snow => 0.018,
             WeatherCondition.Rainy or WeatherCondition.Foggy => 0.010,
             WeatherCondition.Windy => 0.006,
+            WeatherCondition.Hot => 0.012,
+            WeatherCondition.Cold => 0.006,
             _ => 0.0
         };
 
@@ -270,14 +273,27 @@ public class MatchDramaService
     private static bool ShouldCreateDefensiveError(MatchEventContext context)
     {
         var highLineRisk = Math.Max(context.HomeTeam.Tactics.DefensiveLine, context.AwayTeam.Tactics.DefensiveLine);
+        var highPressRisk = Math.Max(context.HomeTeam.Tactics.PressingIntensity, context.AwayTeam.Tactics.PressingIntensity);
+        var activePlayers = GetActivePlayers(context.HomeTeam)
+            .Concat(GetActivePlayers(context.AwayTeam))
+            .ToList();
+        var averageFatigue = activePlayers.Count == 0
+            ? 0
+            : activePlayers.Average(player => Math.Max(0, 65 - player.Stamina));
         var weatherRisk = context.WeatherCondition switch
         {
-            WeatherCondition.HeavyRain or WeatherCondition.Foggy => 0.08,
-            WeatherCondition.Rainy or WeatherCondition.Snow => 0.04,
+            WeatherCondition.Storm or WeatherCondition.HeavyRain or WeatherCondition.Snow => 0.010,
+            WeatherCondition.Rainy or WeatherCondition.Foggy => 0.005,
             _ => 0.0
         };
 
-        return context.Random.NextDouble() < 0.18 + Math.Max(0, highLineRisk - 65) / 300.0 + weatherRisk;
+        var probability =
+            0.006 +
+            Math.Max(0, highLineRisk - 74) / 5000.0 +
+            Math.Max(0, highPressRisk - 72) / 4500.0 +
+            averageFatigue / 5500.0 +
+            weatherRisk;
+        return context.Random.NextDouble() < Math.Clamp(probability, 0.004, 0.026);
     }
 
     private static MatchDramaResult CreateAtmosphereEvent(MatchEventContext context)
@@ -296,28 +312,70 @@ public class MatchDramaService
             };
         }
 
-        if (roll < 0.24)
-        {
-            var defendingTeam = ChooseWeakerDefense(context);
-            return new MatchDramaResult { EventType = EventType.GoalkeeperHeroics, Team = defendingTeam, Player = ChooseGoalkeeper(defendingTeam) };
-        }
-
         if (roll < 0.48)
         {
-            var team = context.HomeTeam.Tactics.PressingIntensity >= context.AwayTeam.Tactics.PressingIntensity ? context.HomeTeam : context.AwayTeam;
+            var team = ChooseConfrontationTeam(context);
             return new MatchDramaResult
             {
-                EventType = context.IsRivalryMatch && context.Random.NextDouble() < 0.35
+                EventType = context.IsRivalryMatch && context.Random.NextDouble() < 0.28
                     ? EventType.RefereeControversy
                     : EventType.Confrontation,
                 Team = team,
-                Player = ChooseDefensivePlayer(team, context.Random),
+                Player = ChooseConfrontationPlayer(team, context.Random),
                 HomeDefenseModifier = team == context.HomeTeam ? 0.96 : 1.0,
                 AwayDefenseModifier = team == context.AwayTeam ? 0.96 : 1.0
             };
         }
 
         return new MatchDramaResult { EventType = EventType.CrowdMomentum, Team = context.HomeTeam, HomeAttackModifier = 1.08 };
+    }
+
+    private static Team ChooseConfrontationTeam(MatchEventContext context)
+    {
+        var homeEdge = GetConfrontationTeamRisk(context.HomeTeam);
+        var awayEdge = GetConfrontationTeamRisk(context.AwayTeam);
+
+        if (Math.Abs(homeEdge - awayEdge) < 0.01)
+        {
+            return context.HomeTeam.Tactics.PressingIntensity >= context.AwayTeam.Tactics.PressingIntensity
+                ? context.HomeTeam
+                : context.AwayTeam;
+        }
+
+        return homeEdge > awayEdge ? context.HomeTeam : context.AwayTeam;
+    }
+
+    private static double GetConfrontationTeamRisk(Team team)
+    {
+        var activePlayers = GetActivePlayers(team).ToList();
+        if (activePlayers.Count == 0)
+        {
+            return team.Tactics.PressingIntensity / 100.0;
+        }
+
+        return team.Tactics.PressingIntensity / 100.0 +
+            activePlayers.Count(player => player.Traits.Contains(PlayerTrait.DivesIntoTackles)) * 0.18 +
+            activePlayers.Count(player => player.YellowCards > 0) * 0.12 +
+            activePlayers.Count(player => player.Morale < 45) * 0.08 +
+            activePlayers.Average(player => Math.Max(0, 100 - player.Stamina)) / 450.0;
+    }
+
+    private static Player ChooseConfrontationPlayer(Team team, Random random)
+    {
+        var candidates = GetActivePlayers(team).ToList();
+        if (candidates.Count == 0)
+        {
+            return team.Players.FirstOrDefault() ?? new Player { Name = team.Name };
+        }
+
+        return candidates
+            .OrderByDescending(player =>
+                (player.Traits.Contains(PlayerTrait.DivesIntoTackles) ? 38 : 0) +
+                player.YellowCards * 20 +
+                Math.Max(0, 50 - player.Morale) * 0.4 +
+                Math.Max(0, 45 - player.Stamina) * 0.2 +
+                random.NextDouble())
+            .First();
     }
 
     private static Team ChooseLatePressureTeam(MatchEventContext context)
