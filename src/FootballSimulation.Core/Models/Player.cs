@@ -8,6 +8,7 @@ public class Player : INotifyPropertyChanged
 {
     private double _stamina = 100;
     private PlayerFormStatus _formStatus = PlayerFormStatus.Average;
+    private int _suspendedMatches;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -72,7 +73,32 @@ public class Player : INotifyPropertyChanged
     public int InjuryRecoveryMatches { get; set; }
     public bool IsSeasonEndingInjury { get; set; }
     public bool NewlyInjuredThisMatch { get; set; }
-    public bool IsSuspended { get; set; }
+    public int SuspendedMatches
+    {
+        get => _suspendedMatches;
+        set
+        {
+            var normalizedValue = Math.Max(0, value);
+            if (_suspendedMatches == normalizedValue)
+            {
+                return;
+            }
+
+            _suspendedMatches = normalizedValue;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(IsSuspended));
+        }
+    }
+
+    [JsonIgnore]
+    public bool NewlySuspendedThisMatch { get; set; }
+
+    [JsonIgnore]
+    public bool IsSuspended
+    {
+        get => SuspendedMatches > 0;
+        set => SuspendedMatches = value ? Math.Max(1, SuspendedMatches) : 0;
+    }
     public int MatchesPlayedRecently { get; set; }
     public int Finishing { get; set; }
     public int YellowCards { get; set; }

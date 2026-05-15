@@ -154,6 +154,7 @@ public class AiManagerService
     {
         var substitutes = team.Substitutes
             .Where(player => !player.IsSuspended && !player.IsInjured && !player.IsSentOff)
+            .Where(player => outgoingPlayer.Position != Position.Goalkeeper || PositionSuitabilityService.IsGoalkeeperCapable(player))
             .ToList();
 
         if (substitutes.Count == 0)

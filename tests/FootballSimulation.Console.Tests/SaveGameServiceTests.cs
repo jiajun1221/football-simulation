@@ -25,6 +25,7 @@ public class SaveGameServiceTests
         selectedTeam.Players[0].IsInjured = true;
         selectedTeam.Players[0].InjuryType = "Hamstring Injury";
         selectedTeam.Players[0].InjuryRecoveryMatches = 3;
+        selectedTeam.Players[1].SuspendedMatches = 1;
 
         try
         {
@@ -55,6 +56,8 @@ public class SaveGameServiceTests
             Assert.True(loadedPlayer.IsInjured);
             Assert.Equal("Hamstring Injury", loadedPlayer.InjuryType);
             Assert.Equal(3, loadedPlayer.InjuryRecoveryMatches);
+            Assert.Equal(1, loadedSelectedTeam.Players[1].SuspendedMatches);
+            Assert.True(loadedSelectedTeam.Players[1].IsSuspended);
             Assert.Equal(league.Table.Sum(entry => entry.Points), loadedLeague.Table.Sum(entry => entry.Points));
             Assert.Equal(league.Fixtures.Count(fixtureItem => fixtureItem.IsPlayed), loadedData.MatchHistory.Count);
         }

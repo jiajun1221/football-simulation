@@ -326,15 +326,28 @@ public class MatchEventFactory
 
     public MatchEvent CreateRedCard(int minute, Player player)
     {
-        return CreateEvent(minute, EventType.RedCard, $"Red card for {player.Name}. {player.Name} is sent off.", player.Name);
+        return CreateEvent(
+            minute,
+            EventType.RedCard,
+            $"Red card for {player.Name}. {player.Name} is sent off. {player.Name} will miss the next match due to suspension.",
+            player.Name);
     }
 
     public MatchEvent CreateRedCard(int minute, Player player, string reason)
     {
+        if (reason.Equals("second yellow", StringComparison.OrdinalIgnoreCase))
+        {
+            return CreateEvent(
+                minute,
+                EventType.RedCard,
+                $"Second yellow! {player.Name} is sent off. That dismissal means {player.Name} is suspended for the next fixture.",
+                player.Name);
+        }
+
         return CreateEvent(
             minute,
             EventType.RedCard,
-            $"Red card for {player.Name}: {reason}. {player.Name} is sent off.",
+            $"Straight red card for {player.Name}: {reason}. {player.Name} is sent off and will miss the next match due to suspension.",
             player.Name);
     }
 
@@ -344,6 +357,26 @@ public class MatchEventFactory
             minute,
             EventType.Substitution,
             $"{playerOn.Name} replaces {playerOff.Name} for {team.Name}.",
+            playerOn.Name,
+            playerOff.Name);
+    }
+
+    public MatchEvent CreateStoppageSubstitution(int minute, Team team, Player playerOff, Player playerOn, EventType stoppageType)
+    {
+        var stoppageText = stoppageType switch
+        {
+            EventType.Goal or EventType.WonderGoal or EventType.Penalty => "before the restart",
+            EventType.Injury => "during the injury stoppage",
+            EventType.Foul or EventType.SetPieceDanger or EventType.CornerKick or EventType.Offside => "during the stoppage",
+            EventType.VarCheck or EventType.VarDecision => "during the VAR stoppage",
+            EventType.YellowCard or EventType.RedCard or EventType.RefereeControversy or EventType.Confrontation => "after the stoppage",
+            _ => "during the stoppage"
+        };
+
+        return CreateEvent(
+            minute,
+            EventType.Substitution,
+            $"{team.Name} make a change {stoppageText}. {playerOn.Name} replaces {playerOff.Name}.",
             playerOn.Name,
             playerOff.Name);
     }
@@ -704,6 +737,24 @@ public class MatchEventFactory
                 $"The crowd erupts and the atmosphere lifts {team.Name}.",
                 $"Stadium noise surges. Momentum swings toward {team.Name}.",
                 $"{team.Name} feed off the noise as pressure builds around the stadium."));
+    }
+
+    public MatchEvent CreateHomeCrowdPressure(int minute, Team homeTeam, Team awayTeam, Random random)
+    {
+        var description = minute switch
+        {
+            <= 15 => Pick(random,
+                $"The home crowd are roaring early. {awayTeam.Name} are trying to settle away from home.",
+                $"Hostile away atmosphere tonight as {homeTeam.Name}'s support drives the opening pressure."),
+            >= 80 => Pick(random,
+                $"The home support are driving {homeTeam.Name} forward late on.",
+                $"The crowd senses blood and {homeTeam.Name} push again."),
+            _ => Pick(random,
+                $"The crowd lifts {homeTeam.Name} and the pressure rises.",
+                $"{awayTeam.Name} are being made to work through a hostile spell.")
+        };
+
+        return CreateEvent(minute, EventType.CrowdMomentum, description);
     }
 
     public MatchEvent CreateExhaustion(int minute, Team team, Player player)

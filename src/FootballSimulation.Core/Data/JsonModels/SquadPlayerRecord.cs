@@ -23,5 +23,6 @@ public class SquadPlayerRecord
     public int? InjuryRecoveryMatches { get; set; }
     public bool? IsSeasonEndingInjury { get; set; }
     public bool? IsSuspended { get; set; }
+    public int? SuspendedMatches { get; set; }
     public int? MatchesPlayedRecently { get; set; }
 }

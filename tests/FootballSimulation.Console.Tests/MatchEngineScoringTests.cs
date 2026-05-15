@@ -346,11 +346,87 @@ public class MatchEngineScoringTests
         });
 
         Assert.NotNull(result);
-        Assert.Equal(EventType.Confrontation, result.EventType);
+        Assert.Equal(EventType.CrowdMomentum, result.EventType);
     }
 
     [Fact]
-    public void SimulateMatch_GoalkeeperHeroicsFollowsSaveByDefendingKeeper()
+    public void SimulateMatch_ConfrontationsOnlyFollowStoppedPlayTriggers()
+    {
+        var seedDataService = new SeedDataService();
+        var engine = new MatchEngine();
+
+        for (var seed = 1; seed <= 80; seed++)
+        {
+            var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+            var result = engine.SimulateMatch(homeTeam, awayTeam, seed: seed);
+            var events = result.Events;
+            var confrontationEvents = events
+                .Where(matchEvent => matchEvent.EventType == EventType.Confrontation)
+                .ToList();
+            Assert.True(
+                confrontationEvents.Count <= 2,
+                $"Seed {seed}: expected at most 2 confrontations, found {confrontationEvents.Count}.");
+
+            for (var confrontationIndex = 1; confrontationIndex < confrontationEvents.Count; confrontationIndex++)
+            {
+                Assert.True(
+                    confrontationEvents[confrontationIndex - 1].Minute + 20 <= confrontationEvents[confrontationIndex].Minute,
+                    $"Seed {seed}: confrontations were too close together.");
+            }
+
+            for (var index = 0; index < events.Count; index++)
+            {
+                if (events[index].EventType != EventType.Confrontation)
+                {
+                    continue;
+                }
+
+                var previousEvent = index > 0 ? events[index - 1] : null;
+                Assert.NotNull(previousEvent);
+                Assert.True(
+                    IsConfrontationTriggerEvent(previousEvent!.EventType),
+                    $"Seed {seed}: confrontation at {events[index].Minute}' followed {previousEvent.EventType}: {previousEvent.Description}");
+            }
+        }
+    }
+
+    [Fact]
+    public void SimulateMatch_StraightRedDoesNotAlsoShowYellowForSameIncident()
+    {
+        var seedDataService = new SeedDataService();
+        var engine = new MatchEngine();
+
+        for (var seed = 1; seed <= 120; seed++)
+        {
+            var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+            var result = engine.SimulateMatch(homeTeam, awayTeam, seed: seed);
+            var events = result.Events;
+
+            for (var index = 0; index < events.Count; index++)
+            {
+                var redCard = events[index];
+                if (redCard.EventType != EventType.RedCard ||
+                    redCard.Description.Contains("Second yellow", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                var sameIncidentYellow = events
+                    .Take(index)
+                    .Any(matchEvent =>
+                        matchEvent.Minute == redCard.Minute &&
+                        matchEvent.EventType == EventType.YellowCard &&
+                        string.Equals(matchEvent.PrimaryPlayerName, redCard.PrimaryPlayerName, StringComparison.OrdinalIgnoreCase));
+
+                Assert.False(
+                    sameIncidentYellow,
+                    $"Seed {seed}: {redCard.PrimaryPlayerName} received yellow and straight red in the same incident.");
+            }
+        }
+    }
+
+    [Fact]
+    public void SimulateMatch_GoalkeeperHeroicsDoesNotDuplicateSaveFeed()
     {
         var seedDataService = new SeedDataService();
         var engine = new MatchEngine();
@@ -368,15 +444,18 @@ public class MatchEngineScoringTests
                     continue;
                 }
 
-                var previousEvent = events[index - 1];
                 var keeperName = events[index].PrimaryPlayerName;
                 var keeperTeam = FindPlayerTeamName(keeperName, result);
-                var attackingPlayerTeam = FindPlayerTeamName(previousEvent.PrimaryPlayerName, result);
+                var previousEvent = events[index - 1];
+                var duplicatesPreviousSave =
+                    previousEvent.EventType == EventType.Save &&
+                    previousEvent.Minute == events[index].Minute &&
+                    string.Equals(previousEvent.SecondaryPlayerName, keeperName, StringComparison.OrdinalIgnoreCase);
 
-                Assert.Equal(EventType.Save, previousEvent.EventType);
-                Assert.Equal(keeperName, previousEvent.SecondaryPlayerName);
                 Assert.Contains($"keeps {keeperTeam} alive", events[index].Description, StringComparison.OrdinalIgnoreCase);
-                Assert.NotEqual(attackingPlayerTeam, keeperTeam);
+                Assert.False(
+                    duplicatesPreviousSave,
+                    $"Seed {seed}: goalkeeper heroics duplicated the previous save for {keeperName}.");
             }
         }
     }
@@ -439,6 +518,21 @@ public class MatchEngineScoringTests
             (matchEvent.Description.Contains("goal ruled out", StringComparison.OrdinalIgnoreCase) ||
                 matchEvent.Description.Contains("goal is ruled out", StringComparison.OrdinalIgnoreCase) ||
                 matchEvent.Description.Contains("goal disallowed", StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static bool IsConfrontationTriggerEvent(EventType eventType)
+    {
+        return eventType is EventType.Foul
+            or EventType.PenaltyDecision
+            or EventType.YellowCard
+            or EventType.RedCard
+            or EventType.VarCheck
+            or EventType.VarDecision
+            or EventType.RefereeControversy
+            or EventType.Offside
+            or EventType.CornerKick
+            or EventType.SetPieceDanger
+            or EventType.RivalryAtmosphere;
     }
 
     private static bool IsPossessionFlowEvent(MatchEvent matchEvent)

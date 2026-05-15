@@ -30,7 +30,33 @@ public class DisciplinaryServiceTests
         Assert.Equal(2, player.YellowCards);
         Assert.True(player.IsSentOff);
         Assert.False(player.IsOnPitch);
+        Assert.True(player.IsSuspended);
+        Assert.Equal(1, player.SuspendedMatches);
+        Assert.True(player.NewlySuspendedThisMatch);
         Assert.Equal(2, teamStats.YellowCards);
         Assert.Equal(1, teamStats.RedCards);
+    }
+
+    [Fact]
+    public void AdvanceRecoveryAfterCompletedRound_ServesSuspensionAfterNextFixture()
+    {
+        var player = new Player
+        {
+            Name = "Suspended Player",
+            Position = Position.Defender,
+            SuspendedMatches = 1,
+            NewlySuspendedThisMatch = true
+        };
+        var team = new Team { Name = "Test FC", Players = [player] };
+        var recoveryService = new InjuryRecoveryService();
+
+        recoveryService.AdvanceRecoveryAfterCompletedRound([team]);
+        Assert.True(player.IsSuspended);
+        Assert.Equal(1, player.SuspendedMatches);
+        Assert.False(player.NewlySuspendedThisMatch);
+
+        recoveryService.AdvanceRecoveryAfterCompletedRound([team]);
+        Assert.False(player.IsSuspended);
+        Assert.Equal(0, player.SuspendedMatches);
     }
 }

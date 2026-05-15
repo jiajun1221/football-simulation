@@ -92,4 +92,13 @@ public static class PositionSuitabilityService
         EnsurePositionMetadata(player);
         return GetEffectivenessMultiplier(player) < 1.0;
     }
+
+    public static bool IsGoalkeeperCapable(Player player)
+    {
+        EnsurePositionMetadata(player);
+        return player.Position == Position.Goalkeeper ||
+            string.Equals(player.PreferredPosition, "GK", StringComparison.OrdinalIgnoreCase) ||
+            player.SecondaryPositions.Any(position =>
+                string.Equals(NormalizeExactPosition(position), "GK", StringComparison.OrdinalIgnoreCase));
+    }
 }

@@ -95,6 +95,61 @@ public class SquadSelectionServiceTests
         Assert.False(substitute.IsOnPitch);
     }
 
+    [Fact]
+    public void SwapStarterWithSubstitute_RejectsOutfieldReplacementForGoalkeeper()
+    {
+        var service = new SquadSelectionService();
+        var team = CreateTeam();
+        var goalkeeper = team.Players[0];
+        var outfieldSubstitute = team.Substitutes[1];
+
+        var result = service.SwapStarterWithSubstitute(team, goalkeeper, outfieldSubstitute);
+
+        Assert.False(result.Success);
+        Assert.Contains(goalkeeper, team.Players);
+        Assert.Contains(outfieldSubstitute, team.Substitutes);
+    }
+
+    [Fact]
+    public void RepairGoalkeeperSlot_PromotesBackupGoalkeeperOnly()
+    {
+        var team = CreateTeam();
+        var originalGoalkeeper = team.Players[0];
+        var backupGoalkeeper = team.Substitutes[0];
+        team.Players.Remove(originalGoalkeeper);
+        team.Substitutes.Add(originalGoalkeeper);
+
+        var jordanHenderson = CreatePlayer("Jordan Henderson", Position.Midfielder, isStarter: true);
+        jordanHenderson.PreferredPosition = "CM";
+        team.Players.Insert(0, jordanHenderson);
+
+        var result = LineupValidationService.RepairGoalkeeperSlot(team);
+
+        Assert.True(result.IsValid);
+        Assert.True(result.WasRepaired);
+        Assert.Contains(backupGoalkeeper, team.Players);
+        Assert.DoesNotContain(jordanHenderson, team.Players.Where(PositionSuitabilityService.IsGoalkeeperCapable));
+        Assert.False(PositionSuitabilityService.IsGoalkeeperCapable(jordanHenderson));
+    }
+
+    [Fact]
+    public void RepairUnavailablePlayers_RemovesSuspendedStarterFromLineup()
+    {
+        var team = CreateTeam();
+        var suspendedStarter = team.Players[1];
+        var replacement = team.Substitutes[1];
+        suspendedStarter.SuspendedMatches = 1;
+
+        var result = LineupValidationService.RepairUnavailablePlayers(team);
+
+        Assert.True(result.IsValid);
+        Assert.DoesNotContain(suspendedStarter, team.Players);
+        Assert.Contains(suspendedStarter, team.Substitutes);
+        Assert.Contains(replacement, team.Players);
+        Assert.False(suspendedStarter.IsStarter);
+        Assert.False(suspendedStarter.IsOnPitch);
+    }
+
     private static Team CreateTeam(string name = "Test FC", int substituteCount = 7)
     {
         var players = new List<Player>

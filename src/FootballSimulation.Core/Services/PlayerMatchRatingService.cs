@@ -19,6 +19,7 @@ public static class PlayerMatchRatingService
             _ => 0.0
         };
 
+        rating = ApplyAttackerContributionCap(performance, rating);
         rating = ApplyConcessionCaps(performance, goalsConceded, rating);
         return Math.Round(Math.Clamp(rating, 1.0, 10.0), 1);
     }
@@ -86,6 +87,36 @@ public static class PlayerMatchRatingService
             Position.Defender when goalsConceded >= 3 => Math.Min(rating, 7.3),
             _ => rating
         };
+    }
+
+    private static double ApplyAttackerContributionCap(PlayerMatchPerformance performance, double rating)
+    {
+        if (performance.Goals <= 0 ||
+            performance.Position is not (Position.Forward or Position.Midfielder))
+        {
+            return rating;
+        }
+
+        var nonGoalContribution =
+            performance.Assists * 0.65 +
+            performance.KeyPasses * 0.14 +
+            Math.Max(0, performance.ShotsOnTarget - performance.Goals) * 0.10 +
+            performance.Tackles * 0.08 +
+            performance.Interceptions * 0.08 +
+            performance.Recoveries * 0.06 +
+            performance.Blocks * 0.06;
+
+        if (nonGoalContribution < 0.55)
+        {
+            return Math.Min(rating, 8.5);
+        }
+
+        if (nonGoalContribution < 1.20)
+        {
+            return Math.Min(rating, 8.9);
+        }
+
+        return rating;
     }
 
     private static double GetTeamDefensiveBonus(Match match, string teamName, int goalsConceded)

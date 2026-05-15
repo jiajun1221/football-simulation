@@ -26,8 +26,8 @@ public class LivePlayerIconViewModel
     public string RatingBadgeBackground { get; init; } = "#102033";
     public string RatingBadgeForeground { get; init; } = "#FACC15";
     public string RatingBadgeBorderBrush { get; init; } = "#FACC15";
-    public double Stamina { get; init; }
-    public string StaminaBrush { get; init; } = "#2FA84F";
+    public double Stamina => LiveStats.StaminaPercent;
+    public string StaminaBrush => LiveStats.StaminaBrush;
     public int Goals { get; init; }
     public int Assists { get; init; }
     public int DefensiveContributions { get; init; }

@@ -1,4 +1,5 @@
 using FootballSimulation.Models;
+using FootballSimulation.Services;
 
 namespace FootballSimulation.Engine;
 
@@ -312,12 +313,12 @@ public class MatchDramaService
             };
         }
 
-        if (roll < 0.48)
+        if (CanCreateAtmosphereConfrontation(context) && roll < 0.18)
         {
             var team = ChooseConfrontationTeam(context);
             return new MatchDramaResult
             {
-                EventType = context.IsRivalryMatch && context.Random.NextDouble() < 0.28
+                EventType = context.IsRivalryMatch && context.Random.NextDouble() < 0.40
                     ? EventType.RefereeControversy
                     : EventType.Confrontation,
                 Team = team,
@@ -328,6 +329,25 @@ public class MatchDramaService
         }
 
         return new MatchDramaResult { EventType = EventType.CrowdMomentum, Team = context.HomeTeam, HomeAttackModifier = 1.08 };
+    }
+
+    private static bool CanCreateAtmosphereConfrontation(MatchEventContext context)
+    {
+        if (context.IsRivalryMatch && context.Random.NextDouble() < 0.10)
+        {
+            return true;
+        }
+
+        return context.PreviousEventType is EventType.Foul
+            or EventType.PenaltyDecision
+            or EventType.YellowCard
+            or EventType.RedCard
+            or EventType.VarCheck
+            or EventType.VarDecision
+            or EventType.RefereeControversy
+            or EventType.Offside
+            or EventType.CornerKick
+            or EventType.SetPieceDanger;
     }
 
     private static Team ChooseConfrontationTeam(MatchEventContext context)
@@ -446,7 +466,7 @@ public class MatchDramaService
     private static Player ChooseGoalkeeper(Team team)
     {
         var activePlayers = GetActivePlayers(team);
-        return activePlayers.FirstOrDefault(player => player.Position == Position.Goalkeeper) ??
+        return activePlayers.FirstOrDefault(PositionSuitabilityService.IsGoalkeeperCapable) ??
             activePlayers.FirstOrDefault() ??
             team.Players.First();
     }
@@ -464,12 +484,12 @@ public class MatchDramaService
 
         return activePlayers.Count > 0
             ? activePlayers
-            : team.Players.Where(player => !player.IsSentOff).ToList();
+            : team.Players.Where(player => !player.IsSentOff && !player.IsSuspended).ToList();
     }
 
     private static bool IsActivePlayer(Player player)
     {
-        return player.IsOnPitch && !player.IsSentOff;
+        return player.IsOnPitch && !player.IsSentOff && !player.IsSuspended;
     }
 }
 

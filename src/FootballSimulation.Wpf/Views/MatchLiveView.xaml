@@ -73,13 +73,13 @@
                 </Border>
 
                 <ProgressBar Grid.Row="1"
-                             Width="36"
+                             Width="{Binding LiveStats.StaminaBarWidth}"
                              Height="3"
                              Minimum="0"
                              Maximum="100"
-                             Value="{Binding Stamina}"
-                             Foreground="{Binding StaminaBrush}"
-                             Background="#40FFFFFF"
+                             Value="{Binding LiveStats.StaminaPercent, Mode=OneWay}"
+                             Foreground="{Binding LiveStats.StaminaBrush, Mode=OneWay}"
+                             Background="#66E5E7EB"
                              BorderThickness="0"
                              HorizontalAlignment="Center"
                              VerticalAlignment="Center" />
@@ -446,27 +446,48 @@
         </DataTemplate>
     </UserControl.Resources>
 
-    <Grid Margin="20"
+    <Grid x:Name="LiveMatchRootGrid"
+          Margin="20"
           Background="{DynamicResource AppPageBackground}">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="320" />
-            <ColumnDefinition Width="*" />
+            <ColumnDefinition x:Name="LiveTrackerColumnDefinition" Width="320" />
+            <ColumnDefinition x:Name="FullMatchColumnDefinition" Width="*" />
         </Grid.ColumnDefinitions>
 
-        <Grid Grid.Column="0"
+        <Grid x:Name="LiveTrackerPanel"
+              Grid.Column="0"
               Margin="0,0,16,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <Border Background="#071226"
+            <Border x:Name="ScoreboardPanel"
+                    Background="#071226"
                     BorderBrush="#243247"
                     BorderThickness="1"
                     CornerRadius="12"
                     Padding="12"
                     Margin="0,0,0,12">
-                <StackPanel>
+                <Grid>
+                    <Button x:Name="CompactViewToggleButton"
+                            Width="30"
+                            Height="30"
+                            Padding="0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            Panel.ZIndex="2"
+                            Content="⤢"
+                            ToolTip="Compact View"
+                            FontFamily="Segoe UI Symbol"
+                            FontSize="14"
+                            FontWeight="Bold"
+                            Foreground="#F8FAFC"
+                            Background="#263B58"
+                            BorderBrush="#4B6383"
+                            BorderThickness="1"
+                            Click="CompactViewToggleButton_Click" />
+                    <StackPanel>
                     <TextBlock x:Name="PhaseTextBlock"
                                Foreground="#F8FAFC"
                                FontSize="12"
@@ -480,16 +501,14 @@
                                TextAlignment="Center"
                                Margin="0,4,0,0" />
 
-                    <Grid Margin="0,8,0,0"
+                    <Grid x:Name="ScoreboardScoreGrid"
+                          HorizontalAlignment="Stretch"
+                          Margin="0,6,0,0"
                           RenderTransformOrigin="0.5,0.5">
                         <Grid.RenderTransform>
                             <ScaleTransform x:Name="ScoreboardScaleTransform" ScaleX="1" ScaleY="1" />
                         </Grid.RenderTransform>
 
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
@@ -497,59 +516,121 @@
                         </Grid.ColumnDefinitions>
 
                         <Border x:Name="HomeScorePanel"
-                                Grid.RowSpan="2"
                                 Grid.Column="0"
+                                Width="136"
+                                Height="78"
                                 Background="#172A45"
                                 CornerRadius="9"
-                                Padding="8">
-                            <StackPanel>
+                                Padding="6"
+                                HorizontalAlignment="Left">
+                            <StackPanel VerticalAlignment="Center">
                                 <TextBlock x:Name="HomeTeamNameTextBlock"
                                            Foreground="#DCE8F7"
-                                           FontSize="12"
-                                           FontWeight="SemiBold"
+                                           FontSize="13"
+                                           FontWeight="Bold"
                                            TextAlignment="Center"
                                            TextTrimming="CharacterEllipsis" />
                                 <TextBlock x:Name="HomeScoreTextBlock"
                                            Foreground="White"
-                                           FontSize="26"
-                                           FontWeight="Bold"
+                                           FontSize="34"
+                                           FontWeight="Black"
                                            TextAlignment="Center" />
                             </StackPanel>
                         </Border>
 
-                        <TextBlock Grid.Column="1"
+                        <TextBlock x:Name="ScoreSeparatorTextBlock"
+                                   Grid.Column="1"
                                    Text="-"
                                    Foreground="#F8FAFC"
-                                   FontSize="24"
-                                   FontWeight="Bold"
+                                   FontSize="22"
+                                   FontWeight="Black"
                                    VerticalAlignment="Center"
-                                   Margin="10,0" />
+                                   Margin="6,0" />
 
                         <Border x:Name="AwayScorePanel"
-                                Grid.RowSpan="2"
                                 Grid.Column="2"
+                                Width="136"
+                                Height="78"
                                 Background="#172A45"
                                 CornerRadius="9"
-                                Padding="8">
-                            <StackPanel>
+                                Padding="6"
+                                HorizontalAlignment="Right">
+                            <StackPanel VerticalAlignment="Center">
                                 <TextBlock x:Name="AwayTeamNameTextBlock"
                                            Foreground="#DCE8F7"
-                                           FontSize="12"
-                                           FontWeight="SemiBold"
+                                           FontSize="13"
+                                           FontWeight="Bold"
                                            TextAlignment="Center"
                                            TextTrimming="CharacterEllipsis" />
                                 <TextBlock x:Name="AwayScoreTextBlock"
                                            Foreground="White"
-                                           FontSize="26"
-                                           FontWeight="Bold"
+                                           FontSize="34"
+                                           FontWeight="Black"
                                            TextAlignment="Center" />
                             </StackPanel>
                         </Border>
                     </Grid>
-                </StackPanel>
+                    <StackPanel x:Name="CompactScoreControlsPanel"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Center"
+                                Margin="0,8,0,0"
+                                Visibility="Collapsed">
+                        <StackPanel.Resources>
+                            <Style TargetType="Button">
+                                <Setter Property="Width" Value="34" />
+                                <Setter Property="Height" Value="30" />
+                                <Setter Property="Margin" Value="2" />
+                                <Setter Property="Background" Value="#263B58" />
+                                <Setter Property="Foreground" Value="#F8FAFC" />
+                                <Setter Property="BorderBrush" Value="#4B6383" />
+                                <Setter Property="BorderThickness" Value="1" />
+                                <Setter Property="FontFamily" Value="Segoe UI Symbol" />
+                                <Setter Property="FontSize" Value="13" />
+                                <Setter Property="FontWeight" Value="Bold" />
+                            </Style>
+                        </StackPanel.Resources>
+                        <Button x:Name="CompactPauseResumeButton"
+                                Content="&#x23F8;"
+                                ToolTip="Pause / Resume"
+                                Click="PauseResumeButton_Click" />
+                        <Button x:Name="CompactDecreaseSpeedButton"
+                                Content="&#x23EA;"
+                                ToolTip="Slower"
+                                Click="DecreaseSpeedButton_Click" />
+                        <Border Width="46"
+                                Height="30"
+                                CornerRadius="10"
+                                Background="#DCEBFF"
+                                Margin="3"
+                                VerticalAlignment="Center">
+                            <TextBlock x:Name="CompactSpeedLevelTextBlock"
+                                       Text="1x"
+                                       Foreground="#071226"
+                                       FontSize="13"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                        </Border>
+                        <Button x:Name="CompactIncreaseSpeedButton"
+                                Content="&#x23E9;"
+                                ToolTip="Faster"
+                                Click="IncreaseSpeedButton_Click" />
+                        <Button x:Name="CompactContinueButton"
+                                Content="Continue"
+                                Width="82"
+                                FontFamily="Segoe UI"
+                                FontSize="11"
+                                ToolTip="Continue"
+                                Visibility="Collapsed"
+                                IsEnabled="False"
+                                Click="ContinueButton_Click" />
+                    </StackPanel>
+                    </StackPanel>
+                </Grid>
             </Border>
 
-            <Border Grid.Row="1"
+            <Border x:Name="FeedPanel"
+                    Grid.Row="1"
                     Background="{DynamicResource AppCardBackground}"
                     CornerRadius="12"
                     Padding="12">
@@ -712,7 +793,8 @@
             </Border>
         </Grid>
 
-        <Grid Grid.Column="1">
+        <Grid x:Name="FullMatchLayoutGrid"
+              Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="7*" />
                 <RowDefinition Height="3*" />

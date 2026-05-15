@@ -71,6 +71,7 @@ public class LeagueEngine
         int? matchSeed = seed.HasValue
             ? seed.Value + fixture.RoundNumber * 100 + fixtureIndex
             : null;
+        PrepareFixtureTeams(fixture);
         var result = _matchEngine.SimulateMatch(fixture.HomeTeam, fixture.AwayTeam, matchSeed, options: CreateOptions(options));
         _playerFormStatusService.UpdateMatchPlayerFormStatuses(result);
 
@@ -92,12 +93,14 @@ public class LeagueEngine
             ? seed.Value + fixture.RoundNumber * 100 + fixtureIndex
             : null;
 
+        PrepareFixtureTeams(fixture);
         return _matchEngine.SimulateFirstHalf(fixture.HomeTeam, fixture.AwayTeam, matchSeed, CreateOptions(options));
     }
 
     public Match CreateLiveFixtureMatch(League league, Fixture fixture, MatchSimulationOptions? options = null)
     {
         ValidateFixtureIsPlayable(league, fixture);
+        PrepareFixtureTeams(fixture);
         return _matchEngine.CreateLiveMatch(fixture.HomeTeam, fixture.AwayTeam, CreateOptions(options));
     }
 
@@ -179,6 +182,12 @@ public class LeagueEngine
         {
             throw new ArgumentException("The fixture does not belong to this league.", nameof(fixture));
         }
+    }
+
+    private static void PrepareFixtureTeams(Fixture fixture)
+    {
+        _ = LineupValidationService.RepairUnavailablePlayers(fixture.HomeTeam);
+        _ = LineupValidationService.RepairUnavailablePlayers(fixture.AwayTeam);
     }
 
     private static MatchSimulationOptions CreateOptions(MatchSimulationOptions? options)

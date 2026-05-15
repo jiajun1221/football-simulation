@@ -52,7 +52,7 @@ public class PlayerStatMappingService
             InjurySeverity = injuryState.Severity,
             InjuryRecoveryMatches = injuryState.RecoveryMatches,
             IsSeasonEndingInjury = injuryState.IsSeasonEnding,
-            IsSuspended = record.IsSuspended ?? false,
+            SuspendedMatches = GetSuspendedMatches(record.SuspendedMatches, record.IsSuspended),
             MatchesPlayedRecently = Math.Max(0, record.MatchesPlayedRecently ?? 0),
             Finishing = CalculateFinishing(position, preferredPosition, overall)
         };
@@ -105,7 +105,7 @@ public class PlayerStatMappingService
             InjurySeverity = injuryState.Severity,
             InjuryRecoveryMatches = injuryState.RecoveryMatches,
             IsSeasonEndingInjury = injuryState.IsSeasonEnding,
-            IsSuspended = record.IsSuspended ?? false,
+            SuspendedMatches = GetSuspendedMatches(record.SuspendedMatches, record.IsSuspended),
             MatchesPlayedRecently = Math.Max(0, record.MatchesPlayedRecently ?? 0),
             Finishing = CalculateFinishing(position, preferredPosition, overall)
         };
@@ -119,6 +119,11 @@ public class PlayerStatMappingService
             .Select(name => Enum.Parse<PlayerTrait>(name, ignoreCase: true))
             .Distinct()
             .ToList();
+    }
+
+    private static int GetSuspendedMatches(int? suspendedMatches, bool? isSuspended)
+    {
+        return Math.Max(0, suspendedMatches ?? (isSuspended == true ? 1 : 0));
     }
 
     private static List<string> MapSecondaryPositions(IEnumerable<string> positions)

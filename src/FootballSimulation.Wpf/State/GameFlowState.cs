@@ -11,4 +11,5 @@ public class GameFlowState
     public Fixture? CurrentFixture { get; set; }
     public Match? CurrentMatch { get; set; }
     public MatchSpeed CurrentMatchSpeed { get; set; } = MatchSpeed.Medium;
+    public bool IsCompactLiveMatchView { get; set; }
 }

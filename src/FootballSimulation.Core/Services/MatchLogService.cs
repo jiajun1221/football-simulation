@@ -16,6 +16,17 @@ public class MatchLogService
         _events.AddRange(matchEvents);
     }
 
+    public void ReplaceLastEvent(MatchEvent matchEvent)
+    {
+        if (_events.Count == 0)
+        {
+            AddEvent(matchEvent);
+            return;
+        }
+
+        _events[^1] = matchEvent;
+    }
+
     public List<MatchEvent> GetEvents()
     {
         return [.. _events];

@@ -121,4 +121,49 @@ public class TacticalRealismTests
         Assert.True(calculator.GetAttackModifier(allOut) > calculator.GetAttackModifier(balanced));
         Assert.True(calculator.GetDefenseModifier(allOut) < calculator.GetDefenseModifier(balanced));
     }
+
+    [Fact]
+    public void HomeAwayAdvantage_AppliesHomeBoostsAndAwayPressure()
+    {
+        var homeTeam = new Team { Name = "Home FC", Tactics = new TeamTactics() };
+        var awayTeam = new Team { Name = "Away FC", Tactics = new TeamTactics() };
+        var match = new Match { HomeTeam = homeTeam, AwayTeam = awayTeam };
+
+        var homeModifier = HomeAwayAdvantageService.GetModifier(match, homeTeam);
+        var awayModifier = HomeAwayAdvantageService.GetModifier(match, awayTeam);
+
+        Assert.True(homeModifier.AttackModifier > 1.0);
+        Assert.True(homeModifier.DefenseModifier > 1.0);
+        Assert.True(homeModifier.PassingModifier > 1.0);
+        Assert.True(awayModifier.AttackModifier < 1.0);
+        Assert.True(awayModifier.FinishingModifier < 1.0);
+        Assert.True(awayModifier.TurnoverRiskModifier > 1.0);
+        Assert.True(awayModifier.FoulRiskModifier > 1.0);
+    }
+
+    [Fact]
+    public void HomeAwayAdvantage_DefensiveAwayTacticsReduceAwayPenalty()
+    {
+        var homeTeam = new Team { Name = "Home FC", Tactics = new TeamTactics() };
+        var defensiveAwayTeam = new Team
+        {
+            Name = "Defensive Away FC",
+            Tactics = new TeamTactics { Mentality = Mentality.Defensive, DefensiveLine = 30, Tempo = 42 }
+        };
+        var aggressiveAwayTeam = new Team
+        {
+            Name = "Aggressive Away FC",
+            Tactics = new TeamTactics { Mentality = Mentality.AllOutAttack, DefensiveLine = 75, Tempo = 78, PressingIntensity = 88 }
+        };
+
+        var defensiveMatch = new Match { HomeTeam = homeTeam, AwayTeam = defensiveAwayTeam };
+        var aggressiveMatch = new Match { HomeTeam = homeTeam, AwayTeam = aggressiveAwayTeam };
+
+        var defensiveModifier = HomeAwayAdvantageService.GetModifier(defensiveMatch, defensiveAwayTeam);
+        var aggressiveModifier = HomeAwayAdvantageService.GetModifier(aggressiveMatch, aggressiveAwayTeam);
+
+        Assert.True(defensiveModifier.AttackModifier > aggressiveModifier.AttackModifier);
+        Assert.True(defensiveModifier.TurnoverRiskModifier < aggressiveModifier.TurnoverRiskModifier);
+        Assert.True(defensiveModifier.FatigueLossModifier < aggressiveModifier.FatigueLossModifier);
+    }
 }

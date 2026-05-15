@@ -28,6 +28,8 @@ public partial class MatchLiveView : UserControl
     private const double PlayerIconSlotWidth = 72;
     private const double PlayerIconSlotHeight = 76;
     private const int MaxPendingSubstitutions = 3;
+    private const double CompactLiveViewWidth = 420;
+    private const double CompactLiveViewMinWidth = 380;
 
     private readonly GameFlowState _state;
     private readonly Action<UserControl> _navigate;
@@ -51,6 +53,8 @@ public partial class MatchLiveView : UserControl
     private bool _isPausedForSubstitution;
     private bool _isPausedForTacticalAdjustment;
     private bool _fixtureCompleted;
+    private bool _isCompactLiveMatchView;
+    private bool _hasStoredExpandedWindowSize;
     private bool _isCancellingPendingSubstitution;
     private Player? _selectedStarterForSubstitution;
     private Player? _selectedBenchForSubstitution;
@@ -58,9 +62,15 @@ public partial class MatchLiveView : UserControl
     private Team? _currentPossessionTeam;
     private LiveMatchStatus _currentLiveStatus = LiveMatchStatus.Neutral;
     private MatchTeamColorPalettes? _matchTeamColors;
+    private EventType? _lastDisplayedEventType;
     private string? _selectedPitchPlayerKey;
     private double _pitchWidth;
     private double _pitchHeight;
+    private double _expandedWindowWidth;
+    private double _expandedWindowMinWidth;
+
+    private sealed record PitchSlotAssignment(Player Player, PitchPosition Position);
+    private WindowState _expandedWindowState;
 
     public MatchLiveView(GameFlowState state, Action<UserControl> navigate, bool isSecondHalf)
     {
@@ -76,6 +86,7 @@ public partial class MatchLiveView : UserControl
         InitializeSpeedControls();
         InitializeTacticalControls();
         PrepareContinueButton();
+        ApplyCompactLiveMatchView(_state.IsCompactLiveMatchView, resizeWindow: false);
 
         ThemeManager.ThemeChanged += ThemeManager_ThemeChanged;
         Loaded += MatchLiveView_Loaded;
@@ -93,12 +104,14 @@ public partial class MatchLiveView : UserControl
 
         RefreshPlayerPanels();
         UpdatePlaybackControls();
+        ApplyCompactWindowSize(_isCompactLiveMatchView);
         await ResumePlaybackAsync();
     }
 
     private void MatchLiveView_Unloaded(object sender, RoutedEventArgs e)
     {
         ThemeManager.ThemeChanged -= ThemeManager_ThemeChanged;
+        RestoreExpandedWindowSize();
         CancelPlayback();
     }
 
@@ -106,6 +119,96 @@ public partial class MatchLiveView : UserControl
     {
         RefreshVisibleFeedTheme();
         UpdatePlaybackControls();
+    }
+
+    private void CompactViewToggleButton_Click(object sender, RoutedEventArgs e)
+    {
+        ApplyCompactLiveMatchView(!_isCompactLiveMatchView, resizeWindow: true);
+    }
+
+    private void ApplyCompactLiveMatchView(bool isCompact, bool resizeWindow)
+    {
+        _isCompactLiveMatchView = isCompact;
+        _state.IsCompactLiveMatchView = isCompact;
+
+        LiveMatchRootGrid.Width = double.NaN;
+        LiveMatchRootGrid.Margin = isCompact ? new Thickness(12) : new Thickness(20);
+        LiveTrackerPanel.Margin = isCompact ? new Thickness(0) : new Thickness(0, 0, 16, 0);
+        LiveTrackerColumnDefinition.Width = isCompact ? new GridLength(1, GridUnitType.Star) : new GridLength(320);
+        FullMatchColumnDefinition.Width = isCompact ? new GridLength(0) : new GridLength(1, GridUnitType.Star);
+        FullMatchLayoutGrid.Visibility = isCompact ? Visibility.Collapsed : Visibility.Visible;
+        FullMatchLayoutGrid.Opacity = isCompact ? 0 : 1;
+        CompactScoreControlsPanel.Visibility = isCompact ? Visibility.Visible : Visibility.Collapsed;
+        ScoreboardPanel.Padding = isCompact ? new Thickness(10) : new Thickness(12);
+        ScoreboardPanel.Margin = isCompact ? new Thickness(0, 0, 0, 8) : new Thickness(0, 0, 0, 12);
+        FeedPanel.Padding = isCompact ? new Thickness(10) : new Thickness(12);
+        PhaseTextBlock.FontSize = isCompact ? 11 : 12;
+        VenueTextBlock.FontSize = isCompact ? 10 : 11;
+        ScoreSeparatorTextBlock.Margin = isCompact ? new Thickness(4, 0, 4, 0) : new Thickness(6, 0, 6, 0);
+
+        CompactViewToggleButton.Content = isCompact ? "⤢" : "⤡";
+        CompactViewToggleButton.ToolTip = isCompact ? "Expand Match View" : "Compact View";
+        AnimateCompactTransition(isCompact);
+        UpdatePlaybackControls();
+
+        if (resizeWindow)
+        {
+            ApplyCompactWindowSize(isCompact);
+        }
+    }
+
+    private void AnimateCompactTransition(bool isCompact)
+    {
+        var duration = TimeSpan.FromMilliseconds(180);
+        var targetScale = 1.0;
+        ScoreboardScaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, new DoubleAnimation(targetScale, duration));
+        ScoreboardScaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, new DoubleAnimation(targetScale, duration));
+        LiveTrackerPanel.BeginAnimation(OpacityProperty, new DoubleAnimation(0.92, 1.0, duration));
+    }
+
+    private void ApplyCompactWindowSize(bool isCompact)
+    {
+        var window = Window.GetWindow(this);
+        if (window is null)
+        {
+            return;
+        }
+
+        if (!isCompact)
+        {
+            RestoreExpandedWindowSize();
+            return;
+        }
+
+        if (!_hasStoredExpandedWindowSize)
+        {
+            _expandedWindowWidth = window.Width;
+            _expandedWindowMinWidth = window.MinWidth;
+            _expandedWindowState = window.WindowState;
+            _hasStoredExpandedWindowSize = true;
+        }
+
+        if (window.WindowState == WindowState.Maximized)
+        {
+            window.WindowState = WindowState.Normal;
+        }
+
+        window.MinWidth = CompactLiveViewMinWidth;
+        window.Width = CompactLiveViewWidth;
+    }
+
+    private void RestoreExpandedWindowSize()
+    {
+        var window = Window.GetWindow(this);
+        if (window is null || !_hasStoredExpandedWindowSize)
+        {
+            return;
+        }
+
+        window.MinWidth = _expandedWindowMinWidth;
+        window.Width = Math.Max(_expandedWindowWidth, _expandedWindowMinWidth);
+        window.WindowState = _expandedWindowState;
+        _hasStoredExpandedWindowSize = false;
     }
 
     private bool InitializeLiveMatchContext()
@@ -178,6 +281,9 @@ public partial class MatchLiveView : UserControl
         ContinueButton.Content = _isSecondHalf ? "End" : "Continue";
         ContinueButton.Visibility = Visibility.Collapsed;
         ContinueButton.IsEnabled = false;
+        CompactContinueButton.Content = ContinueButton.Content;
+        CompactContinueButton.Visibility = Visibility.Collapsed;
+        CompactContinueButton.IsEnabled = false;
     }
 
     private async Task ResumePlaybackAsync()
@@ -284,6 +390,8 @@ public partial class MatchLiveView : UserControl
         await Dispatcher.InvokeAsync(() => { }, System.Windows.Threading.DispatcherPriority.Render);
         RecordDisplayedPitchStats(matchEvent);
         RecordDisplayedPitchRating(matchEvent);
+        SyncLivePlayerStaminaForActivePlayers();
+        _lastDisplayedEventType = matchEvent.EventType;
         if (ShouldRefreshPitchAfterEvent(matchEvent.EventType))
         {
             RefreshPlayerPanels();
@@ -308,6 +416,11 @@ public partial class MatchLiveView : UserControl
             return;
         }
 
+        if (IsSubstitutionStoppageEvent(matchEvent.EventType))
+        {
+            TryCommitPendingSubstitution();
+        }
+
         await Task.Delay(GetDelayFor(feedItem), cancellationToken);
     }
 
@@ -326,6 +439,9 @@ public partial class MatchLiveView : UserControl
 
         ContinueButton.Visibility = Visibility.Visible;
         ContinueButton.IsEnabled = true;
+        CompactContinueButton.Content = ContinueButton.Content;
+        CompactContinueButton.Visibility = Visibility.Visible;
+        CompactContinueButton.IsEnabled = true;
         UpdatePlaybackControls();
         await Task.CompletedTask;
     }
@@ -443,7 +559,7 @@ public partial class MatchLiveView : UserControl
         }
         else if (HasPendingSubstitution())
         {
-            PausedActionStatusTextBlock.Text = "Queued substitutions confirm on resume.";
+            PausedActionStatusTextBlock.Text = "Queued substitutions will be made at the next stoppage.";
             PausedActionStatusTextBlock.Visibility = Visibility.Visible;
         }
         else
@@ -683,6 +799,13 @@ public partial class MatchLiveView : UserControl
 
         var draggedSlot = PositionSuitabilityService.NormalizeExactPosition(draggedPitchPlayer.ExactPosition);
         var targetSlot = PositionSuitabilityService.NormalizeExactPosition(targetPitchPlayer.ExactPosition);
+        if ((targetSlot == "GK" && !PositionSuitabilityService.IsGoalkeeperCapable(draggedPlayer)) ||
+            (draggedSlot == "GK" && !PositionSuitabilityService.IsGoalkeeperCapable(targetPlayer)))
+        {
+            PausedActionStatusTextBlock.Text = "Only a goalkeeper-capable player can occupy the GK slot.";
+            return;
+        }
+
         var draggedIndex = userTeam.Players.IndexOf(draggedPlayer);
         var targetIndex = userTeam.Players.IndexOf(targetPlayer);
         if (draggedIndex < 0 || targetIndex < 0)
@@ -868,7 +991,7 @@ public partial class MatchLiveView : UserControl
         _pendingSubstitutions.Add(new PendingSubstitutionViewModel(substitute, starter));
         PausedActionStatusTextBlock.Text = HasMandatoryInjurySubstitution()
             ? $"{starter.Name} injury replacement queued. Resume to confirm."
-            : "Queued substitutions confirm on resume.";
+            : "Substitution queued. It will be made at the next stoppage.";
         RefreshPausedSubstitutionViews();
         UpdatePlaybackControls();
         return true;
@@ -889,6 +1012,13 @@ public partial class MatchLiveView : UserControl
 
         var userTeam = GetUserTeam();
         var pendingSubstitutions = _pendingSubstitutions.ToList();
+        if (!CanApplyPendingSubstitutionNow())
+        {
+            PausedActionStatusTextBlock.Text = "Substitution pending until the next stoppage.";
+            RefreshPausedSubstitutionViews();
+            return true;
+        }
+
         if (pendingSubstitutions.Count > GetUserSubstitutionsLeft())
         {
             PausedActionStatusTextBlock.Text = "Not enough substitutions remaining for the queued changes.";
@@ -937,11 +1067,7 @@ public partial class MatchLiveView : UserControl
             ApplyManualSubstitutionImpact(starter, substitute);
             _state.CurrentMatch.SuperSubBoosts[substitute.Name] = minute + 10;
 
-            var substitutionEvent = _matchEventFactory.CreateSubstitution(
-                minute,
-                userTeam,
-                starter,
-                substitute);
+            var substitutionEvent = CreateManualSubstitutionEvent(minute, userTeam, starter, substitute);
             _state.CurrentMatch.Events.Add(substitutionEvent);
             InsertFeedItemAtTop(CreateFeedItem(substitutionEvent, _state.CurrentMatch));
             UpdateLiveStatusFromEvent(substitutionEvent);
@@ -956,9 +1082,48 @@ public partial class MatchLiveView : UserControl
         return true;
     }
 
+    private MatchEvent CreateManualSubstitutionEvent(int minute, Team userTeam, Player starter, Player substitute)
+    {
+        return _lastDisplayedEventType.HasValue
+            ? _matchEventFactory.CreateStoppageSubstitution(minute, userTeam, starter, substitute, _lastDisplayedEventType.Value)
+            : _matchEventFactory.CreateSubstitution(minute, userTeam, starter, substitute);
+    }
+
+    private bool CanApplyPendingSubstitutionNow()
+    {
+        if (HasMandatoryInjurySubstitution())
+        {
+            return true;
+        }
+
+        return _state.CurrentMatch?.CurrentPhase == MatchPhase.Halftime ||
+            IsSubstitutionStoppageEvent(_lastDisplayedEventType);
+    }
+
     private bool HasPendingSubstitution()
     {
         return _pendingSubstitutions.Count > 0;
+    }
+
+    private static bool IsSubstitutionStoppageEvent(EventType? eventType)
+    {
+        return eventType is EventType.Halftime
+            or EventType.Injury
+            or EventType.Foul
+            or EventType.PenaltyDecision
+            or EventType.PenaltyTaker
+            or EventType.Penalty
+            or EventType.Offside
+            or EventType.CornerKick
+            or EventType.SetPieceDanger
+            or EventType.Goal
+            or EventType.WonderGoal
+            or EventType.VarCheck
+            or EventType.VarDecision
+            or EventType.YellowCard
+            or EventType.RedCard
+            or EventType.RefereeControversy
+            or EventType.Confrontation;
     }
 
     private void ClearPendingSubstitutions()
@@ -1029,6 +1194,11 @@ public partial class MatchLiveView : UserControl
         }
 
         PositionSuitabilityService.EnsurePositionMetadata(player);
+        if (normalizedPosition == "GK")
+        {
+            return PositionSuitabilityService.IsGoalkeeperCapable(player);
+        }
+
         return string.Equals(player.PreferredPosition, normalizedPosition, StringComparison.OrdinalIgnoreCase) ||
             player.SecondaryPositions.Any(position =>
                 string.Equals(PositionSuitabilityService.NormalizeExactPosition(position), normalizedPosition, StringComparison.OrdinalIgnoreCase));
@@ -1143,6 +1313,13 @@ public partial class MatchLiveView : UserControl
         PauseResumeButton.IsEnabled = isMatchActive && !isOverlayActive && !isMandatoryInjurySubPending;
         DecreaseSpeedButton.IsEnabled = _speedLevel > MinSpeedLevel;
         IncreaseSpeedButton.IsEnabled = _speedLevel < MaxSpeedLevel;
+        CompactPauseResumeButton.Content = PauseResumeButton.Content;
+        CompactPauseResumeButton.IsEnabled = PauseResumeButton.IsEnabled;
+        CompactDecreaseSpeedButton.IsEnabled = DecreaseSpeedButton.IsEnabled;
+        CompactIncreaseSpeedButton.IsEnabled = IncreaseSpeedButton.IsEnabled;
+        CompactContinueButton.Content = ContinueButton.Content;
+        CompactContinueButton.Visibility = ContinueButton.Visibility;
+        CompactContinueButton.IsEnabled = ContinueButton.IsEnabled;
         PausedActionPanel.Visibility = Visibility.Visible;
         PausedActionPanel.IsEnabled = _isPlaybackPaused;
         PausedActionPanel.Opacity = _isPlaybackPaused ? 1.0 : 0.42;
@@ -1177,8 +1354,11 @@ public partial class MatchLiveView : UserControl
     private void UpdateSpeedControls()
     {
         SpeedLevelTextBlock.Text = GetSpeedLevelText(_speedLevel);
+        CompactSpeedLevelTextBlock.Text = SpeedLevelTextBlock.Text;
         DecreaseSpeedButton.IsEnabled = _speedLevel > MinSpeedLevel;
         IncreaseSpeedButton.IsEnabled = _speedLevel < MaxSpeedLevel;
+        CompactDecreaseSpeedButton.IsEnabled = DecreaseSpeedButton.IsEnabled;
+        CompactIncreaseSpeedButton.IsEnabled = IncreaseSpeedButton.IsEnabled;
     }
 
     private void SaveSpeedLevelToState()
@@ -1212,7 +1392,7 @@ public partial class MatchLiveView : UserControl
             0 => "0.5x",
             1 => "1x",
             2 => "2x",
-            3 => "3x",
+            3 => "4x",
             _ => "1x"
         };
     }
@@ -1256,6 +1436,7 @@ public partial class MatchLiveView : UserControl
         }
 
         SyncLivePlayerRatings();
+        SyncLivePlayerStaminaForActivePlayers();
         foreach (var matchEvent in _state.CurrentMatch.Events)
         {
             RecordDisplayedPitchStats(matchEvent);
@@ -1487,7 +1668,27 @@ public partial class MatchLiveView : UserControl
         }
     }
 
-    private LivePlayerStats GetOrCreateLivePlayerStats(Team team, Player player, double fallbackRating = 6.0)
+    private void SyncLivePlayerStaminaForActivePlayers()
+    {
+        if (_state.CurrentMatch is null)
+        {
+            return;
+        }
+
+        SyncTeamLivePlayerStamina(_state.CurrentMatch.HomeTeam);
+        SyncTeamLivePlayerStamina(_state.CurrentMatch.AwayTeam);
+    }
+
+    private void SyncTeamLivePlayerStamina(Team team)
+    {
+        foreach (var player in team.Players.Where(player => player.IsOnPitch && !player.IsSentOff))
+        {
+            GetOrCreateLivePlayerStats(team, player, fallbackStamina: GetStaminaPercentage(player))
+                .SetStaminaPercent(GetStaminaPercentage(player));
+        }
+    }
+
+    private LivePlayerStats GetOrCreateLivePlayerStats(Team team, Player player, double fallbackRating = 6.0, int? fallbackStamina = null)
     {
         var playerId = CreatePlayerId(team, player);
         if (_livePlayerStatsById.TryGetValue(playerId, out var stats))
@@ -1502,6 +1703,7 @@ public partial class MatchLiveView : UserControl
             PlayerName = player.Name
         };
         stats.SetCurrentRating(fallbackRating);
+        stats.SetStaminaPercent(fallbackStamina ?? GetStaminaPercentage(player));
         _livePlayerStatsById[playerId] = stats;
         return stats;
     }
@@ -1545,10 +1747,43 @@ public partial class MatchLiveView : UserControl
             .Where(player => player.IsOnPitch && !player.IsSentOff)
             .ToList();
 
-        for (var index = 0; index < players.Count && index < formationPositions.Count; index++)
+        foreach (var assignment in CreatePitchSlotAssignments(players, formationPositions))
         {
-            yield return CreatePitchIcon(team, players[index], formationPositions[index], isHomeTeam, pitchWidth, pitchHeight);
+            yield return CreatePitchIcon(team, assignment.Player, assignment.Position, isHomeTeam, pitchWidth, pitchHeight);
         }
+    }
+
+    private static List<PitchSlotAssignment> CreatePitchSlotAssignments(
+        IReadOnlyList<Player> players,
+        IReadOnlyList<PitchPosition> formationPositions)
+    {
+        var remainingPlayers = players.ToList();
+        var assignments = new List<PitchSlotAssignment>();
+        foreach (var position in formationPositions)
+        {
+            var selectedPlayer = SelectPlayerForSlot(remainingPlayers, position.ExactPosition);
+            if (selectedPlayer is null)
+            {
+                continue;
+            }
+
+            assignments.Add(new PitchSlotAssignment(selectedPlayer, position));
+            remainingPlayers.Remove(selectedPlayer);
+        }
+
+        return assignments;
+    }
+
+    private static Player? SelectPlayerForSlot(List<Player> remainingPlayers, string exactPosition)
+    {
+        var normalizedSlot = PositionSuitabilityService.NormalizeExactPosition(exactPosition);
+        if (normalizedSlot == "GK")
+        {
+            return remainingPlayers.FirstOrDefault(PositionSuitabilityService.IsGoalkeeperCapable);
+        }
+
+        return remainingPlayers.FirstOrDefault(player => !PositionSuitabilityService.IsGoalkeeperCapable(player)) ??
+            remainingPlayers.FirstOrDefault();
     }
 
     private LivePlayerIconViewModel CreatePitchIcon(
@@ -1562,14 +1797,15 @@ public partial class MatchLiveView : UserControl
         PositionSuitabilityService.EnsurePositionMetadata(player, formationPosition.ExactPosition);
         var performance = _state.CurrentMatch?.PlayerPerformances
             .FirstOrDefault(existing => existing.TeamName == team.Name && existing.PlayerName == player.Name);
-        var stamina = GetStaminaPercentage(player);
+        var currentStamina = GetStaminaPercentage(player);
         var (xRatio, yRatio) = GetLivePitchPosition(formationPosition, isHomeTeam);
         var x = Math.Clamp((pitchWidth * xRatio) - (PlayerIconSlotWidth / 2), 4, Math.Max(4, pitchWidth - PlayerIconSlotWidth - 4));
         var y = Math.Clamp((pitchHeight * yRatio) - (PlayerIconSlotHeight / 2), 4, Math.Max(4, pitchHeight - PlayerIconSlotHeight - 4));
         var playerId = CreatePlayerId(team, player);
         var playerKey = playerId;
-        var liveStats = GetOrCreateLivePlayerStats(team, player, performance?.Rating ?? 6.0);
+        var liveStats = GetOrCreateLivePlayerStats(team, player, performance?.Rating ?? 6.0, currentStamina);
         var displayedStats = GetDisplayedPitchStats(playerKey);
+        var stamina = liveStats.StaminaPercent;
         var status = GetPlayerStatus(stamina, displayedStats);
         var yellowCards = displayedStats.YellowCards;
         var redCards = displayedStats.RedCards;
@@ -1587,7 +1823,7 @@ public partial class MatchLiveView : UserControl
             LiveStats = liveStats,
             ShirtNumberText = player.SquadNumber > 0 ? player.SquadNumber.ToString() : string.Empty,
             Initials = GetInitials(player.Name),
-            PositionText = player.AssignedPosition,
+            PositionText = formationPosition.ExactPosition,
             ExactPosition = formationPosition.ExactPosition,
             TeamSide = isHomeTeam ? "Home" : "Away",
             X = x,
@@ -1601,8 +1837,6 @@ public partial class MatchLiveView : UserControl
             RatingBadgeBackground = ratingBadgeColors.Background,
             RatingBadgeForeground = ratingBadgeColors.Foreground,
             RatingBadgeBorderBrush = ratingBadgeColors.Border,
-            Stamina = stamina,
-            StaminaBrush = GetStaminaBrush(stamina),
             Goals = displayedStats.Goals,
             Assists = displayedStats.Assists,
             DefensiveContributions = displayedStats.DefensiveContributions,
@@ -1624,7 +1858,7 @@ public partial class MatchLiveView : UserControl
             CardsText = yellowCards == 0 && redCards == 0 ? "None" : $"Y{yellowCards} R{redCards}",
             InjuryStatusText = displayedStats.Injuries > 0 ? "Injured" : "Fit",
             FormText = PlayerFormStatusService.ToDisplayText(player.FormStatus),
-            StaminaText = $"{Math.Round(player.Stamina):0}%",
+            StaminaText = $"{stamina:0}%",
             MatchStatusText = status.Text,
             TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits),
             CardStatusBadges = PlayerCardStatusBadgeHelper.Create(yellowCards, redCards)
@@ -2951,13 +3185,18 @@ public partial class MatchLiveView : UserControl
             EventType.Turnover => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "gets the ball", $"{teamName} regain possession"),
             EventType.DefensiveStop => CreateDefensiveHeadline(matchEvent),
             EventType.DefensiveError => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "makes defensive error", $"{teamName} make error"),
+            EventType.Woodwork => CreateWoodworkHeadline(matchEvent, teamName),
             EventType.WonderGoal => CreateWonderGoalHeadline(matchEvent, teamName),
             EventType.GoalkeeperHeroics => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "keeps them alive", "Goalkeeper heroics"),
+            EventType.GoalkeeperMistake => CreateGoalkeeperMistakeHeadline(matchEvent),
             EventType.CornerKick => $"{teamName} win corner",
             EventType.SetPieceDanger => $"{teamName} threaten from set piece",
             EventType.Confrontation => "Players clash",
             EventType.CrowdMomentum => $"{teamName} gain momentum",
-            EventType.VarCheck => "VAR review",
+            EventType.LateDrama => $"{teamName} push late",
+            EventType.RivalryAtmosphere => "Derby tension rises",
+            EventType.Weather => "Weather affects play",
+            EventType.VarCheck => "VAR checking incident",
             EventType.VarDecision => IsGoalDisallowedEvent(matchEvent)
                 ? "Goal ruled out"
                 : "VAR decision",
@@ -2965,13 +3204,13 @@ public partial class MatchLiveView : UserControl
                 ? "Referee warning"
                 : "Referee controversy",
             EventType.Exhaustion => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "looks exhausted", "Stamina dropping"),
-            EventType.Substitution => "Substitution",
+            EventType.Substitution => CreateSubstitutionHeadline(matchEvent),
             EventType.Halftime => "Halftime",
-            EventType.Fulltime => "Fulltime",
+            EventType.Fulltime => "Full time",
             EventType.Miss => IsPenaltyResult(matchEvent)
                 ? CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "misses penalty", $"{teamName} miss penalty")
                 : CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "misses chance", $"{teamName} miss chance"),
-            _ => "Match event"
+            _ => "Match Event"
         };
 
         return LimitHeadlineWords(headline, 8);
@@ -3144,6 +3383,51 @@ public partial class MatchLiveView : UserControl
         return "Important save";
     }
 
+    private static string CreateWoodworkHeadline(MatchEvent matchEvent, string teamName)
+    {
+        var description = matchEvent.Description;
+        if (description.Contains("crossbar", StringComparison.OrdinalIgnoreCase) ||
+            description.Contains("bar", StringComparison.OrdinalIgnoreCase))
+        {
+            return CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "rattles crossbar", $"{teamName} rattle crossbar");
+        }
+
+        if (description.Contains("post", StringComparison.OrdinalIgnoreCase))
+        {
+            return CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "hits the post", $"{teamName} hit the post");
+        }
+
+        if (description.Contains("denies", StringComparison.OrdinalIgnoreCase))
+        {
+            return CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "denied by woodwork", $"Woodwork denies {teamName}");
+        }
+
+        if (description.Contains("rebound", StringComparison.OrdinalIgnoreCase) ||
+            description.Contains("chaos", StringComparison.OrdinalIgnoreCase))
+        {
+            return $"{teamName} denied by woodwork";
+        }
+
+        return CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "hits woodwork", $"{teamName} hit woodwork");
+    }
+
+    private static string CreateGoalkeeperMistakeHeadline(MatchEvent matchEvent)
+    {
+        var description = matchEvent.Description;
+        if (description.Contains("spill", StringComparison.OrdinalIgnoreCase))
+        {
+            return CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "spills the ball", "Keeper spills the ball");
+        }
+
+        if (description.Contains("pass", StringComparison.OrdinalIgnoreCase) ||
+            description.Contains("miskick", StringComparison.OrdinalIgnoreCase))
+        {
+            return CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "misplaces pass", "Keeper makes mistake");
+        }
+
+        return CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "makes a mistake", "Keeper makes mistake");
+    }
+
     private static string CreateGoalHeadline(MatchEvent matchEvent, string teamName)
     {
         if (IsHatTrickGoalEvent(matchEvent))
@@ -3199,6 +3483,20 @@ public partial class MatchLiveView : UserControl
         }
 
         return $"{teamName} win penalty";
+    }
+
+    private static string CreateSubstitutionHeadline(MatchEvent matchEvent)
+    {
+        var playerIn = GetHeadlinePlayerName(matchEvent.PrimaryPlayerName);
+        var playerOut = GetHeadlinePlayerName(matchEvent.SecondaryPlayerName);
+        if (!string.IsNullOrWhiteSpace(playerIn) && !string.IsNullOrWhiteSpace(playerOut))
+        {
+            return $"{playerIn} replaces {playerOut}";
+        }
+
+        return string.IsNullOrWhiteSpace(playerIn)
+            ? "Substitution made"
+            : $"{playerIn} comes on";
     }
 
     private static string CreatePlayerHeadline(string? playerName, string action, string fallback)
@@ -3299,7 +3597,7 @@ public partial class MatchLiveView : UserControl
             EventType.YellowCard => YellowCardStyle(YellowCardIcon(), "YELLOW CARD"),
             EventType.RedCard => RedCardStyle(RedCardIcon(), "RED CARD"),
             EventType.Injury => FoulStyle(InjuryIcon(), "INJURY"),
-            EventType.PenaltyDecision => ChanceStyle(GoalNetIcon(), "PENALTY DECISION"),
+            EventType.PenaltyDecision => VarStyle(GoalNetIcon(), "PENALTY DECISION"),
             EventType.PenaltyTaker => ChanceStyle(TargetIcon(), "PENALTY TAKER"),
             EventType.Penalty => ChanceStyle(GoalNetIcon(), "PENALTY"),
             EventType.Offside => MissStyle(FlagIcon(), "OFFSIDE"),
@@ -3616,10 +3914,10 @@ public partial class MatchLiveView : UserControl
     {
         return staminaPercentage switch
         {
-            < 20 => "#EF4444",
-            < 35 => "#FB923C",
-            < 60 => "#FACC15",
-            _ => "#7CFC9A"
+            < 30 => "#EF4444",
+            < 50 => "#FB923C",
+            <= 70 => "#FACC15",
+            _ => "#86EFAC"
         };
     }
 

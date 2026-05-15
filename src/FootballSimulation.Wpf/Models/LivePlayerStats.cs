@@ -6,7 +6,10 @@ namespace FootballSimulation.Wpf.Models;
 
 public sealed class LivePlayerStats : INotifyPropertyChanged
 {
+    private const double PitchStaminaBarWidth = 42;
+
     private double _currentRating = 6.0;
+    private int _staminaPercent = 100;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -36,10 +39,41 @@ public sealed class LivePlayerStats : INotifyPropertyChanged
     public string RatingDisplay => RatingDisplayHelper.CreateRatingText(CurrentRating);
     public string RatingBrush => RatingDisplayHelper.GetRatingBrush(CurrentRating);
     public string RatingForeground => RatingDisplayHelper.GetRatingForeground(CurrentRating);
+    public int StaminaPercent
+    {
+        get => _staminaPercent;
+        private set
+        {
+            var normalizedStamina = Math.Clamp(value, 0, 100);
+            if (_staminaPercent == normalizedStamina)
+            {
+                return;
+            }
+
+            _staminaPercent = normalizedStamina;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(StaminaBarWidth));
+            OnPropertyChanged(nameof(StaminaBrush));
+        }
+    }
+
+    public double StaminaBarWidth => PitchStaminaBarWidth;
+    public string StaminaBrush => StaminaPercent switch
+    {
+        < 30 => "#EF4444",
+        < 50 => "#FB923C",
+        <= 70 => "#FACC15",
+        _ => "#86EFAC"
+    };
 
     public void SetCurrentRating(double rating)
     {
         CurrentRating = rating;
+    }
+
+    public void SetStaminaPercent(int staminaPercent)
+    {
+        StaminaPercent = staminaPercent;
     }
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)

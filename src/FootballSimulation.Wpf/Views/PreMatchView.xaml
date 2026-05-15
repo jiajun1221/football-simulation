@@ -297,7 +297,8 @@
                     CornerRadius="10"
                     Padding="7"
                     Margin="0,0,0,7"
-                    Opacity="0.72">
+                    Opacity="0.72"
+                    ToolTip="{Binding Tooltip}">
                 <StackPanel>
                     <TextBlock Text="{Binding Name}"
                                Foreground="{DynamicResource FeedAttackLabelForeground}"
@@ -653,7 +654,7 @@
                         </ListBox>
                         <TextBlock x:Name="InjuredPlayersTitleTextBlock"
                                    Grid.Row="2"
-                                   Text="Injured Players"
+                                   Text="Unavailable Players"
                                    Foreground="#FFD1D1"
                                    FontSize="14"
                                    FontWeight="Bold"

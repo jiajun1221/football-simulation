@@ -31,6 +31,8 @@ public partial class PreMatchView : UserControl
     private bool _isDraggingPlayer;
     private bool _isLoadingSetup;
 
+    private sealed record PitchSlotAssignment(Player Player, PitchPosition Position);
+
     public PreMatchView(GameFlowState state, Action<UserControl> navigate)
     {
         InitializeComponent();
@@ -51,7 +53,8 @@ public partial class PreMatchView : UserControl
         _isLoadingSetup = true;
 
         FixtureTextBlock.Text = $"{_state.CurrentFixture.HomeTeam.Name} vs {_state.CurrentFixture.AwayTeam.Name}";
-        ReconcileUnavailablePlayers(_state.SelectedTeam);
+        var goalkeeperValidation = ReconcileUnavailablePlayers(_state.SelectedTeam);
+        ShowGoalkeeperWarningIfNeeded(goalkeeperValidation);
         LoadFormationSelector(_state.SelectedTeam);
         LoadTactics(_state.SelectedTeam.Tactics);
         InitializePitchSlots();
@@ -76,7 +79,7 @@ public partial class PreMatchView : UserControl
         AssignFormationPositions();
     }
 
-    private static void ReconcileUnavailablePlayers(Team team)
+    private static LineupValidationResult ReconcileUnavailablePlayers(Team team)
     {
         var unavailableStarters = team.Players
             .Where(player => !IsAvailableForSelection(player))
@@ -108,6 +111,8 @@ public partial class PreMatchView : UserControl
             replacement.IsStarter = true;
             replacement.IsOnPitch = true;
         }
+
+        return LineupValidationService.RepairGoalkeeperSlot(team);
     }
 
     private void LoadFormationSelector(Team team)
@@ -141,11 +146,11 @@ public partial class PreMatchView : UserControl
         var positions = _formationLayoutService.GetPositions(formation);
         AssignFormationPositions(positions);
 
-        for (var index = 0; index < _pitchSlots.Count && index < positions.Count; index++)
+        foreach (var assignment in CreatePitchSlotAssignments(_pitchSlots, positions))
         {
-            var player = _pitchSlots[index];
-            var position = positions[index];
-            var button = CreatePlayerButton(player);
+            var player = assignment.Player;
+            var position = assignment.Position;
+            var button = CreatePlayerButton(player, position.ExactPosition);
 
             Canvas.SetLeft(button, GetClampedCanvasPosition(PitchCanvas.ActualWidth, position.X, PitchCardWidth));
             Canvas.SetTop(button, GetClampedCanvasPosition(PitchCanvas.ActualHeight, position.Y, PitchCardHeight));
@@ -164,8 +169,44 @@ public partial class PreMatchView : UserControl
 
         for (var index = 0; index < _pitchSlots.Count && index < positions.Count; index++)
         {
-            PositionSuitabilityService.EnsurePositionMetadata(_pitchSlots[index], positions[index].ExactPosition);
+            if (CanPlayerOccupySlot(_pitchSlots[index], positions[index].ExactPosition))
+            {
+                PositionSuitabilityService.EnsurePositionMetadata(_pitchSlots[index], positions[index].ExactPosition);
+            }
         }
+    }
+
+    private static List<PitchSlotAssignment> CreatePitchSlotAssignments(
+        IReadOnlyList<Player> players,
+        IReadOnlyList<PitchPosition> positions)
+    {
+        var remainingPlayers = players.Where(IsAvailableForSelection).ToList();
+        var assignments = new List<PitchSlotAssignment>();
+        foreach (var position in positions)
+        {
+            var selectedPlayer = SelectPlayerForSlot(remainingPlayers, position.ExactPosition);
+            if (selectedPlayer is null)
+            {
+                continue;
+            }
+
+            assignments.Add(new PitchSlotAssignment(selectedPlayer, position));
+            remainingPlayers.Remove(selectedPlayer);
+        }
+
+        return assignments;
+    }
+
+    private static Player? SelectPlayerForSlot(List<Player> remainingPlayers, string exactPosition)
+    {
+        var normalizedSlot = PositionSuitabilityService.NormalizeExactPosition(exactPosition);
+        if (normalizedSlot == "GK")
+        {
+            return remainingPlayers.FirstOrDefault(PositionSuitabilityService.IsGoalkeeperCapable);
+        }
+
+        return remainingPlayers.FirstOrDefault(player => !PositionSuitabilityService.IsGoalkeeperCapable(player)) ??
+            remainingPlayers.FirstOrDefault();
     }
 
     private static double GetClampedCanvasPosition(double canvasSize, double normalizedPosition, double elementSize)
@@ -174,9 +215,9 @@ public partial class PreMatchView : UserControl
         return Math.Clamp(rawPosition, 4, Math.Max(4, canvasSize - elementSize - 4));
     }
 
-    private Button CreatePlayerButton(Player player)
+    private Button CreatePlayerButton(Player player, string displayedPosition)
     {
-        var card = CreatePitchPlayerCard(player);
+        var card = CreatePitchPlayerCard(player, displayedPosition);
         var button = new Button
         {
             Width = PitchCardWidth,
@@ -209,7 +250,7 @@ public partial class PreMatchView : UserControl
         return button;
     }
 
-    private PitchPlayerCard CreatePitchPlayerCard(Player player)
+    private PitchPlayerCard CreatePitchPlayerCard(Player player, string displayedPosition)
     {
         PositionSuitabilityService.EnsurePositionMetadata(player);
         var form = PlayerFormBadgeHelper.Create(player.FormStatus);
@@ -234,7 +275,7 @@ public partial class PreMatchView : UserControl
             ShirtNumberValue = player.SquadNumber > 0 ? player.SquadNumber.ToString() : string.Empty,
             PlayerImagePath = GetPlayerImagePath(player),
             PlayerName = player.Name,
-            PositionText = player.AssignedPosition,
+            PositionText = displayedPosition,
             OverallText = $"OVR {ratingVisual.Rating}",
             OverallForeground = player.IsInjured ? ratingVisual.Foreground : textForeground,
             TextForeground = textForeground,
@@ -355,9 +396,11 @@ public partial class PreMatchView : UserControl
 
         var injuredCards = _state.SelectedTeam.Players
             .Concat(_state.SelectedTeam.Substitutes)
-            .Where(player => player.IsInjured)
+            .Where(player => player.IsInjured || player.IsSuspended)
             .Distinct()
-            .Select(InjuredPlayerCard.Create)
+            .OrderByDescending(player => player.IsSuspended)
+            .ThenBy(player => player.SquadNumber <= 0 ? int.MaxValue : player.SquadNumber)
+            .Select(UnavailablePlayerCard.Create)
             .ToList();
 
         InjuredPlayersListBox.ItemsSource = injuredCards;
@@ -897,6 +940,15 @@ public partial class PreMatchView : UserControl
             return;
         }
 
+        var positions = _formationLayoutService.GetPositions(FormationComboBox.SelectedItem as string ?? _state.SelectedTeam.Formation);
+        var draggedTargetSlot = targetIndex < positions.Count ? positions[targetIndex].ExactPosition : string.Empty;
+        var targetTargetSlot = draggedIndex < positions.Count ? positions[draggedIndex].ExactPosition : string.Empty;
+        if (!CanPlayerOccupySlot(draggedPlayer, draggedTargetSlot) || !CanPlayerOccupySlot(targetPlayer, targetTargetSlot))
+        {
+            MessageBox.Show("Only a goalkeeper-capable player can occupy the GK slot.");
+            return;
+        }
+
         (_pitchSlots[draggedIndex], _pitchSlots[targetIndex]) = (_pitchSlots[targetIndex], _pitchSlots[draggedIndex]);
         _state.SelectedTeam.Players = _pitchSlots.ToList();
         AssignFormationPositions();
@@ -998,7 +1050,13 @@ public partial class PreMatchView : UserControl
             return;
         }
 
-        ReconcileUnavailablePlayers(_state.SelectedTeam);
+        var goalkeeperValidation = ReconcileUnavailablePlayers(_state.SelectedTeam);
+        if (!goalkeeperValidation.IsValid)
+        {
+            MessageBox.Show(goalkeeperValidation.Message ?? LineupValidationService.NoAvailableGoalkeeperMessage);
+            return;
+        }
+
         SaveSetup(_state.SelectedTeam);
         _navigate(new MatchLiveView(_state, _navigate, isSecondHalf: false));
     }
@@ -1022,6 +1080,7 @@ public partial class PreMatchView : UserControl
         foreach (var slot in formationSlots)
         {
             var selectedPlayer = remainingPlayers
+                .Where(player => CanPlayerOccupySlot(player, slot.ExactPosition))
                 .OrderByDescending(player => GetSlotFitScore(player, slot.ExactPosition))
                 .ThenByDescending(GetOverallRating)
                 .ThenBy(player => player.SquadNumber)
@@ -1059,6 +1118,20 @@ public partial class PreMatchView : UserControl
         return player.Position == GetGenericPositionForSlot(normalizedSlot) ? 600 : 100;
     }
 
+    private static bool CanPlayerOccupySlot(Player player, string exactPosition)
+    {
+        return PositionSuitabilityService.NormalizeExactPosition(exactPosition) != "GK" ||
+            PositionSuitabilityService.IsGoalkeeperCapable(player);
+    }
+
+    private static void ShowGoalkeeperWarningIfNeeded(LineupValidationResult result)
+    {
+        if (!result.IsValid)
+        {
+            MessageBox.Show(result.Message ?? LineupValidationService.NoAvailableGoalkeeperMessage);
+        }
+    }
+
     private static Position GetGenericPositionForSlot(string exactPosition)
     {
         return exactPosition switch
@@ -1076,26 +1149,47 @@ public partial class PreMatchView : UserControl
         return !player.IsInjured && !player.IsSuspended && !player.IsSentOff;
     }
 
-    private sealed class InjuredPlayerCard
+    private static string RedCardIcon()
+    {
+        return char.ConvertFromUtf32(0x1F7E5);
+    }
+
+    private sealed class UnavailablePlayerCard
     {
         public string Name { get; init; } = string.Empty;
         public string InjuryType { get; init; } = string.Empty;
         public string RecoveryText { get; init; } = string.Empty;
+        public string Tooltip { get; init; } = string.Empty;
 
-        public static InjuredPlayerCard Create(Player player)
+        public static UnavailablePlayerCard Create(Player player)
         {
+            if (player.IsSuspended)
+            {
+                var matchesText = player.SuspendedMatches == 1
+                    ? "1 match"
+                    : $"{player.SuspendedMatches} matches";
+                return new UnavailablePlayerCard
+                {
+                    Name = $"{RedCardIcon()} {player.Name}",
+                    InjuryType = "SUSPENDED",
+                    RecoveryText = $"Suspended ({matchesText})",
+                    Tooltip = $"Unavailable - suspended for {matchesText}"
+                };
+            }
+
             var severity = player.InjurySeverity?.ToString() ?? "Injury";
             var recoveryText = player.IsSeasonEndingInjury
                 ? "Recovery: Season"
                 : $"Recovery: {Math.Max(1, player.InjuryRecoveryMatches)} Matches";
 
-            return new InjuredPlayerCard
+            return new UnavailablePlayerCard
             {
                 Name = $"X {player.Name}",
                 InjuryType = string.IsNullOrWhiteSpace(player.InjuryType)
                     ? severity
                     : $"{player.InjuryType} | {severity}",
-                RecoveryText = recoveryText
+                RecoveryText = recoveryText,
+                Tooltip = recoveryText
             };
         }
     }

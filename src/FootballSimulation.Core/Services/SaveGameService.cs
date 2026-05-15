@@ -237,6 +237,11 @@ public class SaveGameService
 
     private static void RehydrateReferences(SaveGameData data)
     {
+        foreach (var team in data.Teams)
+        {
+            _ = LineupValidationService.RepairGoalkeeperSlot(team);
+        }
+
         var teamsByName = data.Teams
             .GroupBy(team => team.Name, StringComparer.OrdinalIgnoreCase)
             .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);

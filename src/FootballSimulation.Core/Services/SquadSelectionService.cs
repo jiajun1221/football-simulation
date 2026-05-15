@@ -38,6 +38,13 @@ public class SquadSelectionService
             return SquadSwapResult.Failed("Unavailable players cannot be used as substitutes.");
         }
 
+        PositionSuitabilityService.EnsurePositionMetadata(starter);
+        if (string.Equals(starter.AssignedPosition, "GK", StringComparison.OrdinalIgnoreCase) &&
+            !PositionSuitabilityService.IsGoalkeeperCapable(substitute))
+        {
+            return SquadSwapResult.Failed("Goalkeeper substitutions require a goalkeeper-capable replacement.");
+        }
+
         if (match is not null && substitutionMinute.HasValue &&
             CountTeamSubstitutions(match, team.Name) >= MatchConstants.MaxSubstitutionsPerTeam)
         {

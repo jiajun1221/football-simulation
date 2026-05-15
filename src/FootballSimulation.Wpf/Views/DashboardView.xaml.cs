@@ -90,6 +90,7 @@ public partial class DashboardView : UserControl
         }
 
         UpcomingFixturesItemsControl.ItemsSource = CreateUpcomingFixtureRows(_state.League, _state.SelectedTeam);
+        LoadUnavailablePlayers(_state.SelectedTeam);
     }
 
     private void PrepareMatchButton_Click(object sender, RoutedEventArgs e)
@@ -233,6 +234,55 @@ public partial class DashboardView : UserControl
             .OrderBy(result => result.RoundNumber)
             .Select(CreateResultBadge)
             .ToList();
+    }
+
+    private void LoadUnavailablePlayers(Team selectedTeam)
+    {
+        var unavailablePlayers = selectedTeam.Players
+            .Concat(selectedTeam.Substitutes)
+            .Where(player => player.IsSuspended || player.IsInjured)
+            .Distinct()
+            .OrderByDescending(player => player.IsSuspended)
+            .ThenBy(player => player.SquadNumber <= 0 ? int.MaxValue : player.SquadNumber)
+            .Select(CreateUnavailablePlayerRow)
+            .ToList();
+
+        UnavailablePlayersItemsControl.ItemsSource = unavailablePlayers;
+        UnavailablePlayersPanel.Visibility = unavailablePlayers.Count == 0
+            ? Visibility.Collapsed
+            : Visibility.Visible;
+    }
+
+    private static UnavailablePlayerRow CreateUnavailablePlayerRow(Player player)
+    {
+        if (player.IsSuspended)
+        {
+            var matchesText = player.SuspendedMatches == 1 ? "1 match" : $"{player.SuspendedMatches} matches";
+            return new UnavailablePlayerRow
+            {
+                Icon = RedCardIcon(),
+                Text = $"{player.Name} - Suspended ({matchesText})",
+                BadgeText = "SUSPENDED",
+                Tooltip = $"Unavailable - suspended for {matchesText}"
+            };
+        }
+
+        var recoveryText = player.IsSeasonEndingInjury
+            ? "season"
+            : player.InjuryRecoveryMatches == 1 ? "1 match" : $"{Math.Max(1, player.InjuryRecoveryMatches)} matches";
+
+        return new UnavailablePlayerRow
+        {
+            Icon = "+",
+            Text = $"{player.Name} - Injured ({recoveryText})",
+            BadgeText = "INJURED",
+            Tooltip = $"Unavailable - injured for {recoveryText}"
+        };
+    }
+
+    private static string RedCardIcon()
+    {
+        return char.ConvertFromUtf32(0x1F7E5);
     }
 
     private static List<UpcomingFixtureRow> CreateUpcomingFixtureRows(League league, Team selectedTeam)
@@ -462,6 +512,14 @@ public partial class DashboardView : UserControl
     {
         public string ResultType { get; init; } = string.Empty;
         public string BadgeBrush { get; init; } = "#9AA3AF";
+    }
+
+    private sealed class UnavailablePlayerRow
+    {
+        public string Icon { get; init; } = string.Empty;
+        public string Text { get; init; } = string.Empty;
+        public string BadgeText { get; init; } = string.Empty;
+        public string Tooltip { get; init; } = string.Empty;
     }
 
     private sealed class UpcomingFixtureRow

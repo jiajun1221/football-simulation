@@ -8,6 +8,8 @@ public class InjuryRecoveryService
     {
         foreach (var player in teams.SelectMany(team => team.Players.Concat(team.Substitutes)))
         {
+            AdvanceSuspension(player);
+
             if (!player.IsInjured)
             {
                 continue;
@@ -30,6 +32,23 @@ public class InjuryRecoveryService
                 ClearInjury(player);
             }
         }
+    }
+
+    private static void AdvanceSuspension(Player player)
+    {
+        if (player.SuspendedMatches <= 0)
+        {
+            player.NewlySuspendedThisMatch = false;
+            return;
+        }
+
+        if (player.NewlySuspendedThisMatch)
+        {
+            player.NewlySuspendedThisMatch = false;
+            return;
+        }
+
+        player.SuspendedMatches--;
     }
 
     private static void ClearInjury(Player player)

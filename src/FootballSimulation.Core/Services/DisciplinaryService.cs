@@ -16,6 +16,8 @@ public class DisciplinaryService
 
         player.IsSentOff = true;
         player.IsOnPitch = false;
+        player.SuspendedMatches += 1;
+        player.NewlySuspendedThisMatch = true;
         teamStats.RedCards++;
         return true;
     }

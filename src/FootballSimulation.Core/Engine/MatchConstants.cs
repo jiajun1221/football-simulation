@@ -16,8 +16,8 @@ public static class MatchConstants
     public const double MaximumShotChancePerMinute = 0.40;
     public const double ShotChanceDivisor = 220.0;
 
-    public const double GoalProbabilityBase = 0.10;
-    public const double MinimumGoalProbability = 0.05;
-    public const double MaximumGoalProbability = 0.45;
+    public const double GoalProbabilityBase = 0.06;
+    public const double MinimumGoalProbability = 0.025;
+    public const double MaximumGoalProbability = 0.38;
     public const double GoalProbabilityDivisor = 180.0;
 }

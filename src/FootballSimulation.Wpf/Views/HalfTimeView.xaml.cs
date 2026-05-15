@@ -32,6 +32,8 @@ public partial class HalfTimeView : UserControl
     private bool _isDraggingPlayer;
     private bool _isLoadingSetup;
 
+    private sealed record PitchSlotAssignment(Player Player, PitchPosition Position);
+
     public HalfTimeView(GameFlowState state, Action<UserControl> navigate)
     {
         InitializeComponent();
@@ -115,11 +117,11 @@ public partial class HalfTimeView : UserControl
         var positions = _formationLayoutService.GetPositions(formation);
         AssignFormationPositions(positions);
 
-        for (var index = 0; index < _pitchSlots.Count && index < positions.Count; index++)
+        foreach (var assignment in CreatePitchSlotAssignments(_pitchSlots, positions))
         {
-            var player = _pitchSlots[index];
-            var position = positions[index];
-            var button = CreatePlayerButton(player);
+            var player = assignment.Player;
+            var position = assignment.Position;
+            var button = CreatePlayerButton(player, position.ExactPosition);
 
             Canvas.SetLeft(button, GetClampedCanvasPosition(PitchCanvas.ActualWidth, position.X, PitchCardWidth));
             Canvas.SetTop(button, GetClampedCanvasPosition(PitchCanvas.ActualHeight, position.Y, PitchCardHeight));
@@ -138,8 +140,44 @@ public partial class HalfTimeView : UserControl
 
         for (var index = 0; index < _pitchSlots.Count && index < positions.Count; index++)
         {
-            PositionSuitabilityService.EnsurePositionMetadata(_pitchSlots[index], positions[index].ExactPosition);
+            if (CanPlayerOccupySlot(_pitchSlots[index], positions[index].ExactPosition))
+            {
+                PositionSuitabilityService.EnsurePositionMetadata(_pitchSlots[index], positions[index].ExactPosition);
+            }
         }
+    }
+
+    private static List<PitchSlotAssignment> CreatePitchSlotAssignments(
+        IReadOnlyList<Player> players,
+        IReadOnlyList<PitchPosition> positions)
+    {
+        var remainingPlayers = players.Where(IsActivePitchPlayer).ToList();
+        var assignments = new List<PitchSlotAssignment>();
+        foreach (var position in positions)
+        {
+            var selectedPlayer = SelectPlayerForSlot(remainingPlayers, position.ExactPosition);
+            if (selectedPlayer is null)
+            {
+                continue;
+            }
+
+            assignments.Add(new PitchSlotAssignment(selectedPlayer, position));
+            remainingPlayers.Remove(selectedPlayer);
+        }
+
+        return assignments;
+    }
+
+    private static Player? SelectPlayerForSlot(List<Player> remainingPlayers, string exactPosition)
+    {
+        var normalizedSlot = PositionSuitabilityService.NormalizeExactPosition(exactPosition);
+        if (normalizedSlot == "GK")
+        {
+            return remainingPlayers.FirstOrDefault(PositionSuitabilityService.IsGoalkeeperCapable);
+        }
+
+        return remainingPlayers.FirstOrDefault(player => !PositionSuitabilityService.IsGoalkeeperCapable(player)) ??
+            remainingPlayers.FirstOrDefault();
     }
 
     private static double GetClampedCanvasPosition(double canvasSize, double normalizedPosition, double elementSize)
@@ -148,9 +186,9 @@ public partial class HalfTimeView : UserControl
         return Math.Clamp(rawPosition, 4, Math.Max(4, canvasSize - elementSize - 4));
     }
 
-    private Button CreatePlayerButton(Player player)
+    private Button CreatePlayerButton(Player player, string displayedPosition)
     {
-        var card = CreatePitchPlayerCard(player);
+        var card = CreatePitchPlayerCard(player, displayedPosition);
         var button = new Button
         {
             Width = PitchCardWidth,
@@ -181,7 +219,7 @@ public partial class HalfTimeView : UserControl
         return button;
     }
 
-    private PitchPlayerCard CreatePitchPlayerCard(Player player)
+    private PitchPlayerCard CreatePitchPlayerCard(Player player, string displayedPosition)
     {
         PositionSuitabilityService.EnsurePositionMetadata(player);
         var form = PlayerFormBadgeHelper.Create(player.FormStatus);
@@ -199,7 +237,7 @@ public partial class HalfTimeView : UserControl
             ShirtNumberValue = player.SquadNumber > 0 ? player.SquadNumber.ToString() : string.Empty,
             PlayerImagePath = GetPlayerImagePath(player),
             PlayerName = player.Name,
-            PositionText = player.AssignedPosition,
+            PositionText = displayedPosition,
             OverallText = $"OVR {ratingVisual.Rating}",
             OverallForeground = textForeground,
             TextForeground = textForeground,
@@ -975,6 +1013,15 @@ public partial class HalfTimeView : UserControl
             return;
         }
 
+        var positions = _formationLayoutService.GetPositions(FormationComboBox.SelectedItem as string ?? _state.SelectedTeam.Formation);
+        var draggedTargetSlot = targetIndex < positions.Count ? positions[targetIndex].ExactPosition : string.Empty;
+        var targetTargetSlot = draggedIndex < positions.Count ? positions[draggedIndex].ExactPosition : string.Empty;
+        if (!CanPlayerOccupySlot(draggedPlayer, draggedTargetSlot) || !CanPlayerOccupySlot(targetPlayer, targetTargetSlot))
+        {
+            MessageBox.Show("Only a goalkeeper-capable player can occupy the GK slot.");
+            return;
+        }
+
         (_pitchSlots[draggedIndex], _pitchSlots[targetIndex]) = (_pitchSlots[targetIndex], _pitchSlots[draggedIndex]);
         SyncActivePitchSlotsIntoTeamPlayers();
         AssignFormationPositions();
@@ -1124,6 +1171,7 @@ public partial class HalfTimeView : UserControl
         foreach (var slot in formationSlots)
         {
             var selectedPlayer = remainingPlayers
+                .Where(player => CanPlayerOccupySlot(player, slot.ExactPosition))
                 .OrderByDescending(player => GetSlotFitScore(player, slot.ExactPosition))
                 .ThenByDescending(GetOverallRating)
                 .ThenBy(player => player.SquadNumber)
@@ -1159,6 +1207,12 @@ public partial class HalfTimeView : UserControl
         }
 
         return player.Position == GetGenericPositionForSlot(normalizedSlot) ? 600 : 100;
+    }
+
+    private static bool CanPlayerOccupySlot(Player player, string exactPosition)
+    {
+        return PositionSuitabilityService.NormalizeExactPosition(exactPosition) != "GK" ||
+            PositionSuitabilityService.IsGoalkeeperCapable(player);
     }
 
     private static Position GetGenericPositionForSlot(string exactPosition)
