@@ -6,6 +6,13 @@ namespace FootballSimulation.Engine;
 
 public class MatchEngine
 {
+    private const int CrowdMomentumCooldownMinutes = 12;
+    private const int MaxCrowdMomentumEventsPerTeam = 2;
+    private const int MaxCrowdMomentumEventsPerMatch = 3;
+    private const int FirstHalfMaximumAddedMinutes = 6;
+    private const int SecondHalfMaximumAddedMinutes = 10;
+    private const int ExtremeMaximumAddedMinutes = 12;
+
     private readonly TeamStrengthCalculator _teamStrengthCalculator;
     private readonly DisciplinaryService _disciplinaryService;
     private readonly TacticalImpactCalculator _tacticalImpactCalculator = new();
@@ -88,8 +95,8 @@ public class MatchEngine
         RunMatchMinutes(
             simulationState,
             CreateRandom(seed),
-            startMinute: MatchConstants.HalftimeMinute + 1,
-            endMinute: MatchConstants.DefaultMatchDurationMinutes,
+            startMinute: GetSecondHalfStartMinute(match),
+            endMinute: GetSecondHalfRegulationEndMinute(match),
             includeFulltime: true);
 
         FinalizeSimulationState(simulationState);
@@ -239,11 +246,13 @@ public class MatchEngine
         var homeTeam = match.HomeTeam;
         var awayTeam = match.AwayTeam;
         EnsureMatchWeather(simulationState, startMinute);
+        var isSingleMinuteAdvance = startMinute == endMinute;
+        var dynamicEndMinute = endMinute;
 
-        for (var minute = startMinute; minute <= endMinute; minute++)
+        for (var minute = startMinute; minute <= dynamicEndMinute; minute++)
         {
             UpdateMatchPhase(match, minute);
-            if (minute == MatchConstants.HalftimeMinute + 1)
+            if (minute == GetSecondHalfStartMinute(match))
             {
                 AddSecondHalfRestartEvents(simulationState, minute);
             }
@@ -254,11 +263,16 @@ public class MatchEngine
                 SetPossession(simulationState, homeTeam, BallState.Kickoff, EventType.Kickoff);
             }
 
+            AnnounceAddedTimeIfNeeded(simulationState, minute);
+            var eventsBeforeMinute = simulationState.MatchLog.GetEvents().Count;
+
             TryAddHomeCrowdPressureEvent(simulationState, random, minute);
+            TryAddTimeWastingEvent(simulationState, random, minute);
 
             var strengthSnapshot = CreateStrengthSnapshot(match, random);
             strengthSnapshot = ApplyWeatherModifiers(strengthSnapshot, match.WeatherCondition);
             strengthSnapshot = ApplyHomeCrowdMomentumModifiers(match, strengthSnapshot, minute);
+            strengthSnapshot = ApplyAddedTimePressureModifiers(match, strengthSnapshot, minute);
             if (match.WeatherCondition == WeatherCondition.Cold && minute <= 20)
             {
                 strengthSnapshot = strengthSnapshot with
@@ -308,17 +322,23 @@ public class MatchEngine
                 TryApplyAiManagerDecisions(simulationState, random, minute, stoppageType: simulationState.LastFeedEventType);
             }
 
-            if (minute == MatchConstants.HalftimeMinute)
+            if (minute == GetFirstHalfEndMinute(match))
             {
                 match.CurrentPhase = MatchPhase.Halftime;
                 simulationState.MatchLog.AddEvent(simulationState.EventFactory.CreateHalftime(minute, match));
                 TryApplyAiManagerDecisions(simulationState, random, minute, suppressFeedEvent: true);
             }
 
-            if (includeFulltime && minute == endMinute)
+            if (includeFulltime && minute == GetSecondHalfEndMinute(match))
             {
                 match.CurrentPhase = MatchPhase.Fulltime;
                 simulationState.MatchLog.AddEvent(simulationState.EventFactory.CreateFulltime(minute, match));
+            }
+
+            AddStoppageForNewEvents(simulationState, eventsBeforeMinute, random, minute);
+            if (!isSingleMinuteAdvance)
+            {
+                dynamicEndMinute = Math.Max(dynamicEndMinute, GetPhaseEndMinute(match, includeFulltime));
             }
 
             if (match.CurrentPhase != MatchPhase.Fulltime)
@@ -327,6 +347,131 @@ public class MatchEngine
                 ApplyMinuteFatigue(awayTeam, simulationState.Match, simulationState.Options);
             }
         }
+    }
+
+    private static void AnnounceAddedTimeIfNeeded(MatchSimulationState simulationState, int minute)
+    {
+        var match = simulationState.Match;
+        if (minute == MatchConstants.HalftimeMinute && !match.FirstHalfAddedTimeAnnounced)
+        {
+            match.FirstHalfAddedTimeAnnounced = true;
+            match.FirstHalfAddedMinutes = CalculateAddedMinutes(match.FirstHalfStoppageSeconds, isSecondHalf: false);
+            simulationState.MatchLog.AddEvent(simulationState.EventFactory.CreateAddedTimeAnnouncement(minute, match.FirstHalfAddedMinutes, isSecondHalf: false));
+        }
+
+        var secondHalfRegulationEnd = GetSecondHalfRegulationEndMinute(match);
+        if (minute == secondHalfRegulationEnd && !match.SecondHalfAddedTimeAnnounced)
+        {
+            match.SecondHalfAddedTimeAnnounced = true;
+            match.SecondHalfAddedMinutes = CalculateAddedMinutes(match.SecondHalfStoppageSeconds, isSecondHalf: true);
+            simulationState.MatchLog.AddEvent(simulationState.EventFactory.CreateAddedTimeAnnouncement(minute, match.SecondHalfAddedMinutes, isSecondHalf: true));
+        }
+    }
+
+    private static void AddStoppageForNewEvents(MatchSimulationState simulationState, int eventsBeforeMinute, Random random, int minute)
+    {
+        var newEvents = simulationState.MatchLog.GetEvents().Skip(eventsBeforeMinute).ToList();
+        foreach (var matchEvent in newEvents)
+        {
+            var seconds = GetStoppageSecondsForEvent(matchEvent, random);
+            if (seconds > 0)
+            {
+                AddStoppageSeconds(simulationState.Match, minute, seconds);
+            }
+        }
+    }
+
+    private static int GetStoppageSecondsForEvent(MatchEvent matchEvent, Random random)
+    {
+        return matchEvent.EventType switch
+        {
+            EventType.Goal or EventType.WonderGoal => random.Next(30, 61),
+            EventType.Substitution => random.Next(20, 41),
+            EventType.Injury => IsMajorInjury(matchEvent) ? random.Next(60, 181) : random.Next(30, 61),
+            EventType.VarCheck => random.Next(60, 181),
+            EventType.YellowCard or EventType.RedCard or EventType.Confrontation or EventType.RefereeControversy => random.Next(20, 61),
+            EventType.PenaltyDecision => random.Next(45, 91),
+            EventType.TimeWasting => random.Next(20, 91),
+            EventType.GoalkeeperHeroics when matchEvent.Description.Contains("treatment", StringComparison.OrdinalIgnoreCase) => random.Next(30, 91),
+            _ => 0
+        };
+    }
+
+    private static bool IsMajorInjury(MatchEvent matchEvent)
+    {
+        return matchEvent.Description.Contains("serious", StringComparison.OrdinalIgnoreCase) ||
+            matchEvent.Description.Contains("moderate", StringComparison.OrdinalIgnoreCase) ||
+            matchEvent.Description.Contains("medical", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static void AddStoppageSeconds(Match match, int minute, int seconds)
+    {
+        if (IsFirstHalfMinute(match, minute))
+        {
+            match.FirstHalfStoppageSeconds += seconds;
+            if (match.FirstHalfAddedTimeAnnounced)
+            {
+                match.FirstHalfAddedMinutes = Math.Max(match.FirstHalfAddedMinutes, CalculateAddedMinutes(match.FirstHalfStoppageSeconds, isSecondHalf: false));
+            }
+
+            return;
+        }
+
+        match.SecondHalfStoppageSeconds += seconds;
+        if (match.SecondHalfAddedTimeAnnounced)
+        {
+            match.SecondHalfAddedMinutes = Math.Max(match.SecondHalfAddedMinutes, CalculateAddedMinutes(match.SecondHalfStoppageSeconds, isSecondHalf: true));
+        }
+    }
+
+    private static int CalculateAddedMinutes(int stoppageSeconds, bool isSecondHalf)
+    {
+        var addedMinutes = (int)Math.Ceiling(stoppageSeconds / 60.0);
+        var minimum = isSecondHalf ? 1 : 0;
+        var usualMaximum = isSecondHalf ? SecondHalfMaximumAddedMinutes : FirstHalfMaximumAddedMinutes;
+        var extremeThresholdSeconds = isSecondHalf ? 11 * 60 : 7 * 60;
+        var maximum = addedMinutes > usualMaximum && stoppageSeconds >= extremeThresholdSeconds
+            ? ExtremeMaximumAddedMinutes
+            : usualMaximum;
+
+        return Math.Clamp(addedMinutes, minimum, maximum);
+    }
+
+    private static int GetFirstHalfEndMinute(Match match)
+    {
+        return MatchConstants.HalftimeMinute + match.FirstHalfAddedMinutes;
+    }
+
+    private static int GetSecondHalfStartMinute(Match match)
+    {
+        return GetFirstHalfEndMinute(match) + 1;
+    }
+
+    private static int GetSecondHalfRegulationEndMinute(Match match)
+    {
+        return MatchConstants.DefaultMatchDurationMinutes + match.FirstHalfAddedMinutes;
+    }
+
+    private static int GetSecondHalfEndMinute(Match match)
+    {
+        return GetSecondHalfRegulationEndMinute(match) + match.SecondHalfAddedMinutes;
+    }
+
+    private static int GetPhaseEndMinute(Match match, bool includeFulltime)
+    {
+        return includeFulltime ? GetSecondHalfEndMinute(match) : GetFirstHalfEndMinute(match);
+    }
+
+    private static bool IsFirstHalfMinute(Match match, int minute)
+    {
+        return minute <= GetFirstHalfEndMinute(match);
+    }
+
+    private static int GetRegulationMinute(Match match, int minute)
+    {
+        return minute <= GetFirstHalfEndMinute(match)
+            ? minute
+            : minute - match.FirstHalfAddedMinutes;
     }
 
     private static void AddSecondHalfRestartEvents(MatchSimulationState simulationState, int minute)
@@ -354,16 +499,60 @@ public class MatchEngine
         }
 
         var shouldAdd =
-            minute == 4 ||
             (match.IsRivalryMatch && minute == 12) ||
-            (minute >= 82 && Math.Abs(match.HomeScore - match.AwayScore) <= 1 && !simulationState.HomeCrowdPressureMinutes.Any(existing => existing >= 80));
+            (minute >= 82 && match.HomeScore <= match.AwayScore && !simulationState.HomeCrowdPressureMinutes.Any(existing => existing >= 80));
         if (!shouldAdd)
         {
             return;
         }
 
-        simulationState.HomeCrowdPressureMinutes.Add(minute);
-        simulationState.MatchLog.AddEvent(simulationState.EventFactory.CreateHomeCrowdPressure(minute, match.HomeTeam, match.AwayTeam, random));
+        if (TryAddCrowdMomentum(
+            simulationState,
+            minute,
+            match.HomeTeam,
+            () => simulationState.EventFactory.CreateHomeCrowdPressure(minute, match.HomeTeam, match.AwayTeam, random)))
+        {
+            simulationState.HomeCrowdPressureMinutes.Add(minute);
+        }
+    }
+
+    private static void TryAddTimeWastingEvent(MatchSimulationState simulationState, Random random, int minute)
+    {
+        var match = simulationState.Match;
+        var regulationMinute = GetRegulationMinute(match, minute);
+        if (regulationMinute < 75 || minute - simulationState.LastTimeWastingMinute < 8)
+        {
+            return;
+        }
+
+        var leadingTeam = match.HomeScore > match.AwayScore
+            ? match.HomeTeam
+            : match.AwayScore > match.HomeScore
+                ? match.AwayTeam
+                : null;
+        if (leadingTeam is null)
+        {
+            return;
+        }
+
+        var possessionTeam = GetPossessionTeam(simulationState);
+        if (possessionTeam is null || !string.Equals(possessionTeam.Name, leadingTeam.Name, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        var isAwayLead = leadingTeam == match.AwayTeam;
+        var isDefensiveShape = leadingTeam.Tactics.Mentality is Mentality.Defensive or Mentality.UltraDefensive;
+        var addedTimePressure = regulationMinute > MatchConstants.DefaultMatchDurationMinutes ? 0.05 : 0.0;
+        var chance = 0.035 + addedTimePressure + (isAwayLead ? 0.025 : 0.0) + (isDefensiveShape ? 0.025 : 0.0);
+        if (random.NextDouble() > chance)
+        {
+            return;
+        }
+
+        simulationState.MatchLog.AddEvent(simulationState.EventFactory.CreateTimeWasting(minute, leadingTeam, random));
+        simulationState.LastTimeWastingMinute = minute;
+        SetPossession(simulationState, leadingTeam, BallState.SetPiece, EventType.TimeWasting);
     }
 
     private static void TryAddHomeGoalCrowdSurge(MatchSimulationState simulationState, int minute, Match match, Team scoringTeam)
@@ -373,8 +562,59 @@ public class MatchEngine
             return;
         }
 
-        simulationState.HomeCrowdPressureMinutes.Add(minute);
-        simulationState.MatchLog.AddEvent(simulationState.EventFactory.CreateHomeCrowdPressure(minute, match.HomeTeam, match.AwayTeam, new Random(minute + scoringTeam.Name.Length)));
+        if (TryAddCrowdMomentum(
+            simulationState,
+            minute,
+            match.HomeTeam,
+            () => simulationState.EventFactory.CreateHomeCrowdPressure(minute, match.HomeTeam, match.AwayTeam, new Random(minute + scoringTeam.Name.Length))))
+        {
+            simulationState.HomeCrowdPressureMinutes.Add(minute);
+        }
+    }
+
+    private static bool TryAddCrowdMomentum(
+        MatchSimulationState simulationState,
+        int minute,
+        Team team,
+        Func<MatchEvent> createEvent)
+    {
+        if (!CanAddCrowdMomentum(simulationState, minute, team))
+        {
+            return false;
+        }
+
+        simulationState.MatchLog.AddEvent(createEvent());
+        RegisterCrowdMomentum(simulationState, minute, team);
+        return true;
+    }
+
+    private static bool CanAddCrowdMomentum(MatchSimulationState simulationState, int minute, Team team)
+    {
+        var previousEventType = simulationState.MatchLog.GetEvents().LastOrDefault()?.EventType ?? simulationState.LastFeedEventType;
+        if (previousEventType == EventType.CrowdMomentum)
+        {
+            return false;
+        }
+
+        if (simulationState.TotalCrowdMomentumCount >= MaxCrowdMomentumEventsPerMatch)
+        {
+            return false;
+        }
+
+        if (minute - simulationState.LastCrowdMomentumMinute < CrowdMomentumCooldownMinutes)
+        {
+            return false;
+        }
+
+        var teamCount = GetCount(simulationState.CrowdMomentumCountByTeam, team.Name);
+        return teamCount < MaxCrowdMomentumEventsPerTeam;
+    }
+
+    private static void RegisterCrowdMomentum(MatchSimulationState simulationState, int minute, Team team)
+    {
+        simulationState.LastCrowdMomentumMinute = minute;
+        simulationState.TotalCrowdMomentumCount++;
+        IncrementCount(simulationState.CrowdMomentumCountByTeam, team.Name);
     }
 
     private static void AddPendingHalftimeSubstitutionEvents(MatchSimulationState simulationState, int minute)
@@ -524,6 +764,7 @@ public class MatchEngine
     {
         return matchEvent.EventType is EventType.Kickoff
             or EventType.Attack
+            or EventType.ChanceCreated
             or EventType.Foul
             or EventType.Shot
             or EventType.Goal
@@ -548,7 +789,8 @@ public class MatchEngine
             or EventType.CornerKick
             or EventType.SetPieceDanger
             or EventType.LateDrama
-            or EventType.CrowdMomentum;
+            or EventType.CrowdMomentum
+            or EventType.TimeWasting;
     }
 
     private static Team? GetPossessionTeam(MatchSimulationState simulationState)
@@ -595,6 +837,7 @@ public class MatchEngine
         return matchEvent.EventType switch
         {
             EventType.Attack => actingTeamModel,
+            EventType.ChanceCreated => actingTeamModel,
             EventType.Foul => opposingTeam,
             EventType.PenaltyDecision => opposingTeam,
             EventType.Turnover => actingTeamModel,
@@ -610,6 +853,7 @@ public class MatchEngine
             EventType.Woodwork => opposingTeam,
             EventType.LateDrama => actingTeamModel,
             EventType.CrowdMomentum => actingTeamModel,
+            EventType.TimeWasting => actingTeamModel,
             EventType.Offside => opposingTeam,
             EventType.CornerKick => actingTeamModel,
             EventType.SetPieceDanger => actingTeamModel,
@@ -624,11 +868,13 @@ public class MatchEngine
         {
             EventType.Kickoff => BallState.Kickoff,
             EventType.Attack => BallState.AttackPending,
+            EventType.ChanceCreated => BallState.Chance,
             EventType.Shot or EventType.Save or EventType.Goal or EventType.Miss or EventType.WonderGoal or EventType.Woodwork or EventType.GoalkeeperHeroics => BallState.Chance,
             EventType.GoalkeeperMistake => BallState.Turnover,
             EventType.CornerKick => BallState.CornerPending,
             EventType.SetPieceDanger => BallState.SetPiecePending,
             EventType.Foul or EventType.Offside or EventType.PenaltyDecision or EventType.PenaltyTaker or EventType.Penalty => BallState.SetPiece,
+            EventType.TimeWasting => BallState.SetPiece,
             EventType.Turnover => BallState.Turnover,
             EventType.BadPass or EventType.Miscontrol or EventType.Tackle or EventType.Interception or EventType.Pressure or EventType.BlockedPass => BallState.Turnover,
             EventType.DefensiveStop => BallState.Defending,
@@ -645,6 +891,7 @@ public class MatchEngine
         {
             case EventType.Turnover:
             case EventType.Attack:
+            case EventType.ChanceCreated:
             case EventType.Shot:
             case EventType.Miss:
             case EventType.Goal:
@@ -652,6 +899,7 @@ public class MatchEngine
             case EventType.Woodwork:
             case EventType.LateDrama:
             case EventType.CrowdMomentum:
+            case EventType.TimeWasting:
             case EventType.Offside:
             case EventType.BadPass:
             case EventType.Miscontrol:
@@ -779,9 +1027,38 @@ public class MatchEngine
         simulationState.Match.SuperSubBoosts = simulationState.SuperSubBoosts.ToDictionary(
             entry => entry.Key,
             entry => entry.Value);
-        simulationState.Match.Events = simulationState.MatchLog.GetEvents();
+        simulationState.Match.Events = simulationState.MatchLog.GetEvents()
+            .Select(matchEvent => ApplyDisplayMinute(simulationState.Match, matchEvent))
+            .ToList();
         UpdateFinalPlayerFatigue(simulationState.Match);
         NormalizePlayerRatings(simulationState.Match);
+    }
+
+    private static MatchEvent ApplyDisplayMinute(Match match, MatchEvent matchEvent)
+    {
+        matchEvent.DisplayMinuteText = FormatDisplayMinute(match, matchEvent.Minute);
+        return matchEvent;
+    }
+
+    public static string FormatDisplayMinute(Match match, int minute)
+    {
+        if (minute <= MatchConstants.HalftimeMinute)
+        {
+            return $"{minute}'";
+        }
+
+        if (minute <= GetFirstHalfEndMinute(match))
+        {
+            return $"45+{minute - MatchConstants.HalftimeMinute}'";
+        }
+
+        var regulationMinute = minute - match.FirstHalfAddedMinutes;
+        if (regulationMinute <= MatchConstants.DefaultMatchDurationMinutes)
+        {
+            return $"{regulationMinute}'";
+        }
+
+        return $"90+{regulationMinute - MatchConstants.DefaultMatchDurationMinutes}'";
     }
 
     private static int EstimatePossessionMoments(double possessionPercentage, int totalMinutes)
@@ -811,7 +1088,7 @@ public class MatchEngine
     private static void UpdateMatchPhase(Match match, int minute)
     {
         match.CurrentMinute = minute;
-        match.CurrentPhase = minute <= MatchConstants.HalftimeMinute
+        match.CurrentPhase = minute <= GetFirstHalfEndMinute(match)
             ? MatchPhase.FirstHalf
             : MatchPhase.SecondHalf;
     }
@@ -897,6 +1174,27 @@ public class MatchEngine
         {
             HomeAttackStrength = snapshot.HomeAttackStrength * homeMomentum,
             HomeDefenseStrength = snapshot.HomeDefenseStrength * (1.0 + (homeMomentum - 1.0) * 0.55)
+        };
+    }
+
+    private static TeamStrengthSnapshot ApplyAddedTimePressureModifiers(Match match, TeamStrengthSnapshot snapshot, int minute)
+    {
+        if (GetRegulationMinute(match, minute) <= MatchConstants.DefaultMatchDurationMinutes)
+        {
+            return snapshot;
+        }
+
+        var homeTrailingOrLevel = match.HomeScore <= match.AwayScore;
+        var awayTrailingOrLevel = match.AwayScore <= match.HomeScore;
+        var pressureBoost = 1.035;
+        var defensiveClearanceBoost = 1.015;
+
+        return snapshot with
+        {
+            HomeAttackStrength = snapshot.HomeAttackStrength * (homeTrailingOrLevel ? pressureBoost : 1.0),
+            AwayAttackStrength = snapshot.AwayAttackStrength * (awayTrailingOrLevel ? pressureBoost : 1.0),
+            HomeDefenseStrength = snapshot.HomeDefenseStrength * (homeTrailingOrLevel ? 1.0 : defensiveClearanceBoost),
+            AwayDefenseStrength = snapshot.AwayDefenseStrength * (awayTrailingOrLevel ? 1.0 : defensiveClearanceBoost)
         };
     }
 
@@ -1022,6 +1320,27 @@ public class MatchEngine
         if (dramaResult.ScoresGoal)
         {
             UpdateScore(match, dramaResult.Team);
+        }
+
+        if (dramaResult.EventType == EventType.CrowdMomentum)
+        {
+            if (!TryAddCrowdMomentum(
+                simulationState,
+                minute,
+                dramaResult.Team,
+                () => simulationState.EventFactory.CreateCrowdMomentum(minute, dramaResult.Team)))
+            {
+                return strengthSnapshot;
+            }
+
+            TrackDramaPerformance(match, dramaResult);
+            return strengthSnapshot with
+            {
+                HomeAttackStrength = strengthSnapshot.HomeAttackStrength * dramaResult.HomeAttackModifier,
+                AwayAttackStrength = strengthSnapshot.AwayAttackStrength * dramaResult.AwayAttackModifier,
+                HomeDefenseStrength = strengthSnapshot.HomeDefenseStrength * dramaResult.HomeDefenseModifier,
+                AwayDefenseStrength = strengthSnapshot.AwayDefenseStrength * dramaResult.AwayDefenseModifier
+            };
         }
 
         TrackDramaPerformance(match, dramaResult);
@@ -1237,7 +1556,6 @@ public class MatchEngine
             shooterPerformance.Offsides++;
             shooterPerformance.Rating -= 0.08;
             matchLog.AddEvent(eventFactory.CreateOffside(minute, attackingTeam, shooter, chanceType, random));
-            TryAddVarAfterOffside(minute, match, attackingTeam, random, matchLog, eventFactory);
             MarkAttackResolved(simulationState, defendingTeam, BallState.BuildUp, EventType.Offside);
             return defendingTeam;
         }
@@ -1324,14 +1642,23 @@ public class MatchEngine
         }
 
         attackingStats.TotalShots++;
+        var triggeredChanceTrait = GetTriggeredShotCreationTrait(playmaker, shooter, chanceType);
+        var chanceCreator = ResolveChanceCreator(playmaker, shooter, chanceType);
+        matchLog.AddEvent(eventFactory.CreateChanceCreated(
+            minute,
+            attackingTeam,
+            chanceCreator,
+            shooter,
+            chanceType,
+            random,
+            triggeredChanceTrait));
         matchLog.AddEvent(eventFactory.CreateShot(
             minute,
             attackingTeam,
             shooter,
-            playmaker,
+            chanceCreator,
             chanceType,
-            random,
-            GetTriggeredShotCreationTrait(playmaker, shooter, chanceType)));
+            random));
         var shotPossessionTeam = HandleShotOutcome(
             minute,
             simulationState,
@@ -1339,7 +1666,7 @@ public class MatchEngine
             attackingTeam,
             defendingTeam,
             shooter,
-            playmaker,
+            chanceCreator,
             random,
             matchLog,
             eventFactory,
@@ -1578,7 +1905,7 @@ public class MatchEngine
             defenderPerformance.PenaltiesConceded++;
             defenderPerformance.ErrorsLeadingToShot++;
             defenderPerformance.Rating -= 0.18;
-            return HandlePenaltySequence(minute, match, attackingTeam, defendingTeam, defender, fouledPlayer, random, matchLog, eventFactory, foulContext);
+            return HandlePenaltySequence(minute, simulationState, match, attackingTeam, defendingTeam, defender, fouledPlayer, random, matchLog, eventFactory, foulContext);
         }
 
         if (foulContext.CreatesDangerousSetPiece)
@@ -1680,8 +2007,8 @@ public class MatchEngine
 
         if (roll < goalProbability + 0.55)
         {
-            var defender = ApplyDefensiveContribution(match, defendingTeam, random, ratingBoostOverride: 0.08, allowBlocks: true);
-            matchLog.AddEvent(eventFactory.CreateDefensiveStop(minute, defendingTeam, defender, primaryTaker, random));
+            var defender = ApplyShotBlockContribution(match, defendingTeam, random, ratingBoostOverride: 0.08);
+            matchLog.AddEvent(eventFactory.CreateBlockedShot(minute, defendingTeam, defender, primaryTaker, random));
             return random.NextDouble() < 0.25
                 ? HandleCornerSequence(minute, match, attackingTeam, defendingTeam, primaryTaker, random, matchLog, eventFactory)
                 : defendingTeam;
@@ -1694,6 +2021,7 @@ public class MatchEngine
 
     private Team HandlePenaltySequence(
         int minute,
+        MatchSimulationState simulationState,
         Match match,
         Team attackingTeam,
         Team defendingTeam,
@@ -1714,7 +2042,7 @@ public class MatchEngine
         var penaltyVarReason = foulContext.PenaltyReason.Contains("handle", StringComparison.OrdinalIgnoreCase)
             ? "handball penalty"
             : "penalty";
-        if (TryOverturnPenaltyWithVar(minute, match, defendingTeam, penaltyVarReason, random, matchLog, eventFactory))
+        if (TryOverturnPenaltyWithVar(minute, simulationState, match, defendingTeam, penaltyVarReason, random, matchLog, eventFactory))
         {
             GetOrCreatePerformance(match, attackingTeam, fouledPlayer).Rating -= 0.05;
             return defendingTeam;
@@ -1974,7 +2302,7 @@ public class MatchEngine
                 GetTriggeredWonderGoalTrait(shooter, chanceType),
                 shooterPerformance.Goals));
             ApplyConfidenceBoost(shooter);
-            if (TryDisallowGoalWithVar(minute, match, attackingTeam, shooter, null, random, matchLog, eventFactory))
+            if (TryDisallowGoalWithVar(minute, simulationState, match, attackingTeam, shooter, null, random, matchLog, eventFactory))
             {
                 attackingStats.ShotsOnTarget = Math.Max(0, attackingStats.ShotsOnTarget - 1);
                 shooterPerformance.ShotsOnTarget = Math.Max(0, shooterPerformance.ShotsOnTarget - 1);
@@ -2033,7 +2361,7 @@ public class MatchEngine
                 GetTriggeredGoalTrait(shooter, assister, chanceType, goalTypeDescription),
                 shooterPerformance.Goals));
             ApplyConfidenceBoost(shooter);
-            if (TryDisallowGoalWithVar(minute, match, attackingTeam, shooter, assister, random, matchLog, eventFactory))
+            if (TryDisallowGoalWithVar(minute, simulationState, match, attackingTeam, shooter, assister, random, matchLog, eventFactory))
             {
                 attackingStats.ShotsOnTarget = Math.Max(0, attackingStats.ShotsOnTarget - 1);
                 shooterPerformance.ShotsOnTarget = Math.Max(0, shooterPerformance.ShotsOnTarget - 1);
@@ -2064,8 +2392,8 @@ public class MatchEngine
 
             if (reboundOutcome.Contains("cleared", StringComparison.OrdinalIgnoreCase))
             {
-                var reboundDefender = ApplyDefensiveContribution(match, defendingTeam, random, ratingBoostOverride: 0.07, allowBlocks: true);
-                matchLog.AddEvent(eventFactory.CreateDefensiveStop(minute, defendingTeam, reboundDefender, shooter, random));
+                var reboundDefender = ApplyShotBlockContribution(match, defendingTeam, random, ratingBoostOverride: 0.07);
+                matchLog.AddEvent(eventFactory.CreateReboundClearance(minute, defendingTeam, reboundDefender, shooter, random));
             }
             else if (reboundOutcome.Contains("keeper", StringComparison.OrdinalIgnoreCase))
             {
@@ -2162,23 +2490,30 @@ public class MatchEngine
             return defendingTeam;
         }
 
-        shooterPerformance.Rating -= GetMissedChancePenalty(goalProbability);
-        if (goalProbability >= 0.28 && random.NextDouble() < 0.18)
+        var blockProbability = Math.Clamp(0.20 + GetDefensiveShotBlockPressure(defendingTeam, defendingTeamStrength, attackingTeamStrength), 0.14, 0.42);
+        if (random.NextDouble() < blockProbability)
         {
-            var goalLineDefender = ApplyGoalLineClearance(match, defendingTeam, random);
-            matchLog.AddEvent(eventFactory.CreateGoalLineClearance(minute, defendingTeam, goalLineDefender, shooter, random));
-        }
-        else
-        {
-            var defender = ApplyDefensiveContribution(match, defendingTeam, random, ratingBoostOverride: 0.06, allowBlocks: true);
-            matchLog.AddEvent(eventFactory.CreateDefensiveStop(minute, defendingTeam, defender, shooter, random));
-        }
-        if (random.NextDouble() < 0.12)
-        {
-            attackingStats.Corners++;
-            return HandleCornerSequence(minute, match, attackingTeam, defendingTeam, playmaker, random, matchLog, eventFactory);
+            if (goalProbability >= 0.28 && random.NextDouble() < 0.18)
+            {
+                var goalLineDefender = ApplyGoalLineClearance(match, defendingTeam, random);
+                matchLog.AddEvent(eventFactory.CreateGoalLineClearance(minute, defendingTeam, goalLineDefender, shooter, random));
+            }
+            else
+            {
+                var defender = ApplyShotBlockContribution(match, defendingTeam, random, ratingBoostOverride: 0.06);
+                matchLog.AddEvent(eventFactory.CreateBlockedShot(minute, defendingTeam, defender, shooter, random));
+            }
+
+            if (random.NextDouble() < 0.12)
+            {
+                attackingStats.Corners++;
+                return HandleCornerSequence(minute, match, attackingTeam, defendingTeam, playmaker, random, matchLog, eventFactory);
+            }
+
+            return defendingTeam;
         }
 
+        shooterPerformance.Rating -= GetMissedChancePenalty(goalProbability);
         var shotStyle = ChooseShotStyle(shooter, random, chanceType);
         matchLog.AddEvent(eventFactory.CreateMiss(minute, attackingTeam, shooter, shotStyle, random));
         ApplyConfidenceDrop(shooter, goalProbability >= 0.20 ? 0.04 : 0.015);
@@ -2187,6 +2522,7 @@ public class MatchEngine
 
     private static bool TryDisallowGoalWithVar(
         int minute,
+        MatchSimulationState simulationState,
         Match match,
         Team attackingTeam,
         Player scorer,
@@ -2200,7 +2536,8 @@ public class MatchEngine
             UndoScore(match, attackingTeam);
             ApplyDisallowedGoalMoraleDrop(scorer, assister);
             matchLog.AddEvent(eventFactory.CreateDisallowedGoalOffside(minute, attackingTeam, scorer, assister, match, random));
-            matchLog.AddEvent(eventFactory.CreateCrowdMomentum(minute, GetOpposingTeam(match, attackingTeam)));
+            var defendingTeam = GetOpposingTeam(match, attackingTeam);
+            TryAddCrowdMomentum(simulationState, minute, defendingTeam, () => eventFactory.CreateCrowdMomentum(minute, defendingTeam));
             return true;
         }
 
@@ -2222,7 +2559,8 @@ public class MatchEngine
         UndoScore(match, attackingTeam);
         ApplyDisallowedGoalMoraleDrop(scorer, assister);
         matchLog.AddEvent(eventFactory.CreateVarDecision(minute, attackingTeam, reviewReason.DisallowedOutcome, match, scorer, assister));
-        matchLog.AddEvent(eventFactory.CreateCrowdMomentum(minute, GetOpposingTeam(match, attackingTeam)));
+        var opponentTeam = GetOpposingTeam(match, attackingTeam);
+        TryAddCrowdMomentum(simulationState, minute, opponentTeam, () => eventFactory.CreateCrowdMomentum(minute, opponentTeam));
         return true;
     }
 
@@ -2372,25 +2710,9 @@ public class MatchEngine
         counts[key] = GetCount(counts, key) + 1;
     }
 
-    private static void TryAddVarAfterOffside(
-        int minute,
-        Match match,
-        Team attackingTeam,
-        Random random,
-        MatchLogService matchLog,
-        MatchEventFactory eventFactory)
-    {
-        if (random.NextDouble() > 0.08)
-        {
-            return;
-        }
-
-        matchLog.AddEvent(eventFactory.CreateVarCheck(minute, "offside"));
-        matchLog.AddEvent(eventFactory.CreateVarDecision(minute, attackingTeam, "offside confirmed", match));
-    }
-
     private static bool TryOverturnPenaltyWithVar(
         int minute,
+        MatchSimulationState simulationState,
         Match match,
         Team defendingTeam,
         string checkReason,
@@ -2412,7 +2734,7 @@ public class MatchEngine
         }
 
         matchLog.AddEvent(eventFactory.CreateVarDecision(minute, defendingTeam, checkReason == "handball penalty" ? "no penalty" : "penalty overturned", match));
-        matchLog.AddEvent(eventFactory.CreateCrowdMomentum(minute, defendingTeam));
+        TryAddCrowdMomentum(simulationState, minute, defendingTeam, () => eventFactory.CreateCrowdMomentum(minute, defendingTeam));
         return true;
     }
 
@@ -2665,7 +2987,8 @@ public class MatchEngine
             or EventType.YellowCard
             or EventType.RedCard
             or EventType.RefereeControversy
-            or EventType.Confrontation;
+            or EventType.Confrontation
+            or EventType.TimeWasting;
     }
 
     private static void RegisterConfrontation(MatchSimulationState simulationState, int minute)
@@ -3059,6 +3382,13 @@ public class MatchEngine
         return null;
     }
 
+    private static Player ResolveChanceCreator(Player playmaker, Player shooter, string chanceType)
+    {
+        return chanceType is "dribble run" or "long-range attempt" or "rebound shot" or "one-on-one"
+            ? shooter
+            : playmaker;
+    }
+
     private static PlayerTrait? GetTriggeredWonderGoalTrait(Player shooter, string chanceType)
     {
         if (shooter.Traits.Contains(PlayerTrait.FinesseShot) && (chanceType is "long-range attempt" or "quick combination"))
@@ -3298,6 +3628,14 @@ public class MatchEngine
             attackingStats.ExpectedGoals += 0.08;
             targetPerformance.Shots++;
             targetPerformance.ShotsOnTarget++;
+            matchLog.AddEvent(eventFactory.CreateChanceCreated(
+                minute,
+                attackingTeam,
+                taker,
+                target,
+                "corner delivery",
+                random,
+                taker.Traits.Contains(PlayerTrait.DeadBallSpecialist) ? PlayerTrait.DeadBallSpecialist : null));
             matchLog.AddEvent(eventFactory.CreateShot(
                 minute,
                 attackingTeam,
@@ -3341,14 +3679,15 @@ public class MatchEngine
 
         if (roll < 0.72)
         {
-            var defender = ApplyDefensiveContribution(match, defendingTeam, random, ratingBoostOverride: 0.08, allowBlocks: false);
-            matchLog.AddEvent(eventFactory.CreateDefensiveStop(minute, defendingTeam, defender, target, random));
+            var defender = ApplyShotBlockContribution(match, defendingTeam, random, ratingBoostOverride: 0.08);
+            matchLog.AddEvent(eventFactory.CreateBlockedShot(minute, defendingTeam, defender, target, random));
             return defendingTeam;
         }
 
         attackingStats.TotalShots++;
         attackingStats.ExpectedGoals += 0.05;
         targetPerformance.Shots++;
+        matchLog.AddEvent(eventFactory.CreateChanceCreated(minute, attackingTeam, taker, target, "corner delivery", random));
         matchLog.AddEvent(eventFactory.CreateShot(minute, attackingTeam, target, taker, "corner delivery", random));
         matchLog.AddEvent(eventFactory.CreateMiss(minute, attackingTeam, target, "corner chance", random));
         targetPerformance.Rating -= 0.04;
@@ -3484,6 +3823,16 @@ public class MatchEngine
         };
 
         return Math.Clamp(lowBlockBonus + defensiveMentalityBonus + pressureBonus + riskyTempoBonus + poorTouchRisk + awayComposureRisk + homePressRisk + chanceTypeRisk, 0.0, 0.16);
+    }
+
+    private static double GetDefensiveShotBlockPressure(Team defendingTeam, double defendingTeamStrength, double attackingTeamStrength)
+    {
+        var lowBlockBonus = defendingTeam.Tactics.DefensiveLine <= 40 ? 0.07 : 0.0;
+        var defensiveMentalityBonus = defendingTeam.Tactics.Mentality is Mentality.Defensive or Mentality.UltraDefensive ? 0.06 : 0.0;
+        var compactPressureBonus = Math.Max(0, defendingTeam.Tactics.PressingIntensity - 60) / 1000.0;
+        var strengthBonus = Math.Clamp((defendingTeamStrength - attackingTeamStrength) / 900.0, -0.06, 0.08);
+
+        return lowBlockBonus + defensiveMentalityBonus + compactPressureBonus + strengthBonus;
     }
 
     private static string ChooseSaveType(Player? goalkeeper, string chanceType, Random random)
@@ -3854,6 +4203,20 @@ public class MatchEngine
             performance.AerialDuelsWon++;
             performance.Rating += GetDefensiveActionRating(defender, 0.10, 0.25, random);
         }
+        return defender;
+    }
+
+    private Player ApplyShotBlockContribution(
+        Match match,
+        Team defendingTeam,
+        Random random,
+        double ratingBoostOverride)
+    {
+        var defender = ChooseDefendingPlayer(defendingTeam, random);
+        var performance = GetOrCreatePerformance(match, defendingTeam, defender);
+        performance.Blocks++;
+        performance.Clearances++;
+        performance.Rating += GetDefensiveActionRating(defender, ratingBoostOverride, ratingBoostOverride + 0.18, random);
         return defender;
     }
 
@@ -4655,6 +5018,25 @@ public class MatchEngine
         return Math.Round(Math.Clamp(65 + averagePassing * 0.24 - tempoPenalty + venueAdjustment, 58, 94), 1);
     }
 
+    private static int GetLastCrowdMomentumMinute(Match match)
+    {
+        return match.Events
+            .Where(matchEvent => matchEvent.EventType == EventType.CrowdMomentum)
+            .Select(matchEvent => matchEvent.Minute)
+            .DefaultIfEmpty(-100)
+            .Max();
+    }
+
+    private static Dictionary<string, int> GetCrowdMomentumCountsByTeam(Match match)
+    {
+        return match.Events
+            .Where(matchEvent => matchEvent.EventType == EventType.CrowdMomentum)
+            .Select(matchEvent => FindEventTeamName(matchEvent, match))
+            .Where(teamName => !string.IsNullOrWhiteSpace(teamName))
+            .GroupBy(teamName => teamName!, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(group => group.Key, group => group.Count(), StringComparer.OrdinalIgnoreCase);
+    }
+
     private enum AttackFlowOutcome
     {
         BuildUp,
@@ -4736,5 +5118,13 @@ public class MatchEngine
         public Dictionary<string, int> TeamGoalkeeperErrorCounts { get; } = [];
         public Dictionary<string, int> LastGoalMinuteByPlayer { get; } = [];
         public HashSet<int> HomeCrowdPressureMinutes { get; } = [];
+        public int LastTimeWastingMinute { get; set; } = match.Events
+            .Where(matchEvent => matchEvent.EventType == EventType.TimeWasting)
+            .Select(matchEvent => matchEvent.Minute)
+            .DefaultIfEmpty(-100)
+            .Max();
+        public int LastCrowdMomentumMinute { get; set; } = GetLastCrowdMomentumMinute(match);
+        public int TotalCrowdMomentumCount { get; set; } = match.Events.Count(matchEvent => matchEvent.EventType == EventType.CrowdMomentum);
+        public Dictionary<string, int> CrowdMomentumCountByTeam { get; } = GetCrowdMomentumCountsByTeam(match);
     }
 }

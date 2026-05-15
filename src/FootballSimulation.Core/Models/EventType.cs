@@ -4,6 +4,7 @@ public enum EventType
 {
     Kickoff,
     Attack,
+    ChanceCreated,
     Foul,
     Shot,
     Goal,
@@ -41,6 +42,8 @@ public enum EventType
     Confrontation,
     CrowdMomentum,
     Exhaustion,
+    AddedTime,
+    TimeWasting,
     Halftime,
     Fulltime
 }

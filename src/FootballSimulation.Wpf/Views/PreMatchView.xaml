@@ -339,13 +339,29 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <StackPanel Margin="0,0,0,10">
+                <Grid Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
                     <TextBlock x:Name="FixtureTextBlock"
                                Foreground="#DDF7E8"
                                FontSize="17"
                                FontWeight="SemiBold"
-                               TextWrapping="Wrap" />
-                </StackPanel>
+                               TextWrapping="Wrap"
+                               VerticalAlignment="Center"
+                               Margin="0,0,12,0" />
+
+                    <Button Grid.Column="1"
+                            Content="Back to Dashboard"
+                            Style="{StaticResource PrimaryTextButton}"
+                            Height="34"
+                            MinWidth="150"
+                            Padding="14,0"
+                            FontWeight="SemiBold"
+                            Click="BackToDashboardButton_Click" />
+                </Grid>
 
                 <Grid Grid.Row="1">
                     <Grid.ColumnDefinitions>

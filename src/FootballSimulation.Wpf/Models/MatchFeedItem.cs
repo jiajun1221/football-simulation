@@ -5,8 +5,9 @@ namespace FootballSimulation.Wpf.Models;
 public class MatchFeedItem
 {
     public int Minute { get; set; }
+    public string DisplayMinuteText { get; set; } = string.Empty;
     public MatchEvent? SourceEvent { get; set; }
-    public string MinuteText => $"{Minute}'";
+    public string MinuteText => string.IsNullOrWhiteSpace(DisplayMinuteText) ? $"{Minute}'" : DisplayMinuteText;
     public string Type { get; set; } = string.Empty;
     public string Icon { get; set; } = string.Empty;
     public string TeamName { get; set; } = string.Empty;

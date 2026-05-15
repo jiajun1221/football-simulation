@@ -46,9 +46,11 @@ public class MatchEngineScoringTests
 
         var result = engine.SimulateMatch(homeTeam, awayTeam, seed: 42);
 
-        Assert.Equal(90, result.CurrentMinute);
+        var expectedFulltimeMinute = 90 + result.FirstHalfAddedMinutes + result.SecondHalfAddedMinutes;
+
+        Assert.Equal(expectedFulltimeMinute, result.CurrentMinute);
         Assert.Equal(MatchPhase.Fulltime, result.CurrentPhase);
-        Assert.Contains(result.Events, matchEvent => matchEvent.EventType == EventType.Fulltime && matchEvent.Minute == 90);
+        Assert.Contains(result.Events, matchEvent => matchEvent.EventType == EventType.Fulltime && matchEvent.Minute == expectedFulltimeMinute);
     }
 
     [Fact]
@@ -60,9 +62,11 @@ public class MatchEngineScoringTests
 
         var result = engine.SimulateFirstHalf(homeTeam, awayTeam, seed: 42);
 
-        Assert.Equal(45, result.CurrentMinute);
+        var expectedHalftimeMinute = 45 + result.FirstHalfAddedMinutes;
+
+        Assert.Equal(expectedHalftimeMinute, result.CurrentMinute);
         Assert.Equal(MatchPhase.Halftime, result.CurrentPhase);
-        Assert.DoesNotContain(result.Events, matchEvent => matchEvent.Minute > 45);
+        Assert.DoesNotContain(result.Events, matchEvent => matchEvent.Minute > expectedHalftimeMinute);
         Assert.Contains(result.Events, matchEvent => matchEvent.EventType == EventType.Halftime);
     }
 
@@ -82,7 +86,8 @@ public class MatchEngineScoringTests
 
         Assert.True(fullMatch.Events.Count > firstHalfEventCount);
         Assert.Contains(fullMatch.Events, matchEvent => matchEvent.Minute > 45);
-        Assert.Contains(fullMatch.Events, matchEvent => matchEvent.EventType == EventType.Fulltime && matchEvent.Minute == 90);
+        var expectedFulltimeMinute = 90 + fullMatch.FirstHalfAddedMinutes + fullMatch.SecondHalfAddedMinutes;
+        Assert.Contains(fullMatch.Events, matchEvent => matchEvent.EventType == EventType.Fulltime && matchEvent.Minute == expectedFulltimeMinute);
         Assert.True(fullMatch.HomeScore >= firstHalfHomeScore);
         Assert.True(fullMatch.AwayScore >= firstHalfAwayScore);
     }
@@ -350,6 +355,123 @@ public class MatchEngineScoringTests
     }
 
     [Fact]
+    public void SimulateMatch_LimitsCrowdMomentumSpam()
+    {
+        var seedDataService = new SeedDataService();
+        var engine = new MatchEngine();
+
+        for (var seed = 1; seed <= 140; seed++)
+        {
+            var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+            var result = engine.SimulateMatch(homeTeam, awayTeam, seed: seed);
+            var crowdEvents = result.Events
+                .Select((matchEvent, index) => new { MatchEvent = matchEvent, Index = index })
+                .Where(item => item.MatchEvent.EventType == EventType.CrowdMomentum)
+                .ToList();
+
+            Assert.True(crowdEvents.Count <= 3, $"Seed {seed}: expected at most 3 crowd momentum events.");
+
+            for (var index = 0; index < crowdEvents.Count; index++)
+            {
+                if (index > 0)
+                {
+                    Assert.True(
+                        crowdEvents[index].MatchEvent.Minute - crowdEvents[index - 1].MatchEvent.Minute >= 10,
+                        $"Seed {seed}: crowd momentum events were too close together.");
+                }
+
+                if (crowdEvents[index].Index > 0)
+                {
+                    Assert.NotEqual(EventType.CrowdMomentum, result.Events[crowdEvents[index].Index - 1].EventType);
+                }
+            }
+
+            var countsByTeam = crowdEvents
+                .Select(item => FindEventTeamName(item.MatchEvent, result))
+                .Where(teamName => !string.IsNullOrWhiteSpace(teamName))
+                .GroupBy(teamName => teamName!, StringComparer.OrdinalIgnoreCase);
+
+            foreach (var teamCrowdEvents in countsByTeam)
+            {
+                Assert.True(teamCrowdEvents.Count() <= 2, $"Seed {seed}: {teamCrowdEvents.Key} had too many crowd momentum events.");
+            }
+        }
+    }
+
+    [Fact]
+    public void SimulateFirstHalf_AnnouncesAddedTimeBeforeHalftime()
+    {
+        var seedDataService = new SeedDataService();
+        var engine = new MatchEngine();
+        Match? result = null;
+
+        for (var seed = 1; seed <= 40; seed++)
+        {
+            var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+            result = engine.SimulateFirstHalf(homeTeam, awayTeam, seed: seed);
+            if (result.FirstHalfAddedMinutes > 0)
+            {
+                break;
+            }
+        }
+
+        Assert.NotNull(result);
+        Assert.True(result.FirstHalfAddedTimeAnnounced);
+        Assert.True(result.FirstHalfAddedMinutes > 0);
+
+        var addedTime = Assert.Single(result.Events, matchEvent => matchEvent.EventType == EventType.AddedTime);
+        var halftime = Assert.Single(result.Events, matchEvent => matchEvent.EventType == EventType.Halftime);
+
+        Assert.Equal(45, addedTime.Minute);
+        Assert.Equal(45 + result.FirstHalfAddedMinutes, halftime.Minute);
+        Assert.Equal($"45+{result.FirstHalfAddedMinutes}'", halftime.DisplayMinuteText);
+    }
+
+    [Fact]
+    public void SimulateMatch_SecondHalfCanFinishInAddedTime()
+    {
+        var seedDataService = new SeedDataService();
+        var engine = new MatchEngine();
+        Match? result = null;
+
+        for (var seed = 1; seed <= 40; seed++)
+        {
+            var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+            result = engine.SimulateMatch(homeTeam, awayTeam, seed: seed);
+            if (result.SecondHalfAddedMinutes > 0)
+            {
+                break;
+            }
+        }
+
+        Assert.NotNull(result);
+        Assert.True(result.SecondHalfAddedTimeAnnounced);
+        Assert.True(result.SecondHalfAddedMinutes > 0);
+
+        var fulltime = Assert.Single(result.Events, matchEvent => matchEvent.EventType == EventType.Fulltime);
+        var expectedFulltimeMinute = 90 + result.FirstHalfAddedMinutes + result.SecondHalfAddedMinutes;
+
+        Assert.Equal(expectedFulltimeMinute, fulltime.Minute);
+        Assert.Equal($"90+{result.SecondHalfAddedMinutes}'", fulltime.DisplayMinuteText);
+    }
+
+    [Fact]
+    public void FormatDisplayMinute_UsesAddedTimeNotation()
+    {
+        var match = new Match
+        {
+            FirstHalfAddedMinutes = 3,
+            SecondHalfAddedMinutes = 5
+        };
+
+        Assert.Equal("45'", MatchEngine.FormatDisplayMinute(match, 45));
+        Assert.Equal("45+2'", MatchEngine.FormatDisplayMinute(match, 47));
+        Assert.Equal("46'", MatchEngine.FormatDisplayMinute(match, 49));
+        Assert.Equal("90'", MatchEngine.FormatDisplayMinute(match, 93));
+        Assert.Equal("90+4'", MatchEngine.FormatDisplayMinute(match, 97));
+    }
+
+    [Fact]
     public void SimulateMatch_ConfrontationsOnlyFollowStoppedPlayTriggers()
     {
         var seedDataService = new SeedDataService();
@@ -461,6 +583,41 @@ public class MatchEngineScoringTests
     }
 
     [Fact]
+    public void SimulateMatch_DoesNotGenerateDefenseThenMissForSameShot()
+    {
+        var seedDataService = new SeedDataService();
+        var engine = new MatchEngine();
+
+        for (var seed = 1; seed <= 140; seed++)
+        {
+            var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+            var result = engine.SimulateMatch(homeTeam, awayTeam, seed: seed);
+            var events = result.Events;
+
+            for (var shotIndex = 0; shotIndex < events.Count; shotIndex++)
+            {
+                if (events[shotIndex].EventType != EventType.Shot)
+                {
+                    continue;
+                }
+
+                var sequence = events
+                    .Skip(shotIndex + 1)
+                    .TakeWhile(matchEvent => matchEvent.EventType != EventType.Attack && matchEvent.EventType != EventType.Shot)
+                    .ToList();
+
+                for (var index = 1; index < sequence.Count; index++)
+                {
+                    var defenseThenMiss = IsShotBlockEvent(sequence[index - 1]) && sequence[index].EventType == EventType.Miss;
+                    Assert.False(
+                        defenseThenMiss,
+                        $"Seed {seed}: shot sequence generated defense/block and then miss for the same shot.");
+                }
+            }
+        }
+    }
+
+    [Fact]
     public void SimulateMatch_OffsideGivesOpponentNextAttack()
     {
         var seedDataService = new SeedDataService();
@@ -499,6 +656,91 @@ public class MatchEngineScoringTests
         }
     }
 
+    [Fact]
+    public void SimulateMatch_NormalOffsideDoesNotTriggerVarReview()
+    {
+        var seedDataService = new SeedDataService();
+        var engine = new MatchEngine();
+
+        for (var seed = 1; seed <= 120; seed++)
+        {
+            var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+            var result = engine.SimulateMatch(homeTeam, awayTeam, seed: seed);
+            var events = result.Events;
+
+            for (var index = 0; index < events.Count - 1; index++)
+            {
+                if (events[index].EventType != EventType.Offside || IsGoalDisallowedEvent(events[index]))
+                {
+                    continue;
+                }
+
+                Assert.NotEqual(EventType.VarCheck, events[index + 1].EventType);
+                Assert.NotEqual(EventType.VarDecision, events[index + 1].EventType);
+            }
+        }
+    }
+
+    [Fact]
+    public void SimulateMatch_ChanceCreatedAndShotUseCorrectPlayers()
+    {
+        var seedDataService = new SeedDataService();
+        var engine = new MatchEngine();
+
+        for (var seed = 1; seed <= 100; seed++)
+        {
+            var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+            var result = engine.SimulateMatch(homeTeam, awayTeam, seed: seed);
+            var events = result.Events;
+
+            for (var index = 0; index < events.Count - 1; index++)
+            {
+                if (events[index].EventType != EventType.ChanceCreated)
+                {
+                    continue;
+                }
+
+                var chanceCreated = events[index];
+                var shot = events[index + 1];
+
+                Assert.Equal(EventType.Shot, shot.EventType);
+                Assert.Equal(chanceCreated.SecondaryPlayerName ?? chanceCreated.PrimaryPlayerName, shot.PrimaryPlayerName);
+                Assert.Equal(chanceCreated.PrimaryPlayerName, shot.SecondaryPlayerName ?? shot.PrimaryPlayerName);
+            }
+        }
+    }
+
+    [Fact]
+    public void SimulateMatch_GoalAssistUsesChanceCreatorWhenDifferentFromScorer()
+    {
+        var seedDataService = new SeedDataService();
+        var engine = new MatchEngine();
+
+        for (var seed = 1; seed <= 140; seed++)
+        {
+            var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+            var result = engine.SimulateMatch(homeTeam, awayTeam, seed: seed);
+            var events = result.Events;
+
+            for (var index = 1; index < events.Count; index++)
+            {
+                if (events[index].EventType != EventType.Goal ||
+                    events[index].Description.Contains("Own goal", StringComparison.OrdinalIgnoreCase) ||
+                    index < 2 ||
+                    events[index - 2].EventType != EventType.ChanceCreated ||
+                    events[index - 1].EventType != EventType.Shot ||
+                    !string.Equals(events[index].PrimaryPlayerName, events[index - 1].PrimaryPlayerName, StringComparison.OrdinalIgnoreCase) ||
+                    string.IsNullOrWhiteSpace(events[index - 1].SecondaryPlayerName))
+                {
+                    continue;
+                }
+
+                Assert.Equal(events[index - 2].PrimaryPlayerName, events[index - 1].SecondaryPlayerName);
+                Assert.Equal(events[index - 1].SecondaryPlayerName, events[index].SecondaryPlayerName);
+            }
+        }
+    }
+
     private static string FormatEvent(MatchEvent matchEvent)
     {
         return $"{matchEvent.Minute}|{matchEvent.EventType}|{matchEvent.Description}";
@@ -510,6 +752,14 @@ public class MatchEngineScoringTests
             || matchEvent.EventType == EventType.WonderGoal
             || (matchEvent.EventType == EventType.Penalty
                 && matchEvent.Description.Contains("scores", StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static bool IsShotBlockEvent(MatchEvent matchEvent)
+    {
+        return matchEvent.EventType == EventType.DefensiveStop &&
+            (matchEvent.Description.Contains("block", StringComparison.OrdinalIgnoreCase) ||
+                matchEvent.Description.Contains("clearance", StringComparison.OrdinalIgnoreCase) ||
+                matchEvent.Description.Contains("clears", StringComparison.OrdinalIgnoreCase));
     }
 
     private static bool IsGoalDisallowedEvent(MatchEvent matchEvent)
@@ -538,6 +788,7 @@ public class MatchEngineScoringTests
     private static bool IsPossessionFlowEvent(MatchEvent matchEvent)
     {
         return matchEvent.EventType is EventType.Attack
+            or EventType.ChanceCreated
             or EventType.Turnover
             or EventType.DefensiveStop
             or EventType.Shot

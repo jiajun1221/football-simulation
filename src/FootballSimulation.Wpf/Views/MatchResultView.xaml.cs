@@ -152,7 +152,7 @@ public partial class MatchResultView : UserControl
     private static ScorerRow CreateScorerRow(string playerName, List<MatchEvent> goals, ScorerSummaryMode mode, bool isManOfTheMatch)
     {
         var goalCount = goals.Count;
-        var minutes = goals.Select(matchEvent => $"{matchEvent.Minute}'").ToList();
+        var minutes = goals.Select(FormatGoalMinute).ToList();
         var minuteList = string.Join(", ", minutes);
         var achievement = CreateScorerAchievement(goalCount, isManOfTheMatch);
         var badgeText = mode == ScorerSummaryMode.UltraCompact
@@ -178,6 +178,13 @@ public partial class MatchResultView : UserControl
             string.IsNullOrWhiteSpace(achievement)
                 ? $"{playerName}: {minuteList}"
                 : $"{playerName}: {minuteList} - {achievement}");
+    }
+
+    private static string FormatGoalMinute(MatchEvent matchEvent)
+    {
+        return !string.IsNullOrWhiteSpace(matchEvent.DisplayMinuteText)
+            ? matchEvent.DisplayMinuteText
+            : $"{matchEvent.Minute}'";
     }
 
     private static string CreateGoalBadgeText(int goalCount)

@@ -325,7 +325,7 @@ public partial class MatchLiveView : UserControl
                 }
 
                 var nextMinute = _state.CurrentMatch.CurrentMinute + 1;
-                var includeFulltime = _isSecondHalf && nextMinute == FullTimeMinute;
+                var includeFulltime = _isSecondHalf && nextMinute >= GetPhaseEndMinute();
                 var existingEventCount = _state.CurrentMatch.Events.Count;
 
                 _state.CurrentMatch = _gameSessionService.AdvanceSelectedTeamLiveMatch(
@@ -479,7 +479,7 @@ public partial class MatchLiveView : UserControl
             while (_state.CurrentMatch.CurrentMinute < GetPhaseEndMinute())
             {
                 var nextMinute = _state.CurrentMatch.CurrentMinute + 1;
-                var includeFulltime = _isSecondHalf && nextMinute == FullTimeMinute;
+                var includeFulltime = _isSecondHalf && nextMinute >= GetPhaseEndMinute();
                 _state.CurrentMatch = _gameSessionService.AdvanceSelectedTeamLiveMatch(
                     _state.League,
                     _state.CurrentFixture,
@@ -634,7 +634,7 @@ public partial class MatchLiveView : UserControl
 
         var usedSubstitutions = _squadSelectionService.CountTeamSubstitutions(_state.CurrentMatch, userTeam.Name);
         SubstitutionOverlayStatusTextBlock.Text =
-            $"{_state.CurrentMatch.CurrentMinute}' | {usedSubstitutions}/5 substitutions used. Choose one starter and one substitute.";
+            $"{MatchEngine.FormatDisplayMinute(_state.CurrentMatch, _state.CurrentMatch.CurrentMinute)} | {usedSubstitutions}/5 substitutions used. Choose one starter and one substitute.";
 
         ConfirmSubstitutionButton.IsEnabled = false;
         SubstitutionOverlay.Visibility = Visibility.Visible;
@@ -663,7 +663,7 @@ public partial class MatchLiveView : UserControl
         _isPausedForTacticalAdjustment = true;
 
         var userTeam = GetUserTeam();
-        TacticalOverlayStatusTextBlock.Text = $"{_state.CurrentMatch.CurrentMinute}' | Adjust tactics for the next phase of play.";
+        TacticalOverlayStatusTextBlock.Text = $"{MatchEngine.FormatDisplayMinute(_state.CurrentMatch, _state.CurrentMatch.CurrentMinute)} | Adjust tactics for the next phase of play.";
         TacticalSettingsPanel.LoadTactics(userTeam.Tactics);
 
         TacticalAdjustmentOverlay.Visibility = Visibility.Visible;
@@ -1204,9 +1204,15 @@ public partial class MatchLiveView : UserControl
                 string.Equals(PositionSuitabilityService.NormalizeExactPosition(position), normalizedPosition, StringComparison.OrdinalIgnoreCase));
     }
 
-    private static bool IsAvailableSubstitute(Player player)
+    private bool IsAvailableSubstitute(Player player)
     {
-        return !player.IsSentOff && !player.IsSuspended && !player.IsInjured;
+        if (player.IsSentOff || player.IsSuspended || player.IsInjured)
+        {
+            return false;
+        }
+
+        return _state.CurrentMatch is null ||
+            !_squadSelectionService.WasPlayerSubstitutedOff(_state.CurrentMatch, GetUserTeam().Name, player.Name);
     }
 
     private void ApplyManualSubstitutionImpact(Player playerOff, Player playerOn)
@@ -2339,6 +2345,8 @@ public partial class MatchLiveView : UserControl
 
     private static string RotateIcon() => char.ConvertFromUtf32(0x1F504);
 
+    private static string ClockIcon() => char.ConvertFromUtf32(0x23F1);
+
     private static string PauseIcon() => char.ConvertFromUtf32(0x23F8);
 
     private static string CheckeredFlagIcon() => char.ConvertFromUtf32(0x1F3C1);
@@ -2443,13 +2451,25 @@ public partial class MatchLiveView : UserControl
 
     private int GetPhaseEndMinute()
     {
-        return _isSecondHalf ? FullTimeMinute : FirstHalfEndMinute;
+        if (_state.CurrentMatch is null)
+        {
+            return _isSecondHalf ? FullTimeMinute : FirstHalfEndMinute;
+        }
+
+        return _isSecondHalf
+            ? FullTimeMinute + _state.CurrentMatch.FirstHalfAddedMinutes + _state.CurrentMatch.SecondHalfAddedMinutes
+            : FirstHalfEndMinute + _state.CurrentMatch.FirstHalfAddedMinutes;
     }
 
     private string CreatePhaseLabel(int currentMinute)
     {
         var phaseText = _isSecondHalf ? "Second Half" : "First Half";
-        return $"{phaseText} - {currentMinute}'";
+        if (_state.CurrentMatch is null)
+        {
+            return $"{phaseText} - {currentMinute}'";
+        }
+
+        return $"{phaseText} - {MatchEngine.FormatDisplayMinute(_state.CurrentMatch, currentMinute)}";
     }
 
     private void UpdateVenueLabel(Match match)
@@ -2559,6 +2579,7 @@ public partial class MatchLiveView : UserControl
                 break;
 
             case EventType.Attack:
+            case EventType.ChanceCreated:
             case EventType.Shot:
             case EventType.Woodwork:
             case EventType.Miss:
@@ -3002,6 +3023,9 @@ public partial class MatchLiveView : UserControl
         return new MatchFeedItem
         {
             Minute = matchEvent.Minute,
+            DisplayMinuteText = string.IsNullOrWhiteSpace(matchEvent.DisplayMinuteText)
+                ? MatchEngine.FormatDisplayMinute(match, matchEvent.Minute)
+                : matchEvent.DisplayMinuteText,
             SourceEvent = matchEvent,
             Type = matchEvent.EventType.ToString(),
             Icon = eventStyle.Icon,
@@ -3033,7 +3057,7 @@ public partial class MatchLiveView : UserControl
 
     private static string FindTeamName(MatchEvent matchEvent, Match match)
     {
-        if (matchEvent.EventType is EventType.Halftime or EventType.Fulltime)
+        if (matchEvent.EventType is EventType.AddedTime or EventType.Halftime or EventType.Fulltime)
         {
             return string.Empty;
         }
@@ -3045,6 +3069,7 @@ public partial class MatchLiveView : UserControl
         {
             case EventType.Turnover:
             case EventType.Attack:
+            case EventType.ChanceCreated:
             case EventType.Shot:
             case EventType.Miss:
             case EventType.Goal:
@@ -3052,6 +3077,7 @@ public partial class MatchLiveView : UserControl
             case EventType.Woodwork:
             case EventType.LateDrama:
             case EventType.CrowdMomentum:
+            case EventType.TimeWasting:
             case EventType.Offside:
             case EventType.BadPass:
             case EventType.Miscontrol:
@@ -3161,6 +3187,7 @@ public partial class MatchLiveView : UserControl
                 ? "Second half underway"
                 : "Kickoff underway",
             EventType.Attack => CreateAttackHeadline(matchEvent, teamName),
+            EventType.ChanceCreated => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "creates chance", $"{teamName} create chance"),
             EventType.Shot => CreateShotHeadline(matchEvent, teamName),
             EventType.Save => CreateSaveHeadline(matchEvent),
             EventType.Goal => CreateGoalHeadline(matchEvent, teamName),
@@ -3193,9 +3220,11 @@ public partial class MatchLiveView : UserControl
             EventType.SetPieceDanger => $"{teamName} threaten from set piece",
             EventType.Confrontation => "Players clash",
             EventType.CrowdMomentum => $"{teamName} gain momentum",
+            EventType.TimeWasting => $"{teamName} slow the game",
             EventType.LateDrama => $"{teamName} push late",
             EventType.RivalryAtmosphere => "Derby tension rises",
             EventType.Weather => "Weather affects play",
+            EventType.AddedTime => "Added time announced",
             EventType.VarCheck => "VAR checking incident",
             EventType.VarDecision => IsGoalDisallowedEvent(matchEvent)
                 ? "Goal ruled out"
@@ -3226,6 +3255,7 @@ public partial class MatchLiveView : UserControl
         var suffix = matchEvent.EventType switch
         {
             EventType.Goal => "Crowd erupts.",
+            EventType.ChanceCreated => "Opening created.",
             EventType.Save => IsPenaltyResult(matchEvent) ? string.Empty : "Huge stop.",
             EventType.Miss => IsPenaltyResult(matchEvent) ? string.Empty : "Shot Off Target.",
             EventType.Foul => "Play is stopped.",
@@ -3245,8 +3275,10 @@ public partial class MatchLiveView : UserControl
             EventType.SetPieceDanger => "Danger from dead ball.",
             EventType.Confrontation => "Tempers rise.",
             EventType.CrowdMomentum => "Stadium noise lifts them.",
+            EventType.TimeWasting => "The clock keeps ticking.",
             EventType.Exhaustion => "Fatigue is showing.",
             EventType.Substitution => "Fresh legs arrive.",
+            EventType.AddedTime => "Minimum stoppage time confirmed.",
             _ => string.Empty
         };
 
@@ -3283,6 +3315,13 @@ public partial class MatchLiveView : UserControl
             (matchEvent.Description.Contains("goal ruled out", StringComparison.OrdinalIgnoreCase) ||
                 matchEvent.Description.Contains("goal is ruled out", StringComparison.OrdinalIgnoreCase) ||
                 matchEvent.Description.Contains("goal disallowed", StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static bool IsGoalConfirmedByVarEvent(MatchEvent matchEvent)
+    {
+        return matchEvent.EventType == EventType.VarDecision &&
+            (matchEvent.Description.Contains("confirms the goal", StringComparison.OrdinalIgnoreCase) ||
+                matchEvent.Description.Contains("goal stands", StringComparison.OrdinalIgnoreCase));
     }
 
     private static string CreateAttackHeadline(MatchEvent matchEvent, string teamName)
@@ -3334,7 +3373,7 @@ public partial class MatchLiveView : UserControl
             return CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "punishes mistake", $"{teamName} punish mistake");
         }
 
-        return CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "creates chance", $"{teamName} create chance");
+        return CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "shoots", $"{teamName} shoot");
     }
 
     private static string CreateDefensiveHeadline(MatchEvent matchEvent)
@@ -3343,6 +3382,11 @@ public partial class MatchLiveView : UserControl
         if (description.Contains("tackle", StringComparison.OrdinalIgnoreCase))
         {
             return CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "wins the tackle", "Big defensive tackle");
+        }
+
+        if (description.Contains("block", StringComparison.OrdinalIgnoreCase))
+        {
+            return CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "blocks the shot", "Shot blocked");
         }
 
         if (description.Contains("clearance", StringComparison.OrdinalIgnoreCase)
@@ -3574,6 +3618,11 @@ public partial class MatchLiveView : UserControl
             return DisallowedGoalStyle(FlagIcon(), "GOAL RULED OUT");
         }
 
+        if (IsGoalConfirmedByVarEvent(matchEvent))
+        {
+            return GoalStyle(CheckeredFlagIcon(), "VAR DECISION");
+        }
+
         if (IsHatTrickGoalEvent(matchEvent))
         {
             return GoalStyle(HatTrickIcon(), "HAT-TRICK");
@@ -3586,9 +3635,10 @@ public partial class MatchLiveView : UserControl
 
         return matchEvent.EventType switch
         {
-            EventType.Kickoff => NeutralStyle(FlagIcon(), "KICKOFF"),
+            EventType.Kickoff => MatchBoundaryStyle(FlagIcon(), "KICKOFF"),
             EventType.Attack => AttackStyle(SwordsIcon(), "ATTACK"),
-            EventType.Shot => ChanceStyle(TargetIcon(), "SHOT"),
+            EventType.ChanceCreated => ChanceStyle(StarIcon(), "CHANCE CREATED"),
+            EventType.Shot => SolidOrangeStyle(TargetIcon(), "SHOT"),
             EventType.Save => SaveStyle(GloveIcon(), "SAVE"),
             EventType.Foul => FoulStyle(StopIcon(), "FOUL"),
             EventType.Miss => MissStyle(WarningIcon(), "MISS"),
@@ -3597,7 +3647,7 @@ public partial class MatchLiveView : UserControl
             EventType.YellowCard => YellowCardStyle(YellowCardIcon(), "YELLOW CARD"),
             EventType.RedCard => RedCardStyle(RedCardIcon(), "RED CARD"),
             EventType.Injury => FoulStyle(InjuryIcon(), "INJURY"),
-            EventType.PenaltyDecision => VarStyle(GoalNetIcon(), "PENALTY DECISION"),
+            EventType.PenaltyDecision => SolidOrangeStyle(GoalNetIcon(), "PENALTY DECISION"),
             EventType.PenaltyTaker => ChanceStyle(TargetIcon(), "PENALTY TAKER"),
             EventType.Penalty => ChanceStyle(GoalNetIcon(), "PENALTY"),
             EventType.Offside => MissStyle(FlagIcon(), "OFFSIDE"),
@@ -3615,6 +3665,8 @@ public partial class MatchLiveView : UserControl
             EventType.CornerKick => ChanceStyle(FlagIcon(), "CORNER KICK"),
             EventType.SetPieceDanger => ChanceStyle(TargetIcon(), "SET PIECE"),
             EventType.Weather => WeatherStyle(matchEvent),
+            EventType.AddedTime => MatchBoundaryStyle(ClockIcon(), "ADDED TIME"),
+            EventType.TimeWasting => FoulStyle(ClockIcon(), "TIME WASTING"),
             EventType.VarCheck => VarStyle(TargetIcon(), "VAR CHECK"),
             EventType.VarDecision => VarStyle(CheckeredFlagIcon(), "VAR DECISION"),
             EventType.RefereeControversy => FoulStyle(StopIcon(), "CONTROVERSY"),
@@ -3626,7 +3678,7 @@ public partial class MatchLiveView : UserControl
             EventType.Exhaustion => MissStyle(BatteryIcon(), "EXHAUSTION"),
             EventType.Substitution => NeutralStyle(RotateIcon(), "SUBSTITUTION"),
             EventType.Halftime => NeutralStyle(PauseIcon(), "HALFTIME"),
-            EventType.Fulltime => NeutralStyle(CheckeredFlagIcon(), "FULLTIME"),
+            EventType.Fulltime => MatchBoundaryStyle(CheckeredFlagIcon(), "FULLTIME"),
             _ => NeutralStyle(BulletIcon(), "EVENT")
         };
     }
@@ -3653,7 +3705,17 @@ public partial class MatchLiveView : UserControl
 
     private static FeedEventStyle VarStyle(string icon, string label)
     {
+        return new FeedEventStyle(icon, label, "#7C3AED", "#5B21B6", "#EDE9FE", "#5B21B6", "#FFFFFF", IconForeground: "#5B21B6", MinuteForeground: "#FFFFFF", TitleForeground: "#FFFFFF", DescriptionForeground: "#EDE9FE", TraitBadgeBackground: "#EDE9FE", TraitBadgeBorderBrush: "#C4B5FD");
+    }
+
+    private static FeedEventStyle SolidOrangeStyle(string icon, string label)
+    {
         return new FeedEventStyle(icon, label, "#F97316", "#C2410C", "#FFEDD5", "#C2410C", "#FFFFFF", IconForeground: "#C2410C", MinuteForeground: "#FFFFFF", TitleForeground: "#FFFFFF", DescriptionForeground: "#FFEDD5", TraitBadgeBackground: "#FFEDD5", TraitBadgeBorderBrush: "#FDBA74");
+    }
+
+    private static FeedEventStyle MatchBoundaryStyle(string icon, string label)
+    {
+        return new FeedEventStyle(icon, label, "#111827", "#030712", "#F3F4F6", "#111827", "#FFFFFF", IconForeground: "#111827", MinuteForeground: "#FFFFFF", TitleForeground: "#FFFFFF", DescriptionForeground: "#E5E7EB", TraitBadgeBackground: "#F3F4F6", TraitBadgeBorderBrush: "#9CA3AF");
     }
 
     private static FeedEventStyle DisallowedGoalStyle(string icon, string label)
@@ -3811,6 +3873,7 @@ public partial class MatchLiveView : UserControl
             or EventType.Pressure
             or EventType.BlockedPass
             or EventType.Turnover
+            or EventType.ChanceCreated
             or EventType.DefensiveStop
             or EventType.DefensiveError
             or EventType.WonderGoal
@@ -3820,6 +3883,8 @@ public partial class MatchLiveView : UserControl
             or EventType.Confrontation
             or EventType.CrowdMomentum
             or EventType.Exhaustion
+            or EventType.AddedTime
+            or EventType.TimeWasting
             or EventType.Halftime
             or EventType.Fulltime;
     }
@@ -3843,6 +3908,7 @@ public partial class MatchLiveView : UserControl
             or EventType.Pressure
             or EventType.BlockedPass
             or EventType.Turnover
+            or EventType.ChanceCreated
             or EventType.DefensiveStop
             or EventType.DefensiveError
             or EventType.GoalkeeperHeroics
@@ -3850,6 +3916,7 @@ public partial class MatchLiveView : UserControl
             or EventType.SetPieceDanger
             or EventType.Confrontation
             or EventType.Exhaustion
+            or EventType.TimeWasting
             or EventType.Substitution
             or EventType.Halftime
             or EventType.Fulltime;
@@ -3900,7 +3967,7 @@ public partial class MatchLiveView : UserControl
             nameof(EventType.YellowCard) => 1000,
             nameof(EventType.RedCard) or nameof(EventType.Miss) or nameof(EventType.Injury) or nameof(EventType.BadPass) or nameof(EventType.Miscontrol) or nameof(EventType.DefensiveError) or nameof(EventType.SetPieceDanger) or nameof(EventType.CornerKick) or nameof(EventType.Confrontation) => 1500,
             nameof(EventType.Goal) or nameof(EventType.Penalty) or nameof(EventType.WonderGoal) or nameof(EventType.GoalkeeperHeroics) or nameof(EventType.CrowdMomentum) => 2000,
-            nameof(EventType.Halftime) or nameof(EventType.Fulltime) => 1500,
+            nameof(EventType.AddedTime) or nameof(EventType.TimeWasting) or nameof(EventType.Halftime) or nameof(EventType.Fulltime) => 1500,
             _ => 0
         };
     }

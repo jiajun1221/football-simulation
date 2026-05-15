@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -22,6 +23,7 @@ public partial class PreMatchView : UserControl
     private readonly FormationLayoutService _formationLayoutService = new();
     private readonly TacticalInsightService _tacticalInsightService = new();
     private readonly SquadSelectionService _squadSelectionService = new();
+    private readonly SaveGameService _saveGameService = new();
     private const double PitchCardWidth = 128;
     private const double PitchCardHeight = 70;
 
@@ -74,45 +76,88 @@ public partial class PreMatchView : UserControl
             return;
         }
 
-        _pitchSlots = OrderPlayersForPitch(_state.SelectedTeam.Players, _state.SelectedTeam.Formation).ToList();
-        _state.SelectedTeam.Players = _pitchSlots.ToList();
+        if (_state.SelectedTeam.Players.Count == 11)
+        {
+            _pitchSlots = _state.SelectedTeam.Players.ToList();
+        }
+        else
+        {
+            _pitchSlots = OrderPlayersForPitch(_state.SelectedTeam.Players, _state.SelectedTeam.Formation).ToList();
+            _state.SelectedTeam.Players = _pitchSlots.ToList();
+        }
+
         AssignFormationPositions();
     }
 
-    private static LineupValidationResult ReconcileUnavailablePlayers(Team team)
+    private LineupValidationResult ReconcileUnavailablePlayers(Team team)
     {
-        var unavailableStarters = team.Players
-            .Where(player => !IsAvailableForSelection(player))
-            .ToList();
-        foreach (var player in unavailableStarters)
+        var formationSlots = _formationLayoutService.GetPositions(team.Formation);
+        var wasRepaired = false;
+
+        for (var index = 0; index < team.Players.Count; index++)
         {
-            team.Players.Remove(player);
+            var player = team.Players[index];
+            if (IsAvailableForSelection(player))
+            {
+                continue;
+            }
+
+            var slot = index < formationSlots.Count
+                ? formationSlots[index].ExactPosition
+                : player.AssignedPosition;
+            var replacement = ChooseBenchReplacementForSlot(team, slot);
+            if (replacement is null)
+            {
+                team.Players.RemoveAt(index);
+                index--;
+            }
+            else
+            {
+                team.Substitutes.Remove(replacement);
+                team.Players[index] = replacement;
+                replacement.IsStarter = true;
+                replacement.IsOnPitch = true;
+                PositionSuitabilityService.EnsurePositionMetadata(replacement, slot);
+            }
+
             if (!team.Substitutes.Contains(player))
             {
                 team.Substitutes.Add(player);
             }
+
             player.IsStarter = false;
             player.IsOnPitch = false;
+            wasRepaired = true;
         }
 
         while (team.Players.Count < 11)
         {
-            var replacement = team.Substitutes
-                .Where(IsAvailableForSelection)
-                .OrderByDescending(player => player.OverallRating)
-                .FirstOrDefault();
+            var slot = team.Players.Count < formationSlots.Count
+                ? formationSlots[team.Players.Count].ExactPosition
+                : string.Empty;
+            var replacement = ChooseBenchReplacementForSlot(team, slot);
             if (replacement is null)
             {
                 break;
             }
 
             team.Substitutes.Remove(replacement);
+            PositionSuitabilityService.EnsurePositionMetadata(replacement, slot);
             team.Players.Add(replacement);
             replacement.IsStarter = true;
             replacement.IsOnPitch = true;
+            wasRepaired = true;
         }
 
-        return LineupValidationService.RepairGoalkeeperSlot(team);
+        var goalkeeperResult = LineupValidationService.RepairGoalkeeperSlot(team);
+        if (!goalkeeperResult.IsValid)
+        {
+            return goalkeeperResult;
+        }
+
+        return wasRepaired || goalkeeperResult.WasRepaired
+            ? LineupValidationResult.Repaired()
+            : LineupValidationResult.Valid();
     }
 
     private void LoadFormationSelector(Team team)
@@ -314,6 +359,7 @@ public partial class PreMatchView : UserControl
             {
                 _pitchSlots = OrderPlayersForPitch(_state.SelectedTeam.Players, formation).ToList();
                 _state.SelectedTeam.Players = _pitchSlots.ToList();
+                SaveSetup(_state.SelectedTeam);
             }
         }
 
@@ -324,6 +370,10 @@ public partial class PreMatchView : UserControl
     private void TacticalSettingsPanel_TacticsChanged(object? sender, EventArgs e)
     {
         RefreshTacticalInsight();
+        if (!_isLoadingSetup && _state.SelectedTeam is not null)
+        {
+            SaveSetup(_state.SelectedTeam);
+        }
     }
 
     private void ExecuteSwap(Player starter, Player substitute)
@@ -368,6 +418,7 @@ public partial class PreMatchView : UserControl
         UpdateSelectedPlayerDetails();
         RenderPitch();
         RefreshTacticalInsight();
+        SaveSetup(_state.SelectedTeam);
     }
 
     private void RefreshSubstitutes()
@@ -961,6 +1012,7 @@ public partial class PreMatchView : UserControl
         UpdateSelectedPlayerDetails();
         RenderPitch();
         RefreshTacticalInsight();
+        SaveSetup(_state.SelectedTeam);
     }
 
     private void SwapSubstitutes(Player draggedPlayer, Player targetPlayer)
@@ -989,6 +1041,7 @@ public partial class PreMatchView : UserControl
             $"[PreMatchDrag] Swapped substitutes: {draggedPlayer.Name} -> index {targetIndex}; {targetPlayer.Name} -> index {draggedIndex}");
 
         RefreshSubstitutes();
+        SaveSetup(_state.SelectedTeam);
     }
 
     private static void ApplyDropTargetStyle(Button button, bool canDrop)
@@ -1061,6 +1114,16 @@ public partial class PreMatchView : UserControl
         _navigate(new MatchLiveView(_state, _navigate, isSecondHalf: false));
     }
 
+    private void BackToDashboardButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_state.SelectedTeam is not null)
+        {
+            SaveSetup(_state.SelectedTeam);
+        }
+
+        _navigate(new DashboardView(_state, _navigate));
+    }
+
     private void SaveSetup(Team team)
     {
         if (FormationComboBox.SelectedItem is string formation)
@@ -1069,6 +1132,39 @@ public partial class PreMatchView : UserControl
         }
 
         TacticalSettingsPanel.ApplyTo(team.Tactics);
+        PersistCurrentSaveSlot();
+    }
+
+    private void PersistCurrentSaveSlot()
+    {
+        if (_state.CurrentSaveSlotNumber is not int slotNumber ||
+            _state.League is null ||
+            _state.SelectedTeam is null)
+        {
+            return;
+        }
+
+        try
+        {
+            var saveData = SaveGameService.CreateSaveData(_state.League, _state.SelectedTeam);
+            _saveGameService.SaveGame(slotNumber, saveData);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException or System.Text.Json.JsonException)
+        {
+            Debug.WriteLine($"[PreMatchSave] Could not persist lineup setup: {ex.Message}");
+        }
+    }
+
+    private static Player? ChooseBenchReplacementForSlot(Team team, string exactPosition)
+    {
+        return team.Substitutes
+            .Where(IsAvailableForSelection)
+            .Where(player => CanPlayerOccupySlot(player, exactPosition))
+            .OrderByDescending(player => GetSlotFitScore(player, exactPosition))
+            .ThenByDescending(GetOverallRating)
+            .ThenBy(player => player.SquadNumber <= 0 ? int.MaxValue : player.SquadNumber)
+            .ThenBy(player => player.Name)
+            .FirstOrDefault();
     }
 
     private IEnumerable<Player> OrderPlayersForPitch(IEnumerable<Player> players, string formation)
@@ -1120,8 +1216,10 @@ public partial class PreMatchView : UserControl
 
     private static bool CanPlayerOccupySlot(Player player, string exactPosition)
     {
-        return PositionSuitabilityService.NormalizeExactPosition(exactPosition) != "GK" ||
-            PositionSuitabilityService.IsGoalkeeperCapable(player);
+        var normalizedSlot = PositionSuitabilityService.NormalizeExactPosition(exactPosition);
+        return normalizedSlot == "GK"
+            ? PositionSuitabilityService.IsGoalkeeperCapable(player)
+            : !PositionSuitabilityService.IsGoalkeeperCapable(player);
     }
 
     private static void ShowGoalkeeperWarningIfNeeded(LineupValidationResult result)

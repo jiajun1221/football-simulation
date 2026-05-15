@@ -79,7 +79,7 @@ public partial class MainWindow : Window
         Navigate(new LoadGameView(LoadSavedGame, ShowMainMenu));
     }
 
-    private void LoadSavedGame(SaveGameData saveData)
+    private void LoadSavedGame(SaveGameData saveData, int slotNumber)
     {
         var league = SaveGameService.CreateLeague(saveData);
         var selectedTeam = league.Teams.FirstOrDefault(team =>
@@ -98,7 +98,8 @@ public partial class MainWindow : Window
             League = league,
             SelectedTeam = selectedTeam,
             CurrentFixture = FindNextFixtureForTeam(league, selectedTeam),
-            CurrentMatch = null
+            CurrentMatch = null,
+            CurrentSaveSlotNumber = slotNumber
         };
 
         Navigate(new DashboardView(_state, Navigate));

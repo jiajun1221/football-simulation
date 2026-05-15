@@ -28,11 +28,14 @@ public partial class HalfTimeView : UserControl
 
     private Player? _selectedStarter;
     private List<Player> _pitchSlots = [];
+    private readonly List<PendingHalftimeSubstitution> _pendingHalftimeSubstitutions = [];
     private Point _dragStartPoint;
     private bool _isDraggingPlayer;
     private bool _isLoadingSetup;
 
     private sealed record PitchSlotAssignment(Player Player, PitchPosition Position);
+    private sealed record PendingHalftimeSubstitution(Player Starter, Player Substitute, string AssignedPosition);
+    private sealed record PendingSubstitutionRow(PendingHalftimeSubstitution Substitution, string DisplayText);
 
     public HalfTimeView(GameFlowState state, Action<UserControl> navigate)
     {
@@ -62,6 +65,7 @@ public partial class HalfTimeView : UserControl
         LoadTactics(_state.SelectedTeam.Tactics);
         InitializePitchSlots();
         RefreshSubstitutes();
+        RefreshPendingSubstitutions();
         RenderPitch();
 
         _isLoadingSetup = false;
@@ -251,7 +255,7 @@ public partial class HalfTimeView : UserControl
             FormBadgeBackground = form.Background,
             FormBadgeForeground = form.Foreground,
             TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits),
-            CardStatusBadges = PlayerCardStatusBadgeHelper.Create(player, FindSelectedPlayerPerformance(player, _state.SelectedTeam)),
+            CardStatusBadges = CreateCardStatusBadges(player, pendingIn: false),
             CardBackground = teamColors.PrimaryColor,
             CardBorderBrush = player == _selectedStarter
                 ? teamColors.SelectedGlowColor
@@ -307,41 +311,49 @@ public partial class HalfTimeView : UserControl
         }
 
         var usedSubstitutions = GetUsedSubstitutions();
-        if (usedSubstitutions >= MatchConstants.MaxSubstitutionsPerTeam)
+        var existingStarterPlan = _pendingHalftimeSubstitutions.FirstOrDefault(substitution => substitution.Starter == starter);
+        var pendingCountAfterChange = existingStarterPlan is null
+            ? _pendingHalftimeSubstitutions.Count + 1
+            : _pendingHalftimeSubstitutions.Count;
+        if (usedSubstitutions + pendingCountAfterChange > MatchConstants.MaxSubstitutionsPerTeam)
         {
             MessageBox.Show($"Maximum substitutions reached ({MatchConstants.MaxSubstitutionsPerTeam}/5).");
             return;
         }
 
-        SyncActivePitchSlotsIntoTeamPlayers();
         PositionSuitabilityService.EnsurePositionMetadata(starter);
         PositionSuitabilityService.EnsurePositionMetadata(substitute);
         var incomingAssignedPosition = starter.AssignedPosition;
-
-        var swapResult = _squadSelectionService.SwapStarterWithSubstitute(
-            _state.SelectedTeam,
-            starter,
-            substitute,
-            _state.CurrentMatch,
-            substitutionMinute: 45);
-
-        if (!swapResult.Success)
+        if (incomingAssignedPosition == "GK" && !PositionSuitabilityService.IsGoalkeeperCapable(substitute))
         {
-            MessageBox.Show(swapResult.Message);
-            RefreshSubstitutes();
+            MessageBox.Show("Goalkeeper substitutions require a goalkeeper-capable replacement.");
             return;
         }
 
-        starter.AssignedPosition = starter.PreferredPosition;
-        PositionSuitabilityService.EnsurePositionMetadata(substitute, incomingAssignedPosition);
+        if (_state.CurrentMatch is not null &&
+            _squadSelectionService.WasPlayerSubstitutedOff(_state.CurrentMatch, _state.SelectedTeam.Name, substitute.Name))
+        {
+            MessageBox.Show("Players substituted off cannot return in the same match.");
+            return;
+        }
 
-        _pitchSlots = GetActivePitchPlayers(_state.SelectedTeam).ToList();
-        Debug.WriteLine(
-            $"[HalfTimeDrag] Swapped Sub<->StartingXI: {substitute.Name} -> slot {_pitchSlots.IndexOf(substitute)} ({substitute.AssignedPosition}); " +
-            $"{starter.Name} -> substitute index {_state.SelectedTeam.Substitutes.IndexOf(starter)}");
-        _selectedStarter = substitute;
+        if (existingStarterPlan is not null)
+        {
+            _pendingHalftimeSubstitutions.Remove(existingStarterPlan);
+        }
+
+        if (_pendingHalftimeSubstitutions.Any(substitution => substitution.Substitute == substitute))
+        {
+            MessageBox.Show($"{substitute.Name} is already queued to come on.");
+            return;
+        }
+
+        _pendingHalftimeSubstitutions.Add(new PendingHalftimeSubstitution(starter, substitute, incomingAssignedPosition));
+        Debug.WriteLine($"[HalfTimeDrag] Queued halftime sub: {substitute.Name} -> {starter.Name} ({incomingAssignedPosition})");
+
         RefreshSubstitutes();
         UpdateSelectedPlayerDetails();
+        RefreshPendingSubstitutions();
         RenderPitch();
         RefreshTacticalInsight();
     }
@@ -354,14 +366,59 @@ public partial class HalfTimeView : UserControl
         }
 
         var benchCards = _state.SelectedTeam.Substitutes
-            .Where(player => !player.IsSentOff)
+            .Where(IsAvailableSubstitute)
             .Select(CreateBenchPlayerCard)
             .ToList();
 
         SubstituteListBox.ItemsSource = null;
         SubstituteListBox.ItemsSource = benchCards;
-        SubstituteListBox.IsEnabled = benchCards.Count > 0 && GetUsedSubstitutions() < MatchConstants.MaxSubstitutionsPerTeam;
-        SubstitutionStatusTextBlock.Text = $"{GetUsedSubstitutions()}/5 used";
+        SubstituteListBox.IsEnabled = benchCards.Count > 0 && GetUsedSubstitutions() + _pendingHalftimeSubstitutions.Count < MatchConstants.MaxSubstitutionsPerTeam;
+        SubstitutionStatusTextBlock.Text = _pendingHalftimeSubstitutions.Count == 0
+            ? $"{GetUsedSubstitutions()}/5 used"
+            : $"{GetUsedSubstitutions()}/5 used · {_pendingHalftimeSubstitutions.Count} queued";
+    }
+
+    private bool IsAvailableSubstitute(Player player)
+    {
+        if (player.IsSentOff || player.IsSuspended || player.IsInjured)
+        {
+            return false;
+        }
+
+        return _state.CurrentMatch is null ||
+            !_squadSelectionService.WasPlayerSubstitutedOff(_state.CurrentMatch, _state.SelectedTeam?.Name ?? string.Empty, player.Name);
+    }
+
+    private void RefreshPendingSubstitutions()
+    {
+        if (_pendingHalftimeSubstitutions.Count == 0)
+        {
+            PendingSubstitutionPanel.Visibility = Visibility.Collapsed;
+            PendingSubstitutionsItemsControl.ItemsSource = null;
+            return;
+        }
+
+        PendingSubstitutionPanel.Visibility = Visibility.Visible;
+        PendingSubstitutionHeaderTextBlock.Text = $"{_pendingHalftimeSubstitutions.Count} queued";
+        PendingSubstitutionsItemsControl.ItemsSource = _pendingHalftimeSubstitutions
+            .Select(substitution => new PendingSubstitutionRow(
+                substitution,
+                $"{substitution.Substitute.Name} ↑  {substitution.Starter.Name} ↓"))
+            .ToList();
+    }
+
+    private void CancelPendingSubstitutionButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { Tag: PendingSubstitutionRow row })
+        {
+            return;
+        }
+
+        _pendingHalftimeSubstitutions.Remove(row.Substitution);
+        RefreshSubstitutes();
+        RefreshPendingSubstitutions();
+        UpdateSelectedPlayerDetails();
+        RenderPitch();
     }
 
     private BenchPlayerCard CreateBenchPlayerCard(Player player)
@@ -391,8 +448,38 @@ public partial class HalfTimeView : UserControl
             PositionBackground = teamColors.SecondaryColor,
             PositionForeground = TeamColorService.GetReadableTextColor(teamColors.SecondaryColor),
             TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits),
-            CardStatusBadges = PlayerCardStatusBadgeHelper.Create(player, FindSelectedPlayerPerformance(player, _state.SelectedTeam))
+            CardStatusBadges = CreateCardStatusBadges(player, pendingIn: true)
         };
+    }
+
+    private IReadOnlyList<PlayerCardStatusBadge> CreateCardStatusBadges(Player player, bool pendingIn)
+    {
+        var badges = PlayerCardStatusBadgeHelper.Create(player, FindSelectedPlayerPerformance(player, _state.SelectedTeam)).ToList();
+        if (_pendingHalftimeSubstitutions.Any(substitution => substitution.Starter == player))
+        {
+            badges.Add(new PlayerCardStatusBadge
+            {
+                Text = "↓",
+                TooltipText = "Pending halftime substitution off.",
+                Background = "#DC2626",
+                Foreground = "#FFFFFF",
+                BorderBrush = "#FCA5A5"
+            });
+        }
+
+        if (pendingIn && _pendingHalftimeSubstitutions.Any(substitution => substitution.Substitute == player))
+        {
+            badges.Add(new PlayerCardStatusBadge
+            {
+                Text = "↑",
+                TooltipText = "Pending halftime substitution on.",
+                Background = "#16A34A",
+                Foreground = "#FFFFFF",
+                BorderBrush = "#86EFAC"
+            });
+        }
+
+        return badges;
     }
 
     private int GetUsedSubstitutions()
@@ -968,7 +1055,7 @@ public partial class HalfTimeView : UserControl
         ResetSubstituteListDropTargetStyle();
 
         var draggedPlayer = GetDraggedPlayer(e);
-        var firstSubstitute = _state.SelectedTeam?.Substitutes.FirstOrDefault();
+        var firstSubstitute = _state.SelectedTeam?.Substitutes.FirstOrDefault(IsAvailableSubstitute);
         if (draggedPlayer is null || draggedPlayer.Source != DragSource.StartingXi || firstSubstitute is null)
         {
             return;
@@ -1114,10 +1201,52 @@ public partial class HalfTimeView : UserControl
     {
         if (_state.SelectedTeam is not null)
         {
+            if (!ApplyPendingHalftimeSubstitutions())
+            {
+                return;
+            }
+
             SaveSetup(_state.SelectedTeam);
         }
 
         _navigate(new MatchLiveView(_state, _navigate, isSecondHalf: true));
+    }
+
+    private bool ApplyPendingHalftimeSubstitutions()
+    {
+        if (_state.SelectedTeam is null || _pendingHalftimeSubstitutions.Count == 0)
+        {
+            return true;
+        }
+
+        SyncActivePitchSlotsIntoTeamPlayers();
+        foreach (var pendingSubstitution in _pendingHalftimeSubstitutions.ToList())
+        {
+            var result = _squadSelectionService.SwapStarterWithSubstitute(
+                _state.SelectedTeam,
+                pendingSubstitution.Starter,
+                pendingSubstitution.Substitute,
+                _state.CurrentMatch,
+                MatchConstants.HalftimeMinute);
+            if (!result.Success)
+            {
+                MessageBox.Show(result.Message);
+                RefreshSubstitutes();
+                RefreshPendingSubstitutions();
+                RenderPitch();
+                return false;
+            }
+
+            pendingSubstitution.Starter.AssignedPosition = pendingSubstitution.Starter.PreferredPosition;
+            PositionSuitabilityService.EnsurePositionMetadata(pendingSubstitution.Substitute, pendingSubstitution.AssignedPosition);
+        }
+
+        _pendingHalftimeSubstitutions.Clear();
+        _pitchSlots = GetActivePitchPlayers(_state.SelectedTeam).ToList();
+        RefreshSubstitutes();
+        RefreshPendingSubstitutions();
+        RenderPitch();
+        return true;
     }
 
     private void SaveSetup(Team team)

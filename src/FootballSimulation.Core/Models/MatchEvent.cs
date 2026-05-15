@@ -3,6 +3,7 @@ namespace FootballSimulation.Models;
 public class MatchEvent
 {
     public int Minute { get; set; }
+    public string DisplayMinuteText { get; set; } = string.Empty;
     public EventType EventType { get; set; }
     public int? HomeScore { get; set; }
     public int? AwayScore { get; set; }

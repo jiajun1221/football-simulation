@@ -134,6 +134,7 @@ public partial class DashboardView : UserControl
         {
             var saveData = SaveGameService.CreateSaveData(_state.League, _state.SelectedTeam);
             _saveGameService.SaveGame(slotNumber, saveData);
+            _state.CurrentSaveSlotNumber = slotNumber;
             MessageBox.Show($"Game saved to slot {slotNumber}.", "Save Game", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException or System.Text.Json.JsonException)

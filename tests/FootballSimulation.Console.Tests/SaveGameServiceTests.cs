@@ -1,5 +1,6 @@
 using FootballSimulation.Data;
 using FootballSimulation.Engine;
+using FootballSimulation.Models;
 using FootballSimulation.Services;
 
 namespace FootballSimulation.Console.Tests;
@@ -26,6 +27,8 @@ public class SaveGameServiceTests
         selectedTeam.Players[0].InjuryType = "Hamstring Injury";
         selectedTeam.Players[0].InjuryRecoveryMatches = 3;
         selectedTeam.Players[1].SuspendedMatches = 1;
+        var injuredPlayerName = selectedTeam.Players[0].Name;
+        var suspendedPlayerName = selectedTeam.Players[1].Name;
 
         try
         {
@@ -41,7 +44,9 @@ public class SaveGameServiceTests
                 savedFixture.AwayTeam.Name == fixture.AwayTeam.Name);
             var loadedSelectedFixture = loadedLeague.Fixtures.First(savedFixture =>
                 savedFixture.HomeTeam == loadedSelectedTeam || savedFixture.AwayTeam == loadedSelectedTeam);
-            var loadedPlayer = loadedSelectedTeam.Players[0];
+            var loadedPlayer = loadedSelectedTeam.Players
+                .Concat(loadedSelectedTeam.Substitutes)
+                .Single(player => player.Name == injuredPlayerName);
 
             Assert.NotNull(loadedData);
             Assert.Equal(SaveGameService.CurrentSaveVersion, loadedData!.SaveVersion);
@@ -56,8 +61,11 @@ public class SaveGameServiceTests
             Assert.True(loadedPlayer.IsInjured);
             Assert.Equal("Hamstring Injury", loadedPlayer.InjuryType);
             Assert.Equal(3, loadedPlayer.InjuryRecoveryMatches);
-            Assert.Equal(1, loadedSelectedTeam.Players[1].SuspendedMatches);
-            Assert.True(loadedSelectedTeam.Players[1].IsSuspended);
+            var suspendedPlayer = loadedSelectedTeam.Players
+                .Concat(loadedSelectedTeam.Substitutes)
+                .Single(player => player.Name == suspendedPlayerName);
+            Assert.Equal(1, suspendedPlayer.SuspendedMatches);
+            Assert.True(suspendedPlayer.IsSuspended);
             Assert.Equal(league.Table.Sum(entry => entry.Points), loadedLeague.Table.Sum(entry => entry.Points));
             Assert.Equal(league.Fixtures.Count(fixtureItem => fixtureItem.IsPlayed), loadedData.MatchHistory.Count);
         }
@@ -65,6 +73,81 @@ public class SaveGameServiceTests
         {
             DeleteDirectory(saveDirectory);
         }
+    }
+
+    [Fact]
+    public void SaveGame_AndLoadGame_PreservesCustomLineupSlotsAndBenchOrder()
+    {
+        var saveDirectory = CreateTempSaveDirectory();
+        var saveGameService = new SaveGameService(saveDirectory);
+        var leagueEngine = new LeagueEngine();
+        var teams = new LeagueSeedDataService().CreateLeagueTeams();
+        var selectedTeam = teams[0];
+        var league = leagueEngine.CreateLeague(GameSessionService.PremierLeagueName, teams);
+        var originalPlayers = selectedTeam.Players.Concat(selectedTeam.Substitutes).ToList();
+        var goalkeeper = originalPlayers.First(PositionSuitabilityService.IsGoalkeeperCapable);
+        var outfield = originalPlayers.Where(player => !PositionSuitabilityService.IsGoalkeeperCapable(player)).Take(10).ToList();
+        var slots = new[] { "GK", "RB", "CB", "CB", "LB", "CDM", "CDM", "LW", "CAM", "RW", "ST" };
+        var starters = new[] { goalkeeper, outfield[3], outfield[2], outfield[1], outfield[0], outfield[4], outfield[5], outfield[6], outfield[7], outfield[8], outfield[9] };
+        var bench = originalPlayers.Except(starters).Take(3).ToArray();
+
+        selectedTeam.Formation = "4-2-3-1";
+        selectedTeam.Players = starters.ToList();
+        selectedTeam.Substitutes = bench.Concat(originalPlayers.Except(starters).Except(bench)).ToList();
+        for (var index = 0; index < selectedTeam.Players.Count; index++)
+        {
+            PositionSuitabilityService.EnsurePositionMetadata(selectedTeam.Players[index], slots[index]);
+        }
+
+        try
+        {
+            saveGameService.SaveGame(1, SaveGameService.CreateSaveData(league, selectedTeam));
+
+            var loadedData = saveGameService.LoadGame(1);
+            var loadedLeague = SaveGameService.CreateLeague(loadedData!);
+            var loadedSelectedTeam = loadedLeague.Teams.Single(team => team.Name == selectedTeam.Name);
+
+            Assert.Equal("4-2-3-1", loadedSelectedTeam.Formation);
+            Assert.Equal(starters.Select(player => player.Name), loadedSelectedTeam.Players.Select(player => player.Name));
+            Assert.Equal(slots, loadedSelectedTeam.Players.Select(player => player.AssignedPosition));
+            Assert.Equal(bench.Select(player => player.Name), loadedSelectedTeam.Substitutes.Take(bench.Length).Select(player => player.Name));
+        }
+        finally
+        {
+            DeleteDirectory(saveDirectory);
+        }
+    }
+
+    [Fact]
+    public void ClubMatchSetupService_ReplacesOnlyUnavailableStarterSlot()
+    {
+        var team = new LeagueSeedDataService().CreateLeagueTeams()[0];
+        var allPlayers = team.Players.Concat(team.Substitutes).ToList();
+        var goalkeeper = allPlayers.First(PositionSuitabilityService.IsGoalkeeperCapable);
+        var outfield = allPlayers.Where(player => !PositionSuitabilityService.IsGoalkeeperCapable(player)).Take(13).ToList();
+        var slots = new[] { "GK", "RB", "CB", "CB", "LB", "CDM", "CDM", "LW", "CAM", "RW", "ST" };
+        var starters = new[] { goalkeeper, outfield[0], outfield[1], outfield[2], outfield[3], outfield[4], outfield[5], outfield[6], outfield[7], outfield[8], outfield[9] };
+        var expectedCbName = starters[2].Name;
+        var suspendedRightBack = starters[1];
+
+        team.Formation = "4-2-3-1";
+        team.Players = starters.ToList();
+        team.Substitutes = outfield.Skip(10).Concat(allPlayers.Except(starters).Except(outfield.Skip(10))).ToList();
+        for (var index = 0; index < team.Players.Count; index++)
+        {
+            PositionSuitabilityService.EnsurePositionMetadata(team.Players[index], slots[index]);
+        }
+
+        var setup = ClubMatchSetupService.Capture(team);
+        suspendedRightBack.SuspendedMatches = 1;
+
+        ClubMatchSetupService.Apply(team, setup);
+
+        Assert.NotEqual(suspendedRightBack.Name, team.Players[1].Name);
+        Assert.Equal("RB", team.Players[1].AssignedPosition);
+        Assert.Equal(expectedCbName, team.Players[2].Name);
+        Assert.Equal("CB", team.Players[2].AssignedPosition);
+        Assert.Contains(suspendedRightBack, team.Substitutes);
     }
 
     [Fact]

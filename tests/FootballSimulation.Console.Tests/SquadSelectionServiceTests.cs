@@ -63,6 +63,59 @@ public class SquadSelectionServiceTests
     }
 
     [Fact]
+    public void SwapStarterWithSubstitute_RejectsPlayerAlreadySubstitutedOff()
+    {
+        var service = new SquadSelectionService();
+        var team = CreateTeam();
+        var match = new Match { HomeTeam = team, AwayTeam = CreateTeam("Opponent") };
+        var originalStarter = team.Players[1];
+        var firstSubstitute = team.Substitutes[1];
+
+        var firstSwap = service.SwapStarterWithSubstitute(team, originalStarter, firstSubstitute, match, 60);
+        Assert.True(firstSwap.Success);
+        Assert.Contains(originalStarter, team.Substitutes);
+
+        var rejectedReturn = service.SwapStarterWithSubstitute(team, team.Players[2], originalStarter, match, 70);
+
+        Assert.False(rejectedReturn.Success);
+        Assert.Contains("cannot return", rejectedReturn.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Single(match.Substitutions);
+        Assert.Contains(originalStarter, team.Substitutes);
+        Assert.DoesNotContain(originalStarter, team.Players);
+    }
+
+    [Fact]
+    public void AiManager_DoesNotBringBackPlayerAlreadySubstitutedOff()
+    {
+        var team = CreateTeam(substituteCount: 3);
+        var match = new Match { HomeTeam = team, AwayTeam = CreateTeam("Opponent") };
+        var tiredStarter = team.Players[1];
+        var subbedOffPlayer = team.Substitutes[1];
+        var eligibleSubstitute = team.Substitutes[2];
+        tiredStarter.Stamina = 4;
+        subbedOffPlayer.OverallRating = 99;
+        eligibleSubstitute.OverallRating = 60;
+        match.Substitutions.Add(new MatchSubstitution
+        {
+            Minute = 50,
+            TeamName = team.Name,
+            PlayerOffName = subbedOffPlayer.Name,
+            PlayerOnName = "Earlier Substitute"
+        });
+
+        var decision = new AiManagerService().TryMakeSubstitution(
+            match,
+            team,
+            minute: 60,
+            new MatchSimulationOptions(),
+            new Random(1));
+
+        Assert.NotNull(decision);
+        Assert.Equal(eligibleSubstitute.Name, decision.PlayerOn.Name);
+        Assert.NotEqual(subbedOffPlayer.Name, decision.PlayerOn.Name);
+    }
+
+    [Fact]
     public void SubstituteKeepsFresherStaminaThanTiredStarter()
     {
         var team = CreateTeam();

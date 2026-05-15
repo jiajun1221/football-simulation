@@ -10,6 +10,7 @@ public class GameFlowState
     public League? League { get; set; }
     public Fixture? CurrentFixture { get; set; }
     public Match? CurrentMatch { get; set; }
+    public int? CurrentSaveSlotNumber { get; set; }
     public MatchSpeed CurrentMatchSpeed { get; set; } = MatchSpeed.Medium;
     public bool IsCompactLiveMatchView { get; set; }
 }

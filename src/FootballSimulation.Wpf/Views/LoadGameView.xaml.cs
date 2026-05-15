@@ -36,11 +36,11 @@ public partial class LoadGameView : UserControl
         ["Wolverhampton Wanderers"] = "Wolverhampton Wanderers.png"
     };
 
-    private readonly Action<SaveGameData> _loadGame;
+    private readonly Action<SaveGameData, int> _loadGame;
     private readonly Action _goBack;
     private readonly SaveGameService _saveGameService = new();
 
-    public LoadGameView(Action<SaveGameData> loadGame, Action goBack)
+    public LoadGameView(Action<SaveGameData, int> loadGame, Action goBack)
     {
         InitializeComponent();
         _loadGame = loadGame;
@@ -72,7 +72,7 @@ public partial class LoadGameView : UserControl
                 return;
             }
 
-            _loadGame(saveData);
+            _loadGame(saveData, row.SlotNumber);
         }
         catch (Exception ex) when (ex is InvalidDataException or System.Text.Json.JsonException or NotSupportedException or IOException)
         {

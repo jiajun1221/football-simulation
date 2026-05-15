@@ -10,4 +10,5 @@ public class SaveGameData
     public List<Team> Teams { get; set; } = [];
     public List<Fixture> Fixtures { get; set; } = [];
     public List<Match> MatchHistory { get; set; } = [];
+    public List<ClubMatchSetup> ClubMatchSetups { get; set; } = [];
 }

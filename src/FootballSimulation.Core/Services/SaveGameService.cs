@@ -102,7 +102,8 @@ public class SaveGameService
             },
             Teams = league.Teams,
             Fixtures = league.Fixtures,
-            MatchHistory = CreateMatchHistory(league.Fixtures)
+            MatchHistory = CreateMatchHistory(league.Fixtures),
+            ClubMatchSetups = CreateClubMatchSetups(league.Teams)
         };
     }
 
@@ -235,6 +236,13 @@ public class SaveGameService
             .ToList();
     }
 
+    private static List<ClubMatchSetup> CreateClubMatchSetups(IEnumerable<Team> teams)
+    {
+        return teams
+            .Select(ClubMatchSetupService.Capture)
+            .ToList();
+    }
+
     private static void RehydrateReferences(SaveGameData data)
     {
         foreach (var team in data.Teams)
@@ -245,6 +253,15 @@ public class SaveGameService
         var teamsByName = data.Teams
             .GroupBy(team => team.Name, StringComparer.OrdinalIgnoreCase)
             .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
+
+        foreach (var setup in data.ClubMatchSetups)
+        {
+            if (teamsByName.TryGetValue(setup.ClubName, out var team))
+            {
+                ClubMatchSetupService.Apply(team, setup);
+                _ = LineupValidationService.RepairGoalkeeperSlot(team);
+            }
+        }
 
         foreach (var fixture in data.Fixtures)
         {

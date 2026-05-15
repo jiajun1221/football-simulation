@@ -38,6 +38,11 @@ public class SquadSelectionService
             return SquadSwapResult.Failed("Unavailable players cannot be used as substitutes.");
         }
 
+        if (match is not null && WasPlayerSubstitutedOff(match, team.Name, substitute.Name))
+        {
+            return SquadSwapResult.Failed("Players substituted off cannot return in the same match.");
+        }
+
         PositionSuitabilityService.EnsurePositionMetadata(starter);
         if (string.Equals(starter.AssignedPosition, "GK", StringComparison.OrdinalIgnoreCase) &&
             !PositionSuitabilityService.IsGoalkeeperCapable(substitute))
@@ -72,6 +77,13 @@ public class SquadSelectionService
     {
         return match.Substitutions.Count(substitution =>
             string.Equals(substitution.TeamName, teamName, StringComparison.OrdinalIgnoreCase));
+    }
+
+    public bool WasPlayerSubstitutedOff(Match match, string teamName, string playerName)
+    {
+        return match.Substitutions.Any(substitution =>
+            string.Equals(substitution.TeamName, teamName, StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(substitution.PlayerOffName, playerName, StringComparison.OrdinalIgnoreCase));
     }
 
     private static void RecordMatchSubstitution(
