@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using FootballSimulation.Services;
 
 namespace FootballSimulation.Wpf.Views;
 
@@ -13,13 +14,9 @@ public partial class MainMenuView : UserControl
         new PropertyMetadata(null));
 
     public IReadOnlyList<LeagueOption> LeagueOptions { get; } =
-    [
-        new("Premier League", "/Assets/Leagues/premier-league.png", "Available", "#22C55E", true),
-        new("LaLiga", "/Assets/Leagues/laliga.png", "Coming soon", "#F97316", false),
-        new("Serie A", "/Assets/Leagues/serie-a.png", "Coming soon", "#F97316", false),
-        new("Bundesliga", "/Assets/Leagues/bundesliga.png", "Coming soon", "#F97316", false),
-        new("Ligue 1", "/Assets/Leagues/ligue-1.png", "Coming soon", "#F97316", false)
-    ];
+        new LeagueDataService().LoadLeagueDefinitions()
+            .Select(LeagueOption.FromDefinition)
+            .ToList();
 
     public LeagueOption SelectedLeague
     {
@@ -27,12 +24,12 @@ public partial class MainMenuView : UserControl
         private set => SetValue(SelectedLeagueProperty, value);
     }
 
-    private readonly Action _startNewGame;
+    private readonly Action<string> _startNewGame;
     private readonly Action _showLoadGame;
     private readonly Action _exit;
     private int _selectedLeagueIndex;
 
-    public MainMenuView(Action startNewGame, Action showLoadGame, Action exit)
+    public MainMenuView(Action<string> startNewGame, Action showLoadGame, Action exit)
     {
         InitializeComponent();
         _startNewGame = startNewGame;
@@ -53,7 +50,7 @@ public partial class MainMenuView : UserControl
             return;
         }
 
-        _startNewGame();
+        _startNewGame(SelectedLeague.LeagueId);
     }
 
     private void LoadGameButton_Click(object sender, RoutedEventArgs e)
@@ -85,12 +82,14 @@ public partial class MainMenuView : UserControl
     public sealed class LeagueOption
     {
         public LeagueOption(
+            string leagueId,
             string name,
             string logoPath,
             string statusText,
             string statusBrush,
             bool isAvailable)
         {
+            LeagueId = leagueId;
             Name = name;
             LogoPath = logoPath;
             StatusText = statusText;
@@ -99,12 +98,24 @@ public partial class MainMenuView : UserControl
             CardOpacity = isAvailable ? 1.0 : 0.62;
         }
 
+        public string LeagueId { get; }
         public string Name { get; }
         public string LogoPath { get; }
         public string StatusText { get; }
         public Brush StatusBrush { get; }
         public bool IsAvailable { get; }
         public double CardOpacity { get; }
+
+        public static LeagueOption FromDefinition(FootballSimulation.Models.LeagueDefinition definition)
+        {
+            return new LeagueOption(
+                definition.LeagueId,
+                definition.Name,
+                definition.LogoPath,
+                definition.IsAvailable ? "Available" : "Coming soon",
+                definition.IsAvailable ? "#22C55E" : "#F97316",
+                definition.IsAvailable);
+        }
 
         private static Brush ToBrush(string color)
         {

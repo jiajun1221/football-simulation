@@ -221,11 +221,16 @@ public class MatchEngineScoringTests
 
                 var nextPossessionEvent = events
                     .Skip(index + 1)
-                    .FirstOrDefault(matchEvent => matchEvent.EventType is EventType.Attack or EventType.Kickoff);
+                    .FirstOrDefault(matchEvent =>
+                        matchEvent.EventType is EventType.Attack
+                            or EventType.Kickoff
+                            or EventType.CornerKick
+                            or EventType.SetPieceDanger
+                            or EventType.ChanceCreated
+                            or EventType.Shot);
 
                 if (nextPossessionEvent is not null && nextPossessionEvent.EventType != EventType.Kickoff)
                 {
-                    Assert.Equal(EventType.Attack, nextPossessionEvent.EventType);
                     var nextEventTeam = FindEventTeamName(nextPossessionEvent, result);
                     Assert.True(
                         string.Equals(turnoverTeam, nextEventTeam, StringComparison.OrdinalIgnoreCase),
@@ -777,6 +782,74 @@ public class MatchEngineScoringTests
     }
 
     [Fact]
+    public void SimulateMatch_OpenPlayChanceOnlyUsesSameCreatorAndShooterForSoloMoves()
+    {
+        var seedDataService = new SeedDataService();
+        var engine = new MatchEngine();
+
+        for (var seed = 1; seed <= 120; seed++)
+        {
+            var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+            var result = engine.SimulateMatch(homeTeam, awayTeam, seed: seed);
+            var events = result.Events;
+
+            for (var index = 0; index < events.Count - 1; index++)
+            {
+                if (events[index].EventType != EventType.ChanceCreated ||
+                    events[index + 1].EventType != EventType.Shot ||
+                    !string.Equals(events[index].PrimaryPlayerName, events[index + 1].PrimaryPlayerName, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                Assert.True(
+                    IsSoloChanceDescription(events[index].Description) || IsSoloChanceDescription(events[index + 1].Description),
+                    $"Same-player chance and shot should only happen for solo/rebound/range attacks: {events[index].Description} -> {events[index + 1].Description}");
+            }
+        }
+    }
+
+    [Fact]
+    public void SimulateMatch_CornersSeparateTakerFromShotTargetAndEmitShotBeforeResult()
+    {
+        var seedDataService = new SeedDataService();
+        var engine = new MatchEngine();
+        var cornerShotCount = 0;
+        var samePlayerCornerShots = 0;
+
+        for (var seed = 1; seed <= 140; seed++)
+        {
+            var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+            var result = engine.SimulateMatch(homeTeam, awayTeam, seed: seed);
+            var events = result.Events;
+
+            for (var index = 0; index < events.Count - 1; index++)
+            {
+                if (events[index].EventType != EventType.CornerKick)
+                {
+                    continue;
+                }
+
+                var shot = events[index + 1];
+                Assert.Equal(EventType.Shot, shot.EventType);
+                Assert.Equal(events[index].PrimaryPlayerName, shot.SecondaryPlayerName);
+                Assert.DoesNotContain("creates a shooting chance", shot.Description, StringComparison.OrdinalIgnoreCase);
+
+                cornerShotCount++;
+                if (string.Equals(events[index].PrimaryPlayerName, shot.PrimaryPlayerName, StringComparison.OrdinalIgnoreCase))
+                {
+                    samePlayerCornerShots++;
+                }
+            }
+        }
+
+        Assert.True(cornerShotCount > 0);
+        Assert.True(
+            samePlayerCornerShots <= Math.Max(1, cornerShotCount / 20),
+            $"Corner takers should only rarely take the resulting shot themselves. Same-player: {samePlayerCornerShots}, corners: {cornerShotCount}");
+    }
+
+    [Fact]
     public void SimulateMatch_GoalAssistUsesChanceCreatorWhenDifferentFromScorer()
     {
         var seedDataService = new SeedDataService();
@@ -818,6 +891,16 @@ public class MatchEngineScoringTests
             || matchEvent.EventType == EventType.WonderGoal
             || (matchEvent.EventType == EventType.Penalty
                 && matchEvent.Description.Contains("scores", StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static bool IsSoloChanceDescription(string description)
+    {
+        return description.Contains("dribble", StringComparison.OrdinalIgnoreCase) ||
+            description.Contains("drives into", StringComparison.OrdinalIgnoreCase) ||
+            description.Contains("range", StringComparison.OrdinalIgnoreCase) ||
+            description.Contains("distance", StringComparison.OrdinalIgnoreCase) ||
+            description.Contains("rebound", StringComparison.OrdinalIgnoreCase) ||
+            description.Contains("one-on-one", StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool IsShotBlockEvent(MatchEvent matchEvent)

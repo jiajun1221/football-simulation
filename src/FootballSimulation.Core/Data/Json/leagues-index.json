@@ -1,0 +1,115 @@
+{
+  "activeSeason": "2025-26",
+  "leagues": [
+    {
+      "leagueId": "premier-league",
+      "name": "Premier League",
+      "shortName": "Premier League",
+      "country": "England",
+      "season": "2025-26",
+      "squadFile": "premier-league-2025-26-squads.json",
+      "logoPath": "/Assets/Leagues/premier-league.png",
+      "isAvailable": true,
+      "isPlaceholder": false
+    },
+    {
+      "leagueId": "la-liga",
+      "name": "La Liga",
+      "shortName": "La Liga",
+      "country": "Spain",
+      "season": "2025-26",
+      "squadFile": "la-liga-2025-26-squads.json",
+      "logoPath": "/Assets/Leagues/laliga.png",
+      "isAvailable": true,
+      "isPlaceholder": false
+    },
+    {
+      "leagueId": "serie-a",
+      "name": "Serie A",
+      "shortName": "Serie A",
+      "country": "Italy",
+      "season": "2025-26",
+      "squadFile": "serie-a-2025-26-squads.json",
+      "logoPath": "/Assets/Leagues/serie-a.png",
+      "isAvailable": true,
+      "isPlaceholder": false
+    },
+    {
+      "leagueId": "bundesliga",
+      "name": "Bundesliga",
+      "shortName": "Bundesliga",
+      "country": "Germany",
+      "season": "2025-26",
+      "squadFile": "bundesliga-2025-26-squads.json",
+      "logoPath": "/Assets/Leagues/bundesliga.png",
+      "isAvailable": true,
+      "isPlaceholder": false
+    },
+    {
+      "leagueId": "ligue-1",
+      "name": "Ligue 1",
+      "shortName": "Ligue 1",
+      "country": "France",
+      "season": "2025-26",
+      "squadFile": "ligue-1-2025-26-squads.json",
+      "logoPath": "/Assets/Leagues/ligue-1.png",
+      "isAvailable": true,
+      "isPlaceholder": false
+    },
+    {
+      "leagueId": "eredivisie",
+      "name": "Eredivisie",
+      "shortName": "Eredivisie",
+      "country": "Netherlands",
+      "season": "2025-26",
+      "squadFile": "",
+      "logoPath": "/Assets/Leagues/eredivisie.png",
+      "isAvailable": false,
+      "isPlaceholder": true
+    },
+    {
+      "leagueId": "liga-portugal",
+      "name": "Liga Portugal",
+      "shortName": "Liga Portugal",
+      "country": "Portugal",
+      "season": "2025-26",
+      "squadFile": "",
+      "logoPath": "/Assets/Leagues/liga-portugal.png",
+      "isAvailable": false,
+      "isPlaceholder": true
+    },
+    {
+      "leagueId": "saudi-pro-league",
+      "name": "Saudi Pro League",
+      "shortName": "Saudi Pro League",
+      "country": "Saudi Arabia",
+      "season": "2025-26",
+      "squadFile": "",
+      "logoPath": "/Assets/Leagues/saudi-pro-league.png",
+      "isAvailable": false,
+      "isPlaceholder": true
+    },
+    {
+      "leagueId": "mls",
+      "name": "MLS",
+      "shortName": "MLS",
+      "country": "United States",
+      "season": "2026",
+      "squadFile": "",
+      "logoPath": "/Assets/Leagues/mls.png",
+      "isAvailable": false,
+      "isPlaceholder": true
+    },
+    {
+      "leagueId": "champions-league",
+      "name": "Champions League",
+      "shortName": "UCL",
+      "country": "Europe",
+      "season": "2025-26",
+      "squadFile": "",
+      "logoPath": "/Assets/Leagues/champions-league.png",
+      "isAvailable": false,
+      "isPlaceholder": true
+    }
+  ]
+}

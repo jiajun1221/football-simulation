@@ -30,6 +30,8 @@ public class PlayerStatMappingService
             PreferredPosition = preferredPosition,
             SecondaryPositions = MapSecondaryPositions(record.SecondaryPositions),
             AssignedPosition = preferredPosition,
+            PreferredFoot = string.Empty,
+            DisciplineRating = 50,
             OverallRating = overall,
             BaseOverallRating = overall,
             Age = record.Age,
@@ -83,6 +85,8 @@ public class PlayerStatMappingService
             PreferredPosition = preferredPosition,
             SecondaryPositions = MapSecondaryPositions(record.SecondaryPositions),
             AssignedPosition = preferredPosition,
+            PreferredFoot = NormalizePreferredFoot(record.PreferredFoot),
+            DisciplineRating = Math.Clamp(record.DisciplineRating ?? 50, 1, 100),
             OverallRating = overall,
             BaseOverallRating = overall,
             Age = record.Age,
@@ -160,6 +164,23 @@ public class PlayerStatMappingService
             .Replace("(", string.Empty)
             .Replace(")", string.Empty)
             .Trim();
+    }
+
+    private static string NormalizePreferredFoot(string? preferredFoot)
+    {
+        if (string.IsNullOrWhiteSpace(preferredFoot))
+        {
+            return string.Empty;
+        }
+
+        var normalized = preferredFoot.Trim();
+        return normalized.Equals("left", StringComparison.OrdinalIgnoreCase)
+            ? "Left"
+            : normalized.Equals("right", StringComparison.OrdinalIgnoreCase)
+                ? "Right"
+                : normalized.Equals("both", StringComparison.OrdinalIgnoreCase)
+                    ? "Both"
+                    : normalized;
     }
 
     private static InjuryState CreateInjuryState(

@@ -18,6 +18,8 @@ public class Player : INotifyPropertyChanged
     public string PreferredPosition { get; set; } = string.Empty;
     public List<string> SecondaryPositions { get; set; } = [];
     public string AssignedPosition { get; set; } = string.Empty;
+    public string PreferredFoot { get; set; } = string.Empty;
+    public int DisciplineRating { get; set; } = 50;
     public int OverallRating { get; set; }
     public int BaseOverallRating { get; set; }
     public int GrowthPoints { get; set; }

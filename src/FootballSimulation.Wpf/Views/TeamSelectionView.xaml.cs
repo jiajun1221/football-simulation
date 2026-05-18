@@ -1,10 +1,10 @@
 using System.Globalization;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using FootballSimulation.Models;
 using FootballSimulation.Services;
+using FootballSimulation.Wpf.Services;
 using FootballSimulation.Wpf.State;
 
 namespace FootballSimulation.Wpf.Views;
@@ -64,9 +64,10 @@ public partial class TeamSelectionView : UserControl
 
     private readonly GameFlowState _state;
     private readonly Action<UserControl> _navigate;
-    private readonly PremierLeagueDataService _dataService = new();
+    private readonly LeagueDataService _dataService = new();
     private readonly GameSessionService _gameSessionService = new();
     private readonly List<ClubSelectionItem> _clubItems = [];
+    private readonly LeagueDefinition _leagueDefinition;
 
     public TeamSelectionView(GameFlowState state, Action<UserControl> navigate)
     {
@@ -74,9 +75,13 @@ public partial class TeamSelectionView : UserControl
 
         _state = state;
         _navigate = navigate;
+        _leagueDefinition = _dataService.GetLeagueDefinition(_state.SelectedLeagueId);
+        _state.SelectedLeagueDefinition = _leagueDefinition;
+        _state.SelectedLeagueId = _leagueDefinition.LeagueId;
 
-        _state.Teams = _dataService.LoadTeams();
-        _state.League = _gameSessionService.CreatePremierLeague(_state.Teams);
+        LeagueClubsTitleTextBlock.Text = $"{_leagueDefinition.Name} Clubs";
+        _state.Teams = _dataService.LoadTeams(_leagueDefinition);
+        _state.League = _gameSessionService.CreateLeague(_leagueDefinition, _state.Teams);
 
         _clubItems.AddRange(_state.Teams.Select(CreateClubSelectionItem));
         ClubListBox.ItemsSource = _clubItems;
@@ -118,7 +123,7 @@ public partial class TeamSelectionView : UserControl
         SelectedClubLogoImage.Source = selectedClub.LogoSource;
     }
 
-    private static ClubSelectionItem CreateClubSelectionItem(Team team)
+    private ClubSelectionItem CreateClubSelectionItem(Team team)
     {
         return new ClubSelectionItem
         {
@@ -128,65 +133,23 @@ public partial class TeamSelectionView : UserControl
             City = GetClubCity(team.Name),
             SquadRating = CalculateSquadRating(team),
             Description = CreateClubDescription(team),
-            LogoSource = LoadClubLogo(team.Name)
+            LogoSource = ClubLogoService.LoadClubLogo(team.Name, _leagueDefinition.LeagueId)
         };
     }
 
     public static string GetClubLogoPath(string clubName)
     {
-        string slug = CreateClubSlug(clubName);
-        return $"pack://application:,,,/{ClubsAssetPath}/{slug}.png";
+        return ClubLogoService.GetClubLogoPath(clubName);
     }
 
     public static string CreateClubSlug(string clubName)
     {
-        if (string.IsNullOrWhiteSpace(clubName))
-        {
-            return "default";
-        }
-
-        string normalized = clubName.Normalize(NormalizationForm.FormD);
-        var builder = new StringBuilder();
-        bool previousWasHyphen = false;
-
-        foreach (char character in normalized)
-        {
-            UnicodeCategory category = CharUnicodeInfo.GetUnicodeCategory(character);
-
-            if (category == UnicodeCategory.NonSpacingMark)
-            {
-                continue;
-            }
-
-            if (char.IsLetterOrDigit(character))
-            {
-                builder.Append(char.ToLowerInvariant(character));
-                previousWasHyphen = false;
-                continue;
-            }
-
-            if (!previousWasHyphen)
-            {
-                builder.Append('-');
-                previousWasHyphen = true;
-            }
-        }
-
-        string slug = builder.ToString().Trim('-');
-        return string.IsNullOrWhiteSpace(slug) ? "default" : slug;
+        return ClubLogoService.CreateClubSlug(clubName);
     }
 
     private static BitmapImage? LoadClubLogo(string clubName)
     {
-        foreach (string logoPath in GetLogoCandidatePaths(clubName))
-        {
-            if (ResourceExists(logoPath))
-            {
-                return new BitmapImage(new Uri(logoPath, UriKind.Absolute));
-            }
-        }
-
-        return null;
+        return ClubLogoService.LoadClubLogo(clubName);
     }
 
     private static IEnumerable<string> GetLogoCandidatePaths(string clubName)
@@ -219,18 +182,18 @@ public partial class TeamSelectionView : UserControl
         }
     }
 
-    private static string CreateClubDescription(Team team)
+    private string CreateClubDescription(Team team)
     {
-        string formation = string.IsNullOrWhiteSpace(team.Formation) ? "flexible" : team.Formation;
-        int squadSize = team.Players.Count + team.Substitutes.Count;
-        string city = GetClubCity(team.Name);
+        var formation = string.IsNullOrWhiteSpace(team.Formation) ? "flexible" : team.Formation;
+        var squadSize = team.Players.Count + team.Substitutes.Count;
+        var city = GetClubCity(team.Name);
 
-        return $"Shape a {formation} system with a {squadSize}-player squad. Build your Premier League career from {city}.";
+        return $"Shape a {formation} system with a {squadSize}-player squad. Build your {_leagueDefinition.Name} career from {city}.";
     }
 
-    private static string GetClubCity(string clubName)
+    private string GetClubCity(string clubName)
     {
-        return ClubCities.TryGetValue(clubName, out string? city) ? city : "England";
+        return ClubCities.TryGetValue(clubName, out var city) ? city : _leagueDefinition.Country;
     }
 
     private static string CalculateSquadRating(Team team)

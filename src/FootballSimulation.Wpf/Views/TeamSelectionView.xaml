@@ -109,7 +109,8 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
 
-                            <TextBlock Text="Premier League Clubs"
+                            <TextBlock x:Name="LeagueClubsTitleTextBlock"
+                                       Text="League Clubs"
                                        Foreground="{DynamicResource AppInverseTextBrush}"
                                        FontSize="20"
                                        FontWeight="Bold" />

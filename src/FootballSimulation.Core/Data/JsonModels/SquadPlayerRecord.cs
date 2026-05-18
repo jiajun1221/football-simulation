@@ -7,6 +7,8 @@ public class SquadPlayerRecord
     public string Position { get; set; } = string.Empty;
     public string? PreferredPosition { get; set; }
     public List<string> SecondaryPositions { get; set; } = [];
+    public string? PreferredFoot { get; set; }
+    public int? DisciplineRating { get; set; }
     public int OverallRating { get; set; }
     public int? Age { get; set; }
     public int? PotentialOverall { get; set; }

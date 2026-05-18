@@ -5,6 +5,8 @@ namespace FootballSimulation.Wpf.State;
 
 public class GameFlowState
 {
+    public string SelectedLeagueId { get; set; } = "premier-league";
+    public LeagueDefinition? SelectedLeagueDefinition { get; set; }
     public List<Team> Teams { get; set; } = [];
     public Team? SelectedTeam { get; set; }
     public League? League { get; set; }

@@ -11,6 +11,7 @@ public class PremierLeagueDataService
     private const string DefaultPlayersFileName = "premier-league-2025-26-players.json";
 
     private readonly PlayerStatMappingService _playerStatMappingService;
+    private readonly LeagueDataService _leagueDataService;
 
     public PremierLeagueDataService()
         : this(new PlayerStatMappingService())
@@ -20,11 +21,17 @@ public class PremierLeagueDataService
     public PremierLeagueDataService(PlayerStatMappingService playerStatMappingService)
     {
         _playerStatMappingService = playerStatMappingService;
+        _leagueDataService = new LeagueDataService(playerStatMappingService);
     }
 
     public List<Team> LoadTeams()
     {
         var dataFolder = Path.Combine(AppContext.BaseDirectory, "Data", "Json");
+        if (File.Exists(Path.Combine(dataFolder, "leagues-index.json")))
+        {
+            return _leagueDataService.LoadTeams(LeagueDataService.DefaultLeagueId);
+        }
+
         var squadIndexPath = Path.Combine(dataFolder, SquadIndexFileName);
 
         if (File.Exists(squadIndexPath))

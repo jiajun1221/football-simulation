@@ -1463,7 +1463,6 @@ public class MatchEngine
 
         var playmaker = ChoosePlaymaker(attackingTeam, random);
         var shooter = ChooseShooter(attackingTeam, playmaker, random);
-        var shooterHasSuperSubBoost = IsSuperSubBoostActive(simulationState, shooter, minute);
         var attackingStats = GetTeamStats(match, attackingTeam);
         var defendingStats = GetTeamStats(match, defendingTeam);
         var attackOutcome = DetermineAttackOutcome(attackingTeam, defendingTeam, attackingTeamStrength, defendingTeamStrength, random);
@@ -1526,11 +1525,15 @@ public class MatchEngine
         {
             var defender = ApplyDefensiveContribution(match, defendingTeam, random, ratingBoostOverride: 0.05);
             matchLog.AddEvent(eventFactory.CreateAttackReset(minute, attackingTeam, defendingTeam, defender, random));
-            MarkAttackResolved(simulationState, defendingTeam, BallState.Defending, EventType.DefensiveStop);
-            return defendingTeam;
+            MarkAttackResolved(simulationState, attackingTeam, BallState.BuildUp, EventType.DefensiveStop);
+            return attackingTeam;
         }
 
         var chanceType = ChooseChanceType(attackingTeam, defendingTeam, match.WeatherCondition, playmaker, shooter, random);
+        var attackSequence = CreateOpenPlayAttackSequence(attackingTeam, playmaker, shooter, chanceType, random);
+        playmaker = attackSequence.CreatorPlayer;
+        shooter = attackSequence.ShooterPlayer;
+        var shooterHasSuperSubBoost = IsSuperSubBoostActive(simulationState, shooter, minute);
         if (!isResolvingPreviousAttack)
         {
             matchLog.AddEvent(eventFactory.CreateAttackBuildUp(
@@ -1929,11 +1932,29 @@ public class MatchEngine
     {
         var (primaryTaker, secondaryTaker) = ChooseSetPieceTakers(attackingTeam);
         matchLog.AddEvent(eventFactory.CreateSetPieceThreat(minute, attackingTeam, primaryTaker, secondaryTaker));
+        var triggeredSetPieceTrait = primaryTaker.Traits.Contains(PlayerTrait.DeadBallSpecialist)
+            ? PlayerTrait.DeadBallSpecialist
+            : (PlayerTrait?)null;
+
+        if (!ShouldTakeDirectFreeKick(primaryTaker, random))
+        {
+            return HandleIndirectFreeKickSequence(
+                minute,
+                match,
+                attackingTeam,
+                defendingTeam,
+                primaryTaker,
+                random,
+                matchLog,
+                eventFactory,
+                triggeredSetPieceTrait);
+        }
+
         matchLog.AddEvent(eventFactory.CreateSetPieceShot(
             minute,
             attackingTeam,
             primaryTaker,
-            primaryTaker.Traits.Contains(PlayerTrait.DeadBallSpecialist) ? PlayerTrait.DeadBallSpecialist : null));
+            triggeredSetPieceTrait));
 
         var attackingStats = GetTeamStats(match, attackingTeam);
         attackingStats.TotalShots++;
@@ -2018,6 +2039,121 @@ public class MatchEngine
 
         matchLog.AddEvent(eventFactory.CreateMiss(minute, attackingTeam, primaryTaker, "free-kick", random));
         takerPerformance.Rating -= 0.04;
+        return defendingTeam;
+    }
+
+    private Team HandleIndirectFreeKickSequence(
+        int minute,
+        Match match,
+        Team attackingTeam,
+        Team defendingTeam,
+        Player taker,
+        Random random,
+        MatchLogService matchLog,
+        MatchEventFactory eventFactory,
+        PlayerTrait? triggeredSetPieceTrait)
+    {
+        var target = ChooseSetPieceTarget(attackingTeam, taker, random);
+        var attackingStats = GetTeamStats(match, attackingTeam);
+        var targetPerformance = GetOrCreatePerformance(match, attackingTeam, target);
+        var takerPerformance = GetOrCreatePerformance(match, attackingTeam, taker);
+        var goalProbability = Math.Clamp(
+            0.045 +
+            (target.Traits.Contains(PlayerTrait.PowerHeader) ? 0.026 : 0.0) +
+            (target.Traits.Contains(PlayerTrait.AerialThreat) ? 0.022 : 0.0) +
+            (triggeredSetPieceTrait == PlayerTrait.DeadBallSpecialist ? 0.014 : 0.0),
+            0.035,
+            0.115);
+
+        matchLog.AddEvent(eventFactory.CreateSetPieceDelivery(
+            minute,
+            attackingTeam,
+            taker,
+            target,
+            triggeredSetPieceTrait));
+        matchLog.AddEvent(eventFactory.CreateShot(
+            minute,
+            attackingTeam,
+            target,
+            taker,
+            "free-kick delivery",
+            random,
+            triggeredSetPieceTrait));
+
+        attackingStats.TotalShots++;
+        attackingStats.ExpectedGoals += goalProbability;
+        targetPerformance.Shots++;
+        takerPerformance.KeyPasses++;
+        takerPerformance.Rating += 0.08;
+
+        var roll = random.NextDouble();
+        if (roll < goalProbability)
+        {
+            attackingStats.ShotsOnTarget++;
+            UpdateScore(match, attackingTeam);
+            targetPerformance.ShotsOnTarget++;
+            targetPerformance.Goals++;
+            targetPerformance.Rating += GetGoalRatingBoost(targetPerformance.Goals, goalProbability);
+            if (!string.Equals(target.Name, taker.Name, StringComparison.OrdinalIgnoreCase))
+            {
+                takerPerformance.Assists++;
+                takerPerformance.Rating += GetAssistRatingBoost(goalProbability);
+            }
+
+            matchLog.AddEvent(eventFactory.CreateGoal(
+                minute,
+                attackingTeam,
+                target,
+                match,
+                target.Traits.Contains(PlayerTrait.PowerHeader)
+                    ? "power header from a free kick"
+                    : "header from a free kick",
+                random,
+                target == taker ? null : taker,
+                target.Traits.Contains(PlayerTrait.PowerHeader)
+                    ? PlayerTrait.PowerHeader
+                    : target.Traits.Contains(PlayerTrait.AerialThreat)
+                        ? PlayerTrait.AerialThreat
+                        : triggeredSetPieceTrait,
+                targetPerformance.Goals));
+            return defendingTeam;
+        }
+
+        if (roll < goalProbability + 0.30)
+        {
+            attackingStats.ShotsOnTarget++;
+            targetPerformance.ShotsOnTarget++;
+            var goalkeeper = GetGoalkeeper(defendingTeam);
+            if (goalkeeper is not null)
+            {
+                var goalkeeperPerformance = GetOrCreatePerformance(match, defendingTeam, goalkeeper);
+                goalkeeperPerformance.Saves++;
+                goalkeeperPerformance.Rating += 0.26;
+                matchLog.AddEvent(eventFactory.CreateSave(
+                    minute,
+                    defendingTeam,
+                    target,
+                    goalkeeper,
+                    ChooseSaveType(goalkeeper, "free-kick delivery", random),
+                    random));
+            }
+            else
+            {
+                matchLog.AddEvent(eventFactory.CreateSave(minute, defendingTeam, target));
+            }
+
+            return defendingTeam;
+        }
+
+        if (roll < goalProbability + 0.58)
+        {
+            var defender = ApplyShotBlockContribution(match, defendingTeam, random, ratingBoostOverride: 0.08);
+            matchLog.AddEvent(eventFactory.CreateBlockedShot(minute, defendingTeam, defender, target, random));
+            return defendingTeam;
+        }
+
+        matchLog.AddEvent(eventFactory.CreateMiss(minute, attackingTeam, target, "free-kick header", random));
+        targetPerformance.Rating -= 0.04;
         return defendingTeam;
     }
 
@@ -3372,6 +3508,57 @@ public class MatchEngine
             : playmaker;
     }
 
+    private AttackSequence CreateOpenPlayAttackSequence(
+        Team attackingTeam,
+        Player creator,
+        Player shooter,
+        string chanceType,
+        Random random)
+    {
+        var isSoloMove = IsSoloChanceType(chanceType);
+        var resolvedShooter = isSoloMove
+            ? shooter
+            : ResolveDistinctShooter(attackingTeam, creator, shooter, random);
+
+        return new AttackSequence(
+            CreatorPlayer: isSoloMove ? resolvedShooter : creator,
+            ShooterPlayer: resolvedShooter,
+            SetPieceTaker: null,
+            IsSoloMove: isSoloMove,
+            AttackType: AttackType.OpenPlay);
+    }
+
+    private static bool IsSoloChanceType(string chanceType)
+    {
+        return chanceType is "dribble run" or "long-range attempt" or "rebound shot" or "one-on-one";
+    }
+
+    private Player ResolveDistinctShooter(Team attackingTeam, Player creator, Player shooter, Random random)
+    {
+        if (!string.Equals(creator.Name, shooter.Name, StringComparison.OrdinalIgnoreCase))
+        {
+            return shooter;
+        }
+
+        var candidates = GetAvailablePlayers(attackingTeam)
+            .Where(player =>
+                !string.Equals(player.Name, creator.Name, StringComparison.OrdinalIgnoreCase) &&
+                (player.Position is Position.Forward or Position.Midfielder ||
+                    player.Traits.Contains(PlayerTrait.PowerHeader) ||
+                    player.Traits.Contains(PlayerTrait.AerialThreat)))
+            .ToList();
+
+        if (candidates.Count == 0)
+        {
+            return shooter;
+        }
+
+        return candidates
+            .OrderByDescending(candidate => _teamStrengthCalculator.GetShooterWeight(candidate))
+            .ThenBy(candidate => candidate.Name, StringComparer.OrdinalIgnoreCase)
+            .First();
+    }
+
     private static PlayerTrait? GetTriggeredWonderGoalTrait(Player shooter, string chanceType)
     {
         if (shooter.Traits.Contains(PlayerTrait.FinesseShot) && (chanceType is "long-range attempt" or "quick combination"))
@@ -3548,7 +3735,13 @@ public class MatchEngine
                 : taker.Traits.Contains(PlayerTrait.EarlyCrosser)
                     ? PlayerTrait.EarlyCrosser
                     : null));
-        var target = ChooseShooter(attackingTeam, taker, random);
+        var attackSequence = new AttackSequence(
+            CreatorPlayer: taker,
+            ShooterPlayer: ChooseCornerTarget(attackingTeam, taker, random),
+            SetPieceTaker: taker,
+            IsSoloMove: false,
+            AttackType: AttackType.Corner);
+        var target = attackSequence.ShooterPlayer;
         var attackingStats = GetTeamStats(match, attackingTeam);
         var targetPerformance = GetOrCreatePerformance(match, attackingTeam, target);
         var takerPerformance = GetOrCreatePerformance(match, attackingTeam, taker);
@@ -3583,6 +3776,14 @@ public class MatchEngine
             var goalTypeDescription = target.Traits.Contains(PlayerTrait.PowerHeader)
                 ? "power header from a corner"
                 : "header from a corner";
+            matchLog.AddEvent(eventFactory.CreateShot(
+                minute,
+                attackingTeam,
+                target,
+                taker,
+                "corner delivery",
+                random,
+                taker.Traits.Contains(PlayerTrait.DeadBallSpecialist) ? PlayerTrait.DeadBallSpecialist : null));
             matchLog.AddEvent(eventFactory.CreateGoal(
                 minute,
                 attackingTeam,
@@ -3611,14 +3812,6 @@ public class MatchEngine
             attackingStats.ExpectedGoals += 0.08;
             targetPerformance.Shots++;
             targetPerformance.ShotsOnTarget++;
-            matchLog.AddEvent(eventFactory.CreateChanceCreated(
-                minute,
-                attackingTeam,
-                taker,
-                target,
-                "corner delivery",
-                random,
-                taker.Traits.Contains(PlayerTrait.DeadBallSpecialist) ? PlayerTrait.DeadBallSpecialist : null));
             matchLog.AddEvent(eventFactory.CreateShot(
                 minute,
                 attackingTeam,
@@ -3662,6 +3855,17 @@ public class MatchEngine
 
         if (roll < 0.72)
         {
+            attackingStats.TotalShots++;
+            attackingStats.ExpectedGoals += 0.06;
+            targetPerformance.Shots++;
+            matchLog.AddEvent(eventFactory.CreateShot(
+                minute,
+                attackingTeam,
+                target,
+                taker,
+                "corner delivery",
+                random,
+                taker.Traits.Contains(PlayerTrait.DeadBallSpecialist) ? PlayerTrait.DeadBallSpecialist : null));
             var defender = ApplyShotBlockContribution(match, defendingTeam, random, ratingBoostOverride: 0.08);
             matchLog.AddEvent(eventFactory.CreateBlockedShot(minute, defendingTeam, defender, target, random));
             return defendingTeam;
@@ -3670,7 +3874,6 @@ public class MatchEngine
         attackingStats.TotalShots++;
         attackingStats.ExpectedGoals += 0.05;
         targetPerformance.Shots++;
-        matchLog.AddEvent(eventFactory.CreateChanceCreated(minute, attackingTeam, taker, target, "corner delivery", random));
         matchLog.AddEvent(eventFactory.CreateShot(minute, attackingTeam, target, taker, "corner delivery", random));
         matchLog.AddEvent(eventFactory.CreateMiss(minute, attackingTeam, target, "corner chance", random));
         targetPerformance.Rating -= 0.04;
@@ -4679,6 +4882,22 @@ public class MatchEngine
         return (takers[0], takers.Count > 1 ? takers[1] : takers[0]);
     }
 
+    private static bool ShouldTakeDirectFreeKick(Player taker, Random random)
+    {
+        var directChance =
+            0.46 +
+            (taker.Traits.Contains(PlayerTrait.DeadBallSpecialist) ? 0.12 : 0.0) +
+            (taker.Traits.Contains(PlayerTrait.FinesseShot) ? 0.06 : 0.0) +
+            (taker.Traits.Contains(PlayerTrait.LongShotTaker) ? 0.05 : 0.0);
+
+        return random.NextDouble() < Math.Clamp(directChance, 0.35, 0.72);
+    }
+
+    private static Player ChooseSetPieceTarget(Team team, Player taker, Random random)
+    {
+        return ChooseAerialTarget(team, taker, random, allowSamePlayerChance: 0.01);
+    }
+
     private static Player ChooseCornerTaker(Team team, Player preferredTaker)
     {
         return GetActivePitchPlayers(team)
@@ -4690,6 +4909,99 @@ public class MatchEngine
                 (player.Traits.Contains(PlayerTrait.EarlyCrosser) ? 12 : 0) +
                 (player.Traits.Contains(PlayerTrait.LongPasser) ? 8 : 0))
             .FirstOrDefault() ?? preferredTaker;
+    }
+
+    private static Player ChooseCornerTarget(Team team, Player taker, Random random)
+    {
+        return ChooseAerialTarget(team, taker, random, allowSamePlayerChance: 0.0);
+    }
+
+    private static Player ChooseAerialTarget(Team team, Player taker, Random random, double allowSamePlayerChance)
+    {
+        var activePlayers = GetActivePitchPlayers(team)
+            .Where(player => !player.IsInjured)
+            .ToList();
+
+        if (activePlayers.Count == 0)
+        {
+            return taker;
+        }
+
+        if (random.NextDouble() < allowSamePlayerChance)
+        {
+            return taker;
+        }
+
+        var candidates = activePlayers
+            .Where(player => !string.Equals(player.Name, taker.Name, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        if (candidates.Count == 0)
+        {
+            return taker;
+        }
+
+        var weightedCandidates = candidates
+            .Select(player => new
+            {
+                Player = player,
+                Weight =
+                    GetAerialTargetBaseWeight(player) +
+                    player.OverallRating * 0.20 +
+                    player.CurrentForm * 0.10 +
+                    player.Finishing * 0.18 +
+                    (player.Traits.Contains(PlayerTrait.PowerHeader) ? 30 : 0) +
+                    (player.Traits.Contains(PlayerTrait.AerialThreat) ? 24 : 0) +
+                    (player.Traits.Contains(PlayerTrait.ClinicalFinisher) ? 10 : 0)
+            })
+            .ToList();
+
+        var totalWeight = weightedCandidates.Sum(candidate => Math.Max(1.0, candidate.Weight));
+        var roll = random.NextDouble() * totalWeight;
+        double runningWeight = 0;
+
+        foreach (var candidate in weightedCandidates)
+        {
+            runningWeight += Math.Max(1.0, candidate.Weight);
+            if (roll <= runningWeight)
+            {
+                return candidate.Player;
+            }
+        }
+
+        return weightedCandidates[^1].Player;
+    }
+
+    private static double GetAerialTargetBaseWeight(Player player)
+    {
+        if (PositionMatches(player, "CB"))
+        {
+            return 52;
+        }
+
+        if (PositionMatches(player, "ST"))
+        {
+            return 48;
+        }
+
+        if (player.Position == Position.Defender)
+        {
+            return 34;
+        }
+
+        if (PositionMatches(player, "CDM") || PositionMatches(player, "CM"))
+        {
+            return 28;
+        }
+
+        return player.Position == Position.Forward ? 26 : 12;
+    }
+
+    private static bool PositionMatches(Player player, string exactPosition)
+    {
+        return string.Equals(player.PreferredPosition, exactPosition, StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(player.AssignedPosition, exactPosition, StringComparison.OrdinalIgnoreCase) ||
+            player.SecondaryPositions.Any(position => string.Equals(position, exactPosition, StringComparison.OrdinalIgnoreCase));
     }
 
     private static double GetPenaltyConversionChance(Player player)
@@ -5182,6 +5494,14 @@ public class MatchEngine
         ForcedReset
     }
 
+    private enum AttackType
+    {
+        OpenPlay,
+        Corner,
+        DirectFreeKick,
+        IndirectFreeKick
+    }
+
     private enum BallState
     {
         Kickoff,
@@ -5213,6 +5533,18 @@ public class MatchEngine
         bool DeniesClearChance,
         bool ViolentFoul,
         bool CreatesDangerousSetPiece);
+
+    private sealed record AttackSequence(
+        Player CreatorPlayer,
+        Player ShooterPlayer,
+        Player? SetPieceTaker,
+        bool IsSoloMove,
+        AttackType AttackType)
+    {
+        public string CreatorPlayerId => CreatorPlayer.Name;
+        public string ShooterPlayerId => ShooterPlayer.Name;
+        public string SetPieceTakerId => SetPieceTaker?.Name ?? string.Empty;
+    }
 
     private sealed record GoalVarReviewReason(
         string CheckReason,

@@ -93,16 +93,22 @@ public class SaveGameService
         {
             SaveVersion = CurrentSaveVersion,
             SavedAt = DateTime.Now,
+            LeagueId = string.IsNullOrWhiteSpace(league.LeagueId) ? LeagueDataService.DefaultLeagueId : league.LeagueId,
             SelectedClubName = selectedTeam.Name,
             CurrentRound = GetCurrentRound(league, selectedTeam),
             LeagueState = new LeagueState
             {
+                LeagueId = string.IsNullOrWhiteSpace(league.LeagueId) ? LeagueDataService.DefaultLeagueId : league.LeagueId,
                 Name = league.Name,
+                Season = league.Season,
                 Table = league.Table
             },
             Teams = league.Teams,
             Fixtures = league.Fixtures,
             MatchHistory = CreateMatchHistory(league.Fixtures),
+            PlayerStats = league.PlayerStats.Count > 0
+                ? league.PlayerStats
+                : new PlayerSeasonStatsService().RebuildSeasonStats(league),
             ClubMatchSetups = CreateClubMatchSetups(league.Teams)
         };
     }
@@ -114,12 +120,31 @@ public class SaveGameService
 
         return new League
         {
+            LeagueId = string.IsNullOrWhiteSpace(data.LeagueState.LeagueId)
+                ? string.IsNullOrWhiteSpace(data.LeagueId) ? LeagueDataService.DefaultLeagueId : data.LeagueId
+                : data.LeagueState.LeagueId,
             Name = string.IsNullOrWhiteSpace(data.LeagueState.Name)
                 ? GameSessionService.PremierLeagueName
                 : data.LeagueState.Name,
+            Season = data.LeagueState.Season,
             Teams = data.Teams,
             Fixtures = data.Fixtures,
-            Table = data.LeagueState.Table
+            Table = data.LeagueState.Table,
+            PlayerStats = data.PlayerStats.Count > 0
+                ? data.PlayerStats
+                : new PlayerSeasonStatsService().RebuildSeasonStats(new League
+                {
+                    LeagueId = string.IsNullOrWhiteSpace(data.LeagueState.LeagueId)
+                        ? string.IsNullOrWhiteSpace(data.LeagueId) ? LeagueDataService.DefaultLeagueId : data.LeagueId
+                        : data.LeagueState.LeagueId,
+                    Name = string.IsNullOrWhiteSpace(data.LeagueState.Name)
+                        ? GameSessionService.PremierLeagueName
+                        : data.LeagueState.Name,
+                    Season = data.LeagueState.Season,
+                    Teams = data.Teams,
+                    Fixtures = data.Fixtures,
+                    Table = data.LeagueState.Table
+                })
         };
     }
 
@@ -160,6 +185,10 @@ public class SaveGameService
                 FilePath = slotPath,
                 SaveVersion = data.SaveVersion,
                 SavedAt = data.SavedAt,
+                LeagueId = string.IsNullOrWhiteSpace(data.LeagueState.LeagueId)
+                    ? data.LeagueId
+                    : data.LeagueState.LeagueId,
+                LeagueName = data.LeagueState.Name,
                 SelectedClubName = data.SelectedClubName,
                 CurrentRound = data.CurrentRound,
                 LeaguePosition = tableEntry?.Position,

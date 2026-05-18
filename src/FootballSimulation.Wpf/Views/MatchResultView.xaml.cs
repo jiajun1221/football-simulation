@@ -219,17 +219,9 @@ public partial class MatchResultView : UserControl
             string.Equals(manOfTheMatch.PlayerName, playerName, StringComparison.OrdinalIgnoreCase);
     }
 
-    private static BitmapImage? CreateLogoSource(string teamName)
+    private BitmapImage? CreateLogoSource(string teamName)
     {
-        foreach (var logoPath in GetLogoCandidatePaths(teamName))
-        {
-            if (ResourceExists(logoPath))
-            {
-                return new BitmapImage(new Uri(logoPath, UriKind.Absolute));
-            }
-        }
-
-        return null;
+        return ClubLogoService.LoadClubLogo(teamName, _state.League?.LeagueId ?? _state.SelectedLeagueId);
     }
 
     private static IEnumerable<string> GetLogoCandidatePaths(string teamName)

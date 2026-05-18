@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using FootballSimulation.Models;
 using FootballSimulation.Services;
+using FootballSimulation.Wpf.Services;
 
 namespace FootballSimulation.Wpf.Views;
 
@@ -152,7 +153,7 @@ public partial class LoadGameView : UserControl
             SlotNumber = slot.SlotNumber,
             SlotTitle = $"Slot {slot.SlotNumber}",
             ClubName = slot.SelectedClubName,
-            LogoPath = GetClubLogoPath(slot.SelectedClubName),
+            LogoPath = ClubLogoService.GetClubLogoPath(slot.SelectedClubName, slot.LeagueId),
             RoundText = $"Round {slot.CurrentRound}",
             PositionText = slot.LeaguePosition.HasValue ? $"Position #{slot.LeaguePosition}" : "Position -",
             PointsText = slot.Points.HasValue ? $"Points {slot.Points}" : "Points -",

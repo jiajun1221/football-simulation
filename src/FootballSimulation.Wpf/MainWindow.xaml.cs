@@ -48,6 +48,16 @@ public partial class MainWindow : Window
         }
     }
 
+    private void ShellStatsButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_state.League is null || _state.SelectedTeam is null)
+        {
+            return;
+        }
+
+        Navigate(new LeaguePlayerStatsView(_state, Navigate));
+    }
+
     private void UpdateThemeToggleButton()
     {
         ThemeToggleButton.Content = ThemeManager.CurrentTheme == AppTheme.Dark
@@ -63,9 +73,12 @@ public partial class MainWindow : Window
         Navigate(new MainMenuView(StartNewGame, ShowLoadGame, Close));
     }
 
-    private void StartNewGame()
+    private void StartNewGame(string leagueId)
     {
-        _state = new GameFlowState();
+        _state = new GameFlowState
+        {
+            SelectedLeagueId = leagueId
+        };
         ShowTeamSelection();
     }
 
@@ -96,6 +109,8 @@ public partial class MainWindow : Window
         {
             Teams = league.Teams,
             League = league,
+            SelectedLeagueId = string.IsNullOrWhiteSpace(league.LeagueId) ? LeagueDataService.DefaultLeagueId : league.LeagueId,
+            SelectedLeagueDefinition = TryGetLeagueDefinition(league.LeagueId),
             SelectedTeam = selectedTeam,
             CurrentFixture = FindNextFixtureForTeam(league, selectedTeam),
             CurrentMatch = null,
@@ -109,6 +124,7 @@ public partial class MainWindow : Window
     {
         MainContent.Content = view;
         ShellSaveButton.Visibility = view is DashboardView ? Visibility.Visible : Visibility.Collapsed;
+        ShellStatsButton.Visibility = view is DashboardView or LeaguePlayerStatsView ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private static Fixture? FindNextFixtureForTeam(League league, Team selectedTeam)
@@ -118,6 +134,18 @@ public partial class MainWindow : Window
                 (fixture.HomeTeam == selectedTeam || fixture.AwayTeam == selectedTeam))
             .OrderBy(fixture => fixture.RoundNumber)
             .FirstOrDefault();
+    }
+
+    private static LeagueDefinition? TryGetLeagueDefinition(string? leagueId)
+    {
+        try
+        {
+            return new LeagueDataService().GetLeagueDefinition(leagueId);
+        }
+        catch (InvalidOperationException)
+        {
+            return null;
+        }
     }
 
     private void ApplyWindowChromeTheme()

@@ -286,7 +286,7 @@ public partial class DashboardView : UserControl
         return char.ConvertFromUtf32(0x1F7E5);
     }
 
-    private static List<UpcomingFixtureRow> CreateUpcomingFixtureRows(League league, Team selectedTeam)
+    private List<UpcomingFixtureRow> CreateUpcomingFixtureRows(League league, Team selectedTeam)
     {
         var fixtures = league.Fixtures
             .Where(fixture =>
@@ -447,17 +447,9 @@ public partial class DashboardView : UserControl
         }
     }
 
-    private static string GetClubLogoPath(string clubName)
+    private string GetClubLogoPath(string clubName)
     {
-        foreach (var logoPath in GetLogoCandidatePaths(clubName))
-        {
-            if (ResourceExists(logoPath))
-            {
-                return logoPath;
-            }
-        }
-
-        return string.Empty;
+        return ClubLogoService.GetClubLogoPath(clubName, _state.League?.LeagueId ?? _state.SelectedLeagueId);
     }
 
     private static IEnumerable<string> GetLogoCandidatePaths(string clubName)

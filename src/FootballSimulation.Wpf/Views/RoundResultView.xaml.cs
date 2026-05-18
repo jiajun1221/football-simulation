@@ -70,7 +70,7 @@ public partial class RoundResultView : UserControl
         _navigate(new DashboardView(_state, _navigate));
     }
 
-    private static RoundResultRow CreateRoundResultRow(Fixture fixture, Team? selectedTeam)
+    private RoundResultRow CreateRoundResultRow(Fixture fixture, Team? selectedTeam)
     {
         var isUserMatch = selectedTeam is not null &&
             (string.Equals(fixture.HomeTeam.Name, selectedTeam.Name, StringComparison.OrdinalIgnoreCase) ||
@@ -95,7 +95,7 @@ public partial class RoundResultView : UserControl
         };
     }
 
-    private static List<LeagueTableRow> CreateLeagueTableRows(League league, Team? selectedTeam)
+    private List<LeagueTableRow> CreateLeagueTableRows(League league, Team? selectedTeam)
     {
         return league.Table
             .Select(entry => new LeagueTableRow
@@ -116,17 +116,9 @@ public partial class RoundResultView : UserControl
             .ToList();
     }
 
-    private static string GetClubLogoPath(string clubName)
+    private string GetClubLogoPath(string clubName)
     {
-        foreach (var logoPath in GetLogoCandidatePaths(clubName))
-        {
-            if (ResourceExists(logoPath))
-            {
-                return logoPath;
-            }
-        }
-
-        return string.Empty;
+        return ClubLogoService.GetClubLogoPath(clubName, _state.League?.LeagueId ?? _state.SelectedLeagueId);
     }
 
     private static IEnumerable<string> GetLogoCandidatePaths(string clubName)

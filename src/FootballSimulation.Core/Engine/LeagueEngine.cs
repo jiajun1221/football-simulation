@@ -9,6 +9,7 @@ public class LeagueEngine
     private readonly LeagueScheduleService _scheduleService;
     private readonly LeagueTableService _tableService;
     private readonly PlayerFormStatusService _playerFormStatusService;
+    private readonly PlayerSeasonStatsService _playerSeasonStatsService = new();
 
     public LeagueEngine()
         : this(new MatchEngine(), new LeagueScheduleService(), new LeagueTableService())
@@ -41,6 +42,11 @@ public class LeagueEngine
 
     public League CreateLeague(string leagueName, List<Team> teams)
     {
+        return CreateLeague(string.Empty, leagueName, string.Empty, teams);
+    }
+
+    public League CreateLeague(string leagueId, string leagueName, string season, List<Team> teams)
+    {
         if (teams.Count < 2)
         {
             throw new ArgumentException("A league needs at least two teams.", nameof(teams));
@@ -48,7 +54,9 @@ public class LeagueEngine
 
         return new League
         {
+            LeagueId = leagueId,
             Name = leagueName,
+            Season = season,
             Teams = teams,
             Fixtures = _scheduleService.GenerateFixtures(teams),
             Table = _tableService.CreateTable(teams)
@@ -81,6 +89,7 @@ public class LeagueEngine
 
         _tableService.ApplyMatchResult(league.Table, result);
         league.Table = _tableService.SortTable(league.Table);
+        _playerSeasonStatsService.RebuildLeagueSeasonStats(league);
 
         return result;
     }
@@ -143,6 +152,7 @@ public class LeagueEngine
 
         _tableService.ApplyMatchResult(league.Table, result);
         league.Table = _tableService.SortTable(league.Table);
+        _playerSeasonStatsService.RebuildLeagueSeasonStats(league);
 
         return result;
     }
@@ -157,6 +167,7 @@ public class LeagueEngine
 
         _tableService.ApplyMatchResult(league.Table, match);
         league.Table = _tableService.SortTable(league.Table);
+        _playerSeasonStatsService.RebuildLeagueSeasonStats(league);
     }
 
     public List<Match> SimulateRemainingFixturesInRound(League league, int roundNumber, int? seed = null, MatchSimulationOptions? options = null)

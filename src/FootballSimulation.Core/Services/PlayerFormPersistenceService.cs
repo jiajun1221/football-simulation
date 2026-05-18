@@ -17,8 +17,13 @@ public class PlayerFormPersistenceService
 
     public void SaveActiveSquadFormStatuses(IEnumerable<Team> teams)
     {
+        SaveActiveSquadFormStatuses(teams, LeagueDataService.DefaultLeagueId);
+    }
+
+    public void SaveActiveSquadFormStatuses(IEnumerable<Team> teams, string? leagueId)
+    {
         var outputDataFolder = Path.Combine(AppContext.BaseDirectory, "Data", "Json");
-        var activeSquadFileName = GetActiveSquadFileName(outputDataFolder);
+        var activeSquadFileName = GetActiveSquadFileName(outputDataFolder, leagueId);
         if (string.IsNullOrWhiteSpace(activeSquadFileName))
         {
             return;
@@ -30,8 +35,23 @@ public class PlayerFormPersistenceService
         }
     }
 
-    private static string? GetActiveSquadFileName(string dataFolder)
+    private static string? GetActiveSquadFileName(string dataFolder, string? leagueId)
     {
+        var leagueIndexPath = Path.Combine(dataFolder, "leagues-index.json");
+        if (File.Exists(leagueIndexPath))
+        {
+            var leagueIndex = JsonSerializer.Deserialize<LeagueDataIndex>(File.ReadAllText(leagueIndexPath), JsonOptions);
+            var normalizedLeagueId = string.IsNullOrWhiteSpace(leagueId)
+                ? LeagueDataService.DefaultLeagueId
+                : leagueId.Trim();
+            var definition = leagueIndex?.Leagues.FirstOrDefault(league =>
+                string.Equals(league.LeagueId, normalizedLeagueId, StringComparison.OrdinalIgnoreCase));
+            if (!string.IsNullOrWhiteSpace(definition?.SquadFile))
+            {
+                return definition.SquadFile;
+            }
+        }
+
         var indexPath = Path.Combine(dataFolder, SquadIndexFileName);
         if (!File.Exists(indexPath))
         {

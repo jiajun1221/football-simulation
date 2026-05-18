@@ -27,6 +27,7 @@ public class SeedDataService
             ]
         };
 
+        AssignSquadNumbers(team);
         TeamVenueService.ApplyVenue(team);
         return team;
     }
@@ -53,6 +54,7 @@ public class SeedDataService
             ]
         };
 
+        AssignSquadNumbers(team);
         TeamVenueService.ApplyVenue(team);
         return team;
     }
@@ -60,5 +62,14 @@ public class SeedDataService
     public (Team HomeTeam, Team AwayTeam) CreateDemoTeams()
     {
         return (CreateHomeTeam(), CreateAwayTeam());
+    }
+
+    private static void AssignSquadNumbers(Team team)
+    {
+        var defaultNumbers = new[] { 1, 2, 5, 4, 3, 6, 8, 10, 7, 9, 11 };
+        for (var index = 0; index < team.Players.Count && index < defaultNumbers.Length; index++)
+        {
+            team.Players[index].SquadNumber = defaultNumbers[index];
+        }
     }
 }

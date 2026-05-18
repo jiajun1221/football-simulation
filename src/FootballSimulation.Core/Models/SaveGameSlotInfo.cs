@@ -8,6 +8,8 @@ public class SaveGameSlotInfo
     public string ErrorMessage { get; set; } = string.Empty;
     public int SaveVersion { get; set; }
     public DateTime? SavedAt { get; set; }
+    public string LeagueId { get; set; } = string.Empty;
+    public string LeagueName { get; set; } = string.Empty;
     public string SelectedClubName { get; set; } = string.Empty;
     public int CurrentRound { get; set; }
     public int? LeaguePosition { get; set; }

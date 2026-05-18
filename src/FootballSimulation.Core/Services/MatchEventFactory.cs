@@ -260,6 +260,14 @@ public class MatchEventFactory
 
         string description = chanceType switch
         {
+            "corner delivery" => Pick(random,
+                $"{attackerName} attacks the corner delivery for {attackingTeam.Name}.",
+                $"{attackerName} meets the corner and sends it goalward for {attackingTeam.Name}.",
+                $"{attackerName} rises to the delivery and directs the chance toward goal."),
+            "free-kick delivery" => Pick(random,
+                $"{attackerName} attacks the free-kick delivery for {attackingTeam.Name}.",
+                $"{attackerName} meets {playmakerName}'s free kick and heads goalward for {attackingTeam.Name}.",
+                $"{attackerName} gets on the end of the set-piece delivery for {attackingTeam.Name}."),
             "long-range attempt" => Pick(random,
                 $"{attackerName} shoots from distance for {attackingTeam.Name}.",
                 $"{attackerName} lets fly from range for {attackingTeam.Name}."),
@@ -715,13 +723,24 @@ public class MatchEventFactory
         return CreateEvent(minute, EventType.Shot, description, taker.Name, triggeredTrait: triggeredTrait);
     }
 
+    public MatchEvent CreateSetPieceDelivery(int minute, Team team, Player taker, Player target, PlayerTrait? triggeredTrait = null)
+    {
+        var description = triggeredTrait == PlayerTrait.DeadBallSpecialist
+            ? Pick(new Random(minute + taker.Name.Length + target.Name.Length),
+                $"{taker.Name} whips a dangerous free kick toward {target.Name} for {team.Name}.",
+                $"{taker.Name}'s delivery bends into {target.Name}'s path for {team.Name}.")
+            : $"{taker.Name} delivers the free kick toward {target.Name} for {team.Name}.";
+
+        return CreateEvent(minute, EventType.SetPieceDanger, description, taker.Name, target.Name, triggeredTrait: triggeredTrait);
+    }
+
     public MatchEvent CreateCornerKick(int minute, Team team, Player taker, PlayerTrait? triggeredTrait = null)
     {
         var description = triggeredTrait switch
         {
-            PlayerTrait.DeadBallSpecialist => Pick(new Random(minute + taker.Name.Length), $"{team.Name} win a corner and {taker.Name} shapes a dangerous dead-ball delivery.", $"{taker.Name}'s corner delivery looks dangerous for {team.Name}."),
-            PlayerTrait.EarlyCrosser => $"{taker.Name} takes it quickly, whipping an early corner into the danger area for {team.Name}.",
-            _ => $"{team.Name} win a corner. {taker.Name} goes across to take it."
+            PlayerTrait.DeadBallSpecialist => Pick(new Random(minute + taker.Name.Length), $"{taker.Name} swings in a dangerous corner for {team.Name}.", $"{taker.Name}'s corner delivery drops into a threatening area for {team.Name}."),
+            PlayerTrait.EarlyCrosser => $"{taker.Name} whips an early corner into the danger area for {team.Name}.",
+            _ => $"{taker.Name} delivers the corner for {team.Name}."
         };
 
         return CreateEvent(
