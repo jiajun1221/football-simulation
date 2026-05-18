@@ -33,7 +33,8 @@ public static class PlayerTraitDisplayService
         [PlayerTrait.AerialThreat] = new("AIR", "🦅", "Aerial Threat", "Dominant in aerial duels.", HeaderGoalBonus: 0.12),
         [PlayerTrait.Rapid] = new("RAP", "💨", "Rapid", "Makes more high-speed attacking runs.", DribbleEventBonus: 0.10),
         [PlayerTrait.TechnicalDribbler] = new("TEC", "🕺", "Technical Dribbler", "Better close-control dribbling.", DribbleEventBonus: 0.12),
-        [PlayerTrait.PenaltySpecialist] = new("PEN", "🎯", "Penalty Specialist", "More reliable from the spot.", ShotAccuracyBonus: 0.10)
+        [PlayerTrait.PenaltySpecialist] = new("PEN", "🎯", "Penalty Specialist", "More reliable from the spot.", ShotAccuracyBonus: 0.10),
+        [PlayerTrait.BigMatchPlayer] = new("BIG", "⭐", "Big Match Player", "Can lift performance in high-pressure moments.", MoraleBonus: 0.04)
     };
 
     public static PlayerTraitDefinition GetDefinition(PlayerTrait trait)

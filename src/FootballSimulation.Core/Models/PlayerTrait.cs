@@ -30,6 +30,7 @@ public enum PlayerTrait
     Rapid,
     TechnicalDribbler,
     PenaltySpecialist,
+    BigMatchPlayer,
 
     PlayMaker = Playmaker,
     OneOnOnesGK = OneOnOnes,
@@ -40,6 +41,5 @@ public enum PlayerTrait
     PushesUpForCornersGK = RushesOutOfGoal,
     AggressiveTackler = DivesIntoTackles,
     PaceMerchant = Rapid,
-    SetPieceSpecialist = DeadBallSpecialist,
-    BigMatchPlayer = Leadership
+    SetPieceSpecialist = DeadBallSpecialist
 }

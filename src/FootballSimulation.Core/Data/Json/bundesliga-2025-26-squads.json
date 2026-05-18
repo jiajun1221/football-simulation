@@ -29,9 +29,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -124,9 +122,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -148,8 +144,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Playmaker",
-            "Interceptor"
+            "Interceptor",
+            "PressResistant"
           ],
           "morale": 50
         },
@@ -171,9 +167,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
+            "Playmaker",
+            "TechnicalDribbler"
           ],
           "morale": 50
         },
@@ -196,6 +191,7 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
+            "Engine",
             "Playmaker"
           ],
           "morale": 50
@@ -242,8 +238,7 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50
         },
@@ -287,9 +282,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -310,9 +303,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -334,9 +325,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -358,9 +347,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -381,10 +368,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -404,11 +388,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -428,9 +408,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -451,10 +429,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -475,9 +450,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -498,9 +471,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -521,10 +492,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -544,9 +512,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         }
       ]
@@ -576,9 +542,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -647,9 +611,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -670,9 +632,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -694,7 +654,6 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Playmaker",
             "Interceptor"
           ],
           "morale": 50
@@ -717,9 +676,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -740,10 +697,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -765,8 +719,7 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50
         },
@@ -789,8 +742,7 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50
         },
@@ -812,10 +764,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50
         }
       ],
@@ -835,9 +784,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -859,9 +806,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -883,9 +828,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -907,9 +850,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -930,9 +871,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -952,9 +891,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -974,11 +911,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -999,10 +932,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -1023,9 +953,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -1046,10 +974,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -1070,9 +995,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -1093,10 +1016,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50
         }
       ]
@@ -1126,9 +1046,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -1149,9 +1067,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -1172,9 +1088,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -1196,9 +1110,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -1220,9 +1132,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -1243,8 +1153,6 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
             "Playmaker"
           ],
           "morale": 50
@@ -1267,9 +1175,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -1290,10 +1196,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -1315,8 +1218,7 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50
         },
@@ -1338,9 +1240,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -1361,10 +1261,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50
         }
       ],
@@ -1384,9 +1281,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -1408,9 +1303,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -1431,9 +1324,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -1454,9 +1345,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -1476,11 +1365,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -1501,9 +1386,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -1524,10 +1407,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -1548,9 +1428,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -1571,9 +1449,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -1594,10 +1470,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -1618,9 +1491,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -1641,9 +1512,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         }
       ]
@@ -1673,9 +1542,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -1698,7 +1565,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50
         },
@@ -1792,7 +1660,6 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Playmaker",
             "Interceptor"
           ],
           "morale": 50
@@ -1816,7 +1683,7 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50
         },
@@ -1838,9 +1705,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -1884,9 +1749,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -1907,9 +1770,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         }
       ],
@@ -1929,9 +1790,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -1952,9 +1811,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -1975,9 +1832,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -1999,9 +1854,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -2021,11 +1874,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -2045,9 +1894,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -2068,9 +1915,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -2091,10 +1936,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -2115,10 +1957,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -2139,10 +1978,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -2163,9 +1999,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -2186,9 +2020,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         }
       ]
@@ -2218,9 +2050,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -2243,8 +2073,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50
         },
@@ -2268,8 +2098,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50
         },
@@ -2293,7 +2123,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50
         },
@@ -2338,9 +2169,9 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Flair",
-            "TechnicalDribbler"
+            "Playmaker",
+            "TechnicalDribbler",
+            "Flair"
           ],
           "morale": 50
         },
@@ -2363,6 +2194,7 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
+            "Engine",
             "Playmaker"
           ],
           "morale": 50
@@ -2386,6 +2218,7 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
+            "Engine",
             "Playmaker"
           ],
           "morale": 50
@@ -2409,7 +2242,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "PowerHeader"
           ],
           "morale": 50
         },
@@ -2432,8 +2266,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50
         },
@@ -2456,8 +2290,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50
         }
@@ -2478,9 +2312,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -2549,9 +2381,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -2573,7 +2403,6 @@
           "form": "Average",
           "isStarter": false,
           "traits": [
-            "Playmaker",
             "Interceptor"
           ],
           "morale": 50
@@ -2595,11 +2424,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -2619,11 +2444,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -2644,10 +2465,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -2669,8 +2487,7 @@
           "form": "Average",
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50
         },
@@ -2692,10 +2509,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -2716,10 +2530,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -2740,9 +2551,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         }
       ]
@@ -2773,8 +2582,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "OneOnOnes"
+            "OneOnOnes",
+            "Leadership"
           ],
           "morale": 50
         },
@@ -2798,8 +2607,9 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Interceptor"
+            "Interceptor",
+            "LongPasser",
+            "AerialThreat"
           ],
           "morale": 50
         },
@@ -2869,7 +2679,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50
         },
@@ -2892,8 +2703,9 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Playmaker"
+            "Engine",
+            "Playmaker",
+            "BoxToBox"
           ],
           "morale": 50
         },
@@ -2916,6 +2728,7 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
+            "Engine",
             "Playmaker"
           ],
           "morale": 50
@@ -2939,6 +2752,7 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
+            "Engine",
             "Playmaker"
           ],
           "morale": 50
@@ -2962,8 +2776,9 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Leadership",
+            "SpeedDribbler",
             "Flair",
+            "Rapid",
             "TechnicalDribbler"
           ],
           "morale": 50
@@ -2987,8 +2802,9 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "PowerHeader",
+            "PenaltySpecialist"
           ],
           "morale": 50
         },
@@ -3011,7 +2827,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
           ],
           "morale": 50
         }
@@ -3032,9 +2849,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -3127,9 +2942,8 @@
           "form": "Average",
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
+            "Playmaker",
+            "TechnicalDribbler"
           ],
           "morale": 50
         },
@@ -3151,7 +2965,8 @@
           "form": "Average",
           "isStarter": false,
           "traits": [
-            "Engine"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50
         },
@@ -3174,7 +2989,7 @@
           "form": "Average",
           "isStarter": false,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50
         },
@@ -3196,10 +3011,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -3221,7 +3033,8 @@
           "form": "Average",
           "isStarter": false,
           "traits": [
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
           ],
           "morale": 50
         },
@@ -3242,9 +3055,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -3265,9 +3076,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -3289,9 +3098,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         }
       ]
@@ -3321,9 +3128,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -3439,6 +3244,7 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
+            "Engine",
             "Playmaker"
           ],
           "morale": 50
@@ -3462,7 +3268,6 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Playmaker",
             "Interceptor"
           ],
           "morale": 50
@@ -3485,8 +3290,6 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
             "Playmaker"
           ],
           "morale": 50
@@ -3533,8 +3336,7 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50
         },
@@ -3557,8 +3359,7 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50
         }
@@ -3579,9 +3380,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -3603,9 +3402,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -3627,9 +3424,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -3651,9 +3446,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -3674,10 +3467,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -3698,9 +3488,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -3720,11 +3508,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -3745,9 +3529,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -3791,10 +3573,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -3815,9 +3594,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -3838,9 +3615,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         }
       ]
@@ -3870,9 +3645,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -3894,8 +3667,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Engine"
+            "Engine",
+            "EarlyCrosser"
           ],
           "morale": 50
         },
@@ -3919,7 +3692,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50
         },
@@ -3943,7 +3717,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50
         },
@@ -3967,7 +3742,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50
         },
@@ -3989,9 +3765,9 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Flair",
-            "TechnicalDribbler"
+            "Playmaker",
+            "TechnicalDribbler",
+            "Flair"
           ],
           "morale": 50
         },
@@ -4014,8 +3790,9 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Playmaker"
+            "Engine",
+            "Playmaker",
+            "BoxToBox"
           ],
           "morale": 50
         },
@@ -4037,9 +3814,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
+            "Playmaker",
+            "TechnicalDribbler"
           ],
           "morale": 50
         },
@@ -4062,8 +3838,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
           ],
           "morale": 50
         },
@@ -4086,7 +3862,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
           ],
           "morale": 50
         },
@@ -4109,8 +3886,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50
         }
@@ -4131,9 +3908,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -4201,9 +3976,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -4225,7 +3998,7 @@
           "form": "Average",
           "isStarter": false,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50
         },
@@ -4248,7 +4021,6 @@
           "form": "Average",
           "isStarter": false,
           "traits": [
-            "Playmaker",
             "Interceptor"
           ],
           "morale": 50
@@ -4270,11 +4042,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -4295,9 +4063,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -4319,8 +4085,8 @@
           "form": "Average",
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50
         },
@@ -4343,8 +4109,8 @@
           "form": "Average",
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50
         },
@@ -4366,9 +4132,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -4389,9 +4153,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         }
       ]
@@ -4422,7 +4184,7 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "OneOnOnes"
+            "Leadership"
           ],
           "morale": 50
         },
@@ -4446,7 +4208,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Leadership",
+            "AerialThreat",
+            "Rapid",
             "Interceptor"
           ],
           "morale": 50
@@ -4470,7 +4233,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Leadership",
+            "Rapid",
+            "SpeedDribbler",
             "Engine"
           ],
           "morale": 50
@@ -4494,7 +4258,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Engine"
+            "Engine",
+            "EarlyCrosser"
           ],
           "morale": 50
         },
@@ -4517,7 +4282,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Engine"
+            "Engine",
+            "EarlyCrosser"
           ],
           "morale": 50
         },
@@ -4539,9 +4305,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Leadership",
             "Flair",
-            "TechnicalDribbler"
+            "TechnicalDribbler",
+            "PressResistant",
+            "BigMatchPlayer"
           ],
           "morale": 50
         },
@@ -4564,9 +4331,9 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Playmaker",
-            "Interceptor"
+            "Interceptor",
+            "PressResistant",
+            "LongPasser"
           ],
           "morale": 50
         },
@@ -4588,9 +4355,9 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Flair",
-            "TechnicalDribbler"
+            "Playmaker",
+            "TechnicalDribbler",
+            "Flair"
           ],
           "morale": 50
         },
@@ -4613,9 +4380,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Leadership",
             "Flair",
-            "TechnicalDribbler"
+            "TechnicalDribbler",
+            "EarlyCrosser",
+            "FinesseShot"
           ],
           "morale": 50
         },
@@ -4638,9 +4406,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Leadership",
+            "Rapid",
             "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Engine"
           ],
           "morale": 50
         },
@@ -4663,8 +4432,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "Playmaker",
+            "PowerHeader",
+            "PenaltySpecialist"
           ],
           "morale": 50
         }
@@ -4685,9 +4456,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -4710,7 +4479,9 @@
           "form": "Average",
           "isStarter": false,
           "traits": [
-            "Interceptor"
+            "AerialThreat",
+            "Interceptor",
+            "Leadership"
           ],
           "morale": 50
         },
@@ -4734,7 +4505,8 @@
           "form": "Average",
           "isStarter": false,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50
         },
@@ -4758,7 +4530,8 @@
           "form": "Average",
           "isStarter": false,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50
         },
@@ -4781,9 +4554,9 @@
           "form": "Average",
           "isStarter": false,
           "traits": [
-            "Leadership",
+            "LongPasser",
             "Playmaker",
-            "Interceptor"
+            "Engine"
           ],
           "morale": 50
         },
@@ -4806,8 +4579,9 @@
           "form": "Average",
           "isStarter": false,
           "traits": [
-            "Leadership",
-            "Playmaker"
+            "Engine",
+            "Playmaker",
+            "BoxToBox"
           ],
           "morale": 50
         },
@@ -4830,6 +4604,7 @@
           "form": "Average",
           "isStarter": false,
           "traits": [
+            "Engine",
             "Playmaker"
           ],
           "morale": 50
@@ -4852,8 +4627,6 @@
           "form": "Average",
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
             "Playmaker"
           ],
           "morale": 50
@@ -4877,8 +4650,8 @@
           "form": "Average",
           "isStarter": false,
           "traits": [
-            "Leadership",
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
           ],
           "morale": 50
         },
@@ -4922,10 +4695,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -4943,9 +4713,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50
         }
       ]
@@ -5000,7 +4768,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50
         },
@@ -5024,7 +4793,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50
         },
@@ -5094,8 +4864,6 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
             "Playmaker"
           ],
           "morale": 50
@@ -5118,8 +4886,6 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
             "Playmaker"
           ],
           "morale": 50
@@ -5142,8 +4908,6 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
             "Playmaker"
           ],
           "morale": 50
@@ -5167,8 +4931,7 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50
         },
@@ -5190,9 +4953,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -5213,9 +4974,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         }
       ],
@@ -5235,9 +4994,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -5282,9 +5039,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -5305,9 +5060,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -5329,7 +5082,6 @@
           "form": "Average",
           "isStarter": false,
           "traits": [
-            "Playmaker",
             "Interceptor"
           ],
           "morale": 50
@@ -5352,9 +5104,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -5375,9 +5125,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -5398,10 +5146,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -5422,9 +5167,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -5445,9 +5188,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -5469,9 +5210,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -5492,9 +5231,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50
         }
       ]
@@ -5524,9 +5261,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -5572,9 +5307,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -5596,9 +5329,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -5619,9 +5350,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -5643,7 +5372,7 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50
         },
@@ -5665,9 +5394,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -5688,10 +5415,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -5712,10 +5436,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -5736,9 +5457,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -5759,9 +5478,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         }
       ],
@@ -5781,9 +5498,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -5805,9 +5520,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -5828,9 +5541,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -5852,9 +5563,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -5875,9 +5584,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -5897,11 +5604,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -5922,9 +5625,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -5945,10 +5646,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -5969,9 +5667,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -5992,9 +5688,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -6015,9 +5709,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -6038,9 +5730,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50
         }
       ]
@@ -6070,9 +5760,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -6095,8 +5783,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50
         },
@@ -6119,9 +5807,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -6143,9 +5829,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -6166,9 +5850,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -6189,9 +5871,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
+            "Playmaker",
+            "TechnicalDribbler"
           ],
           "morale": 50
         },
@@ -6214,6 +5895,7 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
+            "Engine",
             "Playmaker"
           ],
           "morale": 50
@@ -6236,8 +5918,6 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
             "Playmaker"
           ],
           "morale": 50
@@ -6283,9 +5963,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -6306,10 +5984,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50
         }
       ],
@@ -6329,9 +6004,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -6352,9 +6025,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -6375,9 +6046,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -6398,9 +6067,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -6422,7 +6089,6 @@
           "form": "Average",
           "isStarter": false,
           "traits": [
-            "Playmaker",
             "Interceptor"
           ],
           "morale": 50
@@ -6444,11 +6110,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -6469,9 +6131,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -6492,10 +6152,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -6516,10 +6173,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -6540,9 +6194,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -6564,9 +6216,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -6588,9 +6238,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         }
       ]
@@ -6620,9 +6268,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -6645,8 +6291,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50
         },
@@ -6716,7 +6362,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50
         },
@@ -6739,6 +6386,7 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
+            "Engine",
             "Playmaker"
           ],
           "morale": 50
@@ -6761,9 +6409,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
+            "Playmaker",
+            "TechnicalDribbler"
           ],
           "morale": 50
         },
@@ -6785,9 +6432,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
+            "Playmaker",
+            "TechnicalDribbler"
           ],
           "morale": 50
         },
@@ -6810,9 +6456,9 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Leadership",
+            "SpeedDribbler",
             "Flair",
-            "TechnicalDribbler"
+            "Rapid"
           ],
           "morale": 50
         },
@@ -6835,8 +6481,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50
         },
@@ -6859,8 +6505,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50
         }
@@ -6881,9 +6527,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -6975,6 +6619,7 @@
           "form": "Average",
           "isStarter": false,
           "traits": [
+            "Engine",
             "Playmaker"
           ],
           "morale": 50
@@ -6998,8 +6643,8 @@
           "form": "Average",
           "isStarter": false,
           "traits": [
-            "Playmaker",
-            "Interceptor"
+            "Interceptor",
+            "PressResistant"
           ],
           "morale": 50
         },
@@ -7021,9 +6666,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -7043,11 +6686,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -7091,10 +6730,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -7115,10 +6751,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -7139,9 +6772,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         }
       ]
@@ -7290,6 +6921,7 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
+            "Engine",
             "Playmaker"
           ],
           "morale": 50
@@ -7313,7 +6945,6 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Playmaker",
             "Interceptor"
           ],
           "morale": 50
@@ -7337,7 +6968,7 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50
         },
@@ -7382,8 +7013,7 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50
         },
@@ -7427,9 +7057,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -7473,9 +7101,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -7496,9 +7122,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -7519,10 +7143,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -7542,11 +7163,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -7567,9 +7184,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -7591,8 +7206,7 @@
           "form": "Average",
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50
         },
@@ -7614,9 +7228,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -7637,10 +7249,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -7660,9 +7269,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -7684,9 +7291,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         }
       ]
@@ -7741,7 +7346,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50
         },
@@ -7834,9 +7440,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
+            "Playmaker",
+            "TechnicalDribbler"
           ],
           "morale": 50
         },
@@ -7859,7 +7464,7 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50
         },
@@ -7882,7 +7487,6 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Playmaker",
             "Interceptor"
           ],
           "morale": 50
@@ -7929,8 +7533,7 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50
         },
@@ -7953,8 +7556,7 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50
         }
@@ -7975,9 +7577,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -8022,9 +7622,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -8045,9 +7643,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -8069,7 +7665,7 @@
           "form": "Average",
           "isStarter": false,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50
         },
@@ -8090,11 +7686,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -8115,9 +7707,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -8138,10 +7728,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -8185,9 +7772,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -8208,10 +7793,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -8232,9 +7814,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         }
       ]
@@ -8264,9 +7844,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -8383,7 +7961,6 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Playmaker",
             "Interceptor"
           ],
           "morale": 50
@@ -8406,7 +7983,7 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Engine"
+            "SpeedDribbler"
           ],
           "morale": 50
         },
@@ -8427,11 +8004,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": true,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -8453,8 +8026,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50
         },
@@ -8521,9 +8094,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -8567,9 +8138,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -8591,9 +8160,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -8614,9 +8181,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -8636,11 +8201,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -8661,9 +8222,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -8684,10 +8243,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -8709,8 +8265,7 @@
           "form": "Average",
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50
         },
@@ -8732,9 +8287,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -8755,9 +8308,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -8778,9 +8329,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         }
       ]
@@ -8835,7 +8384,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50
         },
@@ -8882,7 +8432,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50
         },
@@ -8928,9 +8479,9 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Playmaker",
-            "Interceptor"
+            "Interceptor",
+            "PressResistant",
+            "LongPasser"
           ],
           "morale": 50
         },
@@ -8952,9 +8503,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
+            "Playmaker",
+            "TechnicalDribbler"
           ],
           "morale": 50
         },
@@ -8977,8 +8527,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Playmaker",
-            "Interceptor"
+            "Interceptor",
+            "PressResistant"
           ],
           "morale": 50
         },
@@ -9001,7 +8551,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
           ],
           "morale": 50
         },
@@ -9024,8 +8575,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50
         },
@@ -9069,9 +8620,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -9164,7 +8713,6 @@
           "form": "Average",
           "isStarter": false,
           "traits": [
-            "Playmaker",
             "Interceptor"
           ],
           "morale": 50
@@ -9187,9 +8735,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -9210,10 +8756,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -9235,8 +8778,8 @@
           "form": "Average",
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50
         },
@@ -9259,8 +8802,7 @@
           "form": "Average",
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50
         },
@@ -9283,8 +8825,7 @@
           "form": "Average",
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50
         },
@@ -9306,10 +8847,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -9331,9 +8869,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50
         }
       ]
@@ -9388,7 +8924,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50
         },
@@ -9480,9 +9017,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
+            "Playmaker",
+            "TechnicalDribbler"
           ],
           "morale": 50
         },
@@ -9505,7 +9041,7 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50
         },
@@ -9528,7 +9064,6 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Playmaker",
             "Interceptor"
           ],
           "morale": 50
@@ -9552,7 +9087,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
           ],
           "morale": 50
         },
@@ -9575,8 +9111,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50
         },
@@ -9599,8 +9135,8 @@
           "form": "Average",
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50
         }
@@ -9621,9 +9157,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -9715,8 +9249,6 @@
           "form": "Average",
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
             "Playmaker"
           ],
           "morale": 50
@@ -9739,7 +9271,7 @@
           "form": "Average",
           "isStarter": false,
           "traits": [
-            "Engine"
+            "SpeedDribbler"
           ],
           "morale": 50
         },
@@ -9761,9 +9293,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -9783,11 +9313,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -9831,9 +9357,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -9854,10 +9378,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50
         },
         {
@@ -9878,9 +9399,7 @@
           "fatigue": 0,
           "form": "Average",
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50
         }
       ]

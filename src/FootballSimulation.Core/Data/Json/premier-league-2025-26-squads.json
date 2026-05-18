@@ -29,8 +29,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "OneOnOnes"
+            "OneOnOnes",
+            "RushesOutOfGoal"
           ],
           "morale": 50,
           "isInjured": false,
@@ -63,8 +63,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat",
+            "PressResistant"
           ],
           "morale": 50,
           "isInjured": false,
@@ -97,8 +98,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Interceptor"
+            "AerialThreat",
+            "PowerHeader",
+            "DivesIntoTackles"
           ],
           "morale": 50,
           "isInjured": null,
@@ -130,8 +132,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Engine"
+            "Engine",
+            "EarlyCrosser",
+            "Rapid"
           ],
           "morale": 50,
           "isInjured": null,
@@ -163,8 +166,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Engine"
+            "Engine",
+            "EarlyCrosser",
+            "Rapid"
           ],
           "morale": 50,
           "isInjured": false,
@@ -196,8 +200,10 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Playmaker"
+            "Interceptor",
+            "Engine",
+            "LongShotTaker",
+            "Leadership"
           ],
           "morale": 50,
           "isInjured": false,
@@ -228,9 +234,10 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Flair",
-            "TechnicalDribbler"
+            "Playmaker",
+            "PressResistant",
+            "DeadBallSpecialist",
+            "Leadership"
           ],
           "morale": 50,
           "isInjured": null,
@@ -261,9 +268,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Flair",
-            "TechnicalDribbler"
+            "Playmaker",
+            "TechnicalDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -295,9 +302,11 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
             "Flair",
-            "TechnicalDribbler"
+            "TechnicalDribbler",
+            "EarlyCrosser",
+            "FinesseShot",
+            "TeamPlayer"
           ],
           "morale": 50,
           "isInjured": false,
@@ -329,8 +338,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap",
+            "PowerHeader"
           ],
           "morale": 50,
           "isInjured": null,
@@ -362,8 +372,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap",
+            "PowerHeader"
           ],
           "morale": 50,
           "isInjured": false,
@@ -393,9 +404,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -427,8 +436,9 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Leadership",
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat",
+            "PowerHeader"
           ],
           "morale": 50,
           "isInjured": null,
@@ -460,8 +470,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Leadership",
-            "Engine"
+            "Engine",
+            "EarlyCrosser"
           ],
           "morale": 50,
           "isInjured": null,
@@ -494,8 +504,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Leadership",
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": null,
@@ -527,9 +537,9 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Leadership",
-            "Playmaker",
-            "Interceptor"
+            "Interceptor",
+            "PressResistant",
+            "LongPasser"
           ],
           "morale": 50,
           "isInjured": null,
@@ -561,6 +571,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
+            "Engine",
             "Playmaker"
           ],
           "morale": 50,
@@ -593,8 +604,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Playmaker",
-            "Interceptor"
+            "Interceptor",
+            "PressResistant"
           ],
           "morale": 50,
           "isInjured": null,
@@ -626,8 +637,9 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Leadership",
+            "SpeedDribbler",
             "Flair",
+            "Rapid",
             "TechnicalDribbler"
           ],
           "morale": 50,
@@ -660,9 +672,9 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Leadership",
+            "SpeedDribbler",
             "Flair",
-            "TechnicalDribbler"
+            "Rapid"
           ],
           "morale": 50,
           "isInjured": false,
@@ -694,8 +706,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -759,7 +771,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Engine"
+            "Engine",
+            "EarlyCrosser"
           ],
           "morale": 50,
           "isInjured": null,
@@ -833,8 +846,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": null,
@@ -867,7 +880,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -962,9 +976,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
+            "Playmaker",
+            "TechnicalDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -996,6 +1009,7 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
+            "Engine",
             "Playmaker"
           ],
           "morale": 50,
@@ -1028,8 +1042,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Playmaker",
-            "Interceptor"
+            "Interceptor",
+            "PressResistant"
           ],
           "morale": 50,
           "isInjured": false,
@@ -1061,8 +1075,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
           ],
           "morale": 50,
           "isInjured": false,
@@ -1094,8 +1108,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -1157,9 +1171,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -1222,9 +1234,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -1255,9 +1265,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -1287,9 +1295,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
+            "Playmaker",
+            "TechnicalDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -1321,7 +1328,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50,
           "isInjured": false,
@@ -1353,7 +1360,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50,
           "isInjured": false,
@@ -1384,9 +1391,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -1417,8 +1422,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -1450,8 +1454,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50,
           "isInjured": null,
@@ -1514,10 +1517,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -1590,8 +1590,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -1624,7 +1624,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -1656,7 +1657,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Engine"
+            "Engine",
+            "EarlyCrosser"
           ],
           "morale": 50,
           "isInjured": false,
@@ -1719,9 +1721,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Flair",
-            "TechnicalDribbler"
+            "Playmaker",
+            "TechnicalDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -1753,9 +1755,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Playmaker",
-            "Interceptor"
+            "Interceptor",
+            "PressResistant",
+            "LongPasser"
           ],
           "morale": 50,
           "isInjured": false,
@@ -1787,9 +1789,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Playmaker",
-            "Interceptor"
+            "Interceptor",
+            "PressResistant",
+            "LongPasser"
           ],
           "morale": 50,
           "isInjured": false,
@@ -1821,7 +1823,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
           ],
           "morale": 50,
           "isInjured": null,
@@ -1853,8 +1856,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -1886,8 +1889,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -1917,9 +1920,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -1951,7 +1952,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": null,
@@ -2047,8 +2049,9 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Leadership",
-            "Playmaker"
+            "Engine",
+            "Playmaker",
+            "BoxToBox"
           ],
           "morale": 50,
           "isInjured": false,
@@ -2079,9 +2082,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
+            "Playmaker",
+            "TechnicalDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -2113,6 +2115,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
+            "Engine",
             "Playmaker"
           ],
           "morale": 50,
@@ -2144,9 +2147,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
+            "Playmaker",
+            "TechnicalDribbler"
           ],
           "morale": 50,
           "isInjured": null,
@@ -2209,10 +2211,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -2243,6 +2242,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
+            "Engine",
             "Playmaker"
           ],
           "morale": 50,
@@ -2275,7 +2275,6 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Playmaker",
             "Interceptor"
           ],
           "morale": 50,
@@ -2350,7 +2349,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -2382,7 +2382,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Engine"
+            "Engine",
+            "EarlyCrosser"
           ],
           "morale": 50,
           "isInjured": false,
@@ -2415,7 +2416,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -2447,7 +2449,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Engine"
+            "Engine",
+            "EarlyCrosser"
           ],
           "morale": 50,
           "isInjured": null,
@@ -2479,6 +2482,7 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
+            "Engine",
             "Playmaker"
           ],
           "morale": 50,
@@ -2511,6 +2515,7 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
+            "Engine",
             "Playmaker"
           ],
           "morale": 50,
@@ -2543,8 +2548,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Playmaker",
-            "Interceptor"
+            "Interceptor",
+            "PressResistant"
           ],
           "morale": 50,
           "isInjured": false,
@@ -2576,9 +2581,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
+            "SpeedDribbler",
             "Flair",
-            "TechnicalDribbler"
+            "Rapid"
           ],
           "morale": 50,
           "isInjured": false,
@@ -2610,7 +2615,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
           ],
           "morale": 50,
           "isInjured": false,
@@ -2642,8 +2648,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -2673,9 +2679,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -2707,7 +2711,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -2771,9 +2776,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -2803,7 +2806,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Engine"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -2834,8 +2838,6 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
             "Playmaker"
           ],
           "morale": 50,
@@ -2868,7 +2870,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50,
           "isInjured": null,
@@ -2899,8 +2901,6 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
             "Playmaker"
           ],
           "morale": 50,
@@ -2933,8 +2933,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -2965,9 +2965,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -2997,10 +2995,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -3030,8 +3025,6 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
             "Playmaker"
           ],
           "morale": 50,
@@ -3073,8 +3066,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "OneOnOnes"
+            "OneOnOnes",
+            "RushesOutOfGoal"
           ],
           "morale": 50,
           "isInjured": false,
@@ -3107,8 +3100,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -3140,7 +3133,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Engine"
+            "Engine",
+            "EarlyCrosser"
           ],
           "morale": 50,
           "isInjured": null,
@@ -3172,7 +3166,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Engine"
+            "Engine",
+            "EarlyCrosser"
           ],
           "morale": 50,
           "isInjured": false,
@@ -3236,9 +3231,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Playmaker",
-            "Interceptor"
+            "Interceptor",
+            "PressResistant",
+            "LongPasser"
           ],
           "morale": 50,
           "isInjured": false,
@@ -3270,6 +3265,7 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
+            "Engine",
             "Playmaker"
           ],
           "morale": 50,
@@ -3302,6 +3298,7 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
+            "Engine",
             "Playmaker"
           ],
           "morale": 50,
@@ -3334,9 +3331,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
+            "SpeedDribbler",
             "Flair",
-            "TechnicalDribbler"
+            "Rapid"
           ],
           "morale": 50,
           "isInjured": false,
@@ -3368,7 +3365,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
           ],
           "morale": 50,
           "isInjured": false,
@@ -3400,8 +3398,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -3431,9 +3429,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -3465,7 +3461,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -3498,7 +3495,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -3563,8 +3561,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Playmaker",
-            "Interceptor"
+            "Interceptor",
+            "PressResistant"
           ],
           "morale": 50,
           "isInjured": false,
@@ -3596,6 +3594,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
+            "Engine",
             "Playmaker"
           ],
           "morale": 50,
@@ -3627,9 +3626,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -3659,9 +3656,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -3692,7 +3687,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
           ],
           "morale": 50,
           "isInjured": null,
@@ -3723,9 +3719,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -3755,10 +3749,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -3788,9 +3779,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -3829,9 +3818,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -3992,8 +3979,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Playmaker",
-            "Interceptor"
+            "Interceptor",
+            "PressResistant"
           ],
           "morale": 50,
           "isInjured": false,
@@ -4025,8 +4012,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Playmaker",
-            "Interceptor"
+            "Interceptor",
+            "PressResistant"
           ],
           "morale": 50,
           "isInjured": null,
@@ -4057,8 +4044,6 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
             "Playmaker"
           ],
           "morale": 50,
@@ -4123,8 +4108,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": null,
@@ -4156,8 +4141,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -4187,9 +4172,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -4319,7 +4302,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50,
           "isInjured": false,
@@ -4350,8 +4333,6 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
             "Playmaker"
           ],
           "morale": 50,
@@ -4384,7 +4365,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50,
           "isInjured": null,
@@ -4415,9 +4396,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -4512,8 +4491,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -4545,8 +4523,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -4619,8 +4596,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Engine"
+            "Engine",
+            "EarlyCrosser",
+            "Rapid"
           ],
           "morale": 50,
           "isInjured": false,
@@ -4652,8 +4630,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Engine"
+            "EarlyCrosser",
+            "Engine",
+            "DivesIntoTackles"
           ],
           "morale": 50,
           "isInjured": false,
@@ -4686,8 +4665,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat",
+            "PowerHeader"
           ],
           "morale": 50,
           "isInjured": false,
@@ -4720,8 +4700,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -4752,9 +4732,10 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
             "Flair",
-            "TechnicalDribbler"
+            "Playmaker",
+            "FinesseShot",
+            "PenaltySpecialist"
           ],
           "morale": 50,
           "isInjured": false,
@@ -4786,9 +4767,10 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Playmaker",
-            "Interceptor"
+            "Interceptor",
+            "Engine",
+            "DivesIntoTackles",
+            "PressResistant"
           ],
           "morale": 50,
           "isInjured": null,
@@ -4820,8 +4802,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Playmaker"
+            "LongPasser",
+            "Playmaker",
+            "PressResistant"
           ],
           "morale": 50,
           "isInjured": null,
@@ -4853,8 +4836,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap",
+            "PowerHeader"
           ],
           "morale": 50,
           "isInjured": null,
@@ -4886,8 +4870,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
+            "SpeedDribbler",
             "Flair",
+            "Rapid",
             "TechnicalDribbler"
           ],
           "morale": 50,
@@ -4920,9 +4905,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
+            "SpeedDribbler",
             "Flair",
-            "TechnicalDribbler"
+            "Rapid"
           ],
           "morale": 50,
           "isInjured": false,
@@ -4985,8 +4970,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Leadership",
-            "Engine"
+            "Engine",
+            "EarlyCrosser"
           ],
           "morale": 50,
           "isInjured": false,
@@ -5018,8 +5003,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Leadership",
-            "Engine"
+            "Engine",
+            "EarlyCrosser"
           ],
           "morale": 50,
           "isInjured": false,
@@ -5052,7 +5037,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": null,
@@ -5084,8 +5070,9 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Leadership",
-            "Playmaker"
+            "Engine",
+            "Playmaker",
+            "BoxToBox"
           ],
           "morale": 50,
           "isInjured": false,
@@ -5117,8 +5104,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Playmaker",
-            "Interceptor"
+            "Interceptor",
+            "PressResistant"
           ],
           "morale": 50,
           "isInjured": null,
@@ -5149,10 +5136,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -5183,9 +5167,9 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Leadership",
+            "SpeedDribbler",
             "Flair",
-            "TechnicalDribbler"
+            "Rapid"
           ],
           "morale": 50,
           "isInjured": false,
@@ -5217,9 +5201,9 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Leadership",
+            "SpeedDribbler",
             "Flair",
-            "TechnicalDribbler"
+            "Rapid"
           ],
           "morale": 50,
           "isInjured": null,
@@ -5316,7 +5300,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": null,
@@ -5390,8 +5375,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -5423,7 +5408,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Engine"
+            "Engine",
+            "EarlyCrosser"
           ],
           "morale": 50,
           "isInjured": null,
@@ -5456,7 +5442,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -5488,7 +5475,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Engine"
+            "Engine",
+            "EarlyCrosser"
           ],
           "morale": 50,
           "isInjured": false,
@@ -5520,9 +5508,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Playmaker",
-            "Interceptor"
+            "Interceptor",
+            "PressResistant",
+            "LongPasser"
           ],
           "morale": 50,
           "isInjured": false,
@@ -5554,8 +5542,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Playmaker",
-            "Interceptor"
+            "Interceptor",
+            "PressResistant"
           ],
           "morale": 50,
           "isInjured": null,
@@ -5586,8 +5574,6 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
             "Playmaker"
           ],
           "morale": 50,
@@ -5620,9 +5606,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
+            "SpeedDribbler",
             "Flair",
-            "TechnicalDribbler"
+            "Rapid"
           ],
           "morale": 50,
           "isInjured": false,
@@ -5654,8 +5640,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
           ],
           "morale": 50,
           "isInjured": false,
@@ -5687,8 +5673,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
           ],
           "morale": 50,
           "isInjured": null,
@@ -5718,9 +5704,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -5752,7 +5736,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": null,
@@ -5816,9 +5801,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -5849,7 +5832,6 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Playmaker",
             "Interceptor"
           ],
           "morale": 50,
@@ -5881,8 +5863,6 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
             "Playmaker"
           ],
           "morale": 50,
@@ -5915,7 +5895,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50,
           "isInjured": false,
@@ -5946,10 +5926,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -5980,9 +5957,9 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Leadership",
+            "SpeedDribbler",
             "Flair",
-            "TechnicalDribbler"
+            "Rapid"
           ],
           "morale": 50,
           "isInjured": null,
@@ -6014,8 +5991,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": null,
@@ -6047,8 +6024,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -6154,8 +6131,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -6187,7 +6164,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Engine"
+            "Engine",
+            "EarlyCrosser"
           ],
           "morale": 50,
           "isInjured": null,
@@ -6283,6 +6261,7 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
+            "Engine",
             "Playmaker"
           ],
           "morale": 50,
@@ -6315,8 +6294,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Playmaker",
-            "Interceptor"
+            "Interceptor",
+            "PressResistant"
           ],
           "morale": 50,
           "isInjured": false,
@@ -6347,9 +6326,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
+            "Playmaker",
+            "TechnicalDribbler"
           ],
           "morale": 50,
           "isInjured": null,
@@ -6381,9 +6359,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
+            "SpeedDribbler",
             "Flair",
-            "TechnicalDribbler"
+            "Rapid"
           ],
           "morale": 50,
           "isInjured": false,
@@ -6415,8 +6393,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": null,
@@ -6448,8 +6426,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -6479,9 +6457,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -6577,9 +6553,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -6610,6 +6584,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
+            "Engine",
             "Playmaker"
           ],
           "morale": 50,
@@ -6642,7 +6617,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50,
           "isInjured": false,
@@ -6673,9 +6648,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -6705,10 +6678,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -6739,8 +6709,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": null,
@@ -6772,8 +6742,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -6836,9 +6806,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -6877,9 +6845,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -6910,7 +6876,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Engine"
+            "Engine",
+            "EarlyCrosser"
           ],
           "morale": 50,
           "isInjured": false,
@@ -6943,7 +6910,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -6976,7 +6944,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -7040,8 +7009,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Playmaker",
-            "Interceptor"
+            "Interceptor",
+            "PressResistant"
           ],
           "morale": 50,
           "isInjured": false,
@@ -7072,9 +7041,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
+            "Playmaker",
+            "TechnicalDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -7105,9 +7073,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
+            "Playmaker",
+            "TechnicalDribbler"
           ],
           "morale": 50,
           "isInjured": null,
@@ -7139,8 +7106,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": null,
@@ -7172,8 +7139,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -7205,8 +7172,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -7236,9 +7203,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -7366,7 +7331,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50,
           "isInjured": null,
@@ -7397,9 +7362,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -7429,9 +7392,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -7462,8 +7423,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -7495,8 +7456,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -7559,9 +7520,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -7592,9 +7551,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -7667,7 +7624,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -7700,7 +7658,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -7796,8 +7755,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Playmaker",
-            "Interceptor"
+            "Interceptor",
+            "PressResistant"
           ],
           "morale": 50,
           "isInjured": false,
@@ -7829,6 +7788,7 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
+            "Engine",
             "Playmaker"
           ],
           "morale": 50,
@@ -7860,9 +7820,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
+            "Playmaker",
+            "TechnicalDribbler"
           ],
           "morale": 50,
           "isInjured": null,
@@ -7894,8 +7853,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": true,
@@ -7927,8 +7886,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -7990,9 +7949,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -8088,9 +8045,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -8121,7 +8076,6 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Playmaker",
             "Interceptor"
           ],
           "morale": 50,
@@ -8153,8 +8107,6 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
             "Playmaker"
           ],
           "morale": 50,
@@ -8187,7 +8139,6 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Playmaker",
             "Interceptor"
           ],
           "morale": 50,
@@ -8219,9 +8170,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -8252,8 +8201,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -8345,9 +8293,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -8420,8 +8366,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": null,
@@ -8453,8 +8399,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Engine"
+            "Engine",
+            "EarlyCrosser"
           ],
           "morale": 50,
           "isInjured": false,
@@ -8486,8 +8432,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Engine"
+            "Engine",
+            "EarlyCrosser"
           ],
           "morale": 50,
           "isInjured": false,
@@ -8519,7 +8465,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Engine"
+            "Engine",
+            "EarlyCrosser"
           ],
           "morale": 50,
           "isInjured": null,
@@ -8550,9 +8497,10 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
+            "Playmaker",
             "Flair",
-            "TechnicalDribbler"
+            "TechnicalDribbler",
+            "PressResistant"
           ],
           "morale": 50,
           "isInjured": false,
@@ -8584,9 +8532,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Playmaker",
-            "Interceptor"
+            "Interceptor",
+            "PressResistant",
+            "LongPasser"
           ],
           "morale": 50,
           "isInjured": false,
@@ -8617,9 +8565,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Flair",
-            "TechnicalDribbler"
+            "Playmaker",
+            "TechnicalDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -8651,8 +8599,10 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "TechnicalDribbler",
+            "FinesseShot",
+            "TriesToBeatOffsideTrap"
           ],
           "morale": 50,
           "isInjured": false,
@@ -8684,8 +8634,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap",
+            "PowerHeader"
           ],
           "morale": 50,
           "isInjured": null,
@@ -8717,8 +8668,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
+            "SpeedDribbler",
             "Flair",
+            "Rapid",
             "TechnicalDribbler"
           ],
           "morale": 50,
@@ -8750,7 +8702,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "OneOnOnes"
+            "OneOnOnes",
+            "Leadership"
           ],
           "morale": 50,
           "isInjured": null,
@@ -8782,7 +8735,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Engine"
+            "Engine",
+            "EarlyCrosser"
           ],
           "morale": 50,
           "isInjured": false,
@@ -8815,7 +8769,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Interceptor"
+            "AerialThreat",
+            "PowerHeader"
           ],
           "morale": 50,
           "isInjured": false,
@@ -8848,7 +8803,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -8880,8 +8836,9 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Leadership",
-            "Playmaker"
+            "Engine",
+            "Playmaker",
+            "BoxToBox"
           ],
           "morale": 50,
           "isInjured": false,
@@ -8913,8 +8870,9 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Leadership",
-            "Playmaker"
+            "Engine",
+            "Playmaker",
+            "BoxToBox"
           ],
           "morale": 50,
           "isInjured": false,
@@ -8946,7 +8904,6 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Playmaker",
             "Interceptor"
           ],
           "morale": 50,
@@ -8979,7 +8936,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50,
           "isInjured": null,
@@ -9011,8 +8968,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -9044,8 +9001,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -9077,8 +9034,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": null,
@@ -9110,7 +9067,6 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Playmaker",
             "Interceptor"
           ],
           "morale": 50,
@@ -9152,8 +9108,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "OneOnOnes"
+            "OneOnOnes",
+            "Puncher",
+            "Leadership"
           ],
           "morale": 50,
           "isInjured": false,
@@ -9186,8 +9143,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat",
+            "PowerHeader"
           ],
           "morale": 50,
           "isInjured": false,
@@ -9220,8 +9178,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat",
+            "Leadership"
           ],
           "morale": 50,
           "isInjured": null,
@@ -9254,8 +9213,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat",
+            "PowerHeader"
           ],
           "morale": 50,
           "isInjured": null,
@@ -9287,8 +9247,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Engine"
+            "Engine",
+            "EarlyCrosser"
           ],
           "morale": 50,
           "isInjured": null,
@@ -9319,9 +9279,10 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
             "Flair",
-            "TechnicalDribbler"
+            "TechnicalDribbler",
+            "FinesseShot",
+            "Playmaker"
           ],
           "morale": 50,
           "isInjured": false,
@@ -9353,9 +9314,10 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
             "Playmaker",
-            "Interceptor"
+            "Interceptor",
+            "PressResistant",
+            "Leadership"
           ],
           "morale": 50,
           "isInjured": false,
@@ -9387,8 +9349,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Playmaker"
+            "Engine",
+            "Playmaker",
+            "BoxToBox"
           ],
           "morale": 50,
           "isInjured": false,
@@ -9420,8 +9383,11 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "PowerHeader",
+            "AerialThreat",
+            "TriesToBeatOffsideTrap",
+            "BigMatchPlayer"
           ],
           "morale": 50,
           "isInjured": false,
@@ -9453,8 +9419,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap",
+            "PowerHeader"
           ],
           "morale": 50,
           "isInjured": false,
@@ -9486,8 +9453,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
+            "SpeedDribbler",
             "Flair",
+            "Rapid",
             "TechnicalDribbler"
           ],
           "morale": 50,
@@ -9551,8 +9519,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Leadership",
-            "Engine"
+            "Engine",
+            "EarlyCrosser"
           ],
           "morale": 50,
           "isInjured": null,
@@ -9584,8 +9552,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Leadership",
-            "Engine"
+            "Engine",
+            "EarlyCrosser"
           ],
           "morale": 50,
           "isInjured": null,
@@ -9617,8 +9585,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Leadership",
-            "Engine"
+            "Engine",
+            "EarlyCrosser"
           ],
           "morale": 50,
           "isInjured": false,
@@ -9649,9 +9617,9 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Leadership",
-            "Flair",
-            "TechnicalDribbler"
+            "Playmaker",
+            "TechnicalDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -9683,9 +9651,9 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Leadership",
-            "Playmaker",
-            "Interceptor"
+            "Interceptor",
+            "PressResistant",
+            "LongPasser"
           ],
           "morale": 50,
           "isInjured": null,
@@ -9716,9 +9684,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
+            "Playmaker",
+            "TechnicalDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -9750,6 +9717,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
+            "Engine",
             "Playmaker"
           ],
           "morale": 50,
@@ -9782,8 +9750,9 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Leadership",
+            "SpeedDribbler",
             "Flair",
+            "Rapid",
             "TechnicalDribbler"
           ],
           "morale": 50,
@@ -9816,9 +9785,9 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Leadership",
+            "SpeedDribbler",
             "Flair",
-            "TechnicalDribbler"
+            "Rapid"
           ],
           "morale": 50,
           "isInjured": false,
@@ -9851,8 +9820,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Leadership",
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": null,
@@ -9885,7 +9854,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": null,
@@ -9959,8 +9929,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat",
+            "PowerHeader"
           ],
           "morale": 50,
           "isInjured": true,
@@ -9993,8 +9964,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat",
+            "PowerHeader"
           ],
           "morale": 50,
           "isInjured": false,
@@ -10027,8 +9999,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat",
+            "PowerHeader"
           ],
           "morale": 50,
           "isInjured": null,
@@ -10060,7 +10033,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Engine"
+            "Engine",
+            "EarlyCrosser"
           ],
           "morale": 50,
           "isInjured": false,
@@ -10091,9 +10065,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Flair",
-            "TechnicalDribbler"
+            "Playmaker",
+            "LongPasser",
+            "DeadBallSpecialist"
           ],
           "morale": 50,
           "isInjured": false,
@@ -10125,8 +10099,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Playmaker"
+            "Engine",
+            "Playmaker",
+            "BoxToBox"
           ],
           "morale": 50,
           "isInjured": false,
@@ -10157,9 +10132,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
+            "Playmaker",
+            "TechnicalDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -10191,8 +10165,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
+            "SpeedDribbler",
             "Flair",
+            "Rapid",
             "TechnicalDribbler"
           ],
           "morale": 50,
@@ -10225,8 +10200,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap",
+            "PowerHeader"
           ],
           "morale": 50,
           "isInjured": false,
@@ -10258,8 +10234,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
           ],
           "morale": 50,
           "isInjured": false,
@@ -10289,9 +10265,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -10322,7 +10296,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Engine"
+            "Engine",
+            "EarlyCrosser"
           ],
           "morale": 50,
           "isInjured": false,
@@ -10387,7 +10362,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -10419,8 +10395,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Playmaker",
-            "Interceptor"
+            "Interceptor",
+            "PressResistant"
           ],
           "morale": 50,
           "isInjured": false,
@@ -10452,7 +10428,6 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Playmaker",
             "Interceptor"
           ],
           "morale": 50,
@@ -10485,9 +10460,9 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Leadership",
+            "SpeedDribbler",
             "Flair",
-            "TechnicalDribbler"
+            "Rapid"
           ],
           "morale": 50,
           "isInjured": false,
@@ -10519,7 +10494,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
           ],
           "morale": 50,
           "isInjured": false,
@@ -10721,8 +10697,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Engine"
+            "Engine",
+            "EarlyCrosser"
           ],
           "morale": 50,
           "isInjured": false,
@@ -10755,8 +10731,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -10788,7 +10764,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Engine"
+            "Engine",
+            "EarlyCrosser"
           ],
           "morale": 50,
           "isInjured": false,
@@ -10821,7 +10798,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -10853,9 +10831,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Playmaker",
-            "Interceptor"
+            "Engine",
+            "BoxToBox",
+            "LongPasser"
           ],
           "morale": 50,
           "isInjured": false,
@@ -10887,8 +10865,10 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Playmaker"
+            "Playmaker",
+            "PressResistant",
+            "DivesIntoTackles",
+            "Leadership"
           ],
           "morale": 50,
           "isInjured": null,
@@ -10920,8 +10900,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Playmaker"
+            "Engine",
+            "Playmaker",
+            "BoxToBox"
           ],
           "morale": 50,
           "isInjured": false,
@@ -10953,8 +10934,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap",
+            "PowerHeader"
           ],
           "morale": 50,
           "isInjured": false,
@@ -10986,8 +10968,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
+            "SpeedDribbler",
             "Flair",
+            "Rapid",
             "TechnicalDribbler"
           ],
           "morale": 50,
@@ -11020,8 +11003,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
+            "SpeedDribbler",
             "Flair",
+            "Rapid",
             "TechnicalDribbler"
           ],
           "morale": 50,
@@ -11052,9 +11036,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -11150,9 +11132,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -11183,6 +11163,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
+            "Engine",
             "Playmaker"
           ],
           "morale": 50,
@@ -11215,6 +11196,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
+            "Engine",
             "Playmaker"
           ],
           "morale": 50,
@@ -11247,6 +11229,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
+            "Engine",
             "Playmaker"
           ],
           "morale": 50,
@@ -11279,8 +11262,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -11312,7 +11295,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
           ],
           "morale": 50,
           "isInjured": false,
@@ -11344,8 +11328,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -11376,9 +11360,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -11408,9 +11390,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -11449,9 +11429,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -11483,8 +11461,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat",
+            "PowerHeader"
           ],
           "morale": 50,
           "isInjured": false,
@@ -11517,7 +11496,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": null,
@@ -11612,9 +11592,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Flair",
-            "TechnicalDribbler"
+            "Playmaker",
+            "TechnicalDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -11646,8 +11626,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Playmaker"
+            "Engine",
+            "Playmaker",
+            "BoxToBox"
           ],
           "morale": 50,
           "isInjured": false,
@@ -11678,9 +11659,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
+            "Playmaker",
+            "TechnicalDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -11712,9 +11692,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
+            "SpeedDribbler",
             "Flair",
-            "TechnicalDribbler"
+            "Rapid"
           ],
           "morale": 50,
           "isInjured": true,
@@ -11746,8 +11726,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": null,
@@ -11779,8 +11759,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -11810,9 +11790,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -11939,9 +11917,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
+            "Playmaker",
+            "TechnicalDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -11973,8 +11950,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Playmaker",
-            "Interceptor"
+            "Interceptor",
+            "PressResistant"
           ],
           "morale": 50,
           "isInjured": null,
@@ -12006,6 +11983,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
+            "Engine",
             "Playmaker"
           ],
           "morale": 50,
@@ -12038,7 +12016,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50,
           "isInjured": false,
@@ -12070,7 +12048,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
           ],
           "morale": 50,
           "isInjured": false,
@@ -12165,9 +12144,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -12206,9 +12183,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -12239,7 +12214,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Engine"
+            "Engine",
+            "EarlyCrosser"
           ],
           "morale": 50,
           "isInjured": false,
@@ -12368,6 +12344,7 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
+            "Engine",
             "Playmaker"
           ],
           "morale": 50,
@@ -12400,6 +12377,7 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
+            "Engine",
             "Playmaker"
           ],
           "morale": 50,
@@ -12432,8 +12410,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Playmaker",
-            "Interceptor"
+            "LongPasser",
+            "TeamPlayer"
           ],
           "morale": 50,
           "isInjured": false,
@@ -12465,8 +12443,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": null,
@@ -12560,9 +12538,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -12592,9 +12568,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -12625,9 +12599,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -12658,9 +12630,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -12691,7 +12661,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50,
           "isInjured": null,
@@ -12721,9 +12691,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -12752,11 +12720,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -12785,11 +12749,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -12820,8 +12780,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50,
           "isInjured": null,
@@ -12853,8 +12812,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50,
           "isInjured": null,
@@ -12885,10 +12843,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -12918,9 +12873,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -12993,8 +12946,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat",
+            "PowerHeader"
           ],
           "morale": 50,
           "isInjured": false,
@@ -13027,8 +12981,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat",
+            "PowerHeader"
           ],
           "morale": 50,
           "isInjured": false,
@@ -13060,8 +13015,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Engine"
+            "Engine",
+            "EarlyCrosser"
           ],
           "morale": 50,
           "isInjured": false,
@@ -13093,8 +13048,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Engine"
+            "Engine",
+            "EarlyCrosser"
           ],
           "morale": 50,
           "isInjured": false,
@@ -13125,9 +13080,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Flair",
-            "TechnicalDribbler"
+            "Playmaker",
+            "TechnicalDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -13158,9 +13113,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Flair",
-            "TechnicalDribbler"
+            "Playmaker",
+            "TechnicalDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": null,
@@ -13192,8 +13147,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Playmaker"
+            "Engine",
+            "Playmaker",
+            "BoxToBox"
           ],
           "morale": 50,
           "isInjured": null,
@@ -13225,8 +13181,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
+            "SpeedDribbler",
             "Flair",
+            "Rapid",
             "TechnicalDribbler"
           ],
           "morale": 50,
@@ -13259,8 +13216,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
           ],
           "morale": 50,
           "isInjured": false,
@@ -13292,7 +13249,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
           ],
           "morale": 50,
           "isInjured": false,
@@ -13356,7 +13314,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": null,
@@ -13389,7 +13348,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -13454,8 +13414,9 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Leadership",
-            "Playmaker"
+            "Engine",
+            "Playmaker",
+            "BoxToBox"
           ],
           "morale": 50,
           "isInjured": null,
@@ -13487,8 +13448,9 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Leadership",
-            "Playmaker"
+            "Engine",
+            "Playmaker",
+            "BoxToBox"
           ],
           "morale": 50,
           "isInjured": false,
@@ -13519,9 +13481,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
+            "Playmaker",
+            "TechnicalDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -13553,8 +13514,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Playmaker",
-            "Interceptor"
+            "Interceptor",
+            "PressResistant"
           ],
           "morale": 50,
           "isInjured": false,
@@ -13586,7 +13547,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
           ],
           "morale": 50,
           "isInjured": false,
@@ -13618,7 +13580,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
           ],
           "morale": 50,
           "isInjured": false,
@@ -13650,8 +13613,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": null,
@@ -13683,8 +13646,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Playmaker",
-            "Interceptor"
+            "Interceptor",
+            "PressResistant"
           ],
           "morale": 50,
           "isInjured": null,
@@ -13758,7 +13721,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -13823,7 +13787,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": null,
@@ -13856,7 +13821,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -13888,6 +13854,7 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
+            "Engine",
             "Playmaker"
           ],
           "morale": 50,
@@ -13920,8 +13887,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Playmaker",
-            "Interceptor"
+            "Interceptor",
+            "PressResistant"
           ],
           "morale": 50,
           "isInjured": false,
@@ -13953,7 +13920,6 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Playmaker",
             "Interceptor"
           ],
           "morale": 50,
@@ -13986,9 +13952,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
+            "SpeedDribbler",
             "Flair",
-            "TechnicalDribbler"
+            "Rapid"
           ],
           "morale": 50,
           "isInjured": false,
@@ -14020,7 +13986,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
           ],
           "morale": 50,
           "isInjured": null,
@@ -14052,8 +14019,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -14083,9 +14050,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -14117,7 +14082,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -14212,10 +14178,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -14245,10 +14208,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -14279,8 +14239,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50,
           "isInjured": null,
@@ -14375,10 +14334,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -14409,9 +14365,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -14438,9 +14392,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -14479,9 +14431,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -14513,7 +14463,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": null,
@@ -14546,7 +14497,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": null,
@@ -14644,8 +14596,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Playmaker"
+            "Engine",
+            "Playmaker",
+            "BoxToBox"
           ],
           "morale": 50,
           "isInjured": null,
@@ -14677,8 +14630,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Playmaker",
-            "Interceptor"
+            "Interceptor",
+            "PressResistant"
           ],
           "morale": 50,
           "isInjured": null,
@@ -14709,9 +14662,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
+            "Playmaker",
+            "TechnicalDribbler"
           ],
           "morale": 50,
           "isInjured": null,
@@ -14837,9 +14789,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -14901,9 +14851,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -14933,9 +14881,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -14966,6 +14912,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
+            "Engine",
             "Playmaker"
           ],
           "morale": 50,
@@ -14997,7 +14944,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Engine"
+            "SpeedDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -15027,11 +14974,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -15061,10 +15004,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -15094,9 +15034,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,
@@ -15126,9 +15064,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -15158,9 +15094,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -15187,9 +15121,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": null,
           "injuryType": null,

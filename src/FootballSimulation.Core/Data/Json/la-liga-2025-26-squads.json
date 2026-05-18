@@ -8,12 +8,12 @@
       "shortName": "Athletic Club",
       "city": "",
       "logoKey": "athletic-club",
-      "venue": "San Mam\u00E9s",
-      "stadiumName": "San Mam\u00E9s",
+      "venue": "San Mamés",
+      "stadiumName": "San Mamés",
       "formation": "4-3-3",
       "startingXI": [
         {
-          "name": "Unai Sim\u00F3n",
+          "name": "Unai Simón",
           "squadNumber": 1,
           "position": "GK",
           "preferredPosition": "GK",
@@ -29,7 +29,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "OneOnOnes"
+            "OneOnOnes",
+            "Leadership"
           ],
           "morale": 50,
           "isInjured": false,
@@ -62,7 +63,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -95,7 +97,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -128,7 +131,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -141,7 +145,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Jes\u00FAs Areso",
+          "name": "Jesús Areso",
           "squadNumber": 2,
           "position": "RB",
           "preferredPosition": "RB",
@@ -191,9 +195,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Flair",
-            "TechnicalDribbler"
+            "Playmaker",
+            "TechnicalDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -206,7 +210,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Be\u00F1at Prados",
+          "name": "Beñat Prados",
           "squadNumber": 8,
           "position": "CM",
           "preferredPosition": "CM",
@@ -225,6 +229,7 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
+            "Engine",
             "Playmaker"
           ],
           "morale": 50,
@@ -238,7 +243,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Unai G\u00F3mez",
+          "name": "Unai Gómez",
           "squadNumber": 18,
           "position": "CAM",
           "preferredPosition": "CAM",
@@ -256,8 +261,6 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
             "Playmaker"
           ],
           "morale": 50,
@@ -290,9 +293,10 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
+            "Rapid",
+            "SpeedDribbler",
             "Flair",
-            "TechnicalDribbler"
+            "EarlyCrosser"
           ],
           "morale": 50,
           "isInjured": false,
@@ -305,7 +309,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "I\u00F1aki Williams",
+          "name": "Iñaki Williams",
           "squadNumber": 7,
           "position": "RW",
           "preferredPosition": "RW",
@@ -324,8 +328,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -372,7 +376,7 @@
       ],
       "substitutes": [
         {
-          "name": "\u00C1lex Padilla",
+          "name": "Álex Padilla",
           "squadNumber": 13,
           "position": "GK",
           "preferredPosition": "GK",
@@ -387,9 +391,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -401,7 +403,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Yeray \u00C1lvarez",
+          "name": "Yeray Álvarez",
           "squadNumber": 14,
           "position": "CB",
           "preferredPosition": "CB",
@@ -466,7 +468,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "I\u00F1igo Lekue",
+          "name": "Iñigo Lekue",
           "squadNumber": 20,
           "position": "RB",
           "preferredPosition": "RB",
@@ -484,9 +486,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -516,10 +516,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -549,9 +546,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -563,7 +558,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "I\u00F1igo Ruiz de Galarreta",
+          "name": "Iñigo Ruiz de Galarreta",
           "squadNumber": 24,
           "position": "CM",
           "preferredPosition": "CM",
@@ -581,9 +576,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -613,9 +606,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -627,7 +618,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "\u00C1lex Berenguer",
+          "name": "Álex Berenguer",
           "squadNumber": 17,
           "position": "LW",
           "preferredPosition": "LW",
@@ -646,8 +637,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -679,8 +669,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -711,10 +700,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -744,9 +730,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -786,7 +770,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "OneOnOnes"
+            "OneOnOnes",
+            "Leadership"
           ],
           "morale": 50,
           "isInjured": false,
@@ -819,8 +804,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -833,7 +818,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "D\u00E1vid Hancko",
+          "name": "Dávid Hancko",
           "squadNumber": 5,
           "position": "CB",
           "preferredPosition": "CB",
@@ -853,7 +838,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -866,7 +852,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Jos\u00E9 Mar\u00EDa Gim\u00E9nez",
+          "name": "José María Giménez",
           "squadNumber": 6,
           "position": "CB",
           "preferredPosition": "CB",
@@ -886,7 +872,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -950,8 +937,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Playmaker"
+            "Engine",
+            "Playmaker",
+            "BoxToBox"
           ],
           "morale": 50,
           "isInjured": false,
@@ -983,6 +971,7 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
+            "Engine",
             "Playmaker"
           ],
           "morale": 50,
@@ -1015,7 +1004,7 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50,
           "isInjured": false,
@@ -1028,7 +1017,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Juli\u00E1n Alvarez",
+          "name": "Julián Alvarez",
           "squadNumber": 9,
           "position": "ST",
           "preferredPosition": "ST",
@@ -1047,8 +1036,10 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "Engine",
+            "TeamPlayer",
+            "PenaltySpecialist"
           ],
           "morale": 50,
           "isInjured": false,
@@ -1061,7 +1052,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "\u00C1lex Baena",
+          "name": "Álex Baena",
           "squadNumber": 11,
           "position": "LW",
           "preferredPosition": "LW",
@@ -1080,9 +1071,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Flair",
-            "TechnicalDribbler"
+            "Playmaker",
+            "DeadBallSpecialist",
+            "FinesseShot"
           ],
           "morale": 50,
           "isInjured": false,
@@ -1114,9 +1105,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
+            "SpeedDribbler",
             "Flair",
-            "TechnicalDribbler"
+            "Rapid"
           ],
           "morale": 50,
           "isInjured": false,
@@ -1146,9 +1137,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -1224,7 +1213,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Cl\u00E9ment Lenglet",
+          "name": "Clément Lenglet",
           "squadNumber": 16,
           "position": "CB",
           "preferredPosition": "CB",
@@ -1275,9 +1264,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -1307,9 +1294,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -1340,9 +1325,9 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Leadership",
+            "SpeedDribbler",
             "Flair",
-            "TechnicalDribbler"
+            "Rapid"
           ],
           "morale": 50,
           "isInjured": false,
@@ -1355,7 +1340,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Nico Gonz\u00E1lez",
+          "name": "Nico González",
           "squadNumber": 20,
           "position": "LW",
           "preferredPosition": "LW",
@@ -1374,9 +1359,9 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Leadership",
+            "SpeedDribbler",
             "Flair",
-            "TechnicalDribbler"
+            "Rapid"
           ],
           "morale": 50,
           "isInjured": false,
@@ -1389,7 +1374,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Alexander S\u00F8rloth",
+          "name": "Alexander Sørloth",
           "squadNumber": 10,
           "position": "ST",
           "preferredPosition": "ST",
@@ -1440,8 +1425,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -1504,9 +1489,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -1545,9 +1528,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -1579,7 +1560,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -1610,9 +1592,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -1624,7 +1604,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Javi Gal\u00E1n",
+          "name": "Javi Galán",
           "squadNumber": 15,
           "position": "LB",
           "preferredPosition": "LB",
@@ -1642,9 +1622,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -1675,9 +1653,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -1707,8 +1683,6 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
             "Playmaker"
           ],
           "morale": 50,
@@ -1741,7 +1715,7 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50,
           "isInjured": false,
@@ -1754,7 +1728,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Lucas Torr\u00F3",
+          "name": "Lucas Torró",
           "squadNumber": 6,
           "position": "CDM",
           "preferredPosition": "CDM",
@@ -1772,10 +1746,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -1805,9 +1776,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -1819,7 +1788,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Ra\u00FAl Garc\u00EDa",
+          "name": "Raúl García",
           "squadNumber": 19,
           "position": "ST",
           "preferredPosition": "ST",
@@ -1837,9 +1806,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -1851,7 +1818,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Ra\u00FAl Moro",
+          "name": "Raúl Moro",
           "squadNumber": 11,
           "position": "LW",
           "preferredPosition": "LW",
@@ -1869,10 +1836,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -1886,7 +1850,7 @@
       ],
       "substitutes": [
         {
-          "name": "Aitor Fern\u00E1ndez",
+          "name": "Aitor Fernández",
           "squadNumber": 13,
           "position": "GK",
           "preferredPosition": "GK",
@@ -1901,9 +1865,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -1933,9 +1895,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -1966,9 +1926,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -1998,9 +1956,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -2012,7 +1968,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Iker Mu\u00F1oz",
+          "name": "Iker Muñoz",
           "squadNumber": 16,
           "position": "CDM",
           "preferredPosition": "CDM",
@@ -2030,10 +1986,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -2045,7 +1998,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Moi G\u00F3mez",
+          "name": "Moi Gómez",
           "squadNumber": 18,
           "position": "CAM",
           "preferredPosition": "CAM",
@@ -2062,11 +2015,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -2096,9 +2045,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -2110,7 +2057,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Rub\u00E9n Garc\u00EDa",
+          "name": "Rubén García",
           "squadNumber": 7,
           "position": "RW",
           "preferredPosition": "RW",
@@ -2128,10 +2075,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -2161,10 +2105,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -2194,10 +2135,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -2209,7 +2147,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "V\u00EDctor Mu\u00F1oz",
+          "name": "Víctor Muñoz",
           "squadNumber": 20,
           "position": "LW",
           "preferredPosition": "LW",
@@ -2227,10 +2165,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -2242,7 +2177,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "I\u00F1igo Arguibide",
+          "name": "Iñigo Arguibide",
           "squadNumber": 12,
           "position": "RB",
           "preferredPosition": "RB",
@@ -2260,9 +2195,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -2301,9 +2234,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -2348,7 +2279,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Youssef Enr\u00EDquez",
+          "name": "Youssef Enríquez",
           "squadNumber": 3,
           "position": "LB",
           "preferredPosition": "LB",
@@ -2398,9 +2329,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -2430,9 +2359,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -2463,7 +2390,6 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Playmaker",
             "Interceptor"
           ],
           "morale": 50,
@@ -2496,7 +2422,7 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50,
           "isInjured": false,
@@ -2527,9 +2453,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -2541,7 +2465,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Lucas Boy\u00E9",
+          "name": "Lucas Boyé",
           "squadNumber": 9,
           "position": "ST",
           "preferredPosition": "ST",
@@ -2573,7 +2497,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Toni Mart\u00EDnez",
+          "name": "Toni Martínez",
           "squadNumber": 10,
           "position": "ST",
           "preferredPosition": "ST",
@@ -2605,7 +2529,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Mariano D\u00EDaz",
+          "name": "Mariano Díaz",
           "squadNumber": 19,
           "position": "ST",
           "preferredPosition": "ST",
@@ -2623,9 +2547,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -2639,7 +2561,7 @@
       ],
       "substitutes": [
         {
-          "name": "Ra\u00FAl Fern\u00E1ndez",
+          "name": "Raúl Fernández",
           "squadNumber": 13,
           "position": "GK",
           "preferredPosition": "GK",
@@ -2654,9 +2576,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -2686,9 +2606,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -2700,7 +2618,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Facundo Garc\u00E9s",
+          "name": "Facundo Garcés",
           "squadNumber": 5,
           "position": "CB",
           "preferredPosition": "CB",
@@ -2719,9 +2637,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -2752,9 +2668,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -2766,7 +2680,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Carles Ale\u00F1\u00E1",
+          "name": "Carles Aleñá",
           "squadNumber": 18,
           "position": "CM",
           "preferredPosition": "CM",
@@ -2784,9 +2698,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -2798,7 +2710,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Pablo Ib\u00E1\u00F1ez",
+          "name": "Pablo Ibáñez",
           "squadNumber": 21,
           "position": "CM",
           "preferredPosition": "CM",
@@ -2816,9 +2728,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -2830,7 +2740,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Denis Su\u00E1rez",
+          "name": "Denis Suárez",
           "squadNumber": 20,
           "position": "CAM",
           "preferredPosition": "CAM",
@@ -2847,11 +2757,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -2881,10 +2787,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -2914,10 +2817,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -2947,9 +2847,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -2961,7 +2859,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Aitor Ma\u00F1as",
+          "name": "Aitor Mañas",
           "squadNumber": 30,
           "position": "ST",
           "preferredPosition": "ST",
@@ -2979,9 +2877,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -2993,7 +2889,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "\u00C1ngel P\u00E9rez",
+          "name": "Ángel Pérez",
           "squadNumber": 7,
           "position": "RW",
           "preferredPosition": "RW",
@@ -3011,10 +2907,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -3033,12 +2926,12 @@
       "shortName": "Elche",
       "city": "",
       "logoKey": "elche",
-      "venue": "Manuel Mart\u00EDnez Valero",
-      "stadiumName": "Manuel Mart\u00EDnez Valero",
+      "venue": "Manuel Martínez Valero",
+      "stadiumName": "Manuel Martínez Valero",
       "formation": "4-3-3",
       "startingXI": [
         {
-          "name": "I\u00F1aki Pe\u00F1a",
+          "name": "Iñaki Peña",
           "squadNumber": 1,
           "position": "GK",
           "preferredPosition": "GK",
@@ -3053,9 +2946,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -3067,7 +2958,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "H\u00E9ctor Fort",
+          "name": "Héctor Fort",
           "squadNumber": 2,
           "position": "RB",
           "preferredPosition": "RB",
@@ -3099,7 +2990,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Adri\u00E0 Pedrosa",
+          "name": "Adrià Pedrosa",
           "squadNumber": 3,
           "position": "LB",
           "preferredPosition": "LB",
@@ -3117,9 +3008,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -3131,7 +3020,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "V\u00EDctor Chust",
+          "name": "Víctor Chust",
           "squadNumber": 4,
           "position": "CB",
           "preferredPosition": "CB",
@@ -3150,9 +3039,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -3164,7 +3051,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "L\u00E9o P\u00E9trot",
+          "name": "Léo Pétrot",
           "squadNumber": 15,
           "position": "LB",
           "preferredPosition": "LB",
@@ -3182,9 +3069,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -3215,7 +3100,7 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50,
           "isInjured": false,
@@ -3246,9 +3131,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -3278,9 +3161,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -3292,7 +3173,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Andr\u00E9 Silva",
+          "name": "André Silva",
           "squadNumber": 9,
           "position": "ST",
           "preferredPosition": "ST",
@@ -3324,7 +3205,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Germ\u00E1n Valera",
+          "name": "Germán Valera",
           "squadNumber": 11,
           "position": "LW",
           "preferredPosition": "LW",
@@ -3343,8 +3224,7 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -3375,10 +3255,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -3407,9 +3284,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -3440,9 +3315,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -3473,9 +3346,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -3487,7 +3358,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Buba Sangar\u00E9",
+          "name": "Buba Sangaré",
           "squadNumber": 12,
           "position": "RB",
           "preferredPosition": "RB",
@@ -3505,9 +3376,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -3537,10 +3406,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -3570,10 +3436,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -3585,7 +3448,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "\u00C1lvaro Rodr\u00EDguez",
+          "name": "Álvaro Rodríguez",
           "squadNumber": 10,
           "position": "ST",
           "preferredPosition": "ST",
@@ -3603,9 +3466,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -3635,9 +3496,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -3667,10 +3526,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -3700,10 +3556,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -3715,7 +3568,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Mat\u00EDas Dituro",
+          "name": "Matías Dituro",
           "squadNumber": 22,
           "position": "GK",
           "preferredPosition": "GK",
@@ -3730,9 +3583,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -3762,10 +3613,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -3789,7 +3637,7 @@
       "formation": "4-3-3",
       "startingXI": [
         {
-          "name": "Joan Garc\u00EDa",
+          "name": "Joan García",
           "squadNumber": 1,
           "position": "GK",
           "preferredPosition": "GK",
@@ -3838,8 +3686,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Interceptor"
+            "AerialThreat",
+            "Interceptor",
+            "Rapid"
           ],
           "morale": 50,
           "isInjured": false,
@@ -3871,8 +3720,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Engine"
+            "Engine",
+            "EarlyCrosser",
+            "Rapid"
           ],
           "morale": 50,
           "isInjured": false,
@@ -3885,7 +3735,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Jules Kound\u00E9",
+          "name": "Jules Koundé",
           "squadNumber": 2,
           "position": "RB",
           "preferredPosition": "RB",
@@ -3904,8 +3754,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Engine"
+            "Interceptor",
+            "Rapid",
+            "TeamPlayer"
           ],
           "morale": 50,
           "isInjured": false,
@@ -3938,8 +3789,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -3971,8 +3822,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Playmaker"
+            "Playmaker",
+            "PressResistant",
+            "TechnicalDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -4004,8 +3856,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Playmaker"
+            "PressResistant",
+            "Playmaker",
+            "LongPasser"
           ],
           "morale": 50,
           "isInjured": false,
@@ -4036,9 +3889,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Flair",
-            "TechnicalDribbler"
+            "Playmaker",
+            "TechnicalDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -4070,9 +3923,11 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
             "Flair",
-            "TechnicalDribbler"
+            "TechnicalDribbler",
+            "SpeedDribbler",
+            "FinesseShot",
+            "BigMatchPlayer"
           ],
           "morale": 50,
           "isInjured": false,
@@ -4104,9 +3959,10 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Flair",
-            "TechnicalDribbler"
+            "Engine",
+            "EarlyCrosser",
+            "FinesseShot",
+            "TeamPlayer"
           ],
           "morale": 50,
           "isInjured": false,
@@ -4138,9 +3994,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
+            "SpeedDribbler",
             "Flair",
-            "TechnicalDribbler"
+            "Rapid"
           ],
           "morale": 50,
           "isInjured": false,
@@ -4155,7 +4011,7 @@
       ],
       "substitutes": [
         {
-          "name": "Wojciech Szcz\u0119sny",
+          "name": "Wojciech Szczęsny",
           "squadNumber": 13,
           "position": "GK",
           "preferredPosition": "GK",
@@ -4170,9 +4026,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -4184,7 +4038,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Pau Cubars\u00ED",
+          "name": "Pau Cubarsí",
           "squadNumber": 6,
           "position": "CB",
           "preferredPosition": "CB",
@@ -4204,7 +4058,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -4217,7 +4072,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Jo\u00E3o Cancelo",
+          "name": "João Cancelo",
           "squadNumber": 12,
           "position": "RB",
           "preferredPosition": "RB",
@@ -4236,7 +4091,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Engine"
+            "Engine",
+            "EarlyCrosser"
           ],
           "morale": 50,
           "isInjured": false,
@@ -4249,7 +4105,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Eric Garc\u00EDa",
+          "name": "Eric García",
           "squadNumber": 16,
           "position": "CB",
           "preferredPosition": "CB",
@@ -4269,7 +4125,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -4301,8 +4158,9 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Leadership",
-            "Playmaker"
+            "Engine",
+            "DivesIntoTackles",
+            "BoxToBox"
           ],
           "morale": 50,
           "isInjured": false,
@@ -4315,7 +4173,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Ferm\u00EDn L\u00F3pez",
+          "name": "Fermín López",
           "squadNumber": 20,
           "position": "CAM",
           "preferredPosition": "CAM",
@@ -4333,9 +4191,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
+            "Playmaker",
+            "TechnicalDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -4348,7 +4205,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Marc Casad\u00F3",
+          "name": "Marc Casadó",
           "squadNumber": 28,
           "position": "CDM",
           "preferredPosition": "CDM",
@@ -4366,10 +4223,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -4399,10 +4253,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -4433,7 +4284,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
           ],
           "morale": 50,
           "isInjured": false,
@@ -4465,7 +4317,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "Leadership"
           ],
           "morale": 50,
           "isInjured": false,
@@ -4497,8 +4350,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -4526,9 +4378,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -4567,9 +4417,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -4665,9 +4513,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -4679,7 +4525,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Dakonam Djen\u00E9",
+          "name": "Dakonam Djené",
           "squadNumber": 6,
           "position": "CB",
           "preferredPosition": "CB",
@@ -4698,9 +4544,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -4731,7 +4575,7 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50,
           "isInjured": false,
@@ -4762,9 +4606,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -4776,7 +4618,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Javi Mu\u00F1oz",
+          "name": "Javi Muñoz",
           "squadNumber": 18,
           "position": "CM",
           "preferredPosition": "CM",
@@ -4794,9 +4636,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -4840,7 +4680,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Mart\u00EDn Satriano",
+          "name": "Martín Satriano",
           "squadNumber": 10,
           "position": "ST",
           "preferredPosition": "ST",
@@ -4890,10 +4730,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -4922,9 +4759,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -4936,7 +4771,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Kiko Femen\u00EDa",
+          "name": "Kiko Femenía",
           "squadNumber": 12,
           "position": "RB",
           "preferredPosition": "RB",
@@ -4954,9 +4789,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -4986,9 +4819,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -5019,9 +4850,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -5033,7 +4862,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Mario Mart\u00EDn",
+          "name": "Mario Martín",
           "squadNumber": 28,
           "position": "CDM",
           "preferredPosition": "CDM",
@@ -5051,10 +4880,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -5066,7 +4892,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Luis V\u00E1zquez",
+          "name": "Luis Vázquez",
           "squadNumber": 19,
           "position": "ST",
           "preferredPosition": "ST",
@@ -5084,9 +4910,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -5116,10 +4940,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -5131,7 +4952,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "\u00C1lex Sancris",
+          "name": "Álex Sancris",
           "squadNumber": 17,
           "position": "RW",
           "preferredPosition": "RW",
@@ -5149,10 +4970,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -5182,10 +5000,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -5215,9 +5030,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -5247,9 +5060,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -5261,7 +5072,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Sebasti\u00E1n Boselli",
+          "name": "Sebastián Boselli",
           "squadNumber": 23,
           "position": "CB",
           "preferredPosition": "CB",
@@ -5280,9 +5091,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -5306,7 +5115,7 @@
       "formation": "4-3-3",
       "startingXI": [
         {
-          "name": "Marc-Andr\u00E9 ter Stegen",
+          "name": "Marc-André ter Stegen",
           "squadNumber": 1,
           "position": "GK",
           "preferredPosition": "GK",
@@ -5355,7 +5164,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -5368,7 +5178,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Arnau Mart\u00EDnez",
+          "name": "Arnau Martínez",
           "squadNumber": 2,
           "position": "RB",
           "preferredPosition": "RB",
@@ -5400,7 +5210,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "\u00C1lex Moreno",
+          "name": "Álex Moreno",
           "squadNumber": 3,
           "position": "LB",
           "preferredPosition": "LB",
@@ -5418,9 +5228,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -5432,7 +5240,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "David L\u00F3pez",
+          "name": "David López",
           "squadNumber": 5,
           "position": "CB",
           "preferredPosition": "CB",
@@ -5451,9 +5259,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -5484,7 +5290,7 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50,
           "isInjured": false,
@@ -5497,7 +5303,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Iv\u00E1n Mart\u00EDn",
+          "name": "Iván Martín",
           "squadNumber": 14,
           "position": "CM",
           "preferredPosition": "CM",
@@ -5516,7 +5322,7 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50,
           "isInjured": false,
@@ -5529,7 +5335,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Fran Beltr\u00E1n",
+          "name": "Fran Beltrán",
           "squadNumber": 18,
           "position": "CM",
           "preferredPosition": "CM",
@@ -5548,7 +5354,7 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50,
           "isInjured": false,
@@ -5580,8 +5386,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -5645,8 +5451,7 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -5676,9 +5481,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -5709,9 +5512,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -5723,7 +5524,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Hugo Rinc\u00F3n",
+          "name": "Hugo Rincón",
           "squadNumber": 12,
           "position": "RB",
           "preferredPosition": "RB",
@@ -5741,9 +5542,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -5755,7 +5554,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Alejandro Franc\u00E9s",
+          "name": "Alejandro Francés",
           "squadNumber": 16,
           "position": "CB",
           "preferredPosition": "CB",
@@ -5774,9 +5573,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -5805,11 +5602,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -5839,9 +5632,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -5871,10 +5662,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -5904,9 +5692,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -5937,8 +5723,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -5969,9 +5754,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -6001,10 +5784,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -6034,9 +5814,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -6055,8 +5833,8 @@
       "shortName": "Levante",
       "city": "",
       "logoKey": "levante",
-      "venue": "Ciutat de Val\u00E8ncia",
-      "stadiumName": "Ciutat de Val\u00E8ncia",
+      "venue": "Ciutat de València",
+      "stadiumName": "Ciutat de València",
       "formation": "4-3-3",
       "startingXI": [
         {
@@ -6075,9 +5853,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -6089,7 +5865,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Manu S\u00E1nchez",
+          "name": "Manu Sánchez",
           "squadNumber": 3,
           "position": "LB",
           "preferredPosition": "LB",
@@ -6140,9 +5916,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -6154,7 +5928,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Mat\u00EDas Moreno",
+          "name": "Matías Moreno",
           "squadNumber": 5,
           "position": "CB",
           "preferredPosition": "CB",
@@ -6173,9 +5947,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -6205,9 +5977,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -6238,7 +6008,7 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50,
           "isInjured": false,
@@ -6269,10 +6039,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -6302,10 +6069,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -6317,7 +6081,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Jos\u00E9 Luis Morales",
+          "name": "José Luis Morales",
           "squadNumber": 9,
           "position": "ST",
           "preferredPosition": "ST",
@@ -6335,9 +6099,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -6349,7 +6111,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Iv\u00E1n Romero",
+          "name": "Iván Romero",
           "squadNumber": 10,
           "position": "ST",
           "preferredPosition": "ST",
@@ -6367,9 +6129,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -6399,10 +6159,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -6431,9 +6188,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -6445,7 +6200,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Adri\u00E1n Dela",
+          "name": "Adrián Dela",
           "squadNumber": 14,
           "position": "CB",
           "preferredPosition": "CB",
@@ -6464,9 +6219,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -6478,7 +6231,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Diego Pamp\u00EDn",
+          "name": "Diego Pampín",
           "squadNumber": 15,
           "position": "LB",
           "preferredPosition": "LB",
@@ -6496,9 +6249,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -6510,7 +6261,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "V\u00EDctor Garc\u00EDa",
+          "name": "Víctor García",
           "squadNumber": 12,
           "position": "RB",
           "preferredPosition": "RB",
@@ -6528,9 +6279,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -6542,7 +6291,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Pablo Mart\u00EDnez",
+          "name": "Pablo Martínez",
           "squadNumber": 18,
           "position": "CM",
           "preferredPosition": "CM",
@@ -6560,9 +6309,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -6592,9 +6339,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -6606,7 +6351,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Carlos \u00C1lvarez",
+          "name": "Carlos Álvarez",
           "squadNumber": 20,
           "position": "CAM",
           "preferredPosition": "CAM",
@@ -6623,11 +6368,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -6657,10 +6398,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -6689,9 +6427,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -6721,9 +6457,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -6735,7 +6469,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Roger Brugu\u00E9",
+          "name": "Roger Brugué",
           "squadNumber": 11,
           "position": "LW",
           "preferredPosition": "LW",
@@ -6753,10 +6487,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -6768,7 +6499,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Carlos Esp\u00ED",
+          "name": "Carlos Espí",
           "squadNumber": 30,
           "position": "ST",
           "preferredPosition": "ST",
@@ -6786,9 +6517,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -6827,9 +6556,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -6841,7 +6568,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Andrei Ra\u021Biu",
+          "name": "Andrei Rațiu",
           "squadNumber": 2,
           "position": "RB",
           "preferredPosition": "RB",
@@ -6873,7 +6600,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Pep Chavarr\u00EDa",
+          "name": "Pep Chavarría",
           "squadNumber": 3,
           "position": "LB",
           "preferredPosition": "LB",
@@ -6924,9 +6651,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -6957,9 +6682,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -6971,7 +6694,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "\u00D3scar Valent\u00EDn",
+          "name": "Óscar Valentín",
           "squadNumber": 8,
           "position": "CM",
           "preferredPosition": "CM",
@@ -6989,9 +6712,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -7003,7 +6724,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Pedro D\u00EDaz",
+          "name": "Pedro Díaz",
           "squadNumber": 14,
           "position": "CM",
           "preferredPosition": "CM",
@@ -7021,9 +6742,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -7035,7 +6754,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Unai L\u00F3pez",
+          "name": "Unai López",
           "squadNumber": 18,
           "position": "CM",
           "preferredPosition": "CM",
@@ -7053,9 +6772,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -7086,8 +6803,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -7100,7 +6817,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Fran P\u00E9rez",
+          "name": "Fran Pérez",
           "squadNumber": 11,
           "position": "RW",
           "preferredPosition": "RW",
@@ -7119,8 +6836,7 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -7151,10 +6867,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -7168,7 +6881,7 @@
       ],
       "substitutes": [
         {
-          "name": "Dani C\u00E1rdenas",
+          "name": "Dani Cárdenas",
           "squadNumber": 13,
           "position": "GK",
           "preferredPosition": "GK",
@@ -7183,9 +6896,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -7216,9 +6927,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -7230,7 +6939,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Iv\u00E1n Balliu",
+          "name": "Iván Balliu",
           "squadNumber": 12,
           "position": "RB",
           "preferredPosition": "RB",
@@ -7248,9 +6957,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -7280,9 +6987,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -7294,7 +6999,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Path\u00E9 Ciss",
+          "name": "Pathé Ciss",
           "squadNumber": 21,
           "position": "CM",
           "preferredPosition": "CM",
@@ -7312,9 +7017,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -7344,10 +7047,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -7376,11 +7076,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -7392,7 +7088,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "\u00D3scar Trejo",
+          "name": "Óscar Trejo",
           "squadNumber": 20,
           "position": "CAM",
           "preferredPosition": "CAM",
@@ -7409,11 +7105,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -7425,7 +7117,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "\u00C1lvaro Garc\u00EDa",
+          "name": "Álvaro García",
           "squadNumber": 29,
           "position": "LW",
           "preferredPosition": "LW",
@@ -7443,10 +7135,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -7458,7 +7147,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Isi Palaz\u00F3n",
+          "name": "Isi Palazón",
           "squadNumber": 9,
           "position": "ST",
           "preferredPosition": "ST",
@@ -7475,9 +7164,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -7507,9 +7194,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -7521,7 +7206,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Carlos Mart\u00EDn",
+          "name": "Carlos Martín",
           "squadNumber": 22,
           "position": "LW",
           "preferredPosition": "LW",
@@ -7539,10 +7224,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -7566,7 +7248,7 @@
       "formation": "4-3-3",
       "startingXI": [
         {
-          "name": "\u00C1lvaro Valles",
+          "name": "Álvaro Valles",
           "squadNumber": 1,
           "position": "GK",
           "preferredPosition": "GK",
@@ -7693,7 +7375,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "H\u00E9ctor Beller\u00EDn",
+          "name": "Héctor Bellerín",
           "squadNumber": 2,
           "position": "RB",
           "preferredPosition": "RB",
@@ -7711,9 +7393,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -7744,8 +7424,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Playmaker",
-            "Interceptor"
+            "Interceptor",
+            "PressResistant"
           ],
           "morale": 50,
           "isInjured": false,
@@ -7776,9 +7456,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
+            "Playmaker",
+            "TechnicalDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -7810,7 +7489,7 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50,
           "isInjured": false,
@@ -7842,8 +7521,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -7875,8 +7554,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -7889,7 +7568,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Cucho Hern\u00E1ndez",
+          "name": "Cucho Hernández",
           "squadNumber": 9,
           "position": "ST",
           "preferredPosition": "ST",
@@ -7923,7 +7602,7 @@
       ],
       "substitutes": [
         {
-          "name": "Pau L\u00F3pez",
+          "name": "Pau López",
           "squadNumber": 13,
           "position": "GK",
           "preferredPosition": "GK",
@@ -7938,9 +7617,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -7952,7 +7629,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Ricardo Rodr\u00EDguez",
+          "name": "Ricardo Rodríguez",
           "squadNumber": 15,
           "position": "LB",
           "preferredPosition": "LB",
@@ -7970,9 +7647,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -8003,9 +7678,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -8017,7 +7690,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "\u00C1ngel Ortiz",
+          "name": "Ángel Ortiz",
           "squadNumber": 12,
           "position": "RB",
           "preferredPosition": "RB",
@@ -8035,9 +7708,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -8068,7 +7739,6 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Playmaker",
             "Interceptor"
           ],
           "morale": 50,
@@ -8100,8 +7770,6 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
             "Playmaker"
           ],
           "morale": 50,
@@ -8115,7 +7783,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "\u00C1lvaro Fidalgo",
+          "name": "Álvaro Fidalgo",
           "squadNumber": 21,
           "position": "CM",
           "preferredPosition": "CM",
@@ -8134,7 +7802,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50,
           "isInjured": false,
@@ -8165,9 +7833,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -8179,7 +7845,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Pablo Garc\u00EDa",
+          "name": "Pablo García",
           "squadNumber": 17,
           "position": "RW",
           "preferredPosition": "RW",
@@ -8198,8 +7864,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -8231,8 +7896,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -8263,10 +7927,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -8278,7 +7939,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Chimy \u00C1vila",
+          "name": "Chimy Ávila",
           "squadNumber": 27,
           "position": "ST",
           "preferredPosition": "ST",
@@ -8296,9 +7957,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -8317,12 +7976,12 @@
       "shortName": "Celta Vigo",
       "city": "",
       "logoKey": "celta-vigo",
-      "venue": "Abanca Bala\u00EDdos",
-      "stadiumName": "Abanca Bala\u00EDdos",
+      "venue": "Abanca Balaídos",
+      "stadiumName": "Abanca Balaídos",
       "formation": "4-3-3",
       "startingXI": [
         {
-          "name": "Ionu\u021B Radu",
+          "name": "Ionuț Radu",
           "squadNumber": 1,
           "position": "GK",
           "preferredPosition": "GK",
@@ -8337,9 +7996,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -8351,7 +8008,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Javi Rodr\u00EDguez",
+          "name": "Javi Rodríguez",
           "squadNumber": 4,
           "position": "CB",
           "preferredPosition": "CB",
@@ -8371,7 +8028,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -8384,7 +8042,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "\u00D3scar Mingueza",
+          "name": "Óscar Mingueza",
           "squadNumber": 2,
           "position": "RB",
           "preferredPosition": "RB",
@@ -8468,9 +8126,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -8501,7 +8157,7 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50,
           "isInjured": false,
@@ -8532,9 +8188,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -8546,7 +8200,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Mat\u00EDas Vecino",
+          "name": "Matías Vecino",
           "squadNumber": 18,
           "position": "CM",
           "preferredPosition": "CM",
@@ -8564,9 +8218,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -8578,7 +8230,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Ferran Jutgl\u00E0",
+          "name": "Ferran Jutglà",
           "squadNumber": 7,
           "position": "RW",
           "preferredPosition": "RW",
@@ -8597,8 +8249,7 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -8662,8 +8313,7 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -8678,7 +8328,7 @@
       ],
       "substitutes": [
         {
-          "name": "Iv\u00E1n Villar",
+          "name": "Iván Villar",
           "squadNumber": 13,
           "position": "GK",
           "preferredPosition": "GK",
@@ -8693,9 +8343,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -8707,7 +8355,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Carlos Dom\u00EDnguez",
+          "name": "Carlos Domínguez",
           "squadNumber": 16,
           "position": "CB",
           "preferredPosition": "CB",
@@ -8726,9 +8374,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -8759,9 +8405,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -8791,9 +8435,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -8805,7 +8447,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Miguel Rom\u00E1n",
+          "name": "Miguel Román",
           "squadNumber": 21,
           "position": "CM",
           "preferredPosition": "CM",
@@ -8823,9 +8465,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -8837,7 +8477,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Fer L\u00F3pez",
+          "name": "Fer López",
           "squadNumber": 10,
           "position": "CAM",
           "preferredPosition": "CAM",
@@ -8854,11 +8494,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -8920,10 +8556,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -8935,7 +8568,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Hugo \u00C1lvarez",
+          "name": "Hugo Álvarez",
           "squadNumber": 20,
           "position": "LW",
           "preferredPosition": "LW",
@@ -8953,10 +8586,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -8968,7 +8598,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Pablo Dur\u00E1n",
+          "name": "Pablo Durán",
           "squadNumber": 27,
           "position": "ST",
           "preferredPosition": "ST",
@@ -8986,9 +8616,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -9018,9 +8646,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -9047,9 +8673,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -9073,7 +8697,7 @@
       "formation": "4-3-3",
       "startingXI": [
         {
-          "name": "Leo Rom\u00E1n",
+          "name": "Leo Román",
           "squadNumber": 1,
           "position": "GK",
           "preferredPosition": "GK",
@@ -9088,9 +8712,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -9153,9 +8775,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -9186,9 +8806,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -9218,9 +8836,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -9232,7 +8848,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Sam\u00FA Costa",
+          "name": "Samú Costa",
           "squadNumber": 6,
           "position": "CDM",
           "preferredPosition": "CDM",
@@ -9251,8 +8867,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Playmaker",
-            "Interceptor"
+            "Interceptor",
+            "PressResistant"
           ],
           "morale": 50,
           "isInjured": false,
@@ -9283,9 +8899,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -9314,11 +8928,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -9349,8 +8959,7 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -9381,9 +8990,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -9413,10 +9020,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -9430,7 +9034,7 @@
       ],
       "substitutes": [
         {
-          "name": "Lucas Bergstr\u00F6m",
+          "name": "Lucas Bergström",
           "squadNumber": 13,
           "position": "GK",
           "preferredPosition": "GK",
@@ -9445,9 +9049,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -9459,7 +9061,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Antonio Ra\u00EDllo",
+          "name": "Antonio Raíllo",
           "squadNumber": 14,
           "position": "CB",
           "preferredPosition": "CB",
@@ -9478,9 +9080,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -9510,9 +9110,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -9542,9 +9140,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -9574,9 +9170,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -9588,7 +9182,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Antonio S\u00E1nchez",
+          "name": "Antonio Sánchez",
           "squadNumber": 21,
           "position": "CM",
           "preferredPosition": "CM",
@@ -9606,9 +9200,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -9638,10 +9230,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -9671,9 +9260,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -9685,7 +9272,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Abd\u00F3n Prats",
+          "name": "Abdón Prats",
           "squadNumber": 19,
           "position": "ST",
           "preferredPosition": "ST",
@@ -9703,9 +9290,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -9735,9 +9320,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -9749,7 +9332,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Javi Llabr\u00E9s",
+          "name": "Javi Llabrés",
           "squadNumber": 17,
           "position": "LW",
           "preferredPosition": "LW",
@@ -9767,10 +9350,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -9800,10 +9380,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -9822,8 +9399,8 @@
       "shortName": "Real Madrid",
       "city": "",
       "logoKey": "real-madrid",
-      "venue": "Santiago Bernab\u00E9u",
-      "stadiumName": "Santiago Bernab\u00E9u",
+      "venue": "Santiago Bernabéu",
+      "stadiumName": "Santiago Bernabéu",
       "formation": "4-3-3",
       "startingXI": [
         {
@@ -9843,7 +9420,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "OneOnOnes"
+            "OneOnOnes",
+            "LongThrower",
+            "Leadership"
           ],
           "morale": 50,
           "isInjured": false,
@@ -9875,8 +9454,10 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Engine"
+            "LongPasser",
+            "EarlyCrosser",
+            "Playmaker",
+            "DeadBallSpecialist"
           ],
           "morale": 50,
           "isInjured": false,
@@ -9889,7 +9470,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "\u00C9der Milit\u00E3o",
+          "name": "Éder Militão",
           "squadNumber": 4,
           "position": "CB",
           "preferredPosition": "CB",
@@ -9909,7 +9490,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
+            "AerialThreat",
+            "Rapid",
             "Interceptor"
           ],
           "morale": 50,
@@ -9923,7 +9505,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "\u00C1lvaro Carreras",
+          "name": "Álvaro Carreras",
           "squadNumber": 3,
           "position": "LB",
           "preferredPosition": "LB",
@@ -9942,8 +9524,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Engine"
+            "Engine",
+            "EarlyCrosser",
+            "Rapid"
           ],
           "morale": 50,
           "isInjured": false,
@@ -9956,7 +9539,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Antonio R\u00FCdiger",
+          "name": "Antonio Rüdiger",
           "squadNumber": 5,
           "position": "CB",
           "preferredPosition": "CB",
@@ -9976,7 +9559,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "DivesIntoTackles",
+            "AerialThreat",
+            "Leadership"
           ],
           "morale": 50,
           "isInjured": false,
@@ -10007,9 +9592,11 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Flair",
-            "TechnicalDribbler"
+            "BoxToBox",
+            "Engine",
+            "Playmaker",
+            "PressResistant",
+            "BigMatchPlayer"
           ],
           "morale": 50,
           "isInjured": false,
@@ -10041,8 +9628,10 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Playmaker"
+            "Engine",
+            "BoxToBox",
+            "LongShotTaker",
+            "TeamPlayer"
           ],
           "morale": 50,
           "isInjured": false,
@@ -10055,7 +9644,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Aur\u00E9lien Tchouam\u00E9ni",
+          "name": "Aurélien Tchouaméni",
           "squadNumber": 6,
           "position": "CDM",
           "preferredPosition": "CDM",
@@ -10074,9 +9663,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Playmaker",
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat",
+            "PressResistant"
           ],
           "morale": 50,
           "isInjured": false,
@@ -10089,7 +9678,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Kylian Mbapp\u00E9",
+          "name": "Kylian Mbappé",
           "squadNumber": 9,
           "position": "ST",
           "preferredPosition": "ST",
@@ -10108,8 +9697,11 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "ClinicalFinisher"
+            "Rapid",
+            "ClinicalFinisher",
+            "SpeedDribbler",
+            "Flair",
+            "OutsideFootShot"
           ],
           "morale": 50,
           "isInjured": false,
@@ -10141,9 +9733,11 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
+            "Rapid",
             "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "TechnicalDribbler",
+            "OutsideFootShot"
           ],
           "morale": 50,
           "isInjured": false,
@@ -10175,9 +9769,10 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
             "Flair",
-            "TechnicalDribbler"
+            "TechnicalDribbler",
+            "FinesseShot",
+            "OutsideFootShot"
           ],
           "morale": 50,
           "isInjured": false,
@@ -10273,7 +9868,8 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -10286,7 +9882,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Fran Garc\u00EDa",
+          "name": "Fran García",
           "squadNumber": 21,
           "position": "LB",
           "preferredPosition": "LB",
@@ -10337,8 +9933,9 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Leadership",
-            "Playmaker"
+            "PressResistant",
+            "TechnicalDribbler",
+            "Engine"
           ],
           "morale": 50,
           "isInjured": false,
@@ -10351,7 +9948,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Arda G\u00FCler",
+          "name": "Arda Güler",
           "squadNumber": 20,
           "position": "CAM",
           "preferredPosition": "CAM",
@@ -10369,9 +9966,9 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Leadership",
             "Flair",
-            "TechnicalDribbler"
+            "Playmaker",
+            "FinesseShot"
           ],
           "morale": 50,
           "isInjured": false,
@@ -10403,7 +10000,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50,
           "isInjured": false,
@@ -10416,7 +10013,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Manuel \u00C1ngel",
+          "name": "Manuel Ángel",
           "squadNumber": 28,
           "position": "CM",
           "preferredPosition": "CM",
@@ -10434,9 +10031,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -10448,7 +10043,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Brahim D\u00EDaz",
+          "name": "Brahim Díaz",
           "squadNumber": 17,
           "position": "RW",
           "preferredPosition": "RW",
@@ -10467,9 +10062,9 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Leadership",
             "Flair",
-            "TechnicalDribbler"
+            "TechnicalDribbler",
+            "SpeedDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -10482,7 +10077,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Gonzalo Garc\u00EDa",
+          "name": "Gonzalo García",
           "squadNumber": 19,
           "position": "ST",
           "preferredPosition": "ST",
@@ -10500,9 +10095,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -10532,10 +10125,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -10591,7 +10181,7 @@
       "formation": "4-3-3",
       "startingXI": [
         {
-          "name": "Hora\u021Biu Moldovan",
+          "name": "Horațiu Moldovan",
           "squadNumber": 1,
           "position": "GK",
           "preferredPosition": "GK",
@@ -10606,9 +10196,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -10653,7 +10241,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Javi L\u00F3pez",
+          "name": "Javi López",
           "squadNumber": 3,
           "position": "LB",
           "preferredPosition": "LB",
@@ -10703,9 +10291,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -10736,9 +10322,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -10768,10 +10352,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -10801,10 +10382,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -10833,11 +10411,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -10867,10 +10441,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -10900,10 +10471,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -10915,7 +10483,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "\u00C1lex For\u00E9s",
+          "name": "Álex Forés",
           "squadNumber": 9,
           "position": "ST",
           "preferredPosition": "ST",
@@ -10933,9 +10501,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -10949,7 +10515,7 @@
       ],
       "substitutes": [
         {
-          "name": "Aar\u00F3n Escandell",
+          "name": "Aarón Escandell",
           "squadNumber": 13,
           "position": "GK",
           "preferredPosition": "GK",
@@ -10964,9 +10530,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -10997,9 +10561,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -11030,9 +10592,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -11062,9 +10622,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -11094,9 +10652,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -11126,9 +10682,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -11140,7 +10694,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Nicol\u00E1s Fonseca",
+          "name": "Nicolás Fonseca",
           "squadNumber": 28,
           "position": "CDM",
           "preferredPosition": "CDM",
@@ -11158,10 +10712,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -11191,9 +10742,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -11205,7 +10754,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Brandon Domingu\u00E8s",
+          "name": "Brandon Dominguès",
           "squadNumber": 17,
           "position": "LW",
           "preferredPosition": "LW",
@@ -11223,10 +10772,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -11238,7 +10784,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Federico Vi\u00F1as",
+          "name": "Federico Viñas",
           "squadNumber": 19,
           "position": "ST",
           "preferredPosition": "ST",
@@ -11256,9 +10802,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -11288,10 +10832,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -11321,9 +10862,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -11347,7 +10886,7 @@
       "formation": "4-3-3",
       "startingXI": [
         {
-          "name": "\u00C1lex Remiro",
+          "name": "Álex Remiro",
           "squadNumber": 1,
           "position": "GK",
           "preferredPosition": "GK",
@@ -11376,7 +10915,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Sergio G\u00F3mez",
+          "name": "Sergio Gómez",
           "squadNumber": 3,
           "position": "LB",
           "preferredPosition": "LB",
@@ -11408,7 +10947,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Jon Mart\u00EDn",
+          "name": "Jon Martín",
           "squadNumber": 4,
           "position": "CB",
           "preferredPosition": "CB",
@@ -11474,7 +11013,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Aihen Mu\u00F1oz",
+          "name": "Aihen Muñoz",
           "squadNumber": 15,
           "position": "LB",
           "preferredPosition": "LB",
@@ -11506,7 +11045,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Brais M\u00E9ndez",
+          "name": "Brais Méndez",
           "squadNumber": 10,
           "position": "CAM",
           "preferredPosition": "CAM",
@@ -11524,9 +11063,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Leadership",
-            "Flair",
-            "TechnicalDribbler"
+            "Playmaker",
+            "TechnicalDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -11557,9 +11096,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
+            "Playmaker",
+            "TechnicalDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -11591,7 +11129,7 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50,
           "isInjured": false,
@@ -11623,8 +11161,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -11656,7 +11194,9 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "TeamPlayer",
+            "PenaltySpecialist"
           ],
           "morale": 50,
           "isInjured": false,
@@ -11688,8 +11228,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -11719,9 +11259,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -11817,9 +11355,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -11850,7 +11386,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50,
           "isInjured": false,
@@ -11882,7 +11418,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50,
           "isInjured": false,
@@ -11895,7 +11431,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Be\u00F1at Turrientes",
+          "name": "Beñat Turrientes",
           "squadNumber": 28,
           "position": "CM",
           "preferredPosition": "CM",
@@ -11914,7 +11450,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50,
           "isInjured": false,
@@ -11927,7 +11463,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Pablo Mar\u00EDn",
+          "name": "Pablo Marín",
           "squadNumber": 20,
           "position": "CAM",
           "preferredPosition": "CAM",
@@ -11944,11 +11480,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler",
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -11960,7 +11492,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Orri \u00D3skarsson",
+          "name": "Orri Óskarsson",
           "squadNumber": 19,
           "position": "ST",
           "preferredPosition": "ST",
@@ -11992,7 +11524,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Gon\u00E7alo Guedes",
+          "name": "Gonçalo Guedes",
           "squadNumber": 17,
           "position": "LW",
           "preferredPosition": "LW",
@@ -12011,8 +11543,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -12043,9 +11574,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -12075,10 +11604,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -12117,9 +11643,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -12182,9 +11706,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -12215,9 +11737,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -12248,9 +11768,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -12262,7 +11780,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Urko Gonz\u00E1lez de Z\u00E1rate",
+          "name": "Urko González de Zárate",
           "squadNumber": 16,
           "position": "CDM",
           "preferredPosition": "CDM",
@@ -12281,7 +11799,6 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Playmaker",
             "Interceptor"
           ],
           "morale": 50,
@@ -12295,7 +11812,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Edu Exp\u00F3sito",
+          "name": "Edu Expósito",
           "squadNumber": 8,
           "position": "CM",
           "preferredPosition": "CM",
@@ -12313,9 +11830,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -12327,7 +11842,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Ram\u00F3n Terrats",
+          "name": "Ramón Terrats",
           "squadNumber": 14,
           "position": "CM",
           "preferredPosition": "CM",
@@ -12345,9 +11860,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -12378,8 +11891,7 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -12411,8 +11923,7 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -12443,10 +11954,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -12460,7 +11968,7 @@
       ],
       "substitutes": [
         {
-          "name": "\u00C1ngel Fortu\u00F1o",
+          "name": "Ángel Fortuño",
           "squadNumber": 13,
           "position": "GK",
           "preferredPosition": "GK",
@@ -12475,9 +11983,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -12508,9 +12014,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -12540,9 +12044,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -12554,7 +12056,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Jos\u00E9 Salinas",
+          "name": "José Salinas",
           "squadNumber": 15,
           "position": "LB",
           "preferredPosition": "LB",
@@ -12572,9 +12074,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -12604,10 +12104,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -12637,9 +12134,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -12651,7 +12146,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Kike Garc\u00EDa",
+          "name": "Kike García",
           "squadNumber": 9,
           "position": "ST",
           "preferredPosition": "ST",
@@ -12669,9 +12164,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -12701,10 +12194,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -12734,10 +12224,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -12749,7 +12236,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Roberto Fern\u00E1ndez",
+          "name": "Roberto Fernández",
           "squadNumber": 10,
           "position": "ST",
           "preferredPosition": "ST",
@@ -12767,9 +12254,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -12781,7 +12266,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Rub\u00E9n S\u00E1nchez",
+          "name": "Rubén Sánchez",
           "squadNumber": 12,
           "position": "RB",
           "preferredPosition": "RB",
@@ -12799,9 +12284,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -12831,10 +12314,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -12853,8 +12333,8 @@
       "shortName": "Sevilla",
       "city": "",
       "logoKey": "sevilla",
-      "venue": "Ram\u00F3n S\u00E1nchez-Pizju\u00E1n",
-      "stadiumName": "Ram\u00F3n S\u00E1nchez-Pizju\u00E1n",
+      "venue": "Ramón Sánchez-Pizjuán",
+      "stadiumName": "Ramón Sánchez-Pizjuán",
       "formation": "4-3-3",
       "startingXI": [
         {
@@ -12873,9 +12353,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -12887,7 +12365,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Juanlu S\u00E1nchez",
+          "name": "Juanlu Sánchez",
           "squadNumber": 2,
           "position": "RB",
           "preferredPosition": "RB",
@@ -12919,7 +12397,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Jos\u00E9 \u00C1ngel Carmona",
+          "name": "José Ángel Carmona",
           "squadNumber": 12,
           "position": "RB",
           "preferredPosition": "RB",
@@ -13035,7 +12513,6 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Playmaker",
             "Interceptor"
           ],
           "morale": 50,
@@ -13068,7 +12545,7 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50,
           "isInjured": false,
@@ -13081,7 +12558,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Lucien Agoum\u00E9",
+          "name": "Lucien Agoumé",
           "squadNumber": 16,
           "position": "CDM",
           "preferredPosition": "CDM",
@@ -13100,7 +12577,6 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Playmaker",
             "Interceptor"
           ],
           "morale": 50,
@@ -13212,7 +12688,7 @@
       ],
       "substitutes": [
         {
-          "name": "\u00D8rjan Nyland",
+          "name": "Ørjan Nyland",
           "squadNumber": 13,
           "position": "GK",
           "preferredPosition": "GK",
@@ -13227,9 +12703,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -13241,7 +12715,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "F\u00E1bio Cardoso",
+          "name": "Fábio Cardoso",
           "squadNumber": 5,
           "position": "CB",
           "preferredPosition": "CB",
@@ -13260,9 +12734,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -13293,9 +12765,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -13307,7 +12777,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Marc\u00E3o",
+          "name": "Marcão",
           "squadNumber": 23,
           "position": "CB",
           "preferredPosition": "CB",
@@ -13326,9 +12796,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -13340,7 +12808,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Joan Jord\u00E1n",
+          "name": "Joan Jordán",
           "squadNumber": 18,
           "position": "CM",
           "preferredPosition": "CM",
@@ -13358,9 +12826,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -13390,10 +12856,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -13423,9 +12886,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -13437,7 +12898,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Rub\u00E9n Vargas",
+          "name": "Rubén Vargas",
           "squadNumber": 11,
           "position": "LW",
           "preferredPosition": "LW",
@@ -13456,8 +12917,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -13489,8 +12949,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -13503,7 +12962,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Peque Fern\u00E1ndez",
+          "name": "Peque Fernández",
           "squadNumber": 20,
           "position": "ST",
           "preferredPosition": "ST",
@@ -13520,9 +12979,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -13534,7 +12991,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Alexis S\u00E1nchez",
+          "name": "Alexis Sánchez",
           "squadNumber": 27,
           "position": "ST",
           "preferredPosition": "ST",
@@ -13551,9 +13008,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -13584,9 +13039,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -13625,9 +13078,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -13639,7 +13090,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "C\u00E9sar T\u00E1rrega",
+          "name": "César Tárrega",
           "squadNumber": 4,
           "position": "CB",
           "preferredPosition": "CB",
@@ -13659,7 +13110,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -13672,7 +13124,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Unai N\u00FA\u00F1ez",
+          "name": "Unai Núñez",
           "squadNumber": 5,
           "position": "CB",
           "preferredPosition": "CB",
@@ -13705,7 +13157,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Jos\u00E9 Gay\u00E0",
+          "name": "José Gayà",
           "squadNumber": 3,
           "position": "LB",
           "preferredPosition": "LB",
@@ -13737,7 +13189,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Jos\u00E9 Copete",
+          "name": "José Copete",
           "squadNumber": 6,
           "position": "CB",
           "preferredPosition": "CB",
@@ -13756,9 +13208,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -13789,8 +13239,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Playmaker",
-            "Interceptor"
+            "Interceptor",
+            "PressResistant"
           ],
           "morale": 50,
           "isInjured": false,
@@ -13822,6 +13272,7 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
+            "Engine",
             "Playmaker"
           ],
           "morale": 50,
@@ -13835,7 +13286,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Andr\u00E9 Almeida",
+          "name": "André Almeida",
           "squadNumber": 10,
           "position": "CAM",
           "preferredPosition": "CAM",
@@ -13853,8 +13304,6 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler",
             "Playmaker"
           ],
           "morale": 50,
@@ -13900,7 +13349,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Lucas Beltr\u00E1n",
+          "name": "Lucas Beltrán",
           "squadNumber": 19,
           "position": "ST",
           "preferredPosition": "ST",
@@ -13932,7 +13381,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Diego L\u00F3pez",
+          "name": "Diego López",
           "squadNumber": 7,
           "position": "RW",
           "preferredPosition": "RW",
@@ -13951,8 +13400,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -13982,9 +13431,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -14014,9 +13461,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -14028,7 +13473,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Jes\u00FAs V\u00E1zquez",
+          "name": "Jesús Vázquez",
           "squadNumber": 15,
           "position": "LB",
           "preferredPosition": "LB",
@@ -14046,9 +13491,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -14079,9 +13522,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -14093,7 +13534,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Guido Rodr\u00EDguez",
+          "name": "Guido Rodríguez",
           "squadNumber": 18,
           "position": "CDM",
           "preferredPosition": "CDM",
@@ -14112,7 +13553,6 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Playmaker",
             "Interceptor"
           ],
           "morale": 50,
@@ -14144,10 +13584,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker",
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -14177,9 +13614,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -14210,8 +13645,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -14243,8 +13677,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -14275,9 +13708,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -14306,9 +13737,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "ClinicalFinisher"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -14338,9 +13767,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -14359,12 +13786,12 @@
       "shortName": "Villarreal",
       "city": "",
       "logoKey": "villarreal",
-      "venue": "La Cer\u00E1mica",
-      "stadiumName": "La Cer\u00E1mica",
+      "venue": "La Cerámica",
+      "stadiumName": "La Cerámica",
       "formation": "4-3-3",
       "startingXI": [
         {
-          "name": "Luiz J\u00FAnior",
+          "name": "Luiz Júnior",
           "squadNumber": 1,
           "position": "GK",
           "preferredPosition": "GK",
@@ -14379,9 +13806,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": true,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -14413,7 +13838,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -14446,7 +13872,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -14479,7 +13906,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Interceptor"
+            "Interceptor",
+            "AerialThreat"
           ],
           "morale": 50,
           "isInjured": false,
@@ -14492,7 +13920,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Rafa Mar\u00EDn",
+          "name": "Rafa Marín",
           "squadNumber": 14,
           "position": "CB",
           "preferredPosition": "CB",
@@ -14525,7 +13953,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Santi Comesa\u00F1a",
+          "name": "Santi Comesaña",
           "squadNumber": 8,
           "position": "CM",
           "preferredPosition": "CM",
@@ -14544,7 +13972,7 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50,
           "isInjured": false,
@@ -14576,7 +14004,7 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Playmaker"
+            "Engine"
           ],
           "morale": 50,
           "isInjured": false,
@@ -14608,7 +14036,6 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Playmaker",
             "Interceptor"
           ],
           "morale": 50,
@@ -14641,8 +14068,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler",
+            "Flair"
           ],
           "morale": 50,
           "isInjured": false,
@@ -14674,7 +14101,8 @@
           "formStatus": null,
           "isStarter": true,
           "traits": [
-            "ClinicalFinisher"
+            "ClinicalFinisher",
+            "TriesToBeatOffsideTrap"
           ],
           "morale": 50,
           "isInjured": false,
@@ -14736,9 +14164,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "OneOnOnes"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -14782,7 +14208,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Santiago Mouri\u00F1o",
+          "name": "Santiago Mouriño",
           "squadNumber": 2,
           "position": "RB",
           "preferredPosition": "RB",
@@ -14865,9 +14291,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -14879,7 +14303,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Carlos Maci\u00E0",
+          "name": "Carlos Macià",
           "squadNumber": 24,
           "position": "CM",
           "preferredPosition": "CM",
@@ -14897,9 +14321,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Playmaker"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -14911,7 +14333,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Nicolas P\u00E9p\u00E9",
+          "name": "Nicolas Pépé",
           "squadNumber": 7,
           "position": "RW",
           "preferredPosition": "RW",
@@ -14930,8 +14352,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -14963,8 +14384,7 @@
           "formStatus": null,
           "isStarter": false,
           "traits": [
-            "Flair",
-            "TechnicalDribbler"
+            "SpeedDribbler"
           ],
           "morale": 50,
           "isInjured": false,
@@ -14977,7 +14397,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Ayoze P\u00E9rez",
+          "name": "Ayoze Pérez",
           "squadNumber": 19,
           "position": "ST",
           "preferredPosition": "ST",
@@ -15009,7 +14429,7 @@
           "matchesPlayedRecently": null
         },
         {
-          "name": "Alfon Gonz\u00E1lez",
+          "name": "Alfon González",
           "squadNumber": 20,
           "position": "LW",
           "preferredPosition": "LW",
@@ -15027,10 +14447,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Flair",
-            "TechnicalDribbler"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -15061,9 +14478,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Interceptor"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,
@@ -15093,9 +14508,7 @@
           "form": "Average",
           "formStatus": null,
           "isStarter": false,
-          "traits": [
-            "Engine"
-          ],
+          "traits": [],
           "morale": 50,
           "isInjured": false,
           "injuryType": null,

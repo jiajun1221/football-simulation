@@ -3411,9 +3411,12 @@ public class MatchEngine
             return PlayerTrait.Engine;
         }
 
-        if (playmaker.Traits.Contains(PlayerTrait.Leadership) && (IsTeamLosing(match, attackingTeam) || minute >= 65))
+        if ((playmaker.Traits.Contains(PlayerTrait.Leadership) || playmaker.Traits.Contains(PlayerTrait.BigMatchPlayer)) &&
+            (IsTeamLosing(match, attackingTeam) || minute >= 65))
         {
-            return PlayerTrait.Leadership;
+            return playmaker.Traits.Contains(PlayerTrait.BigMatchPlayer)
+                ? PlayerTrait.BigMatchPlayer
+                : PlayerTrait.Leadership;
         }
 
         if (playmaker.Traits.Contains(PlayerTrait.PressResistant))
