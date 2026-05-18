@@ -387,6 +387,8 @@
                                      VerticalAlignment="Center" />
                             <Canvas x:Name="PitchCanvas"
                                     Margin="16"
+                                    Background="Transparent"
+                                    MouseLeftButtonDown="PitchCanvas_MouseLeftButtonDown"
                                     SizeChanged="PitchCanvas_SizeChanged" />
                             <Border HorizontalAlignment="Left"
                                     VerticalAlignment="Bottom"
@@ -622,10 +624,35 @@
                         </Grid.RowDefinitions>
 
                         <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
                             <TextBlock Text="Substitutes"
                                        Foreground="White"
                                        FontSize="17"
                                        FontWeight="Bold" />
+                            <TextBlock x:Name="SubstituteFilterTextBlock"
+                                       Grid.Column="1"
+                                       Text="All players"
+                                       Foreground="#DDF7E8"
+                                       FontSize="10"
+                                       FontWeight="SemiBold"
+                                       Margin="8,0,0,0"
+                                       VerticalAlignment="Center" />
+                            <Button x:Name="ClearSubstituteFilterButton"
+                                    Grid.Column="2"
+                                    Content="x"
+                                    Width="22"
+                                    Height="22"
+                                    Margin="6,0,0,0"
+                                    Padding="0"
+                                    FontSize="11"
+                                    FontWeight="Black"
+                                    ToolTip="Show all substitutes"
+                                    Visibility="Collapsed"
+                                    Click="ClearSubstituteFilterButton_Click" />
                         </Grid>
 
                         <ListBox x:Name="SubstituteListBox"

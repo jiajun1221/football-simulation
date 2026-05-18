@@ -344,38 +344,6 @@
             </Border>
         </DataTemplate>
 
-        <DataTemplate x:Key="PendingSubstitutionTemplate">
-            <Border Background="{DynamicResource TacticalOptionBackground}"
-                    BorderBrush="{DynamicResource AppBorderBrush}"
-                    BorderThickness="1"
-                    CornerRadius="10"
-                    Padding="8"
-                    Margin="0,0,0,6">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-
-                    <TextBlock Text="{Binding DisplayText}"
-                               Foreground="{DynamicResource AppTextBrush}"
-                               FontSize="11"
-                               FontWeight="Bold"
-                               TextWrapping="Wrap"
-                               VerticalAlignment="Center" />
-
-                    <Button Grid.Column="1"
-                            Content="X"
-                            Width="24"
-                            Height="24"
-                            Margin="8,0,0,0"
-                            Padding="0"
-                            Tag="{Binding}"
-                            Click="CancelPendingSubstitutionButton_Click"
-                            ToolTip="Cancel pending substitution" />
-                </Grid>
-            </Border>
-        </DataTemplate>
     </UserControl.Resources>
 
     <Grid x:Name="MainRootGrid"
@@ -721,26 +689,6 @@
                            FontWeight="Bold"
                            Foreground="{DynamicResource AppTextBrush}"
                            Margin="0,0,0,8" />
-
-                <Border x:Name="PendingSubstitutionPanel"
-                        Background="{DynamicResource AppPanelBackground}"
-                        BorderBrush="{DynamicResource AppBorderBrush}"
-                        BorderThickness="1"
-                        CornerRadius="14"
-                        Padding="10"
-                        Margin="0,0,0,10"
-                        Visibility="Collapsed">
-                    <StackPanel>
-                        <TextBlock x:Name="PendingSubstitutionHeaderTextBlock"
-                                   Text="Pending substitutions"
-                                   Foreground="{DynamicResource AppTextBrush}"
-                                   FontSize="13"
-                                   FontWeight="Black"
-                                   Margin="0,0,0,6" />
-                        <ItemsControl x:Name="PendingSubstitutionsItemsControl"
-                                      ItemTemplate="{StaticResource PendingSubstitutionTemplate}" />
-                    </StackPanel>
-                </Border>
 
                 <Grid Margin="0,0,0,5">
                     <Grid.ColumnDefinitions>

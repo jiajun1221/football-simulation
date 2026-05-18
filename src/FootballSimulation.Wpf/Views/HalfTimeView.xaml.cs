@@ -35,7 +35,6 @@ public partial class HalfTimeView : UserControl
 
     private sealed record PitchSlotAssignment(Player Player, PitchPosition Position);
     private sealed record PendingHalftimeSubstitution(Player Starter, Player Substitute, string AssignedPosition);
-    private sealed record PendingSubstitutionRow(PendingHalftimeSubstitution Substitution, string DisplayText);
 
     public HalfTimeView(GameFlowState state, Action<UserControl> navigate)
     {
@@ -391,34 +390,9 @@ public partial class HalfTimeView : UserControl
 
     private void RefreshPendingSubstitutions()
     {
-        if (_pendingHalftimeSubstitutions.Count == 0)
-        {
-            PendingSubstitutionPanel.Visibility = Visibility.Collapsed;
-            PendingSubstitutionsItemsControl.ItemsSource = null;
-            return;
-        }
-
-        PendingSubstitutionPanel.Visibility = Visibility.Visible;
-        PendingSubstitutionHeaderTextBlock.Text = $"{_pendingHalftimeSubstitutions.Count} queued";
-        PendingSubstitutionsItemsControl.ItemsSource = _pendingHalftimeSubstitutions
-            .Select(substitution => new PendingSubstitutionRow(
-                substitution,
-                $"{substitution.Substitute.Name} ↑  {substitution.Starter.Name} ↓"))
-            .ToList();
-    }
-
-    private void CancelPendingSubstitutionButton_Click(object sender, RoutedEventArgs e)
-    {
-        if (sender is not Button { Tag: PendingSubstitutionRow row })
-        {
-            return;
-        }
-
-        _pendingHalftimeSubstitutions.Remove(row.Substitution);
-        RefreshSubstitutes();
-        RefreshPendingSubstitutions();
-        UpdateSelectedPlayerDetails();
-        RenderPitch();
+        SubstitutionStatusTextBlock.Text = _pendingHalftimeSubstitutions.Count == 0
+            ? $"{GetUsedSubstitutions()}/5 used"
+            : $"{GetUsedSubstitutions()}/5 used · {_pendingHalftimeSubstitutions.Count} queued";
     }
 
     private BenchPlayerCard CreateBenchPlayerCard(Player player)

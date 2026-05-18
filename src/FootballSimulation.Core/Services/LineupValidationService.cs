@@ -17,9 +17,16 @@ public static class LineupValidationService
         var wasRepaired = false;
         foreach (var unavailableStarter in unavailableStarters)
         {
+            var assignedSlot = PositionSuitabilityService.NormalizeExactPosition(unavailableStarter.AssignedPosition);
+            if (string.IsNullOrWhiteSpace(assignedSlot))
+            {
+                assignedSlot = PositionSuitabilityService.GetDefaultExactPosition(unavailableStarter.Position);
+            }
+
             var replacement = team.Substitutes
                 .Where(IsAvailableForSelection)
-                .OrderByDescending(player => PositionSuitabilityService.IsGoalkeeperCapable(unavailableStarter) == PositionSuitabilityService.IsGoalkeeperCapable(player))
+                .Where(player => PositionCompatibilityService.IsReasonableFit(player, assignedSlot))
+                .OrderByDescending(player => PositionCompatibilityService.GetCompatibilityScore(player, assignedSlot))
                 .ThenByDescending(player => player.OverallRating)
                 .ThenBy(player => player.SquadNumber <= 0 ? int.MaxValue : player.SquadNumber)
                 .FirstOrDefault();

@@ -155,7 +155,6 @@ public class AiManagerService
         var substitutes = team.Substitutes
             .Where(player => !player.IsSuspended && !player.IsInjured && !player.IsSentOff)
             .Where(player => !_squadSelectionService.WasPlayerSubstitutedOff(match, team.Name, player.Name))
-            .Where(player => outgoingPlayer.Position != Position.Goalkeeper || PositionSuitabilityService.IsGoalkeeperCapable(player))
             .ToList();
 
         if (substitutes.Count == 0)
@@ -165,16 +164,33 @@ public class AiManagerService
 
         var isLosing = IsLosing(match, team);
         var isWinning = IsWinning(match, team);
+        var outgoingSlot = PositionSuitabilityService.NormalizeExactPosition(outgoingPlayer.AssignedPosition);
+        if (string.IsNullOrWhiteSpace(outgoingSlot))
+        {
+            outgoingSlot = PositionSuitabilityService.GetDefaultExactPosition(outgoingPlayer.Position);
+        }
+        var reasonableSubstitutes = substitutes
+            .Where(substitute => PositionCompatibilityService.GetCompatibilityScore(substitute, outgoingSlot) > PositionCompatibilityService.Emergency)
+            .ToList();
 
-        return substitutes
-            .OrderByDescending(substitute => GetReplacementScore(substitute, outgoingPlayer, isLosing, isWinning))
+        var candidatePool = reasonableSubstitutes.Count > 0
+            ? reasonableSubstitutes
+            : substitutes.Where(substitute => PositionCompatibilityService.IsReasonableFit(substitute, outgoingSlot)).ToList();
+        if (candidatePool.Count == 0)
+        {
+            return null;
+        }
+
+        return candidatePool
+            .OrderByDescending(substitute => GetReplacementScore(substitute, outgoingPlayer, outgoingSlot, isLosing, isWinning))
             .ThenBy(_ => random.NextDouble())
             .FirstOrDefault();
     }
 
-    private double GetReplacementScore(Player substitute, Player outgoingPlayer, bool isLosing, bool isWinning)
+    private double GetReplacementScore(Player substitute, Player outgoingPlayer, string outgoingSlot, bool isLosing, bool isWinning)
     {
         var score = substitute.OverallRating;
+        score += PositionCompatibilityService.GetCompatibilityScore(substitute, outgoingSlot) * 3;
         score += 100 - _fatigueService.GetFatiguePercentage(substitute);
 
         if (substitute.Position == outgoingPlayer.Position)

@@ -548,6 +548,72 @@ public class MatchEngineScoringTests
     }
 
     [Fact]
+    public void SimulateMatch_SecondYellowRedRequiresEarlierBooking()
+    {
+        var seedDataService = new SeedDataService();
+        var engine = new MatchEngine();
+
+        for (var seed = 1; seed <= 240; seed++)
+        {
+            var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+            var result = engine.SimulateMatch(homeTeam, awayTeam, seed: seed);
+            var events = result.Events;
+
+            for (var index = 0; index < events.Count; index++)
+            {
+                var redCard = events[index];
+                if (redCard.EventType != EventType.RedCard ||
+                    !redCard.Description.Contains("Second yellow", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                var earlierBooking = events
+                    .Take(index)
+                    .Any(matchEvent =>
+                        matchEvent.EventType == EventType.YellowCard &&
+                        EventIncludesPlayer(matchEvent, redCard.PrimaryPlayerName));
+
+                Assert.True(
+                    earlierBooking,
+                    $"Seed {seed}: second-yellow red for {redCard.PrimaryPlayerName} had no earlier yellow-card event.");
+            }
+        }
+    }
+
+    [Fact]
+    public void SimulateMatch_RedCardsRespectCooldownAndUseClearStraightRedReasons()
+    {
+        var seedDataService = new SeedDataService();
+        var engine = new MatchEngine();
+
+        for (var seed = 1; seed <= 240; seed++)
+        {
+            var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+            var result = engine.SimulateMatch(homeTeam, awayTeam, seed: seed);
+            var redCards = result.Events
+                .Where(matchEvent => matchEvent.EventType == EventType.RedCard)
+                .ToList();
+
+            for (var index = 1; index < redCards.Count; index++)
+            {
+                Assert.True(
+                    redCards[index].Minute - redCards[index - 1].Minute >= 20,
+                    $"Seed {seed}: red cards occurred at {redCards[index - 1].Minute}' and {redCards[index].Minute}'.");
+            }
+
+            foreach (var redCard in redCards.Where(matchEvent => !matchEvent.Description.Contains("Second yellow", StringComparison.OrdinalIgnoreCase)))
+            {
+                Assert.True(
+                    redCard.Description.Contains("clear scoring chance", StringComparison.OrdinalIgnoreCase) ||
+                    redCard.Description.Contains("serious foul play", StringComparison.OrdinalIgnoreCase) ||
+                    redCard.Description.Contains("violent conduct", StringComparison.OrdinalIgnoreCase),
+                    $"Seed {seed}: straight red used unclear reason: {redCard.Description}");
+            }
+        }
+    }
+
+    [Fact]
     public void SimulateMatch_GoalkeeperHeroicsDoesNotDuplicateSaveFeed()
     {
         var seedDataService = new SeedDataService();
@@ -849,6 +915,13 @@ public class MatchEngineScoringTests
         }
 
         return null;
+    }
+
+    private static bool EventIncludesPlayer(MatchEvent matchEvent, string? playerName)
+    {
+        return !string.IsNullOrWhiteSpace(playerName) &&
+            (string.Equals(matchEvent.PrimaryPlayerName, playerName, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(matchEvent.SecondaryPlayerName, playerName, StringComparison.OrdinalIgnoreCase));
     }
 
     private static bool EventMentionsTeam(string description, string teamName)

@@ -114,37 +114,16 @@ public static class ClubMatchSetupService
         var normalizedSlot = PositionSuitabilityService.NormalizeExactPosition(slot);
         return players
             .Where(player => IsAvailableForSelection(player) && !usedNames.Contains(player.Name))
-            .Where(player => CanOccupySlot(player, normalizedSlot))
+            .Where(player => PositionCompatibilityService.IsReasonableFit(player, normalizedSlot))
             .OrderByDescending(player => GetSlotFitScore(player, normalizedSlot))
             .ThenByDescending(player => player.OverallRating)
             .ThenBy(player => player.SquadNumber <= 0 ? int.MaxValue : player.SquadNumber)
             .FirstOrDefault();
     }
 
-    private static bool CanOccupySlot(Player player, string slot)
-    {
-        if (slot == "GK")
-        {
-            return PositionSuitabilityService.IsGoalkeeperCapable(player);
-        }
-
-        return !PositionSuitabilityService.IsGoalkeeperCapable(player);
-    }
-
     private static int GetSlotFitScore(Player player, string slot)
     {
-        PositionSuitabilityService.EnsurePositionMetadata(player);
-        if (string.Equals(player.AssignedPosition, slot, StringComparison.OrdinalIgnoreCase))
-        {
-            return 4;
-        }
-
-        if (string.Equals(player.PreferredPosition, slot, StringComparison.OrdinalIgnoreCase))
-        {
-            return 3;
-        }
-
-        return player.SecondaryPositions.Contains(slot, StringComparer.OrdinalIgnoreCase) ? 2 : 1;
+        return PositionCompatibilityService.GetCompatibilityScore(player, slot);
     }
 
     private static void ApplyStarterSlot(Player player, string slot)

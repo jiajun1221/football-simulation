@@ -28,6 +28,7 @@ public partial class PreMatchView : UserControl
     private const double PitchCardHeight = 70;
 
     private Player? _selectedStarter;
+    private string? _selectedPositionFilter;
     private List<Player> _pitchSlots = [];
     private Point _dragStartPoint;
     private bool _isDraggingPlayer;
@@ -345,9 +346,42 @@ public partial class PreMatchView : UserControl
         if (sender is Button { Tag: Player player } && IsAvailableForSelection(player))
         {
             _selectedStarter = player;
+            _selectedPositionFilter = (sender as FrameworkElement)?.DataContext is PitchPlayerCard card
+                ? PositionSuitabilityService.NormalizeExactPosition(card.PositionText)
+                : null;
             UpdateSelectedPlayerDetails();
+            RefreshSubstitutes();
             RenderPitch();
         }
+    }
+
+    private void PitchCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (IsWithinPitchPlayerButton(e.OriginalSource as DependencyObject))
+        {
+            return;
+        }
+
+        ClearPitchSelection();
+    }
+
+    private void ClearSubstituteFilterButton_Click(object sender, RoutedEventArgs e)
+    {
+        ClearPitchSelection();
+    }
+
+    private void ClearPitchSelection()
+    {
+        if (_selectedStarter is null && string.IsNullOrWhiteSpace(_selectedPositionFilter))
+        {
+            return;
+        }
+
+        _selectedStarter = null;
+        _selectedPositionFilter = null;
+        UpdateSelectedPlayerDetails();
+        RefreshSubstitutes();
+        RenderPitch();
     }
 
     private void FormationComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -428,14 +462,43 @@ public partial class PreMatchView : UserControl
             return;
         }
 
-        var benchCards = _state.SelectedTeam.Substitutes
+        var normalizedFilter = PositionSuitabilityService.NormalizeExactPosition(_selectedPositionFilter);
+        var availableSubstitutes = _state.SelectedTeam.Substitutes
             .Where(IsAvailableForSelection)
+            .ToList();
+
+        if (!string.IsNullOrWhiteSpace(normalizedFilter))
+        {
+            availableSubstitutes = availableSubstitutes
+                .Where(player => PositionCompatibilityService.IsReasonableFit(player, normalizedFilter))
+                .OrderByDescending(player => PositionCompatibilityService.GetCompatibilityScore(player, normalizedFilter))
+                .ThenByDescending(GetOverallRating)
+                .ThenBy(player => player.SquadNumber <= 0 ? int.MaxValue : player.SquadNumber)
+                .ThenBy(player => player.Name)
+                .ToList();
+        }
+
+        var benchCards = availableSubstitutes
             .Select(CreateBenchPlayerCard)
             .ToList();
 
         SubstituteListBox.ItemsSource = null;
         SubstituteListBox.ItemsSource = benchCards;
         SubstituteListBox.IsEnabled = benchCards.Count > 0;
+        UpdateSubstituteFilterLabel(normalizedFilter);
+    }
+
+    private void UpdateSubstituteFilterLabel(string normalizedFilter)
+    {
+        if (string.IsNullOrWhiteSpace(normalizedFilter))
+        {
+            SubstituteFilterTextBlock.Text = "All players";
+            ClearSubstituteFilterButton.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        SubstituteFilterTextBlock.Text = $"Filter: {normalizedFilter}";
+        ClearSubstituteFilterButton.Visibility = Visibility.Visible;
     }
 
     private void RefreshInjuredPlayers()
@@ -968,6 +1031,21 @@ public partial class PreMatchView : UserControl
         return element.DataContext is PitchPlayerCard pitchCard
             ? pitchCard.Player
             : element.Tag as Player;
+    }
+
+    private static bool IsWithinPitchPlayerButton(DependencyObject? source)
+    {
+        while (source is not null)
+        {
+            if (source is Button { DataContext: PitchPlayerCard })
+            {
+                return true;
+            }
+
+            source = VisualTreeHelper.GetParent(source);
+        }
+
+        return false;
     }
 
     private void SwapPitchPlayers(Player draggedPlayer, Player targetPlayer)

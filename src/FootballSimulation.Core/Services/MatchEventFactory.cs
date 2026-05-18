@@ -266,7 +266,7 @@ public class MatchEventFactory
             "cross into box" => Pick(random,
                 string.IsNullOrWhiteSpace(playmakerName)
                     ? $"{attackerName} meets the delivery and gets the shot away for {attackingTeam.Name}."
-                    : $"{attackerName} meets {playmakerName}'s delivery and gets the shot away.",
+                    : $"{attackerName} meets {playmakerName}'s delivery and gets the shot away for {attackingTeam.Name}.",
                 $"{attackerName} meets the delivery for {attackingTeam.Name} inside the area."),
             "through ball attempt" => !string.IsNullOrWhiteSpace(playmakerName)
                 ? $"{attackerName} runs onto {playmakerName}'s pass and gets the shot away for {attackingTeam.Name}."

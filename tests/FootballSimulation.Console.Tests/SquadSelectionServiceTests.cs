@@ -92,6 +92,8 @@ public class SquadSelectionServiceTests
         var tiredStarter = team.Players[1];
         var subbedOffPlayer = team.Substitutes[1];
         var eligibleSubstitute = team.Substitutes[2];
+        PositionSuitabilityService.EnsurePositionMetadata(subbedOffPlayer, "CB");
+        PositionSuitabilityService.EnsurePositionMetadata(eligibleSubstitute, "CB");
         tiredStarter.Stamina = 4;
         subbedOffPlayer.OverallRating = 99;
         eligibleSubstitute.OverallRating = 60;
@@ -203,6 +205,81 @@ public class SquadSelectionServiceTests
         Assert.False(suspendedStarter.IsOnPitch);
     }
 
+    [Fact]
+    public void AiLineupSelection_UsesNaturalCenterBacksOverHighRatedAttackers()
+    {
+        var team = new Team
+        {
+            Name = "Manchester Test",
+            Formation = "4-3-3",
+            Players =
+            [
+                CreateExactPlayer("Starter GK", Position.Goalkeeper, "GK", 82, true),
+                CreateExactPlayer("High Rated Winger", Position.Forward, "LW", 92, true),
+                CreateExactPlayer("Creative Midfielder", Position.Midfielder, "CAM", 91, true),
+                CreateExactPlayer("Natural Center Back A", Position.Defender, "CB", 82, true),
+                CreateExactPlayer("Natural Right Back", Position.Defender, "RB", 80, true),
+                CreateExactPlayer("Central Midfielder A", Position.Midfielder, "CM", 84, true),
+                CreateExactPlayer("Central Midfielder B", Position.Midfielder, "CM", 83, true),
+                CreateExactPlayer("Attacking Midfielder", Position.Midfielder, "CAM", 86, true),
+                CreateExactPlayer("Left Winger", Position.Forward, "LW", 85, true),
+                CreateExactPlayer("Striker", Position.Forward, "ST", 88, true),
+                CreateExactPlayer("Right Winger", Position.Forward, "RW", 85, true)
+            ],
+            Substitutes =
+            [
+                CreateExactPlayer("Natural Center Back B", Position.Defender, "CB", 79, false),
+                CreateExactPlayer("Natural Left Back", Position.Defender, "LB", 78, false),
+                CreateExactPlayer("Defensive Midfielder", Position.Midfielder, "CDM", 80, false),
+                CreateExactPlayer("Sub GK", Position.Goalkeeper, "GK", 72, false)
+            ]
+        };
+
+        AiLineupSelectionService.BuildRealisticLineup(team);
+
+        var slots = FormationSlotService.GetSlots(team.Formation);
+        var centerBacks = team.Players
+            .Select((player, index) => new { Player = player, Slot = slots[index] })
+            .Where(item => item.Slot == "CB")
+            .Select(item => item.Player)
+            .ToList();
+
+        Assert.All(centerBacks, player => Assert.True(
+            PositionCompatibilityService.GetCompatibilityScore(player, "CB") > PositionCompatibilityService.Emergency,
+            $"{player.Name} should not be used at CB."));
+        Assert.DoesNotContain(centerBacks, player => player.PreferredPosition is "LW" or "RW" or "ST" or "CAM");
+    }
+
+    [Fact]
+    public void AiManager_ChoosesDefensiveReplacementForCenterBack()
+    {
+        var service = new AiManagerService();
+        var team = CreateTeam();
+        var centerBack = team.Players[1];
+        PositionSuitabilityService.EnsurePositionMetadata(centerBack, "CB");
+        centerBack.IsInjured = true;
+        team.Substitutes =
+        [
+            CreateExactPlayer("Attacking Star", Position.Forward, "LW", 92, false),
+            CreateExactPlayer("Backup Center Back", Position.Defender, "CB", 76, false),
+            CreateExactPlayer("Backup Midfielder", Position.Midfielder, "CM", 82, false),
+            CreateExactPlayer("Sub GK", Position.Goalkeeper, "GK", 72, false)
+        ];
+        var opponent = CreateTeam("Opponent");
+        var match = new Match { HomeTeam = team, AwayTeam = opponent };
+
+        var decision = service.TryMakeSubstitution(
+            match,
+            team,
+            minute: 60,
+            new MatchSimulationOptions { EnableAiSubstitutions = true },
+            new Random(1));
+
+        Assert.NotNull(decision);
+        Assert.Equal(centerBack.Name, decision!.PlayerOff.Name);
+        Assert.Equal("Backup Center Back", decision.PlayerOn.Name);
+    }
+
     private static Team CreateTeam(string name = "Test FC", int substituteCount = 7)
     {
         var players = new List<Player>
@@ -251,5 +328,15 @@ public class SquadSelectionServiceTests
             CurrentStamina = 75,
             Finishing = 75
         };
+    }
+
+    private static Player CreateExactPlayer(string name, Position position, string preferredPosition, int overall, bool isStarter)
+    {
+        var player = CreatePlayer(name, position, isStarter);
+        player.PreferredPosition = preferredPosition;
+        player.AssignedPosition = preferredPosition;
+        player.OverallRating = overall;
+        player.BaseOverallRating = overall;
+        return player;
     }
 }

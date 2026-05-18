@@ -71,8 +71,9 @@ public class LeagueEngine
         int? matchSeed = seed.HasValue
             ? seed.Value + fixture.RoundNumber * 100 + fixtureIndex
             : null;
-        PrepareFixtureTeams(fixture);
-        var result = _matchEngine.SimulateMatch(fixture.HomeTeam, fixture.AwayTeam, matchSeed, options: CreateOptions(options));
+        var simulationOptions = CreateOptions(options);
+        PrepareFixtureTeams(fixture, simulationOptions);
+        var result = _matchEngine.SimulateMatch(fixture.HomeTeam, fixture.AwayTeam, matchSeed, options: simulationOptions);
         _playerFormStatusService.UpdateMatchPlayerFormStatuses(result);
 
         fixture.Result = result;
@@ -93,15 +94,17 @@ public class LeagueEngine
             ? seed.Value + fixture.RoundNumber * 100 + fixtureIndex
             : null;
 
-        PrepareFixtureTeams(fixture);
-        return _matchEngine.SimulateFirstHalf(fixture.HomeTeam, fixture.AwayTeam, matchSeed, CreateOptions(options));
+        var simulationOptions = CreateOptions(options);
+        PrepareFixtureTeams(fixture, simulationOptions);
+        return _matchEngine.SimulateFirstHalf(fixture.HomeTeam, fixture.AwayTeam, matchSeed, simulationOptions);
     }
 
     public Match CreateLiveFixtureMatch(League league, Fixture fixture, MatchSimulationOptions? options = null)
     {
         ValidateFixtureIsPlayable(league, fixture);
-        PrepareFixtureTeams(fixture);
-        return _matchEngine.CreateLiveMatch(fixture.HomeTeam, fixture.AwayTeam, CreateOptions(options));
+        var simulationOptions = CreateOptions(options);
+        PrepareFixtureTeams(fixture, simulationOptions);
+        return _matchEngine.CreateLiveMatch(fixture.HomeTeam, fixture.AwayTeam, simulationOptions);
     }
 
     public Match AdvanceLiveFixture(
@@ -184,10 +187,26 @@ public class LeagueEngine
         }
     }
 
-    private static void PrepareFixtureTeams(Fixture fixture)
+    private static void PrepareFixtureTeams(Fixture fixture, MatchSimulationOptions options)
     {
+        if (!IsHumanControlled(fixture.HomeTeam, options))
+        {
+            AiLineupSelectionService.BuildRealisticLineup(fixture.HomeTeam);
+        }
+
+        if (!IsHumanControlled(fixture.AwayTeam, options))
+        {
+            AiLineupSelectionService.BuildRealisticLineup(fixture.AwayTeam);
+        }
+
         _ = LineupValidationService.RepairUnavailablePlayers(fixture.HomeTeam);
         _ = LineupValidationService.RepairUnavailablePlayers(fixture.AwayTeam);
+    }
+
+    private static bool IsHumanControlled(Team team, MatchSimulationOptions options)
+    {
+        return !string.IsNullOrWhiteSpace(options.HumanControlledTeamName) &&
+            string.Equals(team.Name, options.HumanControlledTeamName, StringComparison.OrdinalIgnoreCase);
     }
 
     private static MatchSimulationOptions CreateOptions(MatchSimulationOptions? options)

@@ -9,6 +9,8 @@ public class MatchEngine
     private const int CrowdMomentumCooldownMinutes = 12;
     private const int MaxCrowdMomentumEventsPerTeam = 2;
     private const int MaxCrowdMomentumEventsPerMatch = 3;
+    private const int RedCardCooldownMinutes = 20;
+    private const int EarlyRedCardProtectionMinute = 15;
     private const int FirstHalfMaximumAddedMinutes = 6;
     private const int SecondHalfMaximumAddedMinutes = 10;
     private const int ExtremeMaximumAddedMinutes = 12;
@@ -329,13 +331,13 @@ public class MatchEngine
                 TryApplyAiManagerDecisions(simulationState, random, minute, suppressFeedEvent: true);
             }
 
+            AddStoppageForNewEvents(simulationState, eventsBeforeMinute, random, minute);
             if (includeFulltime && minute == GetSecondHalfEndMinute(match))
             {
                 match.CurrentPhase = MatchPhase.Fulltime;
                 simulationState.MatchLog.AddEvent(simulationState.EventFactory.CreateFulltime(minute, match));
             }
 
-            AddStoppageForNewEvents(simulationState, eventsBeforeMinute, random, minute);
             if (!isSingleMinuteAdvance)
             {
                 dynamicEndMinute = Math.Max(dynamicEndMinute, GetPhaseEndMinute(match, includeFulltime));
@@ -1869,7 +1871,7 @@ public class MatchEngine
         defenderPerformance.Rating -= 0.15;
         GetOrCreatePerformance(match, GetOpposingTeam(match, defendingTeam), fouledPlayer).Rating += 0.05;
 
-        var redCardReason = GetStraightRedReason(foulContext, defender, random);
+        var redCardReason = GetStraightRedReason(foulContext, defender, simulationState, defendingTeam, minute, random);
         if (redCardReason is not null)
         {
             if (TryCancelRedCardWithVar(minute, match, defendingTeam, defender, random, matchLog, eventFactory))
@@ -1878,14 +1880,14 @@ public class MatchEngine
             }
             else
             {
-                ApplyRedCard(minute, match, defendingTeam, attackingTeam, defender, defenderPerformance, defendingStats, matchLog, eventFactory, redCardReason);
+                ApplyRedCard(minute, simulationState, defendingTeam, attackingTeam, defender, defenderPerformance, defendingStats, matchLog, eventFactory, redCardReason);
             }
         }
-        else if (ShouldGiveYellowCard(defender, simulationState, minute, random))
+        else if (ShouldGiveYellowCard(defender, simulationState, foulContext, minute, random))
         {
             ApplyYellowCard(
                 minute,
-                match,
+                simulationState,
                 defendingTeam,
                 attackingTeam,
                 defender,
@@ -2765,36 +2767,6 @@ public class MatchEngine
         return true;
     }
 
-    private bool TryUpgradeYellowToRedWithVar(
-        int minute,
-        Match match,
-        Team defendingTeam,
-        Team attackingTeam,
-        Player defender,
-        PlayerMatchPerformance defenderPerformance,
-        MatchTeamStats defendingStats,
-        Random random,
-        MatchLogService matchLog,
-        MatchEventFactory eventFactory)
-    {
-        if (random.NextDouble() > 0.035)
-        {
-            return false;
-        }
-
-        matchLog.AddEvent(eventFactory.CreateVarCheck(minute, "red card"));
-        var upgraded = random.NextDouble() < 0.30;
-        if (!upgraded)
-        {
-            matchLog.AddEvent(eventFactory.CreateVarDecision(minute, defendingTeam, "no red card", match));
-            return false;
-        }
-
-        matchLog.AddEvent(eventFactory.CreateVarDecision(minute, defendingTeam, "red card upgraded", match));
-        ApplyRedCard(minute, match, defendingTeam, attackingTeam, defender, defenderPerformance, defendingStats, matchLog, eventFactory, "VAR violent conduct");
-        return true;
-    }
-
     private void TryAddRefereeControversy(
         int minute,
         MatchSimulationState simulationState,
@@ -2854,32 +2826,39 @@ public class MatchEngine
         ApplyConfrontationComposureDrop(firstPlayer, secondPlayer);
 
         var roll = random.NextDouble();
-        if (roll < 0.05)
+        if (roll < 0.003)
         {
             var offender = ChooseConfrontationOffender(firstPlayer, secondPlayer, random);
             var offenderTeam = IsPlayerOnTeam(offender, firstTeam) ? firstTeam : secondTeam;
             var opponentTeam = offenderTeam == firstTeam ? secondTeam : firstTeam;
-            matchLog.AddEvent(eventFactory.CreateVarCheck(minute, "red card"));
-            matchLog.AddEvent(eventFactory.CreateVarDecision(minute, offenderTeam, "red card upgraded", simulationState.Match));
-            ApplyRedCard(
-                minute,
-                simulationState.Match,
-                offenderTeam,
-                opponentTeam,
-                offender,
-                GetOrCreatePerformance(simulationState.Match, offenderTeam, offender),
-                GetTeamStats(simulationState.Match, offenderTeam),
-                matchLog,
-                eventFactory,
-                "violent conduct");
-            return;
+            if (!CanIssueRedCard(simulationState, offenderTeam, minute))
+            {
+                roll = 0.25;
+            }
+            else
+            {
+                matchLog.AddEvent(eventFactory.CreateVarCheck(minute, "red card"));
+                matchLog.AddEvent(eventFactory.CreateVarDecision(minute, offenderTeam, "red card upgraded", simulationState.Match));
+                ApplyRedCard(
+                    minute,
+                    simulationState,
+                    offenderTeam,
+                    opponentTeam,
+                    offender,
+                    GetOrCreatePerformance(simulationState.Match, offenderTeam, offender),
+                    GetTeamStats(simulationState.Match, offenderTeam),
+                    matchLog,
+                    eventFactory,
+                    "violent conduct");
+                return;
+            }
         }
 
         if (roll < 0.25)
         {
             matchLog.AddEvent(eventFactory.CreateDoubleBooking(minute, firstPlayer, secondPlayer));
-            ApplyYellowCard(minute, simulationState.Match, firstTeam, secondTeam, firstPlayer, GetOrCreatePerformance(simulationState.Match, firstTeam, firstPlayer), GetTeamStats(simulationState.Match, firstTeam), matchLog, eventFactory, random, addCardEvent: false);
-            ApplyYellowCard(minute, simulationState.Match, secondTeam, firstTeam, secondPlayer, GetOrCreatePerformance(simulationState.Match, secondTeam, secondPlayer), GetTeamStats(simulationState.Match, secondTeam), matchLog, eventFactory, random, addCardEvent: false);
+            ApplyYellowCard(minute, simulationState, firstTeam, secondTeam, firstPlayer, GetOrCreatePerformance(simulationState.Match, firstTeam, firstPlayer), GetTeamStats(simulationState.Match, firstTeam), matchLog, eventFactory, random, addCardEvent: false);
+            ApplyYellowCard(minute, simulationState, secondTeam, firstTeam, secondPlayer, GetOrCreatePerformance(simulationState.Match, secondTeam, secondPlayer), GetTeamStats(simulationState.Match, secondTeam), matchLog, eventFactory, random, addCardEvent: false);
             return;
         }
 
@@ -2890,7 +2869,7 @@ public class MatchEngine
             var opposingTeam = bookedTeam == firstTeam ? secondTeam : firstTeam;
             ApplyYellowCard(
                 minute,
-                simulationState.Match,
+                simulationState,
                 bookedTeam,
                 opposingTeam,
                 bookedPlayer,
@@ -2999,7 +2978,7 @@ public class MatchEngine
 
     private void ApplyYellowCard(
         int minute,
-        Match match,
+        MatchSimulationState simulationState,
         Team bookedTeam,
         Team opposingTeam,
         Player player,
@@ -3011,16 +2990,20 @@ public class MatchEngine
         bool addCardEvent = true,
         string? reason = null)
     {
+        var match = simulationState.Match;
         if (player.IsSentOff)
         {
             return;
         }
 
-        if (addCardEvent &&
-            string.IsNullOrWhiteSpace(reason) &&
-            TryUpgradeYellowToRedWithVar(minute, match, bookedTeam, opposingTeam, player, performance, bookedTeamStats, random, matchLog, eventFactory))
+        if (player.YellowCards >= 1 && !CanIssueRedCard(simulationState, bookedTeam, minute))
         {
             return;
+        }
+
+        if (addCardEvent && string.IsNullOrWhiteSpace(reason))
+        {
+            _ = random.NextDouble();
         }
 
         if (addCardEvent)
@@ -3033,7 +3016,7 @@ public class MatchEngine
 
         if (_disciplinaryService.ApplyYellowCard(player, bookedTeamStats))
         {
-            ApplyRedCard(minute, match, bookedTeam, opposingTeam, player, performance, bookedTeamStats, matchLog, eventFactory, "second yellow");
+            ApplyRedCard(minute, simulationState, bookedTeam, opposingTeam, player, performance, bookedTeamStats, matchLog, eventFactory, "second yellow");
             return;
         }
     }
@@ -4405,15 +4388,42 @@ public class MatchEngine
         return random.NextDouble() < foulProbability;
     }
 
-    private static bool ShouldGiveYellowCard(Player defender, MatchSimulationState simulationState, int minute, Random random)
+    private static bool ShouldGiveYellowCard(Player defender, MatchSimulationState simulationState, FoulContext foulContext, int minute, Random random)
     {
-        var traitBonus = defender.Traits.Contains(PlayerTrait.DivesIntoTackles) ? 0.22 : 0.0;
-        var tensionBonus = IsMatchTense(simulationState, minute) ? 0.12 : 0.0;
+        var baseChance = foulContext.Severity switch
+        {
+            FoulSeverity.Minor => 0.03,
+            FoulSeverity.Tactical => 0.18,
+            FoulSeverity.Reckless => 0.45,
+            FoulSeverity.Dangerous => 0.72,
+            FoulSeverity.Dogso => 0.78,
+            FoulSeverity.Violent => 0.85,
+            _ => MatchConstants.YellowCardChancePerFoul
+        };
+
+        if (defender.YellowCards >= 1)
+        {
+            baseChance = foulContext.Severity switch
+            {
+                FoulSeverity.Minor => 0.0,
+                FoulSeverity.Tactical => 0.03,
+                FoulSeverity.Reckless => 0.055,
+                FoulSeverity.Dangerous or FoulSeverity.Dogso or FoulSeverity.Violent => 0.08,
+                _ => 0.04
+            };
+        }
+
+        var traitBonus = defender.YellowCards >= 1
+            ? 0.0
+            : defender.Traits.Contains(PlayerTrait.DivesIntoTackles) ? 0.08 : 0.0;
+        var tensionBonus = defender.YellowCards >= 1
+            ? 0.0
+            : IsMatchTense(simulationState, minute) ? 0.05 : 0.0;
         var defendingTeam = ResolvePlayerTeam(simulationState.Match, defender);
         var venueModifier = defendingTeam is null
             ? 1.0
             : HomeAwayAdvantageService.GetModifier(simulationState.Match, defendingTeam).YellowRiskModifier;
-        return random.NextDouble() < (MatchConstants.YellowCardChancePerFoul + traitBonus + tensionBonus) * venueModifier;
+        return random.NextDouble() < Math.Clamp((baseChance + traitBonus + tensionBonus) * venueModifier, 0.0, 0.88);
     }
 
     private static FoulContext CreateFoulContext(
@@ -4423,32 +4433,129 @@ public class MatchEngine
         Random random)
     {
         var isBoxThreat = chanceType is "cross into box" or "through ball attempt" or "dribble run" or "quick combination";
+        var isClearThroughThreat = chanceType is "through ball attempt" or "dribble run";
         var attackPressure = attackingTeamStrength / Math.Max(1.0, attackingTeamStrength + defendingTeamStrength);
         var penaltyProbability = isBoxThreat
             ? Math.Clamp(0.16 + attackPressure * 0.18, 0.12, 0.34)
             : 0.0;
         var handball = isBoxThreat && random.NextDouble() < 0.06;
         var isPenalty = handball || random.NextDouble() < penaltyProbability;
-        var deniesClearChance = isBoxThreat && attackPressure > 0.52 && random.NextDouble() < 0.30;
-        var violentFoul = random.NextDouble() < 0.035;
+        var dogsoChance = isClearThroughThreat
+            ? Math.Clamp(0.012 + (attackPressure - 0.54) * 0.16, 0.0, 0.045)
+            : chanceType == "quick combination"
+                ? Math.Clamp((attackPressure - 0.58) * 0.08, 0.0, 0.018)
+                : 0.0;
+        var dogsoRoll = dogsoChance > 0.0 ? random.NextDouble() : 1.0;
+        var deniesClearChance = !handball && dogsoRoll < dogsoChance;
+        var violentRoll = random.NextDouble();
+        var violentFoul = violentRoll < 0.002;
+        var dangerousFoul = !violentFoul &&
+            !deniesClearChance &&
+            violentRoll >= 0.002 &&
+            violentRoll < 0.002 + GetDangerousFoulChance(chanceType, attackPressure);
+        var severity = GetFoulSeverity(chanceType, deniesClearChance, violentFoul, dangerousFoul, attackPressure, dogsoRoll, violentRoll);
         var createsDangerousSetPiece = !isPenalty &&
-            (isBoxThreat || chanceType is "long-range effort" or "wide overload") &&
+            (isBoxThreat || chanceType is "long-range attempt" or "long-range effort" or "wide overload") &&
             random.NextDouble() < 0.72;
         var reason = handball ? "handles the ball near" : "fouls";
 
-        return new FoulContext(isPenalty, reason, deniesClearChance, violentFoul, createsDangerousSetPiece);
+        return new FoulContext(severity, isPenalty, reason, deniesClearChance, violentFoul, createsDangerousSetPiece);
     }
 
-    private static string? GetStraightRedReason(FoulContext foulContext, Player defender, Random random)
+    private static double GetDangerousFoulChance(string chanceType, double attackPressure)
     {
-        if (foulContext.ViolentFoul)
+        var baseChance = chanceType is "dribble run" or "through ball attempt"
+            ? 0.016
+            : 0.009;
+        return Math.Clamp(baseChance + Math.Max(0.0, attackPressure - 0.55) * 0.035, 0.006, 0.024);
+    }
+
+    private static FoulSeverity GetFoulSeverity(
+        string chanceType,
+        bool deniesClearChance,
+        bool violentFoul,
+        bool dangerousFoul,
+        double attackPressure,
+        double dogsoRoll,
+        double violentRoll)
+    {
+        if (violentFoul)
         {
-            return "violent foul";
+            return FoulSeverity.Violent;
         }
 
-        if (foulContext.DeniesClearChance && random.NextDouble() < (foulContext.IsPenalty ? 0.55 : 0.70))
+        if (deniesClearChance)
         {
-            return "denying a clear scoring chance";
+            return FoulSeverity.Dogso;
+        }
+
+        if (dangerousFoul)
+        {
+            return FoulSeverity.Dangerous;
+        }
+
+        var recklessChance = chanceType is "dribble run" or "through ball attempt"
+            ? 0.20
+            : 0.12;
+        recklessChance += Math.Max(0.0, attackPressure - 0.50) * 0.18;
+        var severityRoll = (violentRoll * 997.0) % 1.0;
+        if (severityRoll < Math.Clamp(recklessChance, 0.08, 0.28))
+        {
+            return FoulSeverity.Reckless;
+        }
+
+        var tacticalChance = chanceType is "quick combination" or "through ball attempt"
+            ? 0.44
+            : 0.28;
+        var tacticalRoll = (dogsoRoll * 499.0 + attackPressure) % 1.0;
+        if (tacticalRoll < tacticalChance)
+        {
+            return FoulSeverity.Tactical;
+        }
+
+        return FoulSeverity.Minor;
+    }
+
+    private static string? GetStraightRedReason(
+        FoulContext foulContext,
+        Player defender,
+        MatchSimulationState simulationState,
+        Team defendingTeam,
+        int minute,
+        Random random)
+    {
+        if (!CanIssueRedCard(simulationState, defendingTeam, minute))
+        {
+            return null;
+        }
+
+        var earlyMultiplier = minute < EarlyRedCardProtectionMinute ? 0.30 : 1.0;
+        if (foulContext.Severity == FoulSeverity.Violent)
+        {
+            return random.NextDouble() < 0.88 * earlyMultiplier
+                ? "violent conduct after an off-ball clash"
+                : null;
+        }
+
+        if (foulContext.Severity == FoulSeverity.Dogso)
+        {
+            var dogsoChance = defender.Position == Position.Goalkeeper ? 0.72 : 0.62;
+            if (random.NextDouble() >= dogsoChance * earlyMultiplier)
+            {
+                return null;
+            }
+
+            return defender.Position == Position.Goalkeeper
+                ? "goalkeeper DOGSO, denying a clear scoring chance"
+                : "denying a clear scoring chance as the last defender";
+        }
+
+        if (foulContext.Severity == FoulSeverity.Dangerous && minute >= EarlyRedCardProtectionMinute)
+        {
+            var dangerousRedChance = defender.Traits.Contains(PlayerTrait.DivesIntoTackles) ? 0.16 : 0.11;
+            return random.NextDouble() < dangerousRedChance
+                ? "serious foul play after a dangerous high-risk challenge"
+                : null;
         }
 
         return null;
@@ -4456,7 +4563,7 @@ public class MatchEngine
 
     private static void ApplyRedCard(
         int minute,
-        Match match,
+        MatchSimulationState simulationState,
         Team sentOffTeam,
         Team opponentTeam,
         Player player,
@@ -4466,6 +4573,11 @@ public class MatchEngine
         MatchEventFactory eventFactory,
         string reason)
     {
+        if (reason != "second yellow" && !CanIssueRedCard(simulationState, sentOffTeam, minute))
+        {
+            return;
+        }
+
         var isFirstRedCardIncident = player.RedCardMinute is null;
         if (!player.IsSentOff)
         {
@@ -4482,9 +4594,34 @@ public class MatchEngine
         player.IsOnPitch = false;
         player.RedCardMinute ??= minute;
         matchLog.AddEvent(eventFactory.CreateRedCard(minute, player, reason));
+        simulationState.LastRedCardMinute = minute;
         performance.RedCards = Math.Max(performance.RedCards, 1);
         performance.Rating -= reason == "second yellow" ? 1.0 : 1.35;
         ApplyRedCardTacticalReaction(sentOffTeam, opponentTeam);
+    }
+
+    private static bool CanIssueRedCard(MatchSimulationState simulationState, Team sentOffTeam, int minute)
+    {
+        if (simulationState.LastRedCardMinute + RedCardCooldownMinutes > minute)
+        {
+            return false;
+        }
+
+        var match = simulationState.Match;
+        var sentOffTeamStats = GetTeamStats(match, sentOffTeam);
+        var chaoticMatch = IsRedCardChaosMatch(simulationState, minute);
+        var teamCap = chaoticMatch ? 2 : 1;
+        var matchCap = chaoticMatch ? 3 : 2;
+        var totalRedCards = match.HomeStats.RedCards + match.AwayStats.RedCards;
+
+        return sentOffTeamStats.RedCards < teamCap && totalRedCards < matchCap;
+    }
+
+    private static bool IsRedCardChaosMatch(MatchSimulationState simulationState, int minute)
+    {
+        return simulationState.Match.IsRivalryMatch ||
+            (IsMatchTense(simulationState, minute) &&
+                simulationState.Match.WeatherCondition is WeatherCondition.HeavyRain or WeatherCondition.Storm or WeatherCondition.Snow);
     }
 
     private static void ApplyRedCardTacticalReaction(Team sentOffTeam, Team opponentTeam)
@@ -5059,7 +5196,18 @@ public class MatchEngine
         Turnover
     }
 
+    private enum FoulSeverity
+    {
+        Minor,
+        Tactical,
+        Reckless,
+        Dangerous,
+        Dogso,
+        Violent
+    }
+
     private sealed record FoulContext(
+        FoulSeverity Severity,
         bool IsPenalty,
         string PenaltyReason,
         bool DeniesClearChance,
@@ -5112,6 +5260,11 @@ public class MatchEngine
         public int TensionUntilMinute { get; set; }
         public int LastConfrontationMinute { get; set; } = -100;
         public int ConfrontationCount { get; set; }
+        public int LastRedCardMinute { get; set; } = match.Events
+            .Where(matchEvent => matchEvent.EventType == EventType.RedCard)
+            .Select(matchEvent => matchEvent.Minute)
+            .DefaultIfEmpty(-100)
+            .Max();
         public Dictionary<string, int> TeamDefensiveErrorCooldownUntil { get; } = [];
         public Dictionary<string, int> PlayerDefensiveErrorCooldownUntil { get; } = [];
         public Dictionary<string, int> TeamDefensiveErrorCounts { get; } = [];

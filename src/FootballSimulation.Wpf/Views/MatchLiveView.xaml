@@ -597,7 +597,7 @@
                                 Content="&#x23EA;"
                                 ToolTip="Slower"
                                 Click="DecreaseSpeedButton_Click" />
-                        <Border Width="46"
+                        <Border Width="54"
                                 Height="30"
                                 CornerRadius="10"
                                 Background="#DCEBFF"
@@ -936,7 +936,7 @@
                         <Button x:Name="DecreaseSpeedButton"
                                 Content="&#x23EA;"
                                 Click="DecreaseSpeedButton_Click" />
-                        <Border Width="42"
+                        <Border Width="54"
                                 Height="32"
                                 CornerRadius="10"
                                 Background="{DynamicResource AppHighlightBrush}"
