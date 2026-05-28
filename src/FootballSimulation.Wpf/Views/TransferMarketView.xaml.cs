@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -19,6 +20,9 @@ public partial class TransferMarketView : UserControl
     private TransferOffer? _selectedOffer;
     private TransferHistoryItem? _selectedHistoryItem;
     private TransferPlayerDetailPanel? _activeDetailPanel;
+    private Action? _modalPrimaryAction;
+    private Action? _modalSecondaryAction;
+    private Action? _modalCancelAction;
 
     public TransferMarketView(GameFlowState state, Action<UserControl> navigate)
     {
@@ -27,6 +31,7 @@ public partial class TransferMarketView : UserControl
         _navigate = navigate;
         EnsureTransferState();
         InitializeFilterControls();
+        TransferModal.ActionRequested += TransferModal_ActionRequested;
         LoadMarket();
         TransferTabControl.SelectedIndex = 0;
         SyncTransferTabButtons();
@@ -182,10 +187,18 @@ public partial class TransferMarketView : UserControl
         var offerFeeText = (sender as TransferPlayerDetailPanel)?.OfferFeeText ?? _activeDetailPanel?.OfferFeeText ?? string.Empty;
         if (!TryParseMillionAmount(offerFeeText, out var fee))
         {
-            MessageBox.Show("Enter a valid transfer fee in millions.", "Transfer Market", MessageBoxButton.OK, MessageBoxImage.Warning);
+            ShowSimpleTransferModal(
+                "Invalid Offer",
+                "Transfer Market",
+                _selectedListing.Player.Name,
+                CreatePlayerMeta(_selectedListing),
+                "Enter a valid transfer fee in millions.",
+                "The board needs a valid amount before submitting the bid.",
+                "Continue");
             return;
         }
 
+        var listing = _selectedListing;
         var offer = _transferMarketService.MakeUserOffer(
             _state.TransferMarket,
             _state.League,
@@ -194,8 +207,8 @@ public partial class TransferMarketView : UserControl
             fee,
             GetCurrentRound());
 
-        MessageBox.Show(offer.Message, "Transfer Market", MessageBoxButton.OK, MessageBoxImage.Information);
         RefreshAll();
+        ShowOfferOutcomeModal(offer, listing, submittedFee: fee);
     }
 
     private void DetailPanel_ShortlistToggled(object? sender, EventArgs e)
@@ -228,9 +241,56 @@ public partial class TransferMarketView : UserControl
             return;
         }
 
+        if (HasAgreedTransfer(_selectedListing.Player))
+        {
+            ShowSimpleTransferModal(
+                "Transfer Agreed",
+                "Transfer Market",
+                _selectedListing.Player.Name,
+                CreatePlayerMeta(_selectedListing),
+                "This player already has a transfer agreed for the next window.",
+                "The sale status cannot be changed unless the agreement is cancelled.",
+                "Continue");
+            return;
+        }
+
         _selectedListing.Player.IsListedForSale = !_selectedListing.Player.IsListedForSale;
         RefreshAll();
         UpdateActionAvailability();
+    }
+
+    private void DetailPanel_ContractRenewalRequested(object? sender, EventArgs e)
+    {
+        if (_state.TransferMarket is null || _state.League is null || _state.SelectedTeam is null || _selectedListing is null)
+        {
+            return;
+        }
+
+        var panel = sender as TransferPlayerDetailPanel ?? _activeDetailPanel;
+        if (panel is null || !TryParseThousandAmount(panel.RenewalWageText, out var weeklyWage))
+        {
+            ShowSimpleTransferModal(
+                "Invalid Contract Offer",
+                "Contract Renewal",
+                _selectedListing.Player.Name,
+                CreatePlayerMeta(_selectedListing),
+                "Enter a valid weekly wage in thousands.",
+                "The player representative needs a clear wage proposal.",
+                "Continue");
+            return;
+        }
+
+        var result = _transferMarketService.OfferContractExtension(
+            _state.TransferMarket,
+            _state.League.LeagueId,
+            _state.SelectedTeam,
+            _selectedListing.Player,
+            weeklyWage,
+            panel.RenewalYears,
+            panel.RenewalRole,
+            GetCurrentRound());
+        RefreshAll();
+        ShowContractRenewalModal(_selectedListing, result);
     }
 
     private void DetailPanel_AcceptOfferRequested(object? sender, EventArgs e)
@@ -240,8 +300,11 @@ public partial class TransferMarketView : UserControl
             return;
         }
 
-        _transferMarketService.AcceptOffer(_state.TransferMarket, _selectedOffer.OfferId, _state.League, GetCurrentRound());
+        var offer = _selectedOffer;
+        var listing = _selectedListing;
+        _transferMarketService.AcceptOffer(_state.TransferMarket, offer.OfferId, _state.League, GetCurrentRound());
         RefreshAll();
+        ShowOfferOutcomeModal(offer, listing);
     }
 
     private void DetailPanel_RejectOfferRequested(object? sender, EventArgs e)
@@ -251,8 +314,11 @@ public partial class TransferMarketView : UserControl
             return;
         }
 
-        _transferMarketService.RejectOffer(_state.TransferMarket, _selectedOffer.OfferId);
+        var offer = _selectedOffer;
+        var listing = _selectedListing;
+        _transferMarketService.RejectOffer(_state.TransferMarket, offer.OfferId);
         RefreshAll();
+        ShowOfferOutcomeModal(offer, listing);
     }
 
     private void DetailPanel_CounterOfferRequested(object? sender, EventArgs e)
@@ -265,12 +331,22 @@ public partial class TransferMarketView : UserControl
         var counterFeeText = (sender as TransferPlayerDetailPanel)?.CounterFeeText ?? _activeDetailPanel?.CounterFeeText ?? string.Empty;
         if (!TryParseMillionAmount(counterFeeText, out var fee))
         {
-            MessageBox.Show("Enter a valid counter fee in millions.", "Transfer Market", MessageBoxButton.OK, MessageBoxImage.Warning);
+            ShowSimpleTransferModal(
+                "Invalid Counter",
+                "Transfer Negotiation",
+                _selectedOffer.PlayerName,
+                $"{_selectedOffer.FromClubName} → {_selectedOffer.ToClubName}",
+                "Enter a valid counter fee in millions.",
+                "Your negotiation team needs a valid counter amount.",
+                "Continue");
             return;
         }
 
-        _transferMarketService.CounterOffer(_state.TransferMarket, _selectedOffer.OfferId, fee, _state.League, GetCurrentRound());
+        var offer = _selectedOffer;
+        var listing = _selectedListing;
+        _transferMarketService.CounterOffer(_state.TransferMarket, offer.OfferId, fee, _state.League, GetCurrentRound());
         RefreshAll();
+        ShowOfferOutcomeModal(offer, listing, submittedFee: fee);
     }
 
     private void LoadMarket()
@@ -309,6 +385,383 @@ public partial class TransferMarketView : UserControl
         DeadlineTextBlock.Text = windowInfo.IsOpen
             ? $"R{round} · {windowInfo.RoundsRemaining} rounds left"
             : $"R{round}";
+    }
+
+    private void TransferModal_ActionRequested(object? sender, TransferNotificationModalAction action)
+    {
+        var callback = action switch
+        {
+            TransferNotificationModalAction.Primary => _modalPrimaryAction,
+            TransferNotificationModalAction.Secondary => _modalSecondaryAction,
+            TransferNotificationModalAction.Cancel => _modalCancelAction,
+            _ => null
+        };
+
+        _modalPrimaryAction = null;
+        _modalSecondaryAction = null;
+        _modalCancelAction = null;
+        callback?.Invoke();
+    }
+
+    private void ShowTransferModal(
+        TransferNotificationModalContext context,
+        Action? primaryAction = null,
+        Action? secondaryAction = null,
+        Action? cancelAction = null)
+    {
+        _modalPrimaryAction = primaryAction;
+        _modalSecondaryAction = secondaryAction;
+        _modalCancelAction = cancelAction;
+        TransferModal.Show(context);
+    }
+
+    private void ShowOfferOutcomeModal(TransferOffer offer, TransferPlayerListing? listing, decimal? submittedFee = null)
+    {
+        listing ??= TryFindListingForOffer(offer);
+        switch (offer.Status)
+        {
+            case OfferStatus.Countered:
+                ShowTransferModal(
+                    CreateNegotiationModalContext(offer, listing, submittedFee),
+                    primaryAction: () => AcceptOfferFromModal(offer, listing),
+                    secondaryAction: () => OpenOfferInOffersTab(offer),
+                    cancelAction: () => RejectOfferFromModal(offer, listing));
+                break;
+            case OfferStatus.Completed:
+            case OfferStatus.CompletedWhenWindowOpens:
+                ShowTransferModal(CreateCompletedModalContext(offer, listing));
+                break;
+            case OfferStatus.AgreedForNextWindow:
+                ShowTransferModal(CreateAgreementModalContext(offer, listing));
+                break;
+            case OfferStatus.Rejected:
+            case OfferStatus.Withdrawn:
+                ShowTransferModal(CreateFailedModalContext(offer, listing, submittedFee));
+                break;
+            default:
+                ShowTransferModal(CreateSubmittedModalContext(offer, listing, submittedFee));
+                break;
+        }
+    }
+
+    private void AcceptOfferFromModal(TransferOffer offer, TransferPlayerListing? listing)
+    {
+        if (_state.TransferMarket is null || _state.League is null)
+        {
+            return;
+        }
+
+        _transferMarketService.AcceptOffer(_state.TransferMarket, offer.OfferId, _state.League, GetCurrentRound());
+        RefreshAll();
+        ShowOfferOutcomeModal(offer, listing);
+    }
+
+    private void RejectOfferFromModal(TransferOffer offer, TransferPlayerListing? listing)
+    {
+        if (_state.TransferMarket is null)
+        {
+            return;
+        }
+
+        _transferMarketService.RejectOffer(_state.TransferMarket, offer.OfferId);
+        RefreshAll();
+        ShowOfferOutcomeModal(offer, listing);
+    }
+
+    private void OpenOfferInOffersTab(TransferOffer offer)
+    {
+        TransferTabControl.SelectedIndex = 3;
+        SyncTransferTabButtons();
+        RefreshOffers();
+        var row = OffersDataGrid.Items
+            .OfType<TransferOfferRow>()
+            .FirstOrDefault(item => item.Offer.OfferId == offer.OfferId);
+        if (row is not null)
+        {
+            OffersDataGrid.SelectedItem = row;
+            OffersDataGrid.ScrollIntoView(row);
+        }
+    }
+
+    private TransferNotificationModalContext CreateNegotiationModalContext(
+        TransferOffer offer,
+        TransferPlayerListing? listing,
+        decimal? submittedFee)
+    {
+        var playerName = listing?.Player.Name ?? offer.PlayerName;
+        var marketValue = listing is null ? "-" : TransferMarketService.FormatMoney(listing.MarketValue);
+        return CreateModalContext(
+            "Transfer Negotiation",
+            $"{offer.FromClubName} responded to your offer.",
+            playerName,
+            listing is null ? $"{offer.FromClubName} → {offer.ToClubName}" : CreatePlayerMeta(listing),
+            $"{offer.FromClubName} are willing to negotiate.",
+            $"{offer.FromClubName} believe the player is worth more. Accept their valuation or return with another proposal.",
+            listing,
+            offer.FromClubName,
+            offer.FromLeagueId,
+            "Your Offer",
+            TransferMarketService.FormatMoney(submittedFee ?? offer.Fee),
+            "Counter Offer",
+            TransferMarketService.FormatMoney(offer.CounterFee ?? offer.Fee),
+            "Current Wage",
+            PlayerContractService.FormatWage(listing?.WeeklyWage ?? offer.WeeklyWage ?? 0),
+            "Contract",
+            listing?.Player is null ? "-" : PlayerContractService.FormatContractExpiry(listing.Player),
+            "Accept Deal",
+            "Counter Again",
+            "Cancel",
+            "#061226",
+            "#EFF6FF",
+            "#BFDBFE",
+            "#1E3A8A");
+    }
+
+    private TransferNotificationModalContext CreateCompletedModalContext(TransferOffer offer, TransferPlayerListing? listing)
+    {
+        var playerName = listing?.Player.Name ?? offer.PlayerName;
+        var budgetRemaining = GetBudgetRemainingText(offer);
+        return CreateModalContext(
+            "Transfer Completed",
+            "Official club announcement",
+            playerName,
+            listing is null ? $"{offer.FromClubName} → {offer.ToClubName}" : CreatePlayerMeta(listing),
+            $"{playerName} officially joins {offer.ToClubName}.",
+            "Player is excited to join the club. The deal has been added to transfer history.",
+            listing,
+            offer.ToClubName,
+            offer.ToLeagueId,
+            "Transfer Fee",
+            TransferMarketService.FormatMoney(offer.CounterFee ?? offer.Fee),
+            "Contract",
+            listing?.Player is null ? $"{offer.ContractYears} Years" : PlayerContractService.FormatContractExpiry(listing.Player),
+            "Squad Role",
+            PlayerContractService.FormatRole(offer.SquadRole),
+            "Budget Remaining",
+            budgetRemaining,
+            "Continue",
+            string.Empty,
+            string.Empty,
+            "#061226",
+            "#ECFDF5",
+            "#BBF7D0",
+            "#166534");
+    }
+
+    private TransferNotificationModalContext CreateAgreementModalContext(TransferOffer offer, TransferPlayerListing? listing)
+    {
+        var playerName = listing?.Player.Name ?? offer.PlayerName;
+        return CreateModalContext(
+            "Agreement Reached",
+            $"{offer.ToClubName} have secured a future transfer.",
+            playerName,
+            listing is null ? $"{offer.FromClubName} → {offer.ToClubName}" : CreatePlayerMeta(listing),
+            $"{playerName} will join {offer.ToClubName} when the transfer window opens.",
+            "The player remains available for selection until the window opens.",
+            listing,
+            offer.ToClubName,
+            offer.ToLeagueId,
+            "Agreed Fee",
+            TransferMarketService.FormatMoney(offer.CounterFee ?? offer.Fee),
+            "Status",
+            "Agreed for next window",
+            "Current Club",
+            offer.FromClubName,
+            "Buying Club",
+            offer.ToClubName,
+            "Continue",
+            string.Empty,
+            string.Empty,
+            "#0F172A",
+            "#EFF6FF",
+            "#BFDBFE",
+            "#1D4ED8");
+    }
+
+    private TransferNotificationModalContext CreateFailedModalContext(
+        TransferOffer offer,
+        TransferPlayerListing? listing,
+        decimal? submittedFee)
+    {
+        var playerName = listing?.Player.Name ?? offer.PlayerName;
+        var isWithdrawn = offer.Status == OfferStatus.Withdrawn;
+        return CreateModalContext(
+            isWithdrawn ? "Transfer Failed" : "Offer Rejected",
+            $"{offer.FromClubName} responded to the proposal.",
+            playerName,
+            listing is null ? $"{offer.FromClubName} → {offer.ToClubName}" : CreatePlayerMeta(listing),
+            isWithdrawn ? $"{offer.ToClubName} walked away from talks." : $"{offer.FromClubName} rejected the offer immediately.",
+            string.IsNullOrWhiteSpace(offer.Message) ? "The selling club did not feel the bid matched their valuation." : offer.Message,
+            listing,
+            offer.FromClubName,
+            offer.FromLeagueId,
+            "Your Offer",
+            TransferMarketService.FormatMoney(submittedFee ?? offer.CounterFee ?? offer.Fee),
+            "Market Value",
+            listing is null ? "-" : TransferMarketService.FormatMoney(listing.MarketValue),
+            "Asking Price",
+            listing is null ? "-" : TransferMarketService.FormatMoney(listing.AskingPrice),
+            "Contract",
+            listing?.Player is null ? "-" : PlayerContractService.FormatContractExpiry(listing.Player),
+            "Continue",
+            string.Empty,
+            string.Empty,
+            "#7F1D1D",
+            "#FEF2F2",
+            "#FECACA",
+            "#991B1B");
+    }
+
+    private TransferNotificationModalContext CreateSubmittedModalContext(
+        TransferOffer offer,
+        TransferPlayerListing? listing,
+        decimal? submittedFee)
+    {
+        return CreateModalContext(
+            "Offer Submitted",
+            "Transfer Market",
+            listing?.Player.Name ?? offer.PlayerName,
+            listing is null ? $"{offer.FromClubName} → {offer.ToClubName}" : CreatePlayerMeta(listing),
+            string.IsNullOrWhiteSpace(offer.Message) ? "The proposal has been sent." : offer.Message,
+            "The club will continue monitoring the negotiation.",
+            listing,
+            offer.ToClubName,
+            offer.ToLeagueId,
+            "Offer",
+            TransferMarketService.FormatMoney(submittedFee ?? offer.Fee),
+            "Current Wage",
+            PlayerContractService.FormatWage(listing?.WeeklyWage ?? offer.WeeklyWage ?? 0),
+            "Contract",
+            listing?.Player is null ? "-" : PlayerContractService.FormatContractExpiry(listing.Player),
+            "Status",
+            listing?.ContractStatusText ?? "Active",
+            "Continue",
+            string.Empty,
+            string.Empty,
+            "#061226",
+            "#EFF6FF",
+            "#BFDBFE",
+            "#1E3A8A");
+    }
+
+    private void ShowSimpleTransferModal(
+        string title,
+        string subtitle,
+        string playerName,
+        string playerMeta,
+        string story,
+        string message,
+        string primaryButtonText)
+    {
+        ShowTransferModal(CreateModalContext(
+            title,
+            subtitle,
+            playerName,
+            playerMeta,
+            story,
+            message,
+            null,
+            _state.SelectedTeam?.Name ?? string.Empty,
+            _state.League?.LeagueId ?? _state.SelectedLeagueId,
+            string.Empty,
+            string.Empty,
+            string.Empty,
+            string.Empty,
+            string.Empty,
+            string.Empty,
+            string.Empty,
+            string.Empty,
+            primaryButtonText,
+            string.Empty,
+            string.Empty,
+            "#061226",
+            "#EFF6FF",
+            "#BFDBFE",
+            "#1E3A8A"));
+    }
+
+    private void ShowContractRenewalModal(TransferPlayerListing listing, ContractRenewalResult result)
+    {
+        var accepted = result.Accepted;
+        ShowTransferModal(CreateModalContext(
+            accepted ? "Contract Extended" : "Contract Rejected",
+            accepted ? "Club contract office" : "Player representative response",
+            listing.Player.Name,
+            CreatePlayerMeta(listing),
+            result.Message,
+            accepted
+                ? "The squad planning screen has been updated with the new deal."
+                : "Improve the wage, role, or contract length before trying again.",
+            listing,
+            listing.Team.Name,
+            listing.LeagueId,
+            "Weekly Wage",
+            PlayerContractService.FormatWage(result.WeeklyWage),
+            "Contract",
+            $"Expires {result.ContractEndYear}",
+            "Squad Role",
+            PlayerContractService.FormatRole(result.SquadRole),
+            "Status",
+            accepted ? "Accepted" : "Rejected",
+            "Continue",
+            string.Empty,
+            string.Empty,
+            accepted ? "#061226" : "#7F1D1D",
+            accepted ? "#ECFDF5" : "#FEF2F2",
+            accepted ? "#BBF7D0" : "#FECACA",
+            accepted ? "#166534" : "#991B1B"));
+    }
+
+    private TransferNotificationModalContext CreateModalContext(
+        string title,
+        string subtitle,
+        string playerName,
+        string playerMeta,
+        string story,
+        string message,
+        TransferPlayerListing? listing,
+        string clubName,
+        string leagueId,
+        string detailOneLabel,
+        string detailOneValue,
+        string detailTwoLabel,
+        string detailTwoValue,
+        string detailThreeLabel,
+        string detailThreeValue,
+        string detailFourLabel,
+        string detailFourValue,
+        string primaryButtonText,
+        string secondaryButtonText,
+        string cancelButtonText,
+        string headerBrush,
+        string messageBackground,
+        string messageBorderBrush,
+        string messageForeground)
+    {
+        return new TransferNotificationModalContext(
+            title,
+            subtitle,
+            playerName,
+            playerMeta,
+            story,
+            message,
+            listing?.Player is null ? GetDefaultPlayerImagePath() : GetPlayerImagePath(listing.Player),
+            ClubLogoService.GetClubLogoPath(clubName, leagueId),
+            detailOneLabel,
+            detailOneValue,
+            detailTwoLabel,
+            detailTwoValue,
+            detailThreeLabel,
+            detailThreeValue,
+            detailFourLabel,
+            detailFourValue,
+            primaryButtonText,
+            secondaryButtonText,
+            cancelButtonText,
+            ToBrush(headerBrush),
+            ToBrush(messageBackground),
+            ToBrush(messageBorderBrush),
+            ToBrush(messageForeground));
     }
 
     private void RefreshMarketSearch()
@@ -400,7 +853,7 @@ public partial class TransferMarketView : UserControl
                     listing is null ? "-" : listing.Player.OverallRating.ToString(CultureInfo.InvariantCulture),
                     TransferMarketService.FormatMoney(offer.CounterFee ?? offer.Fee),
                     listing is null ? "-" : TransferMarketService.FormatMoney(listing.MarketValue),
-                    offer.Status.ToString(),
+                    FormatOfferStatus(offer.Status),
                     GetOfferStatusBrush(offer.Status));
             })
             .ToList();
@@ -454,6 +907,7 @@ public partial class TransferMarketView : UserControl
             ? new TransferWindowInfo(false, "Window Closed", 0, "No active league.")
             : _transferMarketService.GetWindowInfo(_state.League, GetCurrentRound());
         var isShortlisted = _state.TransferMarket?.ShortlistedPlayerIds.Contains(player.PlayerId, StringComparer.OrdinalIgnoreCase) == true;
+        var status = CreateStatusDisplay(player);
 
         _selectedListing = listing;
         _selectedOffer = offer;
@@ -468,7 +922,10 @@ public partial class TransferMarketView : UserControl
             windowInfo.Tooltip,
             isShortlisted,
             player.IsListedForSale,
-            mode is not TransferDetailMode.History,
+            mode is not TransferDetailMode.History && !(isOwnPlayer && HasAgreedTransfer(player)),
+            status.Text,
+            status.Brush,
+            status.Tooltip,
             recommendationReason,
             offer,
             historyItem));
@@ -507,6 +964,10 @@ public partial class TransferMarketView : UserControl
 
         _state.TransferMarket ??= _transferMarketService.CreateInitialState(_state.League);
         _transferMarketService.BindActiveLeague(_state.TransferMarket, _state.League);
+        if (_state.SelectedTeam is not null)
+        {
+            _transferMarketService.RunAiTransferActivity(_state.TransferMarket, _state.League, _state.SelectedTeam, GetCurrentRound());
+        }
     }
 
     private void InitializeFilterControls()
@@ -596,7 +1057,7 @@ public partial class TransferMarketView : UserControl
     {
         var player = listing.Player;
         var formBadge = PlayerFormBadgeHelper.Create(player.FormStatus);
-        var saleStatus = GetSaleStatus(player);
+        var status = CreateStatusDisplay(player);
         var nationality = PlayerNationalityDisplayService.Resolve(player);
         return new TransferPlayerRow(
             listing,
@@ -613,20 +1074,122 @@ public partial class TransferMarketView : UserControl
             formBadge.Text,
             TransferMarketService.FormatMoney(listing.MarketValue),
             TransferMarketService.FormatMoney(listing.AskingPrice),
-            listing.StatusText,
-            saleStatus,
+            FormatContractYear(player),
+            PlayerContractService.FormatWage(listing.WeeklyWage),
+            listing.ContractStatusText,
+            status.Text,
+            status.Tooltip,
             reason,
             $"{player.PreferredPosition} · Age {player.Age?.ToString(CultureInfo.InvariantCulture) ?? "-"}",
-            GetStatusBrush(listing.StatusText),
+            status.Brush,
             formBadge.Background,
-            formBadge.Foreground,
-            GetSaleBrush(saleStatus),
-            GetSaleTextBrush(saleStatus));
+            formBadge.Foreground);
     }
 
     private static NationalityDisplayInfo ResolveNationality(Player? player, string playerName)
     {
         return PlayerNationalityDisplayService.Resolve(player ?? new Player { Name = playerName });
+    }
+
+    private TransferPlayerListing? TryFindListingForOffer(TransferOffer offer)
+    {
+        if (_state.TransferMarket is null)
+        {
+            return null;
+        }
+
+        return _transferMarketService
+            .GetAllPlayerListings(_state.TransferMarket, _state.League?.PlayerStats)
+            .FirstOrDefault(listing => listing.Player.PlayerId.Equals(offer.PlayerId, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static string CreatePlayerMeta(TransferPlayerListing listing)
+    {
+        var age = listing.Player.Age?.ToString(CultureInfo.InvariantCulture) ?? "-";
+        return $"{listing.Player.PreferredPosition} · {age} · {listing.Team.Name}";
+    }
+
+    private static string FormatContractYear(Player player)
+    {
+        return player.ContractEndYear?.ToString(CultureInfo.InvariantCulture) ?? "-";
+    }
+
+    private string GetBudgetRemainingText(TransferOffer offer)
+    {
+        if (_state.TransferMarket is null || _state.SelectedTeam is null || _state.League is null ||
+            !offer.ToClubName.Equals(_state.SelectedTeam.Name, StringComparison.OrdinalIgnoreCase))
+        {
+            return "-";
+        }
+
+        var finance = _transferMarketService.GetFinance(_state.TransferMarket, _state.League.LeagueId, _state.SelectedTeam);
+        return TransferMarketService.FormatMoney(finance.AvailableTransferBudget);
+    }
+
+    private static string CreateSquadRoleText(Player? player)
+    {
+        return player?.OverallRating switch
+        {
+            >= 86 => "Key Player",
+            >= 80 => "Important Player",
+            >= 74 => "Rotation Player",
+            _ => "Squad Player"
+        };
+    }
+
+    private static string GetPlayerImagePath(Player player)
+    {
+        var playerImage = $"pack://application:,,,/Assets/Players/{CreatePlayerImageSlug(player.Name)}.png";
+        return ResourceExists(playerImage) ? playerImage : GetDefaultPlayerImagePath();
+    }
+
+    private static string GetDefaultPlayerImagePath()
+    {
+        const string defaultImage = "pack://application:,,,/Assets/Players/default.png";
+        return ResourceExists(defaultImage) ? defaultImage : string.Empty;
+    }
+
+    private static string CreatePlayerImageSlug(string playerName)
+    {
+        var normalized = playerName.Normalize(NormalizationForm.FormD);
+        var builder = new StringBuilder();
+        var previousWasHyphen = false;
+
+        foreach (var character in normalized)
+        {
+            if (CharUnicodeInfo.GetUnicodeCategory(character) == UnicodeCategory.NonSpacingMark)
+            {
+                continue;
+            }
+
+            if (char.IsLetterOrDigit(character))
+            {
+                builder.Append(char.ToLowerInvariant(character));
+                previousWasHyphen = false;
+                continue;
+            }
+
+            if (!previousWasHyphen)
+            {
+                builder.Append('-');
+                previousWasHyphen = true;
+            }
+        }
+
+        var slug = builder.ToString().Trim('-');
+        return string.IsNullOrWhiteSpace(slug) ? "default" : slug;
+    }
+
+    private static bool ResourceExists(string packUri)
+    {
+        try
+        {
+            return Application.GetResourceStream(new Uri(packUri, UriKind.Absolute)) is not null;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     private void ShowEmptyPlayerDetails()
@@ -696,6 +1259,18 @@ public partial class TransferMarketView : UserControl
         return amount > 0;
     }
 
+    private static bool TryParseThousandAmount(string text, out decimal amount)
+    {
+        amount = 0;
+        if (!decimal.TryParse(text, NumberStyles.Number, CultureInfo.InvariantCulture, out var thousands))
+        {
+            return false;
+        }
+
+        amount = Math.Max(0, thousands * 1_000m);
+        return amount > 0;
+    }
+
     private static ComboBoxItem CreateComboItem(string label, string tag)
     {
         return new ComboBoxItem { Content = label, Tag = tag };
@@ -713,14 +1288,78 @@ public partial class TransferMarketView : UserControl
         return Enum.TryParse<PlayerFormStatus>(value, out var status) ? status : null;
     }
 
+    private StatusDisplay CreateStatusDisplay(Player player)
+    {
+        var secondaryStatuses = GetSecondaryStatuses(player).ToList();
+        var primaryStatus = secondaryStatuses.FirstOrDefault() ?? "Available";
+        var displayStatus = GetCompactStatusText(primaryStatus);
+        var tooltip = secondaryStatuses.Count > 1
+            ? $"Also: {string.Join(", ", secondaryStatuses.Skip(1))}"
+            : primaryStatus;
+
+        return new StatusDisplay(displayStatus, GetStatusBrush(primaryStatus), tooltip);
+    }
+
+    private static string GetCompactStatusText(string status)
+    {
+        return status switch
+        {
+            "Offer Received" => "Offer",
+            "Transfer Agreed" => "Agreed",
+            _ => status
+        };
+    }
+
+    private IEnumerable<string> GetSecondaryStatuses(Player player)
+    {
+        if (player.IsInjured || player.InjuryRecoveryMatches > 0)
+        {
+            yield return "Injured";
+        }
+
+        if (player.IsSuspended || player.IsSentOff)
+        {
+            yield return "Banned";
+        }
+
+        if (HasAgreedTransfer(player))
+        {
+            yield return "Transfer Agreed";
+        }
+
+        if (HasActiveAiOffer(player))
+        {
+            yield return "Offer Received";
+        }
+
+        if (HasActiveUserNegotiation(player) || player.TransferStatus == PlayerTransferStatus.Negotiating)
+        {
+            yield return "Negotiating";
+        }
+
+        if (player.TransferStatus == PlayerTransferStatus.Listed)
+        {
+            yield return "Listed";
+        }
+
+        if (player.RejectTransferOffers || player.TransferStatus == PlayerTransferStatus.Unavailable)
+        {
+            yield return "Untouchable";
+        }
+    }
+
     private static string GetStatusBrush(string status)
     {
         return status switch
         {
-            "Listed" => "#F59E0B",
-            "Negotiating" => "#8B5CF6",
-            "Unavailable" => "#64748B",
+            "Available" => "#10B981",
+            "Untouchable" => "#061226",
+            "Listed" => "#2563EB",
+            "Offer Received" => "#8B5CF6",
+            "Negotiating" => "#F59E0B",
             "Injured" => "#EF4444",
+            "Banned" => "#991B1B",
+            "Transfer Agreed" => "#0EA5E9",
             _ => "#10B981"
         };
     }
@@ -729,36 +1368,47 @@ public partial class TransferMarketView : UserControl
     {
         return status switch
         {
-            OfferStatus.Completed or OfferStatus.Accepted => "#10B981",
+            OfferStatus.Completed or OfferStatus.CompletedWhenWindowOpens or OfferStatus.Accepted => "#10B981",
+            OfferStatus.AgreedForNextWindow => "#0EA5E9",
             OfferStatus.Countered => "#8B5CF6",
             OfferStatus.Rejected or OfferStatus.Withdrawn => "#EF4444",
+            OfferStatus.PendingUntilWindowOpens => "#F97316",
             _ => "#2563EB"
         };
     }
 
-    private static string GetSaleStatus(Player player)
+    private static string FormatOfferStatus(OfferStatus status)
     {
-        return player.TransferStatus switch
+        return status switch
         {
-            PlayerTransferStatus.Listed => "Listed",
-            PlayerTransferStatus.Negotiating => "Offer Received",
-            _ => "Not Listed"
+            OfferStatus.PendingUntilWindowOpens => "Pending Window",
+            OfferStatus.AgreedForNextWindow => "Agreed for next window",
+            OfferStatus.CompletedWhenWindowOpens => "Completed",
+            _ => status.ToString()
         };
     }
 
-    private static string GetSaleBrush(string saleStatus)
+    private bool HasActiveAiOffer(Player player)
     {
-        return saleStatus switch
-        {
-            "Listed" => "#F59E0B",
-            "Offer Received" => "#8B5CF6",
-            _ => "#E5E7EB"
-        };
+        return _state.TransferMarket?.Offers.Any(offer =>
+            !offer.IsUserOffer &&
+            offer.PlayerId.Equals(player.PlayerId, StringComparison.OrdinalIgnoreCase) &&
+            offer.Status is OfferStatus.Pending or OfferStatus.PendingUntilWindowOpens or OfferStatus.Countered) == true;
     }
 
-    private static string GetSaleTextBrush(string saleStatus)
+    private bool HasActiveUserNegotiation(Player player)
     {
-        return saleStatus == "Not Listed" ? "#334155" : "#FFFFFF";
+        return _state.TransferMarket?.Offers.Any(offer =>
+            offer.IsUserOffer &&
+            offer.PlayerId.Equals(player.PlayerId, StringComparison.OrdinalIgnoreCase) &&
+            offer.Status is OfferStatus.Pending or OfferStatus.PendingUntilWindowOpens or OfferStatus.Countered) == true;
+    }
+
+    private bool HasAgreedTransfer(Player player)
+    {
+        return _state.TransferMarket?.Offers.Any(offer =>
+            offer.PlayerId.Equals(player.PlayerId, StringComparison.OrdinalIgnoreCase) &&
+            offer.Status == OfferStatus.AgreedForNextWindow) == true;
     }
 
     private static Brush ToBrush(string hex)
@@ -781,17 +1431,20 @@ public partial class TransferMarketView : UserControl
         string Form,
         string MarketValueText,
         string AskingPriceText,
+        string ContractText,
+        string WageText,
+        string ContractStatusText,
         string Status,
-        string SaleStatus,
+        string StatusTooltip,
         string Reason,
         string PlayerMeta,
         string StatusBrush,
         string FormBrush,
-        string FormTextBrush,
-        string SaleBrush,
-        string SaleTextBrush);
+        string FormTextBrush);
 
     private record TraitBadgeRow(string Icon, string Label, string Tooltip);
+
+    private record StatusDisplay(string Text, string Brush, string Tooltip);
 
     private record TransferOfferRow(
         TransferOffer Offer,

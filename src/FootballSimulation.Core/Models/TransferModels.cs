@@ -18,13 +18,25 @@ public enum PlayerRole
     Backup
 }
 
+public enum PlayerContractStatus
+{
+    Active,
+    ExpiringSoon,
+    PreContractEligible,
+    Expired,
+    FreeAgent
+}
+
 public enum OfferStatus
 {
     Pending,
+    PendingUntilWindowOpens,
     Accepted,
     Rejected,
     Countered,
     Withdrawn,
+    AgreedForNextWindow,
+    CompletedWhenWindowOpens,
     Completed
 }
 
@@ -48,8 +60,10 @@ public class ClubFinance
     public decimal ClubWageBudget { get; set; }
     public decimal TransferSpent { get; set; }
     public decimal TransferIncome { get; set; }
+    public decimal WageSpent { get; set; }
 
     public decimal AvailableTransferBudget => Math.Max(0, ClubTransferBudget + TransferIncome - TransferSpent);
+    public decimal AvailableWageBudget => Math.Max(0, ClubWageBudget - WageSpent);
 }
 
 public class TransferOffer
@@ -63,8 +77,13 @@ public class TransferOffer
     public string ToClubName { get; set; } = string.Empty;
     public decimal Fee { get; set; }
     public decimal? CounterFee { get; set; }
+    public decimal? WeeklyWage { get; set; }
+    public int ContractYears { get; set; } = 5;
+    public PlayerRole SquadRole { get; set; } = PlayerRole.Rotation;
     public OfferStatus Status { get; set; } = OfferStatus.Pending;
     public int CreatedRound { get; set; }
+    public int? AgreementRound { get; set; }
+    public int? CompletedRound { get; set; }
     public bool IsUserOffer { get; set; }
     public string Message { get; set; } = string.Empty;
 }
@@ -80,6 +99,9 @@ public class TransferHistoryItem
     public string ToLeagueId { get; set; } = string.Empty;
     public string ToClubName { get; set; } = string.Empty;
     public decimal Fee { get; set; }
+    public decimal? WeeklyWage { get; set; }
+    public int? ContractEndYear { get; set; }
+    public PlayerRole? SquadRole { get; set; }
     public string Type { get; set; } = "Permanent";
 }
 
@@ -110,6 +132,7 @@ public class TransferMarketState
     public List<TransferNotification> Inbox { get; set; } = [];
     public List<TransferHistoryItem> TransferHistory { get; set; } = [];
     public List<string> ShortlistedPlayerIds { get; set; } = [];
+    public List<Player> FreeAgents { get; set; } = [];
     public int LastAiActivityRound { get; set; }
 }
 
@@ -134,7 +157,18 @@ public record TransferPlayerListing(
     string LeagueName,
     decimal MarketValue,
     decimal AskingPrice,
-    string StatusText);
+    string StatusText,
+    decimal WeeklyWage,
+    int? ContractEndYear,
+    int YearsRemaining,
+    string ContractStatusText);
+
+public record ContractRenewalResult(
+    bool Accepted,
+    string Message,
+    decimal WeeklyWage,
+    int ContractEndYear,
+    PlayerRole SquadRole);
 
 public record TransferRecommendation(
     TransferPlayerListing Listing,

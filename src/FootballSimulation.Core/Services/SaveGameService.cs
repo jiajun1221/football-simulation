@@ -319,6 +319,8 @@ public class SaveGameService
             }
         }
 
+        EnsureCompleteDoubleRoundRobinFixtures(data, teamsByName);
+
         foreach (var match in data.MatchHistory)
         {
             RehydrateMatchReferences(match, teamsByName);
@@ -326,6 +328,51 @@ public class SaveGameService
 
         RehydrateTransferMarketReferences(data);
         data.MatchHistory = CreateMatchHistory(data.Fixtures);
+    }
+
+    private static void EnsureCompleteDoubleRoundRobinFixtures(
+        SaveGameData data,
+        IReadOnlyDictionary<string, Team> teamsByName)
+    {
+        if (data.Teams.Count < 2)
+        {
+            return;
+        }
+
+        var expectedRoundCount = (data.Teams.Count - 1) * 2;
+        var expectedFixtureCount = data.Teams.Count * (data.Teams.Count - 1);
+        if (data.Fixtures.Count >= expectedFixtureCount &&
+            data.Fixtures.Select(fixture => fixture.RoundNumber).DefaultIfEmpty(0).Max() >= expectedRoundCount)
+        {
+            return;
+        }
+
+        var existingKeys = data.Fixtures
+            .Select(CreateFixtureKey)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var generatedFixtures = new LeagueScheduleService().GenerateFixtures(data.Teams);
+        foreach (var generatedFixture in generatedFixtures)
+        {
+            generatedFixture.HomeTeam = GetCanonicalTeam(teamsByName, generatedFixture.HomeTeam);
+            generatedFixture.AwayTeam = GetCanonicalTeam(teamsByName, generatedFixture.AwayTeam);
+            if (!existingKeys.Add(CreateFixtureKey(generatedFixture)))
+            {
+                continue;
+            }
+
+            data.Fixtures.Add(generatedFixture);
+        }
+
+        data.Fixtures = data.Fixtures
+            .OrderBy(fixture => fixture.RoundNumber)
+            .ThenBy(fixture => fixture.HomeTeam.Name)
+            .ThenBy(fixture => fixture.AwayTeam.Name)
+            .ToList();
+    }
+
+    private static string CreateFixtureKey(Fixture fixture)
+    {
+        return $"{fixture.RoundNumber}|{fixture.HomeTeam.Name}|{fixture.AwayTeam.Name}";
     }
 
     private static void BackfillPlayerDataFromLeagueData(SaveGameData data)
@@ -372,6 +419,7 @@ public class SaveGameService
                 player.Age ??= sourcePlayer?.Age ?? EstimateAge(player);
                 if (sourcePlayer is null)
                 {
+                    PlayerContractService.EnsureContract(player, leagueId);
                     if (PlayerNationalityDataService.IsMissingOrDefault(player))
                     {
                         _ = PlayerNationalityDataService.TryApply(player);
@@ -379,6 +427,14 @@ public class SaveGameService
 
                     continue;
                 }
+
+                PlayerContractService.ApplyContractData(
+                    player,
+                    leagueId,
+                    sourcePlayer.ContractEndYear,
+                    sourcePlayer.WeeklyWage,
+                    sourcePlayer.ReleaseClause,
+                    sourcePlayer.ContractStatus);
 
                 if (PlayerNationalityDataService.IsMissingOrDefault(player))
                 {

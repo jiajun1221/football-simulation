@@ -17,18 +17,26 @@ public partial class TransferPlayerDetailPanel : UserControl
     public event EventHandler? AcceptOfferRequested;
     public event EventHandler? RejectOfferRequested;
     public event EventHandler? CounterOfferRequested;
+    public event EventHandler? ContractRenewalRequested;
 
     private bool _usesTransferListToggle;
 
     public TransferPlayerDetailPanel()
     {
         InitializeComponent();
+        InitializeContractControls();
         ShowEmpty();
     }
 
     public string OfferFeeText => OfferFeeTextBox.Text;
 
     public string CounterFeeText => CounterFeeTextBox.Text;
+
+    public string RenewalWageText => RenewalWageTextBox.Text;
+
+    public int RenewalYears => RenewalYearsComboBox.SelectedItem is ComboBoxItem { Tag: int years } ? years : 3;
+
+    public PlayerRole RenewalRole => RenewalRoleComboBox.SelectedItem is ComboBoxItem { Tag: PlayerRole role } ? role : PlayerRole.Rotation;
 
     public void ShowEmpty()
     {
@@ -60,11 +68,29 @@ public partial class TransferPlayerDetailPanel : UserControl
         FormBadgeTextBlock.Foreground = ToBrush(formBadge.Foreground);
         FormBadgeTextBlock.Text = formBadge.Text;
 
-        StatusBadgeBorder.Background = ToBrush(GetStatusBrush(listing.StatusText));
-        StatusBadgeTextBlock.Text = listing.StatusText;
+        StatusBadgeBorder.Background = ToBrush(context.StatusBrush);
+        StatusBadgeBorder.ToolTip = context.StatusTooltip;
+        StatusBadgeTextBlock.Text = context.StatusText;
+        ContractBadgeTextBlock.Text = PlayerContractService.FormatContractExpiry(player);
+        WageBadgeTextBlock.Text = PlayerContractService.FormatWage(listing.WeeklyWage);
+        ContractExpiryTextBlock.Text = PlayerContractService.FormatContractExpiry(player);
+        ContractWageTextBlock.Text = PlayerContractService.FormatWage(listing.WeeklyWage);
+        ContractRoleTextBlock.Text = PlayerContractService.FormatRole(player.Role);
+        ReleaseClauseBadgeBorder.Visibility = player.ReleaseClause is > 0 ? Visibility.Visible : Visibility.Collapsed;
+        ReleaseClauseTextBlock.Text = player.ReleaseClause is > 0 ? $"Release Clause {TransferMarketService.FormatMoney(player.ReleaseClause.Value)}" : string.Empty;
+        ContractWarningTextBlock.Visibility = context.IsOwnPlayer && player.ContractStatus is PlayerContractStatus.ExpiringSoon or PlayerContractStatus.PreContractEligible
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+        ContractWarningTextBlock.Text = player.ContractStatus == PlayerContractStatus.PreContractEligible
+            ? "Contract warning: this player can now be approached on a pre-contract."
+            : "Contract warning: this player's deal is expiring soon.";
         MarketValueTextBlock.Text = TransferMarketService.FormatMoney(listing.MarketValue);
         PriceLabelTextBlock.Text = context.Mode is TransferDetailMode.Squad ? "Sale Price" : "Asking Price";
         PriceTextBlock.Text = TransferMarketService.FormatMoney(listing.AskingPrice);
+        var difficulty = CreateNegotiationDifficulty(listing);
+        NegotiationDifficultyTextBlock.Text = difficulty.Label;
+        NegotiationDifficultyBadgeBorder.Background = ToBrush(difficulty.Brush);
+        NegotiationDifficultyBadgeBorder.ToolTip = difficulty.Tooltip;
         GoalsTextBlock.Text = (stat?.Goals ?? 0).ToString(CultureInfo.InvariantCulture);
         AssistsTextBlock.Text = (stat?.Assists ?? 0).ToString(CultureInfo.InvariantCulture);
         MatchesTextBlock.Text = (stat?.Appearances ?? 0).ToString(CultureInfo.InvariantCulture);
@@ -74,6 +100,9 @@ public partial class TransferPlayerDetailPanel : UserControl
         TraitsItemsControl.ItemsSource = CreateTraitBadges(player);
         AttributeItemsControl.ItemsSource = CreateAttributeRows(player);
         OfferFeeTextBox.Text = (listing.AskingPrice / 1_000_000m).ToString("0.#", CultureInfo.InvariantCulture);
+        RenewalWageTextBox.Text = ((listing.WeeklyWage * 1.10m) / 1_000m).ToString("0", CultureInfo.InvariantCulture);
+        SelectRenewalYears(PlayerContractService.GetYearsRemaining(player) <= 1 ? 4 : 3);
+        SelectRenewalRole(player.Role);
         CounterFeeTextBox.Text = context.Offer is null
             ? string.Empty
             : ((context.Offer.CounterFee ?? context.Offer.Fee) / 1_000_000m).ToString("0.#", CultureInfo.InvariantCulture);
@@ -99,7 +128,13 @@ public partial class TransferPlayerDetailPanel : UserControl
         {
             OfferInfoPanel.Visibility = Visibility.Visible;
             OfferInfoTitleTextBlock.Text = "Offer Details";
-            OfferInfoTextBlock.Text = $"{context.Offer.FromClubName} offered {TransferMarketService.FormatMoney(context.Offer.CounterFee ?? context.Offer.Fee)} to {context.Offer.ToClubName}.";
+            OfferInfoTextBlock.Text = context.Offer.Status switch
+            {
+                OfferStatus.PendingUntilWindowOpens => $"{context.Offer.ToClubName} want to sign {context.Offer.PlayerName} when the transfer window opens.",
+                OfferStatus.AgreedForNextWindow => "Transfer will complete when the transfer window opens.",
+                OfferStatus.CompletedWhenWindowOpens => $"{context.Offer.PlayerName} joined {context.Offer.ToClubName} when the transfer window opened.",
+                _ => $"{context.Offer.FromClubName} offered {TransferMarketService.FormatMoney(context.Offer.CounterFee ?? context.Offer.Fee)} to {context.Offer.ToClubName}."
+            };
             PriceLabelTextBlock.Text = "Offer Amount";
             PriceTextBlock.Text = TransferMarketService.FormatMoney(context.Offer.CounterFee ?? context.Offer.Fee);
             return;
@@ -120,7 +155,7 @@ public partial class TransferPlayerDetailPanel : UserControl
         TransferActionPanel.Visibility = context.Mode is TransferDetailMode.Market or TransferDetailMode.Scout
             ? Visibility.Visible
             : Visibility.Collapsed;
-        SquadActionPanel.Visibility = Visibility.Collapsed;
+        SquadActionPanel.Visibility = context.Mode is TransferDetailMode.Squad && context.IsOwnPlayer ? Visibility.Visible : Visibility.Collapsed;
         OfferActionPanel.Visibility = context.Mode is TransferDetailMode.Offers ? Visibility.Visible : Visibility.Collapsed;
 
         var tooltip = context.IsTransferWindowOpen ? null : context.TransferWindowTooltip;
@@ -129,19 +164,27 @@ public partial class TransferPlayerDetailPanel : UserControl
             tooltip = "This player is already in your squad";
         }
 
+        var canRespondToOffer = context.Offer is not null &&
+            context.Offer.Status is OfferStatus.Pending or OfferStatus.PendingUntilWindowOpens or OfferStatus.Countered;
+        var isPreWindowAiOffer = context.Offer is { IsUserOffer: false, Status: OfferStatus.PendingUntilWindowOpens or OfferStatus.Countered } &&
+            !context.IsTransferWindowOpen;
+
         MakeOfferButton.IsEnabled = context.IsTransferWindowOpen && !context.IsOwnPlayer;
         OfferFeeTextBox.IsEnabled = MakeOfferButton.IsEnabled;
-        AcceptOfferButton.IsEnabled = context.IsTransferWindowOpen && context.Offer is not null;
-        RejectOfferButton.IsEnabled = context.IsTransferWindowOpen && context.Offer is not null;
-        CounterOfferButton.IsEnabled = context.IsTransferWindowOpen && context.Offer is not null;
-        CounterFeeTextBox.IsEnabled = context.IsTransferWindowOpen && context.Offer is not null;
+        AcceptOfferButton.Content = isPreWindowAiOffer ? "Accept Agreement" : "Accept";
+        AcceptOfferButton.Width = isPreWindowAiOffer ? 142 : 90;
+        AcceptOfferButton.IsEnabled = canRespondToOffer && (context.IsTransferWindowOpen || !context.Offer!.IsUserOffer);
+        RejectOfferButton.IsEnabled = canRespondToOffer;
+        CounterOfferButton.IsEnabled = canRespondToOffer;
+        CounterFeeTextBox.IsEnabled = canRespondToOffer;
 
         MakeOfferButton.ToolTip = tooltip;
         OfferFeeTextBox.ToolTip = tooltip ?? "Offer fee in millions";
-        AcceptOfferButton.ToolTip = context.IsTransferWindowOpen ? null : context.TransferWindowTooltip;
-        RejectOfferButton.ToolTip = context.IsTransferWindowOpen ? null : context.TransferWindowTooltip;
-        CounterOfferButton.ToolTip = context.IsTransferWindowOpen ? null : context.TransferWindowTooltip;
-        CounterFeeTextBox.ToolTip = context.IsTransferWindowOpen ? "Counter fee in millions" : context.TransferWindowTooltip;
+        AcceptOfferButton.ToolTip = isPreWindowAiOffer ? "Agree now; transfer completes when the window opens." : context.IsTransferWindowOpen ? null : context.TransferWindowTooltip;
+        RejectOfferButton.ToolTip = canRespondToOffer ? null : "Offer is no longer active.";
+        CounterOfferButton.ToolTip = canRespondToOffer ? null : "Offer is no longer active.";
+        CounterFeeTextBox.ToolTip = canRespondToOffer ? "Counter fee in millions" : "Offer is no longer active.";
+        RenewContractButton.IsEnabled = context.Mode is TransferDetailMode.Squad && context.IsOwnPlayer;
     }
 
     private void UpdateCornerAction(TransferPlayerDetailContext context)
@@ -215,6 +258,53 @@ public partial class TransferPlayerDetailPanel : UserControl
         CounterOfferRequested?.Invoke(this, EventArgs.Empty);
     }
 
+    private void RenewContractButton_Click(object sender, RoutedEventArgs e)
+    {
+        ContractRenewalRequested?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void InitializeContractControls()
+    {
+        RenewalYearsComboBox.Items.Clear();
+        foreach (var years in Enumerable.Range(1, 5))
+        {
+            RenewalYearsComboBox.Items.Add(new ComboBoxItem { Content = $"{years} Years", Tag = years });
+        }
+
+        RenewalRoleComboBox.Items.Clear();
+        foreach (var role in Enum.GetValues<PlayerRole>())
+        {
+            RenewalRoleComboBox.Items.Add(new ComboBoxItem { Content = PlayerContractService.FormatRole(role), Tag = role });
+        }
+
+        RenewalYearsComboBox.SelectedIndex = 2;
+        RenewalRoleComboBox.SelectedIndex = 2;
+    }
+
+    private void SelectRenewalYears(int years)
+    {
+        foreach (ComboBoxItem item in RenewalYearsComboBox.Items)
+        {
+            if (item.Tag is int value && value == years)
+            {
+                RenewalYearsComboBox.SelectedItem = item;
+                return;
+            }
+        }
+    }
+
+    private void SelectRenewalRole(PlayerRole role)
+    {
+        foreach (ComboBoxItem item in RenewalRoleComboBox.Items)
+        {
+            if (item.Tag is PlayerRole value && value == role)
+            {
+                RenewalRoleComboBox.SelectedItem = item;
+                return;
+            }
+        }
+    }
+
     private static IEnumerable<TraitBadgeRow> CreateTraitBadges(Player player)
     {
         if (player.Traits.Count == 0)
@@ -242,15 +332,16 @@ public partial class TransferPlayerDetailPanel : UserControl
         ];
     }
 
-    private static string GetStatusBrush(string status)
+    private static NegotiationDifficulty CreateNegotiationDifficulty(TransferPlayerListing listing)
     {
-        return status switch
+        var ratio = listing.MarketValue <= 0 ? 1m : listing.AskingPrice / listing.MarketValue;
+        return ratio switch
         {
-            "Listed" => "#F59E0B",
-            "Negotiating" => "#8B5CF6",
-            "Unavailable" => "#64748B",
-            "Injured" => "#EF4444",
-            _ => "#10B981"
+            <= 1.05m => new NegotiationDifficulty("Easy", "#10B981", "Seller is close to market value."),
+            <= 1.20m => new NegotiationDifficulty("Balanced", "#2563EB", "Seller expects a fair market offer."),
+            <= 1.35m => new NegotiationDifficulty("Expensive", "#F59E0B", "Seller will likely counter fair offers."),
+            <= 1.55m => new NegotiationDifficulty("Very Expensive", "#EA580C", "Seller values the player well above market."),
+            _ => new NegotiationDifficulty("Untouchable", "#061226", "Seller is strongly resisting a transfer.")
         };
     }
 
@@ -261,6 +352,7 @@ public partial class TransferPlayerDetailPanel : UserControl
 
     private record TraitBadgeRow(string Icon, string Label, string Tooltip);
     private record AttributeRow(string Icon, string Label, string Value);
+    private record NegotiationDifficulty(string Label, string Brush, string Tooltip);
 }
 
 public enum TransferDetailMode
@@ -282,6 +374,9 @@ public sealed record TransferPlayerDetailContext(
     bool IsShortlisted,
     bool IsListedForSale,
     bool CanToggleShortlist,
+    string StatusText,
+    string StatusBrush,
+    string StatusTooltip,
     string? RecommendationReason = null,
     TransferOffer? Offer = null,
     TransferHistoryItem? HistoryItem = null);

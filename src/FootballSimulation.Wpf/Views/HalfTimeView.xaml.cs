@@ -179,8 +179,26 @@ public partial class HalfTimeView : UserControl
             return remainingPlayers.FirstOrDefault(PositionSuitabilityService.IsGoalkeeperCapable);
         }
 
-        return remainingPlayers.FirstOrDefault(player => !PositionSuitabilityService.IsGoalkeeperCapable(player)) ??
-            remainingPlayers.FirstOrDefault();
+        var selectedPlayer = remainingPlayers
+            .Where(player => !PositionSuitabilityService.IsGoalkeeperCapable(player))
+            .Select(player => new
+            {
+                Player = player,
+                Compatibility = PositionCompatibilityService.GetCompatibilityScore(player, normalizedSlot)
+            })
+            .Where(candidate => candidate.Compatibility > PositionCompatibilityService.Impossible)
+            .OrderByDescending(candidate => candidate.Compatibility)
+            .ThenByDescending(candidate => candidate.Player.OverallRating)
+            .ThenBy(candidate => candidate.Player.SquadNumber <= 0 ? int.MaxValue : candidate.Player.SquadNumber)
+            .Select(candidate => candidate.Player)
+            .FirstOrDefault();
+
+        if (selectedPlayer is null)
+        {
+            Debug.WriteLine($"[LineupWarning] No compatible player available for {normalizedSlot} pitch slot.");
+        }
+
+        return selectedPlayer;
     }
 
     private static double GetClampedCanvasPosition(double canvasSize, double normalizedPosition, double elementSize)
@@ -1313,6 +1331,7 @@ public partial class HalfTimeView : UserControl
         {
             var selectedPlayer = remainingPlayers
                 .Where(player => CanPlayerOccupySlot(player, slot.ExactPosition))
+                .Where(player => GetSlotFitScore(player, slot.ExactPosition) > PositionCompatibilityService.Impossible)
                 .OrderByDescending(player => GetSlotFitScore(player, slot.ExactPosition))
                 .ThenByDescending(GetOverallRating)
                 .ThenBy(player => player.SquadNumber)
@@ -1334,20 +1353,7 @@ public partial class HalfTimeView : UserControl
 
     private static int GetSlotFitScore(Player player, string exactPosition)
     {
-        PositionSuitabilityService.EnsurePositionMetadata(player);
-        var normalizedSlot = PositionSuitabilityService.NormalizeExactPosition(exactPosition);
-
-        if (player.PreferredPosition == normalizedSlot)
-        {
-            return 1000;
-        }
-
-        if (player.SecondaryPositions.Contains(normalizedSlot))
-        {
-            return 1000;
-        }
-
-        return player.Position == GetGenericPositionForSlot(normalizedSlot) ? 600 : 100;
+        return PositionCompatibilityService.GetCompatibilityScore(player, exactPosition);
     }
 
     private static bool CanPlayerOccupySlot(Player player, string exactPosition)

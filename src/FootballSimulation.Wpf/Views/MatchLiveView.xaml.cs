@@ -58,6 +58,7 @@ public partial class MatchLiveView : UserControl
     private bool _isCompactLiveMatchView;
     private bool _hasStoredExpandedWindowSize;
     private bool _isCancellingPendingSubstitution;
+    private bool _hasLoggedMinute24OpponentStamina;
     private Player? _selectedStarterForSubstitution;
     private Player? _selectedBenchForSubstitution;
     private Player? _mandatoryInjurySubstitutionPlayer;
@@ -1699,6 +1700,7 @@ public partial class MatchLiveView : UserControl
 
         SyncTeamLivePlayerStamina(_state.CurrentMatch.HomeTeam);
         SyncTeamLivePlayerStamina(_state.CurrentMatch.AwayTeam);
+        LogMinute24OpponentStaminaDebug();
     }
 
     private void SyncTeamLivePlayerStamina(Team team)
@@ -1728,6 +1730,30 @@ public partial class MatchLiveView : UserControl
         stats.SetStaminaPercent(fallbackStamina ?? GetStaminaPercentage(player));
         _livePlayerStatsById[playerId] = stats;
         return stats;
+    }
+
+    private void LogMinute24OpponentStaminaDebug()
+    {
+        if (_hasLoggedMinute24OpponentStamina ||
+            _state.CurrentMatch is null ||
+            _state.SelectedTeam is null ||
+            _state.CurrentMatch.CurrentMinute != 24)
+        {
+            return;
+        }
+
+        var opponent = string.Equals(_state.CurrentMatch.HomeTeam.Name, _state.SelectedTeam.Name, StringComparison.OrdinalIgnoreCase)
+            ? _state.CurrentMatch.AwayTeam
+            : _state.CurrentMatch.HomeTeam;
+
+        foreach (var player in opponent.Players.Where(player => player.IsOnPitch && !player.IsSentOff))
+        {
+            var stats = GetOrCreateLivePlayerStats(opponent, player, fallbackStamina: GetStaminaPercentage(player));
+            System.Diagnostics.Debug.WriteLine(
+                $"[StaminaDebug] Minute 24 | Opponent={opponent.Name} | Player={player.Name} | StaminaPercent={stats.StaminaPercent:0} | BarWidth={stats.StaminaBarWidth:0.0}");
+        }
+
+        _hasLoggedMinute24OpponentStamina = true;
     }
 
     private DisplayedPitchStats GetDisplayedPitchStats(string playerKey)
@@ -1804,8 +1830,26 @@ public partial class MatchLiveView : UserControl
             return remainingPlayers.FirstOrDefault(PositionSuitabilityService.IsGoalkeeperCapable);
         }
 
-        return remainingPlayers.FirstOrDefault(player => !PositionSuitabilityService.IsGoalkeeperCapable(player)) ??
-            remainingPlayers.FirstOrDefault();
+        var selectedPlayer = remainingPlayers
+            .Where(player => !PositionSuitabilityService.IsGoalkeeperCapable(player))
+            .Select(player => new
+            {
+                Player = player,
+                Compatibility = PositionCompatibilityService.GetCompatibilityScore(player, normalizedSlot)
+            })
+            .Where(candidate => candidate.Compatibility > PositionCompatibilityService.Impossible)
+            .OrderByDescending(candidate => candidate.Compatibility)
+            .ThenByDescending(candidate => candidate.Player.OverallRating)
+            .ThenBy(candidate => candidate.Player.SquadNumber <= 0 ? int.MaxValue : candidate.Player.SquadNumber)
+            .Select(candidate => candidate.Player)
+            .FirstOrDefault();
+
+        if (selectedPlayer is null)
+        {
+            System.Diagnostics.Debug.WriteLine($"[LineupWarning] No compatible player available for {normalizedSlot} pitch slot.");
+        }
+
+        return selectedPlayer;
     }
 
     private LivePlayerIconViewModel CreatePitchIcon(

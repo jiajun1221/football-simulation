@@ -14,7 +14,7 @@ public class TransferMarketServiceTests
         Assert.True(windowService.IsWindowOpen(league, currentRound: 1));
         Assert.True(windowService.IsWindowOpen(league, currentRound: 4));
         Assert.False(windowService.IsWindowOpen(league, currentRound: 7));
-        Assert.True(windowService.IsWindowOpen(league, currentRound: 10));
+        Assert.True(windowService.IsWindowOpen(league, currentRound: 19));
     }
 
     [Fact]
@@ -67,6 +67,105 @@ public class TransferMarketServiceTests
         Assert.InRange(value, 160_000_000m, 250_000_000m);
     }
 
+    [Theory]
+    [InlineData("Bradley Barcola", 86, 88, 24, PlayerRole.Rotation, "ligue-1", 65_000_000, 95_000_000, 75_000_000, 120_000_000)]
+    [InlineData("Kenan Yildiz", 88, 91, 21, PlayerRole.Prospect, "serie-a", 90_000_000, 140_000_000, 110_000_000, 175_000_000)]
+    [InlineData("Rafael Leao", 88, 90, 27, PlayerRole.KeyPlayer, "serie-a", 90_000_000, 130_000_000, 115_000_000, 180_000_000)]
+    [InlineData("Kylian Mbappe", 92, 94, 28, PlayerRole.KeyPlayer, "la-liga", 180_000_000, 250_000_000, 220_000_000, 300_000_000)]
+    public void PlayerMarketValueCalculator_UsesRealisticStarPriceBands(
+        string playerName,
+        int overall,
+        int potential,
+        int age,
+        PlayerRole role,
+        string leagueId,
+        decimal minMarketValue,
+        decimal maxMarketValue,
+        decimal minAskingPrice,
+        decimal maxAskingPrice)
+    {
+        var calculator = new PlayerMarketValueCalculator();
+        var player = new Player
+        {
+            Name = playerName,
+            OverallRating = overall,
+            PotentialOverall = potential,
+            Age = age,
+            Position = Position.Forward,
+            Role = role,
+            FormStatus = PlayerFormStatus.Average
+        };
+
+        var marketValue = calculator.CalculateMarketValue(player, leagueId);
+        var askingPrice = calculator.CalculateAskingPrice(player, leagueId);
+
+        Assert.InRange(marketValue, minMarketValue, maxMarketValue);
+        Assert.InRange(askingPrice, minAskingPrice, maxAskingPrice);
+        Assert.True(askingPrice >= marketValue);
+    }
+
+    [Fact]
+    public void PlayerMarketValueCalculator_DiscountsListedPlayers()
+    {
+        var calculator = new PlayerMarketValueCalculator();
+        var player = new Player
+        {
+            Name = "Listed Starter",
+            OverallRating = 86,
+            PotentialOverall = 88,
+            Age = 24,
+            Position = Position.Forward,
+            Role = PlayerRole.Starter,
+            FormStatus = PlayerFormStatus.Average
+        };
+
+        var normalAskingPrice = calculator.CalculateAskingPrice(player, "ligue-1");
+        player.TransferStatus = PlayerTransferStatus.Listed;
+        var listedAskingPrice = calculator.CalculateAskingPrice(player, "ligue-1");
+
+        Assert.True(listedAskingPrice < normalAskingPrice);
+    }
+
+    [Fact]
+    public void PlayerMarketValueCalculator_DiscountsShortContractsAndRewardsLongContracts()
+    {
+        var calculator = new PlayerMarketValueCalculator();
+        var player = new Player
+        {
+            Name = "Contract Test Forward",
+            OverallRating = 84,
+            PotentialOverall = 86,
+            Age = 25,
+            Position = Position.Forward,
+            Role = PlayerRole.Starter,
+            FormStatus = PlayerFormStatus.Average,
+            ContractEndYear = PlayerContractService.DefaultSeasonEndYear + 1
+        };
+
+        var shortDealAskingPrice = calculator.CalculateAskingPrice(player, "premier-league");
+        player.ContractEndYear = PlayerContractService.DefaultSeasonEndYear + 5;
+        var longDealAskingPrice = calculator.CalculateAskingPrice(player, "premier-league");
+
+        Assert.True(longDealAskingPrice > shortDealAskingPrice);
+    }
+
+    [Fact]
+    public void OfferContractExtension_AcceptsRealisticWageIncrease()
+    {
+        var league = CreateLeague("premier-league");
+        var selectedTeam = league.Teams.Single(team => team.Name == "Chelsea");
+        var service = new TransferMarketService();
+        var state = service.CreateInitialState(league);
+        var player = selectedTeam.Players.Concat(selectedTeam.Substitutes).First();
+        var wage = PlayerContractService.EstimateWeeklyWage(player, league.LeagueId) * 1.2m;
+
+        var result = service.OfferContractExtension(state, league.LeagueId, selectedTeam, player, wage, 4, player.Role, currentRound: 3);
+
+        Assert.True(result.Accepted);
+        Assert.Equal(PlayerContractService.DefaultSeasonEndYear + 4, player.ContractEndYear);
+        Assert.Equal(wage, player.WeeklyWage);
+    }
+
     [Fact]
     public void MakeUserOffer_CompletesTransferAndUpdatesBudgets()
     {
@@ -108,6 +207,46 @@ public class TransferMarketServiceTests
         Assert.Equal(OfferStatus.Rejected, offer.Status);
         Assert.Equal("Transfer window is closed.", offer.Message);
         Assert.DoesNotContain(selectedTeam.Substitutes, player => player.PlayerId == target.Player.PlayerId);
+    }
+
+    [Fact]
+    public void AcceptAiOfferOutsideWindow_AgreesTransferWithoutMovingPlayer()
+    {
+        var league = CreateLeague("premier-league");
+        var selectedTeam = league.Teams.Single(team => team.Name == "Chelsea");
+        var service = new TransferMarketService();
+        var state = service.CreateInitialState(league);
+        var player = selectedTeam.Players.Concat(selectedTeam.Substitutes).OrderBy(player => player.OverallRating).First();
+
+        var offer = service.CreateAiOfferForUserPlayer(state, league, selectedTeam, player, currentRound: 7);
+        service.AcceptOffer(state, offer.OfferId, league, currentRound: 7);
+
+        Assert.Equal(OfferStatus.AgreedForNextWindow, offer.Status);
+        Assert.Contains(selectedTeam.Players.Concat(selectedTeam.Substitutes), squadPlayer => squadPlayer.PlayerId == player.PlayerId);
+        Assert.DoesNotContain(state.TransferHistory, item => item.PlayerId == player.PlayerId);
+    }
+
+    [Fact]
+    public void ProcessAgreedTransfers_MovesPlayerWhenWindowOpens()
+    {
+        var league = CreateLeague("premier-league");
+        var selectedTeam = league.Teams.Single(team => team.Name == "Chelsea");
+        var service = new TransferMarketService();
+        var state = service.CreateInitialState(league);
+        var player = selectedTeam.Players.Concat(selectedTeam.Substitutes).OrderBy(player => player.OverallRating).First();
+
+        var offer = service.CreateAiOfferForUserPlayer(state, league, selectedTeam, player, currentRound: 7);
+        service.AcceptOffer(state, offer.OfferId, league, currentRound: 7);
+        service.ProcessAgreedTransfers(state, league, currentRound: 19);
+        var buyer = state.Leagues
+            .Single(item => item.LeagueId == offer.ToLeagueId)
+            .Teams
+            .Single(team => team.Name == offer.ToClubName);
+
+        Assert.Equal(OfferStatus.CompletedWhenWindowOpens, offer.Status);
+        Assert.DoesNotContain(selectedTeam.Players.Concat(selectedTeam.Substitutes), squadPlayer => squadPlayer.PlayerId == player.PlayerId);
+        Assert.Contains(buyer.Substitutes, squadPlayer => squadPlayer.PlayerId == player.PlayerId);
+        Assert.Contains(state.TransferHistory, item => item.PlayerId == player.PlayerId && item.Type == "Agreed Transfer");
     }
 
     [Fact]

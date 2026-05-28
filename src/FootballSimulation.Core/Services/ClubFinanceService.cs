@@ -45,7 +45,8 @@ public class ClubFinanceService
             ClubTransferBudget = budget,
             ClubWageBudget = Math.Round(budget * 0.22m, 0),
             TransferSpent = 0,
-            TransferIncome = 0
+            TransferIncome = 0,
+            WageSpent = CalculateWageSpent(team)
         };
     }
 
@@ -57,6 +58,7 @@ public class ClubFinanceService
 
         if (finance is not null)
         {
+            finance.WageSpent = CalculateWageSpent(team);
             return finance;
         }
 
@@ -84,5 +86,12 @@ public class ClubFinanceService
             >= 74 => 32_000_000m,
             _ => 18_000_000m
         };
+    }
+
+    public static decimal CalculateWageSpent(Team team)
+    {
+        return team.Players
+            .Concat(team.Substitutes)
+            .Sum(player => player.WeeklyWage ?? 0);
     }
 }

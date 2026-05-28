@@ -87,6 +87,8 @@ public class SaveGameServiceTests
             .ToDictionary(player => player.Name, player => player.Age);
         var expectedFlagPaths = selectedTeam.Players.Concat(selectedTeam.Substitutes)
             .ToDictionary(player => player.Name, player => player.FlagImagePath);
+        var expectedContractYears = selectedTeam.Players.Concat(selectedTeam.Substitutes)
+            .ToDictionary(player => player.Name, player => player.ContractEndYear);
         foreach (var player in league.Teams.SelectMany(team => team.Players.Concat(team.Substitutes)))
         {
             player.Age = null;
@@ -94,6 +96,9 @@ public class SaveGameServiceTests
             player.NationalityName = string.Empty;
             player.Nationality = string.Empty;
             player.FlagImagePath = string.Empty;
+            player.ContractEndYear = null;
+            player.WeeklyWage = null;
+            player.ReleaseClause = null;
         }
 
         var saveData = SaveGameService.CreateSaveData(league, selectedTeam);
@@ -109,7 +114,44 @@ public class SaveGameServiceTests
         {
             Assert.Equal(expectedAges[player.Name], player.Age);
             Assert.Equal(expectedFlagPaths[player.Name], player.FlagImagePath);
+            Assert.Equal(expectedContractYears[player.Name], player.ContractEndYear);
+            Assert.NotNull(player.WeeklyWage);
+            Assert.True(player.WeeklyWage > 0);
         }
+    }
+
+    [Fact]
+    public void CreateLeague_RepairsLegacyHalfSeasonFixtureList()
+    {
+        var dataService = new LeagueDataService();
+        var definition = dataService.GetLeagueDefinition("premier-league");
+        var teams = dataService.LoadTeams(definition);
+        var leagueEngine = new LeagueEngine();
+        var league = leagueEngine.CreateLeague(definition.LeagueId, definition.Name, definition.Season, teams);
+        var selectedTeam = league.Teams.Single(team => team.Name == "Chelsea");
+        var playedFixture = league.Fixtures
+            .Where(fixture => fixture.RoundNumber == 1)
+            .First(fixture => fixture.HomeTeam == selectedTeam || fixture.AwayTeam == selectedTeam);
+        leagueEngine.SimulateFixture(league, playedFixture);
+        var saveData = SaveGameService.CreateSaveData(league, selectedTeam);
+        saveData.Fixtures = saveData.Fixtures
+            .Where(fixture => fixture.RoundNumber <= league.Teams.Count - 1)
+            .ToList();
+
+        var restoredLeague = SaveGameService.CreateLeague(saveData);
+
+        Assert.Equal(38, restoredLeague.Fixtures.Max(fixture => fixture.RoundNumber));
+        Assert.Equal(restoredLeague.Teams.Count * (restoredLeague.Teams.Count - 1), restoredLeague.Fixtures.Count);
+        var restoredPlayedFixture = restoredLeague.Fixtures.Single(fixture =>
+            fixture.RoundNumber == playedFixture.RoundNumber &&
+            fixture.HomeTeam.Name == playedFixture.HomeTeam.Name &&
+            fixture.AwayTeam.Name == playedFixture.AwayTeam.Name);
+        Assert.True(restoredPlayedFixture.IsPlayed);
+        Assert.NotNull(restoredPlayedFixture.Result);
+        Assert.Contains(restoredLeague.Fixtures, fixture =>
+            fixture.RoundNumber == playedFixture.RoundNumber + restoredLeague.Teams.Count - 1 &&
+            fixture.HomeTeam.Name == playedFixture.AwayTeam.Name &&
+            fixture.AwayTeam.Name == playedFixture.HomeTeam.Name);
     }
 
     [Fact]

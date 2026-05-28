@@ -70,7 +70,7 @@ public class LeagueDataServiceTests
         Assert.Equal(definition.Name, league.Name);
         Assert.Equal(definition.Season, league.Season);
         Assert.Equal(teams.Count, league.Table.Count);
-        Assert.Equal(teams.Count * (teams.Count - 1) / 2, league.Fixtures.Count);
+        Assert.Equal(teams.Count * (teams.Count - 1), league.Fixtures.Count);
     }
 
     [Theory]
@@ -115,5 +115,9 @@ public class LeagueDataServiceTests
         Assert.False(string.IsNullOrWhiteSpace(player.NationalityCode));
         Assert.False(string.IsNullOrWhiteSpace(player.NationalityName));
         Assert.False(string.IsNullOrWhiteSpace(player.FlagImagePath));
+        Assert.NotNull(player.ContractEndYear);
+        Assert.True(player.ContractEndYear >= PlayerContractService.DefaultSeasonEndYear);
+        Assert.NotNull(player.WeeklyWage);
+        Assert.True(player.WeeklyWage > 0);
     }
 }

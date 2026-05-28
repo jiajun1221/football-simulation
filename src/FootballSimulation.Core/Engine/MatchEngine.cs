@@ -5324,12 +5324,11 @@ public class MatchEngine
 
     private void ResetTeamStamina(Team team)
     {
-        _fatigueService.RecoverTeamForNewMatch(team);
         var starters = team.Players.ToHashSet();
 
         foreach (var player in team.Players.Concat(team.Substitutes))
         {
-            player.Stamina = Math.Clamp(player.Stamina, 0, 100);
+            player.Stamina = 100;
             player.LiveMatchModifier = 1.0;
             player.YellowCards = 0;
             player.IsSentOff = false;

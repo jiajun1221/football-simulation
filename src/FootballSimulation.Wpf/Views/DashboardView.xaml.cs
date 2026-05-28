@@ -92,6 +92,37 @@ public partial class DashboardView : UserControl
 
         UpcomingFixturesItemsControl.ItemsSource = CreateUpcomingFixtureRows(_state.League, _state.SelectedTeam);
         LoadUnavailablePlayers(_state.SelectedTeam);
+        RunTransferMarketRoundProcessing();
+    }
+
+    private void RunTransferMarketRoundProcessing()
+    {
+        if (_state.League is null || _state.SelectedTeam is null)
+        {
+            return;
+        }
+
+        _state.TransferMarket ??= _transferMarketService.CreateInitialState(_state.League);
+        _transferMarketService.BindActiveLeague(_state.TransferMarket, _state.League);
+        _transferMarketService.RunAiTransferActivity(
+            _state.TransferMarket,
+            _state.League,
+            _state.SelectedTeam,
+            GetCurrentRoundForTransferProcessing());
+    }
+
+    private int GetCurrentRoundForTransferProcessing()
+    {
+        if (_state.League is null || _state.SelectedTeam is null)
+        {
+            return 1;
+        }
+
+        return _state.League.Fixtures
+            .Where(fixture => !fixture.IsPlayed && IsTeamInFixture(fixture, _state.SelectedTeam))
+            .OrderBy(fixture => fixture.RoundNumber)
+            .Select(fixture => fixture.RoundNumber)
+            .FirstOrDefault(_state.League.Fixtures.Count == 0 ? 1 : _state.League.Fixtures.Max(fixture => fixture.RoundNumber));
     }
 
     private void PrepareMatchButton_Click(object sender, RoutedEventArgs e)

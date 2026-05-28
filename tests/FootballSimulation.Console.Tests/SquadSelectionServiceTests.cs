@@ -251,6 +251,58 @@ public class SquadSelectionServiceTests
     }
 
     [Fact]
+    public void PositionCompatibility_MarksAttackerAtRightBackAsImpossible()
+    {
+        var bryanMbeumo = CreateExactPlayer("Bryan Mbeumo", Position.Forward, "RW", 84, false);
+        bryanMbeumo.SecondaryPositions = ["ST"];
+
+        var score = PositionCompatibilityService.GetCompatibilityScore(bryanMbeumo, "RB");
+
+        Assert.Equal(PositionCompatibilityService.Impossible, score);
+    }
+
+    [Fact]
+    public void AiLineupSelection_UsesNaturalRightBackOverHighRatedWinger()
+    {
+        var bryanMbeumo = CreateExactPlayer("Bryan Mbeumo", Position.Forward, "RW", 88, true);
+        bryanMbeumo.SecondaryPositions = ["ST"];
+        var team = new Team
+        {
+            Name = "Opponent Test",
+            Formation = "4-3-3",
+            Players =
+            [
+                CreateExactPlayer("Starter GK", Position.Goalkeeper, "GK", 82, true),
+                bryanMbeumo,
+                CreateExactPlayer("High Rated Left Winger", Position.Forward, "LW", 87, true),
+                CreateExactPlayer("Natural Center Back A", Position.Defender, "CB", 79, true),
+                CreateExactPlayer("Natural Center Back B", Position.Defender, "CB", 78, true),
+                CreateExactPlayer("Natural Left Back", Position.Defender, "LB", 77, true),
+                CreateExactPlayer("Natural Right Back", Position.Defender, "RB", 74, true),
+                CreateExactPlayer("Central Midfielder A", Position.Midfielder, "CM", 81, true),
+                CreateExactPlayer("Central Midfielder B", Position.Midfielder, "CM", 80, true),
+                CreateExactPlayer("Attacking Midfielder", Position.Midfielder, "CAM", 82, true),
+                CreateExactPlayer("Striker", Position.Forward, "ST", 83, true)
+            ],
+            Substitutes =
+            [
+                CreateExactPlayer("Sub GK", Position.Goalkeeper, "GK", 72, false)
+            ]
+        };
+
+        AiLineupSelectionService.BuildRealisticLineup(team);
+
+        var slots = FormationSlotService.GetSlots(team.Formation);
+        var rightBack = team.Players
+            .Select((player, index) => new { Player = player, Slot = slots[index] })
+            .Single(item => item.Slot == "RB")
+            .Player;
+
+        Assert.Equal("Natural Right Back", rightBack.Name);
+        Assert.NotEqual("Bryan Mbeumo", rightBack.Name);
+    }
+
+    [Fact]
     public void AiManager_ChoosesDefensiveReplacementForCenterBack()
     {
         var service = new AiManagerService();
@@ -278,6 +330,38 @@ public class SquadSelectionServiceTests
         Assert.NotNull(decision);
         Assert.Equal(centerBack.Name, decision!.PlayerOff.Name);
         Assert.Equal("Backup Center Back", decision.PlayerOn.Name);
+    }
+
+    [Fact]
+    public void AiManager_ChoosesDefensiveReplacementForRightBack()
+    {
+        var service = new AiManagerService();
+        var team = CreateTeam();
+        var rightBack = team.Players[1];
+        PositionSuitabilityService.EnsurePositionMetadata(rightBack, "RB");
+        rightBack.Stamina = 4;
+        team.Substitutes =
+        [
+            CreateExactPlayer("Bryan Mbeumo", Position.Forward, "RW", 88, false),
+            CreateExactPlayer("Backup Right Back", Position.Defender, "RB", 72, false),
+            CreateExactPlayer("Backup Center Back", Position.Defender, "CB", 76, false),
+            CreateExactPlayer("Sub GK", Position.Goalkeeper, "GK", 72, false)
+        ];
+        team.Substitutes[0].SecondaryPositions = ["ST"];
+        var opponent = CreateTeam("Opponent");
+        var match = new Match { HomeTeam = team, AwayTeam = opponent };
+
+        var decision = service.TryMakeSubstitution(
+            match,
+            team,
+            minute: 60,
+            new MatchSimulationOptions { EnableAiSubstitutions = true },
+            new Random(1));
+
+        Assert.NotNull(decision);
+        Assert.Equal(rightBack.Name, decision!.PlayerOff.Name);
+        Assert.Equal("Backup Right Back", decision.PlayerOn.Name);
+        Assert.NotEqual("Bryan Mbeumo", decision.PlayerOn.Name);
     }
 
     private static Team CreateTeam(string name = "Test FC", int substituteCount = 7)

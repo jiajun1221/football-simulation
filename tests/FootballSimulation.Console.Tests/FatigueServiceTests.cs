@@ -20,6 +20,25 @@ public class FatigueServiceTests
     }
 
     [Fact]
+    public void CreateLiveMatch_StartsBothTeamsAndBenchesAtFullMatchStamina()
+    {
+        var team = CreateTeam("Home");
+        var opponent = CreateTeam("Away");
+        team.Players[0].Stamina = 42;
+        team.Substitutes[0].Stamina = 55;
+        opponent.Players[0].Stamina = 38;
+        opponent.Substitutes[0].Stamina = 61;
+
+        new MatchEngine().CreateLiveMatch(team, opponent);
+
+        foreach (var player in team.Players.Concat(team.Substitutes).Concat(opponent.Players).Concat(opponent.Substitutes))
+        {
+            Assert.Equal(100, player.Stamina, precision: 4);
+            Assert.Equal(100, player.CurrentStamina, precision: 4);
+        }
+    }
+
+    [Fact]
     public void AdvanceMatch_DoesNotDrainUnusedSubstituteStamina()
     {
         var team = CreateTeam("Home");

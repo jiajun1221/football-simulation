@@ -4,8 +4,8 @@ namespace FootballSimulation.Services;
 
 public static class PositionCompatibilityService
 {
-    public const int Impossible = 0;
-    public const int Emergency = 20;
+    public const int Impossible = -999;
+    public const int Emergency = 35;
 
     public static int GetCompatibilityScore(Player player, string exactPosition)
     {
@@ -26,14 +26,14 @@ public static class PositionCompatibilityService
             return Impossible;
         }
 
-        if (player.PreferredPosition == slot)
+        if (string.Equals(player.PreferredPosition, slot, StringComparison.OrdinalIgnoreCase))
         {
             return 100;
         }
 
-        if (player.SecondaryPositions.Contains(slot))
+        if (player.SecondaryPositions.Contains(slot, StringComparer.OrdinalIgnoreCase))
         {
-            return 80;
+            return 85;
         }
 
         return GetAdjacentRoleScore(player, slot);
@@ -62,73 +62,101 @@ public static class PositionCompatibilityService
     {
         return slot switch
         {
+            "GK" => playerPosition switch
+            {
+                "GK" => 100,
+                _ => Impossible
+            },
             "CB" => playerPosition switch
             {
                 "CB" => 100,
                 "RB" or "LB" => 55,
-                "CDM" => 45,
+                "RWB" or "LWB" => 45,
+                "CDM" => Emergency,
                 _ => Impossible
             },
             "RB" => playerPosition switch
             {
                 "RB" => 100,
-                "CB" => 60,
-                "LB" => 35,
-                "CDM" => 35,
+                "RWB" => 90,
+                "CB" => 55,
+                "LB" => 45,
+                "CDM" => Emergency,
                 _ => Impossible
             },
             "LB" => playerPosition switch
             {
                 "LB" => 100,
-                "CB" => 60,
-                "RB" => 35,
-                "CDM" => 35,
+                "LWB" => 90,
+                "CB" => 55,
+                "RB" => 45,
+                "CDM" => Emergency,
+                _ => Impossible
+            },
+            "RWB" => playerPosition switch
+            {
+                "RWB" => 100,
+                "RB" => 90,
+                "RW" => 60,
+                "CB" => 45,
+                _ => Impossible
+            },
+            "LWB" => playerPosition switch
+            {
+                "LWB" => 100,
+                "LB" => 90,
+                "LW" => 60,
+                "CB" => 45,
                 _ => Impossible
             },
             "CDM" => playerPosition switch
             {
                 "CDM" => 100,
-                "CM" => 85,
-                "CB" => 50,
-                "CAM" => 35,
+                "CM" => 60,
+                "CB" => 55,
                 _ => Impossible
             },
             "CM" => playerPosition switch
             {
                 "CM" => 100,
-                "CAM" or "CDM" => 75,
-                "LW" or "RW" => 35,
+                "CAM" or "CDM" => 60,
                 _ => Impossible
             },
             "CAM" => playerPosition switch
             {
                 "CAM" => 100,
-                "CM" => 75,
-                "LW" or "RW" => 55,
-                "ST" => 45,
+                "CM" => 60,
+                "LW" or "RW" or "CF" => 60,
                 _ => Impossible
             },
             "LW" => playerPosition switch
             {
                 "LW" => 100,
-                "RW" => 85,
-                "CAM" => 65,
-                "ST" => 45,
+                "RW" => 60,
+                "LWB" => 60,
+                "CAM" or "CF" => 60,
                 _ => Impossible
             },
             "RW" => playerPosition switch
             {
                 "RW" => 100,
-                "LW" => 85,
-                "CAM" => 65,
-                "ST" => 45,
+                "LW" => 60,
+                "RWB" => 60,
+                "CAM" or "CF" => 60,
                 _ => Impossible
             },
             "ST" => playerPosition switch
             {
                 "ST" => 100,
-                "LW" or "RW" => 40,
-                "CAM" => 35,
+                "CF" => 60,
+                "LW" or "RW" => Emergency,
+                _ => Impossible
+            },
+            "CF" => playerPosition switch
+            {
+                "CF" => 100,
+                "ST" or "CAM" => 60,
+                "LW" or "RW" => Emergency,
                 _ => Impossible
             },
             _ => Emergency

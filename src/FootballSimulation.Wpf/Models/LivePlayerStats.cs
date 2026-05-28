@@ -6,7 +6,7 @@ namespace FootballSimulation.Wpf.Models;
 
 public sealed class LivePlayerStats : INotifyPropertyChanged
 {
-    private const double PitchStaminaBarWidth = 42;
+    public const double PitchStaminaBarMaxWidth = 42;
 
     private double _currentRating = 6.0;
     private int _staminaPercent = 100;
@@ -57,7 +57,7 @@ public sealed class LivePlayerStats : INotifyPropertyChanged
         }
     }
 
-    public double StaminaBarWidth => PitchStaminaBarWidth;
+    public double StaminaBarWidth => PitchStaminaBarMaxWidth * (StaminaPercent / 100.0);
     public string StaminaBrush => StaminaPercent switch
     {
         < 30 => "#EF4444",

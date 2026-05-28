@@ -28,6 +28,10 @@ public class PlayerDataRecord
     public int? Physical { get; set; }
     public int? Stamina { get; set; }
     public bool IsStarter { get; set; }
+    public int? ContractEndYear { get; set; }
+    public decimal? WeeklyWage { get; set; }
+    public decimal? ReleaseClause { get; set; }
+    public string? ContractStatus { get; set; }
     public string? Form { get; set; }
     public string? FormStatus { get; set; }
     public List<string> Traits { get; set; } = [];

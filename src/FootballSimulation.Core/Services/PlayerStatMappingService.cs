@@ -24,7 +24,7 @@ public class PlayerStatMappingService
         var traits = MapTraits(record.Traits);
         var attributes = CreateAttributes(record, position, preferredPosition, overall, traits, stamina);
 
-        return new Player
+        var player = new Player
         {
             PlayerId = CreateFallbackPlayerId(record.Name, record.SquadNumber, record.Position),
             Name = record.Name,
@@ -72,6 +72,14 @@ public class PlayerStatMappingService
             MatchesPlayedRecently = Math.Max(0, record.MatchesPlayedRecently ?? 0),
             Finishing = CalculateFinishing(position, preferredPosition, overall)
         };
+        PlayerContractService.ApplyContractData(
+            player,
+            string.Empty,
+            record.ContractEndYear,
+            record.WeeklyWage,
+            record.ReleaseClause,
+            MapContractStatus(record.ContractStatus));
+        return player;
     }
 
     public Player MapToPlayer(SquadPlayerRecord record, bool isStarter)
@@ -93,7 +101,7 @@ public class PlayerStatMappingService
         var traits = MapTraits(record.Traits);
         var attributes = CreateAttributes(record, position, preferredPosition, overall, traits, stamina);
 
-        return new Player
+        var player = new Player
         {
             PlayerId = string.IsNullOrWhiteSpace(record.PlayerId)
                 ? CreateFallbackPlayerId(record.Name, record.SquadNumber, record.Position)
@@ -145,6 +153,14 @@ public class PlayerStatMappingService
             MatchesPlayedRecently = Math.Max(0, record.MatchesPlayedRecently ?? 0),
             Finishing = CalculateFinishing(position, preferredPosition, overall)
         };
+        PlayerContractService.ApplyContractData(
+            player,
+            string.Empty,
+            record.ContractEndYear,
+            record.WeeklyWage,
+            record.ReleaseClause,
+            MapContractStatus(record.ContractStatus));
+        return player;
     }
 
     private static List<PlayerTrait> MapTraits(IEnumerable<string> traits)
@@ -205,6 +221,13 @@ public class PlayerStatMappingService
         return Enum.TryParse<PlayerRole>(role?.Replace(" ", string.Empty), ignoreCase: true, out var parsedRole)
             ? parsedRole
             : InferRole(overall, age, position);
+    }
+
+    private static PlayerContractStatus? MapContractStatus(string? status)
+    {
+        return Enum.TryParse<PlayerContractStatus>(status?.Replace(" ", string.Empty), ignoreCase: true, out var parsedStatus)
+            ? parsedStatus
+            : null;
     }
 
     private static PlayerRole InferRole(int overall, int? age, Position position)

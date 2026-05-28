@@ -185,10 +185,27 @@
 
         <DataTemplate x:Key="TransferPlayerCellTemplate">
             <TextBlock Text="{Binding PlayerName}"
+                       ToolTip="{Binding PlayerName}"
                        FontWeight="SemiBold"
                        Foreground="{DynamicResource AppTextBrush}"
                        VerticalAlignment="Center"
                        TextTrimming="CharacterEllipsis" />
+        </DataTemplate>
+
+        <DataTemplate x:Key="StatusCellTemplate">
+            <Border Background="{Binding StatusBrush}"
+                    CornerRadius="10"
+                    Height="24"
+                    Padding="9,0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    ToolTip="{Binding StatusTooltip}">
+                <TextBlock Text="{Binding Status}"
+                           Foreground="#FFFFFF"
+                           FontSize="11"
+                           FontWeight="SemiBold"
+                           VerticalAlignment="Center" />
+            </Border>
         </DataTemplate>
 
         <DataTemplate x:Key="NationalityCellTemplate">
@@ -338,6 +355,7 @@
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CanUserAddRows" Value="False" />
             <Setter Property="CanUserResizeRows" Value="False" />
+            <Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
             <Setter Property="SelectionMode" Value="Single" />
             <Setter Property="SelectionUnit" Value="FullRow" />
             <Setter Property="ColumnHeaderStyle">
@@ -358,7 +376,7 @@
             <Setter Property="CellStyle">
                 <Setter.Value>
                     <Style TargetType="DataGridCell">
-                        <Setter Property="Padding" Value="10,0" />
+                        <Setter Property="Padding" Value="6,0" />
                         <Setter Property="BorderThickness" Value="0" />
                         <Setter Property="VerticalContentAlignment" Value="Center" />
                         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -390,6 +408,7 @@
         </Style>
     </UserControl.Resources>
 
+    <Grid>
     <Grid Margin="22,16,22,16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -476,27 +495,27 @@
             <TabItem Header="Squad">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="70*" />
-                        <ColumnDefinition Width="40*" />
+                        <ColumnDefinition Width="72*" />
+                        <ColumnDefinition Width="28*" />
                     </Grid.ColumnDefinitions>
                     <DataGrid x:Name="SquadDataGrid"
                               Grid.Column="0"
                               Style="{StaticResource ModernGridStyle}"
                               SelectionChanged="SquadDataGrid_SelectionChanged">
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="Player" Width="*">
+                            <DataGridTemplateColumn Header="Player" Width="190">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <StaticResource ResourceKey="TransferPlayerCellTemplate" />
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Nat" Width="52">
+                            <DataGridTemplateColumn Header="Nat" Width="42">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <StaticResource ResourceKey="NationalityCellTemplate" />
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="Pos" Binding="{Binding Position}" Width="70" ElementStyle="{StaticResource CenteredGridTextStyle}" />
-                            <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="60" ElementStyle="{StaticResource CenteredGridTextStyle}" />
-                            <DataGridTemplateColumn Header="OVR" Width="64">
+                            <DataGridTextColumn Header="Pos" Binding="{Binding Position}" Width="45" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                            <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="45" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                            <DataGridTemplateColumn Header="OVR" Width="58">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border Style="{StaticResource OvrBadgeBorderStyle}">
@@ -505,7 +524,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Form" Width="90">
+                            <DataGridTemplateColumn Header="Form" Width="82">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border Background="{Binding FormBrush}" CornerRadius="10" Height="24" Padding="7,0" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -514,35 +533,25 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Value" Width="105">
+                            <DataGridTemplateColumn Header="Value" Width="85">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding MarketValueText}" Style="{StaticResource CenteredValueTextStyle}" />
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Status" Width="105">
+                            <DataGridTextColumn Header="Exp." Binding="{Binding ContractText}" Width="95" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                            <DataGridTextColumn Header="Wage" Binding="{Binding WageText}" Width="80" ElementStyle="{StaticResource CenteredValueTextStyle}" />
+                            <DataGridTemplateColumn Header="Status" Width="115">
                                 <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Border Background="{Binding StatusBrush}" CornerRadius="10" Height="24" Padding="7,0" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Status}" Foreground="#FFFFFF" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" />
-                                        </Border>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Sale" Width="112">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Border Background="{Binding SaleBrush}" CornerRadius="10" Height="24" Padding="7,0" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding SaleStatus}" Foreground="{Binding SaleTextBrush}" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" />
-                                        </Border>
-                                    </DataTemplate>
+                                    <StaticResource ResourceKey="StatusCellTemplate" />
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                         </DataGrid.Columns>
                     </DataGrid>
                     <views:TransferPlayerDetailPanel x:Name="SquadDetailPanel"
                                                      Grid.Column="1"
+                                                     ContractRenewalRequested="DetailPanel_ContractRenewalRequested"
                                                      ShortlistToggled="DetailPanel_ShortlistToggled"
                                                      TransferListToggled="DetailPanel_TransferListToggled" />
                 </Grid>
@@ -550,8 +559,8 @@
             <TabItem Header="Market">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="65*" />
-                        <ColumnDefinition Width="35*" />
+                        <ColumnDefinition Width="72*" />
+                        <ColumnDefinition Width="28*" />
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -631,17 +640,17 @@
                               Style="{StaticResource ModernGridStyle}"
                               SelectionChanged="MarketDataGrid_SelectionChanged">
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="Player" Width="*">
+                            <DataGridTemplateColumn Header="Player" Width="185">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <StaticResource ResourceKey="TransferPlayerCellTemplate" />
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Nat" Width="52">
+                            <DataGridTemplateColumn Header="Nat" Width="42">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <StaticResource ResourceKey="NationalityCellTemplate" />
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Club" Width="190">
+                            <DataGridTemplateColumn Header="Club" Width="120">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -654,9 +663,9 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="Pos" Binding="{Binding Position}" Width="48" ElementStyle="{StaticResource CenteredGridTextStyle}" />
-                            <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="46" ElementStyle="{StaticResource CenteredGridTextStyle}" />
-                            <DataGridTemplateColumn Header="OVR" Width="56">
+                            <DataGridTextColumn Header="Pos" Binding="{Binding Position}" Width="45" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                            <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="45" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                            <DataGridTemplateColumn Header="OVR" Width="58">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border Style="{StaticResource OvrBadgeBorderStyle}">
@@ -665,7 +674,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Form" Width="76">
+                            <DataGridTemplateColumn Header="Form" Width="82">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border Background="{Binding FormBrush}" CornerRadius="10" Height="24" Padding="7,0" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -674,20 +683,18 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Value" Width="95">
+                            <DataGridTemplateColumn Header="Value" Width="85">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding MarketValueText}" Style="{StaticResource CenteredValueTextStyle}" />
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Status" Width="110">
+                            <DataGridTextColumn Header="Exp." Binding="{Binding ContractText}" Width="95" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                            <DataGridTextColumn Header="Wage" Binding="{Binding WageText}" Width="80" ElementStyle="{StaticResource CenteredValueTextStyle}" />
+                            <DataGridTemplateColumn Header="Status" Width="115">
                                 <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Border Background="{Binding StatusBrush}" CornerRadius="10" Height="24" Padding="7,0" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Status}" Foreground="#FFFFFF" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" />
-                                        </Border>
-                                    </DataTemplate>
+                                    <StaticResource ResourceKey="StatusCellTemplate" />
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                         </DataGrid.Columns>
@@ -705,8 +712,8 @@
             <TabItem Header="Scout" Style="{StaticResource RecommendedTabItemStyle}">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="65*" />
-                        <ColumnDefinition Width="35*" />
+                        <ColumnDefinition Width="72*" />
+                        <ColumnDefinition Width="28*" />
                     </Grid.ColumnDefinitions>
                     <Grid Grid.Column="0">
                         <Grid.RowDefinitions>
@@ -726,17 +733,17 @@
                                       Style="{StaticResource ModernGridStyle}"
                                       SelectionChanged="ShortlistedDataGrid_SelectionChanged">
                                 <DataGrid.Columns>
-                                    <DataGridTemplateColumn Header="Player" Width="*">
+                                    <DataGridTemplateColumn Header="Player" Width="180">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <StaticResource ResourceKey="TransferPlayerCellTemplate" />
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
-                                    <DataGridTemplateColumn Header="Nat" Width="52">
+                                    <DataGridTemplateColumn Header="Nat" Width="42">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <StaticResource ResourceKey="NationalityCellTemplate" />
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
-                                    <DataGridTemplateColumn Header="Club" Width="160">
+                                    <DataGridTemplateColumn Header="Club" Width="110">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -746,9 +753,9 @@
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
-                                    <DataGridTextColumn Header="Pos" Binding="{Binding Position}" Width="48" ElementStyle="{StaticResource CenteredGridTextStyle}" />
-                                    <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="46" ElementStyle="{StaticResource CenteredGridTextStyle}" />
-                                    <DataGridTemplateColumn Header="OVR" Width="56">
+                                    <DataGridTextColumn Header="Pos" Binding="{Binding Position}" Width="45" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                                    <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="45" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                                    <DataGridTemplateColumn Header="OVR" Width="58">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <Border Style="{StaticResource OvrBadgeBorderStyle}">
@@ -757,7 +764,7 @@
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
-                                    <DataGridTemplateColumn Header="Form" Width="76">
+                                    <DataGridTemplateColumn Header="Form" Width="82">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <Border Background="{Binding FormBrush}" CornerRadius="10" Height="24" Padding="7,0" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -766,20 +773,18 @@
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
-                                    <DataGridTemplateColumn Header="Value" Width="92">
+                                    <DataGridTemplateColumn Header="Value" Width="85">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBlock Text="{Binding MarketValueText}" Style="{StaticResource CenteredValueTextStyle}" />
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
-                                    <DataGridTemplateColumn Header="Status" Width="105">
+                                    <DataGridTextColumn Header="Exp." Binding="{Binding ContractText}" Width="95" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                                    <DataGridTextColumn Header="Wage" Binding="{Binding WageText}" Width="80" ElementStyle="{StaticResource CenteredValueTextStyle}" />
+                                    <DataGridTemplateColumn Header="Status" Width="115">
                                         <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <Border Background="{Binding StatusBrush}" CornerRadius="10" Height="24" Padding="7,0" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding Status}" Foreground="#FFFFFF" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" />
-                                                </Border>
-                                            </DataTemplate>
+                                            <StaticResource ResourceKey="StatusCellTemplate" />
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
                                 </DataGrid.Columns>
@@ -812,17 +817,17 @@
                                   Style="{StaticResource ModernGridStyle}"
                                   SelectionChanged="RecommendedDataGrid_SelectionChanged">
                             <DataGrid.Columns>
-                                <DataGridTemplateColumn Header="Player" Width="*">
+                                <DataGridTemplateColumn Header="Player" Width="180">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <StaticResource ResourceKey="TransferPlayerCellTemplate" />
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="Nat" Width="52">
+                                <DataGridTemplateColumn Header="Nat" Width="42">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <StaticResource ResourceKey="NationalityCellTemplate" />
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="Club" Width="150">
+                                <DataGridTemplateColumn Header="Club" Width="110">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -832,9 +837,9 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTextColumn Header="Pos" Binding="{Binding Position}" Width="48" ElementStyle="{StaticResource CenteredGridTextStyle}" />
-                                <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="46" ElementStyle="{StaticResource CenteredGridTextStyle}" />
-                                <DataGridTemplateColumn Header="OVR" Width="56">
+                                <DataGridTextColumn Header="Pos" Binding="{Binding Position}" Width="45" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                                <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="45" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                                <DataGridTemplateColumn Header="OVR" Width="58">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <Border Style="{StaticResource OvrBadgeBorderStyle}">
@@ -843,11 +848,18 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="Value" Width="92">
+                                <DataGridTemplateColumn Header="Value" Width="85">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding MarketValueText}" Style="{StaticResource CenteredValueTextStyle}" />
                                         </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Exp." Binding="{Binding ContractText}" Width="95" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                                <DataGridTextColumn Header="Wage" Binding="{Binding WageText}" Width="80" ElementStyle="{StaticResource CenteredValueTextStyle}" />
+                                <DataGridTemplateColumn Header="Status" Width="115">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <StaticResource ResourceKey="StatusCellTemplate" />
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
                                 <DataGridTemplateColumn Header="Reason" Width="*">
@@ -876,15 +888,15 @@
             <TabItem Header="Offers">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="65*" />
-                        <ColumnDefinition Width="35*" />
+                        <ColumnDefinition Width="72*" />
+                        <ColumnDefinition Width="28*" />
                     </Grid.ColumnDefinitions>
                     <DataGrid x:Name="OffersDataGrid"
                               Grid.Column="0"
                               Style="{StaticResource ModernGridStyle}"
                               SelectionChanged="OffersDataGrid_SelectionChanged">
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="Offer" Width="*">
+                            <DataGridTemplateColumn Header="Offer" Width="220">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -897,7 +909,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="OVR" Width="64">
+                            <DataGridTemplateColumn Header="OVR" Width="58">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border Style="{StaticResource OvrBadgeBorderStyle}">
@@ -906,31 +918,31 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Player" Width="130">
+                            <DataGridTemplateColumn Header="Player" Width="180">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <StaticResource ResourceKey="TransferPlayerCellTemplate" />
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Nat" Width="52">
+                            <DataGridTemplateColumn Header="Nat" Width="42">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <StaticResource ResourceKey="NationalityCellTemplate" />
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Offer" Width="90">
+                            <DataGridTemplateColumn Header="Offer" Width="80">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding FeeText}" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" VerticalAlignment="Center" />
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Value" Width="92">
+                            <DataGridTemplateColumn Header="Value" Width="85">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding MarketValueText}" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" VerticalAlignment="Center" />
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Status" Width="100">
+                            <DataGridTemplateColumn Header="Status" Width="115">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border Background="{Binding StatusBrush}" CornerRadius="10" Height="24" Padding="7,0" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -954,8 +966,8 @@
             <TabItem Header="History">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="65*" />
-                        <ColumnDefinition Width="35*" />
+                        <ColumnDefinition Width="72*" />
+                        <ColumnDefinition Width="28*" />
                     </Grid.ColumnDefinitions>
                     <DataGrid x:Name="HistoryDataGrid"
                               Grid.Column="0"
@@ -963,17 +975,17 @@
                               SelectionChanged="HistoryDataGrid_SelectionChanged">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Round" Binding="{Binding RoundNumber}" Width="62" />
-                            <DataGridTemplateColumn Header="Player" Width="*">
+                            <DataGridTemplateColumn Header="Player" Width="180">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <StaticResource ResourceKey="TransferPlayerCellTemplate" />
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Nat" Width="52">
+                            <DataGridTemplateColumn Header="Nat" Width="42">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <StaticResource ResourceKey="NationalityCellTemplate" />
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="OVR" Width="56">
+                            <DataGridTemplateColumn Header="OVR" Width="58">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border Style="{StaticResource OvrBadgeBorderStyle}">
@@ -1017,5 +1029,10 @@
                 </Grid>
             </TabItem>
         </TabControl>
+    </Grid>
+
+    <views:TransferNotificationModal x:Name="TransferModal"
+                                     HorizontalAlignment="Stretch"
+                                     VerticalAlignment="Stretch" />
     </Grid>
 </UserControl>

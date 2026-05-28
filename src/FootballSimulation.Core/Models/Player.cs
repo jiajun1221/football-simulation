@@ -34,6 +34,10 @@ public class Player : INotifyPropertyChanged
     public int? Age { get; set; }
     public int? PotentialOverall { get; set; }
     public PlayerTransferStatus TransferStatus { get; set; } = PlayerTransferStatus.None;
+    public int? ContractEndYear { get; set; }
+    public decimal? WeeklyWage { get; set; }
+    public decimal? ReleaseClause { get; set; }
+    public PlayerContractStatus ContractStatus { get; set; } = PlayerContractStatus.Active;
     [JsonIgnore]
     public bool IsListedForSale
     {

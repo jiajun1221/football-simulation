@@ -19,12 +19,12 @@ public class LeagueScheduleService
             workingTeams.Add(new Team { Name = "BYE" });
         }
 
-        var fixtures = new List<Fixture>();
+        var firstLegFixtures = new List<Fixture>();
         var rotatingTeams = workingTeams.ToList();
-        var totalRounds = rotatingTeams.Count - 1;
+        var singleRoundRobinRounds = rotatingTeams.Count - 1;
         var matchesPerRound = rotatingTeams.Count / 2;
 
-        for (var round = 1; round <= totalRounds; round++)
+        for (var round = 1; round <= singleRoundRobinRounds; round++)
         {
             for (var matchIndex = 0; matchIndex < matchesPerRound; matchIndex++)
             {
@@ -42,7 +42,7 @@ public class LeagueScheduleService
                     (homeTeam, awayTeam) = (awayTeam, homeTeam);
                 }
 
-                fixtures.Add(new Fixture
+                firstLegFixtures.Add(new Fixture
                 {
                     RoundNumber = round,
                     HomeTeam = homeTeam,
@@ -52,6 +52,14 @@ public class LeagueScheduleService
 
             RotateTeams(rotatingTeams);
         }
+
+        var fixtures = new List<Fixture>(firstLegFixtures);
+        fixtures.AddRange(firstLegFixtures.Select(fixture => new Fixture
+        {
+            RoundNumber = fixture.RoundNumber + singleRoundRobinRounds,
+            HomeTeam = fixture.AwayTeam,
+            AwayTeam = fixture.HomeTeam
+        }));
 
         return fixtures;
     }

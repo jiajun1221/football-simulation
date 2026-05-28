@@ -262,6 +262,27 @@
                                                VerticalAlignment="Center" />
                                 </StackPanel>
                             </Border>
+                            <Border x:Name="ContractBadgeBorder"
+                                    Background="#EFF6FF"
+                                    BorderBrush="#BFDBFE"
+                                    BorderThickness="1"
+                                    CornerRadius="10"
+                                    Padding="8,3"
+                                    Margin="0,0,6,6">
+                                <TextBlock x:Name="ContractBadgeTextBlock"
+                                           Foreground="#1D4ED8"
+                                           FontWeight="SemiBold" />
+                            </Border>
+                            <Border Background="#F8FAFC"
+                                    BorderBrush="#CBD5E1"
+                                    BorderThickness="1"
+                                    CornerRadius="10"
+                                    Padding="8,3"
+                                    Margin="0,0,6,6">
+                                <TextBlock x:Name="WageBadgeTextBlock"
+                                           Foreground="#0F172A"
+                                           FontWeight="SemiBold" />
+                            </Border>
                         </WrapPanel>
 
                         <Grid Style="{StaticResource DetailSectionHeaderStyle}" Margin="0,4,0,7">
@@ -389,16 +410,59 @@
                             <TextBlock Grid.Column="1" Text="Market Info" Style="{StaticResource DetailSectionTitleStyle}" />
                             <Border Grid.Column="2" Style="{StaticResource DetailSectionDividerStyle}" />
                         </Grid>
-                        <UniformGrid Columns="2" Margin="0,0,0,10">
+                        <UniformGrid Columns="3" Margin="0,0,0,10">
                             <StackPanel Margin="0,0,8,8">
                                 <TextBlock Text="Market Value" Style="{StaticResource DetailMutedTextStyle}" />
                                 <TextBlock x:Name="MarketValueTextBlock" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" />
                             </StackPanel>
-                            <StackPanel Margin="0,0,0,8">
+                            <StackPanel Margin="0,0,8,8">
                                 <TextBlock x:Name="PriceLabelTextBlock" Style="{StaticResource DetailMutedTextStyle}" />
                                 <TextBlock x:Name="PriceTextBlock" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource AppAccentBrush}" />
                             </StackPanel>
+                            <StackPanel Margin="0,0,0,8">
+                                <TextBlock Text="Difficulty" Style="{StaticResource DetailMutedTextStyle}" />
+                                <Border x:Name="NegotiationDifficultyBadgeBorder"
+                                        CornerRadius="9"
+                                        Padding="8,3"
+                                        HorizontalAlignment="Left">
+                                    <TextBlock x:Name="NegotiationDifficultyTextBlock"
+                                               Foreground="#FFFFFF"
+                                               FontSize="11"
+                                               FontWeight="Bold" />
+                                </Border>
+                            </StackPanel>
                         </UniformGrid>
+
+                        <Grid Style="{StaticResource DetailSectionHeaderStyle}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="📄" Style="{StaticResource DetailSectionIconStyle}" />
+                            <TextBlock Grid.Column="1" Text="Contract" Style="{StaticResource DetailSectionTitleStyle}" />
+                            <Border Grid.Column="2" Style="{StaticResource DetailSectionDividerStyle}" />
+                        </Grid>
+                        <WrapPanel Margin="0,0,0,10">
+                            <Border Background="#EFF6FF" CornerRadius="10" Padding="8,4" Margin="0,0,6,6">
+                                <TextBlock x:Name="ContractExpiryTextBlock" Foreground="#1D4ED8" FontWeight="Bold" />
+                            </Border>
+                            <Border Background="#F8FAFC" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="10" Padding="8,4" Margin="0,0,6,6">
+                                <TextBlock x:Name="ContractWageTextBlock" Foreground="#0F172A" FontWeight="Bold" />
+                            </Border>
+                            <Border Background="#F8FAFC" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="10" Padding="8,4" Margin="0,0,6,6">
+                                <TextBlock x:Name="ContractRoleTextBlock" Foreground="#0F172A" FontWeight="Bold" />
+                            </Border>
+                            <Border x:Name="ReleaseClauseBadgeBorder" Background="#FEF3C7" CornerRadius="10" Padding="8,4" Margin="0,0,6,6">
+                                <TextBlock x:Name="ReleaseClauseTextBlock" Foreground="#92400E" FontWeight="Bold" />
+                            </Border>
+                        </WrapPanel>
+                        <TextBlock x:Name="ContractWarningTextBlock"
+                                   Foreground="#B45309"
+                                   FontWeight="SemiBold"
+                                   TextWrapping="Wrap"
+                                   Visibility="Collapsed"
+                                   Margin="0,0,0,10" />
 
                         <TextBlock x:Name="RecommendationTextBlock"
                                    Foreground="#2563EB"
@@ -433,7 +497,33 @@
                                 Click="MakeOfferButton_Click" />
                     </StackPanel>
 
-                    <StackPanel x:Name="SquadActionPanel" Visibility="Collapsed" />
+                    <StackPanel x:Name="SquadActionPanel" Visibility="Collapsed">
+                        <TextBlock Text="Contract Extension" Style="{StaticResource DetailLabelStyle}" />
+                        <UniformGrid Columns="3" Margin="0,0,0,8">
+                            <TextBox x:Name="RenewalWageTextBox"
+                                     Style="{StaticResource DetailTextBoxStyle}"
+                                     Margin="0,0,6,0"
+                                     ToolTip="Weekly wage in thousands" />
+                            <ComboBox x:Name="RenewalYearsComboBox"
+                                      Height="30"
+                                      Padding="7,2"
+                                      Background="{DynamicResource AppInputBackground}"
+                                      Foreground="{DynamicResource AppTextBrush}"
+                                      Margin="0,0,6,0"
+                                      ToolTip="Contract length" />
+                            <ComboBox x:Name="RenewalRoleComboBox"
+                                      Height="30"
+                                      Padding="7,2"
+                                      Background="{DynamicResource AppInputBackground}"
+                                      Foreground="{DynamicResource AppTextBrush}"
+                                      ToolTip="Squad role" />
+                        </UniformGrid>
+                        <Button x:Name="RenewContractButton"
+                                Content="Offer Extension"
+                                Style="{StaticResource DetailPrimaryButtonStyle}"
+                                HorizontalAlignment="Stretch"
+                                Click="RenewContractButton_Click" />
+                    </StackPanel>
 
                     <StackPanel x:Name="OfferActionPanel" Visibility="Collapsed">
                         <TextBlock Text="Counter Amount" Style="{StaticResource DetailLabelStyle}" />

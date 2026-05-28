@@ -30,6 +30,10 @@ public class SquadPlayerRecord
     public string? TransferStatus { get; set; }
     public string? Role { get; set; }
     public bool? RejectTransferOffers { get; set; }
+    public int? ContractEndYear { get; set; }
+    public decimal? WeeklyWage { get; set; }
+    public decimal? ReleaseClause { get; set; }
+    public string? ContractStatus { get; set; }
     public int? Stamina { get; set; }
     public int Fatigue { get; set; }
     public string Form { get; set; } = "Average";
