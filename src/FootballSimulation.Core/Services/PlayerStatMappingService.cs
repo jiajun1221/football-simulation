@@ -21,9 +21,12 @@ public class PlayerStatMappingService
             record.InjurySeverity,
             record.InjuryRecoveryMatches,
             record.IsSeasonEndingInjury);
+        var traits = MapTraits(record.Traits);
+        var attributes = CreateAttributes(record, position, preferredPosition, overall, traits, stamina);
 
         return new Player
         {
+            PlayerId = CreateFallbackPlayerId(record.Name, record.SquadNumber, record.Position),
             Name = record.Name,
             SquadNumber = record.SquadNumber,
             Position = position,
@@ -31,18 +34,29 @@ public class PlayerStatMappingService
             SecondaryPositions = MapSecondaryPositions(record.SecondaryPositions),
             AssignedPosition = preferredPosition,
             PreferredFoot = string.Empty,
+            Nationality = record.Nationality?.Trim() ?? string.Empty,
+            NationalityCode = record.NationalityCode?.Trim() ?? string.Empty,
+            NationalityName = record.NationalityName?.Trim() ?? record.Nationality?.Trim() ?? string.Empty,
+            FlagEmoji = record.FlagEmoji?.Trim() ?? string.Empty,
+            FlagImagePath = record.FlagImagePath?.Trim() ?? string.Empty,
             DisciplineRating = 50,
             OverallRating = overall,
             BaseOverallRating = overall,
             Age = record.Age,
             PotentialOverall = record.PotentialOverall,
+            Role = InferRole(overall, record.Age, position),
             Form = form,
             IsStarter = record.IsStarter,
             IsOnPitch = record.IsStarter,
             CurrentForm = currentForm,
             FormStatus = loadedStatus,
             Morale = ClampStat(record.Morale ?? 50),
-            Traits = MapTraits(record.Traits),
+            Traits = traits,
+            Pace = attributes.Pace,
+            Shooting = attributes.Shooting,
+            Dribbling = attributes.Dribbling,
+            Defending = attributes.Defending,
+            Physical = attributes.Physical,
             Attack = CalculateAttack(position, preferredPosition, overall),
             Defense = CalculateDefense(position, preferredPosition, overall),
             Passing = CalculatePassing(position, preferredPosition, overall),
@@ -76,9 +90,14 @@ public class PlayerStatMappingService
             record.InjurySeverity,
             record.InjuryRecoveryMatches,
             record.IsSeasonEndingInjury);
+        var traits = MapTraits(record.Traits);
+        var attributes = CreateAttributes(record, position, preferredPosition, overall, traits, stamina);
 
         return new Player
         {
+            PlayerId = string.IsNullOrWhiteSpace(record.PlayerId)
+                ? CreateFallbackPlayerId(record.Name, record.SquadNumber, record.Position)
+                : record.PlayerId.Trim(),
             Name = record.Name,
             SquadNumber = record.SquadNumber,
             Position = position,
@@ -86,18 +105,31 @@ public class PlayerStatMappingService
             SecondaryPositions = MapSecondaryPositions(record.SecondaryPositions),
             AssignedPosition = preferredPosition,
             PreferredFoot = NormalizePreferredFoot(record.PreferredFoot),
+            Nationality = record.Nationality?.Trim() ?? string.Empty,
+            NationalityCode = record.NationalityCode?.Trim() ?? string.Empty,
+            NationalityName = record.NationalityName?.Trim() ?? record.Nationality?.Trim() ?? string.Empty,
+            FlagEmoji = record.FlagEmoji?.Trim() ?? string.Empty,
+            FlagImagePath = record.FlagImagePath?.Trim() ?? string.Empty,
             DisciplineRating = Math.Clamp(record.DisciplineRating ?? 50, 1, 100),
             OverallRating = overall,
             BaseOverallRating = overall,
             Age = record.Age,
             PotentialOverall = record.PotentialOverall,
+            TransferStatus = MapTransferStatus(record.TransferStatus),
+            Role = MapRole(record.Role, overall, record.Age, position),
+            RejectTransferOffers = record.RejectTransferOffers == true,
             Form = form,
             IsStarter = isStarter,
             IsOnPitch = isStarter,
             CurrentForm = currentForm,
             FormStatus = loadedStatus,
             Morale = ClampStat(record.Morale ?? 50),
-            Traits = MapTraits(record.Traits),
+            Traits = traits,
+            Pace = attributes.Pace,
+            Shooting = attributes.Shooting,
+            Dribbling = attributes.Dribbling,
+            Defending = attributes.Defending,
+            Physical = attributes.Physical,
             Attack = CalculateAttack(position, preferredPosition, overall),
             Defense = CalculateDefense(position, preferredPosition, overall),
             Passing = CalculatePassing(position, preferredPosition, overall),
@@ -123,6 +155,89 @@ public class PlayerStatMappingService
             .Select(name => Enum.Parse<PlayerTrait>(name, ignoreCase: true))
             .Distinct()
             .ToList();
+    }
+
+    private static PlayerAttributeRatings CreateAttributes(
+        PlayerDataRecord record,
+        Position position,
+        string preferredPosition,
+        int overall,
+        IReadOnlyCollection<PlayerTrait> traits,
+        int stamina)
+    {
+        var derived = PlayerAttributeService.DeriveAttributes(position, preferredPosition, overall, traits, stamina);
+        return new PlayerAttributeRatings(
+            ClampStat(record.Pace ?? derived.Pace),
+            ClampStat(record.Shooting ?? derived.Shooting),
+            ClampStat(record.PassingAttribute ?? derived.Passing),
+            ClampStat(record.Dribbling ?? derived.Dribbling),
+            ClampStat(record.Defending ?? derived.Defending),
+            ClampStat(record.Physical ?? derived.Physical));
+    }
+
+    private static PlayerAttributeRatings CreateAttributes(
+        SquadPlayerRecord record,
+        Position position,
+        string preferredPosition,
+        int overall,
+        IReadOnlyCollection<PlayerTrait> traits,
+        int stamina)
+    {
+        var derived = PlayerAttributeService.DeriveAttributes(position, preferredPosition, overall, traits, stamina);
+        return new PlayerAttributeRatings(
+            ClampStat(record.Pace ?? derived.Pace),
+            ClampStat(record.Shooting ?? derived.Shooting),
+            ClampStat(record.PassingAttribute ?? derived.Passing),
+            ClampStat(record.Dribbling ?? derived.Dribbling),
+            ClampStat(record.Defending ?? derived.Defending),
+            ClampStat(record.Physical ?? derived.Physical));
+    }
+
+    private static PlayerTransferStatus MapTransferStatus(string? status)
+    {
+        return Enum.TryParse<PlayerTransferStatus>(status, ignoreCase: true, out var parsedStatus)
+            ? parsedStatus
+            : PlayerTransferStatus.None;
+    }
+
+    private static PlayerRole MapRole(string? role, int overall, int? age, Position position)
+    {
+        return Enum.TryParse<PlayerRole>(role?.Replace(" ", string.Empty), ignoreCase: true, out var parsedRole)
+            ? parsedRole
+            : InferRole(overall, age, position);
+    }
+
+    private static PlayerRole InferRole(int overall, int? age, Position position)
+    {
+        if (age is <= 21 && overall < 82)
+        {
+            return PlayerRole.Prospect;
+        }
+
+        if (overall >= 86)
+        {
+            return PlayerRole.KeyPlayer;
+        }
+
+        if (overall >= 80)
+        {
+            return PlayerRole.Starter;
+        }
+
+        return position == Position.Goalkeeper && overall < 75
+            ? PlayerRole.Backup
+            : PlayerRole.Rotation;
+    }
+
+    private static string CreateFallbackPlayerId(string name, int squadNumber, string position)
+    {
+        var slug = new string(name
+            .Normalize()
+            .Where(character => char.IsLetterOrDigit(character))
+            .Select(char.ToLowerInvariant)
+            .ToArray());
+
+        return $"{slug}-{squadNumber}-{position.Trim().ToLowerInvariant()}";
     }
 
     private static int GetSuspendedMatches(int? suspendedMatches, bool? isSuspended)

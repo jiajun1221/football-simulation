@@ -18,6 +18,7 @@
     <Resource Include="Assets\App\*.png" />
     <Resource Include="Assets\Backgrounds\*.png" />
     <Resource Include="Assets\Clubs\**\*.png" />
+    <Resource Include="Assets\Flags\*.png" />
     <Resource Include="Assets\Leagues\*.png" />
     <Resource Include="Assets\Players\*.png" />
   </ItemGroup>

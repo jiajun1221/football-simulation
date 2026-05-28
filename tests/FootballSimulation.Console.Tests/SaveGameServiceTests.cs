@@ -76,6 +76,43 @@ public class SaveGameServiceTests
     }
 
     [Fact]
+    public void CreateLeague_BackfillsMissingPlayerDataFromLeagueData()
+    {
+        var dataService = new LeagueDataService();
+        var definition = dataService.GetLeagueDefinition("premier-league");
+        var teams = dataService.LoadTeams(definition);
+        var league = new GameSessionService().CreateLeague(definition, teams);
+        var selectedTeam = league.Teams.Single(team => team.Name == "Chelsea");
+        var expectedAges = selectedTeam.Players.Concat(selectedTeam.Substitutes)
+            .ToDictionary(player => player.Name, player => player.Age);
+        var expectedFlagPaths = selectedTeam.Players.Concat(selectedTeam.Substitutes)
+            .ToDictionary(player => player.Name, player => player.FlagImagePath);
+        foreach (var player in league.Teams.SelectMany(team => team.Players.Concat(team.Substitutes)))
+        {
+            player.Age = null;
+            player.NationalityCode = string.Empty;
+            player.NationalityName = string.Empty;
+            player.Nationality = string.Empty;
+            player.FlagImagePath = string.Empty;
+        }
+
+        var saveData = SaveGameService.CreateSaveData(league, selectedTeam);
+        var restoredLeague = SaveGameService.CreateLeague(saveData);
+        var restoredChelsea = restoredLeague.Teams.Single(team => team.Name == "Chelsea");
+
+        Assert.All(restoredLeague.Teams.SelectMany(team => team.Players.Concat(team.Substitutes)), player =>
+        {
+            Assert.NotNull(player.Age);
+            Assert.InRange(player.Age!.Value, 15, 45);
+        });
+        foreach (var player in restoredChelsea.Players.Concat(restoredChelsea.Substitutes))
+        {
+            Assert.Equal(expectedAges[player.Name], player.Age);
+            Assert.Equal(expectedFlagPaths[player.Name], player.FlagImagePath);
+        }
+    }
+
+    [Fact]
     public void SaveGame_AndLoadGame_PreservesCustomLineupSlotsAndBenchOrder()
     {
         var saveDirectory = CreateTempSaveDirectory();

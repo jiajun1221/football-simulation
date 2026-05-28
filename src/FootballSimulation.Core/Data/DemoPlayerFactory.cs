@@ -11,6 +11,7 @@ public static class DemoPlayerFactory
         {
             Name = name,
             Position = Position.Goalkeeper,
+            Age = EstimateAge(Position.Goalkeeper, overall),
             OverallRating = overall,
             BaseOverallRating = overall,
             Attack = 18,
@@ -29,6 +30,7 @@ public static class DemoPlayerFactory
         {
             Name = name,
             Position = Position.Defender,
+            Age = EstimateAge(Position.Defender, overall),
             OverallRating = overall,
             BaseOverallRating = overall,
             Attack = attack,
@@ -47,6 +49,7 @@ public static class DemoPlayerFactory
         {
             Name = name,
             Position = Position.Midfielder,
+            Age = EstimateAge(Position.Midfielder, overall),
             OverallRating = overall,
             BaseOverallRating = overall,
             Attack = attack,
@@ -65,6 +68,7 @@ public static class DemoPlayerFactory
         {
             Name = name,
             Position = Position.Forward,
+            Age = EstimateAge(Position.Forward, overall),
             OverallRating = overall,
             BaseOverallRating = overall,
             Attack = attack,
@@ -79,5 +83,17 @@ public static class DemoPlayerFactory
     private static int CalculateOverall(int attack, int defense, int passing, int stamina, int finishing)
     {
         return (int)Math.Round((attack + defense + passing + stamina + finishing) / 5.0);
+    }
+
+    private static int EstimateAge(Position position, int overall)
+    {
+        return position switch
+        {
+            Position.Goalkeeper => overall >= 80 ? 29 : 25,
+            Position.Defender => overall >= 78 ? 27 : 24,
+            Position.Midfielder => overall >= 78 ? 26 : 23,
+            Position.Forward => overall >= 80 ? 25 : 22,
+            _ => 24
+        };
     }
 }

@@ -66,6 +66,42 @@
             </Setter>
         </Style>
 
+        <Style x:Key="DashboardWhiteActionButton" TargetType="Button">
+            <Setter Property="Height" Value="36" />
+            <Setter Property="Padding" Value="12,0" />
+            <Setter Property="Background" Value="#FFFFFF" />
+            <Setter Property="Foreground" Value="#061226" />
+            <Setter Property="BorderBrush" Value="#CBD5E1" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ActionBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="12">
+                            <TextBlock Text="{TemplateBinding Content}"
+                                       Foreground="{TemplateBinding Foreground}"
+                                       FontSize="{TemplateBinding FontSize}"
+                                       FontWeight="{TemplateBinding FontWeight}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       TextAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ActionBorder" Property="BorderBrush" Value="#60A5FA" />
+                                <Setter TargetName="ActionBorder" Property="Background" Value="#F8FAFC" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="ModernDataGrid" TargetType="DataGrid">
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
@@ -136,85 +172,33 @@
             <Border Background="{DynamicResource AppSecondaryCardBackground}"
                     BorderBrush="{DynamicResource AppBorderBrush}"
                     BorderThickness="1"
-                    CornerRadius="14"
-                    Padding="7"
+                    CornerRadius="12"
+                    Padding="7,6"
                     Margin="0,0,6,0"
-                    MinHeight="108"
+                    MinHeight="54"
                     VerticalAlignment="Stretch">
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="12"
-                                      ShadowDepth="1"
-                                      Direction="270"
-                                      Opacity="0.10"
-                                      Color="#233A55" />
-                </Border.Effect>
                 <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-
-                        <Border Background="{Binding HomeAwayBrush}"
-                                CornerRadius="8"
-                                Padding="5,2"
-                                HorizontalAlignment="Left">
-                            <TextBlock Text="{Binding HomeAwayText}"
-                                       Foreground="{Binding HomeAwayForeground}"
-                                       FontSize="8"
-                                       FontWeight="Bold"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center" />
-                        </Border>
-
-                        <TextBlock Grid.Column="1"
-                                   Text="{Binding RoundText}"
-                                   FontSize="9"
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Image Source="{Binding OpponentLogoPath}"
+                           Width="24"
+                           Height="24"
+                           Stretch="Uniform"
+                           Margin="0,0,7,0"
+                           VerticalAlignment="Center" />
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding SummaryText}"
+                                   FontSize="11"
                                    FontWeight="Bold"
                                    Foreground="{DynamicResource AppTextBrush}"
-                                   VerticalAlignment="Center" />
-                    </Grid>
-
-                    <Grid Grid.Row="1"
-                          Margin="0,5,0,4"
-                          HorizontalAlignment="Stretch">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <Image Source="{Binding OpponentLogoPath}"
-                               Width="28"
-                               Height="28"
-                               Stretch="Uniform"
-                               HorizontalAlignment="Center"
-                               Margin="0,0,0,4" />
-                        <TextBlock Grid.Row="1"
-                                   Text="{Binding OpponentName}"
-                                   FontSize="9"
-                                   FontWeight="Bold"
-                                   Foreground="{DynamicResource AppTextBrush}"
-                                   TextAlignment="Center"
-                                   TextWrapping="Wrap"
-                                   TextTrimming="CharacterEllipsis"
-                                   LineHeight="11"
-                                   HorizontalAlignment="Stretch" />
-                    </Grid>
-
-                    <TextBlock Grid.Row="2"
-                               Text="{Binding VenueText}"
-                               FontSize="8"
-                               Foreground="{DynamicResource AppMutedTextBrush}"
-                               TextAlignment="Center"
-                               TextWrapping="Wrap"
-                               TextTrimming="CharacterEllipsis"
-                               LineHeight="10"
-                               HorizontalAlignment="Stretch" />
+                                   TextTrimming="CharacterEllipsis" />
+                        <TextBlock Text="{Binding VenueText}"
+                                   FontSize="8"
+                                   Foreground="{DynamicResource AppMutedTextBrush}"
+                                   TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
                 </Grid>
             </Border>
         </DataTemplate>
@@ -281,10 +265,9 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <Grid Margin="0,0,0,18">
+                <Grid Margin="0,0,0,12">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="62" />
                         <ColumnDefinition Width="*" />
@@ -303,13 +286,13 @@
                                VerticalAlignment="Center" />
                     </Border>
 
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,8,0">
                         <TextBlock Text="Club Dashboard"
-                                   FontSize="15"
+                                   FontSize="13"
                                    FontWeight="SemiBold"
                                    Foreground="{DynamicResource AppMutedTextBrush}" />
                         <TextBlock x:Name="SelectedTeamTextBlock"
-                                   FontSize="30"
+                                   FontSize="25"
                                    FontWeight="Bold"
                                    Foreground="{DynamicResource AppTextBrush}"
                                    Margin="0,2,0,0" />
@@ -331,47 +314,39 @@
                     </StackPanel>
                 </Grid>
 
-                <UniformGrid Grid.Row="1"
-                             Columns="3"
-                             Margin="0,0,0,18">
-                    <Border Background="{DynamicResource AppSecondaryCardBackground}" CornerRadius="12" Padding="10" Margin="0,0,8,0">
-                        <StackPanel>
-                            <TextBlock Text="Position" FontSize="11" Foreground="{DynamicResource AppMutedTextBrush}" FontWeight="SemiBold" />
-                            <TextBlock x:Name="PositionStatTextBlock" FontSize="18" Foreground="{DynamicResource AppTextBrush}" FontWeight="Bold" />
-                        </StackPanel>
-                    </Border>
-                    <Border Background="{DynamicResource AppSecondaryCardBackground}" CornerRadius="12" Padding="10" Margin="0,0,8,0">
-                        <StackPanel>
-                            <TextBlock Text="Points" FontSize="11" Foreground="{DynamicResource AppMutedTextBrush}" FontWeight="SemiBold" />
-                            <TextBlock x:Name="PointsStatTextBlock" FontSize="18" Foreground="{DynamicResource AppTextBrush}" FontWeight="Bold" />
-                        </StackPanel>
-                    </Border>
-                    <Border Background="{DynamicResource AppSecondaryCardBackground}" CornerRadius="12" Padding="10">
-                        <StackPanel>
-                            <TextBlock Text="Goal Diff" FontSize="11" Foreground="{DynamicResource AppMutedTextBrush}" FontWeight="SemiBold" />
-                            <TextBlock x:Name="GoalDifferenceStatTextBlock" FontSize="18" Foreground="{DynamicResource AppTextBrush}" FontWeight="Bold" />
-                        </StackPanel>
-                    </Border>
-                </UniformGrid>
+                <Border Grid.Row="1"
+                        Background="{DynamicResource AppSecondaryCardBackground}"
+                        CornerRadius="12"
+                        Padding="12,8"
+                        Margin="0,0,0,12">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock Text="Position " Foreground="{DynamicResource AppMutedTextBrush}" FontSize="12" FontWeight="SemiBold" />
+                        <TextBlock x:Name="PositionStatTextBlock" Foreground="{DynamicResource AppTextBrush}" FontSize="15" FontWeight="Bold" />
+                        <TextBlock Text="  |  Points " Foreground="{DynamicResource AppMutedTextBrush}" FontSize="12" FontWeight="SemiBold" />
+                        <TextBlock x:Name="PointsStatTextBlock" Foreground="{DynamicResource AppTextBrush}" FontSize="15" FontWeight="Bold" />
+                        <TextBlock Text="  |  GD " Foreground="{DynamicResource AppMutedTextBrush}" FontSize="12" FontWeight="SemiBold" />
+                        <TextBlock x:Name="GoalDifferenceStatTextBlock" Foreground="{DynamicResource AppTextBrush}" FontSize="15" FontWeight="Bold" />
+                    </StackPanel>
+                </Border>
 
-                <StackPanel Grid.Row="2" Margin="0,0,0,24">
-                    <Grid Margin="0,0,0,8">
+                <StackPanel Grid.Row="2" Margin="0,0,0,14">
+                    <Grid Margin="0,0,0,6">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="Upcoming Match"
-                                   FontSize="17"
+                                   FontSize="15"
                                    FontWeight="Bold"
                                    Foreground="{DynamicResource AppTextBrush}"
                                    VerticalAlignment="Center" />
                         <Border Grid.Column="1"
                                 x:Name="HomeAwayBadge"
-                                CornerRadius="11"
-                                Padding="11,5">
+                                CornerRadius="9"
+                                Padding="8,3">
                             <TextBlock x:Name="HomeAwayBadgeTextBlock"
                                        Foreground="White"
-                                       FontSize="11"
+                                       FontSize="9"
                                        FontWeight="Bold" />
                         </Border>
                     </Grid>
@@ -379,66 +354,98 @@
                     <Border Background="{DynamicResource AppSecondaryCardBackground}"
                             BorderBrush="{DynamicResource AppBorderBrush}"
                             BorderThickness="1"
-                            CornerRadius="16"
-                            Padding="16"
-                            Margin="0,0,0,14">
+                            CornerRadius="14"
+                            Padding="10"
+                            Margin="0,0,0,10">
                         <StackPanel>
-                            <TextBlock x:Name="UpcomingRoundTextBlock"
-                                       Foreground="{DynamicResource AppMutedTextBrush}"
-                                       FontSize="12"
-                                       FontWeight="SemiBold"
-                                       Margin="0,0,0,10" />
-
-                            <Grid Margin="0,0,0,12">
+                            <Grid Margin="0,0,0,8">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="42" />
+                                    <ColumnDefinition Width="34" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
 
                                 <StackPanel HorizontalAlignment="Center">
-                                    <Image x:Name="UpcomingHomeLogoImage" Width="44" Height="44" Stretch="Uniform" />
+                                    <Image x:Name="UpcomingHomeLogoImage" Width="34" Height="34" Stretch="Uniform" />
                                     <TextBlock x:Name="UpcomingHomeNameTextBlock"
-                                               FontSize="12"
+                                               FontSize="10"
                                                FontWeight="Bold"
                                                Foreground="{DynamicResource AppTextBrush}"
                                                TextAlignment="Center"
                                                TextWrapping="Wrap"
-                                               Margin="0,6,0,0" />
+                                               Margin="0,3,0,0" />
                                 </StackPanel>
 
-                                <TextBlock Grid.Column="1"
-                                           Text="vs"
-                                           FontSize="17"
-                                           FontWeight="Bold"
-                                           Foreground="{DynamicResource AppMutedTextBrush}"
-                                           HorizontalAlignment="Center"
-                                           VerticalAlignment="Center" />
+                                <StackPanel Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <TextBlock x:Name="UpcomingRoundTextBlock"
+                                               Foreground="{DynamicResource AppMutedTextBrush}"
+                                               FontSize="9"
+                                               FontWeight="SemiBold"
+                                               HorizontalAlignment="Center" />
+                                    <TextBlock Text="vs"
+                                               FontSize="14"
+                                               FontWeight="Bold"
+                                               Foreground="{DynamicResource AppTextBrush}"
+                                               HorizontalAlignment="Center" />
+                                </StackPanel>
 
                                 <StackPanel Grid.Column="2" HorizontalAlignment="Center">
-                                    <Image x:Name="UpcomingAwayLogoImage" Width="44" Height="44" Stretch="Uniform" />
+                                    <Image x:Name="UpcomingAwayLogoImage" Width="34" Height="34" Stretch="Uniform" />
                                     <TextBlock x:Name="UpcomingAwayNameTextBlock"
-                                               FontSize="12"
+                                               FontSize="10"
                                                FontWeight="Bold"
                                                Foreground="{DynamicResource AppTextBrush}"
                                                TextAlignment="Center"
                                                TextWrapping="Wrap"
-                                               Margin="0,6,0,0" />
+                                               Margin="0,3,0,0" />
                                 </StackPanel>
                             </Grid>
 
                             <TextBlock x:Name="VenueTextBlock"
                                        Foreground="{DynamicResource AppMutedTextBrush}"
-                                       FontSize="13"
+                                       FontSize="10"
                                        FontWeight="SemiBold"
-                                       TextWrapping="Wrap" />
+                                       TextWrapping="Wrap"
+                                       TextAlignment="Center" />
                         </StackPanel>
                     </Border>
 
-                    <Button x:Name="PrepareMatchButton"
-                            Style="{StaticResource PrimaryDashboardButton}"
-                            Content="Prepare Match"
-                            Click="PrepareMatchButton_Click" />
+                    <StackPanel Margin="0,0,0,10">
+                        <TextBlock Text="Upcoming Fixtures"
+                                   FontSize="15"
+                                   FontWeight="Bold"
+                                   Foreground="{DynamicResource AppTextBrush}"
+                                   Margin="0,0,0,6" />
+                        <ItemsControl x:Name="UpcomingFixturesItemsControl"
+                                      ItemTemplate="{StaticResource FixtureCardTemplate}"
+                                      ItemContainerStyle="{StaticResource FixtureCardItemStyle}"
+                                      VerticalAlignment="Stretch">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Columns="2" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
+                    </StackPanel>
+
+                    <UniformGrid Columns="2" Rows="2">
+                        <Button x:Name="PrepareMatchButton"
+                                Style="{StaticResource DashboardWhiteActionButton}"
+                                Content="⚽ Prepare Match"
+                                Margin="0,0,6,6"
+                                Click="PrepareMatchButton_Click" />
+                        <Button Content="💾 Save Game"
+                                Style="{StaticResource DashboardWhiteActionButton}"
+                                Margin="0,0,0,6"
+                                Click="SaveGameButton_Click" />
+                        <Button Content="⚙ Team Settings"
+                                Style="{StaticResource DashboardWhiteActionButton}"
+                                Margin="0,0,6,0"
+                                Click="TeamSettingsButton_Click" />
+                        <Button Content="📊 Player Stats"
+                                Style="{StaticResource DashboardWhiteActionButton}"
+                                Click="PlayerStatsButton_Click" />
+                    </UniformGrid>
 
                     <StackPanel x:Name="UnavailablePlayersPanel"
                                 Margin="0,12,0,0"
@@ -451,24 +458,6 @@
                         <ItemsControl x:Name="UnavailablePlayersItemsControl"
                                       ItemTemplate="{StaticResource UnavailablePlayerTemplate}" />
                     </StackPanel>
-                </StackPanel>
-
-                <StackPanel Grid.Row="3">
-                    <TextBlock Text="Upcoming Club Fixtures"
-                               FontSize="17"
-                               FontWeight="Bold"
-                               Foreground="{DynamicResource AppTextBrush}"
-                               Margin="0,0,0,8" />
-                    <ItemsControl x:Name="UpcomingFixturesItemsControl"
-                                  ItemTemplate="{StaticResource FixtureCardTemplate}"
-                                  ItemContainerStyle="{StaticResource FixtureCardItemStyle}"
-                                  VerticalAlignment="Stretch">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <UniformGrid Columns="3" Rows="1" />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                    </ItemsControl>
                 </StackPanel>
             </Grid>
         </Border>

@@ -321,14 +321,27 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
-                        <TextBlock Grid.Row="0"
-                                   Text="{Binding DisplayName}"
-                                   Foreground="{Binding NameForeground}"
-                                   FontSize="9.2"
-                                   FontWeight="Black"
-                                   TextTrimming="CharacterEllipsis"
-                                   TextWrapping="NoWrap"
-                                   Margin="0,0,0,4" />
+                        <Grid Grid.Row="0" VerticalAlignment="Center" Margin="0,0,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Image Source="{Binding FlagImagePath}"
+                                   ToolTip="{Binding NationalityName}"
+                                   Width="14"
+                                   Height="10"
+                                   Stretch="UniformToFill"
+                                   Margin="0,0,4,0"
+                                   VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding DisplayName}"
+                                       Foreground="{Binding NameForeground}"
+                                       FontSize="9.2"
+                                       FontWeight="Black"
+                                       TextTrimming="CharacterEllipsis"
+                                       TextWrapping="NoWrap"
+                                       VerticalAlignment="Center" />
+                        </Grid>
 
                         <Grid Grid.Row="1">
                             <Grid.ColumnDefinitions>
@@ -997,13 +1010,26 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
 
-                                <TextBlock x:Name="SelectedPlayerNameTextBlock"
-                                           Foreground="{DynamicResource AppTextBrush}"
-                                           FontSize="15"
-                                           FontWeight="Bold"
-                                           TextWrapping="Wrap"
-                                           VerticalAlignment="Center"
-                                           Margin="0,0,8,0" />
+                                <Grid VerticalAlignment="Center" Margin="0,0,8,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Image Source="{Binding FlagImagePath}"
+                                           ToolTip="{Binding NationalityName}"
+                                           Width="18"
+                                           Height="12"
+                                           Stretch="UniformToFill"
+                                           Margin="0,0,5,0"
+                                           VerticalAlignment="Center" />
+                                    <TextBlock x:Name="SelectedPlayerNameTextBlock"
+                                               Grid.Column="1"
+                                               Foreground="{DynamicResource AppTextBrush}"
+                                               FontSize="15"
+                                               FontWeight="Bold"
+                                               TextWrapping="Wrap"
+                                               VerticalAlignment="Center" />
+                                </Grid>
 
                                 <StackPanel Grid.Column="1"
                                             Orientation="Horizontal"

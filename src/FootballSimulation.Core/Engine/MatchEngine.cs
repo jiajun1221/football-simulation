@@ -1213,13 +1213,18 @@ public class MatchEngine
             return 0;
         }
 
-        return activePlayers.Average(player => player.Position switch
+        return activePlayers.Average(player =>
         {
-            Position.Forward => (player.Attack + player.Finishing) / 2.0 * 1.30,
-            Position.Midfielder => (player.Attack + player.Passing) / 2.0 * 1.10,
-            Position.Defender => player.Attack * 0.70,
-            Position.Goalkeeper => player.Attack * 0.30,
-            _ => player.Attack
+            var attributes = PlayerAttributeService.GetAttributes(player);
+            var attackingProfile = player.Attack * 0.35 + player.Finishing * 0.25 + attributes.Pace * 0.15 + attributes.Dribbling * 0.15 + attributes.Shooting * 0.10;
+            return player.Position switch
+            {
+                Position.Forward => attackingProfile * 1.30,
+                Position.Midfielder => (attackingProfile * 0.55 + attributes.Passing * 0.45) * 1.10,
+                Position.Defender => attackingProfile * 0.70,
+                Position.Goalkeeper => attackingProfile * 0.30,
+                _ => attackingProfile
+            };
         });
     }
 
@@ -1231,13 +1236,18 @@ public class MatchEngine
             return 0;
         }
 
-        return activePlayers.Average(player => player.Position switch
+        return activePlayers.Average(player =>
         {
-            Position.Goalkeeper => player.Defense * 1.40,
-            Position.Defender => player.Defense * 1.20,
-            Position.Midfielder => player.Defense * 0.90,
-            Position.Forward => player.Defense * 0.40,
-            _ => player.Defense
+            var attributes = PlayerAttributeService.GetAttributes(player);
+            var defensiveProfile = player.Defense * 0.50 + attributes.Defending * 0.34 + attributes.Physical * 0.16;
+            return player.Position switch
+            {
+                Position.Goalkeeper => defensiveProfile * 1.40,
+                Position.Defender => defensiveProfile * 1.20,
+                Position.Midfielder => defensiveProfile * 0.90,
+                Position.Forward => defensiveProfile * 0.40,
+                _ => defensiveProfile
+            };
         });
     }
 
@@ -1964,7 +1974,8 @@ public class MatchEngine
         takerPerformance.KeyPasses++;
         takerPerformance.Rating += 0.12;
 
-        var goalProbability = Math.Clamp(0.025 + primaryTaker.Finishing / 1700.0 +
+        var takerAttributes = PlayerAttributeService.GetAttributes(primaryTaker);
+        var goalProbability = Math.Clamp(0.025 + (primaryTaker.Finishing * 0.45 + takerAttributes.Shooting * 0.35 + takerAttributes.Passing * 0.20) / 1700.0 +
             (primaryTaker.Traits.Contains(PlayerTrait.DeadBallSpecialist) ? 0.040 : 0.0) +
             (primaryTaker.Traits.Contains(PlayerTrait.FinesseShot) ? 0.020 : 0.0), 0.035, 0.14);
         var roll = random.NextDouble();
@@ -2057,8 +2068,12 @@ public class MatchEngine
         var attackingStats = GetTeamStats(match, attackingTeam);
         var targetPerformance = GetOrCreatePerformance(match, attackingTeam, target);
         var takerPerformance = GetOrCreatePerformance(match, attackingTeam, taker);
+        var targetAttributes = PlayerAttributeService.GetAttributes(target);
+        var takerAttributes = PlayerAttributeService.GetAttributes(taker);
         var goalProbability = Math.Clamp(
             0.045 +
+            Math.Max(0, targetAttributes.Physical - 72) * 0.0008 +
+            Math.Max(0, takerAttributes.Passing - 72) * 0.0005 +
             (target.Traits.Contains(PlayerTrait.PowerHeader) ? 0.026 : 0.0) +
             (target.Traits.Contains(PlayerTrait.AerialThreat) ? 0.022 : 0.0) +
             (triggeredSetPieceTrait == PlayerTrait.DeadBallSpecialist ? 0.014 : 0.0),
@@ -3938,16 +3953,18 @@ public class MatchEngine
         var width = attackingTeam.Tactics.Width;
         var tempo = attackingTeam.Tactics.Tempo;
         var line = defendingTeam.Tactics.DefensiveLine;
-        var passingBonus = Math.Max(0, playmaker.Passing - 72) * 0.035;
-        var attackBonus = Math.Max(0, shooter.Attack - 72) * 0.030;
-        var finishingBonus = Math.Max(0, shooter.Finishing - 72) * 0.025;
+        var playmakerAttributes = PlayerAttributeService.GetAttributes(playmaker);
+        var shooterAttributes = PlayerAttributeService.GetAttributes(shooter);
+        var passingBonus = Math.Max(0, playmakerAttributes.Passing - 72) * 0.035;
+        var attackBonus = Math.Max(0, (shooterAttributes.Pace + shooterAttributes.Dribbling) / 2.0 - 72) * 0.030;
+        var finishingBonus = Math.Max(0, shooterAttributes.Shooting - 72) * 0.025;
 
         var weightedChanceTypes = new List<(string Type, double Weight)>
         {
             ("long-range attempt", 1.0 + Math.Max(0, 40 - line) * 0.035 + finishingBonus + (shooter.Traits.Contains(PlayerTrait.LongShotTaker) ? 1.60 : 0.0) + (shooter.Traits.Contains(PlayerTrait.FinesseShot) ? 0.58 : 0.0) + (shooter.Traits.Contains(PlayerTrait.OutsideFootShot) ? 0.35 : 0.0)),
-            ("cross into box", 1.0 + Math.Max(0, width - 50) * 0.045 + passingBonus * 0.65 + (playmaker.Traits.Contains(PlayerTrait.EarlyCrosser) ? 1.55 : 0.0) + (playmaker.Traits.Contains(PlayerTrait.LongPasser) ? 0.55 : 0.0) + (shooter.Traits.Contains(PlayerTrait.PowerHeader) ? 0.40 : 0.0) + (shooter.Traits.Contains(PlayerTrait.AerialThreat) ? 0.34 : 0.0)),
-            ("through ball attempt", 1.0 + Math.Max(0, line - 50) * 0.045 + Math.Max(0, tempo - 55) * 0.025 + passingBonus + attackBonus * 0.65 + (playmaker.Traits.Contains(PlayerTrait.LongPasser) ? 1.25 : 0.0) + (playmaker.Traits.Contains(PlayerTrait.Playmaker) ? 0.55 : 0.0) + (shooter.Traits.Contains(PlayerTrait.TriesToBeatOffsideTrap) ? 0.95 : 0.0)),
-            ("dribble run", 1.0 + Math.Max(0, width - 60) * 0.025 + Math.Max(0, tempo - 60) * 0.020 + attackBonus + (shooter.Traits.Contains(PlayerTrait.Rapid) ? 1.00 : 0.0) + (shooter.Traits.Contains(PlayerTrait.SpeedDribbler) ? 1.45 : 0.0) + (shooter.Traits.Contains(PlayerTrait.TechnicalDribbler) ? 0.85 : 0.0) + (shooter.Traits.Contains(PlayerTrait.Flair) ? 0.70 : 0.0)),
+            ("cross into box", 1.0 + Math.Max(0, width - 50) * 0.045 + passingBonus * 0.65 + Math.Max(0, shooterAttributes.Physical - 72) * 0.020 + (playmaker.Traits.Contains(PlayerTrait.EarlyCrosser) ? 1.55 : 0.0) + (playmaker.Traits.Contains(PlayerTrait.LongPasser) ? 0.55 : 0.0) + (shooter.Traits.Contains(PlayerTrait.PowerHeader) ? 0.40 : 0.0) + (shooter.Traits.Contains(PlayerTrait.AerialThreat) ? 0.34 : 0.0)),
+            ("through ball attempt", 1.0 + Math.Max(0, line - 50) * 0.045 + Math.Max(0, tempo - 55) * 0.025 + passingBonus + Math.Max(0, shooterAttributes.Pace - 72) * 0.030 + attackBonus * 0.45 + (playmaker.Traits.Contains(PlayerTrait.LongPasser) ? 1.25 : 0.0) + (playmaker.Traits.Contains(PlayerTrait.Playmaker) ? 0.55 : 0.0) + (shooter.Traits.Contains(PlayerTrait.TriesToBeatOffsideTrap) ? 0.95 : 0.0)),
+            ("dribble run", 1.0 + Math.Max(0, width - 60) * 0.025 + Math.Max(0, tempo - 60) * 0.020 + Math.Max(0, shooterAttributes.Dribbling - 72) * 0.036 + Math.Max(0, shooterAttributes.Pace - 72) * 0.018 + (shooter.Traits.Contains(PlayerTrait.Rapid) ? 1.00 : 0.0) + (shooter.Traits.Contains(PlayerTrait.SpeedDribbler) ? 1.45 : 0.0) + (shooter.Traits.Contains(PlayerTrait.TechnicalDribbler) ? 0.85 : 0.0) + (shooter.Traits.Contains(PlayerTrait.Flair) ? 0.70 : 0.0)),
             ("quick combination", 1.0 + Math.Max(0, 50 - width) * 0.045 + Math.Max(0, 55 - tempo) * 0.020 + passingBonus + attackBonus * 0.45 + (playmaker.Traits.Contains(PlayerTrait.Playmaker) ? 1.45 : 0.0) + (playmaker.Traits.Contains(PlayerTrait.PressResistant) ? 0.65 : 0.0) + (playmaker.Traits.Contains(PlayerTrait.TeamPlayer) ? 0.90 : 0.0) + (shooter.Traits.Contains(PlayerTrait.ClinicalFinisher) ? 0.35 : 0.0))
         };
 
@@ -3992,11 +4009,13 @@ public class MatchEngine
 
     private static double GetPreShotDisruptionRisk(Match match, Team attackingTeam, Team defendingTeam, string chanceType, Player shooter)
     {
+        var shooterAttributes = PlayerAttributeService.GetAttributes(shooter);
         var lowBlockBonus = defendingTeam.Tactics.DefensiveLine <= 40 ? 0.045 : 0.0;
         var defensiveMentalityBonus = defendingTeam.Tactics.Mentality is Mentality.Defensive ? 0.035 : 0.0;
         var pressureBonus = Math.Max(0, defendingTeam.Tactics.PressingIntensity - 60) * 0.001;
         var riskyTempoBonus = Math.Max(0, attackingTeam.Tactics.Tempo - 72) * 0.0012;
-        var poorTouchRisk = Math.Max(0, 58 - shooter.Passing) * 0.0014;
+        var poorTouchRisk = Math.Max(0, 58 - ((shooterAttributes.Passing + shooterAttributes.Dribbling) / 2.0)) * 0.0014;
+        var pressResistanceReduction = Math.Max(0, shooterAttributes.Dribbling - 78) * 0.0008;
         var awayComposureRisk = HomeAwayAdvantageService.IsHomeTeam(match, attackingTeam)
             ? -0.010
             : 0.035 * HomeAwayAdvantageService.GetAwayShapeMitigation(attackingTeam);
@@ -4011,7 +4030,7 @@ public class MatchEngine
             _ => 0.0
         };
 
-        return Math.Clamp(lowBlockBonus + defensiveMentalityBonus + pressureBonus + riskyTempoBonus + poorTouchRisk + awayComposureRisk + homePressRisk + chanceTypeRisk, 0.0, 0.16);
+        return Math.Clamp(lowBlockBonus + defensiveMentalityBonus + pressureBonus + riskyTempoBonus + poorTouchRisk + awayComposureRisk + homePressRisk + chanceTypeRisk - pressResistanceReduction, 0.0, 0.16);
     }
 
     private static double GetDefensiveShotBlockPressure(Team defendingTeam, double defendingTeamStrength, double attackingTeamStrength)
@@ -5009,11 +5028,12 @@ public class MatchEngine
 
     private static double GetPenaltyConversionChance(Player player)
     {
+        var attributes = PlayerAttributeService.GetAttributes(player);
         var penaltyBonus = player.Traits.Contains(PlayerTrait.PenaltySpecialist) ? 0.10 : 0.0;
         var traitBonus = player.Traits.Contains(PlayerTrait.ClinicalFinisher) ? 0.08 : 0.0;
         var finesseBonus = player.Traits.Contains(PlayerTrait.FinesseShot) ? 0.04 : 0.0;
         var setPieceBonus = player.Traits.Contains(PlayerTrait.DeadBallSpecialist) ? 0.04 : 0.0;
-        return Math.Clamp(0.58 + player.Finishing / 600.0 + penaltyBonus + traitBonus + finesseBonus + setPieceBonus, 0.65, 0.85);
+        return Math.Clamp(0.58 + (player.Finishing * 0.45 + attributes.Shooting * 0.55) / 600.0 + penaltyBonus + traitBonus + finesseBonus + setPieceBonus, 0.65, 0.85);
     }
 
     private Team ChooseAttackingTeam(
@@ -5185,10 +5205,15 @@ public class MatchEngine
         double scorerCooldownPenalty)
     {
         var boost = hasSuperSubBoost ? 1.05 : 1.0;
+        var attributes = PlayerAttributeService.GetAttributes(attacker);
         var (baseProbability, minimumProbability, maximumProbability) = GetChanceGoalProbabilityBand(chanceType);
         var chanceScore =
             (_teamStrengthCalculator.GetEffectiveFinishing(attacker) - 72) * 0.0014 * boost +
             (_teamStrengthCalculator.GetEffectiveAttack(attacker) - 72) * 0.0007 * boost +
+            (attributes.Shooting - 72) * 0.00055 * boost +
+            (chanceType == "dribble run" ? (attributes.Dribbling - 72) * 0.00035 : 0.0) +
+            (chanceType == "through ball attempt" ? (attributes.Pace - 72) * 0.00030 : 0.0) +
+            (chanceType.Contains("cross", StringComparison.OrdinalIgnoreCase) ? (attributes.Physical - 72) * 0.00025 : 0.0) +
             (attackingTeamStrength - defendingTeamStrength) / 1050.0;
 
         var traitBonus =

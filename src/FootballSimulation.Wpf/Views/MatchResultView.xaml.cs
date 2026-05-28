@@ -310,11 +310,16 @@ public partial class MatchResultView : UserControl
         var player = team.Players.Concat(team.Substitutes)
             .FirstOrDefault(candidate => string.Equals(candidate.Name, performance.PlayerName, StringComparison.OrdinalIgnoreCase));
         var formBadge = PlayerFormBadgeHelper.Create(player?.FormStatus ?? PlayerFormStatus.Average);
+        var nationality = player is null
+            ? PlayerNationalityDisplayService.Resolve(new Player { Name = performance.PlayerName })
+            : PlayerNationalityDisplayService.Resolve(player);
         var defensiveContributions = performance.Tackles + performance.Interceptions + performance.Blocks + performance.Clearances;
 
         return new PlayerPerformanceRow
         {
             PlayerName = performance.PlayerName,
+            FlagImagePath = nationality.FlagImagePath,
+            NationalityName = nationality.Name,
             PositionText = GetPositionText(performance.Position),
             OverallText = player is null ? string.Empty : $"OVR {GetOverallRating(player)}",
             GrowthText = player is null ? string.Empty : PlayerGrowthDisplayHelper.CreateGrowthText(player),
@@ -437,6 +442,8 @@ public partial class MatchResultView : UserControl
     private sealed class PlayerPerformanceRow
     {
         public string PlayerName { get; init; } = string.Empty;
+        public string FlagImagePath { get; init; } = "/Assets/Flags/default.png";
+        public string NationalityName { get; init; } = "Unknown nationality";
         public string PositionText { get; init; } = string.Empty;
         public string OverallText { get; init; } = string.Empty;
         public string GrowthText { get; init; } = string.Empty;

@@ -1,0 +1,52 @@
+{
+  "players": [
+    {
+      "name": "Tosin Adarabioyo",
+      "nationalityCode": "GB",
+      "nationalityName": "England",
+      "flagImagePath": "/Assets/Flags/england.png"
+    },
+    {
+      "name": "Benoit Badiashile",
+      "nationalityCode": "FR",
+      "nationalityName": "France",
+      "flagImagePath": "/Assets/Flags/france.png"
+    },
+    {
+      "name": "Benoît Badiashile",
+      "nationalityCode": "FR",
+      "nationalityName": "France",
+      "flagImagePath": "/Assets/Flags/france.png"
+    },
+    {
+      "name": "Josh Acheampong",
+      "nationalityCode": "GB",
+      "nationalityName": "England",
+      "flagImagePath": "/Assets/Flags/england.png"
+    },
+    {
+      "name": "Estevao",
+      "nationalityCode": "BR",
+      "nationalityName": "Brazil",
+      "flagImagePath": "/Assets/Flags/brazil.png"
+    },
+    {
+      "name": "Estêvão",
+      "nationalityCode": "BR",
+      "nationalityName": "Brazil",
+      "flagImagePath": "/Assets/Flags/brazil.png"
+    },
+    {
+      "name": "Filip Jorgensen",
+      "nationalityCode": "DK",
+      "nationalityName": "Denmark",
+      "flagImagePath": "/Assets/Flags/denmark.png"
+    },
+    {
+      "name": "Filip Jørgensen",
+      "nationalityCode": "DK",
+      "nationalityName": "Denmark",
+      "flagImagePath": "/Assets/Flags/denmark.png"
+    }
+  ]
+}

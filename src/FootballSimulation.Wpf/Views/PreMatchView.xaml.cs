@@ -313,6 +313,7 @@ public partial class PreMatchView : UserControl
                     ? ratingVisual.Foreground
                     : teamColors.BorderColor;
         var textForeground = player.IsInjured ? "#8F1F1F" : teamColors.TextColor;
+        var nationality = PlayerNationalityDisplayService.Resolve(player);
 
         return new PitchPlayerCard
         {
@@ -321,6 +322,8 @@ public partial class PreMatchView : UserControl
             ShirtNumberValue = player.SquadNumber > 0 ? player.SquadNumber.ToString() : string.Empty,
             PlayerImagePath = GetPlayerImagePath(player),
             PlayerName = player.Name,
+            FlagImagePath = nationality.FlagImagePath,
+            NationalityName = nationality.Name,
             PositionText = displayedPosition,
             OverallText = $"OVR {ratingVisual.Rating}",
             OverallForeground = player.IsInjured ? ratingVisual.Foreground : textForeground,
@@ -527,11 +530,14 @@ public partial class PreMatchView : UserControl
         PositionSuitabilityService.EnsurePositionMetadata(player);
         var form = PlayerFormBadgeHelper.Create(player.FormStatus);
         var teamColors = TeamColorService.GetPalette(_state.SelectedTeam);
+        var nationality = PlayerNationalityDisplayService.Resolve(player);
 
         return new BenchPlayerCard
         {
             Player = player,
             Name = player.Name,
+            FlagImagePath = nationality.FlagImagePath,
+            NationalityName = nationality.Name,
             ShirtNumberText = player.SquadNumber > 0 ? $"#{player.SquadNumber}" : string.Empty,
             PlayerImagePath = GetPlayerImagePath(player),
             Position = player.PreferredPosition,
@@ -572,6 +578,9 @@ public partial class PreMatchView : UserControl
         SelectedPlayerCard.DataContext = _selectedStarter;
 
         SelectedPlayerImage.Source = CreateImageSource(GetPlayerImagePath(_selectedStarter));
+        var selectedNationality = PlayerNationalityDisplayService.Resolve(_selectedStarter);
+        SelectedPlayerFlagImage.Source = CreateImageSource(selectedNationality.FlagImagePath);
+        SelectedPlayerFlagImage.ToolTip = selectedNationality.Name;
         SelectedPlayerNumberTextBlock.Text = _selectedStarter.SquadNumber > 0 ? $"#{_selectedStarter.SquadNumber}" : "No squad number";
         SelectedPlayerNameTextBlock.Text = _selectedStarter.Name;
         SelectedPlayerPositionChip.Text = GetPlayablePositionsText(_selectedStarter);
@@ -737,7 +746,7 @@ public partial class PreMatchView : UserControl
     {
         return string.IsNullOrWhiteSpace(imagePath)
             ? null
-            : new BitmapImage(new Uri(imagePath, UriKind.Absolute));
+            : new BitmapImage(new Uri(imagePath, UriKind.RelativeOrAbsolute));
     }
 
     private static Brush ToBrush(string color)
@@ -1224,7 +1233,7 @@ public partial class PreMatchView : UserControl
 
         try
         {
-            var saveData = SaveGameService.CreateSaveData(_state.League, _state.SelectedTeam);
+            var saveData = SaveGameService.CreateSaveData(_state.League, _state.SelectedTeam, _state.TransferMarket);
             _saveGameService.SaveGame(slotNumber, saveData);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException or System.Text.Json.JsonException)
@@ -1384,6 +1393,8 @@ public partial class PreMatchView : UserControl
     {
         public Player Player { get; init; } = new();
         public string Name { get; init; } = string.Empty;
+        public string FlagImagePath { get; init; } = "/Assets/Flags/default.png";
+        public string NationalityName { get; init; } = "Unknown nationality";
         public string ShirtNumberText { get; init; } = string.Empty;
         public string PlayerImagePath { get; init; } = string.Empty;
         public string Position { get; init; } = string.Empty;

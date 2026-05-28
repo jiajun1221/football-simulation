@@ -36,6 +36,7 @@ public partial class MatchLiveView : UserControl
     private readonly Action<UserControl> _navigate;
     private readonly bool _isSecondHalf;
     private readonly GameSessionService _gameSessionService = new();
+    private readonly TransferMarketService _transferMarketService = new();
     private readonly SquadSelectionService _squadSelectionService = new();
     private readonly MatchEventFactory _matchEventFactory = new();
     private readonly FormationLayoutService _formationLayoutService = new();
@@ -435,6 +436,17 @@ public partial class MatchLiveView : UserControl
         if (_isSecondHalf && !_fixtureCompleted)
         {
             _gameSessionService.CompleteSelectedTeamLiveMatch(_state.League, _state.CurrentFixture, _state.CurrentMatch);
+            if (_state.SelectedTeam is not null)
+            {
+                _state.TransferMarket ??= _transferMarketService.CreateInitialState(_state.League);
+                _transferMarketService.BindActiveLeague(_state.TransferMarket, _state.League);
+                _transferMarketService.RunAiTransferActivity(
+                    _state.TransferMarket,
+                    _state.League,
+                    _state.SelectedTeam,
+                    _state.CurrentFixture.RoundNumber);
+            }
+
             _fixtureCompleted = true;
         }
 
@@ -1823,11 +1835,14 @@ public partial class MatchLiveView : UserControl
         var teamColors = GetMatchPalette(team);
         var formBadge = PlayerFormBadgeHelper.Create(GetDisplayedFormStatus(liveStats.CurrentRating));
         var ratingBadgeColors = GetRatingBadgeColors(liveStats.CurrentRating, formBadge);
+        var nationality = PlayerNationalityDisplayService.Resolve(player);
 
         return new LivePlayerIconViewModel
         {
             PlayerId = playerId,
             Name = player.Name,
+            FlagImagePath = nationality.FlagImagePath,
+            NationalityName = nationality.Name,
             TeamName = team.Name,
             PlayerKey = playerKey,
             LiveStats = liveStats,
@@ -4020,6 +4035,7 @@ public partial class MatchLiveView : UserControl
         var cardStatusBadges = team is null
             ? PlayerCardStatusBadgeHelper.Create(player)
             : PlayerCardStatusBadgeHelper.Create(displayedStats.YellowCards, displayedStats.RedCards);
+        var nationality = PlayerNationalityDisplayService.Resolve(player);
 
         if (string.IsNullOrWhiteSpace(exactPosition))
         {
@@ -4036,6 +4052,8 @@ public partial class MatchLiveView : UserControl
             Player = player,
             Name = player.Name,
             DisplayName = isPendingSubIn ? $"{player.Name} ↑" : player.Name,
+            FlagImagePath = nationality.FlagImagePath,
+            NationalityName = nationality.Name,
             ShirtNumberText = player.SquadNumber > 0 ? $"#{player.SquadNumber}" : string.Empty,
             Position = exactPosition,
             OverallText = $"OVR {GetOverallRating(player)}",
@@ -4218,6 +4236,8 @@ public partial class MatchLiveView : UserControl
         public Player Player { get; init; } = new();
         public string Name { get; init; } = string.Empty;
         public string DisplayName { get; init; } = string.Empty;
+        public string FlagImagePath { get; init; } = "/Assets/Flags/default.png";
+        public string NationalityName { get; init; } = "Unknown nationality";
         public string ShirtNumberText { get; init; } = string.Empty;
         public string Position { get; init; } = string.Empty;
         public string OverallText { get; init; } = string.Empty;

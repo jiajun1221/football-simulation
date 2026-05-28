@@ -30,7 +30,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Stefan Posch",
@@ -54,7 +57,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "AT",
+          "nationalityName": "Austria",
+          "flagImagePath": "/Assets/Flags/austria.png"
         },
         {
           "name": "Anthony Caci",
@@ -77,7 +83,10 @@
           "traits": [
             "Engine"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Andreas Hanche-Olsen",
@@ -101,7 +110,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "NO",
+          "nationalityName": "Norway",
+          "flagImagePath": "/Assets/Flags/norway.png"
         },
         {
           "name": "Dominik Kohr",
@@ -123,7 +135,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Kaishu Sano",
@@ -147,7 +162,10 @@
             "Interceptor",
             "PressResistant"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "JP",
+          "nationalityName": "Japan",
+          "flagImagePath": "/Assets/Flags/japan.png"
         },
         {
           "name": "Paul Nebel",
@@ -170,7 +188,10 @@
             "Playmaker",
             "TechnicalDribbler"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Nadiem Amiri",
@@ -194,7 +215,10 @@
             "Engine",
             "Playmaker"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Nelson Weiper",
@@ -217,7 +241,10 @@
           "traits": [
             "ClinicalFinisher"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Sheraldo Becker",
@@ -240,7 +267,10 @@
           "traits": [
             "SpeedDribbler"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "NL",
+          "nationalityName": "Kingdom of the Netherlands",
+          "flagImagePath": "/Assets/Flags/kingdom-of-the-netherlands.png"
         },
         {
           "name": "Benedict Hollerbach",
@@ -263,7 +293,10 @@
           "traits": [
             "ClinicalFinisher"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         }
       ],
       "substitutes": [
@@ -283,7 +316,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Phillipp Mwene",
@@ -304,7 +340,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "AT",
+          "nationalityName": "Austria",
+          "flagImagePath": "/Assets/Flags/austria.png"
         },
         {
           "name": "Maxim Leitsch",
@@ -326,7 +365,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Danny da Costa",
@@ -348,7 +390,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Lennard Maloney",
@@ -369,7 +414,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "US",
+          "nationalityName": "United States",
+          "flagImagePath": "/Assets/Flags/usa.png"
         },
         {
           "name": "Jae-sung Lee",
@@ -389,7 +437,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "KR",
+          "nationalityName": "South Korea",
+          "flagImagePath": "/Assets/Flags/south-korea.png"
         },
         {
           "name": "Nikolas Veratschnig",
@@ -409,7 +460,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "AT",
+          "nationalityName": "Austria",
+          "flagImagePath": "/Assets/Flags/austria.png"
         },
         {
           "name": "Niklas Tauer",
@@ -430,7 +484,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Phillip Tietz",
@@ -451,7 +508,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "William Bøving",
@@ -472,7 +532,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DK",
+          "nationalityName": "Kingdom of Denmark",
+          "flagImagePath": "/Assets/Flags/kingdom-of-denmark.png"
         },
         {
           "name": "Silas",
@@ -493,7 +556,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "PT",
+          "nationalityName": "Portugal",
+          "flagImagePath": "/Assets/Flags/portugal.png"
         },
         {
           "name": "Armindo Sieb",
@@ -513,7 +579,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         }
       ]
     },
@@ -543,7 +612,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Timo Hübers",
@@ -567,7 +639,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Sebastian Sebulonsen",
@@ -590,7 +665,10 @@
           "traits": [
             "Engine"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "NO",
+          "nationalityName": "Norway",
+          "flagImagePath": "/Assets/Flags/norway.png"
         },
         {
           "name": "Jahmai Simpson-Pusey",
@@ -612,7 +690,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "GB",
+          "nationalityName": "United Kingdom",
+          "flagImagePath": "/Assets/Flags/united-kingdom.png"
         },
         {
           "name": "Kristoffer Lund",
@@ -633,7 +714,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "US",
+          "nationalityName": "United States",
+          "flagImagePath": "/Assets/Flags/usa.png"
         },
         {
           "name": "Eric Martel",
@@ -656,7 +740,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Denis Huseinbasic",
@@ -677,7 +764,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Tom Krauß",
@@ -698,7 +788,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Jakub Kamiński",
@@ -721,7 +814,10 @@
           "traits": [
             "SpeedDribbler"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "PL",
+          "nationalityName": "Poland",
+          "flagImagePath": "/Assets/Flags/poland.png"
         },
         {
           "name": "Jan Thielmann",
@@ -744,7 +840,10 @@
           "traits": [
             "SpeedDribbler"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Linton Maina",
@@ -765,7 +864,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         }
       ],
       "substitutes": [
@@ -785,7 +887,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Luca Kilian",
@@ -807,7 +912,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Cenk Özkacar",
@@ -829,7 +937,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "TR",
+          "nationalityName": "Turkey",
+          "flagImagePath": "/Assets/Flags/turkey.png"
         },
         {
           "name": "Dominique Heintz",
@@ -851,7 +962,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Ísak Jóhannesson",
@@ -872,7 +986,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Alessio Castro-Montes",
@@ -892,7 +1009,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "BE",
+          "nationalityName": "Belgium",
+          "flagImagePath": "/Assets/Flags/belgium.png"
         },
         {
           "name": "Florian Kainz",
@@ -912,7 +1032,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Fayssal Harchaoui",
@@ -933,7 +1056,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Luca Waldschmidt",
@@ -954,7 +1080,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Marius Bülter",
@@ -975,7 +1104,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Ragnar Ache",
@@ -996,7 +1128,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Youssoupha Niang",
@@ -1017,7 +1152,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         }
       ]
     },
@@ -1047,7 +1185,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Leonidas Stergiou",
@@ -1068,7 +1209,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Omar Traoré",
@@ -1089,7 +1233,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Patrick Mainka",
@@ -1111,7 +1258,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Benedikt Gimber",
@@ -1133,7 +1283,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Arijon Ibrahimovic",
@@ -1155,7 +1308,10 @@
           "traits": [
             "Playmaker"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Jan Schöppner",
@@ -1176,7 +1332,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Niklas Dorsch",
@@ -1197,7 +1356,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Eren Dinkçi",
@@ -1220,7 +1382,10 @@
           "traits": [
             "SpeedDribbler"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Marvin Pieringer",
@@ -1241,7 +1406,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Mathias Honsak",
@@ -1262,7 +1430,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         }
       ],
       "substitutes": [
@@ -1282,7 +1453,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Tim Siersleben",
@@ -1304,7 +1478,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Leart Paçarada",
@@ -1325,7 +1502,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Jonas Föhrenbach",
@@ -1346,7 +1526,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Adrian Beck",
@@ -1366,7 +1549,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Luca Kerber",
@@ -1387,7 +1573,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Julian Niehues",
@@ -1408,7 +1597,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Nick Rothweiler",
@@ -1429,7 +1621,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Mikkel Kaufmann",
@@ -1450,7 +1645,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Kingdom of Denmark",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Sirlord Conteh",
@@ -1471,7 +1669,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Budu Zivzivadze",
@@ -1492,7 +1693,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "GE",
+          "nationalityName": "Georgia",
+          "flagImagePath": "/Assets/Flags/georgia.png"
         },
         {
           "name": "Stefan Schimmer",
@@ -1513,7 +1717,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         }
       ]
     },
@@ -1543,7 +1750,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Leopold Querfeld",
@@ -1568,7 +1778,10 @@
             "Interceptor",
             "AerialThreat"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "AT",
+          "nationalityName": "Austria",
+          "flagImagePath": "/Assets/Flags/austria.png"
         },
         {
           "name": "Danilho Doekhi",
@@ -1592,7 +1805,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "NL",
+          "nationalityName": "Kingdom of the Netherlands",
+          "flagImagePath": "/Assets/Flags/kingdom-of-the-netherlands.png"
         },
         {
           "name": "Diogo Leite",
@@ -1616,7 +1832,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "PT",
+          "nationalityName": "Portugal",
+          "flagImagePath": "/Assets/Flags/portugal.png"
         },
         {
           "name": "Tom Rothe",
@@ -1639,7 +1858,10 @@
           "traits": [
             "Engine"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Aljoscha Kemlein",
@@ -1662,7 +1884,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Alex Král",
@@ -1685,7 +1910,10 @@
           "traits": [
             "Engine"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "CZ",
+          "nationalityName": "Czech Republic",
+          "flagImagePath": "/Assets/Flags/czech-republic.png"
         },
         {
           "name": "András Schäfer",
@@ -1706,7 +1934,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "HU",
+          "nationalityName": "Hungary",
+          "flagImagePath": "/Assets/Flags/hungary.png"
         },
         {
           "name": "Andrej Ilic",
@@ -1729,7 +1960,10 @@
           "traits": [
             "ClinicalFinisher"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Oliver Burke",
@@ -1750,7 +1984,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "GB",
+          "nationalityName": "United Kingdom",
+          "flagImagePath": "/Assets/Flags/united-kingdom.png"
         },
         {
           "name": "Tim Skarke",
@@ -1771,7 +2008,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         }
       ],
       "substitutes": [
@@ -1791,7 +2031,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Derrick Köhn",
@@ -1812,7 +2055,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "GH",
+          "nationalityName": "Ghana",
+          "flagImagePath": "/Assets/Flags/ghana.png"
         },
         {
           "name": "Josip Juranovic",
@@ -1833,7 +2079,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Stanley Nsoki",
@@ -1855,7 +2104,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Woo-yeong Jeong",
@@ -1875,7 +2127,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "KR",
+          "nationalityName": "South Korea",
+          "flagImagePath": "/Assets/Flags/south-korea.png"
         },
         {
           "name": "Robert Skov",
@@ -1895,7 +2150,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Kingdom of Denmark",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Janik Haberer",
@@ -1916,7 +2174,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Rani Khedira",
@@ -1937,7 +2198,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "David Preu",
@@ -1958,7 +2222,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Livan Burcu",
@@ -1979,7 +2246,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "TR",
+          "nationalityName": "Turkey",
+          "flagImagePath": "/Assets/Flags/turkey.png"
         },
         {
           "name": "Ilyas Ansah",
@@ -2000,7 +2270,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Dmytro Bogdanov",
@@ -2021,7 +2294,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UA",
+          "nationalityName": "Ukraine",
+          "flagImagePath": "/Assets/Flags/ukraine.png"
         }
       ]
     },
@@ -2051,7 +2327,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "NL",
+          "nationalityName": "Kingdom of the Netherlands",
+          "flagImagePath": "/Assets/Flags/kingdom-of-the-netherlands.png"
         },
         {
           "name": "Jarell Quansah",
@@ -2076,7 +2355,10 @@
             "Interceptor",
             "AerialThreat"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "GB",
+          "nationalityName": "United Kingdom",
+          "flagImagePath": "/Assets/Flags/united-kingdom.png"
         },
         {
           "name": "Edmond Tapsoba",
@@ -2101,7 +2383,10 @@
             "Interceptor",
             "AerialThreat"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "BF",
+          "nationalityName": "Burkina Faso",
+          "flagImagePath": "/Assets/Flags/burkina-faso.png"
         },
         {
           "name": "Loïc Badé",
@@ -2126,7 +2411,10 @@
             "Interceptor",
             "AerialThreat"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Alejandro Grimaldo",
@@ -2149,7 +2437,10 @@
           "traits": [
             "Engine"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Malik Tillman",
@@ -2173,7 +2464,10 @@
             "TechnicalDribbler",
             "Flair"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "US",
+          "nationalityName": "United States",
+          "flagImagePath": "/Assets/Flags/usa.png"
         },
         {
           "name": "Exequiel Palacios",
@@ -2197,7 +2491,10 @@
             "Engine",
             "Playmaker"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "AR",
+          "nationalityName": "Argentina",
+          "flagImagePath": "/Assets/Flags/argentina.png"
         },
         {
           "name": "Aleix García",
@@ -2221,7 +2518,10 @@
             "Engine",
             "Playmaker"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Patrik Schick",
@@ -2245,7 +2545,10 @@
             "ClinicalFinisher",
             "PowerHeader"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "CZ",
+          "nationalityName": "Czech Republic",
+          "flagImagePath": "/Assets/Flags/czech-republic.png"
         },
         {
           "name": "Eliesse Ben Seghir",
@@ -2269,7 +2572,10 @@
             "SpeedDribbler",
             "Flair"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Nathan Tella",
@@ -2293,7 +2599,10 @@
             "SpeedDribbler",
             "Flair"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "GB",
+          "nationalityName": "United Kingdom",
+          "flagImagePath": "/Assets/Flags/united-kingdom.png"
         }
       ],
       "substitutes": [
@@ -2313,7 +2622,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Axel Tape",
@@ -2337,7 +2649,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Arthur",
@@ -2360,7 +2675,10 @@
           "traits": [
             "Engine"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "BR",
+          "nationalityName": "Brazil",
+          "flagImagePath": "/Assets/Flags/brazil.png"
         },
         {
           "name": "Tim Oermann",
@@ -2382,7 +2700,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Robert Andrich",
@@ -2405,7 +2726,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Jonas Hofmann",
@@ -2425,7 +2749,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Ibrahim Maza",
@@ -2445,7 +2772,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Equi Fernández",
@@ -2466,7 +2796,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "AR",
+          "nationalityName": "Argentina",
+          "flagImagePath": "/Assets/Flags/argentina.png"
         },
         {
           "name": "Martin Terrier",
@@ -2489,7 +2822,10 @@
           "traits": [
             "SpeedDribbler"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Ernest Poku",
@@ -2510,7 +2846,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "NL",
+          "nationalityName": "Kingdom of the Netherlands",
+          "flagImagePath": "/Assets/Flags/kingdom-of-the-netherlands.png"
         },
         {
           "name": "Montrell Culbreath",
@@ -2531,7 +2870,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Christian Kofane",
@@ -2552,7 +2894,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         }
       ]
     },
@@ -2585,7 +2930,10 @@
             "OneOnOnes",
             "Leadership"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "CH",
+          "nationalityName": "Switzerland",
+          "flagImagePath": "/Assets/Flags/switzerland.png"
         },
         {
           "name": "Nico Schlotterbeck",
@@ -2611,7 +2959,10 @@
             "LongPasser",
             "AerialThreat"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Daniel Svensson",
@@ -2634,7 +2985,10 @@
           "traits": [
             "Engine"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "SE",
+          "nationalityName": "Sweden",
+          "flagImagePath": "/Assets/Flags/sweden.png"
         },
         {
           "name": "Julian Ryerson",
@@ -2657,7 +3011,10 @@
           "traits": [
             "Engine"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "NO",
+          "nationalityName": "Norway",
+          "flagImagePath": "/Assets/Flags/norway.png"
         },
         {
           "name": "Waldemar Anton",
@@ -2682,7 +3039,10 @@
             "Interceptor",
             "AerialThreat"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Felix Nmecha",
@@ -2707,7 +3067,10 @@
             "Playmaker",
             "BoxToBox"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Carney Chukwuemeka",
@@ -2731,7 +3094,10 @@
             "Engine",
             "Playmaker"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "AT",
+          "nationalityName": "Austria",
+          "flagImagePath": "/Assets/Flags/austria.png"
         },
         {
           "name": "Jobe Bellingham",
@@ -2755,7 +3121,10 @@
             "Engine",
             "Playmaker"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "IE",
+          "nationalityName": "Ireland",
+          "flagImagePath": "/Assets/Flags/ireland.png"
         },
         {
           "name": "Karim Adeyemi",
@@ -2781,7 +3150,10 @@
             "Rapid",
             "TechnicalDribbler"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Serhou Guirassy",
@@ -2806,7 +3178,10 @@
             "PowerHeader",
             "PenaltySpecialist"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Maximilian Beier",
@@ -2830,7 +3205,10 @@
             "ClinicalFinisher",
             "TriesToBeatOffsideTrap"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         }
       ],
       "substitutes": [
@@ -2850,7 +3228,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Ramy Bensebaini",
@@ -2874,7 +3255,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DZ",
+          "nationalityName": "Algeria",
+          "flagImagePath": "/Assets/Flags/algeria.png"
         },
         {
           "name": "Emre Can",
@@ -2898,7 +3282,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "TR",
+          "nationalityName": "Turkey",
+          "flagImagePath": "/Assets/Flags/turkey.png"
         },
         {
           "name": "Niklas Süle",
@@ -2922,7 +3309,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Julian Brandt",
@@ -2945,7 +3335,10 @@
             "Playmaker",
             "TechnicalDribbler"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Yan Couto",
@@ -2968,7 +3361,10 @@
             "SpeedDribbler",
             "Flair"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "BR",
+          "nationalityName": "Brazil",
+          "flagImagePath": "/Assets/Flags/brazil.png"
         },
         {
           "name": "Marcel Sabitzer",
@@ -2991,7 +3387,10 @@
           "traits": [
             "Engine"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "AT",
+          "nationalityName": "Austria",
+          "flagImagePath": "/Assets/Flags/austria.png"
         },
         {
           "name": "Salih Özcan",
@@ -3012,7 +3411,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "TR",
+          "nationalityName": "Turkey",
+          "flagImagePath": "/Assets/Flags/turkey.png"
         },
         {
           "name": "Fábio Silva",
@@ -3036,7 +3438,10 @@
             "ClinicalFinisher",
             "TriesToBeatOffsideTrap"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "PT",
+          "nationalityName": "Portugal",
+          "flagImagePath": "/Assets/Flags/portugal.png"
         },
         {
           "name": "Samuele Inácio",
@@ -3056,7 +3461,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Almugera Kabar",
@@ -3077,7 +3485,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Filippo Mane",
@@ -3099,7 +3510,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "IT",
+          "nationalityName": "Italy",
+          "flagImagePath": "/Assets/Flags/italy.png"
         }
       ]
     },
@@ -3129,7 +3543,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Nico Elvedi",
@@ -3153,7 +3570,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "CH",
+          "nationalityName": "Switzerland",
+          "flagImagePath": "/Assets/Flags/switzerland.png"
         },
         {
           "name": "Joe Scally",
@@ -3176,7 +3596,10 @@
           "traits": [
             "Engine"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "US",
+          "nationalityName": "United States",
+          "flagImagePath": "/Assets/Flags/usa.png"
         },
         {
           "name": "Lukas Ullrich",
@@ -3199,7 +3622,10 @@
           "traits": [
             "Engine"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Kevin Diks",
@@ -3223,7 +3649,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "ID",
+          "nationalityName": "Indonesia",
+          "flagImagePath": "/Assets/Flags/indonesia.png"
         },
         {
           "name": "Rocco Reitz",
@@ -3247,7 +3676,10 @@
             "Engine",
             "Playmaker"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Yannik Engelhardt",
@@ -3270,7 +3702,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Giovanni Reyna",
@@ -3292,7 +3727,10 @@
           "traits": [
             "Playmaker"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "US",
+          "nationalityName": "United States",
+          "flagImagePath": "/Assets/Flags/usa.png"
         },
         {
           "name": "Tim Kleindienst",
@@ -3315,7 +3753,10 @@
           "traits": [
             "ClinicalFinisher"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Franck Honorat",
@@ -3338,7 +3779,10 @@
           "traits": [
             "SpeedDribbler"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Robin Hack",
@@ -3361,7 +3805,10 @@
           "traits": [
             "SpeedDribbler"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         }
       ],
       "substitutes": [
@@ -3381,7 +3828,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Fabio Chiarodia",
@@ -3403,7 +3853,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "IT",
+          "nationalityName": "Italy",
+          "flagImagePath": "/Assets/Flags/italy.png"
         },
         {
           "name": "Marvin Friedrich",
@@ -3425,7 +3878,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Kota Takai",
@@ -3447,7 +3903,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "JP",
+          "nationalityName": "Japan",
+          "flagImagePath": "/Assets/Flags/japan.png"
         },
         {
           "name": "Philipp Sander",
@@ -3468,7 +3927,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Florian Neuhaus",
@@ -3489,7 +3951,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Kevin Stöger",
@@ -3509,7 +3974,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "AT",
+          "nationalityName": "Austria",
+          "flagImagePath": "/Assets/Flags/austria.png"
         },
         {
           "name": "Jens Castrop",
@@ -3530,7 +3998,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Shuto Machino",
@@ -3553,7 +4024,10 @@
           "traits": [
             "ClinicalFinisher"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "JP",
+          "nationalityName": "Japan",
+          "flagImagePath": "/Assets/Flags/japan.png"
         },
         {
           "name": "Nathan Ngoumou",
@@ -3574,7 +4048,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Haris Tabakovic",
@@ -3595,7 +4072,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Alejo Sarco",
@@ -3616,7 +4096,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "AR",
+          "nationalityName": "Argentina",
+          "flagImagePath": "/Assets/Flags/argentina.png"
         }
       ]
     },
@@ -3646,7 +4129,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "BR",
+          "nationalityName": "Brazil",
+          "flagImagePath": "/Assets/Flags/brazil.png"
         },
         {
           "name": "Nathaniel Brown",
@@ -3670,7 +4156,10 @@
             "Engine",
             "EarlyCrosser"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Arthur Theate",
@@ -3695,7 +4184,10 @@
             "Interceptor",
             "AerialThreat"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "BE",
+          "nationalityName": "Belgium",
+          "flagImagePath": "/Assets/Flags/belgium.png"
         },
         {
           "name": "Robin Koch",
@@ -3720,7 +4212,10 @@
             "Interceptor",
             "AerialThreat"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Nnamdi Collins",
@@ -3745,7 +4240,10 @@
             "Interceptor",
             "AerialThreat"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Can Uzun",
@@ -3769,7 +4267,10 @@
             "TechnicalDribbler",
             "Flair"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "TR",
+          "nationalityName": "Turkey",
+          "flagImagePath": "/Assets/Flags/turkey.png"
         },
         {
           "name": "Hugo Larsson",
@@ -3794,7 +4295,10 @@
             "Playmaker",
             "BoxToBox"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "SE",
+          "nationalityName": "Sweden",
+          "flagImagePath": "/Assets/Flags/sweden.png"
         },
         {
           "name": "Farès Chaïbi",
@@ -3817,7 +4321,10 @@
             "Playmaker",
             "TechnicalDribbler"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Jonathan Burkardt",
@@ -3841,7 +4348,10 @@
             "ClinicalFinisher",
             "TriesToBeatOffsideTrap"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Arnaud Kalimuendo",
@@ -3865,7 +4375,10 @@
             "ClinicalFinisher",
             "TriesToBeatOffsideTrap"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Jean-Mattéo Bahoya",
@@ -3889,7 +4402,10 @@
             "SpeedDribbler",
             "Flair"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         }
       ],
       "substitutes": [
@@ -3909,7 +4425,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Rasmus Kristensen",
@@ -3932,7 +4451,10 @@
           "traits": [
             "Engine"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Kingdom of Denmark",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Aurèle Amenda",
@@ -3956,7 +4478,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "CH",
+          "nationalityName": "Switzerland",
+          "flagImagePath": "/Assets/Flags/switzerland.png"
         },
         {
           "name": "Elias Baum",
@@ -3977,7 +4502,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Oscar Højlund",
@@ -4000,7 +4528,10 @@
           "traits": [
             "Engine"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Kingdom of Denmark",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Ellyes Skhiri",
@@ -4023,7 +4554,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Mario Götze",
@@ -4043,7 +4577,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Mahmoud Dahoud",
@@ -4064,7 +4601,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Ritsu Doan",
@@ -4088,7 +4628,10 @@
             "SpeedDribbler",
             "Flair"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "JP",
+          "nationalityName": "Japan",
+          "flagImagePath": "/Assets/Flags/japan.png"
         },
         {
           "name": "Ansgar Knauff",
@@ -4112,7 +4655,10 @@
             "SpeedDribbler",
             "Flair"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Michy Batshuayi",
@@ -4133,7 +4679,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "BE",
+          "nationalityName": "Belgium",
+          "flagImagePath": "/Assets/Flags/belgium.png"
         },
         {
           "name": "Younes Ebnoutalib",
@@ -4154,7 +4703,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         }
       ]
     },
@@ -4186,7 +4738,10 @@
           "traits": [
             "Leadership"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Dayot Upamecano",
@@ -4212,7 +4767,10 @@
             "Rapid",
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Alphonso Davies",
@@ -4237,7 +4795,10 @@
             "SpeedDribbler",
             "Engine"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "CA",
+          "nationalityName": "Canada",
+          "flagImagePath": "/Assets/Flags/canada.png"
         },
         {
           "name": "Konrad Laimer",
@@ -4261,7 +4822,10 @@
             "Engine",
             "EarlyCrosser"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "AT",
+          "nationalityName": "Austria",
+          "flagImagePath": "/Assets/Flags/austria.png"
         },
         {
           "name": "Josip Stanisic",
@@ -4285,7 +4849,10 @@
             "Engine",
             "EarlyCrosser"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Jamal Musiala",
@@ -4310,7 +4877,10 @@
             "PressResistant",
             "BigMatchPlayer"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "GB",
+          "nationalityName": "United Kingdom",
+          "flagImagePath": "/Assets/Flags/united-kingdom.png"
         },
         {
           "name": "Aleksandar Pavlovic",
@@ -4335,7 +4905,10 @@
             "PressResistant",
             "LongPasser"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Lennart Karl",
@@ -4359,7 +4932,10 @@
             "TechnicalDribbler",
             "Flair"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Michael Olise",
@@ -4385,7 +4961,10 @@
             "EarlyCrosser",
             "FinesseShot"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Luis Díaz",
@@ -4411,7 +4990,10 @@
             "SpeedDribbler",
             "Engine"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "CL",
+          "nationalityName": "Chile",
+          "flagImagePath": "/Assets/Flags/chile.png"
         },
         {
           "name": "Harry Kane",
@@ -4437,7 +5019,10 @@
             "PowerHeader",
             "PenaltySpecialist"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "GB",
+          "nationalityName": "United Kingdom",
+          "flagImagePath": "/Assets/Flags/united-kingdom.png"
         }
       ],
       "substitutes": [
@@ -4457,7 +5042,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Jonathan Tah",
@@ -4483,7 +5071,10 @@
             "Interceptor",
             "Leadership"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Min-jae Kim",
@@ -4508,7 +5099,10 @@
             "Interceptor",
             "AerialThreat"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Hiroki Ito",
@@ -4533,7 +5127,10 @@
             "Interceptor",
             "AerialThreat"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "JP",
+          "nationalityName": "Japan",
+          "flagImagePath": "/Assets/Flags/japan.png"
         },
         {
           "name": "Joshua Kimmich",
@@ -4558,7 +5155,10 @@
             "Playmaker",
             "Engine"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Tom Bischof",
@@ -4583,7 +5183,10 @@
             "Playmaker",
             "BoxToBox"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Leon Goretzka",
@@ -4607,7 +5210,10 @@
             "Engine",
             "Playmaker"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Raphaël Guerreiro",
@@ -4629,7 +5235,10 @@
           "traits": [
             "Playmaker"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Nicolas Jackson",
@@ -4653,7 +5262,10 @@
             "ClinicalFinisher",
             "TriesToBeatOffsideTrap"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "SN",
+          "nationalityName": "Senegal",
+          "flagImagePath": "/Assets/Flags/senegal.png"
         },
         {
           "name": "Serge Gnabry",
@@ -4675,7 +5287,10 @@
           "traits": [
             "ClinicalFinisher"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "David Santos Daiber",
@@ -4696,7 +5311,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Sven Ulreich",
@@ -4714,7 +5332,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         }
       ]
     },
@@ -4746,7 +5367,10 @@
           "traits": [
             "OneOnOnes"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Chrislain Matsima",
@@ -4771,7 +5395,10 @@
             "Interceptor",
             "AerialThreat"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Noahkai Banks",
@@ -4796,7 +5423,10 @@
             "Interceptor",
             "AerialThreat"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "US",
+          "nationalityName": "United States",
+          "flagImagePath": "/Assets/Flags/usa.png"
         },
         {
           "name": "Keven Schlotterbeck",
@@ -4820,7 +5450,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Cédric Zesiger",
@@ -4844,7 +5477,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "CH",
+          "nationalityName": "Switzerland",
+          "flagImagePath": "/Assets/Flags/switzerland.png"
         },
         {
           "name": "Alexis Claude-Maurice",
@@ -4866,7 +5502,10 @@
           "traits": [
             "Playmaker"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Mert Kömür",
@@ -4888,7 +5527,10 @@
           "traits": [
             "Playmaker"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "TR",
+          "nationalityName": "Turkey",
+          "flagImagePath": "/Assets/Flags/turkey.png"
         },
         {
           "name": "Fabian Rieder",
@@ -4910,7 +5552,10 @@
           "traits": [
             "Playmaker"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "CH",
+          "nationalityName": "Switzerland",
+          "flagImagePath": "/Assets/Flags/switzerland.png"
         },
         {
           "name": "Ismaël Gharbi",
@@ -4933,7 +5578,10 @@
           "traits": [
             "SpeedDribbler"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Rodrigo Ribeiro",
@@ -4954,7 +5602,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "PT",
+          "nationalityName": "Portugal",
+          "flagImagePath": "/Assets/Flags/portugal.png"
         },
         {
           "name": "Michael Gregoritsch",
@@ -4975,7 +5626,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "AT",
+          "nationalityName": "Austria",
+          "flagImagePath": "/Assets/Flags/austria.png"
         }
       ],
       "substitutes": [
@@ -4995,7 +5649,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Arthur Chaves",
@@ -5019,7 +5676,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "BR",
+          "nationalityName": "Brazil",
+          "flagImagePath": "/Assets/Flags/brazil.png"
         },
         {
           "name": "Dimitrios Giannoulis",
@@ -5040,7 +5700,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Marius Wolf",
@@ -5061,7 +5724,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Kristijan Jakic",
@@ -5084,7 +5750,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Han-Noah Massengo",
@@ -5105,7 +5774,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Elvis Rexhbecaj",
@@ -5126,7 +5798,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Yannik Keitel",
@@ -5147,7 +5822,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Thomas Kastanaras",
@@ -5168,7 +5846,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "GR",
+          "nationalityName": "Greece",
+          "flagImagePath": "/Assets/Flags/greece.png"
         },
         {
           "name": "Uchenna Ogundu",
@@ -5189,7 +5870,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "NG",
+          "nationalityName": "Nigeria",
+          "flagImagePath": "/Assets/Flags/nigeria.png"
         },
         {
           "name": "Jeffrey Gouweleeuw",
@@ -5211,7 +5895,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "NL",
+          "nationalityName": "Kingdom of the Netherlands",
+          "flagImagePath": "/Assets/Flags/kingdom-of-the-netherlands.png"
         },
         {
           "name": "Mads Pedersen",
@@ -5232,7 +5919,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Kingdom of Denmark",
+          "flagImagePath": "/Assets/Flags/default.png"
         }
       ]
     },
@@ -5262,7 +5952,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "HR",
+          "nationalityName": "Croatia",
+          "flagImagePath": "/Assets/Flags/croatia.png"
         },
         {
           "name": "Eric Smith",
@@ -5286,7 +5979,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "GB",
+          "nationalityName": "United Kingdom",
+          "flagImagePath": "/Assets/Flags/united-kingdom.png"
         },
         {
           "name": "David Nemeth",
@@ -5308,7 +6004,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "AT",
+          "nationalityName": "Austria",
+          "flagImagePath": "/Assets/Flags/austria.png"
         },
         {
           "name": "Hauke Wahl",
@@ -5330,7 +6029,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Manolis Saliakas",
@@ -5351,7 +6053,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "GR",
+          "nationalityName": "Greece",
+          "flagImagePath": "/Assets/Flags/greece.png"
         },
         {
           "name": "Joel Chima Fujita",
@@ -5374,7 +6079,10 @@
           "traits": [
             "Engine"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "JP",
+          "nationalityName": "Japan",
+          "flagImagePath": "/Assets/Flags/japan.png"
         },
         {
           "name": "Mathias Rasmussen",
@@ -5395,7 +6103,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "NO",
+          "nationalityName": "Norway",
+          "flagImagePath": "/Assets/Flags/norway.png"
         },
         {
           "name": "James Sands",
@@ -5416,7 +6127,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "US",
+          "nationalityName": "United States",
+          "flagImagePath": "/Assets/Flags/usa.png"
         },
         {
           "name": "Mathias Pereira Lage",
@@ -5437,7 +6151,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "PT",
+          "nationalityName": "Portugal",
+          "flagImagePath": "/Assets/Flags/portugal.png"
         },
         {
           "name": "Taichi Hara",
@@ -5458,7 +6175,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "JP",
+          "nationalityName": "Japan",
+          "flagImagePath": "/Assets/Flags/japan.png"
         },
         {
           "name": "Martijn Kaars",
@@ -5479,7 +6199,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "NL",
+          "nationalityName": "Kingdom of the Netherlands",
+          "flagImagePath": "/Assets/Flags/kingdom-of-the-netherlands.png"
         }
       ],
       "substitutes": [
@@ -5499,7 +6222,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Karol Mets",
@@ -5521,7 +6247,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "EE",
+          "nationalityName": "Estonia",
+          "flagImagePath": "/Assets/Flags/estonia.png"
         },
         {
           "name": "Fin Stevens",
@@ -5542,7 +6271,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "GB",
+          "nationalityName": "United Kingdom",
+          "flagImagePath": "/Assets/Flags/united-kingdom.png"
         },
         {
           "name": "Adam Dzwigala",
@@ -5564,7 +6296,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Jackson Irvine",
@@ -5585,7 +6320,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "AU",
+          "nationalityName": "Australia",
+          "flagImagePath": "/Assets/Flags/australia.png"
         },
         {
           "name": "Danel Sinani",
@@ -5605,7 +6343,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "LU",
+          "nationalityName": "Luxembourg",
+          "flagImagePath": "/Assets/Flags/luxembourg.png"
         },
         {
           "name": "Connor Metcalfe",
@@ -5626,7 +6367,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "AU",
+          "nationalityName": "Australia",
+          "flagImagePath": "/Assets/Flags/australia.png"
         },
         {
           "name": "Marwin Schmitz",
@@ -5647,7 +6391,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Ricky-Jade Jones",
@@ -5668,7 +6415,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "GB",
+          "nationalityName": "United Kingdom",
+          "flagImagePath": "/Assets/Flags/united-kingdom.png"
         },
         {
           "name": "Andréas Hountondji",
@@ -5689,7 +6439,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Abdoulie Ceesay",
@@ -5710,7 +6463,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "GM",
+          "nationalityName": "The Gambia",
+          "flagImagePath": "/Assets/Flags/the-gambia.png"
         },
         {
           "name": "Lars Ritzka",
@@ -5731,7 +6487,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         }
       ]
     },
@@ -5761,7 +6520,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Luka Vuskovic",
@@ -5786,7 +6548,10 @@
             "Interceptor",
             "AerialThreat"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Jordan Torunarigha",
@@ -5808,7 +6573,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Warmed Omari",
@@ -5830,7 +6598,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Giorgi Gocholeishvili",
@@ -5851,7 +6622,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "GE",
+          "nationalityName": "Georgia",
+          "flagImagePath": "/Assets/Flags/georgia.png"
         },
         {
           "name": "Fábio Vieira",
@@ -5874,7 +6648,10 @@
             "Playmaker",
             "TechnicalDribbler"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "PT",
+          "nationalityName": "Portugal",
+          "flagImagePath": "/Assets/Flags/portugal.png"
         },
         {
           "name": "Albert Sambi Lokonga",
@@ -5898,7 +6675,10 @@
             "Engine",
             "Playmaker"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "BE",
+          "nationalityName": "Belgium",
+          "flagImagePath": "/Assets/Flags/belgium.png"
         },
         {
           "name": "Albert Grønbæk",
@@ -5920,7 +6700,10 @@
           "traits": [
             "Playmaker"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Kingdom of Denmark",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Yussuf Poulsen",
@@ -5943,7 +6726,10 @@
           "traits": [
             "ClinicalFinisher"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "TZ",
+          "nationalityName": "Tanzania",
+          "flagImagePath": "/Assets/Flags/tanzania.png"
         },
         {
           "name": "Robert Glatzel",
@@ -5964,7 +6750,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Jean-Luc Dompé",
@@ -5985,7 +6774,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         }
       ],
       "substitutes": [
@@ -6005,7 +6797,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "NO",
+          "nationalityName": "Norway",
+          "flagImagePath": "/Assets/Flags/norway.png"
         },
         {
           "name": "William Mikelbrencis",
@@ -6026,7 +6821,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Noah Katterbach",
@@ -6047,7 +6845,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Miro Muheim",
@@ -6068,7 +6869,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "CH",
+          "nationalityName": "Switzerland",
+          "flagImagePath": "/Assets/Flags/switzerland.png"
         },
         {
           "name": "Nicolai Remberg",
@@ -6091,7 +6895,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Omar Megeed",
@@ -6111,7 +6918,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Damion Downs",
@@ -6132,7 +6942,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "US",
+          "nationalityName": "United States",
+          "flagImagePath": "/Assets/Flags/usa.png"
         },
         {
           "name": "Bakery Jatta",
@@ -6153,7 +6966,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "GM",
+          "nationalityName": "The Gambia",
+          "flagImagePath": "/Assets/Flags/the-gambia.png"
         },
         {
           "name": "Rayan Philippe",
@@ -6174,7 +6990,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Ransford Königsdörffer",
@@ -6195,7 +7014,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "GH",
+          "nationalityName": "Ghana",
+          "flagImagePath": "/Assets/Flags/ghana.png"
         },
         {
           "name": "Daniel Elfadli",
@@ -6217,7 +7039,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Nicolás Capaldo",
@@ -6239,7 +7064,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "AR",
+          "nationalityName": "Argentina",
+          "flagImagePath": "/Assets/Flags/argentina.png"
         }
       ]
     },
@@ -6269,7 +7097,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "BE",
+          "nationalityName": "Belgium",
+          "flagImagePath": "/Assets/Flags/belgium.png"
         },
         {
           "name": "Castello Lukeba",
@@ -6294,7 +7125,10 @@
             "Interceptor",
             "AerialThreat"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Benjamin Henrichs",
@@ -6317,7 +7151,10 @@
           "traits": [
             "Engine"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "David Raum",
@@ -6340,7 +7177,10 @@
           "traits": [
             "Engine"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "El Chadaille Bitshiabu",
@@ -6365,7 +7205,10 @@
             "Interceptor",
             "AerialThreat"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Xaver Schlager",
@@ -6389,7 +7232,10 @@
             "Engine",
             "Playmaker"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "AT",
+          "nationalityName": "Austria",
+          "flagImagePath": "/Assets/Flags/austria.png"
         },
         {
           "name": "Brajan Gruda",
@@ -6412,7 +7258,10 @@
             "Playmaker",
             "TechnicalDribbler"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Christoph Baumgartner",
@@ -6435,7 +7284,10 @@
             "Playmaker",
             "TechnicalDribbler"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "AT",
+          "nationalityName": "Austria",
+          "flagImagePath": "/Assets/Flags/austria.png"
         },
         {
           "name": "Yan Diomande",
@@ -6460,7 +7312,10 @@
             "Flair",
             "Rapid"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "CI",
+          "nationalityName": "Ivory Coast",
+          "flagImagePath": "/Assets/Flags/ivory-coast.png"
         },
         {
           "name": "Antonio Nusa",
@@ -6484,7 +7339,10 @@
             "SpeedDribbler",
             "Flair"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "NO",
+          "nationalityName": "Norway",
+          "flagImagePath": "/Assets/Flags/norway.png"
         },
         {
           "name": "Johan Bakayoko",
@@ -6508,7 +7366,10 @@
             "SpeedDribbler",
             "Flair"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "BE",
+          "nationalityName": "Belgium",
+          "flagImagePath": "/Assets/Flags/belgium.png"
         }
       ],
       "substitutes": [
@@ -6528,7 +7389,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "HU",
+          "nationalityName": "Hungary",
+          "flagImagePath": "/Assets/Flags/hungary.png"
         },
         {
           "name": "Ridle Baku",
@@ -6551,7 +7415,10 @@
           "traits": [
             "Engine"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Willi Orbán",
@@ -6575,7 +7442,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "HU",
+          "nationalityName": "Hungary",
+          "flagImagePath": "/Assets/Flags/hungary.png"
         },
         {
           "name": "Max Finkgräfe",
@@ -6598,7 +7468,10 @@
           "traits": [
             "Engine"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Ezechiel Banzuzi",
@@ -6622,7 +7495,10 @@
             "Engine",
             "Playmaker"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "CD",
+          "nationalityName": "Democratic Republic of the Congo",
+          "flagImagePath": "/Assets/Flags/democratic-republic-of-the-congo.png"
         },
         {
           "name": "Nicolas Seiwald",
@@ -6646,7 +7522,10 @@
             "Interceptor",
             "PressResistant"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "AT",
+          "nationalityName": "Austria",
+          "flagImagePath": "/Assets/Flags/austria.png"
         },
         {
           "name": "Assan Ouédraogo",
@@ -6667,7 +7546,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Andrija Maksimovic",
@@ -6687,7 +7569,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Conrad Harder",
@@ -6710,7 +7595,10 @@
           "traits": [
             "ClinicalFinisher"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Kingdom of Denmark",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Ayodele Thomas",
@@ -6731,7 +7619,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Tidiam Gomis",
@@ -6752,7 +7643,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Rômulo",
@@ -6773,7 +7667,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "BR",
+          "nationalityName": "Brazil",
+          "flagImagePath": "/Assets/Flags/brazil.png"
         }
       ]
     },
@@ -6805,7 +7702,10 @@
           "traits": [
             "OneOnOnes"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Philipp Lienhart",
@@ -6829,7 +7729,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "AT",
+          "nationalityName": "Austria",
+          "flagImagePath": "/Assets/Flags/austria.png"
         },
         {
           "name": "Philipp Treu",
@@ -6852,7 +7755,10 @@
           "traits": [
             "Engine"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Max Rosenfelder",
@@ -6876,7 +7782,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Matthias Ginter",
@@ -6900,7 +7809,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Johan Manzambi",
@@ -6924,7 +7836,10 @@
             "Engine",
             "Playmaker"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "CH",
+          "nationalityName": "Switzerland",
+          "flagImagePath": "/Assets/Flags/switzerland.png"
         },
         {
           "name": "Patrick Osterhage",
@@ -6947,7 +7862,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Maximilian Eggestein",
@@ -6970,7 +7888,10 @@
           "traits": [
             "Engine"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Yuito Suzuki",
@@ -6992,7 +7913,10 @@
           "traits": [
             "ClinicalFinisher"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "JP",
+          "nationalityName": "Japan",
+          "flagImagePath": "/Assets/Flags/japan.png"
         },
         {
           "name": "Niklas Beste",
@@ -7015,7 +7939,10 @@
           "traits": [
             "SpeedDribbler"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Igor Matanovic",
@@ -7038,7 +7965,10 @@
           "traits": [
             "ClinicalFinisher"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         }
       ],
       "substitutes": [
@@ -7058,7 +7988,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Jordy Makengo",
@@ -7081,7 +8014,10 @@
           "traits": [
             "Engine"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Christian Günter",
@@ -7102,7 +8038,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Lukas Kübler",
@@ -7123,7 +8062,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Nicolas Höfler",
@@ -7144,7 +8086,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Daniel-Kofi Kyereh",
@@ -7164,7 +8109,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "GH",
+          "nationalityName": "Ghana",
+          "flagImagePath": "/Assets/Flags/ghana.png"
         },
         {
           "name": "Rouven Tarnutzer",
@@ -7185,7 +8133,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Vincenzo Grifo",
@@ -7208,7 +8159,10 @@
           "traits": [
             "SpeedDribbler"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "IT",
+          "nationalityName": "Italy",
+          "flagImagePath": "/Assets/Flags/italy.png"
         },
         {
           "name": "Lucas Höler",
@@ -7229,7 +8183,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Derry Scherhant",
@@ -7250,7 +8207,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Maximilian Philipp",
@@ -7270,7 +8230,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Bruno Ogbus",
@@ -7292,7 +8255,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "CH",
+          "nationalityName": "Switzerland",
+          "flagImagePath": "/Assets/Flags/switzerland.png"
         }
       ]
     },
@@ -7324,7 +8290,10 @@
           "traits": [
             "OneOnOnes"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "JP",
+          "nationalityName": "Japan",
+          "flagImagePath": "/Assets/Flags/japan.png"
         },
         {
           "name": "Karim Coulibaly",
@@ -7349,7 +8318,10 @@
             "Interceptor",
             "AerialThreat"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "SN",
+          "nationalityName": "Senegal",
+          "flagImagePath": "/Assets/Flags/senegal.png"
         },
         {
           "name": "Marco Friedl",
@@ -7373,7 +8345,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "AT",
+          "nationalityName": "Austria",
+          "flagImagePath": "/Assets/Flags/austria.png"
         },
         {
           "name": "Maximilian Wöber",
@@ -7397,7 +8372,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "AT",
+          "nationalityName": "Austria",
+          "flagImagePath": "/Assets/Flags/austria.png"
         },
         {
           "name": "Felix Agu",
@@ -7420,7 +8398,10 @@
           "traits": [
             "Engine"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Romano Schmid",
@@ -7443,7 +8424,10 @@
             "Playmaker",
             "TechnicalDribbler"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "AT",
+          "nationalityName": "Austria",
+          "flagImagePath": "/Assets/Flags/austria.png"
         },
         {
           "name": "Jens Stage",
@@ -7466,7 +8450,10 @@
           "traits": [
             "Engine"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Kingdom of Denmark",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Senne Lynen",
@@ -7489,7 +8476,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "BE",
+          "nationalityName": "Belgium",
+          "flagImagePath": "/Assets/Flags/belgium.png"
         },
         {
           "name": "Victor Boniface",
@@ -7512,7 +8502,10 @@
           "traits": [
             "ClinicalFinisher"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "NG",
+          "nationalityName": "Nigeria",
+          "flagImagePath": "/Assets/Flags/nigeria.png"
         },
         {
           "name": "Justin Njinmah",
@@ -7535,7 +8528,10 @@
           "traits": [
             "SpeedDribbler"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Marco Grüll",
@@ -7558,7 +8554,10 @@
           "traits": [
             "SpeedDribbler"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "AT",
+          "nationalityName": "Austria",
+          "flagImagePath": "/Assets/Flags/austria.png"
         }
       ],
       "substitutes": [
@@ -7578,7 +8577,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "EE",
+          "nationalityName": "Estonia",
+          "flagImagePath": "/Assets/Flags/estonia.png"
         },
         {
           "name": "Yukinari Sugawara",
@@ -7601,7 +8603,10 @@
           "traits": [
             "Engine"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "JP",
+          "nationalityName": "Japan",
+          "flagImagePath": "/Assets/Flags/japan.png"
         },
         {
           "name": "Amos Pieper",
@@ -7623,7 +8628,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Mitchell Weiser",
@@ -7644,7 +8652,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DZ",
+          "nationalityName": "Algeria",
+          "flagImagePath": "/Assets/Flags/algeria.png"
         },
         {
           "name": "Cameron Puertas",
@@ -7667,7 +8678,10 @@
           "traits": [
             "Engine"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Patrice Covic",
@@ -7687,7 +8701,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Leonardo Bittencourt",
@@ -7708,7 +8725,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "BR",
+          "nationalityName": "Brazil",
+          "flagImagePath": "/Assets/Flags/brazil.png"
         },
         {
           "name": "Wesley Adeh",
@@ -7729,7 +8749,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Keke Topp",
@@ -7752,7 +8775,10 @@
           "traits": [
             "ClinicalFinisher"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Jovan Milosevic",
@@ -7773,7 +8799,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Samuel Mbangula",
@@ -7794,7 +8823,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "BE",
+          "nationalityName": "Belgium",
+          "flagImagePath": "/Assets/Flags/belgium.png"
         },
         {
           "name": "Salim Musah",
@@ -7815,7 +8847,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         }
       ]
     },
@@ -7845,7 +8880,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Koki Machida",
@@ -7869,7 +8907,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "JP",
+          "nationalityName": "Japan",
+          "flagImagePath": "/Assets/Flags/japan.png"
         },
         {
           "name": "Valentin Gendrey",
@@ -7892,7 +8933,10 @@
           "traits": [
             "Engine"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Robin Hranac",
@@ -7916,7 +8960,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Ozan Kabak",
@@ -7940,7 +8987,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "TR",
+          "nationalityName": "Turkey",
+          "flagImagePath": "/Assets/Flags/turkey.png"
         },
         {
           "name": "Wouter Burger",
@@ -7963,7 +9013,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "NL",
+          "nationalityName": "Kingdom of the Netherlands",
+          "flagImagePath": "/Assets/Flags/kingdom-of-the-netherlands.png"
         },
         {
           "name": "Alexander Prass",
@@ -7985,7 +9038,10 @@
           "traits": [
             "SpeedDribbler"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "AT",
+          "nationalityName": "Austria",
+          "flagImagePath": "/Assets/Flags/austria.png"
         },
         {
           "name": "Andrej Kramaric",
@@ -8005,7 +9061,10 @@
           "form": "Average",
           "isStarter": true,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Bazoumana Touré",
@@ -8029,7 +9088,10 @@
             "SpeedDribbler",
             "Flair"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "CI",
+          "nationalityName": "Ivory Coast",
+          "flagImagePath": "/Assets/Flags/ivory-coast.png"
         },
         {
           "name": "Adam Hlozek",
@@ -8052,7 +9114,10 @@
           "traits": [
             "ClinicalFinisher"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "CZ",
+          "nationalityName": "Czech Republic",
+          "flagImagePath": "/Assets/Flags/czech-republic.png"
         },
         {
           "name": "Max Moerstedt",
@@ -8075,7 +9140,10 @@
           "traits": [
             "ClinicalFinisher"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         }
       ],
       "substitutes": [
@@ -8095,7 +9163,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Bernardo",
@@ -8118,7 +9189,10 @@
           "traits": [
             "Engine"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "BR",
+          "nationalityName": "Brazil",
+          "flagImagePath": "/Assets/Flags/brazil.png"
         },
         {
           "name": "Vladimír Coufal",
@@ -8139,7 +9213,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "CZ",
+          "nationalityName": "Czech Republic",
+          "flagImagePath": "/Assets/Flags/czech-republic.png"
         },
         {
           "name": "Kevin Akpoguma",
@@ -8161,7 +9238,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Grischa Prömel",
@@ -8182,7 +9262,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Muhammed Damar",
@@ -8202,7 +9285,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "TR",
+          "nationalityName": "Turkey",
+          "flagImagePath": "/Assets/Flags/turkey.png"
         },
         {
           "name": "Luka Duric",
@@ -8223,7 +9309,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Leon Avdullahu",
@@ -8244,7 +9333,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "CH",
+          "nationalityName": "Switzerland",
+          "flagImagePath": "/Assets/Flags/switzerland.png"
         },
         {
           "name": "Cole Campbell",
@@ -8267,7 +9359,10 @@
           "traits": [
             "SpeedDribbler"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "US",
+          "nationalityName": "United States",
+          "flagImagePath": "/Assets/Flags/usa.png"
         },
         {
           "name": "Tim Lemperle",
@@ -8288,7 +9383,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Ihlas Bebou",
@@ -8309,7 +9407,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Fisnik Asllani",
@@ -8330,7 +9431,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         }
       ]
     },
@@ -8362,7 +9466,10 @@
           "traits": [
             "OneOnOnes"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Finn Jeltsch",
@@ -8387,7 +9494,10 @@
             "Interceptor",
             "AerialThreat"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Maximilian Mittelstädt",
@@ -8410,7 +9520,10 @@
           "traits": [
             "Engine"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Jeff Chabot",
@@ -8435,7 +9548,10 @@
             "Interceptor",
             "AerialThreat"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Lorenz Assignon",
@@ -8458,7 +9574,10 @@
           "traits": [
             "Engine"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Angelo Stiller",
@@ -8483,7 +9602,10 @@
             "PressResistant",
             "LongPasser"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Bilal El Khannouss",
@@ -8506,7 +9628,10 @@
             "Playmaker",
             "TechnicalDribbler"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "BE",
+          "nationalityName": "Belgium",
+          "flagImagePath": "/Assets/Flags/belgium.png"
         },
         {
           "name": "Chema Andrés",
@@ -8530,7 +9655,10 @@
             "Interceptor",
             "PressResistant"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Deniz Undav",
@@ -8554,7 +9682,10 @@
             "ClinicalFinisher",
             "TriesToBeatOffsideTrap"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "TR",
+          "nationalityName": "Turkey",
+          "flagImagePath": "/Assets/Flags/turkey.png"
         },
         {
           "name": "Jamie Leweling",
@@ -8578,7 +9709,10 @@
             "SpeedDribbler",
             "Flair"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "GH",
+          "nationalityName": "Ghana",
+          "flagImagePath": "/Assets/Flags/ghana.png"
         },
         {
           "name": "Ermedin Demirovic",
@@ -8601,7 +9735,10 @@
           "traits": [
             "ClinicalFinisher"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         }
       ],
       "substitutes": [
@@ -8621,7 +9758,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Josha Vagnoman",
@@ -8644,7 +9784,10 @@
           "traits": [
             "Engine"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Luca Jaquez",
@@ -8668,7 +9811,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Ramon Hendriks",
@@ -8692,7 +9838,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Atakan Karazor",
@@ -8715,7 +9864,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Nikolas Nartey",
@@ -8736,7 +9888,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Mirza Catovic",
@@ -8757,7 +9912,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Tiago Tomás",
@@ -8781,7 +9939,10 @@
             "SpeedDribbler",
             "Flair"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Badredine Bouanani",
@@ -8804,7 +9965,10 @@
           "traits": [
             "SpeedDribbler"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Chris Führich",
@@ -8827,7 +9991,10 @@
           "traits": [
             "SpeedDribbler"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Justin Diehl",
@@ -8848,7 +10015,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Ameen Al-Dakhil",
@@ -8870,7 +10040,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         }
       ]
     },
@@ -8902,7 +10075,10 @@
           "traits": [
             "OneOnOnes"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Konstantinos Koulierakis",
@@ -8927,7 +10103,10 @@
             "Interceptor",
             "AerialThreat"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Jeanuël Belocian",
@@ -8951,7 +10130,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Joakim Maehle",
@@ -8974,7 +10156,10 @@
           "traits": [
             "Engine"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Saël Kumbedi",
@@ -8997,7 +10182,10 @@
           "traits": [
             "Engine"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Lovro Majer",
@@ -9020,7 +10208,10 @@
             "Playmaker",
             "TechnicalDribbler"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Mattias Svanberg",
@@ -9043,7 +10234,10 @@
           "traits": [
             "Engine"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Vini Souza",
@@ -9066,7 +10260,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Mohamed Amoura",
@@ -9090,7 +10287,10 @@
             "ClinicalFinisher",
             "TriesToBeatOffsideTrap"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Jesper Lindstrøm",
@@ -9114,7 +10314,10 @@
             "SpeedDribbler",
             "Flair"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Patrick Wimmer",
@@ -9138,7 +10341,10 @@
             "SpeedDribbler",
             "Flair"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "AT",
+          "nationalityName": "Austria",
+          "flagImagePath": "/Assets/Flags/austria.png"
         }
       ],
       "substitutes": [
@@ -9158,7 +10364,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Kilian Fischer",
@@ -9181,7 +10390,10 @@
           "traits": [
             "Engine"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Denis Vavro",
@@ -9205,7 +10417,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "SK",
+          "nationalityName": "Slovakia",
+          "flagImagePath": "/Assets/Flags/slovakia.png"
         },
         {
           "name": "Moritz Jenz",
@@ -9229,7 +10444,10 @@
           "traits": [
             "Interceptor"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Bence Dárdai",
@@ -9251,7 +10469,10 @@
           "traits": [
             "Playmaker"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "HU",
+          "nationalityName": "Hungary",
+          "flagImagePath": "/Assets/Flags/hungary.png"
         },
         {
           "name": "Kevin Paredes",
@@ -9273,7 +10494,10 @@
           "traits": [
             "SpeedDribbler"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "US",
+          "nationalityName": "United States",
+          "flagImagePath": "/Assets/Flags/usa.png"
         },
         {
           "name": "Maximilian Arnold",
@@ -9294,7 +10518,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Christian Eriksen",
@@ -9314,7 +10541,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Kingdom of Denmark",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Jonas Wind",
@@ -9337,7 +10567,10 @@
           "traits": [
             "ClinicalFinisher"
           ],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Kingdom of Denmark",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Kento Shiogai",
@@ -9358,7 +10591,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "JP",
+          "nationalityName": "Japan",
+          "flagImagePath": "/Assets/Flags/japan.png"
         },
         {
           "name": "Adam Daghim",
@@ -9379,7 +10615,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Kingdom of Denmark",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Dzenan Pejcinovic",
@@ -9400,7 +10639,10 @@
           "form": "Average",
           "isStarter": false,
           "traits": [],
-          "morale": 50
+          "morale": 50,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         }
       ]
     }

@@ -1,0 +1,1021 @@
+<UserControl x:Class="FootballSimulation.Wpf.Views.TransferMarketView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:views="clr-namespace:FootballSimulation.Wpf.Views"
+             Background="{DynamicResource AppPageBackground}">
+    <UserControl.Resources>
+        <DropShadowEffect x:Key="SoftCardShadow"
+                          BlurRadius="18"
+                          ShadowDepth="3"
+                          Opacity="0.12"
+                          Color="#0F172A" />
+
+        <Style x:Key="TransferCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource AppCardBackground}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AppCardBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="14" />
+            <Setter Property="Padding" Value="12" />
+            <Setter Property="Effect" Value="{StaticResource SoftCardShadow}" />
+        </Style>
+
+        <Style x:Key="MutedTextStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource AppMutedTextBrush}" />
+            <Setter Property="FontSize" Value="12" />
+        </Style>
+
+        <Style x:Key="FilterLabelStyle" TargetType="TextBlock" BasedOn="{StaticResource MutedTextStyle}">
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Margin" Value="0,0,0,3" />
+        </Style>
+
+        <Style x:Key="ModernTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Height" Value="30" />
+            <Setter Property="Padding" Value="9,4" />
+            <Setter Property="Background" Value="{DynamicResource AppInputBackground}" />
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AppCardBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+
+        <Style x:Key="ModernComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Height" Value="30" />
+            <Setter Property="Padding" Value="7,2" />
+            <Setter Property="Background" Value="{DynamicResource AppInputBackground}" />
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AppCardBorderBrush}" />
+        </Style>
+
+        <Style x:Key="PrimaryTransferButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="30" />
+            <Setter Property="Padding" Value="14,0" />
+            <Setter Property="Background" Value="#2563EB" />
+            <Setter Property="Foreground" Value="#FFFFFF" />
+            <Setter Property="BorderBrush" Value="#2563EB" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="12">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#1D4ED8" />
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#1D4ED8" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#E5E7EB" />
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#D1D5DB" />
+                                <Setter Property="Foreground" Value="#94A3B8" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SecondaryTransferButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="30" />
+            <Setter Property="Padding" Value="14,0" />
+            <Setter Property="Background" Value="{DynamicResource AppCardBackground}" />
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AppCardBorderBrush}" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="12">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#F1F5F9" />
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#60A5FA" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#E5E7EB" />
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#D1D5DB" />
+                                <Setter Property="Foreground" Value="#94A3B8" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="DangerTransferButtonStyle" TargetType="Button" BasedOn="{StaticResource PrimaryTransferButtonStyle}">
+            <Setter Property="Background" Value="#DC2626" />
+            <Setter Property="Foreground" Value="#FFFFFF" />
+            <Setter Property="BorderBrush" Value="#DC2626" />
+        </Style>
+
+        <Style x:Key="BackButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="32" />
+            <Setter Property="Padding" Value="18,0" />
+            <Setter Property="Background" Value="#061226" />
+            <Setter Property="Foreground" Value="#FFFFFF" />
+            <Setter Property="BorderBrush" Value="#061226" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Width" Value="160" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="12">
+                            <TextBlock Text="{TemplateBinding Content}"
+                                       Foreground="{TemplateBinding Foreground}"
+                                       FontWeight="{TemplateBinding FontWeight}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#1E293B" />
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#1E293B" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#E5E7EB" />
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#D1D5DB" />
+                                <Setter Property="Foreground" Value="#475569" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="OvrBadgeBorderStyle" TargetType="Border">
+            <Setter Property="Background" Value="#061226" />
+            <Setter Property="BorderBrush" Value="#1E293B" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="MinWidth" Value="42" />
+            <Setter Property="Height" Value="24" />
+            <Setter Property="Padding" Value="8,0" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="CenteredGridTextStyle" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+        </Style>
+
+        <Style x:Key="CenteredValueTextStyle" TargetType="TextBlock" BasedOn="{StaticResource CenteredGridTextStyle}">
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+
+        <DataTemplate x:Key="TransferPlayerCellTemplate">
+            <TextBlock Text="{Binding PlayerName}"
+                       FontWeight="SemiBold"
+                       Foreground="{DynamicResource AppTextBrush}"
+                       VerticalAlignment="Center"
+                       TextTrimming="CharacterEllipsis" />
+        </DataTemplate>
+
+        <DataTemplate x:Key="NationalityCellTemplate">
+            <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <Image Source="{Binding NationalityFlagImagePath}"
+                       ToolTip="{Binding NationalityName}"
+                       Width="24"
+                       Height="16"
+                       Stretch="UniformToFill"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center" />
+            </Grid>
+        </DataTemplate>
+
+        <Style x:Key="PillTabItemStyle" TargetType="TabItem">
+            <Setter Property="Margin" Value="0,2,10,2" />
+            <Setter Property="Padding" Value="18,8" />
+            <Setter Property="MinWidth" Value="84" />
+            <Setter Property="MaxWidth" Value="140" />
+            <Setter Property="MinHeight" Value="38" />
+            <Setter Property="Foreground" Value="#07162F" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border x:Name="TabBorder"
+                                MinHeight="{TemplateBinding MinHeight}"
+                                Background="#FFFFFF"
+                                BorderBrush="#CBD5E1"
+                                BorderThickness="1"
+                                CornerRadius="12"
+                                Padding="{TemplateBinding Padding}">
+                            <TextBlock Text="{TemplateBinding Header}"
+                                       Foreground="{TemplateBinding Foreground}"
+                                       FontWeight="{TemplateBinding FontWeight}"
+                                       FontSize="{TemplateBinding FontSize}"
+                                       TextWrapping="NoWrap"
+                                       TextTrimming="CharacterEllipsis"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="TabBorder" Property="Background" Value="#07162F" />
+                                <Setter TargetName="TabBorder" Property="BorderBrush" Value="#07162F" />
+                                <Setter TargetName="TabBorder" Property="BorderThickness" Value="1" />
+                                <Setter Property="Foreground" Value="#FFFFFF" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="TabBorder" Property="Background" Value="#EFF6FF" />
+                                <Setter TargetName="TabBorder" Property="BorderBrush" Value="#93C5FD" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="TabBorder" Property="Background" Value="#F1F5F9" />
+                                <Setter TargetName="TabBorder" Property="BorderBrush" Value="#CBD5E1" />
+                                <Setter Property="Foreground" Value="#94A3B8" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="RecommendedTabItemStyle" TargetType="TabItem" BasedOn="{StaticResource PillTabItemStyle}">
+            <Setter Property="MinWidth" Value="92" />
+        </Style>
+
+        <Style x:Key="ModernTabControlStyle" TargetType="TabControl">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabControl">
+                        <ContentPresenter ContentSource="SelectedContent" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SegmentedTabButtonStyle" TargetType="RadioButton">
+            <Setter Property="Height" Value="38" />
+            <Setter Property="MinWidth" Value="92" />
+            <Setter Property="Padding" Value="18,0" />
+            <Setter Property="Margin" Value="0,0,4,0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="#344054" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="SegmentBorder"
+                                Height="{TemplateBinding Height}"
+                                MinWidth="{TemplateBinding MinWidth}"
+                                Padding="{TemplateBinding Padding}"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="10">
+                            <TextBlock Text="{TemplateBinding Content}"
+                                       Foreground="{TemplateBinding Foreground}"
+                                       FontWeight="{TemplateBinding FontWeight}"
+                                       FontSize="{TemplateBinding FontSize}"
+                                       TextWrapping="NoWrap"
+                                       HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                       VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="SegmentBorder" Property="Background" Value="#FFFFFF" />
+                                <Setter Property="Foreground" Value="#061226" />
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="SegmentBorder" Property="Background" Value="#061226" />
+                                <Setter TargetName="SegmentBorder" Property="Effect" Value="{StaticResource SoftCardShadow}" />
+                                <Setter Property="Foreground" Value="#FFFFFF" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Foreground" Value="#98A2B3" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="RecommendedSegmentedTabButtonStyle" TargetType="RadioButton" BasedOn="{StaticResource SegmentedTabButtonStyle}">
+            <Setter Property="MinWidth" Value="92" />
+        </Style>
+
+        <Style x:Key="ModernGridStyle" TargetType="DataGrid">
+            <Setter Property="AutoGenerateColumns" Value="False" />
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="HeadersVisibility" Value="Column" />
+            <Setter Property="GridLinesVisibility" Value="None" />
+            <Setter Property="RowHeight" Value="46" />
+            <Setter Property="AlternationCount" Value="2" />
+            <Setter Property="Background" Value="{DynamicResource AppCardBackground}" />
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AppCardBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CanUserAddRows" Value="False" />
+            <Setter Property="CanUserResizeRows" Value="False" />
+            <Setter Property="SelectionMode" Value="Single" />
+            <Setter Property="SelectionUnit" Value="FullRow" />
+            <Setter Property="ColumnHeaderStyle">
+                <Setter.Value>
+                    <Style TargetType="DataGridColumnHeader">
+                        <Setter Property="Height" Value="40" />
+                        <Setter Property="Padding" Value="10,6" />
+                        <Setter Property="Background" Value="{DynamicResource AppCardBackground}" />
+                        <Setter Property="Foreground" Value="{DynamicResource AppMutedTextBrush}" />
+                        <Setter Property="FontWeight" Value="SemiBold" />
+                        <Setter Property="BorderBrush" Value="{DynamicResource AppCardBorderBrush}" />
+                        <Setter Property="BorderThickness" Value="0,0,0,1" />
+                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                        <Setter Property="VerticalContentAlignment" Value="Center" />
+                    </Style>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="CellStyle">
+                <Setter.Value>
+                    <Style TargetType="DataGridCell">
+                        <Setter Property="Padding" Value="10,0" />
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="VerticalContentAlignment" Value="Center" />
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                    </Style>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="RowStyle">
+                <Setter.Value>
+                    <Style TargetType="DataGridRow">
+                        <Setter Property="Background" Value="{DynamicResource AppCardBackground}" />
+                        <Setter Property="BorderBrush" Value="{DynamicResource AppCardBorderBrush}" />
+                        <Setter Property="BorderThickness" Value="0,0,0,1" />
+                        <Style.Triggers>
+                            <Trigger Property="AlternationIndex" Value="1">
+                                <Setter Property="Background" Value="{DynamicResource TableAlternateRowBackground}" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#E0F2FE" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#DBEAFE" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="22,16,22,16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <DockPanel Grid.Row="0" Margin="0,0,0,8">
+            <Button Content="Back to Dashboard"
+                    Style="{StaticResource BackButtonStyle}"
+                    Click="BackButton_Click"
+                    Margin="12,0,0,0"
+                    DockPanel.Dock="Right" />
+            <StackPanel>
+                <TextBlock Text="Transfer Market"
+                           FontSize="28"
+                           FontWeight="Bold"
+                           Foreground="{DynamicResource AppTextBrush}" />
+                <WrapPanel Margin="1,2,0,0" VerticalAlignment="Center">
+                    <TextBlock Text="League:" Style="{StaticResource MutedTextStyle}" FontWeight="SemiBold" Margin="0,0,4,0" />
+                    <TextBlock x:Name="SubtitleTextBlock" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource AppTextBrush}" Margin="0,0,12,0" />
+                    <TextBlock Text="|" Foreground="{DynamicResource AppMutedTextBrush}" Margin="0,0,12,0" />
+                    <TextBlock Text="Club:" Style="{StaticResource MutedTextStyle}" FontWeight="SemiBold" Margin="0,0,4,0" />
+                    <TextBlock x:Name="ClubTextBlock" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource AppTextBrush}" Margin="0,0,12,0" />
+                    <TextBlock Text="|" Foreground="{DynamicResource AppMutedTextBrush}" Margin="0,0,12,0" />
+                    <TextBlock Text="Budget:" Style="{StaticResource MutedTextStyle}" FontWeight="SemiBold" Margin="0,0,4,0" />
+                    <TextBlock x:Name="BudgetTextBlock" FontWeight="Bold" FontSize="13" Foreground="#2563EB" Margin="0,0,12,0" />
+                    <TextBlock Text="|" Foreground="{DynamicResource AppMutedTextBrush}" Margin="0,0,12,0" />
+                    <TextBlock Text="Window:" Style="{StaticResource MutedTextStyle}" FontWeight="SemiBold" Margin="0,0,4,0" />
+                    <TextBlock x:Name="WindowTextBlock" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource AppTextBrush}" Margin="0,0,12,0" />
+                    <TextBlock Text="|" Foreground="{DynamicResource AppMutedTextBrush}" Margin="0,0,12,0" />
+                    <TextBlock Text="Deadline:" Style="{StaticResource MutedTextStyle}" FontWeight="SemiBold" Margin="0,0,4,0" />
+                    <TextBlock x:Name="DeadlineTextBlock" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource AppTextBrush}" />
+                </WrapPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <Border Grid.Row="1"
+                Background="#EAF0F7"
+                CornerRadius="14"
+                Padding="4"
+                HorizontalAlignment="Left"
+                Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal">
+                <RadioButton x:Name="SquadSegmentButton"
+                             Content="Squad"
+                             GroupName="TransferTabs"
+                             Tag="0"
+                             IsChecked="True"
+                             Style="{StaticResource SegmentedTabButtonStyle}"
+                             Click="TransferTabButton_Click" />
+                <RadioButton x:Name="MarketSegmentButton"
+                             Content="Market"
+                             GroupName="TransferTabs"
+                             Tag="1"
+                             Style="{StaticResource SegmentedTabButtonStyle}"
+                             Click="TransferTabButton_Click" />
+                <RadioButton x:Name="RecommendedSegmentButton"
+                             Content="Scout"
+                             GroupName="TransferTabs"
+                             Tag="2"
+                             Style="{StaticResource RecommendedSegmentedTabButtonStyle}"
+                             Click="TransferTabButton_Click" />
+                <RadioButton x:Name="OffersSegmentButton"
+                             Content="Offers"
+                             GroupName="TransferTabs"
+                             Tag="3"
+                             Style="{StaticResource SegmentedTabButtonStyle}"
+                             Click="TransferTabButton_Click" />
+                <RadioButton x:Name="HistorySegmentButton"
+                             Content="History"
+                             GroupName="TransferTabs"
+                             Tag="4"
+                             Style="{StaticResource SegmentedTabButtonStyle}"
+                             Click="TransferTabButton_Click" />
+            </StackPanel>
+        </Border>
+
+        <TabControl x:Name="TransferTabControl"
+                    Grid.Row="2"
+                    SelectedIndex="0"
+                    Style="{StaticResource ModernTabControlStyle}"
+                    SelectionChanged="TransferTabControl_SelectionChanged">
+            <TabItem Header="Squad">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="70*" />
+                        <ColumnDefinition Width="40*" />
+                    </Grid.ColumnDefinitions>
+                    <DataGrid x:Name="SquadDataGrid"
+                              Grid.Column="0"
+                              Style="{StaticResource ModernGridStyle}"
+                              SelectionChanged="SquadDataGrid_SelectionChanged">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="Player" Width="*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <StaticResource ResourceKey="TransferPlayerCellTemplate" />
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Nat" Width="52">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <StaticResource ResourceKey="NationalityCellTemplate" />
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Pos" Binding="{Binding Position}" Width="70" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                            <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="60" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                            <DataGridTemplateColumn Header="OVR" Width="64">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Style="{StaticResource OvrBadgeBorderStyle}">
+                                            <TextBlock Text="{Binding OverallText}" Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Form" Width="90">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{Binding FormBrush}" CornerRadius="10" Height="24" Padding="7,0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Form}" Foreground="{Binding FormTextBrush}" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Value" Width="105">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding MarketValueText}" Style="{StaticResource CenteredValueTextStyle}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Status" Width="105">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{Binding StatusBrush}" CornerRadius="10" Height="24" Padding="7,0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Status}" Foreground="#FFFFFF" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Sale" Width="112">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{Binding SaleBrush}" CornerRadius="10" Height="24" Padding="7,0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding SaleStatus}" Foreground="{Binding SaleTextBrush}" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <views:TransferPlayerDetailPanel x:Name="SquadDetailPanel"
+                                                     Grid.Column="1"
+                                                     ShortlistToggled="DetailPanel_ShortlistToggled"
+                                                     TransferListToggled="DetailPanel_TransferListToggled" />
+                </Grid>
+            </TabItem>
+            <TabItem Header="Market">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="65*" />
+                        <ColumnDefinition Width="35*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Style="{StaticResource TransferCardStyle}" Margin="0,0,0,8" Padding="12,9">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid Grid.Row="0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*" />
+                                    <ColumnDefinition Width="108" />
+                                    <ColumnDefinition Width="145" />
+                                    <ColumnDefinition Width="118" />
+                                    <ColumnDefinition Width="90" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                    <TextBlock Text="Search" Style="{StaticResource FilterLabelStyle}" />
+                                    <TextBox x:Name="SearchNameTextBox" Style="{StaticResource ModernTextBoxStyle}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="0,0,8,0">
+                                    <TextBlock Text="Position" Style="{StaticResource FilterLabelStyle}" />
+                                    <ComboBox x:Name="SearchPositionComboBox" Style="{StaticResource ModernComboBoxStyle}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Margin="0,0,8,0">
+                                    <TextBlock Text="League" Style="{StaticResource FilterLabelStyle}" />
+                                    <ComboBox x:Name="SearchLeagueComboBox" Style="{StaticResource ModernComboBoxStyle}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="3" Margin="0,0,8,0">
+                                    <TextBlock Text="Max Value" Style="{StaticResource FilterLabelStyle}" />
+                                    <ComboBox x:Name="SearchMaxPriceComboBox" Style="{StaticResource ModernComboBoxStyle}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="4" Margin="0,0,8,0">
+                                    <TextBlock Text="Min OVR" Style="{StaticResource FilterLabelStyle}" />
+                                    <ComboBox x:Name="SearchMinOvrComboBox" Style="{StaticResource ModernComboBoxStyle}" />
+                                </StackPanel>
+                                <Button Grid.Column="5" Content="More Filters" Width="104" Style="{StaticResource SecondaryTransferButtonStyle}" Margin="0,17,8,0" Click="MoreFiltersButton_Click" x:Name="MoreFiltersButton" />
+                                <Button Grid.Column="6" Content="Search" Width="78" Style="{StaticResource PrimaryTransferButtonStyle}" Margin="0,17,8,0" Click="SearchButton_Click" />
+                                <Button Grid.Column="7" Content="Reset" Width="72" Style="{StaticResource SecondaryTransferButtonStyle}" Margin="0,17,0,0" Click="ClearSearchButton_Click" />
+                            </Grid>
+
+                            <WrapPanel x:Name="AdvancedFiltersPanel" Grid.Row="1" Visibility="Collapsed" Margin="0,8,0,0">
+                                <StackPanel Width="180" Margin="0,0,8,0">
+                                    <TextBlock Text="Club" Style="{StaticResource FilterLabelStyle}" />
+                                    <TextBox x:Name="SearchClubTextBox" Style="{StaticResource ModernTextBoxStyle}" />
+                                </StackPanel>
+                                <StackPanel Width="150" Margin="0,0,8,0">
+                                    <TextBlock Text="Trait" Style="{StaticResource FilterLabelStyle}" />
+                                    <TextBox x:Name="SearchTraitTextBox" Style="{StaticResource ModernTextBoxStyle}" />
+                                </StackPanel>
+                                <StackPanel Width="100" Margin="0,0,8,0">
+                                    <TextBlock Text="Min Age" Style="{StaticResource FilterLabelStyle}" />
+                                    <ComboBox x:Name="SearchMinAgeComboBox" Style="{StaticResource ModernComboBoxStyle}" />
+                                </StackPanel>
+                                <StackPanel Width="100" Margin="0,0,8,0">
+                                    <TextBlock Text="Max Age" Style="{StaticResource FilterLabelStyle}" />
+                                    <ComboBox x:Name="SearchMaxAgeComboBox" Style="{StaticResource ModernComboBoxStyle}" />
+                                </StackPanel>
+                                <StackPanel Width="130">
+                                    <TextBlock Text="Form" Style="{StaticResource FilterLabelStyle}" />
+                                    <ComboBox x:Name="SearchFormComboBox" Style="{StaticResource ModernComboBoxStyle}" />
+                                </StackPanel>
+                            </WrapPanel>
+                        </Grid>
+                    </Border>
+
+                    <DataGrid x:Name="MarketDataGrid"
+                              Grid.Row="1"
+                              Grid.Column="0"
+                              Style="{StaticResource ModernGridStyle}"
+                              SelectionChanged="MarketDataGrid_SelectionChanged">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="Player" Width="*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <StaticResource ResourceKey="TransferPlayerCellTemplate" />
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Nat" Width="52">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <StaticResource ResourceKey="NationalityCellTemplate" />
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Club" Width="190">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Image Source="{Binding ClubLogoPath}" Width="24" Height="24" Stretch="Uniform" Margin="0,0,8,0" />
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding ClubName}" Foreground="{DynamicResource AppTextBrush}" />
+                                                <TextBlock Text="{Binding LeagueName}" Style="{StaticResource MutedTextStyle}" />
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Pos" Binding="{Binding Position}" Width="48" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                            <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="46" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                            <DataGridTemplateColumn Header="OVR" Width="56">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Style="{StaticResource OvrBadgeBorderStyle}">
+                                            <TextBlock Text="{Binding OverallText}" Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Form" Width="76">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{Binding FormBrush}" CornerRadius="10" Height="24" Padding="7,0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Form}" Foreground="{Binding FormTextBrush}" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Value" Width="95">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding MarketValueText}" Style="{StaticResource CenteredValueTextStyle}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Status" Width="110">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{Binding StatusBrush}" CornerRadius="10" Height="24" Padding="7,0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Status}" Foreground="#FFFFFF" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <views:TransferPlayerDetailPanel x:Name="MarketDetailPanel"
+                                                     Grid.Row="1"
+                                                     Grid.Column="1"
+                                                     MakeOfferRequested="DetailPanel_MakeOfferRequested"
+                                                     ShortlistToggled="DetailPanel_ShortlistToggled"
+                                                     TransferListToggled="DetailPanel_TransferListToggled" />
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Scout" Style="{StaticResource RecommendedTabItemStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="65*" />
+                        <ColumnDefinition Width="35*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid Grid.Column="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="210" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Text="Shortlisted Players"
+                                   Foreground="{DynamicResource AppTextBrush}"
+                                   FontSize="15"
+                                   FontWeight="Bold"
+                                   Margin="0,0,0,8" />
+                        <Grid Grid.Row="1" Margin="0,0,0,14">
+                            <DataGrid x:Name="ShortlistedDataGrid"
+                                      Style="{StaticResource ModernGridStyle}"
+                                      SelectionChanged="ShortlistedDataGrid_SelectionChanged">
+                                <DataGrid.Columns>
+                                    <DataGridTemplateColumn Header="Player" Width="*">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <StaticResource ResourceKey="TransferPlayerCellTemplate" />
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Nat" Width="52">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <StaticResource ResourceKey="NationalityCellTemplate" />
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Club" Width="160">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <Image Source="{Binding ClubLogoPath}" Width="24" Height="24" Stretch="Uniform" Margin="0,0,8,0" />
+                                                    <TextBlock Text="{Binding ClubName}" Foreground="{DynamicResource AppTextBrush}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTextColumn Header="Pos" Binding="{Binding Position}" Width="48" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                                    <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="46" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                                    <DataGridTemplateColumn Header="OVR" Width="56">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Border Style="{StaticResource OvrBadgeBorderStyle}">
+                                                    <TextBlock Text="{Binding OverallText}" Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                </Border>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Form" Width="76">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Border Background="{Binding FormBrush}" CornerRadius="10" Height="24" Padding="7,0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Form}" Foreground="{Binding FormTextBrush}" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                                </Border>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Value" Width="92">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding MarketValueText}" Style="{StaticResource CenteredValueTextStyle}" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Status" Width="105">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Border Background="{Binding StatusBrush}" CornerRadius="10" Height="24" Padding="7,0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Status}" Foreground="#FFFFFF" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                                </Border>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                            <Border x:Name="ShortlistedEmptyState"
+                                    Background="{DynamicResource AppCardBackground}"
+                                    BorderBrush="{DynamicResource AppCardBorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="14"
+                                    Padding="18"
+                                    Visibility="Collapsed">
+                                <TextBlock Text="No shortlisted players yet. Star players from the market to track them here."
+                                           Foreground="{DynamicResource AppMutedTextBrush}"
+                                           FontWeight="SemiBold"
+                                           TextAlignment="Center"
+                                           TextWrapping="Wrap"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center" />
+                            </Border>
+                        </Grid>
+
+                        <TextBlock Grid.Row="2"
+                                   Text="Recommended Players"
+                                   Foreground="{DynamicResource AppTextBrush}"
+                                   FontSize="15"
+                                   FontWeight="Bold"
+                                   Margin="0,0,0,8" />
+                        <DataGrid x:Name="RecommendedDataGrid"
+                                  Grid.Row="3"
+                                  Style="{StaticResource ModernGridStyle}"
+                                  SelectionChanged="RecommendedDataGrid_SelectionChanged">
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn Header="Player" Width="*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <StaticResource ResourceKey="TransferPlayerCellTemplate" />
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Nat" Width="52">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <StaticResource ResourceKey="NationalityCellTemplate" />
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Club" Width="150">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <Image Source="{Binding ClubLogoPath}" Width="24" Height="24" Stretch="Uniform" Margin="0,0,8,0" />
+                                                <TextBlock Text="{Binding ClubName}" Foreground="{DynamicResource AppTextBrush}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Pos" Binding="{Binding Position}" Width="48" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                                <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="46" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                                <DataGridTemplateColumn Header="OVR" Width="56">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border Style="{StaticResource OvrBadgeBorderStyle}">
+                                                <TextBlock Text="{Binding OverallText}" Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Value" Width="92">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding MarketValueText}" Style="{StaticResource CenteredValueTextStyle}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Reason" Width="*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Reason}"
+                                                       ToolTip="{Binding Reason}"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       TextWrapping="NoWrap"
+                                                       Foreground="{DynamicResource AppTextBrush}"
+                                                       VerticalAlignment="Center" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                    <views:TransferPlayerDetailPanel x:Name="RecommendedDetailPanel"
+                                                     Grid.Column="1"
+                                                     MakeOfferRequested="DetailPanel_MakeOfferRequested"
+                                                     ShortlistToggled="DetailPanel_ShortlistToggled"
+                                                     TransferListToggled="DetailPanel_TransferListToggled" />
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Offers">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="65*" />
+                        <ColumnDefinition Width="35*" />
+                    </Grid.ColumnDefinitions>
+                    <DataGrid x:Name="OffersDataGrid"
+                              Grid.Column="0"
+                              Style="{StaticResource ModernGridStyle}"
+                              SelectionChanged="OffersDataGrid_SelectionChanged">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="Offer" Width="*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Image Source="{Binding BuyingClubLogoPath}" Width="24" Height="24" Stretch="Uniform" Margin="0,0,8,0" />
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Message}" FontWeight="SemiBold" Foreground="{DynamicResource AppTextBrush}" TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Text="{Binding BuyingClubName}" Style="{StaticResource MutedTextStyle}" />
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="OVR" Width="64">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Style="{StaticResource OvrBadgeBorderStyle}">
+                                            <TextBlock Text="{Binding OverallText}" Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Player" Width="130">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <StaticResource ResourceKey="TransferPlayerCellTemplate" />
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Nat" Width="52">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <StaticResource ResourceKey="NationalityCellTemplate" />
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Offer" Width="90">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding FeeText}" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" VerticalAlignment="Center" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Value" Width="92">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding MarketValueText}" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" VerticalAlignment="Center" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Status" Width="100">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{Binding StatusBrush}" CornerRadius="10" Height="24" Padding="7,0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Status}" Foreground="#FFFFFF" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <views:TransferPlayerDetailPanel x:Name="OffersDetailPanel"
+                                                     Grid.Column="1"
+                                                     AcceptOfferRequested="DetailPanel_AcceptOfferRequested"
+                                                     RejectOfferRequested="DetailPanel_RejectOfferRequested"
+                                                     CounterOfferRequested="DetailPanel_CounterOfferRequested"
+                                                     ShortlistToggled="DetailPanel_ShortlistToggled"
+                                                     TransferListToggled="DetailPanel_TransferListToggled" />
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="History">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="65*" />
+                        <ColumnDefinition Width="35*" />
+                    </Grid.ColumnDefinitions>
+                    <DataGrid x:Name="HistoryDataGrid"
+                              Grid.Column="0"
+                              Style="{StaticResource ModernGridStyle}"
+                              SelectionChanged="HistoryDataGrid_SelectionChanged">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Round" Binding="{Binding RoundNumber}" Width="62" />
+                            <DataGridTemplateColumn Header="Player" Width="*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <StaticResource ResourceKey="TransferPlayerCellTemplate" />
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Nat" Width="52">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <StaticResource ResourceKey="NationalityCellTemplate" />
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="OVR" Width="56">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Style="{StaticResource OvrBadgeBorderStyle}">
+                                            <TextBlock Text="{Binding OverallText}" Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="From" Width="150">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Image Source="{Binding FromLogoPath}" Width="24" Height="24" Stretch="Uniform" Margin="0,0,8,0" />
+                                            <TextBlock Text="{Binding FromClubName}" Foreground="{DynamicResource AppTextBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="To" Width="150">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Image Source="{Binding ToLogoPath}" Width="24" Height="24" Stretch="Uniform" Margin="0,0,8,0" />
+                                            <TextBlock Text="{Binding ToClubName}" Foreground="{DynamicResource AppTextBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Fee" Width="92">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding FeeText}" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" VerticalAlignment="Center" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="100" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <views:TransferPlayerDetailPanel x:Name="HistoryDetailPanel"
+                                                     Grid.Column="1" />
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</UserControl>

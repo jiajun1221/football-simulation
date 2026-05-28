@@ -232,6 +232,7 @@ public partial class HalfTimeView : UserControl
         var teamColors = TeamColorService.GetPalette(_state.SelectedTeam);
         var textForeground = teamColors.TextColor;
         var positionBackground = teamColors.SecondaryColor;
+        var nationality = PlayerNationalityDisplayService.Resolve(player);
 
         return new PitchPlayerCard
         {
@@ -240,6 +241,8 @@ public partial class HalfTimeView : UserControl
             ShirtNumberValue = player.SquadNumber > 0 ? player.SquadNumber.ToString() : string.Empty,
             PlayerImagePath = GetPlayerImagePath(player),
             PlayerName = player.Name,
+            FlagImagePath = nationality.FlagImagePath,
+            NationalityName = nationality.Name,
             PositionText = displayedPosition,
             OverallText = $"OVR {ratingVisual.Rating}",
             OverallForeground = textForeground,
@@ -400,11 +403,14 @@ public partial class HalfTimeView : UserControl
         PositionSuitabilityService.EnsurePositionMetadata(player);
         var form = PlayerFormBadgeHelper.Create(player.FormStatus);
         var teamColors = TeamColorService.GetPalette(_state.SelectedTeam);
+        var nationality = PlayerNationalityDisplayService.Resolve(player);
 
         return new BenchPlayerCard
         {
             Player = player,
             Name = player.Name,
+            FlagImagePath = nationality.FlagImagePath,
+            NationalityName = nationality.Name,
             ShirtNumberText = player.SquadNumber > 0 ? $"#{player.SquadNumber}" : string.Empty,
             PlayerImagePath = GetPlayerImagePath(player),
             Position = player.PreferredPosition,
@@ -486,6 +492,9 @@ public partial class HalfTimeView : UserControl
         SelectedPlayerCard.Visibility = Visibility.Visible;
         SelectedPlayerCard.DataContext = _selectedStarter;
 
+        var selectedNationality = PlayerNationalityDisplayService.Resolve(_selectedStarter);
+        SelectedPlayerFlagImage.Source = CreateImageSource(selectedNationality.FlagImagePath);
+        SelectedPlayerFlagImage.ToolTip = selectedNationality.Name;
         SelectedPlayerNameTextBlock.Text = _selectedStarter.Name;
         SelectedPlayerMetaTextBlock.Text = $"{team?.Name ?? _state.SelectedTeam?.Name ?? "Team"} | {_selectedStarter.AssignedPosition}";
         var selectedTraitBadges = PlayerTraitBadgeHelper.Create(_selectedStarter.Traits);
@@ -782,7 +791,7 @@ public partial class HalfTimeView : UserControl
     {
         return string.IsNullOrWhiteSpace(imagePath)
             ? null
-            : new BitmapImage(new Uri(imagePath, UriKind.Absolute));
+            : new BitmapImage(new Uri(imagePath, UriKind.RelativeOrAbsolute));
     }
 
     private static Brush ToBrush(string color)
@@ -1346,6 +1355,8 @@ public partial class HalfTimeView : UserControl
     {
         public Player Player { get; init; } = new();
         public string Name { get; init; } = string.Empty;
+        public string FlagImagePath { get; init; } = "/Assets/Flags/default.png";
+        public string NationalityName { get; init; } = "Unknown nationality";
         public string ShirtNumberText { get; init; } = string.Empty;
         public string PlayerImagePath { get; init; } = string.Empty;
         public string Position { get; init; } = string.Empty;

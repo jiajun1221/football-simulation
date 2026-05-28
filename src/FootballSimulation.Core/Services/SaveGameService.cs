@@ -6,7 +6,7 @@ namespace FootballSimulation.Services;
 
 public class SaveGameService
 {
-    public const int CurrentSaveVersion = 1;
+    public const int CurrentSaveVersion = 2;
     public const int MaxSaveSlots = 3;
 
     private const string SaveFolderName = "WPFFootballSimulator";
@@ -86,8 +86,17 @@ public class SaveGameService
 
     public static SaveGameData CreateSaveData(League league, Team selectedTeam)
     {
+        return CreateSaveData(league, selectedTeam, transferMarketState: null);
+    }
+
+    public static SaveGameData CreateSaveData(League league, Team selectedTeam, TransferMarketState? transferMarketState)
+    {
         ArgumentNullException.ThrowIfNull(league);
         ArgumentNullException.ThrowIfNull(selectedTeam);
+        if (transferMarketState is not null)
+        {
+            new TransferMarketService().BindActiveLeague(transferMarketState, league);
+        }
 
         return new SaveGameData
         {
@@ -109,7 +118,8 @@ public class SaveGameService
             PlayerStats = league.PlayerStats.Count > 0
                 ? league.PlayerStats
                 : new PlayerSeasonStatsService().RebuildSeasonStats(league),
-            ClubMatchSetups = CreateClubMatchSetups(league.Teams)
+            ClubMatchSetups = CreateClubMatchSetups(league.Teams),
+            TransferMarketState = transferMarketState ?? new TransferMarketState()
         };
     }
 
@@ -216,7 +226,7 @@ public class SaveGameService
 
     private static void ValidateSaveVersion(SaveGameData data)
     {
-        if (data.SaveVersion != CurrentSaveVersion)
+        if (data.SaveVersion is < 1 or > CurrentSaveVersion)
         {
             throw new InvalidDataException($"Unsupported save version {data.SaveVersion}.");
         }
@@ -274,8 +284,14 @@ public class SaveGameService
 
     private static void RehydrateReferences(SaveGameData data)
     {
+        BackfillPlayerDataFromLeagueData(data);
         foreach (var team in data.Teams)
         {
+            foreach (var player in team.Players.Concat(team.Substitutes))
+            {
+                PlayerAttributeService.ApplyMissingAttributes(player);
+            }
+
             _ = LineupValidationService.RepairGoalkeeperSlot(team);
         }
 
@@ -308,7 +324,124 @@ public class SaveGameService
             RehydrateMatchReferences(match, teamsByName);
         }
 
+        RehydrateTransferMarketReferences(data);
         data.MatchHistory = CreateMatchHistory(data.Fixtures);
+    }
+
+    private static void BackfillPlayerDataFromLeagueData(SaveGameData data)
+    {
+        var leagueId = string.IsNullOrWhiteSpace(data.LeagueState.LeagueId)
+            ? string.IsNullOrWhiteSpace(data.LeagueId) ? LeagueDataService.DefaultLeagueId : data.LeagueId
+            : data.LeagueState.LeagueId;
+
+        List<Team> sourceTeams;
+        try
+        {
+            sourceTeams = new LeagueDataService().LoadTeams(leagueId);
+        }
+        catch (InvalidOperationException)
+        {
+            return;
+        }
+
+        var sourceRows = sourceTeams
+            .SelectMany(team => team.Players.Concat(team.Substitutes)
+                .Select(player => new
+                {
+                    TeamName = team.Name,
+                    Player = player
+                }))
+            .ToList();
+
+        foreach (var team in data.Teams)
+        {
+            foreach (var player in team.Players.Concat(team.Substitutes))
+            {
+                var sourcePlayer = sourceRows.FirstOrDefault(row =>
+                        row.TeamName.Equals(team.Name, StringComparison.OrdinalIgnoreCase) &&
+                        row.Player.Name.Equals(player.Name, StringComparison.OrdinalIgnoreCase) &&
+                        row.Player.SquadNumber == player.SquadNumber)?.Player
+                    ?? sourceRows.FirstOrDefault(row =>
+                        row.TeamName.Equals(team.Name, StringComparison.OrdinalIgnoreCase) &&
+                        row.Player.Name.Equals(player.Name, StringComparison.OrdinalIgnoreCase))?.Player
+                    ?? sourceRows
+                        .Where(row => row.Player.Name.Equals(player.Name, StringComparison.OrdinalIgnoreCase))
+                        .Select(row => row.Player)
+                        .FirstOrDefault();
+
+                player.Age ??= sourcePlayer?.Age ?? EstimateAge(player);
+                if (sourcePlayer is null)
+                {
+                    if (PlayerNationalityDataService.IsMissingOrDefault(player))
+                    {
+                        _ = PlayerNationalityDataService.TryApply(player);
+                    }
+
+                    continue;
+                }
+
+                if (PlayerNationalityDataService.IsMissingOrDefault(player))
+                {
+                    player.NationalityCode = sourcePlayer.NationalityCode;
+                    player.NationalityName = sourcePlayer.NationalityName;
+                    player.Nationality = sourcePlayer.Nationality;
+                    player.FlagImagePath = sourcePlayer.FlagImagePath;
+                }
+
+                if (PlayerNationalityDataService.IsMissingOrDefault(player))
+                {
+                    _ = PlayerNationalityDataService.TryApply(player);
+                }
+            }
+        }
+    }
+
+    private static int EstimateAge(Player player)
+    {
+        return player.Position switch
+        {
+            Position.Goalkeeper => player.OverallRating >= 80 ? 29 : 25,
+            Position.Defender => player.OverallRating >= 80 ? 27 : 24,
+            Position.Midfielder => player.OverallRating >= 80 ? 26 : 23,
+            Position.Forward => player.OverallRating >= 82 ? 25 : 22,
+            _ => 24
+        };
+    }
+
+    private static void RehydrateTransferMarketReferences(SaveGameData data)
+    {
+        if (data.TransferMarketState.Leagues.Count == 0)
+        {
+            return;
+        }
+
+        var activeLeagueId = string.IsNullOrWhiteSpace(data.LeagueState.LeagueId)
+            ? data.LeagueId
+            : data.LeagueState.LeagueId;
+
+        foreach (var league in data.TransferMarketState.Leagues)
+        {
+            if (league.LeagueId.Equals(activeLeagueId, StringComparison.OrdinalIgnoreCase))
+            {
+                league.Teams = data.Teams;
+            }
+
+            foreach (var team in league.Teams)
+            {
+                _ = LineupValidationService.RepairGoalkeeperSlot(team);
+            }
+        }
+
+        new TransferMarketService().BindActiveLeague(data.TransferMarketState, new League
+        {
+            LeagueId = activeLeagueId,
+            Name = string.IsNullOrWhiteSpace(data.LeagueState.Name) ? GameSessionService.PremierLeagueName : data.LeagueState.Name,
+            Season = data.LeagueState.Season,
+            Teams = data.Teams,
+            Fixtures = data.Fixtures,
+            Table = data.LeagueState.Table,
+            PlayerStats = data.PlayerStats
+        });
     }
 
     private static void RehydrateMatchReferences(Match match, IReadOnlyDictionary<string, Team> teamsByName)

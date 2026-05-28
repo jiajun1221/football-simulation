@@ -4,6 +4,8 @@ public class LivePlayerIconViewModel
 {
     public string PlayerId { get; init; } = string.Empty;
     public string Name { get; init; } = string.Empty;
+    public string FlagImagePath { get; init; } = "/Assets/Flags/default.png";
+    public string NationalityName { get; init; } = "Unknown nationality";
     public string TeamName { get; init; } = string.Empty;
     public string PlayerKey { get; init; } = string.Empty;
     public LivePlayerStats LiveStats { get; init; } = new();

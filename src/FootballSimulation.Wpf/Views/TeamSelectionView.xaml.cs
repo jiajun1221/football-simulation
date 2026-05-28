@@ -66,6 +66,7 @@ public partial class TeamSelectionView : UserControl
     private readonly Action<UserControl> _navigate;
     private readonly LeagueDataService _dataService = new();
     private readonly GameSessionService _gameSessionService = new();
+    private readonly TransferMarketService _transferMarketService = new();
     private readonly List<ClubSelectionItem> _clubItems = [];
     private readonly LeagueDefinition _leagueDefinition;
 
@@ -82,6 +83,7 @@ public partial class TeamSelectionView : UserControl
         LeagueClubsTitleTextBlock.Text = $"{_leagueDefinition.Name} Clubs";
         _state.Teams = _dataService.LoadTeams(_leagueDefinition);
         _state.League = _gameSessionService.CreateLeague(_leagueDefinition, _state.Teams);
+        _state.TransferMarket = _transferMarketService.CreateInitialState(_state.League);
 
         _clubItems.AddRange(_state.Teams.Select(CreateClubSelectionItem));
         ClubListBox.ItemsSource = _clubItems;

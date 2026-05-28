@@ -10,7 +10,8 @@
         Background="{DynamicResource AppPageBackground}">
     <Grid Background="{DynamicResource AppPageBackground}">
         <ContentControl x:Name="MainContent" />
-        <StackPanel HorizontalAlignment="Right"
+        <StackPanel x:Name="ShellActionsPanel"
+                    HorizontalAlignment="Right"
                     VerticalAlignment="Top"
                     Orientation="Horizontal"
                     Margin="0,8,12,0"
@@ -63,14 +64,14 @@
                     Cursor="Hand"
                     Visibility="Collapsed"
                     Click="ShellStatsButton_Click"
-                    Background="#0EA5E9"
-                    Foreground="#FFFFFF"
-                    BorderBrush="#0EA5E9"
+                    Background="{DynamicResource AppToggleBackground}"
+                    Foreground="{DynamicResource AppToggleForeground}"
+                    BorderBrush="{DynamicResource AppToggleBorderBrush}"
                     BorderThickness="1"
                     FontFamily="Segoe UI Emoji"
                     FontSize="14"
                     FontWeight="SemiBold"
-                    ToolTip="League Player Stats"
+                    ToolTip="Transfer Market"
                     Margin="0,0,8,0">
                 <Button.Template>
                     <ControlTemplate TargetType="Button">
@@ -91,6 +92,43 @@
                     </ControlTemplate>
                 </Button.Template>
                 <Button.Content>📊</Button.Content>
+            </Button>
+
+            <Button x:Name="ShellTransferButton"
+                    Width="34"
+                    Height="30"
+                    Padding="0"
+                    Cursor="Hand"
+                    Visibility="Collapsed"
+                    Click="ShellTransferButton_Click"
+                    Background="{DynamicResource AppToggleBackground}"
+                    Foreground="{DynamicResource AppToggleForeground}"
+                    BorderBrush="{DynamicResource AppToggleBorderBrush}"
+                    BorderThickness="1"
+                    FontFamily="Segoe UI Emoji"
+                    FontSize="14"
+                    FontWeight="SemiBold"
+                    ToolTip="Transfer Market"
+                    Margin="0,0,8,0">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="TransferBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="15">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="TransferBorder" Property="Background" Value="#F8FAFC" />
+                                <Setter TargetName="TransferBorder" Property="BorderBrush" Value="#94A3B8" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
+                <Button.Content>⇄</Button.Content>
             </Button>
 
             <Button x:Name="ThemeToggleButton"

@@ -110,5 +110,10 @@ public class LeagueDataServiceTests
         Assert.False(string.IsNullOrWhiteSpace(player.PreferredPosition));
         Assert.InRange(player.SquadNumber, 1, 99);
         Assert.InRange(player.DisciplineRating, 1, 100);
+        Assert.NotNull(player.Age);
+        Assert.InRange(player.Age!.Value, 15, 45);
+        Assert.False(string.IsNullOrWhiteSpace(player.NationalityCode));
+        Assert.False(string.IsNullOrWhiteSpace(player.NationalityName));
+        Assert.False(string.IsNullOrWhiteSpace(player.FlagImagePath));
     }
 }

@@ -146,15 +146,17 @@ public class MatchDramaService
 
     private static double GetPlayerInjuryRisk(Player player)
     {
+        var attributes = PlayerAttributeService.GetAttributes(player);
         var lowStaminaRisk = Math.Max(0.0, 55.0 - player.Stamina) * 0.9;
         var traitRisk = player.Traits.Contains(PlayerTrait.InjuryProne) ? 26.0 : 0.0;
         var workloadRisk = Math.Max(0, player.MatchesPlayedRecently - 2) * 8.0;
+        var physicalProtection = Math.Max(0, attributes.Physical - 70) * 0.18;
         var duelRisk =
             (player.Traits.Contains(PlayerTrait.DivesIntoTackles) ? 5.0 : 0.0) +
             (player.Traits.Contains(PlayerTrait.Rapid) || player.Traits.Contains(PlayerTrait.SpeedDribbler) ? 4.0 : 0.0) +
             (player.Traits.Contains(PlayerTrait.PowerHeader) || player.Traits.Contains(PlayerTrait.AerialThreat) ? 3.0 : 0.0);
 
-        return lowStaminaRisk + traitRisk + workloadRisk + duelRisk;
+        return Math.Max(0.0, lowStaminaRisk + traitRisk + workloadRisk + duelRisk - physicalProtection);
     }
 
     private static string ChooseInjuryCause(MatchEventContext context, Player player)
@@ -433,7 +435,16 @@ public class MatchDramaService
     {
         var players = GetActivePlayers(team)
             .Where(player => player.Position is Position.Forward or Position.Midfielder)
-            .OrderByDescending(player => player.Attack + player.Finishing + player.CurrentForm)
+            .OrderByDescending(player =>
+            {
+                var attributes = PlayerAttributeService.GetAttributes(player);
+                return attributes.Pace * 0.22 +
+                    attributes.Shooting * 0.32 +
+                    attributes.Dribbling * 0.24 +
+                    player.Attack * 0.12 +
+                    player.Finishing * 0.10 +
+                    player.CurrentForm;
+            })
             .Take(4)
             .ToList();
 
@@ -445,7 +456,11 @@ public class MatchDramaService
     {
         var players = GetActivePlayers(team)
             .Where(player => player.Position is Position.Defender or Position.Midfielder)
-            .OrderByDescending(player => player.Defense)
+            .OrderByDescending(player =>
+            {
+                var attributes = PlayerAttributeService.GetAttributes(player);
+                return attributes.Defending * 0.62 + attributes.Physical * 0.22 + player.Defense * 0.16;
+            })
             .Take(5)
             .ToList();
 
@@ -457,7 +472,11 @@ public class MatchDramaService
     {
         var player = GetActivePlayers(team)
             .Where(candidate => candidate.Traits.Contains(PlayerTrait.DeadBallSpecialist) || candidate.Traits.Contains(PlayerTrait.AerialThreat))
-            .OrderByDescending(candidate => candidate.Passing + candidate.Finishing)
+            .OrderByDescending(candidate =>
+            {
+                var attributes = PlayerAttributeService.GetAttributes(candidate);
+                return attributes.Passing + attributes.Shooting * 0.40 + attributes.Physical * 0.20;
+            })
             .FirstOrDefault();
 
         return player ?? ChooseAttackingPlayer(team, random);

@@ -14,6 +14,7 @@ namespace FootballSimulation.Wpf;
 public partial class MainWindow : Window
 {
     private GameFlowState _state = new();
+    private readonly TransferMarketService _transferMarketService = new();
 
     public MainWindow()
     {
@@ -56,6 +57,18 @@ public partial class MainWindow : Window
         }
 
         Navigate(new LeaguePlayerStatsView(_state, Navigate));
+    }
+
+    private void ShellTransferButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_state.League is null || _state.SelectedTeam is null)
+        {
+            return;
+        }
+
+        _state.TransferMarket ??= _transferMarketService.CreateInitialState(_state.League);
+        _transferMarketService.BindActiveLeague(_state.TransferMarket, _state.League);
+        Navigate(new TransferMarketView(_state, Navigate));
     }
 
     private void UpdateThemeToggleButton()
@@ -105,10 +118,16 @@ public partial class MainWindow : Window
             return;
         }
 
+        var transferMarket = saveData.TransferMarketState.Leagues.Count > 0
+            ? saveData.TransferMarketState
+            : _transferMarketService.CreateInitialState(league);
+        _transferMarketService.BindActiveLeague(transferMarket, league);
+
         _state = new GameFlowState
         {
             Teams = league.Teams,
             League = league,
+            TransferMarket = transferMarket,
             SelectedLeagueId = string.IsNullOrWhiteSpace(league.LeagueId) ? LeagueDataService.DefaultLeagueId : league.LeagueId,
             SelectedLeagueDefinition = TryGetLeagueDefinition(league.LeagueId),
             SelectedTeam = selectedTeam,
@@ -123,8 +142,10 @@ public partial class MainWindow : Window
     private void Navigate(UserControl view)
     {
         MainContent.Content = view;
-        ShellSaveButton.Visibility = view is DashboardView ? Visibility.Visible : Visibility.Collapsed;
-        ShellStatsButton.Visibility = view is DashboardView or LeaguePlayerStatsView ? Visibility.Visible : Visibility.Collapsed;
+        ShellActionsPanel.Visibility = Visibility.Visible;
+        ShellSaveButton.Visibility = Visibility.Collapsed;
+        ShellStatsButton.Visibility = view is LeaguePlayerStatsView ? Visibility.Visible : Visibility.Collapsed;
+        ShellTransferButton.Visibility = view is TransferMarketView ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private static Fixture? FindNextFixtureForTeam(League league, Team selectedTeam)

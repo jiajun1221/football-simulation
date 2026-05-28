@@ -40,7 +40,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Dani Vivian",
@@ -74,7 +77,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Aitor Paredes",
@@ -108,7 +114,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Aymeric Laporte",
@@ -142,7 +151,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Jesús Areso",
@@ -174,7 +186,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Oihan Sancet",
@@ -207,7 +222,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Beñat Prados",
@@ -240,7 +258,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Unai Gómez",
@@ -271,7 +292,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Nico Williams",
@@ -306,7 +330,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Iñaki Williams",
@@ -339,7 +366,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Gorka Guruzeta",
@@ -371,7 +401,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         }
       ],
       "substitutes": [
@@ -400,7 +433,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Yeray Álvarez",
@@ -433,7 +469,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Andoni Gorosabel",
@@ -465,7 +504,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Iñigo Lekue",
@@ -495,7 +537,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Mikel Vesga",
@@ -525,7 +570,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Alejandro Rego",
@@ -555,7 +603,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Iñigo Ruiz de Galarreta",
@@ -585,7 +636,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Mikel Jauregizar",
@@ -615,7 +669,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Álex Berenguer",
@@ -647,7 +704,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Robert Navarro",
@@ -679,7 +739,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Nico Serrano",
@@ -709,7 +772,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Urko Izeta",
@@ -739,7 +805,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         }
       ]
     },
@@ -781,7 +850,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "SI",
+          "nationalityName": "Slovenia",
+          "flagImagePath": "/Assets/Flags/slovenia.png"
         },
         {
           "name": "Robin Le Normand",
@@ -815,7 +887,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Dávid Hancko",
@@ -849,7 +924,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "SK",
+          "nationalityName": "Slovakia",
+          "flagImagePath": "/Assets/Flags/slovakia.png"
         },
         {
           "name": "José María Giménez",
@@ -883,7 +961,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UY",
+          "nationalityName": "Uruguay",
+          "flagImagePath": "/Assets/Flags/uruguay.png"
         },
         {
           "name": "Marcos Llorente",
@@ -915,7 +996,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Pablo Barrios",
@@ -949,7 +1033,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Johnny Cardoso",
@@ -982,7 +1069,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "US",
+          "nationalityName": "United States",
+          "flagImagePath": "/Assets/Flags/usa.png"
         },
         {
           "name": "Koke",
@@ -1014,7 +1104,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Julián Alvarez",
@@ -1049,7 +1142,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "AR",
+          "nationalityName": "Argentina",
+          "flagImagePath": "/Assets/Flags/argentina.png"
         },
         {
           "name": "Álex Baena",
@@ -1083,7 +1179,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Giuliano Simeone",
@@ -1117,7 +1216,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "AR",
+          "nationalityName": "Argentina",
+          "flagImagePath": "/Assets/Flags/argentina.png"
         }
       ],
       "substitutes": [
@@ -1146,7 +1248,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "AR",
+          "nationalityName": "Argentina",
+          "flagImagePath": "/Assets/Flags/argentina.png"
         },
         {
           "name": "Nahuel Molina",
@@ -1178,7 +1283,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "AR",
+          "nationalityName": "Argentina",
+          "flagImagePath": "/Assets/Flags/argentina.png"
         },
         {
           "name": "Matteo Ruggeri",
@@ -1210,7 +1318,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Clément Lenglet",
@@ -1243,7 +1354,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Obed Vargas",
@@ -1273,7 +1387,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "US",
+          "nationalityName": "United States",
+          "flagImagePath": "/Assets/Flags/usa.png"
         },
         {
           "name": "Rodrigo Mendoza",
@@ -1303,7 +1420,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Ademola Lookman",
@@ -1337,7 +1457,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "GB",
+          "nationalityName": "United Kingdom",
+          "flagImagePath": "/Assets/Flags/united-kingdom.png"
         },
         {
           "name": "Nico González",
@@ -1371,7 +1494,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "AR",
+          "nationalityName": "Argentina",
+          "flagImagePath": "/Assets/Flags/argentina.png"
         },
         {
           "name": "Alexander Sørloth",
@@ -1403,7 +1529,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "NO",
+          "nationalityName": "Norway",
+          "flagImagePath": "/Assets/Flags/norway.png"
         },
         {
           "name": "Thiago Almada",
@@ -1436,7 +1565,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "AR",
+          "nationalityName": "Argentina",
+          "flagImagePath": "/Assets/Flags/argentina.png"
         },
         {
           "name": "Antoine Griezmann",
@@ -1467,7 +1599,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Marc Pubill",
@@ -1498,7 +1633,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         }
       ]
     },
@@ -1537,7 +1675,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "CO",
+          "nationalityName": "Colombia",
+          "flagImagePath": "/Assets/Flags/colombia.png"
         },
         {
           "name": "Enzo Boyomo",
@@ -1571,7 +1712,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Abel Bretones",
@@ -1601,7 +1745,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Javi Galán",
@@ -1631,7 +1778,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Jorge Herrando",
@@ -1662,7 +1812,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Aimar Oroz",
@@ -1693,7 +1846,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Jon Moncayola",
@@ -1725,7 +1881,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Lucas Torró",
@@ -1755,7 +1914,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Ante Budimir",
@@ -1785,7 +1947,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "HR",
+          "nationalityName": "Croatia",
+          "flagImagePath": "/Assets/Flags/croatia.png"
         },
         {
           "name": "Raúl García",
@@ -1815,7 +1980,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Raúl Moro",
@@ -1845,7 +2013,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         }
       ],
       "substitutes": [
@@ -1874,7 +2045,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Valentin Rosier",
@@ -1904,7 +2078,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Alejandro Catena",
@@ -1935,7 +2112,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Juan Cruz",
@@ -1965,7 +2145,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Iker Muñoz",
@@ -1995,7 +2178,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Moi Gómez",
@@ -2024,7 +2210,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Asier Osambela",
@@ -2054,7 +2243,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Rubén García",
@@ -2084,7 +2276,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "MX",
+          "nationalityName": "Mexico",
+          "flagImagePath": "/Assets/Flags/mexico.png"
         },
         {
           "name": "Kike Barja",
@@ -2114,7 +2309,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Iker Benito",
@@ -2144,7 +2342,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Víctor Muñoz",
@@ -2174,7 +2375,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Iñigo Arguibide",
@@ -2204,7 +2408,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         }
       ]
     },
@@ -2243,7 +2450,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Jon Pacheco",
@@ -2276,7 +2486,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Youssef Enríquez",
@@ -2308,7 +2521,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Nahuel Tenaglia",
@@ -2338,7 +2554,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "AR",
+          "nationalityName": "Argentina",
+          "flagImagePath": "/Assets/Flags/argentina.png"
         },
         {
           "name": "Jonny Otto",
@@ -2368,7 +2587,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Antonio Blanco",
@@ -2400,7 +2622,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "AR",
+          "nationalityName": "Argentina",
+          "flagImagePath": "/Assets/Flags/argentina.png"
         },
         {
           "name": "Ander Guevara",
@@ -2432,7 +2657,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Jon Guridi",
@@ -2462,7 +2690,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Lucas Boyé",
@@ -2494,7 +2725,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "AR",
+          "nationalityName": "Argentina",
+          "flagImagePath": "/Assets/Flags/argentina.png"
         },
         {
           "name": "Toni Martínez",
@@ -2526,7 +2760,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Mariano Díaz",
@@ -2556,7 +2793,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         }
       ],
       "substitutes": [
@@ -2585,7 +2825,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "PE",
+          "nationalityName": "Peru",
+          "flagImagePath": "/Assets/Flags/peru.png"
         },
         {
           "name": "Victor Parada",
@@ -2615,7 +2858,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Facundo Garcés",
@@ -2646,7 +2892,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "AR",
+          "nationalityName": "Argentina",
+          "flagImagePath": "/Assets/Flags/argentina.png"
         },
         {
           "name": "Ville Koski",
@@ -2677,7 +2926,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "FI",
+          "nationalityName": "Finland",
+          "flagImagePath": "/Assets/Flags/finland.png"
         },
         {
           "name": "Carles Aleñá",
@@ -2707,7 +2959,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Pablo Ibáñez",
@@ -2737,7 +2992,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Denis Suárez",
@@ -2766,7 +3024,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Carlos Protesoni",
@@ -2796,7 +3057,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Abde Rebbach",
@@ -2826,7 +3090,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "DZ",
+          "nationalityName": "Algeria",
+          "flagImagePath": "/Assets/Flags/algeria.png"
         },
         {
           "name": "Ibrahim Diabate",
@@ -2856,7 +3123,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "CI",
+          "nationalityName": "Ivory Coast",
+          "flagImagePath": "/Assets/Flags/ivory-coast.png"
         },
         {
           "name": "Aitor Mañas",
@@ -2886,7 +3156,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Ángel Pérez",
@@ -2916,7 +3189,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         }
       ]
     },
@@ -2955,7 +3231,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Héctor Fort",
@@ -2987,7 +3266,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Adrià Pedrosa",
@@ -3017,7 +3299,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Víctor Chust",
@@ -3048,7 +3333,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Léo Pétrot",
@@ -3078,7 +3366,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Martim Neto",
@@ -3110,7 +3401,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "PT",
+          "nationalityName": "Portugal",
+          "flagImagePath": "/Assets/Flags/portugal.png"
         },
         {
           "name": "Gonzalo Villar",
@@ -3140,7 +3434,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Aleix Febas",
@@ -3170,7 +3467,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "André Silva",
@@ -3202,7 +3502,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "BR",
+          "nationalityName": "Brazil",
+          "flagImagePath": "/Assets/Flags/brazil.png"
         },
         {
           "name": "Germán Valera",
@@ -3234,7 +3537,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Grady Diangana",
@@ -3264,7 +3570,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "CD",
+          "nationalityName": "Democratic Republic of the Congo",
+          "flagImagePath": "/Assets/Flags/democratic-republic-of-the-congo.png"
         }
       ],
       "substitutes": [
@@ -3293,7 +3602,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Pedro Bigas",
@@ -3324,7 +3636,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "John Donald",
@@ -3355,7 +3670,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Buba Sangaré",
@@ -3385,7 +3703,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Marc Aguado",
@@ -3415,7 +3736,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Federico Redondo",
@@ -3445,7 +3769,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "AR",
+          "nationalityName": "Argentina",
+          "flagImagePath": "/Assets/Flags/argentina.png"
         },
         {
           "name": "Álvaro Rodríguez",
@@ -3475,7 +3802,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Rafa Mir",
@@ -3505,7 +3835,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Tete Morente",
@@ -3535,7 +3868,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Josan",
@@ -3565,7 +3901,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Matías Dituro",
@@ -3592,7 +3931,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "CL",
+          "nationalityName": "Chile",
+          "flagImagePath": "/Assets/Flags/chile.png"
         },
         {
           "name": "Yago Santiago",
@@ -3622,7 +3964,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         }
       ]
     },
@@ -3663,7 +4008,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Ronald Araujo",
@@ -3698,7 +4046,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UY",
+          "nationalityName": "Uruguay",
+          "flagImagePath": "/Assets/Flags/uruguay.png"
         },
         {
           "name": "Alejandro Balde",
@@ -3732,7 +4083,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Jules Koundé",
@@ -3766,7 +4120,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Andreas Christensen",
@@ -3800,7 +4157,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Kingdom of Denmark",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Pedri",
@@ -3834,7 +4194,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Frenkie de Jong",
@@ -3868,7 +4231,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "NL",
+          "nationalityName": "Kingdom of the Netherlands",
+          "flagImagePath": "/Assets/Flags/kingdom-of-the-netherlands.png"
         },
         {
           "name": "Dani Olmo",
@@ -3901,7 +4267,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Lamine Yamal",
@@ -3937,7 +4306,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Raphinha",
@@ -3972,7 +4344,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "BR",
+          "nationalityName": "Brazil",
+          "flagImagePath": "/Assets/Flags/brazil.png"
         },
         {
           "name": "Marcus Rashford",
@@ -4006,7 +4381,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "GB",
+          "nationalityName": "United Kingdom",
+          "flagImagePath": "/Assets/Flags/united-kingdom.png"
         }
       ],
       "substitutes": [
@@ -4035,7 +4413,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "PL",
+          "nationalityName": "Poland",
+          "flagImagePath": "/Assets/Flags/poland.png"
         },
         {
           "name": "Pau Cubarsí",
@@ -4069,7 +4450,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "João Cancelo",
@@ -4102,7 +4486,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "PT",
+          "nationalityName": "Portugal",
+          "flagImagePath": "/Assets/Flags/portugal.png"
         },
         {
           "name": "Eric García",
@@ -4136,7 +4523,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Gavi",
@@ -4170,7 +4560,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Fermín López",
@@ -4202,7 +4595,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Marc Casadó",
@@ -4232,7 +4628,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Marc Bernal",
@@ -4262,7 +4661,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Ferran Torres",
@@ -4295,7 +4697,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Robert Lewandowski",
@@ -4328,7 +4733,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "PL",
+          "nationalityName": "Poland",
+          "flagImagePath": "/Assets/Flags/poland.png"
         },
         {
           "name": "Roony Bardghji",
@@ -4360,7 +4768,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "SE",
+          "nationalityName": "Sweden",
+          "flagImagePath": "/Assets/Flags/sweden.png"
         },
         {
           "name": "Diego Kochen",
@@ -4387,7 +4798,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "US",
+          "nationalityName": "United States",
+          "flagImagePath": "/Assets/Flags/usa.png"
         }
       ]
     },
@@ -4426,7 +4840,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Abdel Abqar",
@@ -4459,7 +4876,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "MA",
+          "nationalityName": "Morocco",
+          "flagImagePath": "/Assets/Flags/morocco.png"
         },
         {
           "name": "Juan Iglesias",
@@ -4491,7 +4911,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Zaid Romero",
@@ -4522,7 +4945,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "AR",
+          "nationalityName": "Argentina",
+          "flagImagePath": "/Assets/Flags/argentina.png"
         },
         {
           "name": "Dakonam Djené",
@@ -4553,7 +4979,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Mauro Arambarri",
@@ -4585,7 +5014,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UY",
+          "nationalityName": "Uruguay",
+          "flagImagePath": "/Assets/Flags/uruguay.png"
         },
         {
           "name": "Luis Milla",
@@ -4615,7 +5047,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Javi Muñoz",
@@ -4645,7 +5080,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Borja Mayoral",
@@ -4677,7 +5115,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Martín Satriano",
@@ -4709,7 +5150,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "IT",
+          "nationalityName": "Italy",
+          "flagImagePath": "/Assets/Flags/italy.png"
         },
         {
           "name": "Veljko Birmancevic",
@@ -4739,7 +5183,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         }
       ],
       "substitutes": [
@@ -4768,7 +5215,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Kiko Femenía",
@@ -4798,7 +5248,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Diego Rico",
@@ -4828,7 +5281,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Domingos Duarte",
@@ -4859,7 +5315,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "PT",
+          "nationalityName": "Portugal",
+          "flagImagePath": "/Assets/Flags/portugal.png"
         },
         {
           "name": "Mario Martín",
@@ -4889,7 +5348,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Luis Vázquez",
@@ -4919,7 +5381,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "MX",
+          "nationalityName": "Mexico",
+          "flagImagePath": "/Assets/Flags/mexico.png"
         },
         {
           "name": "Juanmi",
@@ -4949,7 +5414,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Álex Sancris",
@@ -4979,7 +5447,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Abu Kamara",
@@ -5009,7 +5480,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "GB",
+          "nationalityName": "United Kingdom",
+          "flagImagePath": "/Assets/Flags/united-kingdom.png"
         },
         {
           "name": "Ismael Bekhoucha",
@@ -5039,7 +5513,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Allan Nyom",
@@ -5069,7 +5546,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Sebastián Boselli",
@@ -5100,7 +5580,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "IT",
+          "nationalityName": "Italy",
+          "flagImagePath": "/Assets/Flags/italy.png"
         }
       ]
     },
@@ -5141,7 +5624,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Vitor Reis",
@@ -5175,7 +5661,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "BR",
+          "nationalityName": "Brazil",
+          "flagImagePath": "/Assets/Flags/brazil.png"
         },
         {
           "name": "Arnau Martínez",
@@ -5207,7 +5696,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Álex Moreno",
@@ -5237,7 +5729,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "David López",
@@ -5268,7 +5763,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Azzedine Ounahi",
@@ -5300,7 +5798,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Iván Martín",
@@ -5332,7 +5833,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Fran Beltrán",
@@ -5364,7 +5868,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Viktor Tsygankov",
@@ -5397,7 +5904,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Vladyslav Vanat",
@@ -5429,7 +5939,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UA",
+          "nationalityName": "Ukraine",
+          "flagImagePath": "/Assets/Flags/ukraine.png"
         },
         {
           "name": "Bryan Gil",
@@ -5461,7 +5974,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         }
       ],
       "substitutes": [
@@ -5490,7 +6006,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "AR",
+          "nationalityName": "Argentina",
+          "flagImagePath": "/Assets/Flags/argentina.png"
         },
         {
           "name": "Daley Blind",
@@ -5521,7 +6040,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "NL",
+          "nationalityName": "Kingdom of the Netherlands",
+          "flagImagePath": "/Assets/Flags/kingdom-of-the-netherlands.png"
         },
         {
           "name": "Hugo Rincón",
@@ -5551,7 +6073,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Alejandro Francés",
@@ -5582,7 +6107,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Thomas Lemar",
@@ -5611,7 +6139,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Donny van de Beek",
@@ -5641,7 +6172,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "NL",
+          "nationalityName": "Kingdom of the Netherlands",
+          "flagImagePath": "/Assets/Flags/kingdom-of-the-netherlands.png"
         },
         {
           "name": "Axel Witsel",
@@ -5671,7 +6205,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "BE",
+          "nationalityName": "Belgium",
+          "flagImagePath": "/Assets/Flags/belgium.png"
         },
         {
           "name": "Lass Kourouma",
@@ -5701,7 +6238,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Joel Roca",
@@ -5733,7 +6273,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Abel Ruiz",
@@ -5763,7 +6306,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Portu",
@@ -5793,7 +6339,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Cristhian Stuani",
@@ -5823,7 +6372,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "IT",
+          "nationalityName": "Italy",
+          "flagImagePath": "/Assets/Flags/italy.png"
         }
       ]
     },
@@ -5862,7 +6414,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "AU",
+          "nationalityName": "Australia",
+          "flagImagePath": "/Assets/Flags/australia.png"
         },
         {
           "name": "Manu Sánchez",
@@ -5894,7 +6449,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Alan Matturro",
@@ -5925,7 +6483,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "IT",
+          "nationalityName": "Italy",
+          "flagImagePath": "/Assets/Flags/italy.png"
         },
         {
           "name": "Matías Moreno",
@@ -5956,7 +6517,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Jeremy Toljan",
@@ -5986,7 +6550,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "US",
+          "nationalityName": "United States",
+          "flagImagePath": "/Assets/Flags/usa.png"
         },
         {
           "name": "Unai Vencedor",
@@ -6018,7 +6585,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Ugo Raghouber",
@@ -6048,7 +6618,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Oriol Rey",
@@ -6078,7 +6651,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "José Luis Morales",
@@ -6108,7 +6684,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Iván Romero",
@@ -6138,7 +6717,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Tay Abed",
@@ -6168,7 +6750,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         }
       ],
       "substitutes": [
@@ -6197,7 +6782,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "BR",
+          "nationalityName": "Brazil",
+          "flagImagePath": "/Assets/Flags/brazil.png"
         },
         {
           "name": "Adrián Dela",
@@ -6228,7 +6816,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Diego Pampín",
@@ -6258,7 +6849,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Víctor García",
@@ -6288,7 +6882,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "VE",
+          "nationalityName": "Venezuela",
+          "flagImagePath": "/Assets/Flags/venezuela.png"
         },
         {
           "name": "Pablo Martínez",
@@ -6318,7 +6915,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "PY",
+          "nationalityName": "Paraguay",
+          "flagImagePath": "/Assets/Flags/paraguay.png"
         },
         {
           "name": "Jon Ander Olasagasti",
@@ -6348,7 +6948,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Carlos Álvarez",
@@ -6377,7 +6980,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "CO",
+          "nationalityName": "Colombia",
+          "flagImagePath": "/Assets/Flags/colombia.png"
         },
         {
           "name": "Kervin Arriaga",
@@ -6407,7 +7013,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "HN",
+          "nationalityName": "Honduras",
+          "flagImagePath": "/Assets/Flags/honduras.png"
         },
         {
           "name": "Iker Losada",
@@ -6436,7 +7045,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Karl Etta Eyong",
@@ -6466,7 +7078,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Roger Brugué",
@@ -6496,7 +7111,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Carlos Espí",
@@ -6526,7 +7144,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         }
       ]
     },
@@ -6565,7 +7186,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "AR",
+          "nationalityName": "Argentina",
+          "flagImagePath": "/Assets/Flags/argentina.png"
         },
         {
           "name": "Andrei Rațiu",
@@ -6597,7 +7221,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "RO",
+          "nationalityName": "Romania",
+          "flagImagePath": "/Assets/Flags/romania.png"
         },
         {
           "name": "Pep Chavarría",
@@ -6629,7 +7256,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Florian Lejeune",
@@ -6660,7 +7290,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Luiz Felipe",
@@ -6691,7 +7324,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "BR",
+          "nationalityName": "Brazil",
+          "flagImagePath": "/Assets/Flags/brazil.png"
         },
         {
           "name": "Óscar Valentín",
@@ -6721,7 +7357,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Pedro Díaz",
@@ -6751,7 +7390,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Unai López",
@@ -6781,7 +7423,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Ilias Akhomach",
@@ -6814,7 +7459,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "MA",
+          "nationalityName": "Morocco",
+          "flagImagePath": "/Assets/Flags/morocco.png"
         },
         {
           "name": "Fran Pérez",
@@ -6846,7 +7494,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Jorge de Frutos",
@@ -6876,7 +7527,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         }
       ],
       "substitutes": [
@@ -6905,7 +7559,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Abdul Mumin",
@@ -6936,7 +7593,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "GH",
+          "nationalityName": "Ghana",
+          "flagImagePath": "/Assets/Flags/ghana.png"
         },
         {
           "name": "Iván Balliu",
@@ -6966,7 +7626,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Alfonso Espino",
@@ -6996,7 +7659,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Pathé Ciss",
@@ -7026,7 +7692,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "SN",
+          "nationalityName": "Senegal",
+          "flagImagePath": "/Assets/Flags/senegal.png"
         },
         {
           "name": "Gerard Gumbau",
@@ -7056,7 +7725,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Randy Nteka",
@@ -7085,7 +7757,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Óscar Trejo",
@@ -7114,7 +7789,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "AR",
+          "nationalityName": "Argentina",
+          "flagImagePath": "/Assets/Flags/argentina.png"
         },
         {
           "name": "Álvaro García",
@@ -7144,7 +7822,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Isi Palazón",
@@ -7173,7 +7854,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Sergio Camello",
@@ -7203,7 +7887,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Carlos Martín",
@@ -7233,7 +7920,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         }
       ]
     },
@@ -7274,7 +7964,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Natan",
@@ -7307,7 +8000,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Diego Llorente",
@@ -7340,7 +8036,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Junior Firpo",
@@ -7372,7 +8071,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Héctor Bellerín",
@@ -7402,7 +8104,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Sofyan Amrabat",
@@ -7435,7 +8140,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Giovani Lo Celso",
@@ -7467,7 +8175,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Pablo Fornals",
@@ -7499,7 +8210,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Antony",
@@ -7532,7 +8246,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Abde Ezzalzouli",
@@ -7565,7 +8282,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Cucho Hernández",
@@ -7597,7 +8317,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         }
       ],
       "substitutes": [
@@ -7626,7 +8349,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Ricardo Rodríguez",
@@ -7656,7 +8382,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Marc Bartra",
@@ -7687,7 +8416,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Ángel Ortiz",
@@ -7717,7 +8449,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Marc Roca",
@@ -7749,7 +8484,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Isco",
@@ -7780,7 +8518,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Álvaro Fidalgo",
@@ -7812,7 +8553,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Sergi Altimira",
@@ -7842,7 +8586,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Pablo García",
@@ -7874,7 +8621,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Rodrigo Riquelme",
@@ -7906,7 +8656,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Aitor Ruibal",
@@ -7936,7 +8689,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Chimy Ávila",
@@ -7966,7 +8722,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         }
       ]
     },
@@ -8005,7 +8764,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Javi Rodríguez",
@@ -8039,7 +8801,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Óscar Mingueza",
@@ -8071,7 +8836,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Carl Starfelt",
@@ -8104,7 +8872,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Joseph Aidoo",
@@ -8135,7 +8906,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Hugo Sotelo",
@@ -8167,7 +8941,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Ilaix Moriba",
@@ -8197,7 +8974,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Matías Vecino",
@@ -8227,7 +9007,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Ferran Jutglà",
@@ -8259,7 +9042,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Borja Iglesias",
@@ -8291,7 +9077,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Williot Swedberg",
@@ -8323,7 +9112,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         }
       ],
       "substitutes": [
@@ -8352,7 +9144,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Carlos Domínguez",
@@ -8383,7 +9178,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Marcos Alonso",
@@ -8414,7 +9212,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Sergio Carreira",
@@ -8444,7 +9245,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Miguel Román",
@@ -8474,7 +9278,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Fer López",
@@ -8503,7 +9310,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Iago Aspas",
@@ -8535,7 +9345,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Franco Cervi",
@@ -8565,7 +9378,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "IT",
+          "nationalityName": "Italy",
+          "flagImagePath": "/Assets/Flags/italy.png"
         },
         {
           "name": "Hugo Álvarez",
@@ -8595,7 +9411,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Pablo Durán",
@@ -8625,7 +9444,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Mihailo Ristic",
@@ -8655,7 +9477,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Marc Vidal",
@@ -8682,7 +9507,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         }
       ]
     },
@@ -8721,7 +9549,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Pablo Maffeo",
@@ -8753,7 +9584,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Martin Valjent",
@@ -8784,7 +9618,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "SK",
+          "nationalityName": "Slovakia",
+          "flagImagePath": "/Assets/Flags/slovakia.png"
         },
         {
           "name": "Marash Kumbulla",
@@ -8815,7 +9652,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "AL",
+          "nationalityName": "Albania",
+          "flagImagePath": "/Assets/Flags/albania.png"
         },
         {
           "name": "Johan Mojica",
@@ -8845,7 +9685,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "CO",
+          "nationalityName": "Colombia",
+          "flagImagePath": "/Assets/Flags/colombia.png"
         },
         {
           "name": "Samú Costa",
@@ -8878,7 +9721,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Sergi Darder",
@@ -8908,7 +9754,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Pablo Torre",
@@ -8937,7 +9786,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Zito Luvumbo",
@@ -8969,7 +9821,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "AO",
+          "nationalityName": "Angola",
+          "flagImagePath": "/Assets/Flags/angola.png"
         },
         {
           "name": "Vedat Muriqi",
@@ -8999,7 +9854,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "TR",
+          "nationalityName": "Turkey",
+          "flagImagePath": "/Assets/Flags/turkey.png"
         },
         {
           "name": "Takuma Asano",
@@ -9029,7 +9887,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         }
       ],
       "substitutes": [
@@ -9058,7 +9919,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "FI",
+          "nationalityName": "Finland",
+          "flagImagePath": "/Assets/Flags/finland.png"
         },
         {
           "name": "Antonio Raíllo",
@@ -9089,7 +9953,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Toni Lato",
@@ -9119,7 +9986,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Mateu Morey",
@@ -9149,7 +10019,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Manu Morlanes",
@@ -9179,7 +10052,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Antonio Sánchez",
@@ -9209,7 +10085,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "MX",
+          "nationalityName": "Mexico",
+          "flagImagePath": "/Assets/Flags/mexico.png"
         },
         {
           "name": "Omar Mascarell",
@@ -9239,7 +10118,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Jan Salas",
@@ -9269,7 +10151,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Abdón Prats",
@@ -9299,7 +10184,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Mateo Joseph",
@@ -9329,7 +10217,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Javi Llabrés",
@@ -9359,7 +10250,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Justin Kalumba",
@@ -9389,7 +10283,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         }
       ]
     },
@@ -9432,7 +10329,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "BE",
+          "nationalityName": "Belgium",
+          "flagImagePath": "/Assets/Flags/belgium.png"
         },
         {
           "name": "Trent Alexander-Arnold",
@@ -9467,7 +10367,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "GB",
+          "nationalityName": "United Kingdom",
+          "flagImagePath": "/Assets/Flags/united-kingdom.png"
         },
         {
           "name": "Éder Militão",
@@ -9502,7 +10405,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "BR",
+          "nationalityName": "Brazil",
+          "flagImagePath": "/Assets/Flags/brazil.png"
         },
         {
           "name": "Álvaro Carreras",
@@ -9536,7 +10442,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Antonio Rüdiger",
@@ -9571,7 +10480,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "DE",
+          "nationalityName": "Germany",
+          "flagImagePath": "/Assets/Flags/germany.png"
         },
         {
           "name": "Jude Bellingham",
@@ -9606,7 +10518,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "GB",
+          "nationalityName": "United Kingdom",
+          "flagImagePath": "/Assets/Flags/united-kingdom.png"
         },
         {
           "name": "Federico Valverde",
@@ -9641,7 +10556,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UY",
+          "nationalityName": "Uruguay",
+          "flagImagePath": "/Assets/Flags/uruguay.png"
         },
         {
           "name": "Aurélien Tchouaméni",
@@ -9675,7 +10593,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Kylian Mbappé",
@@ -9711,7 +10632,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Vinicius Junior",
@@ -9747,7 +10671,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "BR",
+          "nationalityName": "Brazil",
+          "flagImagePath": "/Assets/Flags/brazil.png"
         },
         {
           "name": "Rodrygo",
@@ -9782,7 +10709,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "BR",
+          "nationalityName": "Brazil",
+          "flagImagePath": "/Assets/Flags/brazil.png"
         }
       ],
       "substitutes": [
@@ -9813,7 +10743,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UA",
+          "nationalityName": "Ukraine",
+          "flagImagePath": "/Assets/Flags/ukraine.png"
         },
         {
           "name": "Ferland Mendy",
@@ -9845,7 +10778,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "David Alaba",
@@ -9879,7 +10815,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "AT",
+          "nationalityName": "Austria",
+          "flagImagePath": "/Assets/Flags/austria.png"
         },
         {
           "name": "Fran García",
@@ -9911,7 +10850,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Eduardo Camavinga",
@@ -9945,7 +10887,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Arda Güler",
@@ -9978,7 +10923,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Dani Ceballos",
@@ -10010,7 +10958,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Manuel Ángel",
@@ -10040,7 +10991,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Brahim Díaz",
@@ -10074,7 +11028,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Gonzalo García",
@@ -10104,7 +11061,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Franco Mastantuono",
@@ -10134,7 +11094,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "AR",
+          "nationalityName": "Argentina",
+          "flagImagePath": "/Assets/Flags/argentina.png"
         },
         {
           "name": "Daniel Carvajal",
@@ -10166,7 +11129,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         }
       ]
     },
@@ -10205,7 +11171,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "RO",
+          "nationalityName": "Romania",
+          "flagImagePath": "/Assets/Flags/romania.png"
         },
         {
           "name": "David Carmo",
@@ -10238,7 +11207,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "PT",
+          "nationalityName": "Portugal",
+          "flagImagePath": "/Assets/Flags/portugal.png"
         },
         {
           "name": "Javi López",
@@ -10270,7 +11242,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Nacho Vidal",
@@ -10300,7 +11275,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "David Costas",
@@ -10331,7 +11309,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Leander Dendoncker",
@@ -10361,7 +11342,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "BE",
+          "nationalityName": "Belgium",
+          "flagImagePath": "/Assets/Flags/belgium.png"
         },
         {
           "name": "Santiago Colombatto",
@@ -10391,7 +11375,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "AR",
+          "nationalityName": "Argentina",
+          "flagImagePath": "/Assets/Flags/argentina.png"
         },
         {
           "name": "Luka Ilic",
@@ -10420,7 +11407,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Ovie Ejaria",
@@ -10450,7 +11440,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "GB",
+          "nationalityName": "United Kingdom",
+          "flagImagePath": "/Assets/Flags/united-kingdom.png"
         },
         {
           "name": "Haissem Hassan",
@@ -10480,7 +11473,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "EG",
+          "nationalityName": "Egypt",
+          "flagImagePath": "/Assets/Flags/egypt.png"
         },
         {
           "name": "Álex Forés",
@@ -10510,7 +11506,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         }
       ],
       "substitutes": [
@@ -10539,7 +11538,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Eric Bailly",
@@ -10570,7 +11572,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "CI",
+          "nationalityName": "Ivory Coast",
+          "flagImagePath": "/Assets/Flags/ivory-coast.png"
         },
         {
           "name": "Dani Calvo",
@@ -10601,7 +11606,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Lucas Ahijado",
@@ -10631,7 +11639,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Santi Cazorla",
@@ -10661,7 +11672,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Kwasi Sibo",
@@ -10691,7 +11705,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "GH",
+          "nationalityName": "Ghana",
+          "flagImagePath": "/Assets/Flags/ghana.png"
         },
         {
           "name": "Nicolás Fonseca",
@@ -10721,7 +11738,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "IT",
+          "nationalityName": "Italy",
+          "flagImagePath": "/Assets/Flags/italy.png"
         },
         {
           "name": "Alberto Reina",
@@ -10751,7 +11771,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Brandon Dominguès",
@@ -10781,7 +11804,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Federico Viñas",
@@ -10811,7 +11837,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UY",
+          "nationalityName": "Uruguay",
+          "flagImagePath": "/Assets/Flags/uruguay.png"
         },
         {
           "name": "Ilyas Chaira",
@@ -10841,7 +11870,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Thiago Borbas",
@@ -10871,7 +11903,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         }
       ]
     },
@@ -10912,7 +11947,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Sergio Gómez",
@@ -10944,7 +11982,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Jon Martín",
@@ -10977,7 +12018,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Igor Zubeldia",
@@ -11010,7 +12054,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Aihen Muñoz",
@@ -11042,7 +12089,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Brais Méndez",
@@ -11075,7 +12125,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Arsen Zakharyan",
@@ -11107,7 +12160,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "RU",
+          "nationalityName": "Russia",
+          "flagImagePath": "/Assets/Flags/russia.png"
         },
         {
           "name": "Luka Sucic",
@@ -11139,7 +12195,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Takefusa Kubo",
@@ -11172,7 +12231,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "JP",
+          "nationalityName": "Japan",
+          "flagImagePath": "/Assets/Flags/japan.png"
         },
         {
           "name": "Mikel Oyarzabal",
@@ -11206,7 +12268,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Ander Barrenetxea",
@@ -11239,7 +12304,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         }
       ],
       "substitutes": [
@@ -11268,7 +12336,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Duje Caleta-Car",
@@ -11301,7 +12372,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "HR",
+          "nationalityName": "Croatia",
+          "flagImagePath": "/Assets/Flags/croatia.png"
         },
         {
           "name": "Jon Aramburu",
@@ -11333,7 +12407,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "VE",
+          "nationalityName": "Venezuela",
+          "flagImagePath": "/Assets/Flags/venezuela.png"
         },
         {
           "name": "Aritz Elustondo",
@@ -11364,7 +12441,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Yangel Herrera",
@@ -11396,7 +12476,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "VE",
+          "nationalityName": "Venezuela",
+          "flagImagePath": "/Assets/Flags/venezuela.png"
         },
         {
           "name": "Carlos Soler",
@@ -11428,7 +12511,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Beñat Turrientes",
@@ -11460,7 +12546,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Pablo Marín",
@@ -11489,7 +12578,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "EC",
+          "nationalityName": "Ecuador",
+          "flagImagePath": "/Assets/Flags/ecuador.png"
         },
         {
           "name": "Orri Óskarsson",
@@ -11521,7 +12613,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "IS",
+          "nationalityName": "Iceland",
+          "flagImagePath": "/Assets/Flags/iceland.png"
         },
         {
           "name": "Gonçalo Guedes",
@@ -11553,7 +12648,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "PT",
+          "nationalityName": "Portugal",
+          "flagImagePath": "/Assets/Flags/portugal.png"
         },
         {
           "name": "Jon Karrikaburu",
@@ -11583,7 +12681,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Wesley",
@@ -11613,7 +12714,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "BR",
+          "nationalityName": "Brazil",
+          "flagImagePath": "/Assets/Flags/brazil.png"
         }
       ]
     },
@@ -11652,7 +12756,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Omar El Hilali",
@@ -11684,7 +12791,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "MA",
+          "nationalityName": "Morocco",
+          "flagImagePath": "/Assets/Flags/morocco.png"
         },
         {
           "name": "Leandro Cabrera",
@@ -11715,7 +12825,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UY",
+          "nationalityName": "Uruguay",
+          "flagImagePath": "/Assets/Flags/uruguay.png"
         },
         {
           "name": "Fernando Calero",
@@ -11746,7 +12859,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Clemens Riedel",
@@ -11777,7 +12893,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Urko González de Zárate",
@@ -11809,7 +12928,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Edu Expósito",
@@ -11839,7 +12961,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Ramón Terrats",
@@ -11869,7 +12994,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Javi Puado",
@@ -11901,7 +13029,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Cyril Ngonge",
@@ -11933,7 +13064,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "BE",
+          "nationalityName": "Belgium",
+          "flagImagePath": "/Assets/Flags/belgium.png"
         },
         {
           "name": "Pere Milla",
@@ -11963,7 +13097,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         }
       ],
       "substitutes": [
@@ -11992,7 +13129,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Miguel Rubio",
@@ -12023,7 +13163,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Carlos Romero",
@@ -12053,7 +13196,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "José Salinas",
@@ -12083,7 +13229,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Charles Pickel",
@@ -12113,7 +13262,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "CH",
+          "nationalityName": "Switzerland",
+          "flagImagePath": "/Assets/Flags/switzerland.png"
         },
         {
           "name": "Pol Lozano",
@@ -12143,7 +13295,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Kike García",
@@ -12173,7 +13328,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Jofre Carreras",
@@ -12203,7 +13361,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Tyrhys Dolan",
@@ -12233,7 +13394,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "GB",
+          "nationalityName": "United Kingdom",
+          "flagImagePath": "/Assets/Flags/united-kingdom.png"
         },
         {
           "name": "Roberto Fernández",
@@ -12263,7 +13427,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "PY",
+          "nationalityName": "Paraguay",
+          "flagImagePath": "/Assets/Flags/paraguay.png"
         },
         {
           "name": "Rubén Sánchez",
@@ -12293,7 +13460,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Antoniu Roca",
@@ -12323,7 +13493,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         }
       ]
     },
@@ -12362,7 +13535,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "GR",
+          "nationalityName": "Greece",
+          "flagImagePath": "/Assets/Flags/greece.png"
         },
         {
           "name": "Juanlu Sánchez",
@@ -12394,7 +13570,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "José Ángel Carmona",
@@ -12426,7 +13605,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Gabriel Suazo",
@@ -12458,7 +13640,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "CL",
+          "nationalityName": "Chile",
+          "flagImagePath": "/Assets/Flags/chile.png"
         },
         {
           "name": "Kike Salas",
@@ -12491,7 +13676,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Batista Mendy",
@@ -12523,7 +13711,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Djibril Sow",
@@ -12555,7 +13746,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "CH",
+          "nationalityName": "Switzerland",
+          "flagImagePath": "/Assets/Flags/switzerland.png"
         },
         {
           "name": "Lucien Agoumé",
@@ -12587,7 +13781,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Isaac Romero",
@@ -12619,7 +13816,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Neal Maupay",
@@ -12651,7 +13851,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Akor Adams",
@@ -12683,7 +13886,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "NG",
+          "nationalityName": "Nigeria",
+          "flagImagePath": "/Assets/Flags/nigeria.png"
         }
       ],
       "substitutes": [
@@ -12712,7 +13918,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "NO",
+          "nationalityName": "Norway",
+          "flagImagePath": "/Assets/Flags/norway.png"
         },
         {
           "name": "Fábio Cardoso",
@@ -12743,7 +13952,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "PT",
+          "nationalityName": "Portugal",
+          "flagImagePath": "/Assets/Flags/portugal.png"
         },
         {
           "name": "Federico Gattoni",
@@ -12774,7 +13986,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "AR",
+          "nationalityName": "Argentina",
+          "flagImagePath": "/Assets/Flags/argentina.png"
         },
         {
           "name": "Marcão",
@@ -12805,7 +14020,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "BR",
+          "nationalityName": "Brazil",
+          "flagImagePath": "/Assets/Flags/brazil.png"
         },
         {
           "name": "Joan Jordán",
@@ -12835,7 +14053,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Nemanja Gudelj",
@@ -12865,7 +14086,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "RS",
+          "nationalityName": "Serbia",
+          "flagImagePath": "/Assets/Flags/serbia.png"
         },
         {
           "name": "Manu Bueno",
@@ -12895,7 +14119,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Rubén Vargas",
@@ -12927,7 +14154,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Chidera Ejuke",
@@ -12959,7 +14189,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "NG",
+          "nationalityName": "Nigeria",
+          "flagImagePath": "/Assets/Flags/nigeria.png"
         },
         {
           "name": "Peque Fernández",
@@ -12988,7 +14221,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Alexis Sánchez",
@@ -13017,7 +14253,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "CL",
+          "nationalityName": "Chile",
+          "flagImagePath": "/Assets/Flags/chile.png"
         },
         {
           "name": "Tanguy Nianzou",
@@ -13048,7 +14287,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         }
       ]
     },
@@ -13087,7 +14329,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "César Tárrega",
@@ -13121,7 +14366,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Unai Núñez",
@@ -13154,7 +14402,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "José Gayà",
@@ -13186,7 +14437,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "José Copete",
@@ -13217,7 +14471,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Pepelu",
@@ -13250,7 +14507,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Javi Guerra",
@@ -13283,7 +14543,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "André Almeida",
@@ -13314,7 +14577,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "PT",
+          "nationalityName": "Portugal",
+          "flagImagePath": "/Assets/Flags/portugal.png"
         },
         {
           "name": "Hugo Duro",
@@ -13346,7 +14612,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Lucas Beltrán",
@@ -13378,7 +14647,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "IT",
+          "nationalityName": "Italy",
+          "flagImagePath": "/Assets/Flags/italy.png"
         },
         {
           "name": "Diego López",
@@ -13411,7 +14683,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         }
       ],
       "substitutes": [
@@ -13440,7 +14715,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "MK",
+          "nationalityName": "North Macedonia",
+          "flagImagePath": "/Assets/Flags/north-macedonia.png"
         },
         {
           "name": "Thierry Correia",
@@ -13470,7 +14748,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Jesús Vázquez",
@@ -13500,7 +14781,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Mouctar Diakhaby",
@@ -13531,7 +14815,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Guido Rodríguez",
@@ -13563,7 +14850,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "AR",
+          "nationalityName": "Argentina",
+          "flagImagePath": "/Assets/Flags/argentina.png"
         },
         {
           "name": "Baptiste Santamaria",
@@ -13593,7 +14883,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Filip Ugrinic",
@@ -13623,7 +14916,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "CH",
+          "nationalityName": "Switzerland",
+          "flagImagePath": "/Assets/Flags/switzerland.png"
         },
         {
           "name": "Arnaut Danjuma",
@@ -13655,7 +14951,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "NG",
+          "nationalityName": "Nigeria",
+          "flagImagePath": "/Assets/Flags/nigeria.png"
         },
         {
           "name": "Largie Ramazani",
@@ -13687,7 +14986,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "BE",
+          "nationalityName": "Belgium",
+          "flagImagePath": "/Assets/Flags/belgium.png"
         },
         {
           "name": "Umar Sadiq",
@@ -13717,7 +15019,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "NG",
+          "nationalityName": "Nigeria",
+          "flagImagePath": "/Assets/Flags/nigeria.png"
         },
         {
           "name": "Dani Raba",
@@ -13746,7 +15051,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Renzo Saravia",
@@ -13776,7 +15084,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "AR",
+          "nationalityName": "Argentina",
+          "flagImagePath": "/Assets/Flags/argentina.png"
         }
       ]
     },
@@ -13815,7 +15126,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "BR",
+          "nationalityName": "Brazil",
+          "flagImagePath": "/Assets/Flags/brazil.png"
         },
         {
           "name": "Renato Veiga",
@@ -13849,7 +15163,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "PT",
+          "nationalityName": "Portugal",
+          "flagImagePath": "/Assets/Flags/portugal.png"
         },
         {
           "name": "Logan Costa",
@@ -13883,7 +15200,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Juan Foyth",
@@ -13917,7 +15237,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "AR",
+          "nationalityName": "Argentina",
+          "flagImagePath": "/Assets/Flags/argentina.png"
         },
         {
           "name": "Rafa Marín",
@@ -13950,7 +15273,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Santi Comesaña",
@@ -13982,7 +15308,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Pape Gueye",
@@ -14014,7 +15343,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Thomas Partey",
@@ -14046,7 +15378,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "GH",
+          "nationalityName": "Ghana",
+          "flagImagePath": "/Assets/Flags/ghana.png"
         },
         {
           "name": "Alberto Moleiro",
@@ -14079,7 +15414,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Georges Mikautadze",
@@ -14112,7 +15450,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Gerard Moreno",
@@ -14144,7 +15485,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         }
       ],
       "substitutes": [
@@ -14173,7 +15517,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Sergi Cardona",
@@ -14205,7 +15552,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Santiago Mouriño",
@@ -14237,7 +15587,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UY",
+          "nationalityName": "Uruguay",
+          "flagImagePath": "/Assets/Flags/uruguay.png"
         },
         {
           "name": "Pau Navarro",
@@ -14270,7 +15623,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Dani Parejo",
@@ -14300,7 +15656,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Carlos Macià",
@@ -14330,7 +15689,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Nicolas Pépé",
@@ -14362,7 +15724,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Tajon Buchanan",
@@ -14394,7 +15759,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "CA",
+          "nationalityName": "Canada",
+          "flagImagePath": "/Assets/Flags/canada.png"
         },
         {
           "name": "Ayoze Pérez",
@@ -14426,7 +15794,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         },
         {
           "name": "Alfon González",
@@ -14456,7 +15827,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "UN",
+          "nationalityName": "Unknown nationality",
+          "flagImagePath": "/Assets/Flags/default.png"
         },
         {
           "name": "Willy Kambwala",
@@ -14487,7 +15861,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "FR",
+          "nationalityName": "France",
+          "flagImagePath": "/Assets/Flags/france.png"
         },
         {
           "name": "Alfonso Pedraza",
@@ -14517,7 +15894,10 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": null
+          "matchesPlayedRecently": null,
+          "nationalityCode": "ES",
+          "nationalityName": "Spain",
+          "flagImagePath": "/Assets/Flags/spain.png"
         }
       ]
     }

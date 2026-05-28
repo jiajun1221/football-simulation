@@ -10,6 +10,7 @@ public class GameFlowState
     public List<Team> Teams { get; set; } = [];
     public Team? SelectedTeam { get; set; }
     public League? League { get; set; }
+    public TransferMarketState? TransferMarket { get; set; }
     public Fixture? CurrentFixture { get; set; }
     public Match? CurrentMatch { get; set; }
     public int? CurrentSaveSlotNumber { get; set; }

@@ -112,6 +112,26 @@ public partial class DashboardView : UserControl
         _navigate(new PreMatchView(_state, _navigate));
     }
 
+    private void SaveGameButton_Click(object sender, RoutedEventArgs e)
+    {
+        SaveGame();
+    }
+
+    private void PlayerStatsButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_state.League is null || _state.SelectedTeam is null)
+        {
+            return;
+        }
+
+        _navigate(new LeaguePlayerStatsView(_state, _navigate));
+    }
+
+    private void TeamSettingsButton_Click(object sender, RoutedEventArgs e)
+    {
+        PrepareMatchButton_Click(sender, e);
+    }
+
     public void SaveGame()
     {
         if (_state.League is null || _state.SelectedTeam is null)
@@ -132,7 +152,7 @@ public partial class DashboardView : UserControl
 
         try
         {
-            var saveData = SaveGameService.CreateSaveData(_state.League, _state.SelectedTeam);
+            var saveData = SaveGameService.CreateSaveData(_state.League, _state.SelectedTeam, _state.TransferMarket);
             _saveGameService.SaveGame(slotNumber, saveData);
             _state.CurrentSaveSlotNumber = slotNumber;
             MessageBox.Show($"Game saved to slot {slotNumber}.", "Save Game", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -229,7 +249,7 @@ public partial class DashboardView : UserControl
         }
 
         PositionStatTextBlock.Text = $"#{tableEntry.Position}";
-        PointsStatTextBlock.Text = tableEntry.Entry.Points.ToString();
+        PointsStatTextBlock.Text = $"{tableEntry.Entry.Points} pts";
         GoalDifferenceStatTextBlock.Text = FormatGoalDifference(tableEntry.Entry.GoalDifference);
         ClubFormItemsControl.ItemsSource = _recentResultService.GetRecentResults(league, selectedTeam)
             .OrderBy(result => result.RoundNumber)
@@ -302,6 +322,7 @@ public partial class DashboardView : UserControl
                 {
                     RoundText = $"R{fixture.RoundNumber}",
                     HomeAwayText = isHome ? "HOME" : "AWAY",
+                    SummaryText = $"{CreateClubCode(opponent.Name)} {(isHome ? "H" : "A")} R{fixture.RoundNumber}",
                     OpponentName = CreateTwoLineText(opponent.Name),
                     VenueText = CreateTwoLineText(GetVenueName(fixture.HomeTeam)),
                     OpponentLogoPath = GetClubLogoPath(opponent.Name),
@@ -315,6 +336,7 @@ public partial class DashboardView : UserControl
             ? [new UpcomingFixtureRow
             {
                 OpponentName = "No upcoming fixtures",
+                SummaryText = "No fixtures",
                 VenueText = "Season schedule is complete.",
                 RoundText = "-",
                 HomeAwayText = "-",
@@ -332,6 +354,43 @@ public partial class DashboardView : UserControl
     private static string GetHomeAwayBadgeForeground(bool isHome)
     {
         return "#FFFFFF";
+    }
+
+    private static string CreateClubCode(string clubName)
+    {
+        var commonCodes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Arsenal"] = "ARS",
+            ["Aston Villa"] = "AVL",
+            ["Chelsea"] = "CHE",
+            ["Liverpool"] = "LIV",
+            ["Manchester City"] = "MCI",
+            ["Manchester United"] = "MUN",
+            ["Newcastle United"] = "NEW",
+            ["Nottingham Forest"] = "NFO",
+            ["Tottenham Hotspur"] = "TOT",
+            ["West Ham United"] = "WHU",
+            ["Wolverhampton Wanderers"] = "WOL"
+        };
+
+        if (commonCodes.TryGetValue(clubName, out var code))
+        {
+            return code;
+        }
+
+        var words = clubName
+            .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .Where(word => !string.Equals(word, "FC", StringComparison.OrdinalIgnoreCase))
+            .ToArray();
+        var letters = words.Length >= 2
+            ? string.Concat(words.Select(word => word[0]))
+            : clubName;
+
+        return new string(letters
+            .Where(char.IsLetterOrDigit)
+            .Take(3)
+            .Select(char.ToUpperInvariant)
+            .ToArray());
     }
 
     private static bool IsTeamInFixture(Fixture fixture, Team team)
@@ -519,6 +578,7 @@ public partial class DashboardView : UserControl
     {
         public string RoundText { get; init; } = string.Empty;
         public string HomeAwayText { get; init; } = string.Empty;
+        public string SummaryText { get; init; } = string.Empty;
         public string OpponentName { get; init; } = string.Empty;
         public string VenueText { get; init; } = string.Empty;
         public string OpponentLogoPath { get; init; } = string.Empty;

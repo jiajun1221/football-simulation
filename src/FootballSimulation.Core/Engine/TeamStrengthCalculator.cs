@@ -66,25 +66,33 @@ public class TeamStrengthCalculator
     public double GetEffectiveAttack(Player player)
     {
         var traitModifier = GetTraitModifier(player, PlayerTrait.Rapid, PlayerTrait.SpeedDribbler, PlayerTrait.TechnicalDribbler, PlayerTrait.Flair, PlayerTrait.Leadership);
-        return player.Attack * GetStaminaModifier(player) * GetStatusModifier(player) * traitModifier * PositionSuitabilityService.GetEffectivenessMultiplier(player);
+        var attributes = PlayerAttributeService.GetAttributes(player);
+        var attack = player.Attack * 0.35 + attributes.Pace * 0.22 + attributes.Dribbling * 0.23 + attributes.Shooting * 0.20;
+        return attack * GetStaminaModifier(player) * GetStatusModifier(player) * traitModifier * PositionSuitabilityService.GetEffectivenessMultiplier(player);
     }
 
     public double GetEffectiveDefense(Player player)
     {
         var traitModifier = GetTraitModifier(player, PlayerTrait.DivesIntoTackles, PlayerTrait.Interceptor, PlayerTrait.PowerHeader, PlayerTrait.AerialThreat, PlayerTrait.Engine, PlayerTrait.Leadership);
-        return player.Defense * GetStaminaModifier(player) * GetStatusModifier(player) * traitModifier * PositionSuitabilityService.GetEffectivenessMultiplier(player);
+        var attributes = PlayerAttributeService.GetAttributes(player);
+        var defense = player.Defense * 0.50 + attributes.Defending * 0.34 + attributes.Physical * 0.16;
+        return defense * GetStaminaModifier(player) * GetStatusModifier(player) * traitModifier * PositionSuitabilityService.GetEffectivenessMultiplier(player);
     }
 
     public double GetEffectivePassing(Player player)
     {
         var traitModifier = GetTraitModifier(player, PlayerTrait.Playmaker, PlayerTrait.LongPasser, PlayerTrait.PressResistant, PlayerTrait.DeadBallSpecialist, PlayerTrait.EarlyCrosser, PlayerTrait.TeamPlayer, PlayerTrait.Leadership);
-        return player.Passing * GetStaminaModifier(player) * GetStatusModifier(player) * traitModifier * PositionSuitabilityService.GetEffectivenessMultiplier(player);
+        var attributes = PlayerAttributeService.GetAttributes(player);
+        var passing = player.Passing * 0.62 + attributes.Passing * 0.28 + attributes.Dribbling * 0.10;
+        return passing * GetStaminaModifier(player) * GetStatusModifier(player) * traitModifier * PositionSuitabilityService.GetEffectivenessMultiplier(player);
     }
 
     public double GetEffectiveFinishing(Player player)
     {
         var traitModifier = GetTraitModifier(player, PlayerTrait.ClinicalFinisher, PlayerTrait.FinesseShot, PlayerTrait.LongShotTaker, PlayerTrait.PowerHeader, PlayerTrait.AerialThreat, PlayerTrait.OutsideFootShot);
-        return player.Finishing * GetStaminaModifier(player) * GetStatusModifier(player) * traitModifier * PositionSuitabilityService.GetEffectivenessMultiplier(player);
+        var attributes = PlayerAttributeService.GetAttributes(player);
+        var finishing = player.Finishing * 0.55 + attributes.Shooting * 0.35 + attributes.Physical * 0.10;
+        return finishing * GetStaminaModifier(player) * GetStatusModifier(player) * traitModifier * PositionSuitabilityService.GetEffectivenessMultiplier(player);
     }
 
     public double GetPlaymakerWeight(Player player)
@@ -105,7 +113,8 @@ public class TeamStrengthCalculator
             (player.Traits.Contains(PlayerTrait.TeamPlayer) ? 1.06 : 1.0) *
             (player.Traits.Contains(PlayerTrait.LongThrower) ? 1.04 : 1.0);
 
-        return (GetEffectivePassing(player) * 0.72 + GetEffectiveAttack(player) * 0.28) * positionModifier * decisionModifier;
+        var attributes = PlayerAttributeService.GetAttributes(player);
+        return (GetEffectivePassing(player) * 0.64 + attributes.Passing * 0.20 + attributes.Dribbling * 0.16) * positionModifier * decisionModifier;
     }
 
     public double GetShooterWeight(Player player)
@@ -128,7 +137,8 @@ public class TeamStrengthCalculator
             (player.Traits.Contains(PlayerTrait.TriesToBeatOffsideTrap) ? 1.04 : 1.0) *
             (player.Traits.Contains(PlayerTrait.TechnicalDribbler) ? 1.03 : 1.0);
 
-        return (GetEffectiveAttack(player) * 0.30 + GetEffectiveFinishing(player) * 0.70) * positionModifier * decisionModifier;
+        var attributes = PlayerAttributeService.GetAttributes(player);
+        return (GetEffectiveAttack(player) * 0.22 + GetEffectiveFinishing(player) * 0.58 + attributes.Pace * 0.08 + attributes.Shooting * 0.12) * positionModifier * decisionModifier;
     }
 
     private static double GetStaminaModifier(Player player)

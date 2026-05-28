@@ -10,6 +10,8 @@ public class PitchPlayerCard
     public string ShirtNumberValue { get; init; } = string.Empty;
     public string PlayerImagePath { get; init; } = string.Empty;
     public string PlayerName { get; init; } = string.Empty;
+    public string FlagImagePath { get; init; } = "/Assets/Flags/default.png";
+    public string NationalityName { get; init; } = "Unknown nationality";
     public string PositionText { get; init; } = string.Empty;
     public string OverallText { get; init; } = string.Empty;
     public string OverallForeground { get; init; } = "#071A2E";

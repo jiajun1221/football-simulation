@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace FootballSimulation.Data.JsonModels;
 
 public class PlayerDataRecord
@@ -9,9 +11,21 @@ public class PlayerDataRecord
     public string Position { get; set; } = string.Empty;
     public string? PreferredPosition { get; set; }
     public List<string> SecondaryPositions { get; set; } = [];
+    public string? Nationality { get; set; }
+    public string? NationalityCode { get; set; }
+    public string? NationalityName { get; set; }
+    public string? FlagEmoji { get; set; }
+    public string? FlagImagePath { get; set; }
     public int OverallRating { get; set; }
     public int? Age { get; set; }
     public int? PotentialOverall { get; set; }
+    public int? Pace { get; set; }
+    public int? Shooting { get; set; }
+    [JsonPropertyName("passing")]
+    public int? PassingAttribute { get; set; }
+    public int? Dribbling { get; set; }
+    public int? Defending { get; set; }
+    public int? Physical { get; set; }
     public int? Stamina { get; set; }
     public bool IsStarter { get; set; }
     public string? Form { get; set; }

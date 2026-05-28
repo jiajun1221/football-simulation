@@ -12,6 +12,7 @@ public class Player : INotifyPropertyChanged
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
+    public string PlayerId { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public int SquadNumber { get; set; }
     public Position Position { get; set; }
@@ -19,6 +20,11 @@ public class Player : INotifyPropertyChanged
     public List<string> SecondaryPositions { get; set; } = [];
     public string AssignedPosition { get; set; } = string.Empty;
     public string PreferredFoot { get; set; } = string.Empty;
+    public string Nationality { get; set; } = string.Empty;
+    public string NationalityCode { get; set; } = string.Empty;
+    public string NationalityName { get; set; } = string.Empty;
+    public string FlagEmoji { get; set; } = string.Empty;
+    public string FlagImagePath { get; set; } = string.Empty;
     public int DisciplineRating { get; set; } = 50;
     public int OverallRating { get; set; }
     public int BaseOverallRating { get; set; }
@@ -27,6 +33,27 @@ public class Player : INotifyPropertyChanged
     public int LastMatchOverallIncrease { get; set; }
     public int? Age { get; set; }
     public int? PotentialOverall { get; set; }
+    public PlayerTransferStatus TransferStatus { get; set; } = PlayerTransferStatus.None;
+    [JsonIgnore]
+    public bool IsListedForSale
+    {
+        get => TransferStatus == PlayerTransferStatus.Listed;
+        set
+        {
+            if (value)
+            {
+                TransferStatus = PlayerTransferStatus.Listed;
+                return;
+            }
+
+            if (TransferStatus == PlayerTransferStatus.Listed)
+            {
+                TransferStatus = PlayerTransferStatus.None;
+            }
+        }
+    }
+    public PlayerRole Role { get; set; } = PlayerRole.Rotation;
+    public bool RejectTransferOffers { get; set; }
     public string Form { get; set; } = "Average";
     public bool IsStarter { get; set; }
     public int CurrentForm { get; set; } = 50;
@@ -47,6 +74,11 @@ public class Player : INotifyPropertyChanged
 
     public int Morale { get; set; } = 50;
     public List<PlayerTrait> Traits { get; set; } = [];
+    public int Pace { get; set; }
+    public int Shooting { get; set; }
+    public int Dribbling { get; set; }
+    public int Defending { get; set; }
+    public int Physical { get; set; }
     public int Attack { get; set; }
     public int Defense { get; set; }
     public int Passing { get; set; }
