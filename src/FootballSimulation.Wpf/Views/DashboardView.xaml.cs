@@ -17,6 +17,7 @@ public partial class DashboardView : UserControl
     private readonly GameSessionService _gameSessionService = new();
     private readonly RecentResultService _recentResultService = new();
     private readonly SaveGameService _saveGameService = new();
+    private readonly TransferMarketService _transferMarketService = new();
     private const string ClubsAssetPath = "Assets/Clubs";
     private const string DefaultLogoPath = "pack://application:,,,/Assets/Clubs/default.png";
 
@@ -127,9 +128,16 @@ public partial class DashboardView : UserControl
         _navigate(new LeaguePlayerStatsView(_state, _navigate));
     }
 
-    private void TeamSettingsButton_Click(object sender, RoutedEventArgs e)
+    private void TransferMarketButton_Click(object sender, RoutedEventArgs e)
     {
-        PrepareMatchButton_Click(sender, e);
+        if (_state.League is null || _state.SelectedTeam is null)
+        {
+            return;
+        }
+
+        _state.TransferMarket ??= _transferMarketService.CreateInitialState(_state.League);
+        _transferMarketService.BindActiveLeague(_state.TransferMarket, _state.League);
+        _navigate(new TransferMarketView(_state, _navigate));
     }
 
     public void SaveGame()
@@ -323,8 +331,9 @@ public partial class DashboardView : UserControl
                     RoundText = $"R{fixture.RoundNumber}",
                     HomeAwayText = isHome ? "HOME" : "AWAY",
                     SummaryText = $"{CreateClubCode(opponent.Name)} {(isHome ? "H" : "A")} R{fixture.RoundNumber}",
+                    OpponentShortName = CreateShortClubName(opponent.Name),
                     OpponentName = CreateTwoLineText(opponent.Name),
-                    VenueText = CreateTwoLineText(GetVenueName(fixture.HomeTeam)),
+                    VenueText = GetVenueName(fixture.HomeTeam),
                     OpponentLogoPath = GetClubLogoPath(opponent.Name),
                     HomeAwayBrush = GetHomeAwayBadgeBackground(isHome),
                     HomeAwayForeground = GetHomeAwayBadgeForeground(isHome)
@@ -336,6 +345,7 @@ public partial class DashboardView : UserControl
             ? [new UpcomingFixtureRow
             {
                 OpponentName = "No upcoming fixtures",
+                OpponentShortName = "No fixtures",
                 SummaryText = "No fixtures",
                 VenueText = "Season schedule is complete.",
                 RoundText = "-",
@@ -391,6 +401,39 @@ public partial class DashboardView : UserControl
             .Take(3)
             .Select(char.ToUpperInvariant)
             .ToArray());
+    }
+
+    private static string CreateShortClubName(string clubName)
+    {
+        var shortNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["AFC Bournemouth"] = "Bournemouth",
+            ["Brighton & Hove Albion"] = "Brighton",
+            ["Manchester City"] = "Man City",
+            ["Manchester United"] = "Man United",
+            ["Newcastle United"] = "Newcastle",
+            ["Nottingham Forest"] = "Nott'm Forest",
+            ["Tottenham Hotspur"] = "Tottenham",
+            ["West Ham United"] = "West Ham",
+            ["Wolverhampton Wanderers"] = "Wolves"
+        };
+
+        if (shortNames.TryGetValue(clubName, out var shortName))
+        {
+            return shortName;
+        }
+
+        var cleanedName = clubName
+            .Replace(" FC", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace(" CF", string.Empty, StringComparison.OrdinalIgnoreCase);
+
+        if (cleanedName.Length <= 14)
+        {
+            return cleanedName;
+        }
+
+        var words = cleanedName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return words.Length == 0 ? cleanedName : words[0];
     }
 
     private static bool IsTeamInFixture(Fixture fixture, Team team)
@@ -579,6 +622,7 @@ public partial class DashboardView : UserControl
         public string RoundText { get; init; } = string.Empty;
         public string HomeAwayText { get; init; } = string.Empty;
         public string SummaryText { get; init; } = string.Empty;
+        public string OpponentShortName { get; init; } = string.Empty;
         public string OpponentName { get; init; } = string.Empty;
         public string VenueText { get; init; } = string.Empty;
         public string OpponentLogoPath { get; init; } = string.Empty;

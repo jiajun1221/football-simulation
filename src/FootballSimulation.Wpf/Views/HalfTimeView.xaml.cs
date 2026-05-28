@@ -374,7 +374,7 @@ public partial class HalfTimeView : UserControl
 
         SubstituteListBox.ItemsSource = null;
         SubstituteListBox.ItemsSource = benchCards;
-        SubstituteListBox.IsEnabled = benchCards.Count > 0 && GetUsedSubstitutions() + _pendingHalftimeSubstitutions.Count < MatchConstants.MaxSubstitutionsPerTeam;
+        SubstituteListBox.IsEnabled = benchCards.Count > 0;
         SubstitutionStatusTextBlock.Text = _pendingHalftimeSubstitutions.Count == 0
             ? $"{GetUsedSubstitutions()}/5 used"
             : $"{GetUsedSubstitutions()}/5 used · {_pendingHalftimeSubstitutions.Count} queued";
@@ -404,6 +404,7 @@ public partial class HalfTimeView : UserControl
         var form = PlayerFormBadgeHelper.Create(player.FormStatus);
         var teamColors = TeamColorService.GetPalette(_state.SelectedTeam);
         var nationality = PlayerNationalityDisplayService.Resolve(player);
+        var isPendingSubstitute = _pendingHalftimeSubstitutions.Any(substitution => substitution.Substitute == player);
 
         return new BenchPlayerCard
         {
@@ -428,8 +429,36 @@ public partial class HalfTimeView : UserControl
             PositionBackground = teamColors.SecondaryColor,
             PositionForeground = TeamColorService.GetReadableTextColor(teamColors.SecondaryColor),
             TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits),
-            CardStatusBadges = CreateCardStatusBadges(player, pendingIn: true)
+            CardStatusBadges = CreateCardStatusBadges(player, pendingIn: true),
+            CancelButtonVisibility = isPendingSubstitute ? Visibility.Visible : Visibility.Collapsed
         };
+    }
+
+    private void CancelPendingSubstitutionButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { DataContext: BenchPlayerCard benchCard })
+        {
+            return;
+        }
+
+        var pendingSubstitution = _pendingHalftimeSubstitutions.FirstOrDefault(substitution => substitution.Substitute == benchCard.Player);
+        if (pendingSubstitution is null)
+        {
+            return;
+        }
+
+        _pendingHalftimeSubstitutions.Remove(pendingSubstitution);
+        if (_selectedStarter == pendingSubstitution.Starter)
+        {
+            _selectedStarter = null;
+        }
+
+        RefreshSubstitutes();
+        UpdateSelectedPlayerDetails();
+        RefreshPendingSubstitutions();
+        RenderPitch();
+        RefreshTacticalInsight();
+        e.Handled = true;
     }
 
     private IReadOnlyList<PlayerCardStatusBadge> CreateCardStatusBadges(Player player, bool pendingIn)
@@ -1375,5 +1404,6 @@ public partial class HalfTimeView : UserControl
         public string PositionForeground { get; init; } = "#102033";
         public IReadOnlyList<PlayerTraitBadge> TraitBadges { get; init; } = [];
         public IReadOnlyList<PlayerCardStatusBadge> CardStatusBadges { get; init; } = [];
+        public Visibility CancelButtonVisibility { get; init; } = Visibility.Collapsed;
     }
 }
