@@ -31,7 +31,8 @@ public static class AiLineupSelectionService
         foreach (var slot in slots)
         {
             var selectedPlayer = ChooseForSlot(availablePlayers, usedNames, currentSlotByPlayerName, slot, allowEmergency: false) ??
-                ChooseForSlot(availablePlayers, usedNames, currentSlotByPlayerName, slot, allowEmergency: true);
+                ChooseForSlot(availablePlayers, usedNames, currentSlotByPlayerName, slot, allowEmergency: true) ??
+                ChooseFallbackForSlot(availablePlayers, usedNames, slot);
             if (selectedPlayer is null)
             {
                 Debug.WriteLine($"[AiLineup] No natural {slot} available for {team.Name}.");
@@ -92,6 +93,32 @@ public static class AiLineupSelectionService
             .ThenBy(candidate => candidate.Player.SquadNumber <= 0 ? int.MaxValue : candidate.Player.SquadNumber)
             .Select(candidate => candidate.Player)
             .FirstOrDefault();
+    }
+
+    private static Player? ChooseFallbackForSlot(
+        IEnumerable<Player> players,
+        ISet<string> usedNames,
+        string slot)
+    {
+        var normalizedSlot = PositionSuitabilityService.NormalizeExactPosition(slot);
+        if (normalizedSlot == "GK")
+        {
+            return null;
+        }
+
+        var fallback = players
+            .Where(player => !usedNames.Contains(player.Name))
+            .Where(player => !PositionSuitabilityService.IsGoalkeeperCapable(player))
+            .OrderByDescending(player => player.OverallRating)
+            .ThenBy(player => player.SquadNumber <= 0 ? int.MaxValue : player.SquadNumber)
+            .FirstOrDefault();
+
+        if (fallback is not null)
+        {
+            Debug.WriteLine($"[AiLineup] Fallback selected {fallback.Name} for {slot}.");
+        }
+
+        return fallback;
     }
 
     private static bool IsAvailableForSelection(Player player)

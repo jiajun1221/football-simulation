@@ -118,9 +118,10 @@ public partial class HalfTimeView : UserControl
 
         var formation = FormationComboBox.SelectedItem as string ?? _state.SelectedTeam.Formation;
         var positions = _formationLayoutService.GetPositions(formation);
-        AssignFormationPositions(positions);
+        var assignments = CreatePitchSlotAssignments(_pitchSlots, positions);
+        ApplyPitchSlotAssignments(assignments);
 
-        foreach (var assignment in CreatePitchSlotAssignments(_pitchSlots, positions))
+        foreach (var assignment in assignments)
         {
             var player = assignment.Player;
             var position = assignment.Position;
@@ -154,11 +155,20 @@ public partial class HalfTimeView : UserControl
         IReadOnlyList<Player> players,
         IReadOnlyList<PitchPosition> positions)
     {
-        var remainingPlayers = players.Where(IsActivePitchPlayer).ToList();
+        var orderedPlayers = players.Where(IsActivePitchPlayer).ToList();
+        var remainingPlayers = orderedPlayers.ToList();
         var assignments = new List<PitchSlotAssignment>();
-        foreach (var position in positions)
+        for (var index = 0; index < positions.Count; index++)
         {
-            var selectedPlayer = SelectPlayerForSlot(remainingPlayers, position.ExactPosition);
+            var position = positions[index];
+            var currentSlotPlayer = index < orderedPlayers.Count &&
+                remainingPlayers.Contains(orderedPlayers[index])
+                ? orderedPlayers[index]
+                : null;
+            var selectedPlayer = currentSlotPlayer is not null &&
+                CanPlayerOccupySlot(currentSlotPlayer, position.ExactPosition)
+                    ? currentSlotPlayer
+                    : SelectPlayerForSlot(remainingPlayers, position.ExactPosition);
             if (selectedPlayer is null)
             {
                 continue;
@@ -169,6 +179,21 @@ public partial class HalfTimeView : UserControl
         }
 
         return assignments;
+    }
+
+    private void ApplyPitchSlotAssignments(IReadOnlyList<PitchSlotAssignment> assignments)
+    {
+        foreach (var assignment in assignments)
+        {
+            PositionSuitabilityService.EnsurePositionMetadata(assignment.Player, assignment.Position.ExactPosition);
+        }
+
+        var assignedPlayers = assignments.Select(assignment => assignment.Player).ToList();
+        var remainingPlayers = _pitchSlots
+            .Where(player => !assignedPlayers.Contains(player))
+            .ToList();
+        _pitchSlots = assignedPlayers.Concat(remainingPlayers).ToList();
+        SyncActivePitchSlotsIntoTeamPlayers();
     }
 
     private static Player? SelectPlayerForSlot(List<Player> remainingPlayers, string exactPosition)
@@ -242,7 +267,7 @@ public partial class HalfTimeView : UserControl
 
     private PitchPlayerCard CreatePitchPlayerCard(Player player, string displayedPosition)
     {
-        PositionSuitabilityService.EnsurePositionMetadata(player);
+        PositionSuitabilityService.EnsurePositionMetadata(player, displayedPosition);
         var form = PlayerFormBadgeHelper.Create(player.FormStatus);
         var isOutOfPosition = PositionSuitabilityService.IsOutOfPosition(player);
         var suitability = PositionSuitabilityService.GetEffectivenessMultiplier(player);
@@ -422,7 +447,6 @@ public partial class HalfTimeView : UserControl
         var form = PlayerFormBadgeHelper.Create(player.FormStatus);
         var teamColors = TeamColorService.GetPalette(_state.SelectedTeam);
         var nationality = PlayerNationalityDisplayService.Resolve(player);
-        var isPendingSubstitute = _pendingHalftimeSubstitutions.Any(substitution => substitution.Substitute == player);
 
         return new BenchPlayerCard
         {
@@ -447,22 +471,27 @@ public partial class HalfTimeView : UserControl
             PositionBackground = teamColors.SecondaryColor,
             PositionForeground = TeamColorService.GetReadableTextColor(teamColors.SecondaryColor),
             TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits),
-            CardStatusBadges = CreateCardStatusBadges(player, pendingIn: true),
-            CancelButtonVisibility = isPendingSubstitute ? Visibility.Visible : Visibility.Collapsed
+            CardStatusBadges = CreateCardStatusBadges(player, pendingIn: true)
         };
     }
 
-    private void CancelPendingSubstitutionButton_Click(object sender, RoutedEventArgs e)
+    private bool CancelPendingSubstitutionForSubstitute(Player substitute)
     {
-        if (sender is not FrameworkElement { DataContext: BenchPlayerCard benchCard })
-        {
-            return;
-        }
+        var pendingSubstitution = _pendingHalftimeSubstitutions.FirstOrDefault(substitution => substitution.Substitute == substitute);
+        return CancelPendingSubstitution(pendingSubstitution);
+    }
 
-        var pendingSubstitution = _pendingHalftimeSubstitutions.FirstOrDefault(substitution => substitution.Substitute == benchCard.Player);
+    private bool CancelPendingSubstitutionForStarter(Player starter)
+    {
+        var pendingSubstitution = _pendingHalftimeSubstitutions.FirstOrDefault(substitution => substitution.Starter == starter);
+        return CancelPendingSubstitution(pendingSubstitution);
+    }
+
+    private bool CancelPendingSubstitution(PendingHalftimeSubstitution? pendingSubstitution)
+    {
         if (pendingSubstitution is null)
         {
-            return;
+            return false;
         }
 
         _pendingHalftimeSubstitutions.Remove(pendingSubstitution);
@@ -476,7 +505,7 @@ public partial class HalfTimeView : UserControl
         RefreshPendingSubstitutions();
         RenderPitch();
         RefreshTacticalInsight();
-        e.Handled = true;
+        return true;
     }
 
     private IReadOnlyList<PlayerCardStatusBadge> CreateCardStatusBadges(Player player, bool pendingIn)
@@ -877,6 +906,14 @@ public partial class HalfTimeView : UserControl
 
     private void StarterButton_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
+        if (e.ClickCount >= 2 &&
+            sender is Button { Tag: Player player } &&
+            CancelPendingSubstitutionForStarter(player))
+        {
+            e.Handled = true;
+            return;
+        }
+
         _dragStartPoint = e.GetPosition(this);
     }
 
@@ -898,6 +935,14 @@ public partial class HalfTimeView : UserControl
 
     private void SubstituteCard_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
+        if (e.ClickCount >= 2 &&
+            sender is FrameworkElement { DataContext: BenchPlayerCard benchCard } &&
+            CancelPendingSubstitutionForSubstitute(benchCard.Player))
+        {
+            e.Handled = true;
+            return;
+        }
+
         _dragStartPoint = e.GetPosition(this);
     }
 
@@ -1135,7 +1180,7 @@ public partial class HalfTimeView : UserControl
         var targetTargetSlot = draggedIndex < positions.Count ? positions[draggedIndex].ExactPosition : string.Empty;
         if (!CanPlayerOccupySlot(draggedPlayer, draggedTargetSlot) || !CanPlayerOccupySlot(targetPlayer, targetTargetSlot))
         {
-            MessageBox.Show("Only a goalkeeper-capable player can occupy the GK slot.");
+            MessageBox.Show("That swap is not position-compatible. Use a player who can cover the target slot.");
             return;
         }
 
@@ -1358,8 +1403,14 @@ public partial class HalfTimeView : UserControl
 
     private static bool CanPlayerOccupySlot(Player player, string exactPosition)
     {
-        return PositionSuitabilityService.NormalizeExactPosition(exactPosition) != "GK" ||
-            PositionSuitabilityService.IsGoalkeeperCapable(player);
+        var normalizedSlot = PositionSuitabilityService.NormalizeExactPosition(exactPosition);
+        if (normalizedSlot == "GK")
+        {
+            return PositionSuitabilityService.IsGoalkeeperCapable(player);
+        }
+
+        return !PositionSuitabilityService.IsGoalkeeperCapable(player) &&
+            PositionCompatibilityService.GetCompatibilityScore(player, normalizedSlot) > PositionCompatibilityService.Impossible;
     }
 
     private static Position GetGenericPositionForSlot(string exactPosition)
@@ -1410,6 +1461,5 @@ public partial class HalfTimeView : UserControl
         public string PositionForeground { get; init; } = "#102033";
         public IReadOnlyList<PlayerTraitBadge> TraitBadges { get; init; } = [];
         public IReadOnlyList<PlayerCardStatusBadge> CardStatusBadges { get; init; } = [];
-        public Visibility CancelButtonVisibility { get; init; } = Visibility.Collapsed;
     }
 }

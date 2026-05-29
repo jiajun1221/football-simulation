@@ -303,6 +303,37 @@ public class SquadSelectionServiceTests
     }
 
     [Fact]
+    public void AiLineupSelection_StillFillsElevenWhenSquadLacksNaturalWidePlayers()
+    {
+        var team = new Team
+        {
+            Name = "Fallback Test",
+            Formation = "4-3-3",
+            Players =
+            [
+                CreateExactPlayer("Starter GK", Position.Goalkeeper, "GK", 82, true),
+                CreateExactPlayer("Left Back", Position.Defender, "LB", 78, true),
+                CreateExactPlayer("Center Back A", Position.Defender, "CB", 78, true),
+                CreateExactPlayer("Center Back B", Position.Defender, "CB", 77, true),
+                CreateExactPlayer("Right Back", Position.Defender, "RB", 76, true),
+                CreateExactPlayer("Midfielder A", Position.Midfielder, "CM", 80, true),
+                CreateExactPlayer("Midfielder B", Position.Midfielder, "CM", 79, true),
+                CreateExactPlayer("Midfielder C", Position.Midfielder, "CM", 78, true),
+                CreateExactPlayer("Striker A", Position.Forward, "ST", 82, true),
+                CreateExactPlayer("Striker B", Position.Forward, "ST", 81, true),
+                CreateExactPlayer("Striker C", Position.Forward, "ST", 80, true)
+            ],
+            Substitutes = []
+        };
+
+        AiLineupSelectionService.BuildRealisticLineup(team);
+
+        Assert.Equal(11, team.Players.Count);
+        Assert.All(team.Players, player => Assert.True(player.IsStarter));
+        Assert.All(team.Players, player => Assert.True(player.IsOnPitch));
+    }
+
+    [Fact]
     public void AiManager_ChoosesDefensiveReplacementForCenterBack()
     {
         var service = new AiManagerService();

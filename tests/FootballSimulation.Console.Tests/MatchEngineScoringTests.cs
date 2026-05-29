@@ -850,6 +850,40 @@ public class MatchEngineScoringTests
     }
 
     [Fact]
+    public void SimulateMatch_DoesNotEmitRepeatedSetPieceFeedForSameSequence()
+    {
+        var seedDataService = new SeedDataService();
+        var engine = new MatchEngine();
+
+        for (var seed = 1; seed <= 140; seed++)
+        {
+            var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+            var result = engine.SimulateMatch(homeTeam, awayTeam, seed: seed);
+            var events = result.Events;
+
+            for (var index = 1; index < events.Count; index++)
+            {
+                var previousEvent = events[index - 1];
+                var currentEvent = events[index];
+                if (previousEvent.EventType != EventType.SetPieceDanger ||
+                    currentEvent.EventType != EventType.SetPieceDanger ||
+                    previousEvent.Minute != currentEvent.Minute)
+                {
+                    continue;
+                }
+
+                var previousTeam = FindEventTeamName(previousEvent, result);
+                var currentTeam = FindEventTeamName(currentEvent, result);
+
+                Assert.False(
+                    !string.IsNullOrWhiteSpace(previousTeam) &&
+                    string.Equals(previousTeam, currentTeam, StringComparison.OrdinalIgnoreCase),
+                    $"Repeated set-piece feed found for {previousTeam} at {previousEvent.Minute}': {previousEvent.Description} -> {currentEvent.Description}");
+            }
+        }
+    }
+
+    [Fact]
     public void SimulateMatch_GoalAssistUsesChanceCreatorWhenDifferentFromScorer()
     {
         var seedDataService = new SeedDataService();

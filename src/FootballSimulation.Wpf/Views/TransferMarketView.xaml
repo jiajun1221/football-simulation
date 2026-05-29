@@ -718,8 +718,6 @@
                     <Grid Grid.Column="0">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
-                            <RowDefinition Height="210" />
-                            <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
 
@@ -728,7 +726,7 @@
                                    FontSize="15"
                                    FontWeight="Bold"
                                    Margin="0,0,0,8" />
-                        <Grid Grid.Row="1" Margin="0,0,0,14">
+                        <Grid Grid.Row="1">
                             <DataGrid x:Name="ShortlistedDataGrid"
                                       Style="{StaticResource ModernGridStyle}"
                                       SelectionChanged="ShortlistedDataGrid_SelectionChanged">
@@ -806,76 +804,6 @@
                             </Border>
                         </Grid>
 
-                        <TextBlock Grid.Row="2"
-                                   Text="Recommended Players"
-                                   Foreground="{DynamicResource AppTextBrush}"
-                                   FontSize="15"
-                                   FontWeight="Bold"
-                                   Margin="0,0,0,8" />
-                        <DataGrid x:Name="RecommendedDataGrid"
-                                  Grid.Row="3"
-                                  Style="{StaticResource ModernGridStyle}"
-                                  SelectionChanged="RecommendedDataGrid_SelectionChanged">
-                            <DataGrid.Columns>
-                                <DataGridTemplateColumn Header="Player" Width="180">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <StaticResource ResourceKey="TransferPlayerCellTemplate" />
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="Nat" Width="42">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <StaticResource ResourceKey="NationalityCellTemplate" />
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="Club" Width="110">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                <Image Source="{Binding ClubLogoPath}" Width="24" Height="24" Stretch="Uniform" Margin="0,0,8,0" />
-                                                <TextBlock Text="{Binding ClubName}" Foreground="{DynamicResource AppTextBrush}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                                <DataGridTextColumn Header="Pos" Binding="{Binding Position}" Width="45" ElementStyle="{StaticResource CenteredGridTextStyle}" />
-                                <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="45" ElementStyle="{StaticResource CenteredGridTextStyle}" />
-                                <DataGridTemplateColumn Header="OVR" Width="58">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <Border Style="{StaticResource OvrBadgeBorderStyle}">
-                                                <TextBlock Text="{Binding OverallText}" Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                            </Border>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="Value" Width="85">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="{Binding MarketValueText}" Style="{StaticResource CenteredValueTextStyle}" />
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                                <DataGridTextColumn Header="Exp." Binding="{Binding ContractText}" Width="95" ElementStyle="{StaticResource CenteredGridTextStyle}" />
-                                <DataGridTextColumn Header="Wage" Binding="{Binding WageText}" Width="80" ElementStyle="{StaticResource CenteredValueTextStyle}" />
-                                <DataGridTemplateColumn Header="Status" Width="115">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <StaticResource ResourceKey="StatusCellTemplate" />
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="Reason" Width="*">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="{Binding Reason}"
-                                                       ToolTip="{Binding Reason}"
-                                                       TextTrimming="CharacterEllipsis"
-                                                       TextWrapping="NoWrap"
-                                                       Foreground="{DynamicResource AppTextBrush}"
-                                                       VerticalAlignment="Center" />
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                            </DataGrid.Columns>
-                        </DataGrid>
                     </Grid>
                     <views:TransferPlayerDetailPanel x:Name="RecommendedDetailPanel"
                                                      Grid.Column="1"

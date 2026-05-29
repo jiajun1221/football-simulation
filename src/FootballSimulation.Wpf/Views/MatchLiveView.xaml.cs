@@ -1847,6 +1847,11 @@ public partial class MatchLiveView : UserControl
         if (selectedPlayer is null)
         {
             System.Diagnostics.Debug.WriteLine($"[LineupWarning] No compatible player available for {normalizedSlot} pitch slot.");
+            selectedPlayer = remainingPlayers
+                .Where(player => !PositionSuitabilityService.IsGoalkeeperCapable(player))
+                .OrderByDescending(player => player.OverallRating)
+                .ThenBy(player => player.SquadNumber <= 0 ? int.MaxValue : player.SquadNumber)
+                .FirstOrDefault();
         }
 
         return selectedPlayer;

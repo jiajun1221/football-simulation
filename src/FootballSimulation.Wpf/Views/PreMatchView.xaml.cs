@@ -190,9 +190,10 @@ public partial class PreMatchView : UserControl
 
         var formation = FormationComboBox.SelectedItem as string ?? _state.SelectedTeam.Formation;
         var positions = _formationLayoutService.GetPositions(formation);
-        AssignFormationPositions(positions);
+        var assignments = CreatePitchSlotAssignments(_pitchSlots, positions);
+        ApplyPitchSlotAssignments(assignments);
 
-        foreach (var assignment in CreatePitchSlotAssignments(_pitchSlots, positions))
+        foreach (var assignment in assignments)
         {
             var player = assignment.Player;
             var position = assignment.Position;
@@ -226,11 +227,20 @@ public partial class PreMatchView : UserControl
         IReadOnlyList<Player> players,
         IReadOnlyList<PitchPosition> positions)
     {
-        var remainingPlayers = players.Where(IsAvailableForSelection).ToList();
+        var orderedPlayers = players.Where(IsAvailableForSelection).ToList();
+        var remainingPlayers = orderedPlayers.ToList();
         var assignments = new List<PitchSlotAssignment>();
-        foreach (var position in positions)
+        for (var index = 0; index < positions.Count; index++)
         {
-            var selectedPlayer = SelectPlayerForSlot(remainingPlayers, position.ExactPosition);
+            var position = positions[index];
+            var currentSlotPlayer = index < orderedPlayers.Count &&
+                remainingPlayers.Contains(orderedPlayers[index])
+                ? orderedPlayers[index]
+                : null;
+            var selectedPlayer = currentSlotPlayer is not null &&
+                CanPlayerOccupySlot(currentSlotPlayer, position.ExactPosition)
+                    ? currentSlotPlayer
+                    : SelectPlayerForSlot(remainingPlayers, position.ExactPosition);
             if (selectedPlayer is null)
             {
                 continue;
@@ -241,6 +251,26 @@ public partial class PreMatchView : UserControl
         }
 
         return assignments;
+    }
+
+    private void ApplyPitchSlotAssignments(IReadOnlyList<PitchSlotAssignment> assignments)
+    {
+        if (_state.SelectedTeam is null)
+        {
+            return;
+        }
+
+        foreach (var assignment in assignments)
+        {
+            PositionSuitabilityService.EnsurePositionMetadata(assignment.Player, assignment.Position.ExactPosition);
+        }
+
+        var assignedPlayers = assignments.Select(assignment => assignment.Player).ToList();
+        var remainingPlayers = _pitchSlots
+            .Where(player => !assignedPlayers.Contains(player))
+            .ToList();
+        _pitchSlots = assignedPlayers.Concat(remainingPlayers).ToList();
+        _state.SelectedTeam.Players = _pitchSlots.ToList();
     }
 
     private static Player? SelectPlayerForSlot(List<Player> remainingPlayers, string exactPosition)
@@ -316,7 +346,7 @@ public partial class PreMatchView : UserControl
 
     private PitchPlayerCard CreatePitchPlayerCard(Player player, string displayedPosition)
     {
-        PositionSuitabilityService.EnsurePositionMetadata(player);
+        PositionSuitabilityService.EnsurePositionMetadata(player, displayedPosition);
         var form = PlayerFormBadgeHelper.Create(player.FormStatus);
         var isOutOfPosition = PositionSuitabilityService.IsOutOfPosition(player);
         var suitability = PositionSuitabilityService.GetEffectivenessMultiplier(player);
@@ -1101,7 +1131,7 @@ public partial class PreMatchView : UserControl
         var targetTargetSlot = draggedIndex < positions.Count ? positions[draggedIndex].ExactPosition : string.Empty;
         if (!CanPlayerOccupySlot(draggedPlayer, draggedTargetSlot) || !CanPlayerOccupySlot(targetPlayer, targetTargetSlot))
         {
-            MessageBox.Show("Only a goalkeeper-capable player can occupy the GK slot.");
+            MessageBox.Show("That swap is not position-compatible. Use a player who can cover the target slot.");
             return;
         }
 
@@ -1311,9 +1341,13 @@ public partial class PreMatchView : UserControl
     private static bool CanPlayerOccupySlot(Player player, string exactPosition)
     {
         var normalizedSlot = PositionSuitabilityService.NormalizeExactPosition(exactPosition);
-        return normalizedSlot == "GK"
-            ? PositionSuitabilityService.IsGoalkeeperCapable(player)
-            : !PositionSuitabilityService.IsGoalkeeperCapable(player);
+        if (normalizedSlot == "GK")
+        {
+            return PositionSuitabilityService.IsGoalkeeperCapable(player);
+        }
+
+        return !PositionSuitabilityService.IsGoalkeeperCapable(player) &&
+            PositionCompatibilityService.GetCompatibilityScore(player, normalizedSlot) > PositionCompatibilityService.Impossible;
     }
 
     private static void ShowGoalkeeperWarningIfNeeded(LineupValidationResult result)

@@ -115,18 +115,6 @@ public partial class TransferMarketView : UserControl
         ShowPlayerDetails(row.Listing, TransferDetailMode.Market, panel: MarketDetailPanel);
     }
 
-    private void RecommendedDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        if (RecommendedDataGrid.SelectedItem is not TransferPlayerRow row)
-        {
-            RecommendedDetailPanel.ShowEmpty();
-            return;
-        }
-
-        _selectedListing = row.Listing;
-        ShowPlayerDetails(row.Listing, TransferDetailMode.Scout, row.Reason, panel: RecommendedDetailPanel);
-    }
-
     private void ShortlistedDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (ShortlistedDataGrid.SelectedItem is not TransferPlayerRow row)
@@ -807,11 +795,6 @@ public partial class TransferMarketView : UserControl
 
         ShortlistedDataGrid.ItemsSource = shortlistedRows;
         ShortlistedEmptyState.Visibility = shortlistedRows.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-
-        RecommendedDataGrid.ItemsSource = _transferMarketService
-            .GetRecommendedPlayers(_state.TransferMarket, _state.League, _state.SelectedTeam)
-            .Select(recommendation => CreatePlayerRow(recommendation.Listing, recommendation.Reason))
-            .ToList();
     }
 
     private void RefreshSquad()
@@ -947,12 +930,7 @@ public partial class TransferMarketView : UserControl
                     : _activeDetailPanel == HistoryDetailPanel
                         ? TransferDetailMode.History
                         : TransferDetailMode.Market;
-        var selectedRecommendation = RecommendedDataGrid.SelectedItem as TransferPlayerRow;
-        var recommendationReason = mode is TransferDetailMode.Scout &&
-            selectedRecommendation?.PlayerId == _selectedListing.Player.PlayerId
-                ? selectedRecommendation.Reason
-                : string.Empty;
-        ShowPlayerDetails(_selectedListing, mode, recommendationReason, _selectedOffer, _selectedHistoryItem, _activeDetailPanel);
+        ShowPlayerDetails(_selectedListing, mode, string.Empty, _selectedOffer, _selectedHistoryItem, _activeDetailPanel);
     }
 
     private void EnsureTransferState()

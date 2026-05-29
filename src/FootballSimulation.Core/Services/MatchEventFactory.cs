@@ -693,27 +693,6 @@ public class MatchEventFactory
             triggeredTrait: triggeredTrait ?? (player.Traits.Contains(PlayerTrait.DeadBallSpecialist) ? PlayerTrait.DeadBallSpecialist : null));
     }
 
-    public MatchEvent CreateSetPieceThreat(int minute, Team team, Player primaryTaker, Player secondaryTaker)
-    {
-        var secondaryText = string.Equals(primaryTaker.Name, secondaryTaker.Name, StringComparison.OrdinalIgnoreCase)
-            ? "a teammate"
-            : secondaryTaker.Name;
-        var triggeredTrait = primaryTaker.Traits.Contains(PlayerTrait.DeadBallSpecialist) ? PlayerTrait.DeadBallSpecialist : (PlayerTrait?)null;
-        var description = triggeredTrait == PlayerTrait.DeadBallSpecialist
-            ? Pick(new Random(minute + primaryTaker.Name.Length),
-                $"{team.Name} win a dangerous free kick. {primaryTaker.Name}'s set-piece reputation has everyone alert.",
-                $"{primaryTaker.Name} stands over it for {team.Name}, ready to bend a dangerous delivery.")
-            : $"{team.Name} win a dangerous free kick. {primaryTaker.Name} and {secondaryText} stand over it.";
-
-        return CreateEvent(
-            minute,
-            EventType.SetPieceDanger,
-            description,
-            primaryTaker.Name,
-            secondaryTaker.Name,
-            triggeredTrait: triggeredTrait);
-    }
-
     public MatchEvent CreateSetPieceShot(int minute, Team team, Player taker, PlayerTrait? triggeredTrait = null)
     {
         var description = triggeredTrait == PlayerTrait.DeadBallSpecialist

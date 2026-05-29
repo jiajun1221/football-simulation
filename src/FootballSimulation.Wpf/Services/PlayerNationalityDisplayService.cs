@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using FootballSimulation.Models;
+using FootballSimulation.Services;
 
 namespace FootballSimulation.Wpf.Services;
 
@@ -17,7 +18,8 @@ public static class PlayerNationalityDisplayService
         ["EN"] = Flag("GB-ENG", "England", "england"),
         ["ES"] = Flag("ES", "Spain", "spain"),
         ["FR"] = Flag("FR", "France", "france"),
-        ["GB"] = Flag("GB", "United Kingdom", "united-kingdom"),
+        ["GB"] = Flag("GB-ENG", "England", "england"),
+        ["GBR"] = Flag("GB-ENG", "England", "england"),
         ["GB-ENG"] = Flag("GB-ENG", "England", "england"),
         ["GB-NIR"] = Flag("GB-NIR", "Northern Ireland", "northern-ireland"),
         ["GB-SCT"] = Flag("GB-SCT", "Scotland", "scotland"),
@@ -47,16 +49,34 @@ public static class PlayerNationalityDisplayService
         .GroupBy(item => item.Name, StringComparer.OrdinalIgnoreCase)
         .ToDictionary(group => group.Key, group => group.First().Code, StringComparer.OrdinalIgnoreCase);
 
+    private static readonly Dictionary<string, NationalityDisplayInfo> CountryAliases = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["British"] = Flag("GB-ENG", "England", "england"),
+        ["Kingdom of Denmark"] = Flag("DK", "Denmark", "denmark"),
+        ["Kingdom of the Netherlands"] = Flag("NL", "Netherlands", "netherlands"),
+        ["United Kingdom"] = Flag("GB-ENG", "England", "england")
+    };
+
     public static NationalityDisplayInfo Resolve(Player player)
     {
+        if (ShouldBackfillNationality(player))
+        {
+            _ = PlayerNationalityDataService.TryApply(player);
+        }
+
         if (!string.IsNullOrWhiteSpace(player.FlagImagePath) &&
-            !player.FlagImagePath.EndsWith("/default.png", StringComparison.OrdinalIgnoreCase) &&
-            !player.FlagImagePath.EndsWith("\\default.png", StringComparison.OrdinalIgnoreCase))
+            !IsDefaultOrGenericUnitedKingdomFlag(player.FlagImagePath))
         {
             return new NationalityDisplayInfo(
                 string.IsNullOrWhiteSpace(player.NationalityCode) ? "UN" : player.NationalityCode.Trim(),
                 string.IsNullOrWhiteSpace(player.NationalityName) ? "Unknown nationality" : player.NationalityName.Trim(),
                 player.FlagImagePath.Trim());
+        }
+
+        if (!string.IsNullOrWhiteSpace(player.NationalityName) &&
+            CountryAliases.TryGetValue(player.NationalityName.Trim(), out var aliasInfo))
+        {
+            return WithPlayerOverrides(player, aliasInfo);
         }
 
         if (!string.IsNullOrWhiteSpace(player.NationalityName) &&
@@ -89,8 +109,15 @@ public static class PlayerNationalityDisplayService
     {
         var resolved = info with
         {
-            FlagImagePath = string.IsNullOrWhiteSpace(player.FlagImagePath) ? info.FlagImagePath : player.FlagImagePath.Trim(),
-            Name = string.IsNullOrWhiteSpace(player.NationalityName) ? info.Name : player.NationalityName.Trim()
+            FlagImagePath = string.IsNullOrWhiteSpace(player.FlagImagePath) ||
+                IsDefaultOrGenericUnitedKingdomFlag(player.FlagImagePath)
+                    ? info.FlagImagePath
+                    : player.FlagImagePath.Trim(),
+            Name = string.IsNullOrWhiteSpace(player.NationalityName) ||
+                player.NationalityName.Equals("Unknown nationality", StringComparison.OrdinalIgnoreCase) ||
+                player.NationalityName.Equals("United Kingdom", StringComparison.OrdinalIgnoreCase)
+                    ? info.Name
+                    : player.NationalityName.Trim()
         };
         ApplyToPlayer(player, resolved);
         return resolved;
@@ -102,6 +129,26 @@ public static class PlayerNationalityDisplayService
         player.NationalityName = info.Name;
         player.Nationality = info.Name;
         player.FlagImagePath = info.FlagImagePath;
+    }
+
+    private static bool ShouldBackfillNationality(Player player)
+    {
+        return string.IsNullOrWhiteSpace(player.NationalityCode) ||
+            string.IsNullOrWhiteSpace(player.NationalityName) ||
+            string.IsNullOrWhiteSpace(player.FlagImagePath) ||
+            player.NationalityCode.Equals("UN", StringComparison.OrdinalIgnoreCase) ||
+            player.NationalityCode.Equals("GBR", StringComparison.OrdinalIgnoreCase) ||
+            player.NationalityName.Equals("Unknown nationality", StringComparison.OrdinalIgnoreCase) ||
+            player.NationalityName.Equals("United Kingdom", StringComparison.OrdinalIgnoreCase) ||
+            IsDefaultOrGenericUnitedKingdomFlag(player.FlagImagePath);
+    }
+
+    private static bool IsDefaultOrGenericUnitedKingdomFlag(string flagImagePath)
+    {
+        return flagImagePath.EndsWith("/default.png", StringComparison.OrdinalIgnoreCase) ||
+            flagImagePath.EndsWith("\\default.png", StringComparison.OrdinalIgnoreCase) ||
+            flagImagePath.EndsWith("/united-kingdom.png", StringComparison.OrdinalIgnoreCase) ||
+            flagImagePath.EndsWith("\\united-kingdom.png", StringComparison.OrdinalIgnoreCase);
     }
 
     private static NationalityDisplayInfo Flag(string code, string name, string slug)

@@ -1941,7 +1941,6 @@ public class MatchEngine
         MatchEventFactory eventFactory)
     {
         var (primaryTaker, secondaryTaker) = ChooseSetPieceTakers(attackingTeam);
-        matchLog.AddEvent(eventFactory.CreateSetPieceThreat(minute, attackingTeam, primaryTaker, secondaryTaker));
         var triggeredSetPieceTrait = primaryTaker.Traits.Contains(PlayerTrait.DeadBallSpecialist)
             ? PlayerTrait.DeadBallSpecialist
             : (PlayerTrait?)null;

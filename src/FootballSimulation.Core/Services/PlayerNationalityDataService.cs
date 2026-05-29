@@ -30,7 +30,11 @@ public static class PlayerNationalityDataService
             string.IsNullOrWhiteSpace(player.NationalityName) ||
             string.IsNullOrWhiteSpace(player.FlagImagePath) ||
             player.NationalityCode.Equals("UN", StringComparison.OrdinalIgnoreCase) ||
+            player.NationalityCode.Equals("GBR", StringComparison.OrdinalIgnoreCase) ||
+            player.NationalityName.Equals("United Kingdom", StringComparison.OrdinalIgnoreCase) ||
             player.NationalityName.Equals("Unknown nationality", StringComparison.OrdinalIgnoreCase) ||
+            player.FlagImagePath.EndsWith("/united-kingdom.png", StringComparison.OrdinalIgnoreCase) ||
+            player.FlagImagePath.EndsWith("\\united-kingdom.png", StringComparison.OrdinalIgnoreCase) ||
             player.FlagImagePath.EndsWith("/default.png", StringComparison.OrdinalIgnoreCase) ||
             player.FlagImagePath.EndsWith("\\default.png", StringComparison.OrdinalIgnoreCase);
     }
