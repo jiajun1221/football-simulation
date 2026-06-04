@@ -15,7 +15,8 @@ public static class PositionSuitabilityService
     public static void EnsurePositionMetadata(Player player, string? assignedPosition = null)
     {
         var normalizedAssigned = NormalizeExactPosition(assignedPosition);
-        var normalizedPreferred = NormalizeExactPosition(player.PreferredPosition);
+        var preferredPositions = NormalizeExactPositions(player.PreferredPosition);
+        var normalizedPreferred = preferredPositions.FirstOrDefault() ?? string.Empty;
 
         if (string.IsNullOrWhiteSpace(normalizedPreferred))
         {
@@ -37,8 +38,9 @@ public static class PositionSuitabilityService
             player.AssignedPosition = normalizedPreferred;
         }
 
-        player.SecondaryPositions = player.SecondaryPositions
-            .Select(NormalizeExactPosition)
+        player.SecondaryPositions = preferredPositions
+            .Skip(1)
+            .Concat(player.SecondaryPositions.SelectMany(NormalizeExactPositions))
             .Where(position => position.Length > 0 && position != player.PreferredPosition)
             .Distinct()
             .ToList();
@@ -53,6 +55,31 @@ public static class PositionSuitabilityService
 
         var normalized = position.Trim().ToUpperInvariant().Replace("-", string.Empty).Replace(" ", string.Empty);
         return ExactPositions.Contains(normalized) ? normalized : string.Empty;
+    }
+
+    public static IReadOnlyList<string> NormalizeExactPositions(string? positions)
+    {
+        if (string.IsNullOrWhiteSpace(positions))
+        {
+            return [];
+        }
+
+        return positions
+            .Split(['/', ',', '|', ';', '\\', ' ', '\t', '\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(NormalizeExactPosition)
+            .Where(position => position.Length > 0)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    public static IReadOnlyList<string> GetNaturalExactPositions(Player player)
+    {
+        EnsurePositionMetadata(player);
+        return new[] { player.PreferredPosition }
+            .Concat(player.SecondaryPositions)
+            .SelectMany(NormalizeExactPositions)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
     }
 
     public static string GetDefaultExactPosition(Position position)
@@ -72,7 +99,7 @@ public static class PositionSuitabilityService
         EnsurePositionMetadata(player);
 
         if (player.AssignedPosition == player.PreferredPosition ||
-            player.SecondaryPositions.Contains(player.AssignedPosition))
+            player.SecondaryPositions.Contains(player.AssignedPosition, StringComparer.OrdinalIgnoreCase))
         {
             return 1.0;
         }
@@ -97,8 +124,6 @@ public static class PositionSuitabilityService
     {
         EnsurePositionMetadata(player);
         return player.Position == Position.Goalkeeper ||
-            string.Equals(player.PreferredPosition, "GK", StringComparison.OrdinalIgnoreCase) ||
-            player.SecondaryPositions.Any(position =>
-                string.Equals(NormalizeExactPosition(position), "GK", StringComparison.OrdinalIgnoreCase));
+            GetNaturalExactPositions(player).Contains("GK", StringComparer.OrdinalIgnoreCase);
     }
 }

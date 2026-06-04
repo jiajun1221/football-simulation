@@ -489,16 +489,22 @@ public partial class FormationSetupPanel : UserControl
         var positions = _formationLayoutService.GetPositions(FormationComboBox.SelectedItem as string ?? _team.Formation);
         var firstSlot = secondIndex < positions.Count ? positions[secondIndex].ExactPosition : string.Empty;
         var secondSlot = firstIndex < positions.Count ? positions[firstIndex].ExactPosition : string.Empty;
-        if (!CanPlayerOccupySlot(first, firstSlot) || !CanPlayerOccupySlot(second, secondSlot))
+        var hardBlockMessage = CreateHardSwapBlockMessage(first, firstSlot, second, secondSlot);
+        if (!string.IsNullOrWhiteSpace(hardBlockMessage))
         {
-            MessageBox.Show("That swap is not position-compatible. Use a player who can cover the target slot.");
+            MessageBox.Show(hardBlockMessage);
             return;
         }
+        var outOfPositionWarning = CreateOutOfPositionSwapWarning(first, firstSlot, second, secondSlot);
         (_pitchSlots[firstIndex], _pitchSlots[secondIndex]) = (_pitchSlots[secondIndex], _pitchSlots[firstIndex]);
         _team.Players = _pitchSlots.ToList();
         AssignFormationPositions();
         RefreshAll();
         NotifyChanged();
+        if (!string.IsNullOrWhiteSpace(outOfPositionWarning))
+        {
+            MessageBox.Show(outOfPositionWarning, "Out Of Position", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
     }
 
     private void SwapBenchPlayers(Player first, Player second)
@@ -545,6 +551,84 @@ public partial class FormationSetupPanel : UserControl
     private static bool IsAvailable(Player player) => !player.IsInjured && !player.IsSuspended && !player.IsSentOff;
     private static string GetStaminaBrush(Player player) => player.Stamina < 35 ? "#EF4444" : player.Stamina < 60 ? "#F59E0B" : "#22C55E";
     private static bool CanPlayerOccupySlot(Player player, string slot) => PositionSuitabilityService.NormalizeExactPosition(slot) == "GK" ? PositionSuitabilityService.IsGoalkeeperCapable(player) : !PositionSuitabilityService.IsGoalkeeperCapable(player) && PositionCompatibilityService.GetCompatibilityScore(player, slot) > PositionCompatibilityService.Impossible;
+
+    private static string? CreateHardSwapBlockMessage(Player firstPlayer, string firstTargetSlot, Player secondPlayer, string secondTargetSlot)
+    {
+        var firstFailure = CreateHardPositionFailure(firstPlayer, firstTargetSlot);
+        var secondFailure = CreateHardPositionFailure(secondPlayer, secondTargetSlot);
+        var failures = new[] { firstFailure, secondFailure }
+            .Where(message => !string.IsNullOrWhiteSpace(message))
+            .ToList();
+
+        return failures.Count switch
+        {
+            0 => null,
+            1 => failures[0],
+            _ => string.Join(Environment.NewLine, failures)
+        };
+    }
+
+    private static string? CreateHardPositionFailure(Player player, string targetSlot)
+    {
+        var normalizedSlot = PositionSuitabilityService.NormalizeExactPosition(targetSlot);
+        if (string.IsNullOrWhiteSpace(normalizedSlot) ||
+            PositionCompatibilityService.CanOccupySlot(player, normalizedSlot, allowOutOfPosition: true))
+        {
+            return null;
+        }
+
+        return $"{player.Name} cannot cover {normalizedSlot}. Choose a player who can play {normalizedSlot}.";
+    }
+
+    private static string? CreateOutOfPositionSwapWarning(Player firstPlayer, string firstTargetSlot, Player secondPlayer, string secondTargetSlot)
+    {
+        var firstWarning = CreateOutOfPositionWarningPart(firstPlayer, firstTargetSlot);
+        var secondWarning = CreateOutOfPositionWarningPart(secondPlayer, secondTargetSlot);
+        if (firstWarning is null && secondWarning is null)
+        {
+            return null;
+        }
+
+        var naturalFitText = CreateNaturalFitText(firstPlayer, firstTargetSlot, secondPlayer, secondTargetSlot);
+        var warningParts = new[] { firstWarning, secondWarning }
+            .Where(message => !string.IsNullOrWhiteSpace(message));
+        return $"{naturalFitText}{string.Join(" ", warningParts)} OVR will be reduced for out-of-position players.";
+    }
+
+    private static string CreateNaturalFitText(Player firstPlayer, string firstTargetSlot, Player secondPlayer, string secondTargetSlot)
+    {
+        var naturalFits = new[]
+            {
+                CreateNaturalFitPart(firstPlayer, firstTargetSlot),
+                CreateNaturalFitPart(secondPlayer, secondTargetSlot)
+            }
+            .Where(message => !string.IsNullOrWhiteSpace(message))
+            .ToList();
+
+        return naturalFits.Count == 0 ? string.Empty : $"{string.Join(", ", naturalFits)}. ";
+    }
+
+    private static string? CreateNaturalFitPart(Player player, string targetSlot)
+    {
+        var normalizedSlot = PositionSuitabilityService.NormalizeExactPosition(targetSlot);
+        return !string.IsNullOrWhiteSpace(normalizedSlot) &&
+            PositionCompatibilityService.CanPlayPosition(player, normalizedSlot)
+                ? $"{player.Name} can play {normalizedSlot}"
+                : null;
+    }
+
+    private static string? CreateOutOfPositionWarningPart(Player player, string targetSlot)
+    {
+        var normalizedSlot = PositionSuitabilityService.NormalizeExactPosition(targetSlot);
+        if (string.IsNullOrWhiteSpace(normalizedSlot) ||
+            normalizedSlot == "GK" ||
+            PositionCompatibilityService.CanPlayPosition(player, normalizedSlot))
+        {
+            return null;
+        }
+
+        return $"{player.Name} cannot naturally cover {normalizedSlot}.";
+    }
 
     private static bool IsWithinPitchCard(DependencyObject? source)
     {

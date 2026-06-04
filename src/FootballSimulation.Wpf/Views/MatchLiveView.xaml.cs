@@ -1185,7 +1185,12 @@ public partial class MatchLiveView : UserControl
             return availableSubstitutes;
         }
 
-        return availableSubstitutes.Where(substitute => CanPlayerCoverPosition(substitute, selectedPosition));
+        return availableSubstitutes
+            .Where(substitute => CanPlayerCoverPosition(substitute, selectedPosition))
+            .OrderByDescending(substitute => PositionCompatibilityService.GetCompatibilityScore(substitute, selectedPosition))
+            .ThenByDescending(GetOverallRating)
+            .ThenBy(substitute => substitute.SquadNumber <= 0 ? int.MaxValue : substitute.SquadNumber)
+            .ThenBy(substitute => substitute.Name);
     }
 
     private Player? GetSelectedActiveUserPlayer(Team userTeam)
@@ -1207,15 +1212,7 @@ public partial class MatchLiveView : UserControl
             return false;
         }
 
-        PositionSuitabilityService.EnsurePositionMetadata(player);
-        if (normalizedPosition == "GK")
-        {
-            return PositionSuitabilityService.IsGoalkeeperCapable(player);
-        }
-
-        return string.Equals(player.PreferredPosition, normalizedPosition, StringComparison.OrdinalIgnoreCase) ||
-            player.SecondaryPositions.Any(position =>
-                string.Equals(PositionSuitabilityService.NormalizeExactPosition(position), normalizedPosition, StringComparison.OrdinalIgnoreCase));
+        return PositionCompatibilityService.CanOccupySlot(player, normalizedPosition, allowOutOfPosition: true);
     }
 
     private bool IsAvailableSubstitute(Player player)

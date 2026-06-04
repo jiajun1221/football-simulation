@@ -26,17 +26,19 @@ public static class PositionCompatibilityService
             return Impossible;
         }
 
-        if (string.Equals(player.PreferredPosition, slot, StringComparison.OrdinalIgnoreCase))
+        var naturalPositions = PositionSuitabilityService.GetNaturalExactPositions(player);
+        if (naturalPositions.Count > 0 &&
+            string.Equals(naturalPositions[0], slot, StringComparison.OrdinalIgnoreCase))
         {
             return 100;
         }
 
-        if (player.SecondaryPositions.Contains(slot, StringComparer.OrdinalIgnoreCase))
+        if (naturalPositions.Skip(1).Contains(slot, StringComparer.OrdinalIgnoreCase))
         {
             return 85;
         }
 
-        return GetAdjacentRoleScore(player, slot);
+        return GetAdjacentRoleScore(naturalPositions, slot);
     }
 
     public static bool IsReasonableFit(Player player, string exactPosition)
@@ -44,10 +46,37 @@ public static class PositionCompatibilityService
         return GetCompatibilityScore(player, exactPosition) > Impossible;
     }
 
-    private static int GetAdjacentRoleScore(Player player, string slot)
+    public static bool CanPlayPosition(Player player, string exactPosition)
     {
-        var positions = new[] { player.PreferredPosition }
-            .Concat(player.SecondaryPositions)
+        var slot = PositionSuitabilityService.NormalizeExactPosition(exactPosition);
+        return !string.IsNullOrWhiteSpace(slot) &&
+            PositionSuitabilityService.GetNaturalExactPositions(player).Contains(slot, StringComparer.OrdinalIgnoreCase);
+    }
+
+    public static bool CanOccupySlot(Player player, string exactPosition, bool allowOutOfPosition = true)
+    {
+        var slot = PositionSuitabilityService.NormalizeExactPosition(exactPosition);
+        if (string.IsNullOrWhiteSpace(slot))
+        {
+            return allowOutOfPosition;
+        }
+
+        if (slot == "GK")
+        {
+            return PositionSuitabilityService.IsGoalkeeperCapable(player);
+        }
+
+        if (PositionSuitabilityService.IsGoalkeeperCapable(player))
+        {
+            return false;
+        }
+
+        return allowOutOfPosition || GetCompatibilityScore(player, slot) > Impossible;
+    }
+
+    private static int GetAdjacentRoleScore(IEnumerable<string> naturalPositions, string slot)
+    {
+        var positions = naturalPositions
             .Where(position => !string.IsNullOrWhiteSpace(position))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
