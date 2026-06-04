@@ -40,6 +40,7 @@ public class SeasonAwardsService
             SelectedClubPosition = selectedClubPosition,
             SelectedClubOutcome = GetOutcomeLabel(selectedClubPosition, sortedTable.Count),
             FinalTable = CreateFinalTableRows(sortedTable),
+            CompetitionResults = CreateCompetitionResults(league, selectedTeam),
             PlayerStats = archivedStats,
             Awards = CreateAwards(league, archivedStats),
             Highlights = CreateHighlights(league, sortedTable, archivedStats)
@@ -85,6 +86,19 @@ public class SeasonAwardsService
         IReadOnlyList<ArchivedPlayerStatRow> stats)
     {
         var highlights = new List<SeasonHighlight>();
+        highlights.AddRange(CreateCompetitionResults(league, league.Teams.FirstOrDefault() ?? new Team())
+            .Where(result => result.Competition != CompetitionType.PremierLeague)
+            .Select(result => new SeasonHighlight
+            {
+                Icon = CompetitionDisplayCode(result.Competition),
+                Title = result.CompetitionName,
+                PrimaryText = string.IsNullOrWhiteSpace(result.WinnerTeamName)
+                    ? "No winner recorded."
+                    : $"{result.WinnerTeamName} won the competition.",
+                SecondaryText = string.IsNullOrWhiteSpace(result.RunnerUpTeamName)
+                    ? result.SelectedClubResult
+                    : $"Runner-up: {result.RunnerUpTeamName}. {result.SelectedClubResult}"
+            }));
         var playedMatches = league.Fixtures
             .Where(fixture => fixture.IsPlayed && fixture.Result is not null)
             .Select(fixture => fixture.Result!)
@@ -231,6 +245,81 @@ public class SeasonAwardsService
             .OrderByDescending(stat => stat.AverageRating)
             .ThenByDescending(stat => stat.Goals + stat.Assists)
             .ToList();
+    }
+
+    private static List<ArchivedCompetitionResult> CreateCompetitionResults(League league, Team selectedTeam)
+    {
+        return Enum.GetValues<CompetitionType>()
+            .Select(competition =>
+            {
+                var state = league.CompetitionStates.FirstOrDefault(state => state.Competition == competition);
+                var selectedResult = competition == CompetitionType.PremierLeague
+                    ? GetOutcomeLabel(GetPosition(new LeagueTableService().SortTable(league.Table), selectedTeam.Name), league.Table.Count)
+                    : CreateSelectedCompetitionResult(league, competition, selectedTeam.Name);
+
+                return new ArchivedCompetitionResult
+                {
+                    Competition = competition,
+                    CompetitionName = CompetitionNames.GetDisplayName(competition),
+                    WinnerTeamName = competition == CompetitionType.PremierLeague
+                        ? new LeagueTableService().SortTable(league.Table).FirstOrDefault()?.TeamName ?? string.Empty
+                        : state?.WinnerTeamName ?? string.Empty,
+                    RunnerUpTeamName = competition == CompetitionType.PremierLeague
+                        ? new LeagueTableService().SortTable(league.Table).Skip(1).FirstOrDefault()?.TeamName ?? string.Empty
+                        : state?.RunnerUpTeamName ?? string.Empty,
+                    SelectedClubResult = selectedResult
+                };
+            })
+            .ToList();
+    }
+
+    private static string CreateSelectedCompetitionResult(League league, CompetitionType competition, string selectedTeamName)
+    {
+        var fixtures = league.Fixtures
+            .Where(fixture => fixture.Competition == competition &&
+                (fixture.HomeTeam.Name.Equals(selectedTeamName, StringComparison.OrdinalIgnoreCase) ||
+                fixture.AwayTeam.Name.Equals(selectedTeamName, StringComparison.OrdinalIgnoreCase)))
+            .ToList();
+        if (fixtures.Count == 0)
+        {
+            return "Did not participate.";
+        }
+
+        var eliminatedFixture = fixtures
+            .Where(fixture => fixture.IsKnockout &&
+                fixture.LosingTeamName.Equals(selectedTeamName, StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(GetFixtureCalendarRound)
+            .FirstOrDefault();
+        if (eliminatedFixture is not null)
+        {
+            return $"Eliminated in the {eliminatedFixture.RoundName}.";
+        }
+
+        var wonFinal = fixtures.Any(fixture => fixture.RoundName.Contains("Final", StringComparison.OrdinalIgnoreCase) &&
+            fixture.WinningTeamName.Equals(selectedTeamName, StringComparison.OrdinalIgnoreCase));
+        if (wonFinal)
+        {
+            return "Champions.";
+        }
+
+        return "Campaign complete.";
+    }
+
+    private static int GetFixtureCalendarRound(Fixture fixture)
+    {
+        return fixture.CalendarRound > 0 ? fixture.CalendarRound : fixture.RoundNumber;
+    }
+
+    private static string CompetitionDisplayCode(CompetitionType competition)
+    {
+        return competition switch
+        {
+            CompetitionType.PremierLeague => "PL",
+            CompetitionType.FACup => "FA",
+            CompetitionType.LeagueCup => "LC",
+            CompetitionType.ChampionsLeague => "UCL",
+            _ => "CUP"
+        };
     }
 
     private static List<BestXiPlayer> CreateBestXi(League league, IReadOnlyList<ArchivedPlayerStatRow> stats)

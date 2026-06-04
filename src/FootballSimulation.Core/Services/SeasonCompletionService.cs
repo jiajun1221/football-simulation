@@ -20,7 +20,8 @@ public class SeasonCompletionService
 
         return league.Fixtures
             .Where(fixture => !fixture.IsPlayed && IsTeamInFixture(fixture, selectedTeam))
-            .OrderBy(fixture => fixture.RoundNumber)
+            .OrderBy(GetFixtureCalendarRound)
+            .ThenBy(fixture => fixture.Competition)
             .FirstOrDefault();
     }
 
@@ -30,5 +31,10 @@ public class SeasonCompletionService
             fixture.AwayTeam == team ||
             fixture.HomeTeam.Name.Equals(team.Name, StringComparison.OrdinalIgnoreCase) ||
             fixture.AwayTeam.Name.Equals(team.Name, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static int GetFixtureCalendarRound(Fixture fixture)
+    {
+        return fixture.CalendarRound > 0 ? fixture.CalendarRound : fixture.RoundNumber;
     }
 }

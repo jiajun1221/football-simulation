@@ -70,7 +70,10 @@ public class LeagueDataServiceTests
         Assert.Equal(definition.Name, league.Name);
         Assert.Equal(definition.Season, league.Season);
         Assert.Equal(teams.Count, league.Table.Count);
-        Assert.Equal(teams.Count * (teams.Count - 1), league.Fixtures.Count);
+        Assert.Equal(teams.Count * (teams.Count - 1), league.Fixtures.Count(fixture => fixture.Competition == CompetitionType.PremierLeague));
+        Assert.Contains(league.Fixtures, fixture => fixture.Competition == CompetitionType.FACup);
+        Assert.Contains(league.Fixtures, fixture => fixture.Competition == CompetitionType.LeagueCup);
+        Assert.Contains(league.Fixtures, fixture => fixture.Competition == CompetitionType.ChampionsLeague);
     }
 
     [Theory]

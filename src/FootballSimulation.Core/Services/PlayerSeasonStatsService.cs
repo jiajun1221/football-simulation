@@ -32,6 +32,52 @@ public class PlayerSeasonStatsService
     public void RebuildLeagueSeasonStats(League league)
     {
         league.PlayerStats = RebuildSeasonStats(league);
+        league.PlayerCompetitionStats = RebuildCompetitionStats(league);
+    }
+
+    public List<PlayerCompetitionStats> RebuildCompetitionStats(League league)
+    {
+        ArgumentNullException.ThrowIfNull(league);
+
+        return Enum.GetValues<CompetitionType>()
+            .SelectMany(competition => RebuildSeasonStats(league, competition)
+                .Select(stat => new PlayerCompetitionStats
+                {
+                    Competition = competition,
+                    PlayerId = stat.PlayerId,
+                    PlayerName = stat.PlayerName,
+                    TeamId = stat.TeamId,
+                    TeamName = stat.TeamName,
+                    Position = stat.Position,
+                    ExactPosition = stat.ExactPosition,
+                    Appearances = stat.Appearances,
+                    Starts = stat.Starts,
+                    Goals = stat.Goals,
+                    Assists = stat.Assists,
+                    Saves = stat.Saves,
+                    GoalsConceded = stat.GoalsConceded,
+                    CleanSheets = stat.CleanSheets,
+                    YellowCards = stat.YellowCards,
+                    RedCards = stat.RedCards,
+                    AverageRating = stat.AverageRating,
+                    MinutesPlayed = stat.MinutesPlayed
+                }))
+            .ToList();
+    }
+
+    private List<PlayerSeasonStats> RebuildSeasonStats(League league, CompetitionType competition)
+    {
+        var filteredLeague = new League
+        {
+            LeagueId = league.LeagueId,
+            Name = league.Name,
+            Season = league.Season,
+            Teams = league.Teams,
+            Fixtures = league.Fixtures.Where(fixture => fixture.Competition == competition).ToList(),
+            Table = league.Table
+        };
+
+        return RebuildSeasonStats(filteredLeague);
     }
 
     private static void ApplyMatch(

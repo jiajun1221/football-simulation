@@ -445,7 +445,7 @@ public partial class MatchLiveView : UserControl
                     _state.TransferMarket,
                     _state.League,
                     _state.SelectedTeam,
-                    _state.CurrentFixture.RoundNumber);
+                    GetFixtureCalendarRound(_state.CurrentFixture));
             }
 
             _fixtureCompleted = true;
@@ -2546,11 +2546,27 @@ public partial class MatchLiveView : UserControl
             string.Equals(match.HomeTeam.Name, selectedTeam.Name, StringComparison.OrdinalIgnoreCase);
         var homeAwayText = isSelectedTeamHome ? "Home" : "Away";
         var venue = TeamVenueService.GetDisplayVenue(match.HomeTeam);
+        var fixture = _state.CurrentFixture;
+        var competitionText = fixture is null
+            ? string.Empty
+            : $"{CompetitionDisplayService.GetName(fixture.Competition)} - {GetFixtureRoundText(fixture)} - ";
 
-        VenueTextBlock.Text = $"Venue: {venue} ({homeAwayText})";
+        VenueTextBlock.Text = $"{competitionText}Venue: {venue} ({homeAwayText})";
         VenueTextBlock.ToolTip = isSelectedTeamHome
             ? $"{selectedTeam?.Name ?? match.HomeTeam.Name} are playing at home."
             : $"{selectedTeam?.Name ?? match.AwayTeam.Name} are away at {venue}.";
+    }
+
+    private static string GetFixtureRoundText(Fixture fixture)
+    {
+        return string.IsNullOrWhiteSpace(fixture.RoundName)
+            ? $"Round {fixture.RoundNumber}"
+            : fixture.RoundName;
+    }
+
+    private static int GetFixtureCalendarRound(Fixture fixture)
+    {
+        return fixture.CalendarRound > 0 ? fixture.CalendarRound : fixture.RoundNumber;
     }
 
     private void InsertFeedItemAtTop(MatchFeedItem feedItem)

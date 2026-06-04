@@ -10,6 +10,7 @@ public class SeasonRolloverService
     private readonly ClubFinanceService _clubFinanceService;
     private readonly LeagueTableService _leagueTableService;
     private readonly LeagueScheduleService _leagueScheduleService;
+    private readonly SeasonCalendarService _seasonCalendarService = new();
 
     public SeasonRolloverService()
         : this(
@@ -72,8 +73,10 @@ public class SeasonRolloverService
 
         league.Season = nextSeason;
         league.Table = _leagueTableService.CreateTable(league.Teams);
-        league.Fixtures = _leagueScheduleService.GenerateFixtures(league.Teams);
+        league.Fixtures = _seasonCalendarService.GenerateSeasonFixtures(league.Teams, nextSeason);
         league.PlayerStats = [];
+        league.PlayerCompetitionStats = [];
+        league.CompetitionStates = _seasonCalendarService.CreateInitialCompetitionStates(league.Teams);
 
         ApplyOffseasonPlayerReset(league.Teams);
         UpdateTransferMarket(league, transferMarketState, promotedClubs);

@@ -386,7 +386,8 @@
                     <ColumnDefinition Width="1.05*" />
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Row="0"
+                <TextBlock x:Name="ResultHeaderTextBlock"
+                           Grid.Row="0"
                            Grid.Column="3"
                            Text="FULL TIME"
                            Foreground="#90A4BE"

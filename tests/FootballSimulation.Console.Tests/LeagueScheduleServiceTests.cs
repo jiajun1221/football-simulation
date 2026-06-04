@@ -1,3 +1,4 @@
+using FootballSimulation.Models;
 using FootballSimulation.Services;
 
 namespace FootballSimulation.Console.Tests;
@@ -15,13 +16,16 @@ public class LeagueScheduleServiceTests
         var dataService = new LeagueDataService();
         var definition = dataService.GetLeagueDefinition(leagueId);
         var league = new GameSessionService().CreateLeague(definition, dataService.LoadTeams(definition));
+        var leagueFixtures = league.Fixtures
+            .Where(fixture => fixture.Competition == CompetitionType.PremierLeague)
+            .ToList();
 
-        Assert.Equal(expectedRounds, league.Fixtures.Max(fixture => fixture.RoundNumber));
-        Assert.Equal(league.Teams.Count * (league.Teams.Count - 1), league.Fixtures.Count);
+        Assert.Equal(expectedRounds, leagueFixtures.Max(fixture => fixture.RoundNumber));
+        Assert.Equal(league.Teams.Count * (league.Teams.Count - 1), leagueFixtures.Count);
 
-        foreach (var firstLegFixture in league.Fixtures.Where(fixture => fixture.RoundNumber <= league.Teams.Count - 1))
+        foreach (var firstLegFixture in leagueFixtures.Where(fixture => fixture.RoundNumber <= league.Teams.Count - 1))
         {
-            Assert.Contains(league.Fixtures, reverseFixture =>
+            Assert.Contains(leagueFixtures, reverseFixture =>
                 reverseFixture.RoundNumber == firstLegFixture.RoundNumber + league.Teams.Count - 1 &&
                 reverseFixture.HomeTeam == firstLegFixture.AwayTeam &&
                 reverseFixture.AwayTeam == firstLegFixture.HomeTeam);

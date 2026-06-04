@@ -6,7 +6,7 @@ namespace FootballSimulation.Services;
 
 public class SaveGameService
 {
-    public const int CurrentSaveVersion = 3;
+    public const int CurrentSaveVersion = 4;
     public const int MaxSaveSlots = 3;
 
     private const string SaveFolderName = "WPFFootballSimulator";
@@ -118,6 +118,10 @@ public class SaveGameService
             PlayerStats = league.PlayerStats.Count > 0
                 ? league.PlayerStats
                 : new PlayerSeasonStatsService().RebuildSeasonStats(league),
+            PlayerCompetitionStats = league.PlayerCompetitionStats.Count > 0
+                ? league.PlayerCompetitionStats
+                : new PlayerSeasonStatsService().RebuildCompetitionStats(league),
+            CompetitionStates = league.CompetitionStates,
             SeasonHistory = league.SeasonHistory,
             ClubMatchSetups = CreateClubMatchSetups(league.Teams),
             TransferMarketState = transferMarketState ?? new TransferMarketState()
@@ -156,6 +160,22 @@ public class SaveGameService
                     Fixtures = data.Fixtures,
                     Table = data.LeagueState.Table
                 }),
+            PlayerCompetitionStats = data.PlayerCompetitionStats.Count > 0
+                ? data.PlayerCompetitionStats
+                : new PlayerSeasonStatsService().RebuildCompetitionStats(new League
+                {
+                    LeagueId = string.IsNullOrWhiteSpace(data.LeagueState.LeagueId)
+                        ? string.IsNullOrWhiteSpace(data.LeagueId) ? LeagueDataService.DefaultLeagueId : data.LeagueId
+                        : data.LeagueState.LeagueId,
+                    Name = string.IsNullOrWhiteSpace(data.LeagueState.Name)
+                        ? GameSessionService.PremierLeagueName
+                        : data.LeagueState.Name,
+                    Season = data.LeagueState.Season,
+                    Teams = data.Teams,
+                    Fixtures = data.Fixtures,
+                    Table = data.LeagueState.Table
+                }),
+            CompetitionStates = data.CompetitionStates ?? [],
             SeasonHistory = data.SeasonHistory ?? []
         };
     }
@@ -249,17 +269,23 @@ public class SaveGameService
     {
         var nextFixture = league.Fixtures
             .Where(fixture => !fixture.IsPlayed && IsTeamInFixture(fixture, selectedTeam))
-            .OrderBy(fixture => fixture.RoundNumber)
+            .OrderBy(GetFixtureCalendarRound)
+            .ThenBy(fixture => fixture.Competition)
             .FirstOrDefault();
 
         if (nextFixture is not null)
         {
-            return nextFixture.RoundNumber;
+            return GetFixtureCalendarRound(nextFixture);
         }
 
         return league.Fixtures.Count == 0
             ? 1
-            : league.Fixtures.Max(fixture => fixture.RoundNumber);
+            : league.Fixtures.Max(GetFixtureCalendarRound);
+    }
+
+    private static int GetFixtureCalendarRound(Fixture fixture)
+    {
+        return fixture.CalendarRound > 0 ? fixture.CalendarRound : fixture.RoundNumber;
     }
 
     private static bool IsTeamInFixture(Fixture fixture, Team team)
@@ -272,7 +298,8 @@ public class SaveGameService
     {
         return fixtures
             .Where(fixture => fixture.IsPlayed && fixture.Result is not null)
-            .OrderBy(fixture => fixture.RoundNumber)
+            .OrderBy(GetFixtureCalendarRound)
+            .ThenBy(fixture => fixture.Competition)
             .Select(fixture => fixture.Result!)
             .ToList();
     }
@@ -292,6 +319,8 @@ public class SaveGameService
         data.Fixtures ??= [];
         data.MatchHistory ??= [];
         data.PlayerStats ??= [];
+        data.PlayerCompetitionStats ??= [];
+        data.CompetitionStates ??= [];
         data.ClubMatchSetups ??= [];
         data.TransferMarketState ??= new TransferMarketState();
 
@@ -321,8 +350,11 @@ public class SaveGameService
 
         foreach (var fixture in data.Fixtures)
         {
+            EnsureFixtureMetadata(fixture);
             fixture.HomeTeam = GetCanonicalTeam(teamsByName, fixture.HomeTeam);
             fixture.AwayTeam = GetCanonicalTeam(teamsByName, fixture.AwayTeam);
+            ApplyMissingFixtureTeamData(fixture.HomeTeam);
+            ApplyMissingFixtureTeamData(fixture.AwayTeam);
 
             if (fixture.Result is not null)
             {
@@ -331,6 +363,7 @@ public class SaveGameService
         }
 
         EnsureCompleteDoubleRoundRobinFixtures(data, teamsByName);
+        EnsureCompetitionStates(data);
 
         foreach (var match in data.MatchHistory)
         {
@@ -339,6 +372,68 @@ public class SaveGameService
 
         RehydrateTransferMarketReferences(data);
         data.MatchHistory = CreateMatchHistory(data.Fixtures);
+    }
+
+    private static void EnsureFixtureMetadata(Fixture fixture)
+    {
+        if (string.IsNullOrWhiteSpace(fixture.FixtureId))
+        {
+            fixture.FixtureId = Guid.NewGuid().ToString("N");
+        }
+
+        if (fixture.CalendarRound <= 0)
+        {
+            fixture.CalendarRound = fixture.RoundNumber;
+        }
+
+        if (fixture.RoundNumber <= 0)
+        {
+            fixture.RoundNumber = fixture.CalendarRound;
+        }
+
+        if (fixture.Competition == CompetitionType.PremierLeague)
+        {
+            fixture.AffectsLeagueTable = true;
+            fixture.RoundName = string.IsNullOrWhiteSpace(fixture.RoundName)
+                ? $"Round {fixture.RoundNumber}"
+                : fixture.RoundName;
+        }
+        else
+        {
+            fixture.AffectsLeagueTable = false;
+            fixture.RoundName = string.IsNullOrWhiteSpace(fixture.RoundName)
+                ? CompetitionNames.GetDisplayName(fixture.Competition)
+                : fixture.RoundName;
+        }
+
+        if (string.IsNullOrWhiteSpace(fixture.Venue) && fixture.HomeTeam is not null)
+        {
+            fixture.Venue = !string.IsNullOrWhiteSpace(fixture.HomeTeam.StadiumName)
+                ? fixture.HomeTeam.StadiumName
+                : !string.IsNullOrWhiteSpace(fixture.HomeTeam.Venue)
+                    ? fixture.HomeTeam.Venue
+                    : $"{fixture.HomeTeam.Name} Stadium";
+        }
+    }
+
+    private static void EnsureCompetitionStates(SaveGameData data)
+    {
+        if (data.CompetitionStates.Count > 0)
+        {
+            return;
+        }
+
+        data.CompetitionStates = new SeasonCalendarService().CreateInitialCompetitionStates(data.Teams);
+    }
+
+    private static void ApplyMissingFixtureTeamData(Team team)
+    {
+        foreach (var player in team.Players.Concat(team.Substitutes))
+        {
+            PlayerAttributeService.ApplyMissingAttributes(player);
+        }
+
+        _ = LineupValidationService.RepairGoalkeeperSlot(team);
     }
 
     private static void EnsureCompleteDoubleRoundRobinFixtures(
@@ -364,6 +459,7 @@ public class SaveGameService
         var generatedFixtures = new LeagueScheduleService().GenerateFixtures(data.Teams);
         foreach (var generatedFixture in generatedFixtures)
         {
+            EnsureFixtureMetadata(generatedFixture);
             generatedFixture.HomeTeam = GetCanonicalTeam(teamsByName, generatedFixture.HomeTeam);
             generatedFixture.AwayTeam = GetCanonicalTeam(teamsByName, generatedFixture.AwayTeam);
             if (!existingKeys.Add(CreateFixtureKey(generatedFixture)))
@@ -375,7 +471,8 @@ public class SaveGameService
         }
 
         data.Fixtures = data.Fixtures
-            .OrderBy(fixture => fixture.RoundNumber)
+            .OrderBy(GetFixtureCalendarRound)
+            .ThenBy(fixture => fixture.Competition)
             .ThenBy(fixture => fixture.HomeTeam.Name)
             .ThenBy(fixture => fixture.AwayTeam.Name)
             .ToList();

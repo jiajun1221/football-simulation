@@ -364,7 +364,7 @@ public class TransferMarketServiceTests
 
         service.BindActiveLeague(state, league);
 
-        Assert.Equal("GB", legacyPlayer.NationalityCode);
+        Assert.Equal("GB-ENG", legacyPlayer.NationalityCode);
         Assert.Equal("England", legacyPlayer.NationalityName);
         Assert.Equal("/Assets/Flags/england.png", legacyPlayer.FlagImagePath);
     }

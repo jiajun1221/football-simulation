@@ -10,10 +10,20 @@ public class SeasonArchive
     public int SelectedClubPosition { get; set; }
     public string SelectedClubOutcome { get; set; } = string.Empty;
     public List<ArchivedLeagueTableRow> FinalTable { get; set; } = [];
+    public List<ArchivedCompetitionResult> CompetitionResults { get; set; } = [];
     public List<ArchivedPlayerStatRow> PlayerStats { get; set; } = [];
     public SeasonAwards Awards { get; set; } = new();
     public List<SeasonHighlight> Highlights { get; set; } = [];
     public BudgetRolloverSummary BudgetSummary { get; set; } = new();
+}
+
+public class ArchivedCompetitionResult
+{
+    public CompetitionType Competition { get; set; }
+    public string CompetitionName { get; set; } = string.Empty;
+    public string WinnerTeamName { get; set; } = string.Empty;
+    public string RunnerUpTeamName { get; set; } = string.Empty;
+    public string SelectedClubResult { get; set; } = string.Empty;
 }
 
 public class ArchivedLeagueTableRow

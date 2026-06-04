@@ -8,6 +8,8 @@ public class LeagueEngine
     private readonly MatchEngine _matchEngine;
     private readonly LeagueScheduleService _scheduleService;
     private readonly LeagueTableService _tableService;
+    private readonly SeasonCalendarService _seasonCalendarService = new();
+    private readonly CompetitionProgressionService _competitionProgressionService = new();
     private readonly PlayerFormStatusService _playerFormStatusService;
     private readonly PlayerSeasonStatsService _playerSeasonStatsService = new();
     private readonly InjuryRiskService _injuryRiskService = new();
@@ -59,8 +61,9 @@ public class LeagueEngine
             Name = leagueName,
             Season = season,
             Teams = teams,
-            Fixtures = _scheduleService.GenerateFixtures(teams),
-            Table = _tableService.CreateTable(teams)
+            Fixtures = _seasonCalendarService.GenerateSeasonFixtures(teams, season),
+            Table = _tableService.CreateTable(teams),
+            CompetitionStates = _seasonCalendarService.CreateInitialCompetitionStates(teams)
         };
     }
 
@@ -86,12 +89,7 @@ public class LeagueEngine
         _injuryRiskService.ApplyPostMatchLoad(result);
         _playerFormStatusService.UpdateMatchPlayerFormStatuses(result);
 
-        fixture.Result = result;
-        fixture.IsPlayed = true;
-
-        _tableService.ApplyMatchResult(league.Table, result);
-        league.Table = _tableService.SortTable(league.Table);
-        _playerSeasonStatsService.RebuildLeagueSeasonStats(league);
+        CompleteFixtureProgression(league, fixture, result, matchSeed);
 
         return result;
     }
@@ -150,12 +148,7 @@ public class LeagueEngine
         _injuryRiskService.ApplyPostMatchLoad(result);
         _playerFormStatusService.UpdateMatchPlayerFormStatuses(result);
 
-        fixture.Result = result;
-        fixture.IsPlayed = true;
-
-        _tableService.ApplyMatchResult(league.Table, result);
-        league.Table = _tableService.SortTable(league.Table);
-        _playerSeasonStatsService.RebuildLeagueSeasonStats(league);
+        CompleteFixtureProgression(league, fixture, result, matchSeed);
 
         return result;
     }
@@ -164,21 +157,19 @@ public class LeagueEngine
     {
         ValidateFixtureIsPlayable(league, fixture);
 
-        fixture.Result = match;
-        fixture.IsPlayed = true;
         _injuryRiskService.ApplyPostMatchLoad(match);
         _playerFormStatusService.UpdateMatchPlayerFormStatuses(match);
 
-        _tableService.ApplyMatchResult(league.Table, match);
-        league.Table = _tableService.SortTable(league.Table);
-        _playerSeasonStatsService.RebuildLeagueSeasonStats(league);
+        CompleteFixtureProgression(league, fixture, match);
     }
 
     public List<Match> SimulateRemainingFixturesInRound(League league, int roundNumber, int? seed = null, MatchSimulationOptions? options = null)
     {
         var results = new List<Match>();
         var roundFixtures = league.Fixtures
-            .Where(fixture => fixture.RoundNumber == roundNumber && !fixture.IsPlayed)
+            .Where(fixture => fixture.Competition == CompetitionType.PremierLeague &&
+                fixture.RoundNumber == roundNumber &&
+                !fixture.IsPlayed)
             .ToList();
 
         foreach (var fixture in roundFixtures)
@@ -187,6 +178,30 @@ public class LeagueEngine
         }
 
         return results;
+    }
+
+    public List<Match> SimulateRemainingFixturesForCalendarSlot(League league, int calendarRound, int? seed = null, MatchSimulationOptions? options = null)
+    {
+        var results = new List<Match>();
+        var roundFixtures = league.Fixtures
+            .Where(fixture => GetFixtureCalendarRound(fixture) == calendarRound && !fixture.IsPlayed)
+            .ToList();
+
+        foreach (var fixture in roundFixtures)
+        {
+            results.Add(SimulateFixture(league, fixture, seed, options));
+        }
+
+        return results;
+    }
+
+    private void CompleteFixtureProgression(League league, Fixture fixture, Match result, int? seed = null)
+    {
+        _competitionProgressionService.EnsureFixtureMetadata(fixture);
+        fixture.Result = result;
+        fixture.IsPlayed = true;
+        _competitionProgressionService.ProcessCompletedFixture(league, fixture, seed);
+        _playerSeasonStatsService.RebuildLeagueSeasonStats(league);
     }
 
     private static void ValidateFixtureIsPlayable(League league, Fixture fixture)
@@ -206,8 +221,8 @@ public class LeagueEngine
     {
         if (options.EnableInjuries)
         {
-            _ = _injuryRiskService.TryCreatePreparationInjury(fixture.HomeTeam, fixture.RoundNumber, random);
-            _ = _injuryRiskService.TryCreatePreparationInjury(fixture.AwayTeam, fixture.RoundNumber, random);
+            _ = _injuryRiskService.TryCreatePreparationInjury(fixture.HomeTeam, GetFixtureCalendarRound(fixture), random);
+            _ = _injuryRiskService.TryCreatePreparationInjury(fixture.AwayTeam, GetFixtureCalendarRound(fixture), random);
         }
 
         if (!IsHumanControlled(fixture.HomeTeam, options))
@@ -240,5 +255,10 @@ public class LeagueEngine
         return matchSeed.HasValue
             ? new Random(unchecked(matchSeed.Value * 397 ^ 0x2F6E2B1))
             : Random.Shared;
+    }
+
+    private static int GetFixtureCalendarRound(Fixture fixture)
+    {
+        return fixture.CalendarRound > 0 ? fixture.CalendarRound : fixture.RoundNumber;
     }
 }

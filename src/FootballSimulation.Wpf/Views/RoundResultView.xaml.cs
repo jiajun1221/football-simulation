@@ -57,9 +57,11 @@ public partial class RoundResultView : UserControl
             return;
         }
 
-        TitleTextBlock.Text = $"Round {_state.CurrentFixture.RoundNumber} Results";
+        var currentSlot = GetFixtureCalendarRound(_state.CurrentFixture);
+        TitleTextBlock.Text = $"{CompetitionDisplayService.GetName(_state.CurrentFixture.Competition)} - {GetFixtureRoundText(_state.CurrentFixture)} Results";
         RoundResultsListBox.ItemsSource = _state.League.Fixtures
-            .Where(fixture => fixture.RoundNumber == _state.CurrentFixture.RoundNumber)
+            .Where(fixture => GetFixtureCalendarRound(fixture) == currentSlot)
+            .OrderBy(fixture => fixture.Competition)
             .Select(fixture => CreateRoundResultRow(fixture, _state.SelectedTeam))
             .ToList();
         LeagueTableDataGrid.ItemsSource = CreateLeagueTableRows(_state.League, _state.SelectedTeam);
@@ -87,9 +89,7 @@ public partial class RoundResultView : UserControl
             AwayTeamName = fixture.AwayTeam.Name,
             HomeLogoPath = GetClubLogoPath(fixture.HomeTeam.Name),
             AwayLogoPath = GetClubLogoPath(fixture.AwayTeam.Name),
-            ScoreText = fixture.Result is null
-                ? "vs"
-                : $"{fixture.Result.HomeScore} - {fixture.Result.AwayScore}",
+            ScoreText = CreateScoreText(fixture),
             RowBackground = isUserMatch
                 ? ThemeManager.GetBrushHex("TableCurrentClubBackground", "#5A3D12")
                 : ThemeManager.GetBrushHex("AppSecondaryCardBackground", "#111827"),
@@ -124,6 +124,45 @@ public partial class RoundResultView : UserControl
     private string GetClubLogoPath(string clubName)
     {
         return ClubLogoService.GetClubLogoPath(clubName, _state.League?.LeagueId ?? _state.SelectedLeagueId);
+    }
+
+    private static string CreateScoreText(Fixture fixture)
+    {
+        if (fixture.Result is null)
+        {
+            return "vs";
+        }
+
+        var score = $"{fixture.Result.HomeScore} - {fixture.Result.AwayScore}";
+        if (!fixture.IsKnockout || string.IsNullOrWhiteSpace(fixture.WinningTeamName))
+        {
+            return score;
+        }
+
+        if (fixture.PenaltyHomeScore.HasValue && fixture.PenaltyAwayScore.HasValue)
+        {
+            return $"{score} ({fixture.PenaltyHomeScore}-{fixture.PenaltyAwayScore} pens, {fixture.WinningTeamName} advance)";
+        }
+
+        if (fixture.ExtraTimeHomeScore.HasValue && fixture.ExtraTimeAwayScore.HasValue &&
+            (fixture.ExtraTimeHomeScore != fixture.Result.HomeScore || fixture.ExtraTimeAwayScore != fixture.Result.AwayScore))
+        {
+            return $"{fixture.ExtraTimeHomeScore} - {fixture.ExtraTimeAwayScore} AET";
+        }
+
+        return $"{score} ({fixture.WinningTeamName} advance)";
+    }
+
+    private static int GetFixtureCalendarRound(Fixture fixture)
+    {
+        return fixture.CalendarRound > 0 ? fixture.CalendarRound : fixture.RoundNumber;
+    }
+
+    private static string GetFixtureRoundText(Fixture fixture)
+    {
+        return string.IsNullOrWhiteSpace(fixture.RoundName)
+            ? $"Round {fixture.RoundNumber}"
+            : fixture.RoundName;
     }
 
     private static IEnumerable<string> GetLogoCandidatePaths(string clubName)

@@ -68,10 +68,7 @@ public class SeasonRolloverServiceTests
         var teams = dataService.LoadTeams(definition).Take(6).ToList();
         var selectedTeam = teams[0];
         var league = leagueEngine.CreateLeague("premier-league", GameSessionService.PremierLeagueName, "2025-26", teams);
-        foreach (var fixture in league.Fixtures.OrderBy(fixture => fixture.RoundNumber).ToList())
-        {
-            leagueEngine.SimulateFixture(league, fixture, seed: 12);
-        }
+        SimulateAllFixtures(leagueEngine, league);
 
         var transferMarket = new TransferMarketService().CreateInitialState(league);
         var result = new SeasonRolloverService().StartNextSeason(league, selectedTeam, transferMarket);
@@ -96,6 +93,10 @@ public class SeasonRolloverServiceTests
             Assert.Equal(0, row.Points);
         });
         Assert.Empty(result.League.PlayerStats);
+        Assert.Empty(result.League.PlayerCompetitionStats);
+        Assert.Contains(result.League.Fixtures, fixture => fixture.Competition == CompetitionType.FACup);
+        Assert.Contains(result.League.Fixtures, fixture => fixture.Competition == CompetitionType.LeagueCup);
+        Assert.Contains(result.League.Fixtures, fixture => fixture.Competition == CompetitionType.ChampionsLeague);
         Assert.Equal("2026-27", result.TransferMarketState.ActiveSeason);
         Assert.Contains(result.League.Teams, team => team.Name == result.SelectedTeam.Name);
         Assert.True(result.Archive.BudgetSummary.NewBudget > 0);
@@ -154,5 +155,21 @@ public class SeasonRolloverServiceTests
         {
             Directory.Delete(path, recursive: true);
         }
+    }
+
+    private static void SimulateAllFixtures(LeagueEngine leagueEngine, League league)
+    {
+        var safety = 0;
+        while (league.Fixtures.Any(fixture => !fixture.IsPlayed) && safety++ < 500)
+        {
+            var fixture = league.Fixtures
+                .Where(fixture => !fixture.IsPlayed)
+                .OrderBy(fixture => fixture.CalendarRound > 0 ? fixture.CalendarRound : fixture.RoundNumber)
+                .ThenBy(fixture => fixture.Competition)
+                .First();
+            leagueEngine.SimulateFixture(league, fixture, seed: 12 + safety);
+        }
+
+        Assert.DoesNotContain(league.Fixtures, fixture => !fixture.IsPlayed);
     }
 }

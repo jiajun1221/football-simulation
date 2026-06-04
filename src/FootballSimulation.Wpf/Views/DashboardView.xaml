@@ -451,11 +451,23 @@
                     </Border>
 
                     <StackPanel Margin="0,0,0,10">
-                        <TextBlock Text="Upcoming Fixtures"
-                                   FontSize="15"
-                                   FontWeight="Bold"
-                                   Foreground="{DynamicResource AppTextBrush}"
-                                   Margin="0,0,0,6" />
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Upcoming Fixtures"
+                                       FontSize="15"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource AppTextBrush}"
+                                       VerticalAlignment="Center" />
+                            <ComboBox x:Name="FixtureFilterComboBox"
+                                      Grid.Column="1"
+                                      Width="132"
+                                      Height="28"
+                                      FontSize="11"
+                                      SelectionChanged="FixtureFilterComboBox_SelectionChanged" />
+                        </Grid>
                         <ItemsControl x:Name="UpcomingFixturesItemsControl"
                                       ItemTemplate="{StaticResource FixtureCardTemplate}"
                                       ItemContainerStyle="{StaticResource FixtureCardItemStyle}"

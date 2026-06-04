@@ -1,4 +1,5 @@
 using FootballSimulation.Data;
+using FootballSimulation.Models;
 using FootballSimulation.Services;
 
 namespace FootballSimulation.Console.Tests;
@@ -47,15 +48,16 @@ public class GameSessionServiceTests
 
         Assert.True(fixture.IsPlayed);
         Assert.Same(match, fixture.Result);
-        Assert.All(league.Fixtures.Where(roundFixture => roundFixture.RoundNumber == fixture.RoundNumber), roundFixture =>
+        var slotFixtures = league.Fixtures.Where(roundFixture => GetFixtureCalendarRound(roundFixture) == GetFixtureCalendarRound(fixture)).ToList();
+        Assert.All(slotFixtures, roundFixture =>
         {
             Assert.True(roundFixture.IsPlayed);
             Assert.NotNull(roundFixture.Result);
         });
-        Assert.Equal(4, league.Table.Sum(entry => entry.Played));
+        Assert.Equal(slotFixtures.Count(roundFixture => roundFixture.Competition == CompetitionType.PremierLeague) * 2, league.Table.Sum(entry => entry.Played));
         Assert.Equal(
-            league.Fixtures
-                .Where(roundFixture => roundFixture.RoundNumber == fixture.RoundNumber)
+            slotFixtures
+                .Where(roundFixture => roundFixture.Competition == CompetitionType.PremierLeague)
                 .Sum(roundFixture => roundFixture.Result!.HomeScore + roundFixture.Result.AwayScore),
             league.Table.Sum(entry => entry.GoalsFor));
     }
@@ -76,16 +78,22 @@ public class GameSessionServiceTests
 
         Assert.True(fixture.IsPlayed);
         Assert.Same(finalResult, fixture.Result);
-        Assert.All(league.Fixtures.Where(roundFixture => roundFixture.RoundNumber == fixture.RoundNumber), roundFixture =>
+        var slotFixtures = league.Fixtures.Where(roundFixture => GetFixtureCalendarRound(roundFixture) == GetFixtureCalendarRound(fixture)).ToList();
+        Assert.All(slotFixtures, roundFixture =>
         {
             Assert.True(roundFixture.IsPlayed);
             Assert.NotNull(roundFixture.Result);
         });
-        Assert.Equal(4, league.Table.Sum(entry => entry.Played));
+        Assert.Equal(slotFixtures.Count(roundFixture => roundFixture.Competition == CompetitionType.PremierLeague) * 2, league.Table.Sum(entry => entry.Played));
         Assert.Equal(
-            league.Fixtures
-                .Where(roundFixture => roundFixture.RoundNumber == fixture.RoundNumber)
+            slotFixtures
+                .Where(roundFixture => roundFixture.Competition == CompetitionType.PremierLeague)
                 .Sum(roundFixture => roundFixture.Result!.HomeScore + roundFixture.Result.AwayScore),
             league.Table.Sum(entry => entry.GoalsFor));
+    }
+
+    private static int GetFixtureCalendarRound(Fixture fixture)
+    {
+        return fixture.CalendarRound > 0 ? fixture.CalendarRound : fixture.RoundNumber;
     }
 }

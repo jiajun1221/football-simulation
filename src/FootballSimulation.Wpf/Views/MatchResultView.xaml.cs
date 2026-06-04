@@ -73,6 +73,7 @@ public partial class MatchResultView : UserControl
         AwayPlayersTitleTextBlock.Text = $"{match.AwayTeam.Name} Players";
         HomeTeamLogoImage.Source = CreateLogoSource(match.HomeTeam.Name);
         AwayTeamLogoImage.Source = CreateLogoSource(match.AwayTeam.Name);
+        ResultHeaderTextBlock.Text = CreateResultHeader();
 
         var totalGoals = match.HomeScore + match.AwayScore;
         HomeScorersContentControl.Content = CreateGoalSummaryPanel(match, match.HomeTeam, totalGoals, summary.ManOfTheMatch);
@@ -98,6 +99,20 @@ public partial class MatchResultView : UserControl
     private void NextButton_Click(object sender, RoutedEventArgs e)
     {
         _navigate(new RoundResultView(_state, _navigate));
+    }
+
+    private string CreateResultHeader()
+    {
+        var fixture = _state.CurrentFixture;
+        if (fixture is null)
+        {
+            return "FULL TIME";
+        }
+
+        var roundText = string.IsNullOrWhiteSpace(fixture.RoundName)
+            ? $"Round {fixture.RoundNumber}"
+            : fixture.RoundName;
+        return $"FULL TIME - {CompetitionDisplayService.GetName(fixture.Competition)} - {roundText}";
     }
 
     private static ScorerPanel CreateGoalSummaryPanel(Match match, Team team, int totalGoals, PlayerMatchPerformance? manOfTheMatch)

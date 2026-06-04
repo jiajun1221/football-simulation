@@ -56,7 +56,7 @@ public partial class PreMatchView : UserControl
 
         _isLoadingSetup = true;
 
-        FixtureTextBlock.Text = $"{_state.CurrentFixture.HomeTeam.Name} vs {_state.CurrentFixture.AwayTeam.Name}";
+        FixtureTextBlock.Text = $"{CompetitionDisplayService.GetName(_state.CurrentFixture.Competition)} - {GetFixtureRoundText(_state.CurrentFixture)} - {_state.CurrentFixture.HomeTeam.Name} vs {_state.CurrentFixture.AwayTeam.Name}";
         var goalkeeperValidation = ReconcileUnavailablePlayers(_state.SelectedTeam);
         ShowGoalkeeperWarningIfNeeded(goalkeeperValidation);
         LoadFormationSelector(_state.SelectedTeam);
@@ -90,6 +90,13 @@ public partial class PreMatchView : UserControl
         }
 
         AssignFormationPositions();
+    }
+
+    private static string GetFixtureRoundText(Fixture fixture)
+    {
+        return string.IsNullOrWhiteSpace(fixture.RoundName)
+            ? $"Round {fixture.RoundNumber}"
+            : fixture.RoundName;
     }
 
     private LineupValidationResult ReconcileUnavailablePlayers(Team team)

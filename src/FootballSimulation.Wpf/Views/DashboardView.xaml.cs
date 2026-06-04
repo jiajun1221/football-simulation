@@ -19,6 +19,7 @@ public partial class DashboardView : UserControl
     private readonly SaveGameService _saveGameService = new();
     private readonly TransferMarketService _transferMarketService = new();
     private readonly SeasonCompletionService _seasonCompletionService = new();
+    private CompetitionType? _fixtureFilter;
     private const string ClubsAssetPath = "Assets/Clubs";
     private const string DefaultLogoPath = "pack://application:,,,/Assets/Clubs/default.png";
 
@@ -76,6 +77,7 @@ public partial class DashboardView : UserControl
         }
 
         SelectedTeamTextBlock.Text = _state.SelectedTeam.Name;
+        EnsureFixtureFilterOptions();
         SelectedClubLogoImage.Source = CreateImageSource(GetClubLogoPath(_state.SelectedTeam.Name));
         LeagueTableDataGrid.ItemsSource = CreateLeagueTableRows(_state.League, _state.SelectedTeam);
         LoadSelectedClubStats(_state.League, _state.SelectedTeam);
@@ -94,6 +96,39 @@ public partial class DashboardView : UserControl
         UpcomingFixturesItemsControl.ItemsSource = CreateUpcomingFixtureRows(_state.League, _state.SelectedTeam);
         LoadUnavailablePlayers(_state.SelectedTeam);
         RunTransferMarketRoundProcessing();
+    }
+
+    private void EnsureFixtureFilterOptions()
+    {
+        if (FixtureFilterComboBox.ItemsSource is not null)
+        {
+            return;
+        }
+
+        var options = new List<FixtureFilterOption>
+        {
+            new("All", null),
+            new("Premier League", CompetitionType.PremierLeague),
+            new("FA Cup", CompetitionType.FACup),
+            new("League Cup", CompetitionType.LeagueCup),
+            new("Champions League", CompetitionType.ChampionsLeague)
+        };
+        FixtureFilterComboBox.DisplayMemberPath = nameof(FixtureFilterOption.Label);
+        FixtureFilterComboBox.ItemsSource = options;
+        FixtureFilterComboBox.SelectedIndex = 0;
+    }
+
+    private void FixtureFilterComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (FixtureFilterComboBox.SelectedItem is FixtureFilterOption option)
+        {
+            _fixtureFilter = option.Competition;
+        }
+
+        if (_state.League is not null && _state.SelectedTeam is not null)
+        {
+            UpcomingFixturesItemsControl.ItemsSource = CreateUpcomingFixtureRows(_state.League, _state.SelectedTeam);
+        }
     }
 
     private void RunTransferMarketRoundProcessing()
@@ -264,16 +299,14 @@ public partial class DashboardView : UserControl
         var isHome = fixture.HomeTeam == selectedTeam;
         var venue = GetVenueName(fixture.HomeTeam);
 
-        UpcomingRoundTextBlock.Text = $"Round {fixture.RoundNumber}";
+        UpcomingRoundTextBlock.Text = $"{CompetitionDisplayService.GetShortName(fixture.Competition)}{Environment.NewLine}{GetFixtureRoundText(fixture)}";
         UpcomingHomeNameTextBlock.Text = fixture.HomeTeam.Name;
         UpcomingAwayNameTextBlock.Text = fixture.AwayTeam.Name;
         UpcomingHomeLogoImage.Source = CreateImageSource(GetClubLogoPath(fixture.HomeTeam.Name));
         UpcomingAwayLogoImage.Source = CreateImageSource(GetClubLogoPath(fixture.AwayTeam.Name));
-        VenueTextBlock.Text = $"Venue: {venue}";
-        HomeAwayBadgeTextBlock.Text = isHome ? "HOME" : "AWAY";
-        HomeAwayBadge.Background = new SolidColorBrush(isHome
-            ? Color.FromRgb(47, 168, 79)
-            : Color.FromRgb(249, 115, 22));
+        VenueTextBlock.Text = $"{CompetitionDisplayService.GetName(fixture.Competition)} - {GetFixtureRoundText(fixture)} - Venue: {venue}";
+        HomeAwayBadgeTextBlock.Text = $"{CompetitionDisplayService.GetShortName(fixture.Competition)} - {(isHome ? "HOME" : "AWAY")}";
+        HomeAwayBadge.Background = CreateBrush(CompetitionDisplayService.GetColor(fixture.Competition));
         PrepareMatchButton.Content = "Prepare Match";
         PrepareMatchButton.IsEnabled = true;
     }
@@ -374,23 +407,25 @@ public partial class DashboardView : UserControl
         var fixtures = league.Fixtures
             .Where(fixture =>
                 !fixture.IsPlayed &&
-                IsTeamInFixture(fixture, selectedTeam))
-            .OrderBy(fixture => fixture.RoundNumber)
-            .Take(3)
+                IsTeamInFixture(fixture, selectedTeam) &&
+                (_fixtureFilter is null || fixture.Competition == _fixtureFilter))
+            .OrderBy(GetFixtureCalendarRound)
+            .ThenBy(fixture => fixture.Competition)
+            .Take(5)
             .Select(fixture =>
             {
                 var isHome = fixture.HomeTeam == selectedTeam;
                 var opponent = isHome ? fixture.AwayTeam : fixture.HomeTeam;
                 return new UpcomingFixtureRow
                 {
-                    RoundText = $"R{fixture.RoundNumber}",
+                    RoundText = $"{CompetitionDisplayService.GetShortName(fixture.Competition)} {GetFixtureRoundText(fixture)}",
                     HomeAwayText = isHome ? "HOME" : "AWAY",
-                    SummaryText = $"{CreateClubCode(opponent.Name)} {(isHome ? "H" : "A")} R{fixture.RoundNumber}",
+                    SummaryText = $"{CreateClubCode(opponent.Name)} {(isHome ? "H" : "A")} {CompetitionDisplayService.GetShortName(fixture.Competition)}",
                     OpponentShortName = CreateShortClubName(opponent.Name),
                     OpponentName = CreateTwoLineText(opponent.Name),
-                    VenueText = GetVenueName(fixture.HomeTeam),
+                    VenueText = $"{CompetitionDisplayService.GetName(fixture.Competition)} - {GetVenueName(fixture.HomeTeam)}",
                     OpponentLogoPath = GetClubLogoPath(opponent.Name),
-                    HomeAwayBrush = GetHomeAwayBadgeBackground(isHome),
+                    HomeAwayBrush = CompetitionDisplayService.GetColor(fixture.Competition),
                     HomeAwayForeground = GetHomeAwayBadgeForeground(isHome)
                 };
             })
@@ -493,15 +528,34 @@ public partial class DashboardView : UserControl
 
     private static bool IsTeamInFixture(Fixture fixture, Team team)
     {
-        return fixture.HomeTeam == team || fixture.AwayTeam == team;
+        return fixture.HomeTeam.Name.Equals(team.Name, StringComparison.OrdinalIgnoreCase) ||
+            fixture.AwayTeam.Name.Equals(team.Name, StringComparison.OrdinalIgnoreCase);
     }
 
     private static Fixture? FindNextFixtureForTeamOrDefault(League league, Team selectedTeam)
     {
         return league.Fixtures
             .Where(fixture => !fixture.IsPlayed && IsTeamInFixture(fixture, selectedTeam))
-            .OrderBy(fixture => fixture.RoundNumber)
+            .OrderBy(GetFixtureCalendarRound)
+            .ThenBy(fixture => fixture.Competition)
             .FirstOrDefault();
+    }
+
+    private static int GetFixtureCalendarRound(Fixture fixture)
+    {
+        return fixture.CalendarRound > 0 ? fixture.CalendarRound : fixture.RoundNumber;
+    }
+
+    private static string GetFixtureRoundText(Fixture fixture)
+    {
+        return string.IsNullOrWhiteSpace(fixture.RoundName)
+            ? $"Round {fixture.RoundNumber}"
+            : fixture.RoundName;
+    }
+
+    private static SolidColorBrush CreateBrush(string hex)
+    {
+        return (SolidColorBrush)new BrushConverter().ConvertFromString(hex)!;
     }
 
     private static bool IsCurrentMatchForFixture(Match match, Fixture? fixture)
@@ -684,4 +738,6 @@ public partial class DashboardView : UserControl
         public string HomeAwayBrush { get; init; } = "#E1E5EA";
         public string HomeAwayForeground { get; init; } = "#64748B";
     }
+
+    private sealed record FixtureFilterOption(string Label, CompetitionType? Competition);
 }

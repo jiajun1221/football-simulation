@@ -17,6 +17,7 @@ public class SaveGameServiceTests
         var selectedTeam = teams[0];
         var league = leagueEngine.CreateLeague(GameSessionService.PremierLeagueName, teams);
         var fixture = league.Fixtures
+            .Where(leagueFixture => leagueFixture.Competition == CompetitionType.PremierLeague)
             .OrderBy(leagueFixture => leagueFixture.RoundNumber)
             .First(leagueFixture => leagueFixture.HomeTeam == selectedTeam || leagueFixture.AwayTeam == selectedTeam);
 
@@ -39,6 +40,7 @@ public class SaveGameServiceTests
             var loadedLeague = SaveGameService.CreateLeague(loadedData!);
             var loadedSelectedTeam = loadedLeague.Teams.Single(team => team.Name == selectedTeam.Name);
             var loadedFixture = loadedLeague.Fixtures.Single(savedFixture =>
+                savedFixture.Competition == fixture.Competition &&
                 savedFixture.RoundNumber == fixture.RoundNumber &&
                 savedFixture.HomeTeam.Name == fixture.HomeTeam.Name &&
                 savedFixture.AwayTeam.Name == fixture.AwayTeam.Name);
@@ -135,20 +137,25 @@ public class SaveGameServiceTests
         leagueEngine.SimulateFixture(league, playedFixture);
         var saveData = SaveGameService.CreateSaveData(league, selectedTeam);
         saveData.Fixtures = saveData.Fixtures
-            .Where(fixture => fixture.RoundNumber <= league.Teams.Count - 1)
+            .Where(fixture => fixture.Competition == CompetitionType.PremierLeague &&
+                fixture.RoundNumber <= league.Teams.Count - 1)
             .ToList();
 
         var restoredLeague = SaveGameService.CreateLeague(saveData);
 
-        Assert.Equal(38, restoredLeague.Fixtures.Max(fixture => fixture.RoundNumber));
-        Assert.Equal(restoredLeague.Teams.Count * (restoredLeague.Teams.Count - 1), restoredLeague.Fixtures.Count);
+        var restoredLeagueFixtures = restoredLeague.Fixtures
+            .Where(fixture => fixture.Competition == CompetitionType.PremierLeague)
+            .ToList();
+        Assert.Equal(38, restoredLeagueFixtures.Max(fixture => fixture.RoundNumber));
+        Assert.Equal(restoredLeague.Teams.Count * (restoredLeague.Teams.Count - 1), restoredLeagueFixtures.Count);
         var restoredPlayedFixture = restoredLeague.Fixtures.Single(fixture =>
+            fixture.Competition == playedFixture.Competition &&
             fixture.RoundNumber == playedFixture.RoundNumber &&
             fixture.HomeTeam.Name == playedFixture.HomeTeam.Name &&
             fixture.AwayTeam.Name == playedFixture.AwayTeam.Name);
         Assert.True(restoredPlayedFixture.IsPlayed);
         Assert.NotNull(restoredPlayedFixture.Result);
-        Assert.Contains(restoredLeague.Fixtures, fixture =>
+        Assert.Contains(restoredLeagueFixtures, fixture =>
             fixture.RoundNumber == playedFixture.RoundNumber + restoredLeague.Teams.Count - 1 &&
             fixture.HomeTeam.Name == playedFixture.AwayTeam.Name &&
             fixture.AwayTeam.Name == playedFixture.HomeTeam.Name);
@@ -249,7 +256,7 @@ public class SaveGameServiceTests
             Assert.True(slots.Single(slot => slot.SlotNumber == 1).IsEmpty);
             Assert.False(savedSlot.IsEmpty);
             Assert.Equal(selectedTeam.Name, savedSlot.SelectedClubName);
-            Assert.Equal(1, savedSlot.CurrentRound);
+            Assert.Equal(2, savedSlot.CurrentRound);
             Assert.Equal(0, savedSlot.Points);
             Assert.Equal(1, savedSlot.LeaguePosition);
             Assert.NotNull(savedSlot.SavedAt);
