@@ -107,6 +107,32 @@ public class FatigueServiceTests
     }
 
     [Fact]
+    public void AdvanceMatch_HighIntensityAwayTeamDoesNotCollapseBySeventiethMinute()
+    {
+        var team = CreateTeam("Home");
+        var opponent = CreateTeam("Away");
+        team.Tactics.Tempo = 90;
+        team.Tactics.PressingIntensity = 90;
+        opponent.Tactics.Tempo = 90;
+        opponent.Tactics.PressingIntensity = 90;
+        var engine = new MatchEngine();
+        var options = new MatchSimulationOptions
+        {
+            EnableAiSubstitutions = false,
+            EnableDynamicFatigue = true,
+            EnableInjuries = false
+        };
+        var match = engine.CreateLiveMatch(team, opponent, options);
+
+        engine.AdvanceMatch(match, 1, 70, includeFulltime: false, options: options);
+
+        var activeHomeAverage = team.Players.Where(player => player.IsOnPitch).Average(player => player.Stamina);
+        var activeAwayAverage = opponent.Players.Where(player => player.IsOnPitch).Average(player => player.Stamina);
+        Assert.True(activeAwayAverage >= 45, $"Away average stamina was {activeAwayAverage:0.0}%.");
+        Assert.True(activeAwayAverage >= activeHomeAverage - 8, $"Away stamina {activeAwayAverage:0.0}% was too far below home {activeHomeAverage:0.0}%.");
+    }
+
+    [Fact]
     public void LowStaminaReducesPlayerEffectiveness()
     {
         var calculator = new TeamStrengthCalculator();

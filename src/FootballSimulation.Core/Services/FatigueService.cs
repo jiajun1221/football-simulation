@@ -4,7 +4,8 @@ namespace FootballSimulation.Services;
 
 public class FatigueService
 {
-    private const double BaseStaminaLossPerMinute = 0.45;
+    private const double BaseStaminaLossPerMinute = 0.32;
+    private const double MaximumDynamicStaminaLossPerMinute = 0.72;
     private const int MinimumMatchStartRecoveryPoints = 50;
     private const int MaximumMatchStartRecoveryPoints = 60;
 
@@ -21,7 +22,7 @@ public class FatigueService
 
     public void ApplyMinuteFatigue(Team team, Match? match = null)
     {
-        foreach (var player in team.Players.Where(player => player.IsOnPitch && !player.IsSentOff))
+        foreach (var player in team.Players.Where(player => player.IsOnPitch && !player.IsSentOff && !player.IsSuspended && !player.IsInjured))
         {
             var staminaLoss = BaseStaminaLossPerMinute
                 * GetTempoMultiplier(team.Tactics.Tempo)
@@ -32,7 +33,7 @@ public class FatigueService
                 * GetTraitFatigueMultiplier(player)
                 * GetActivityMultiplier(match, team, player);
 
-            player.Stamina = Math.Clamp(player.Stamina - staminaLoss, 0, 100);
+            player.Stamina = Math.Clamp(player.Stamina - Math.Min(staminaLoss, MaximumDynamicStaminaLossPerMinute), 0, 100);
         }
     }
 
@@ -50,10 +51,10 @@ public class FatigueService
     {
         return tempo switch
         {
-            <= 25 => 0.72,
-            < 40 => 0.84,
-            >= 85 => 1.55,
-            > 70 => 1.34,
+            <= 25 => 0.78,
+            < 40 => 0.88,
+            >= 85 => 1.24,
+            > 70 => 1.14,
             _ => 1.00
         };
     }
@@ -62,10 +63,10 @@ public class FatigueService
     {
         return pressing switch
         {
-            <= 25 => 0.62,
-            < 40 => 0.78,
-            >= 85 => 1.85,
-            > 70 => 1.52,
+            <= 25 => 0.72,
+            < 40 => 0.86,
+            >= 85 => 1.36,
+            > 70 => 1.20,
             _ => 1.00
         };
     }
@@ -74,10 +75,10 @@ public class FatigueService
     {
         return position switch
         {
-            Position.Goalkeeper => 1.05,
-            Position.Defender => 1.10,
-            Position.Midfielder => 1.15,
-            Position.Forward => 1.20,
+            Position.Goalkeeper => 0.88,
+            Position.Defender => 1.02,
+            Position.Midfielder => 1.08,
+            Position.Forward => 1.10,
             _ => 1.00
         };
     }
@@ -92,8 +93,8 @@ public class FatigueService
         return PositionSuitabilityService.GetEffectivenessMultiplier(player) switch
         {
             >= 1.0 => 1.00,
-            >= 0.90 => 1.08,
-            _ => 1.18
+            >= 0.90 => 1.04,
+            _ => 1.10
         };
     }
 

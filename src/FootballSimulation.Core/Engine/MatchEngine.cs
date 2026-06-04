@@ -19,6 +19,7 @@ public class MatchEngine
     private readonly DisciplinaryService _disciplinaryService;
     private readonly TacticalImpactCalculator _tacticalImpactCalculator = new();
     private readonly MatchDramaService _matchDramaService = new();
+    private readonly InjuryRiskService _injuryRiskService = new();
     private readonly FatigueService _fatigueService = new();
     private readonly AiManagerService _aiManagerService = new();
     private readonly HashSet<string> _secondWindAppliedPlayerKeys = [];
@@ -319,7 +320,10 @@ public class MatchEngine
                 SetPossession(simulationState, nextPossessionTeam, simulationState.BallState, simulationState.LastFeedEventType);
             }
 
-            if (minute >= 60 && IsSubstitutionStoppageEvent(simulationState.LastFeedEventType))
+            TryAddMinuteInjuryEvent(simulationState, random, minute);
+
+            if ((minute >= 60 || simulationState.LastFeedEventType == EventType.Injury) &&
+                IsSubstitutionStoppageEvent(simulationState.LastFeedEventType))
             {
                 TryApplyAiManagerDecisions(simulationState, random, minute, stoppageType: simulationState.LastFeedEventType);
             }
@@ -349,6 +353,30 @@ public class MatchEngine
                 ApplyMinuteFatigue(awayTeam, simulationState.Match, simulationState.Options);
             }
         }
+    }
+
+    private void TryAddMinuteInjuryEvent(MatchSimulationState simulationState, Random random, int minute)
+    {
+        if (!simulationState.Options.EnableInjuries)
+        {
+            return;
+        }
+
+        var injury = _injuryRiskService.TryCreateMatchInjury(
+            simulationState.Match,
+            minute,
+            simulationState.LastFeedEventType,
+            random);
+        if (injury is null)
+        {
+            return;
+        }
+
+        simulationState.MatchLog.AddEvent(simulationState.EventFactory.CreateInjury(minute, injury.Team, injury.Player, injury.Cause));
+        var performance = GetOrCreatePerformance(simulationState.Match, injury.Team, injury.Player);
+        performance.Injuries++;
+        performance.Rating -= 1.40;
+        SetPossession(simulationState, injury.Team, BallState.SetPiece, EventType.Injury);
     }
 
     private static void AnnounceAddedTimeIfNeeded(MatchSimulationState simulationState, int minute)
@@ -788,6 +816,7 @@ public class MatchEngine
             or EventType.DefensiveStop
             or EventType.WonderGoal
             or EventType.GoalkeeperHeroics
+            or EventType.Injury
             or EventType.CornerKick
             or EventType.SetPieceDanger
             or EventType.LateDrama
@@ -875,6 +904,7 @@ public class MatchEngine
             EventType.GoalkeeperMistake => BallState.Turnover,
             EventType.CornerKick => BallState.CornerPending,
             EventType.SetPieceDanger => BallState.SetPiecePending,
+            EventType.Injury => BallState.SetPiece,
             EventType.Foul or EventType.Offside or EventType.PenaltyDecision or EventType.PenaltyTaker or EventType.Penalty => BallState.SetPiece,
             EventType.TimeWasting => BallState.SetPiece,
             EventType.Turnover => BallState.Turnover,
@@ -922,6 +952,7 @@ public class MatchEngine
             case EventType.DefensiveError:
             case EventType.GoalkeeperHeroics:
             case EventType.GoalkeeperMistake:
+            case EventType.Injury:
             case EventType.Tackle:
             case EventType.Interception:
             case EventType.Pressure:
@@ -1303,6 +1334,7 @@ public class MatchEngine
             Minute = minute,
             WeatherCondition = match.WeatherCondition,
             IsRivalryMatch = match.IsRivalryMatch,
+            EnableInjuries = simulationState.Options.EnableInjuries,
             PreviousEventType = simulationState.LastFeedEventType,
             HomeAttackStrength = strengthSnapshot.HomeAttackStrength,
             AwayAttackStrength = strengthSnapshot.AwayAttackStrength,
@@ -1875,8 +1907,11 @@ public class MatchEngine
         matchLog.AddEvent(eventFactory.CreateFoul(
             minute,
             defendingTeam,
+            attackingTeam,
             defender,
             fouledPlayer,
+            foulContext.Location,
+            foulContext.IsPenalty,
             defender.Traits.Contains(PlayerTrait.DivesIntoTackles) ? PlayerTrait.DivesIntoTackles : null));
         defendingStats.Fouls++;
         var defenderPerformance = GetOrCreatePerformance(match, defendingTeam, defender);
@@ -2090,7 +2125,7 @@ public class MatchEngine
             attackingTeam,
             target,
             taker,
-            "free-kick delivery",
+            "free-kick header",
             random,
             triggeredSetPieceTrait));
 
@@ -3798,7 +3833,7 @@ public class MatchEngine
                 attackingTeam,
                 target,
                 taker,
-                "corner delivery",
+                "corner header",
                 random,
                 taker.Traits.Contains(PlayerTrait.DeadBallSpecialist) ? PlayerTrait.DeadBallSpecialist : null));
             matchLog.AddEvent(eventFactory.CreateGoal(
@@ -3834,7 +3869,7 @@ public class MatchEngine
                 attackingTeam,
                 target,
                 taker,
-                "corner delivery",
+                "corner header",
                 random,
                 taker.Traits.Contains(PlayerTrait.DeadBallSpecialist) ? PlayerTrait.DeadBallSpecialist : null));
             if (goalkeeper is not null)
@@ -3880,7 +3915,7 @@ public class MatchEngine
                 attackingTeam,
                 target,
                 taker,
-                "corner delivery",
+                "corner header",
                 random,
                 taker.Traits.Contains(PlayerTrait.DeadBallSpecialist) ? PlayerTrait.DeadBallSpecialist : null));
             var defender = ApplyShotBlockContribution(match, defendingTeam, random, ratingBoostOverride: 0.08);
@@ -3891,7 +3926,7 @@ public class MatchEngine
         attackingStats.TotalShots++;
         attackingStats.ExpectedGoals += 0.05;
         targetPerformance.Shots++;
-        matchLog.AddEvent(eventFactory.CreateShot(minute, attackingTeam, target, taker, "corner delivery", random));
+        matchLog.AddEvent(eventFactory.CreateShot(minute, attackingTeam, target, taker, "corner header", random));
         matchLog.AddEvent(eventFactory.CreateMiss(minute, attackingTeam, target, "corner chance", random));
         targetPerformance.Rating -= 0.04;
         return defendingTeam;
@@ -4681,9 +4716,14 @@ public class MatchEngine
         var createsDangerousSetPiece = !isPenalty &&
             (isBoxThreat || chanceType is "long-range attempt" or "long-range effort" or "wide overload") &&
             random.NextDouble() < 0.72;
+        var location = isPenalty
+            ? FoulLocation.PenaltyBox
+            : createsDangerousSetPiece || isBoxThreat
+                ? FoulLocation.FinalThird
+                : FoulLocation.OpenPlay;
         var reason = handball ? "handles the ball near" : "fouls";
 
-        return new FoulContext(severity, isPenalty, reason, deniesClearChance, violentFoul, createsDangerousSetPiece);
+        return new FoulContext(severity, isPenalty, reason, deniesClearChance, violentFoul, createsDangerousSetPiece, location);
     }
 
     private static double GetDangerousFoulChance(string chanceType, double attackPressure)
@@ -5558,7 +5598,8 @@ public class MatchEngine
         string PenaltyReason,
         bool DeniesClearChance,
         bool ViolentFoul,
-        bool CreatesDangerousSetPiece);
+        bool CreatesDangerousSetPiece,
+        FoulLocation Location);
 
     private sealed record AttackSequence(
         Player CreatorPlayer,

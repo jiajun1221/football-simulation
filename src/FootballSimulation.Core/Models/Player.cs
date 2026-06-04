@@ -60,6 +60,7 @@ public class Player : INotifyPropertyChanged
     public bool RejectTransferOffers { get; set; }
     public string Form { get; set; } = "Average";
     public bool IsStarter { get; set; }
+    public bool IsCaptain { get; set; }
     public int CurrentForm { get; set; } = 50;
     public PlayerFormStatus FormStatus
     {

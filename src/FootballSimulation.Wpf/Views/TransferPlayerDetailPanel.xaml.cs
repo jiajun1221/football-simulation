@@ -18,6 +18,7 @@ public partial class TransferPlayerDetailPanel : UserControl
     public event EventHandler? RejectOfferRequested;
     public event EventHandler? CounterOfferRequested;
     public event EventHandler? ContractRenewalRequested;
+    public event EventHandler? CaptainAssignmentRequested;
 
     private bool _usesTransferListToggle;
 
@@ -43,6 +44,7 @@ public partial class TransferPlayerDetailPanel : UserControl
         EmptyStatePanel.Visibility = Visibility.Visible;
         DetailContentPanel.Visibility = Visibility.Collapsed;
         CornerActionButton.Visibility = Visibility.Collapsed;
+        CaptainActionButton.Visibility = Visibility.Collapsed;
     }
 
     public void ShowPlayer(TransferPlayerDetailContext context)
@@ -54,6 +56,7 @@ public partial class TransferPlayerDetailPanel : UserControl
         EmptyStatePanel.Visibility = Visibility.Collapsed;
         DetailContentPanel.Visibility = Visibility.Visible;
         UpdateCornerAction(context);
+        UpdateCaptainAction(context);
         ClubLogoImage.Source = ClubLogoService.LoadClubLogo(listing.Team.Name, listing.LeagueId);
         NameTextBlock.Text = player.Name;
         ClubTextBlock.Text = $"{listing.Team.Name} · {listing.LeagueName} · {player.PreferredPosition} · Age {player.Age?.ToString(CultureInfo.InvariantCulture) ?? "N/A"}";
@@ -199,7 +202,7 @@ public partial class TransferPlayerDetailPanel : UserControl
             CornerActionButton.Background = ToBrush(context.IsListedForSale ? "#0B2A1B" : "#061226");
             CornerActionButton.Foreground = ToBrush(context.IsListedForSale ? "#22C55E" : "#FFFFFF");
             CornerActionButton.BorderBrush = ToBrush(context.IsListedForSale ? "#22C55E" : "#233756");
-            SetCornerActionGlow(context.IsListedForSale ? "#22C55E" : "#0F172A", context.IsListedForSale ? 0.50 : 0.45);
+            SetActionGlow(CornerActionButton, context.IsListedForSale ? "#22C55E" : "#0F172A", context.IsListedForSale ? 0.50 : 0.45);
             CornerActionButton.ToolTip = context.CanToggleShortlist
                 ? context.IsListedForSale ? "Remove from transfer list" : "Put on transfer list"
                 : "Transfer list cannot be changed from history.";
@@ -210,15 +213,34 @@ public partial class TransferPlayerDetailPanel : UserControl
         CornerActionButton.Background = ToBrush("#061226");
         CornerActionButton.Foreground = ToBrush(context.IsShortlisted ? "#FACC15" : "#FFFFFF");
         CornerActionButton.BorderBrush = ToBrush(context.IsShortlisted ? "#FACC15" : "#233756");
-        SetCornerActionGlow(context.IsShortlisted ? "#FACC15" : "#0F172A", context.IsShortlisted ? 0.42 : 0.45);
+        SetActionGlow(CornerActionButton, context.IsShortlisted ? "#FACC15" : "#0F172A", context.IsShortlisted ? 0.42 : 0.45);
         CornerActionButton.ToolTip = context.CanToggleShortlist
             ? context.IsShortlisted ? "Remove from shortlist" : "Add to shortlist"
             : "Shortlist cannot be changed from history.";
     }
 
-    private void SetCornerActionGlow(string color, double opacity)
+    private void UpdateCaptainAction(TransferPlayerDetailContext context)
     {
-        CornerActionButton.Effect = new System.Windows.Media.Effects.DropShadowEffect
+        var showCaptainAction = context.Mode is TransferDetailMode.Squad &&
+            context.IsOwnPlayer &&
+            context.CanAssignCaptain;
+
+        CaptainActionButton.Visibility = showCaptainAction ? Visibility.Visible : Visibility.Collapsed;
+        if (!showCaptainAction)
+        {
+            return;
+        }
+
+        CaptainActionButton.Background = ToBrush(context.IsCaptain ? "#FACC15" : "#061226");
+        CaptainActionButton.Foreground = ToBrush(context.IsCaptain ? "#061226" : "#FFFFFF");
+        CaptainActionButton.BorderBrush = ToBrush(context.IsCaptain ? "#EAB308" : "#233756");
+        CaptainActionButton.ToolTip = context.IsCaptain ? "Current Team Captain" : "Assign as Captain";
+        SetActionGlow(CaptainActionButton, context.IsCaptain ? "#FACC15" : "#0F172A", context.IsCaptain ? 0.50 : 0.45);
+    }
+
+    private static void SetActionGlow(Button button, string color, double opacity)
+    {
+        button.Effect = new System.Windows.Media.Effects.DropShadowEffect
         {
             BlurRadius = 9,
             ShadowDepth = 0,
@@ -241,6 +263,11 @@ public partial class TransferPlayerDetailPanel : UserControl
         }
 
         ShortlistToggled?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void CaptainActionButton_Click(object sender, RoutedEventArgs e)
+    {
+        CaptainAssignmentRequested?.Invoke(this, EventArgs.Empty);
     }
 
     private void AcceptOfferButton_Click(object sender, RoutedEventArgs e)
@@ -379,4 +406,6 @@ public sealed record TransferPlayerDetailContext(
     string StatusTooltip,
     string? RecommendationReason = null,
     TransferOffer? Offer = null,
-    TransferHistoryItem? HistoryItem = null);
+    TransferHistoryItem? HistoryItem = null,
+    bool CanAssignCaptain = false,
+    bool IsCaptain = false);

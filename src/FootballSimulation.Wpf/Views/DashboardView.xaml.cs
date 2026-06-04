@@ -18,6 +18,7 @@ public partial class DashboardView : UserControl
     private readonly RecentResultService _recentResultService = new();
     private readonly SaveGameService _saveGameService = new();
     private readonly TransferMarketService _transferMarketService = new();
+    private readonly SeasonCompletionService _seasonCompletionService = new();
     private const string ClubsAssetPath = "Assets/Clubs";
     private const string DefaultLogoPath = "pack://application:,,,/Assets/Clubs/default.png";
 
@@ -129,6 +130,12 @@ public partial class DashboardView : UserControl
     {
         if (_state.CurrentFixture is null)
         {
+            if (_seasonCompletionService.IsLeagueComplete(_state.League))
+            {
+                _navigate(new EndSeasonResultView(_state, _navigate));
+                return;
+            }
+
             MessageBox.Show("No upcoming fixture was found.");
             return;
         }
@@ -157,6 +164,16 @@ public partial class DashboardView : UserControl
         }
 
         _navigate(new LeaguePlayerStatsView(_state, _navigate));
+    }
+
+    private void MySquadButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_state.SelectedTeam is null)
+        {
+            return;
+        }
+
+        _navigate(new SquadOverviewView(_state, _navigate));
     }
 
     private void TransferMarketButton_Click(object sender, RoutedEventArgs e)
@@ -257,6 +274,8 @@ public partial class DashboardView : UserControl
         HomeAwayBadge.Background = new SolidColorBrush(isHome
             ? Color.FromRgb(47, 168, 79)
             : Color.FromRgb(249, 115, 22));
+        PrepareMatchButton.Content = "Prepare Match";
+        PrepareMatchButton.IsEnabled = true;
     }
 
     private void LoadNoUpcomingMatch()
@@ -266,10 +285,15 @@ public partial class DashboardView : UserControl
         UpcomingAwayNameTextBlock.Text = "-";
         UpcomingHomeLogoImage.Source = null;
         UpcomingAwayLogoImage.Source = null;
-        VenueTextBlock.Text = "No upcoming fixture was found.";
+        VenueTextBlock.Text = _seasonCompletionService.IsLeagueComplete(_state.League)
+            ? "All league fixtures have been played."
+            : "No upcoming fixture was found.";
         HomeAwayBadgeTextBlock.Text = "-";
         HomeAwayBadge.Background = new SolidColorBrush(Color.FromRgb(100, 116, 139));
-        PrepareMatchButton.IsEnabled = false;
+        PrepareMatchButton.Content = _seasonCompletionService.IsLeagueComplete(_state.League)
+            ? "View Season Results"
+            : "Prepare Match";
+        PrepareMatchButton.IsEnabled = _seasonCompletionService.IsLeagueComplete(_state.League);
     }
 
     private void LoadSelectedClubStats(League league, Team selectedTeam)

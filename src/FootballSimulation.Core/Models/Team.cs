@@ -9,4 +9,5 @@ public class Team
     public List<Player> Players { get; set; } = [];
     public List<Player> Substitutes { get; set; } = [];
     public TeamTactics Tactics { get; set; } = new();
+    public List<FormationPreset> FormationPresets { get; set; } = [];
 }

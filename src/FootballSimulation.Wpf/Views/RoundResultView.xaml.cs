@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using FootballSimulation.Models;
+using FootballSimulation.Services;
 using FootballSimulation.Wpf.Services;
 using FootballSimulation.Wpf.State;
 
@@ -37,6 +38,7 @@ public partial class RoundResultView : UserControl
 
     private readonly GameFlowState _state;
     private readonly Action<UserControl> _navigate;
+    private readonly SeasonCompletionService _seasonCompletionService = new();
 
     public RoundResultView(GameFlowState state, Action<UserControl> navigate)
     {
@@ -65,9 +67,12 @@ public partial class RoundResultView : UserControl
 
     private void NextButton_Click(object sender, RoutedEventArgs e)
     {
+        var isSeasonComplete = _seasonCompletionService.IsLeagueComplete(_state.League);
         _state.CurrentFixture = null;
         _state.CurrentMatch = null;
-        _navigate(new DashboardView(_state, _navigate));
+        _navigate(isSeasonComplete
+            ? new EndSeasonResultView(_state, _navigate)
+            : new DashboardView(_state, _navigate));
     }
 
     private RoundResultRow CreateRoundResultRow(Fixture fixture, Team? selectedTeam)

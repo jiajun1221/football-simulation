@@ -555,13 +555,22 @@
                 </Grid>
             </Grid>
 
-            <Button x:Name="CornerActionButton"
-                    Style="{StaticResource DetailCornerActionButtonStyle}"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Top"
-                    Margin="0,-4,-4,0"
-                    Visibility="Collapsed"
-                    Click="CornerActionButton_Click" />
+            <StackPanel x:Name="CornerActionsPanel"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
+                        Margin="0,-4,-4,0">
+                <Button x:Name="CaptainActionButton"
+                        Content="C"
+                        Style="{StaticResource DetailCornerActionButtonStyle}"
+                        Margin="0,0,6,0"
+                        Visibility="Collapsed"
+                        Click="CaptainActionButton_Click" />
+                <Button x:Name="CornerActionButton"
+                        Style="{StaticResource DetailCornerActionButtonStyle}"
+                        Visibility="Collapsed"
+                        Click="CornerActionButton_Click" />
+            </StackPanel>
         </Grid>
     </Border>
 </UserControl>

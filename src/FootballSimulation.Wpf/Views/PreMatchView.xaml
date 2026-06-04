@@ -21,6 +21,45 @@
             </Setter>
         </Style>
 
+        <Style x:Key="SavedFormationLoadButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="30" />
+            <Setter Property="Padding" Value="12,0" />
+            <Setter Property="Background" Value="#2563EB" />
+            <Setter Property="Foreground" Value="#FFFFFF" />
+            <Setter Property="BorderBrush" Value="#1D4ED8" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="12"
+                                Padding="{TemplateBinding Padding}"
+                                TextElement.Foreground="{TemplateBinding Foreground}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              TextElement.Foreground="{TemplateBinding Foreground}"
+                                              RecognizesAccessKey="True" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#1D4ED8" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#EEF2F6" />
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#D5DEE8" />
+                                <Setter Property="Foreground" Value="#7A8798" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <DataTemplate x:Key="TraitIconBadgeTemplate">
             <Border Width="14"
                     Height="14"
@@ -49,6 +88,7 @@
                     Padding="5">
                 <Grid>
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -316,32 +356,124 @@
         </DataTemplate>
 
         <DataTemplate x:Key="InjuredPlayerCardTemplate">
-            <Border Width="128"
-                    Background="{DynamicResource FeedAttackBackground}"
-                    BorderBrush="{DynamicResource FeedAttackBorder}"
-                    BorderThickness="1"
+            <Border MinWidth="128"
+                    MinHeight="94"
+                    Background="{Binding CardBackground}"
+                    BorderBrush="{Binding CardBorderBrush}"
+                    BorderThickness="2"
                     CornerRadius="10"
-                    Padding="7"
+                    Padding="6"
                     Margin="0,0,0,7"
-                    Opacity="0.72"
+                    Opacity="0.82"
+                    Cursor="No"
                     ToolTip="{Binding Tooltip}">
-                <StackPanel>
-                    <TextBlock Text="{Binding Name}"
-                               Foreground="{DynamicResource FeedAttackLabelForeground}"
-                               FontSize="10"
-                               FontWeight="Black"
-                               TextWrapping="Wrap" />
-                    <TextBlock Text="{Binding InjuryType}"
-                               Foreground="{DynamicResource FeedAttackLabelForeground}"
-                               FontSize="9"
-                               FontWeight="SemiBold"
-                               Margin="0,3,0,0" />
-                    <TextBlock Text="{Binding RecoveryText}"
-                               Foreground="{DynamicResource FeedAttackLabelForeground}"
-                               FontSize="9"
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="{Binding ShirtNumberText}"
+                                   Foreground="{Binding TextForeground}"
+                                   FontSize="10"
+                                   FontWeight="Bold"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,4,0" />
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding OverallText}"
+                                   Foreground="{Binding TextForeground}"
+                                   FontSize="9.5"
+                                   FontWeight="Black"
+                                   VerticalAlignment="Center" />
+                        <Border Grid.Column="2"
+                                Background="{Binding PositionBackground}"
+                                CornerRadius="7"
+                                Padding="5,1">
+                            <TextBlock Text="{Binding Position}"
+                                       Foreground="{Binding PositionForeground}"
+                                       FontSize="7.5"
+                                       FontWeight="Black" />
+                        </Border>
+                    </Grid>
+
+                    <Grid Grid.Row="1" VerticalAlignment="Center" Margin="0,4,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Image Source="{Binding FlagImagePath}"
+                               ToolTip="{Binding NationalityName}"
+                               Width="14"
+                               Height="10"
+                               Stretch="UniformToFill"
+                               Margin="0,0,4,0"
+                               VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding Name}"
+                                   Foreground="{Binding TextForeground}"
+                                   FontSize="9.2"
+                                   FontWeight="Black"
+                                   TextTrimming="CharacterEllipsis"
+                                   TextWrapping="NoWrap"
+                                   VerticalAlignment="Center" />
+                    </Grid>
+
+                    <WrapPanel Grid.Row="2" Margin="0,3,0,0">
+                        <Border Background="{Binding StatusBadgeBackground}"
+                                CornerRadius="7"
+                                Padding="5,1"
+                                Margin="0,0,2,2">
+                            <TextBlock Text="{Binding StatusText}"
+                                       Foreground="#FFFFFF"
+                                       FontSize="7"
+                                       FontWeight="Bold" />
+                        </Border>
+                        <Border Background="{Binding BenchFormBadgeBackground}"
+                                CornerRadius="7"
+                                Padding="5,1"
+                                Margin="0,0,2,2">
+                            <TextBlock Text="{Binding BenchFormBadgeText}"
+                                       Foreground="{Binding BenchFormBadgeForeground}"
+                                       FontSize="7"
+                                       FontWeight="Bold" />
+                        </Border>
+                        <ItemsControl ItemsSource="{Binding TraitBadges}"
+                                      ItemTemplate="{StaticResource TraitIconBadgeTemplate}"
+                                      Margin="0,0,0,2">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
+                    </WrapPanel>
+
+                    <TextBlock Grid.Row="3"
+                               Text="{Binding UnavailableInfoText}"
+                               Foreground="#FECACA"
+                               FontSize="8"
                                FontWeight="Bold"
+                               TextTrimming="CharacterEllipsis"
                                Margin="0,2,0,0" />
-                </StackPanel>
+                    <ProgressBar Grid.Row="4"
+                                 Height="5"
+                                 Minimum="0"
+                                 Maximum="100"
+                                 Value="{Binding Stamina}"
+                                 Foreground="{Binding StaminaBrush}"
+                                 Background="{DynamicResource AppBorderBrush}"
+                                 BorderThickness="0"
+                                 Margin="0,5,0,0" />
+                </Grid>
             </Border>
         </DataTemplate>
     </UserControl.Resources>
@@ -401,16 +533,26 @@
                             BorderBrush="#B8F2CD"
                             BorderThickness="2"
                             CornerRadius="18">
-                        <Grid>
-                            <Line X1="0" Y1="0" X2="900" Y2="0" Stroke="#8FE2AE" Opacity="0.45" />
-                            <Line X1="0" Y1="260" X2="900" Y2="260" Stroke="#8FE2AE" Opacity="0.35" />
-                            <Ellipse Width="110"
-                                     Height="110"
-                                     Stroke="#8FE2AE"
-                                     StrokeThickness="2"
-                                     Opacity="0.45"
-                                     HorizontalAlignment="Center"
-                                     VerticalAlignment="Center" />
+                        <Grid ClipToBounds="True">
+                            <Viewbox Stretch="Fill"
+                                     IsHitTestVisible="False"
+                                     Margin="16">
+                                <Canvas Width="1000" Height="680">
+                                    <Rectangle Width="1000"
+                                               Height="680"
+                                               Stroke="#B8F2CD"
+                                               StrokeThickness="5"
+                                               Opacity="0.72" />
+                                    <Line X1="0" Y1="0" X2="1000" Y2="0" Stroke="#B8F2CD" StrokeThickness="5" Opacity="0.72" />
+                                    <Ellipse Width="230" Height="230" Canvas.Left="385" Canvas.Top="-115" Stroke="#B8F2CD" StrokeThickness="4" Opacity="0.58" />
+                                    <Ellipse Width="10" Height="10" Canvas.Left="495" Canvas.Top="-5" Fill="#B8F2CD" Opacity="0.78" />
+
+                                    <Rectangle Width="500" Height="156" Canvas.Left="250" Canvas.Top="524" Stroke="#B8F2CD" StrokeThickness="4" Opacity="0.66" />
+                                    <Rectangle Width="250" Height="70" Canvas.Left="375" Canvas.Top="610" Stroke="#B8F2CD" StrokeThickness="4" Opacity="0.66" />
+                                    <Ellipse Width="10" Height="10" Canvas.Left="495" Canvas.Top="557" Fill="#B8F2CD" Opacity="0.72" />
+                                    <Path Data="M 414 524 A 96 96 0 0 1 586 524" Stroke="#B8F2CD" StrokeThickness="4" Opacity="0.55" Fill="Transparent" />
+                                </Canvas>
+                            </Viewbox>
                             <Canvas x:Name="PitchCanvas"
                                     Margin="16"
                                     Background="Transparent"
@@ -743,8 +885,19 @@
                                  ItemTemplate="{StaticResource InjuredPlayerCardTemplate}"
                                  Background="Transparent"
                                  BorderThickness="0"
-                                 IsHitTestVisible="False"
-                                 Visibility="Collapsed" />
+                                 Visibility="Collapsed"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <Setter Property="Padding" Value="0" />
+                                    <Setter Property="Margin" Value="0" />
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                    <Setter Property="VerticalContentAlignment" Value="Stretch" />
+                                    <Setter Property="Background" Value="Transparent" />
+                                    <Setter Property="BorderThickness" Value="0" />
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                        </ListBox>
                     </Grid>
                     </Border>
                 </Grid>
@@ -759,6 +912,8 @@
                     <Grid Margin="0,0,0,6">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="Tactic"
@@ -775,7 +930,49 @@
                                    Margin="6,0,0,0"
                                    VerticalAlignment="Center"
                                    ToolTipService.ShowDuration="30000" />
+                        <Button x:Name="ToggleSavedFormationsButton"
+                                Grid.Column="3"
+                                Content="Formation ▼"
+                                Style="{StaticResource SavedFormationLoadButtonStyle}"
+                                Height="28"
+                                Padding="10,0"
+                                Margin="8,0,0,0"
+                                FontSize="11"
+                                Click="ToggleSavedFormationsButton_Click" />
                     </Grid>
+
+                    <Border x:Name="SavedFormationsPanel"
+                            Background="{DynamicResource AppSecondaryCardBackground}"
+                            BorderBrush="{DynamicResource AppCardBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="14"
+                            Padding="10"
+                            Margin="0,0,0,10"
+                            Visibility="Collapsed">
+                        <StackPanel>
+                            <TextBlock Text="Saved Formations"
+                                       FontSize="12"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource AppTextBrush}"
+                                       Margin="0,0,0,6" />
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <ComboBox x:Name="SavedFormationComboBox"
+                                          Height="30"
+                                          DisplayMemberPath="Name"
+                                          ToolTip="Choose a saved formation preset" />
+                                <Button x:Name="LoadSavedFormationButton"
+                                        Grid.Column="1"
+                                        Content="Load"
+                                        Style="{StaticResource SavedFormationLoadButtonStyle}"
+                                        Margin="6,0,0,0"
+                                        Click="LoadSavedFormationButton_Click" />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
 
                     <controls:TacticalSettingsPanel x:Name="TacticalSettingsPanel"
                                                     PanelMaxHeight="350"

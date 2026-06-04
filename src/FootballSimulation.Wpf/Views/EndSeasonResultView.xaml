@@ -1,0 +1,356 @@
+<UserControl x:Class="FootballSimulation.Wpf.Views.EndSeasonResultView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{DynamicResource AppPageBackground}">
+    <UserControl.Resources>
+        <Style x:Key="ResultCard" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource AppCardBackground}" />
+            <Setter Property="CornerRadius" Value="18" />
+            <Setter Property="Padding" Value="20" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+
+        <Style x:Key="SectionTitle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="FontWeight" Value="Black" />
+            <Setter Property="Margin" Value="0,0,0,12" />
+        </Style>
+
+        <Style x:Key="MutedText" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource AppMutedTextBrush}" />
+            <Setter Property="FontSize" Value="12" />
+        </Style>
+
+        <Style x:Key="CleanDataGrid" TargetType="DataGrid">
+            <Setter Property="Background" Value="{DynamicResource AppCardBackground}" />
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="GridLinesVisibility" Value="Horizontal" />
+            <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource AppBorderBrush}" />
+            <Setter Property="HeadersVisibility" Value="Column" />
+            <Setter Property="RowHeight" Value="36" />
+            <Setter Property="ColumnHeaderHeight" Value="32" />
+            <Setter Property="CanUserAddRows" Value="False" />
+            <Setter Property="CanUserDeleteRows" Value="False" />
+            <Setter Property="CanUserResizeRows" Value="False" />
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="AutoGenerateColumns" Value="False" />
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="16" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <ScrollViewer Grid.Row="0"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+            <StackPanel>
+                <Border x:Name="HeroBorder"
+                        CornerRadius="24"
+                        Padding="26"
+                        Background="{DynamicResource AppPrimaryBrush}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="220" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel>
+                            <TextBlock x:Name="SeasonTitleTextBlock"
+                                       Foreground="White"
+                                       FontSize="32"
+                                       FontWeight="Black" />
+                            <TextBlock x:Name="LeagueSubtitleTextBlock"
+                                       Foreground="#D9E7FF"
+                                       FontSize="15"
+                                       Margin="0,6,0,0" />
+                            <TextBlock x:Name="ClubSummaryTextBlock"
+                                       Foreground="White"
+                                       FontSize="18"
+                                       FontWeight="SemiBold"
+                                       Margin="0,18,0,0" />
+                        </StackPanel>
+
+                        <Border Grid.Column="1"
+                                Background="#22FFFFFF"
+                                BorderBrush="#55FFFFFF"
+                                BorderThickness="1"
+                                CornerRadius="18"
+                                Padding="18"
+                                VerticalAlignment="Center">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="TROPHY"
+                                           Foreground="#FFE08A"
+                                           FontSize="16"
+                                           FontWeight="Black"
+                                           HorizontalAlignment="Center" />
+                                <TextBlock x:Name="OutcomeTitleTextBlock"
+                                           Foreground="White"
+                                           FontSize="22"
+                                           FontWeight="Black"
+                                           TextAlignment="Center"
+                                           Margin="0,8,0,0" />
+                                <TextBlock x:Name="OutcomeSubtitleTextBlock"
+                                           Foreground="#D9E7FF"
+                                           FontSize="12"
+                                           TextAlignment="Center"
+                                           TextWrapping="Wrap"
+                                           Margin="0,6,0,0" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <Grid Margin="0,16,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1.3*" />
+                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="1*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Style="{StaticResource ResultCard}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Text="Final Table" Style="{StaticResource SectionTitle}" />
+                            <DataGrid x:Name="FinalTableDataGrid"
+                                      Grid.Row="1"
+                                      Style="{StaticResource CleanDataGrid}"
+                                      MaxHeight="520">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="#" Binding="{Binding Position}" Width="42" />
+                                    <DataGridTextColumn Header="Club" Binding="{Binding TeamName}" Width="*" />
+                                    <DataGridTextColumn Header="P" Binding="{Binding Played}" Width="42" />
+                                    <DataGridTextColumn Header="W" Binding="{Binding Wins}" Width="42" />
+                                    <DataGridTextColumn Header="D" Binding="{Binding Draws}" Width="42" />
+                                    <DataGridTextColumn Header="L" Binding="{Binding Losses}" Width="42" />
+                                    <DataGridTextColumn Header="GD" Binding="{Binding GoalDifference}" Width="50" />
+                                    <DataGridTextColumn Header="Pts" Binding="{Binding Points}" Width="54" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
+                    </Border>
+
+                    <StackPanel Grid.Column="2">
+                        <Border Style="{StaticResource ResultCard}">
+                            <StackPanel>
+                                <TextBlock Text="League Outcomes" Style="{StaticResource SectionTitle}" />
+                                <TextBlock x:Name="ChampionTextBlock"
+                                           Foreground="{DynamicResource AppTextBrush}"
+                                           FontSize="16"
+                                           FontWeight="Bold" />
+                                <TextBlock Text="European Qualification"
+                                           Style="{StaticResource MutedText}"
+                                           Margin="0,16,0,6" />
+                                <ItemsControl x:Name="EuropeanTeamsItemsControl" />
+                                <TextBlock Text="Relegated Teams"
+                                           Style="{StaticResource MutedText}"
+                                           Margin="0,16,0,6" />
+                                <ItemsControl x:Name="RelegatedTeamsItemsControl" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource ResultCard}"
+                                Margin="0,16,0,0">
+                            <StackPanel>
+                                <TextBlock Text="Budget Rollover" Style="{StaticResource SectionTitle}" />
+                                <TextBlock x:Name="BudgetSummaryTextBlock"
+                                           Foreground="{DynamicResource AppTextBrush}"
+                                           FontSize="18"
+                                           FontWeight="Black" />
+                                <TextBlock x:Name="BudgetBreakdownTextBlock"
+                                           Foreground="{DynamicResource AppMutedTextBrush}"
+                                           TextWrapping="Wrap"
+                                           Margin="0,8,0,0" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+
+                <Border Style="{StaticResource ResultCard}"
+                        Margin="0,16,0,0">
+                    <StackPanel>
+                        <TextBlock Text="Player Statistics" Style="{StaticResource SectionTitle}" />
+                        <TabControl Background="Transparent"
+                                    BorderThickness="0">
+                            <TabItem Header="Top Scorers">
+                                <DataGrid x:Name="TopScorersDataGrid" Style="{StaticResource CleanDataGrid}" />
+                            </TabItem>
+                            <TabItem Header="Top Assists">
+                                <DataGrid x:Name="TopAssistsDataGrid" Style="{StaticResource CleanDataGrid}" />
+                            </TabItem>
+                            <TabItem Header="Most Saves">
+                                <DataGrid x:Name="MostSavesDataGrid" Style="{StaticResource CleanDataGrid}" />
+                            </TabItem>
+                            <TabItem Header="Best Rating">
+                                <DataGrid x:Name="BestRatingDataGrid" Style="{StaticResource CleanDataGrid}" />
+                            </TabItem>
+                            <TabItem Header="Clean Sheets">
+                                <DataGrid x:Name="CleanSheetsDataGrid" Style="{StaticResource CleanDataGrid}" />
+                            </TabItem>
+                            <TabItem Header="Cards">
+                                <DataGrid x:Name="CardsDataGrid" Style="{StaticResource CleanDataGrid}" />
+                            </TabItem>
+                        </TabControl>
+                    </StackPanel>
+                </Border>
+
+                <Grid Margin="0,16,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="1.4*" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <Border Style="{StaticResource ResultCard}">
+                            <StackPanel>
+                                <TextBlock Text="Season Awards" Style="{StaticResource SectionTitle}" />
+                                <TextBlock x:Name="PlayerOfSeasonTextBlock"
+                                           Foreground="{DynamicResource AppTextBrush}"
+                                           FontSize="18"
+                                           FontWeight="Black"
+                                           TextWrapping="Wrap" />
+                                <TextBlock x:Name="PlayerOfSeasonSummaryTextBlock"
+                                           Foreground="{DynamicResource AppMutedTextBrush}"
+                                           Margin="0,6,0,0"
+                                           TextWrapping="Wrap" />
+                                <TextBlock x:Name="YoungPlayerTextBlock"
+                                           Foreground="{DynamicResource AppTextBrush}"
+                                           FontSize="15"
+                                           FontWeight="Bold"
+                                           Margin="0,16,0,0"
+                                           TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource ResultCard}"
+                                Margin="0,16,0,0">
+                            <StackPanel>
+                                <TextBlock Text="Season Highlights" Style="{StaticResource SectionTitle}" />
+                                <ItemsControl x:Name="HighlightsItemsControl">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="{DynamicResource AppSecondaryCardBackground}"
+                                                    BorderBrush="{DynamicResource AppBorderBrush}"
+                                                    BorderThickness="1"
+                                                    CornerRadius="12"
+                                                    Padding="12"
+                                                    Margin="0,0,0,8">
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Title}"
+                                                               Foreground="{DynamicResource AppTextBrush}"
+                                                               FontWeight="Black" />
+                                                    <TextBlock Text="{Binding PrimaryText}"
+                                                               Foreground="{DynamicResource AppTextBrush}"
+                                                               FontSize="13"
+                                                               Margin="0,4,0,0" />
+                                                    <TextBlock Text="{Binding SecondaryText}"
+                                                               Foreground="{DynamicResource AppMutedTextBrush}"
+                                                               FontSize="12"
+                                                               TextWrapping="Wrap"
+                                                               Margin="0,3,0,0" />
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
+                    <Border Grid.Column="2" Style="{StaticResource ResultCard}">
+                        <StackPanel>
+                            <TextBlock Text="Best XI" Style="{StaticResource SectionTitle}" />
+                            <Border Background="#166534"
+                                    BorderBrush="#BBF7D0"
+                                    BorderThickness="2"
+                                    CornerRadius="20"
+                                    Height="420"
+                                    Padding="12">
+                                <Grid>
+                                    <Canvas>
+                                        <Line X1="0" Y1="210" X2="720" Y2="210" Stroke="#77FFFFFF" StrokeThickness="2" />
+                                        <Rectangle Canvas.Left="190" Canvas.Top="284" Width="340" Height="124" Stroke="#77FFFFFF" StrokeThickness="2" />
+                                        <Rectangle Canvas.Left="270" Canvas.Top="338" Width="180" Height="70" Stroke="#77FFFFFF" StrokeThickness="2" />
+                                        <Ellipse Canvas.Left="334" Canvas.Top="252" Width="52" Height="52" Stroke="#77FFFFFF" StrokeThickness="2" />
+                                    </Canvas>
+                                    <ItemsControl x:Name="BestXiItemsControl">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <Canvas />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemContainerStyle>
+                                            <Style TargetType="ContentPresenter">
+                                                <Setter Property="Canvas.Left" Value="{Binding Left}" />
+                                                <Setter Property="Canvas.Top" Value="{Binding Top}" />
+                                            </Style>
+                                        </ItemsControl.ItemContainerStyle>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Width="116"
+                                                        Background="#EAF7EF"
+                                                        BorderBrush="#14532D"
+                                                        BorderThickness="2"
+                                                        CornerRadius="12"
+                                                        Padding="8">
+                                                    <StackPanel>
+                                                        <TextBlock Text="{Binding Slot}"
+                                                                   Foreground="#14532D"
+                                                                   FontWeight="Black"
+                                                                   FontSize="11" />
+                                                        <TextBlock Text="{Binding PlayerName}"
+                                                                   Foreground="#052E16"
+                                                                   FontWeight="Bold"
+                                                                   TextTrimming="CharacterEllipsis" />
+                                                        <TextBlock Text="{Binding TeamName}"
+                                                                   Foreground="#166534"
+                                                                   FontSize="11"
+                                                                   TextTrimming="CharacterEllipsis" />
+                                                        <TextBlock Text="{Binding Detail}"
+                                                                   Foreground="#166534"
+                                                                   FontSize="11" />
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock x:Name="FooterTextBlock"
+                       VerticalAlignment="Center"
+                       Foreground="{DynamicResource AppMutedTextBrush}" />
+            <Button Grid.Column="1"
+                    Content="End Season"
+                    Width="160"
+                    Height="44"
+                    Background="#2563EB"
+                    Foreground="White"
+                    BorderBrush="#1D4ED8"
+                    FontWeight="Black"
+                    Click="EndSeasonButton_Click" />
+        </Grid>
+    </Grid>
+</UserControl>

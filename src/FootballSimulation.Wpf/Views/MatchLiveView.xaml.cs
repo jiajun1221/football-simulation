@@ -2377,6 +2377,8 @@ public partial class MatchLiveView : UserControl
 
     private static string TargetIcon() => char.ConvertFromUtf32(0x1F3AF);
 
+    private static string HeaderIcon() => $"{SoccerBallIcon()}↕";
+
     private static string StopIcon() => char.ConvertFromUtf32(0x1F6D1);
 
     private static string StarIcon() => char.ConvertFromUtf32(0x2B50);
@@ -3259,7 +3261,7 @@ public partial class MatchLiveView : UserControl
             EventType.Shot => CreateShotHeadline(matchEvent, teamName),
             EventType.Save => CreateSaveHeadline(matchEvent),
             EventType.Goal => CreateGoalHeadline(matchEvent, teamName),
-            EventType.Foul => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "commits foul", "Foul given"),
+            EventType.Foul => CreateFoulHeadline(matchEvent),
             EventType.YellowCard => matchEvent.Description.Contains("Both players", StringComparison.OrdinalIgnoreCase)
                 ? "Both players booked"
                 : CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "booked", "Yellow card shown"),
@@ -3306,7 +3308,7 @@ public partial class MatchLiveView : UserControl
             EventType.Fulltime => "Full time",
             EventType.Miss => IsPenaltyResult(matchEvent)
                 ? CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "misses penalty", $"{teamName} miss penalty")
-                : CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "misses chance", $"{teamName} miss chance"),
+                : CreateMissHeadline(matchEvent, teamName),
             _ => "Match Event"
         };
 
@@ -3326,7 +3328,9 @@ public partial class MatchLiveView : UserControl
             EventType.ChanceCreated => "Opening created.",
             EventType.Save => IsPenaltyResult(matchEvent) ? string.Empty : "Huge stop.",
             EventType.Miss => IsPenaltyResult(matchEvent) ? string.Empty : "Shot Off Target.",
-            EventType.Foul => "Play is stopped.",
+            EventType.Foul => matchEvent.IsPenaltyFoul || matchEvent.FoulLocation == FoulLocation.PenaltyBox
+                ? string.Empty
+                : "Play is stopped.",
             EventType.YellowCard => "He is on a booking.",
             EventType.RedCard => "They are down to ten.",
             EventType.Injury => "Medical staff are watching.",
@@ -3430,6 +3434,20 @@ public partial class MatchLiveView : UserControl
 
     private static string CreateShotHeadline(MatchEvent matchEvent, string teamName)
     {
+        var classifiedHeadline = matchEvent.ShotClassification switch
+        {
+            ShotClassification.Header => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "heads at goal", $"{teamName} header"),
+            ShotClassification.Volley => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "volleys goalward", $"{teamName} volley"),
+            ShotClassification.LongShot => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "shoots from distance", $"{teamName} long shot"),
+            ShotClassification.FreeKick => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "takes free kick", $"{teamName} free kick"),
+            ShotClassification.Penalty => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "takes penalty", $"{teamName} penalty"),
+            _ => string.Empty
+        };
+        if (!string.IsNullOrWhiteSpace(classifiedHeadline))
+        {
+            return classifiedHeadline;
+        }
+
         if (matchEvent.Description.Contains("REBOUND SHOT", StringComparison.OrdinalIgnoreCase))
         {
             return CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "rebound shot", $"{teamName} rebound shot");
@@ -3442,6 +3460,18 @@ public partial class MatchLiveView : UserControl
         }
 
         return CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "shoots", $"{teamName} shoot");
+    }
+
+    private static string CreateMissHeadline(MatchEvent matchEvent, string teamName)
+    {
+        return matchEvent.ShotClassification switch
+        {
+            ShotClassification.Header => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "heads wide", $"{teamName} header wide"),
+            ShotClassification.Volley => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "volleys wide", $"{teamName} volley wide"),
+            ShotClassification.LongShot => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "shoots wide", $"{teamName} long shot wide"),
+            ShotClassification.FreeKick => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "free kick wide", $"{teamName} free kick wide"),
+            _ => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "misses chance", $"{teamName} miss chance")
+        };
     }
 
     private static string CreateDefensiveHeadline(MatchEvent matchEvent)
@@ -3622,6 +3652,26 @@ public partial class MatchLiveView : UserControl
         return $"{shortName} {action}";
     }
 
+    private static string CreateFoulHeadline(MatchEvent matchEvent)
+    {
+        if (matchEvent.IsPenaltyFoul || matchEvent.FoulLocation == FoulLocation.PenaltyBox)
+        {
+            var foulingPlayer = GetHeadlinePlayerName(string.IsNullOrWhiteSpace(matchEvent.FoulingPlayer)
+                ? matchEvent.PrimaryPlayerName
+                : matchEvent.FoulingPlayer);
+            var fouledPlayer = GetHeadlinePlayerName(string.IsNullOrWhiteSpace(matchEvent.FouledPlayer)
+                ? matchEvent.SecondaryPlayerName
+                : matchEvent.FouledPlayer);
+
+            if (!string.IsNullOrWhiteSpace(foulingPlayer) && !string.IsNullOrWhiteSpace(fouledPlayer))
+            {
+                return $"{foulingPlayer} fouls {fouledPlayer} inside the box";
+            }
+        }
+
+        return CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "commits foul", "Foul given");
+    }
+
     private static string GetHeadlinePlayerName(string? fullName)
     {
         if (string.IsNullOrWhiteSpace(fullName))
@@ -3706,7 +3756,7 @@ public partial class MatchLiveView : UserControl
             EventType.Kickoff => MatchBoundaryStyle(FlagIcon(), "KICKOFF"),
             EventType.Attack => AttackStyle(SwordsIcon(), "ATTACK"),
             EventType.ChanceCreated => ChanceStyle(StarIcon(), "CHANCE CREATED"),
-            EventType.Shot => SolidOrangeStyle(TargetIcon(), "SHOT"),
+            EventType.Shot => ShotStyle(matchEvent),
             EventType.Save => SaveStyle(GloveIcon(), "SAVE"),
             EventType.Foul => FoulStyle(StopIcon(), "FOUL"),
             EventType.Miss => MissStyle(WarningIcon(), "MISS"),
@@ -3779,6 +3829,19 @@ public partial class MatchLiveView : UserControl
     private static FeedEventStyle SolidOrangeStyle(string icon, string label)
     {
         return new FeedEventStyle(icon, label, "#F97316", "#C2410C", "#FFEDD5", "#C2410C", "#FFFFFF", IconForeground: "#C2410C", MinuteForeground: "#FFFFFF", TitleForeground: "#FFFFFF", DescriptionForeground: "#FFEDD5", TraitBadgeBackground: "#FFEDD5", TraitBadgeBorderBrush: "#FDBA74");
+    }
+
+    private static FeedEventStyle ShotStyle(MatchEvent matchEvent)
+    {
+        return matchEvent.ShotClassification switch
+        {
+            ShotClassification.Header => SolidOrangeStyle(HeaderIcon(), "HEADER"),
+            ShotClassification.Volley => SolidOrangeStyle(SoccerBallIcon(), "VOLLEY"),
+            ShotClassification.LongShot => SolidOrangeStyle(TargetIcon(), "LONG SHOT"),
+            ShotClassification.FreeKick => SolidOrangeStyle(TargetIcon(), "FREE KICK"),
+            ShotClassification.Penalty => SolidOrangeStyle(GoalNetIcon(), "PENALTY"),
+            _ => SolidOrangeStyle(TargetIcon(), "SHOT")
+        };
     }
 
     private static FeedEventStyle MatchBoundaryStyle(string icon, string label)

@@ -19,10 +19,11 @@
         </Style>
 
         <Style x:Key="PrimaryDashboardButton" TargetType="Button">
-            <Setter Property="Height" Value="50" />
-            <Setter Property="Background" Value="{DynamicResource AppButtonBackground}" />
-            <Setter Property="Foreground" Value="{DynamicResource AppButtonForeground}" />
-            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Height" Value="48" />
+            <Setter Property="Background" Value="#030712" />
+            <Setter Property="Foreground" Value="#FFFFFF" />
+            <Setter Property="FontWeight" Value="Black" />
+            <Setter Property="FontSize" Value="13" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="Template">
@@ -30,13 +31,14 @@
                     <ControlTemplate TargetType="Button">
                         <ControlTemplate.Resources>
                             <Style TargetType="TextBlock">
-                                <Setter Property="Foreground" Value="{DynamicResource AppButtonForeground}" />
+                                <Setter Property="Foreground" Value="#FFFFFF" />
                             </Style>
                             <Style TargetType="AccessText">
-                                <Setter Property="Foreground" Value="{DynamicResource AppButtonForeground}" />
+                                <Setter Property="Foreground" Value="#FFFFFF" />
                             </Style>
                         </ControlTemplate.Resources>
-                        <Border Background="{TemplateBinding Background}"
+                        <Border x:Name="PrimaryActionBorder"
+                                Background="{TemplateBinding Background}"
                                 CornerRadius="14"
                                 Padding="16,0"
                                 TextElement.Foreground="{TemplateBinding Foreground}">
@@ -57,8 +59,14 @@
                                        TextWrapping="Wrap" />
                         </Border>
                         <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="PrimaryActionBorder" Property="Background" Value="#111827" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="PrimaryActionBorder" Property="Background" Value="#000000" />
+                            </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Foreground" Value="{DynamicResource AppButtonForeground}" />
+                                <Setter TargetName="PrimaryActionBorder" Property="Opacity" Value="0.55" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -460,27 +468,55 @@
                         </ItemsControl>
                     </StackPanel>
 
-                    <UniformGrid Columns="2" Rows="2">
+                    <Grid Margin="0,2,0,16">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
                         <Button x:Name="PrepareMatchButton"
-                                Style="{StaticResource DashboardWhiteActionButton}"
+                                Grid.Row="0"
+                                Grid.ColumnSpan="2"
+                                Style="{StaticResource PrimaryDashboardButton}"
                                 Content="⚽ Prepare Match"
-                                Margin="0,0,6,6"
+                                Margin="0,0,0,8"
                                 Click="PrepareMatchButton_Click" />
+
                         <Button Content="💾 Save Game"
+                                Grid.Row="1"
+                                Grid.Column="0"
                                 Style="{StaticResource DashboardWhiteActionButton}"
-                                Margin="0,0,0,6"
+                                Margin="0,0,6,8"
                                 Click="SaveGameButton_Click" />
+
+                        <Button Content="👥 My Squad"
+                                Grid.Row="1"
+                                Grid.Column="1"
+                                Style="{StaticResource DashboardWhiteActionButton}"
+                                Margin="0,0,0,8"
+                                Click="MySquadButton_Click" />
+
                         <Button Content="💼 Transfer Market"
+                                Grid.Row="2"
+                                Grid.Column="0"
                                 Style="{StaticResource DashboardWhiteActionButton}"
                                 Margin="0,0,6,0"
                                 Click="TransferMarketButton_Click" />
+
                         <Button Content="📊 Player Stats"
+                                Grid.Row="2"
+                                Grid.Column="1"
                                 Style="{StaticResource DashboardWhiteActionButton}"
                                 Click="PlayerStatsButton_Click" />
-                    </UniformGrid>
+                    </Grid>
 
                     <StackPanel x:Name="UnavailablePlayersPanel"
-                                Margin="0,12,0,0"
+                                Margin="0,2,0,0"
                                 Visibility="Collapsed">
                         <TextBlock Text="Unavailable"
                                    Foreground="{DynamicResource AppTextBrush}"

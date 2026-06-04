@@ -11,6 +11,7 @@ public class MatchEventContext
     public int Minute { get; init; }
     public WeatherCondition WeatherCondition { get; init; }
     public bool IsRivalryMatch { get; init; }
+    public bool EnableInjuries { get; init; } = true;
     public EventType? PreviousEventType { get; init; }
     public double HomeAttackStrength { get; init; }
     public double AwayAttackStrength { get; init; }

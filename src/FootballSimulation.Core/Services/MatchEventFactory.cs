@@ -173,16 +173,48 @@ public class MatchEventFactory
         return CreateEvent(minute, EventType.Turnover, description, possessionPlayer.Name);
     }
 
-    public MatchEvent CreateFoul(int minute, Team defendingTeam, Player defender, Player attacker, PlayerTrait? triggeredTrait = null)
+    public MatchEvent CreateFoul(
+        int minute,
+        Team defendingTeam,
+        Team attackingTeam,
+        Player defender,
+        Player attacker,
+        FoulLocation foulLocation = FoulLocation.OpenPlay,
+        bool isPenaltyFoul = false,
+        PlayerTrait? triggeredTrait = null)
     {
-        var description = triggeredTrait == PlayerTrait.DivesIntoTackles
+        var description = isPenaltyFoul || foulLocation == FoulLocation.PenaltyBox
+            ? CreatePenaltyBoxFoulDescription(defendingTeam, attackingTeam, defender, attacker, triggeredTrait)
+            : triggeredTrait == PlayerTrait.DivesIntoTackles
             ? Pick(
                 new Random(minute + defender.Name.Length + attacker.Name.Length),
                 $"{defender.Name} flies into an aggressive challenge on {attacker.Name} for {defendingTeam.Name}.",
                 $"A crunching tackle from {defender.Name} stops {attacker.Name}, but the referee gives the foul.")
             : $"{defender.Name} fouls {attacker.Name} for {defendingTeam.Name}.";
 
-        return CreateEvent(minute, EventType.Foul, description, defender.Name, attacker.Name, triggeredTrait: triggeredTrait);
+        var matchEvent = CreateEvent(minute, EventType.Foul, description, defender.Name, attacker.Name, triggeredTrait: triggeredTrait);
+        matchEvent.FoulLocation = foulLocation;
+        matchEvent.IsPenaltyFoul = isPenaltyFoul;
+        matchEvent.FoulingPlayer = defender.Name;
+        matchEvent.FouledPlayer = attacker.Name;
+        matchEvent.FoulingTeam = defendingTeam.Name;
+        matchEvent.AttackingTeam = attackingTeam.Name;
+        return matchEvent;
+    }
+
+    private static string CreatePenaltyBoxFoulDescription(
+        Team defendingTeam,
+        Team attackingTeam,
+        Player defender,
+        Player attacker,
+        PlayerTrait? triggeredTrait)
+    {
+        if (triggeredTrait == PlayerTrait.DivesIntoTackles)
+        {
+            return $"{defender.Name} dives in and brings down {attacker.Name} inside the penalty area for {defendingTeam.Name}. {attackingTeam.Name} appeal immediately as the referee stops play.";
+        }
+
+        return $"{defender.Name} brings down {attacker.Name} inside the penalty area for {defendingTeam.Name}. The referee stops play immediately.";
     }
 
     public MatchEvent CreateShot(int minute, Team attackingTeam, Player attacker, Player? playmaker = null, PlayerTrait? triggeredTrait = null)
@@ -191,7 +223,9 @@ public class MatchEventFactory
             ? $"{attacker.Name} takes a shot for {attackingTeam.Name} after a pass from {playmaker.Name}."
             : $"{attacker.Name} takes a shot for {attackingTeam.Name}.";
 
-        return CreateEvent(minute, EventType.Shot, description, attacker.Name, GetAssistCandidateName(attacker, playmaker), triggeredTrait: triggeredTrait);
+        var matchEvent = CreateEvent(minute, EventType.Shot, description, attacker.Name, GetAssistCandidateName(attacker, playmaker), triggeredTrait: triggeredTrait);
+        matchEvent.ShotClassification = ClassifyShot(string.Empty, description);
+        return matchEvent;
     }
 
     public MatchEvent CreateChanceCreated(
@@ -260,6 +294,16 @@ public class MatchEventFactory
 
         string description = chanceType switch
         {
+            "corner header" => Pick(random,
+                $"{attackerName} heads the corner goalward for {attackingTeam.Name}.",
+                $"{attackerName} rises to the corner and directs a header toward goal.",
+                $"{attackerName} attacks the corner delivery and heads at goal for {attackingTeam.Name}."),
+            "free-kick header" => Pick(random,
+                string.IsNullOrWhiteSpace(playmakerName)
+                    ? $"{attackerName} heads the free kick goalward for {attackingTeam.Name}."
+                    : $"{attackerName} heads {playmakerName}'s free kick goalward for {attackingTeam.Name}.",
+                $"{attackerName} meets the free-kick delivery and heads at goal for {attackingTeam.Name}.",
+                $"{attackerName} goes for a free-kick header for {attackingTeam.Name}."),
             "corner delivery" => Pick(random,
                 $"{attackerName} attacks the corner delivery for {attackingTeam.Name}.",
                 $"{attackerName} meets the corner and sends it goalward for {attackingTeam.Name}.",
@@ -287,7 +331,9 @@ public class MatchEventFactory
                 : $"{attackerName} takes a shot for {attackingTeam.Name}."
         };
 
-        return CreateEvent(minute, EventType.Shot, description, attacker.Name, GetAssistCandidateName(attacker, playmaker), triggeredTrait: triggeredTrait);
+        var matchEvent = CreateEvent(minute, EventType.Shot, description, attacker.Name, GetAssistCandidateName(attacker, playmaker), triggeredTrait: triggeredTrait);
+        matchEvent.ShotClassification = ClassifyShot(chanceType, description);
+        return matchEvent;
     }
 
     public MatchEvent CreateGoal(int minute, Team attackingTeam, Player scorer, Match match, Player? assister = null, int scorerMatchGoals = 0)
@@ -354,7 +400,9 @@ public class MatchEventFactory
             $"{attacker.Name} goes for a {shotStyle} for {attackingTeam.Name}, but drags it wide.",
             $"{attacker.Name} attempts a {shotStyle} for {attackingTeam.Name} and misses the target.");
 
-        return CreateEvent(minute, EventType.Miss, description, attacker.Name);
+        var matchEvent = CreateEvent(minute, EventType.Miss, description, attacker.Name);
+        matchEvent.ShotClassification = ClassifyShot(shotStyle, description);
+        return matchEvent;
     }
 
     public MatchEvent CreateSave(int minute, Team defendingTeam, Player attacker)
@@ -484,6 +532,9 @@ public class MatchEventFactory
             "aerial duel impact" => $"{playerName} lands awkwardly after an aerial duel.",
             "sprint muscle pull" => $"{playerName} pulls up suddenly after a sprint.",
             "over exhaustion" => $"{playerName} drops to the turf after pushing through exhaustion.",
+            "training overload" => $"{playerName} is ruled out after an overloaded training week.",
+            "training muscle strain" => $"{playerName} suffers a muscle strain in preparation.",
+            "training knock" => $"{playerName} picks up a knock during training.",
             "awkward landing" => $"{playerName} goes down after an awkward landing.",
             _ => $"{playerName} goes down after a heavy collision."
         };
@@ -505,12 +556,14 @@ public class MatchEventFactory
             ? $"{player.Name} scores from the penalty spot for {team.Name}.{milestoneText}"
             : $"{player.Name}'s penalty for {team.Name} is saved.";
 
-        return CreateEvent(
+        var matchEvent = CreateEvent(
             minute,
             converted ? EventType.Goal : EventType.Save,
             $"{outcome} Score: {match.HomeTeam.Name} {match.HomeScore} - {match.AwayScore} {match.AwayTeam.Name}",
             player.Name,
             match: match);
+        matchEvent.ShotClassification = ShotClassification.Penalty;
+        return matchEvent;
     }
 
     public MatchEvent CreatePenaltyDecision(int minute, Team defendingTeam, Player defender, Player attacker, string reason)
@@ -568,7 +621,7 @@ public class MatchEventFactory
                 ? EventType.Save
                 : EventType.Miss;
 
-        return CreateEvent(
+        var matchEvent = CreateEvent(
             minute,
             eventType,
             $"{outcome} Score: {match.HomeTeam.Name} {match.HomeScore} - {match.AwayScore} {match.AwayTeam.Name}",
@@ -576,6 +629,8 @@ public class MatchEventFactory
             goalkeeper?.Name,
             match: match,
             triggeredTrait: triggeredTrait);
+        matchEvent.ShotClassification = ShotClassification.Penalty;
+        return matchEvent;
     }
 
     public MatchEvent CreateOffside(int minute, Team team, Player player)
@@ -699,7 +754,9 @@ public class MatchEventFactory
             ? Pick(new Random(minute + taker.Name.Length), $"{taker.Name} curls the free kick with real dead-ball quality for {team.Name}.", $"{taker.Name} strikes the set piece cleanly for {team.Name}.")
             : $"{taker.Name} takes the free kick for {team.Name}.";
 
-        return CreateEvent(minute, EventType.Shot, description, taker.Name, triggeredTrait: triggeredTrait);
+        var matchEvent = CreateEvent(minute, EventType.Shot, description, taker.Name, triggeredTrait: triggeredTrait);
+        matchEvent.ShotClassification = ShotClassification.FreeKick;
+        return matchEvent;
     }
 
     public MatchEvent CreateSetPieceDelivery(int minute, Team team, Player taker, Player target, PlayerTrait? triggeredTrait = null)
@@ -1371,6 +1428,42 @@ public class MatchEventFactory
             WeatherCondition = weatherCondition,
             Description = description
         };
+    }
+
+    private static ShotClassification ClassifyShot(string shotContext, string description)
+    {
+        var text = $"{shotContext} {description}";
+        if (ContainsAny(text, "penalty"))
+        {
+            return ShotClassification.Penalty;
+        }
+
+        if (ContainsAny(text, "heads", "header", "nods", "glances", "powers a header", "flicks on", "headed"))
+        {
+            return ShotClassification.Header;
+        }
+
+        if (ContainsAny(text, "volley", "volleys", "half-volley"))
+        {
+            return ShotClassification.Volley;
+        }
+
+        if (ContainsAny(text, "free kick", "free-kick", "set piece", "set-piece"))
+        {
+            return ShotClassification.FreeKick;
+        }
+
+        if (ContainsAny(text, "long-range", "long range", "from distance", "from range"))
+        {
+            return ShotClassification.LongShot;
+        }
+
+        return ShotClassification.Standard;
+    }
+
+    private static bool ContainsAny(string value, params string[] needles)
+    {
+        return needles.Any(needle => value.Contains(needle, StringComparison.OrdinalIgnoreCase));
     }
 
     private static string Pick(Random random, params string[] options)

@@ -24,6 +24,7 @@ public partial class PreMatchView : UserControl
     private readonly TacticalInsightService _tacticalInsightService = new();
     private readonly SquadSelectionService _squadSelectionService = new();
     private readonly SaveGameService _saveGameService = new();
+    private readonly FormationPresetService _formationPresetService = new();
     private const double PitchCardWidth = 128;
     private const double PitchCardHeight = 70;
 
@@ -60,6 +61,7 @@ public partial class PreMatchView : UserControl
         ShowGoalkeeperWarningIfNeeded(goalkeeperValidation);
         LoadFormationSelector(_state.SelectedTeam);
         LoadTactics(_state.SelectedTeam.Tactics);
+        LoadSavedFormationSelector(_state.SelectedTeam);
         InitializePitchSlots();
         RefreshSubstitutes();
         RefreshInjuredPlayers();
@@ -172,6 +174,27 @@ public partial class PreMatchView : UserControl
     private void LoadTactics(TeamTactics tactics)
     {
         TacticalSettingsPanel.LoadTactics(tactics);
+    }
+
+    private void LoadSavedFormationSelector(Team team)
+    {
+        SavedFormationComboBox.ItemsSource = team.FormationPresets
+            .OrderByDescending(preset => preset.UpdatedAt)
+            .ToList();
+        SavedFormationComboBox.SelectedIndex = team.FormationPresets.Count == 0 ? -1 : 0;
+        var hasPresets = team.FormationPresets.Count > 0;
+        SavedFormationComboBox.IsEnabled = hasPresets;
+        LoadSavedFormationButton.IsEnabled = hasPresets;
+        LoadSavedFormationButton.ToolTip = hasPresets
+            ? "Load the selected formation preset"
+            : "Save formation presets from My Squad.";
+    }
+
+    private void ToggleSavedFormationsButton_Click(object sender, RoutedEventArgs e)
+    {
+        var isExpanded = SavedFormationsPanel.Visibility == Visibility.Visible;
+        SavedFormationsPanel.Visibility = isExpanded ? Visibility.Collapsed : Visibility.Visible;
+        ToggleSavedFormationsButton.Content = isExpanded ? "Formation ▼" : "Formation ▲";
     }
 
     private void RenderPitch()
@@ -461,6 +484,37 @@ public partial class PreMatchView : UserControl
         }
     }
 
+    private void LoadSavedFormationButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_state.SelectedTeam is null || SavedFormationComboBox.SelectedItem is not FormationPreset preset)
+        {
+            return;
+        }
+
+        var result = _formationPresetService.ApplyPreset(_state.SelectedTeam, preset);
+        if (!result.Success)
+        {
+            MessageBox.Show(result.Message, "Saved Formations", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        _isLoadingSetup = true;
+        LoadFormationSelector(_state.SelectedTeam);
+        LoadTactics(_state.SelectedTeam.Tactics);
+        InitializePitchSlots();
+        RefreshSubstitutes();
+        RefreshInjuredPlayers();
+        RenderPitch();
+        _isLoadingSetup = false;
+        RefreshTacticalInsight();
+        SaveSetup(_state.SelectedTeam);
+
+        if (result.Warnings.Count > 0)
+        {
+            MessageBox.Show(string.Join(Environment.NewLine, result.Warnings), "Preset Loaded With Changes", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+    }
+
     private void ExecuteSwap(Player starter, Player substitute)
     {
         if (_state.SelectedTeam is null)
@@ -565,7 +619,7 @@ public partial class PreMatchView : UserControl
             .Distinct()
             .OrderByDescending(player => player.IsSuspended)
             .ThenBy(player => player.SquadNumber <= 0 ? int.MaxValue : player.SquadNumber)
-            .Select(UnavailablePlayerCard.Create)
+            .Select(player => UnavailablePlayerCard.Create(player, _state.SelectedTeam))
             .ToList();
 
         InjuredPlayersListBox.ItemsSource = injuredCards;
@@ -1380,23 +1434,70 @@ public partial class PreMatchView : UserControl
         return char.ConvertFromUtf32(0x1F7E5);
     }
 
-    private sealed class UnavailablePlayerCard
+    private sealed record UnavailablePlayerCard
     {
         public string Name { get; init; } = string.Empty;
+        public string FlagImagePath { get; init; } = "/Assets/Flags/default.png";
+        public string NationalityName { get; init; } = "Unknown nationality";
+        public string ShirtNumberText { get; init; } = string.Empty;
+        public string Position { get; init; } = string.Empty;
+        public string OverallText { get; init; } = string.Empty;
+        public double Stamina { get; init; }
+        public string StaminaBrush { get; init; } = "#2FA84F";
+        public string BenchFormBadgeText { get; init; } = string.Empty;
+        public string BenchFormBadgeBackground { get; init; } = "#E1E5EA";
+        public string BenchFormBadgeForeground { get; init; } = "#465364";
+        public string CardBackground { get; init; } = "White";
+        public string CardBorderBrush { get; init; } = "#B91C1C";
+        public string TextForeground { get; init; } = "#102033";
+        public string PositionBackground { get; init; } = "#E7EEF8";
+        public string PositionForeground { get; init; } = "#102033";
+        public string StatusText { get; init; } = "Unavailable";
+        public string StatusBadgeBackground { get; init; } = "#B91C1C";
         public string InjuryType { get; init; } = string.Empty;
         public string RecoveryText { get; init; } = string.Empty;
+        public string UnavailableInfoText => string.IsNullOrWhiteSpace(RecoveryText)
+            ? InjuryType
+            : $"{InjuryType} | {RecoveryText}";
         public string Tooltip { get; init; } = string.Empty;
+        public IReadOnlyList<PlayerTraitBadge> TraitBadges { get; init; } = [];
 
-        public static UnavailablePlayerCard Create(Player player)
+        public static UnavailablePlayerCard Create(Player player, Team team)
         {
+            PositionSuitabilityService.EnsurePositionMetadata(player);
+            var form = PlayerFormBadgeHelper.Create(player.FormStatus);
+            var teamColors = TeamColorService.GetPalette(team);
+            var nationality = PlayerNationalityDisplayService.Resolve(player);
+            var baseCard = new UnavailablePlayerCard
+            {
+                Name = player.Name,
+                FlagImagePath = nationality.FlagImagePath,
+                NationalityName = nationality.Name,
+                ShirtNumberText = player.SquadNumber > 0 ? $"#{player.SquadNumber}" : string.Empty,
+                Position = player.PreferredPosition,
+                OverallText = $"OVR {GetOverallRating(player)}",
+                Stamina = GetStaminaPercentage(player),
+                StaminaBrush = GetStaminaBrush(player),
+                BenchFormBadgeText = form.Text,
+                BenchFormBadgeBackground = form.Background,
+                BenchFormBadgeForeground = form.Foreground,
+                CardBackground = teamColors.PrimaryColor,
+                CardBorderBrush = "#B91C1C",
+                TextForeground = teamColors.TextColor,
+                PositionBackground = teamColors.SecondaryColor,
+                PositionForeground = TeamColorService.GetReadableTextColor(teamColors.SecondaryColor),
+                TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits)
+            };
+
             if (player.IsSuspended)
             {
                 var matchesText = player.SuspendedMatches == 1
                     ? "1 match"
                     : $"{player.SuspendedMatches} matches";
-                return new UnavailablePlayerCard
+                return baseCard with
                 {
-                    Name = $"{RedCardIcon()} {player.Name}",
+                    StatusText = "Banned",
+                    StatusBadgeBackground = "#7F1D1D",
                     InjuryType = "SUSPENDED",
                     RecoveryText = $"Suspended ({matchesText})",
                     Tooltip = $"Unavailable - suspended for {matchesText}"
@@ -1408,9 +1509,10 @@ public partial class PreMatchView : UserControl
                 ? "Recovery: Season"
                 : $"Recovery: {Math.Max(1, player.InjuryRecoveryMatches)} Matches";
 
-            return new UnavailablePlayerCard
+            return baseCard with
             {
-                Name = $"X {player.Name}",
+                StatusText = "Injured",
+                StatusBadgeBackground = "#DC2626",
                 InjuryType = string.IsNullOrWhiteSpace(player.InjuryType)
                     ? severity
                     : $"{player.InjuryType} | {severity}",

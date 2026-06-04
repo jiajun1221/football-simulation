@@ -6,7 +6,7 @@ namespace FootballSimulation.Services;
 
 public class SaveGameService
 {
-    public const int CurrentSaveVersion = 2;
+    public const int CurrentSaveVersion = 3;
     public const int MaxSaveSlots = 3;
 
     private const string SaveFolderName = "WPFFootballSimulator";
@@ -118,6 +118,7 @@ public class SaveGameService
             PlayerStats = league.PlayerStats.Count > 0
                 ? league.PlayerStats
                 : new PlayerSeasonStatsService().RebuildSeasonStats(league),
+            SeasonHistory = league.SeasonHistory,
             ClubMatchSetups = CreateClubMatchSetups(league.Teams),
             TransferMarketState = transferMarketState ?? new TransferMarketState()
         };
@@ -154,7 +155,8 @@ public class SaveGameService
                     Teams = data.Teams,
                     Fixtures = data.Fixtures,
                     Table = data.LeagueState.Table
-                })
+                }),
+            SeasonHistory = data.SeasonHistory ?? []
         };
     }
 
@@ -284,6 +286,15 @@ public class SaveGameService
 
     private static void RehydrateReferences(SaveGameData data)
     {
+        data.SeasonHistory ??= [];
+        data.LeagueState ??= new LeagueState();
+        data.Teams ??= [];
+        data.Fixtures ??= [];
+        data.MatchHistory ??= [];
+        data.PlayerStats ??= [];
+        data.ClubMatchSetups ??= [];
+        data.TransferMarketState ??= new TransferMarketState();
+
         BackfillPlayerDataFromLeagueData(data);
         foreach (var team in data.Teams)
         {

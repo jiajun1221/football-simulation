@@ -28,11 +28,11 @@ public class MatchDramaService
             };
         }
 
-        var injuryCandidate = FindInjuryCandidate(context);
+        var injuryCandidate = context.EnableInjuries ? FindInjuryCandidate(context) : null;
         if (injuryCandidate is not null && context.Random.NextDouble() < GetInjuryProbability(injuryCandidate))
         {
             var injuryCause = ChooseInjuryCause(context, injuryCandidate);
-            ApplyMatchInjury(injuryCandidate, injuryCause, context.Random);
+            InjuryRiskService.ApplyInjury(injuryCandidate, injuryCause, context.Random);
 
             return new MatchDramaResult
             {
@@ -197,70 +197,6 @@ public class MatchDramaService
     private static Team GetOpposingTeam(MatchEventContext context, Player player)
     {
         return player.TeamIs(context.HomeTeam) ? context.AwayTeam : context.HomeTeam;
-    }
-
-    private static void ApplyMatchInjury(Player player, string injuryCause, Random random)
-    {
-        var severity = ChooseInjurySeverity(player, injuryCause, random);
-        player.IsInjured = true;
-        player.NewlyInjuredThisMatch = true;
-        player.InjurySeverity = severity;
-        player.InjuryType = ChooseInjuryType(injuryCause, severity, random);
-        player.IsSeasonEndingInjury = severity == InjurySeverity.SeasonEnding;
-        player.InjuryRecoveryMatches = severity switch
-        {
-            InjurySeverity.Minor => random.Next(1, 4),
-            InjurySeverity.Moderate => random.Next(4, 11),
-            InjurySeverity.Serious => random.Next(15, 31),
-            InjurySeverity.SeasonEnding => 99,
-            _ => 1
-        };
-        player.Stamina = 0;
-        player.LiveMatchModifier = 0.25;
-    }
-
-    private static InjurySeverity ChooseInjurySeverity(Player player, string injuryCause, Random random)
-    {
-        var seriousBonus =
-            (injuryCause is "dangerous tackle" or "goalkeeper collision" or "aerial duel impact" ? 0.06 : 0.0) +
-            (player.Traits.Contains(PlayerTrait.InjuryProne) ? 0.04 : 0.0);
-        var roll = random.NextDouble();
-
-        if (roll < 0.004 + seriousBonus / 10.0)
-        {
-            return InjurySeverity.SeasonEnding;
-        }
-
-        if (roll < 0.08 + seriousBonus)
-        {
-            return InjurySeverity.Serious;
-        }
-
-        if (roll < 0.34 + seriousBonus)
-        {
-            return InjurySeverity.Moderate;
-        }
-
-        return InjurySeverity.Minor;
-    }
-
-    private static string ChooseInjuryType(string injuryCause, InjurySeverity severity, Random random)
-    {
-        if (severity == InjurySeverity.SeasonEnding)
-        {
-            return random.NextDouble() < 0.5 ? "ACL Injury" : "Fracture";
-        }
-
-        return injuryCause switch
-        {
-            "dangerous tackle" => random.NextDouble() < 0.55 ? "Ankle Injury" : "Knee Injury",
-            "goalkeeper collision" => random.NextDouble() < 0.5 ? "Shoulder Injury" : "Head Injury",
-            "aerial duel impact" => random.NextDouble() < 0.5 ? "Head Injury" : "Back Injury",
-            "sprint muscle pull" => random.NextDouble() < 0.65 ? "Hamstring Injury" : "Calf Strain",
-            "over exhaustion" => random.NextDouble() < 0.5 ? "Muscle Fatigue" : "Groin Strain",
-            "awkward landing" => random.NextDouble() < 0.5 ? "Ankle Injury" : "Knee Injury",
-            _ => random.NextDouble() < 0.5 ? "Impact Injury" : "Knock"
-        };
     }
 
     private static double GetStaminaRatio(Player player)
@@ -508,7 +444,7 @@ public class MatchDramaService
 
     private static bool IsActivePlayer(Player player)
     {
-        return player.IsOnPitch && !player.IsSentOff && !player.IsSuspended;
+        return player.IsOnPitch && !player.IsSentOff && !player.IsSuspended && !player.IsInjured;
     }
 }
 

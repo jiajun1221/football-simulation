@@ -10,6 +10,7 @@ public class LeagueEngine
     private readonly LeagueTableService _tableService;
     private readonly PlayerFormStatusService _playerFormStatusService;
     private readonly PlayerSeasonStatsService _playerSeasonStatsService = new();
+    private readonly InjuryRiskService _injuryRiskService = new();
 
     public LeagueEngine()
         : this(new MatchEngine(), new LeagueScheduleService(), new LeagueTableService())
@@ -80,8 +81,9 @@ public class LeagueEngine
             ? seed.Value + fixture.RoundNumber * 100 + fixtureIndex
             : null;
         var simulationOptions = CreateOptions(options);
-        PrepareFixtureTeams(fixture, simulationOptions);
+        PrepareFixtureTeams(fixture, simulationOptions, CreatePreparationRandom(matchSeed));
         var result = _matchEngine.SimulateMatch(fixture.HomeTeam, fixture.AwayTeam, matchSeed, options: simulationOptions);
+        _injuryRiskService.ApplyPostMatchLoad(result);
         _playerFormStatusService.UpdateMatchPlayerFormStatuses(result);
 
         fixture.Result = result;
@@ -104,7 +106,7 @@ public class LeagueEngine
             : null;
 
         var simulationOptions = CreateOptions(options);
-        PrepareFixtureTeams(fixture, simulationOptions);
+        PrepareFixtureTeams(fixture, simulationOptions, CreatePreparationRandom(matchSeed));
         return _matchEngine.SimulateFirstHalf(fixture.HomeTeam, fixture.AwayTeam, matchSeed, simulationOptions);
     }
 
@@ -112,7 +114,7 @@ public class LeagueEngine
     {
         ValidateFixtureIsPlayable(league, fixture);
         var simulationOptions = CreateOptions(options);
-        PrepareFixtureTeams(fixture, simulationOptions);
+        PrepareFixtureTeams(fixture, simulationOptions, Random.Shared);
         return _matchEngine.CreateLiveMatch(fixture.HomeTeam, fixture.AwayTeam, simulationOptions);
     }
 
@@ -145,6 +147,7 @@ public class LeagueEngine
             ? seed.Value + fixture.RoundNumber * 100 + fixtureIndex
             : null;
         var result = _matchEngine.SimulateSecondHalf(match, matchSeed, CreateOptions(options));
+        _injuryRiskService.ApplyPostMatchLoad(result);
         _playerFormStatusService.UpdateMatchPlayerFormStatuses(result);
 
         fixture.Result = result;
@@ -163,6 +166,7 @@ public class LeagueEngine
 
         fixture.Result = match;
         fixture.IsPlayed = true;
+        _injuryRiskService.ApplyPostMatchLoad(match);
         _playerFormStatusService.UpdateMatchPlayerFormStatuses(match);
 
         _tableService.ApplyMatchResult(league.Table, match);
@@ -198,8 +202,14 @@ public class LeagueEngine
         }
     }
 
-    private static void PrepareFixtureTeams(Fixture fixture, MatchSimulationOptions options)
+    private void PrepareFixtureTeams(Fixture fixture, MatchSimulationOptions options, Random random)
     {
+        if (options.EnableInjuries)
+        {
+            _ = _injuryRiskService.TryCreatePreparationInjury(fixture.HomeTeam, fixture.RoundNumber, random);
+            _ = _injuryRiskService.TryCreatePreparationInjury(fixture.AwayTeam, fixture.RoundNumber, random);
+        }
+
         if (!IsHumanControlled(fixture.HomeTeam, options))
         {
             AiLineupSelectionService.BuildRealisticLineup(fixture.HomeTeam);
@@ -223,5 +233,12 @@ public class LeagueEngine
     private static MatchSimulationOptions CreateOptions(MatchSimulationOptions? options)
     {
         return options ?? new MatchSimulationOptions();
+    }
+
+    private static Random CreatePreparationRandom(int? matchSeed)
+    {
+        return matchSeed.HasValue
+            ? new Random(unchecked(matchSeed.Value * 397 ^ 0x2F6E2B1))
+            : Random.Shared;
     }
 }
