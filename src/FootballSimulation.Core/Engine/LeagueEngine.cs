@@ -13,6 +13,8 @@ public class LeagueEngine
     private readonly PlayerFormStatusService _playerFormStatusService;
     private readonly PlayerSeasonStatsService _playerSeasonStatsService = new();
     private readonly InjuryRiskService _injuryRiskService = new();
+    private readonly YouthAcademyService _youthAcademyService = new();
+    private readonly YouthScoutService _youthScoutService = new();
 
     public LeagueEngine()
         : this(new MatchEngine(), new LeagueScheduleService(), new LeagueTableService())
@@ -55,7 +57,7 @@ public class LeagueEngine
             throw new ArgumentException("A league needs at least two teams.", nameof(teams));
         }
 
-        return new League
+        var league = new League
         {
             LeagueId = leagueId,
             Name = leagueName,
@@ -65,6 +67,10 @@ public class LeagueEngine
             Table = _tableService.CreateTable(teams),
             CompetitionStates = _seasonCalendarService.CreateInitialCompetitionStates(teams)
         };
+        _youthAcademyService.EnsureAcademies(league);
+        _youthAcademyService.GenerateSeasonalIntake(league, season);
+        _youthScoutService.EnsureScoutNetwork(league);
+        return league;
     }
 
     public Match SimulateFixture(League league, Fixture fixture, int? seed = null, MatchSimulationOptions? options = null)

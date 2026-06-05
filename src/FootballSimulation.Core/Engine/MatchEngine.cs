@@ -696,12 +696,24 @@ public class MatchEngine
         bool suppressFeedEvent = false,
         EventType? stoppageType = null)
     {
+        var previousFormation = FormationCatalogService.NormalizeFormationName(team.Formation);
         var decision = _aiManagerService.TryMakeSubstitution(
             simulationState.Match,
             team,
             minute,
             simulationState.Options,
             random);
+        var currentFormation = FormationCatalogService.NormalizeFormationName(team.Formation);
+
+        if (!suppressFeedEvent &&
+            !string.Equals(previousFormation, currentFormation, StringComparison.OrdinalIgnoreCase))
+        {
+            simulationState.MatchLog.AddEvent(CreateTacticalChangeEvent(
+                minute,
+                simulationState.Match,
+                team,
+                currentFormation));
+        }
 
         if (decision is null)
         {
@@ -717,6 +729,43 @@ public class MatchEngine
         }
 
         simulationState.SuperSubBoosts[decision.PlayerOn.Name] = minute + 10;
+    }
+
+    private static MatchEvent CreateTacticalChangeEvent(int minute, Match match, Team team, string formation)
+    {
+        return new MatchEvent
+        {
+            Minute = minute,
+            EventType = EventType.TacticalChange,
+            HomeScore = match.HomeScore,
+            AwayScore = match.AwayScore,
+            Description = $"{team.Name} switch to {formation}{CreateTacticalChangeReason(match, team, minute)}."
+        };
+    }
+
+    private static string CreateTacticalChangeReason(Match match, Team team, int minute)
+    {
+        if (IsTeamWinning(match, team) && minute >= 70)
+        {
+            return " to protect the lead";
+        }
+
+        if (IsTeamLosing(match, team) && minute >= 78)
+        {
+            return " in search of a late goal";
+        }
+
+        if (IsTeamLosing(match, team) && minute >= 60)
+        {
+            return " to chase the game";
+        }
+
+        if (team == match.AwayTeam && minute >= 60)
+        {
+            return " to absorb pressure away from home";
+        }
+
+        return string.Empty;
     }
 
     private static bool IsSuperSubBoostActive(MatchSimulationState simulationState, Player player, int minute)
@@ -3105,6 +3154,14 @@ public class MatchEngine
             return false;
         }
 
+        var latestEventType = simulationState.MatchLog.GetEvents().LastOrDefault()?.EventType;
+        if (latestEventType.HasValue &&
+            latestEventType != triggerEventType &&
+            !IsConfrontationTriggerEvent(latestEventType, simulationState.Match.IsRivalryMatch))
+        {
+            return false;
+        }
+
         var cap = simulationState.Match.IsRivalryMatch ? 3 : 2;
         if (simulationState.ConfrontationCount >= cap)
         {
@@ -4861,7 +4918,18 @@ public class MatchEngine
         simulationState.LastRedCardMinute = minute;
         performance.RedCards = Math.Max(performance.RedCards, 1);
         performance.Rating -= reason == "second yellow" ? 1.0 : 1.35;
-        ApplyRedCardTacticalReaction(sentOffTeam, opponentTeam);
+        var redCardFormation = ApplyRedCardTacticalReaction(sentOffTeam, opponentTeam);
+        if (!string.IsNullOrWhiteSpace(redCardFormation))
+        {
+            matchLog.AddEvent(new MatchEvent
+            {
+                Minute = minute,
+                EventType = EventType.TacticalChange,
+                HomeScore = simulationState.Match.HomeScore,
+                AwayScore = simulationState.Match.AwayScore,
+                Description = $"{sentOffTeam.Name} switch to {redCardFormation} after the red card."
+            });
+        }
     }
 
     private static bool CanIssueRedCard(MatchSimulationState simulationState, Team sentOffTeam, int minute)
@@ -4888,7 +4956,7 @@ public class MatchEngine
                 simulationState.Match.WeatherCondition is WeatherCondition.HeavyRain or WeatherCondition.Storm or WeatherCondition.Snow);
     }
 
-    private static void ApplyRedCardTacticalReaction(Team sentOffTeam, Team opponentTeam)
+    private static string? ApplyRedCardTacticalReaction(Team sentOffTeam, Team opponentTeam)
     {
         sentOffTeam.Tactics.Mentality = Mentality.Defensive;
         sentOffTeam.Tactics.PressingIntensity = Math.Max(25, sentOffTeam.Tactics.PressingIntensity - 15);
@@ -4898,6 +4966,16 @@ public class MatchEngine
         opponentTeam.Tactics.Mentality = Mentality.Attacking;
         opponentTeam.Tactics.PressingIntensity = Math.Min(90, opponentTeam.Tactics.PressingIntensity + 12);
         opponentTeam.Tactics.Tempo = Math.Min(90, opponentTeam.Tactics.Tempo + 10);
+
+        var formationService = new InMatchFormationService();
+        var formation = formationService.ChooseBestFormation(sentOffTeam, ["4-5-1", "5-4-1", "5-3-2"]);
+        if (string.IsNullOrWhiteSpace(formation))
+        {
+            return null;
+        }
+
+        var result = formationService.ApplyFormation(sentOffTeam, formation);
+        return result.Success ? result.Formation : null;
     }
 
     private static Player ChoosePenaltyTaker(Team team)
@@ -5451,6 +5529,13 @@ public class MatchEngine
         return team == match.HomeTeam
             ? match.HomeScore < match.AwayScore
             : match.AwayScore < match.HomeScore;
+    }
+
+    private static bool IsTeamWinning(Match match, Team team)
+    {
+        return team == match.HomeTeam
+            ? match.HomeScore > match.AwayScore
+            : match.AwayScore > match.HomeScore;
     }
 
     private static bool IsRivalry(string homeTeamName, string awayTeamName)

@@ -98,18 +98,19 @@ public static class PositionSuitabilityService
     {
         EnsurePositionMetadata(player);
 
-        if (player.AssignedPosition == player.PreferredPosition ||
-            player.SecondaryPositions.Contains(player.AssignedPosition, StringComparer.OrdinalIgnoreCase))
+        var penalty = GetOutOfPositionPenalty(player, player.AssignedPosition);
+        if (penalty <= 0)
         {
             return 1.0;
         }
 
-        return 0.70;
+        var baseOverall = Math.Max(1, GetBaseOverall(player));
+        return Math.Clamp((baseOverall - penalty) / (double)baseOverall, 0.70, 1.0);
     }
 
     public static int GetEffectiveOverall(Player player)
     {
-        var baseOverall = PlayerOverallCalculator.CalculateOverall(player);
+        var baseOverall = GetBaseOverall(player);
 
         return (int)Math.Round(baseOverall * GetEffectivenessMultiplier(player));
     }
@@ -125,5 +126,126 @@ public static class PositionSuitabilityService
         EnsurePositionMetadata(player);
         return player.Position == Position.Goalkeeper ||
             GetNaturalExactPositions(player).Contains("GK", StringComparer.OrdinalIgnoreCase);
+    }
+
+    public static int GetOutOfPositionPenalty(Player player, string? assignedPosition = null)
+    {
+        EnsurePositionMetadata(player);
+        var slot = NormalizeExactPosition(assignedPosition) is { Length: > 0 } normalized
+            ? normalized
+            : player.AssignedPosition;
+        if (string.IsNullOrWhiteSpace(slot))
+        {
+            return 0;
+        }
+
+        var naturalPositions = GetNaturalExactPositions(player);
+        if (naturalPositions.Count > 0 &&
+            naturalPositions[0].Equals(slot, StringComparison.OrdinalIgnoreCase))
+        {
+            return 0;
+        }
+
+        if (naturalPositions.Skip(1).Contains(slot, StringComparer.OrdinalIgnoreCase))
+        {
+            return 1;
+        }
+
+        return naturalPositions
+            .Select(position => GetPositionPenalty(position, slot))
+            .DefaultIfEmpty(15)
+            .Min();
+    }
+
+    private static int GetPositionPenalty(string playerPosition, string slot)
+    {
+        if (playerPosition.Equals(slot, StringComparison.OrdinalIgnoreCase))
+        {
+            return 0;
+        }
+
+        return slot switch
+        {
+            "GK" => 99,
+            "CB" => playerPosition switch
+            {
+                "RB" or "LB" => 4,
+                "RWB" or "LWB" => 6,
+                "CDM" => 8,
+                _ => 99
+            },
+            "RB" or "LB" => playerPosition switch
+            {
+                "RWB" or "LWB" => 2,
+                "CB" => 4,
+                "CDM" => 7,
+                _ => 99
+            },
+            "RWB" or "LWB" => playerPosition switch
+            {
+                "RB" or "LB" => 2,
+                "RM" or "LM" => 4,
+                "CB" => 6,
+                "RW" or "LW" => 7,
+                _ => 99
+            },
+            "CDM" => playerPosition switch
+            {
+                "CM" => 2,
+                "CB" => 5,
+                "CAM" => 8,
+                _ => 99
+            },
+            "CM" => playerPosition switch
+            {
+                "CDM" => 2,
+                "CAM" => 3,
+                "LM" or "RM" => 4,
+                _ => 99
+            },
+            "CAM" => playerPosition switch
+            {
+                "CM" => 2,
+                "CF" => 2,
+                "LW" or "RW" or "LM" or "RM" => 4,
+                _ => 99
+            },
+            "LW" or "RW" => playerPosition switch
+            {
+                "LM" or "RM" => 2,
+                "CAM" or "CF" => 3,
+                "ST" => 5,
+                "LW" or "RW" => 4,
+                _ => 99
+            },
+            "LM" or "RM" => playerPosition switch
+            {
+                "LW" or "RW" => 2,
+                "LWB" or "RWB" or "LB" or "RB" => 5,
+                "CM" or "CAM" => 4,
+                _ => 99
+            },
+            "ST" => playerPosition switch
+            {
+                "CF" => 2,
+                "CAM" => 5,
+                "LW" or "RW" => 6,
+                _ => 99
+            },
+            "CF" => playerPosition switch
+            {
+                "ST" or "CAM" => 3,
+                "LW" or "RW" => 6,
+                _ => 99
+            },
+            _ => 15
+        };
+    }
+
+    private static int GetBaseOverall(Player player)
+    {
+        return player.OverallRating > 0
+            ? player.OverallRating
+            : PlayerOverallCalculator.CalculateOverall(player);
     }
 }

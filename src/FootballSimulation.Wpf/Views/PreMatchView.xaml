@@ -218,11 +218,14 @@
                     MinHeight="70"
                     Background="{Binding CardBackground}"
                     BorderBrush="{Binding CardBorderBrush}"
-                    BorderThickness="1"
+                    BorderThickness="{Binding CardBorderThickness}"
                     CornerRadius="10"
                     Padding="6"
                     Margin="0,0,0,7"
-                    AllowDrop="True"
+                    Opacity="{Binding CardOpacity}"
+                    Cursor="{Binding CardCursor}"
+                    ToolTip="{Binding Tooltip}"
+                    AllowDrop="{Binding CanInteract}"
                     PreviewMouseLeftButtonDown="SubstituteCard_PreviewMouseLeftButtonDown"
                     MouseMove="SubstituteCard_MouseMove"
                     PreviewDragEnter="SubstituteCard_DragEnter"
@@ -312,6 +315,26 @@
                     <StackPanel Grid.Row="2"
                                 Orientation="Horizontal"
                                 Margin="0,3,0,0">
+                        <Border Background="{Binding StatusBadgeBackground}"
+                                CornerRadius="7"
+                                Padding="5,1"
+                                HorizontalAlignment="Left"
+                                Margin="0,0,2,0">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding StatusText}" Value="">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <TextBlock Text="{Binding StatusText}"
+                                       Foreground="#FFFFFF"
+                                       FontSize="7"
+                                       FontWeight="Bold" />
+                        </Border>
                         <Border Background="{Binding BenchFormBadgeBackground}"
                                 CornerRadius="7"
                                 Padding="5,1"
@@ -343,128 +366,6 @@
                     </StackPanel>
 
                     <ProgressBar Grid.Row="3"
-                                 Height="5"
-                                 Minimum="0"
-                                 Maximum="100"
-                                 Value="{Binding Stamina}"
-                                 Foreground="{Binding StaminaBrush}"
-                                 Background="{DynamicResource AppBorderBrush}"
-                                 BorderThickness="0"
-                                 Margin="0,5,0,0" />
-                </Grid>
-            </Border>
-        </DataTemplate>
-
-        <DataTemplate x:Key="InjuredPlayerCardTemplate">
-            <Border MinWidth="128"
-                    MinHeight="94"
-                    Background="{Binding CardBackground}"
-                    BorderBrush="{Binding CardBorderBrush}"
-                    BorderThickness="2"
-                    CornerRadius="10"
-                    Padding="6"
-                    Margin="0,0,0,7"
-                    Opacity="0.82"
-                    Cursor="No"
-                    ToolTip="{Binding Tooltip}">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-
-                    <Grid Grid.Row="0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Text="{Binding ShirtNumberText}"
-                                   Foreground="{Binding TextForeground}"
-                                   FontSize="10"
-                                   FontWeight="Bold"
-                                   VerticalAlignment="Center"
-                                   Margin="0,0,4,0" />
-                        <TextBlock Grid.Column="1"
-                                   Text="{Binding OverallText}"
-                                   Foreground="{Binding TextForeground}"
-                                   FontSize="9.5"
-                                   FontWeight="Black"
-                                   VerticalAlignment="Center" />
-                        <Border Grid.Column="2"
-                                Background="{Binding PositionBackground}"
-                                CornerRadius="7"
-                                Padding="5,1">
-                            <TextBlock Text="{Binding Position}"
-                                       Foreground="{Binding PositionForeground}"
-                                       FontSize="7.5"
-                                       FontWeight="Black" />
-                        </Border>
-                    </Grid>
-
-                    <Grid Grid.Row="1" VerticalAlignment="Center" Margin="0,4,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <Image Source="{Binding FlagImagePath}"
-                               ToolTip="{Binding NationalityName}"
-                               Width="14"
-                               Height="10"
-                               Stretch="UniformToFill"
-                               Margin="0,0,4,0"
-                               VerticalAlignment="Center" />
-                        <TextBlock Grid.Column="1"
-                                   Text="{Binding Name}"
-                                   Foreground="{Binding TextForeground}"
-                                   FontSize="9.2"
-                                   FontWeight="Black"
-                                   TextTrimming="CharacterEllipsis"
-                                   TextWrapping="NoWrap"
-                                   VerticalAlignment="Center" />
-                    </Grid>
-
-                    <WrapPanel Grid.Row="2" Margin="0,3,0,0">
-                        <Border Background="{Binding StatusBadgeBackground}"
-                                CornerRadius="7"
-                                Padding="5,1"
-                                Margin="0,0,2,2">
-                            <TextBlock Text="{Binding StatusText}"
-                                       Foreground="#FFFFFF"
-                                       FontSize="7"
-                                       FontWeight="Bold" />
-                        </Border>
-                        <Border Background="{Binding BenchFormBadgeBackground}"
-                                CornerRadius="7"
-                                Padding="5,1"
-                                Margin="0,0,2,2">
-                            <TextBlock Text="{Binding BenchFormBadgeText}"
-                                       Foreground="{Binding BenchFormBadgeForeground}"
-                                       FontSize="7"
-                                       FontWeight="Bold" />
-                        </Border>
-                        <ItemsControl ItemsSource="{Binding TraitBadges}"
-                                      ItemTemplate="{StaticResource TraitIconBadgeTemplate}"
-                                      Margin="0,0,0,2">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel Orientation="Horizontal" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                        </ItemsControl>
-                    </WrapPanel>
-
-                    <TextBlock Grid.Row="3"
-                               Text="{Binding UnavailableInfoText}"
-                               Foreground="#FECACA"
-                               FontSize="8"
-                               FontWeight="Bold"
-                               TextTrimming="CharacterEllipsis"
-                               Margin="0,2,0,0" />
-                    <ProgressBar Grid.Row="4"
                                  Height="5"
                                  Minimum="0"
                                  Maximum="100"
@@ -771,7 +672,7 @@
                                                       ShadowDepth="2"
                                                       Opacity="0.26" />
                                 </Border.Effect>
-                                <StackPanel Width="122">
+                                <StackPanel Width="168">
                                     <TextBlock Text="Formation ⚽"
                                                FontSize="10"
                                                FontWeight="Bold"
@@ -780,7 +681,21 @@
                                     <ComboBox x:Name="FormationComboBox"
                                               Height="28"
                                               FontSize="12"
-                                              SelectionChanged="FormationComboBox_SelectionChanged" />
+                                              SelectionChanged="FormationComboBox_SelectionChanged">
+                                        <ComboBox.GroupStyle>
+                                            <GroupStyle>
+                                                <GroupStyle.HeaderTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Name}"
+                                                                   FontSize="10"
+                                                                   FontWeight="Black"
+                                                                   Foreground="#2563EB"
+                                                                   Margin="6,6,0,3" />
+                                                    </DataTemplate>
+                                                </GroupStyle.HeaderTemplate>
+                                            </GroupStyle>
+                                        </ComboBox.GroupStyle>
+                                    </ComboBox>
                                 </StackPanel>
                             </Border>
                         </Grid>
@@ -871,32 +786,6 @@
                             <ListBox.ItemTemplate>
                                 <StaticResource ResourceKey="SubstituteCardTemplate" />
                             </ListBox.ItemTemplate>
-                        </ListBox>
-                        <TextBlock x:Name="InjuredPlayersTitleTextBlock"
-                                   Grid.Row="2"
-                                   Text="Unavailable Players"
-                                   Foreground="#FFD1D1"
-                                   FontSize="14"
-                                   FontWeight="Bold"
-                                   Margin="0,12,0,6"
-                                   Visibility="Collapsed" />
-                        <ListBox x:Name="InjuredPlayersListBox"
-                                 Grid.Row="3"
-                                 ItemTemplate="{StaticResource InjuredPlayerCardTemplate}"
-                                 Background="Transparent"
-                                 BorderThickness="0"
-                                 Visibility="Collapsed"
-                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                            <ListBox.ItemContainerStyle>
-                                <Style TargetType="ListBoxItem">
-                                    <Setter Property="Padding" Value="0" />
-                                    <Setter Property="Margin" Value="0" />
-                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                                    <Setter Property="VerticalContentAlignment" Value="Stretch" />
-                                    <Setter Property="Background" Value="Transparent" />
-                                    <Setter Property="BorderThickness" Value="0" />
-                                </Style>
-                            </ListBox.ItemContainerStyle>
                         </ListBox>
                     </Grid>
                     </Border>

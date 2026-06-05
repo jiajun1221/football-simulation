@@ -17,6 +17,11 @@ public class TransferMarketService
     {
     }
 
+    public TransferMarketService(int seed)
+        : this(new LeagueDataService(), new ClubFinanceService(), new PlayerMarketValueCalculator(), new TransferWindowService(), seed)
+    {
+    }
+
     public TransferMarketService(
         LeagueDataService leagueDataService,
         ClubFinanceService financeService,
@@ -332,7 +337,8 @@ public class TransferMarketService
 
     public void RunAiTransferActivity(TransferMarketState state, League activeLeague, Team selectedTeam, int currentRound)
     {
-        if (_windowService.IsWindowOpen(activeLeague, currentRound))
+        var windowPhase = _windowService.GetWindowPhase(activeLeague, currentRound);
+        if (windowPhase != TransferWindowPhase.Closed)
         {
             ProcessAgreedTransfers(state, activeLeague, currentRound);
         }
@@ -347,46 +353,423 @@ public class TransferMarketService
         state.LastAiActivityRound = currentRound;
         GenerateAiOffersForUserPlayers(state, activeLeague, selectedTeam, currentRound);
 
-        if (!_windowService.IsWindowOpen(activeLeague, currentRound))
+        if (windowPhase == TransferWindowPhase.Closed)
         {
             return;
         }
 
-        if (_random.NextDouble() > 0.35)
-        {
-            return;
-        }
+        RunAiClubTransferActivity(state, activeLeague, selectedTeam, currentRound, windowPhase);
+    }
 
+    private void RunAiClubTransferActivity(
+        TransferMarketState state,
+        League activeLeague,
+        Team selectedTeam,
+        int currentRound,
+        TransferWindowPhase windowPhase)
+    {
         var listings = GetAllListings(state, activeLeague.PlayerStats)
             .Where(listing => listing.Team != selectedTeam)
-            .Where(listing => listing.Player.Role is PlayerRole.Rotation or PlayerRole.Backup or PlayerRole.Prospect)
-            .OrderBy(_ => _random.Next())
-            .Take(20)
+            .Where(listing => listing.Team.Name != "Free Agents")
+            .Where(listing => listing.Player.TransferStatus != PlayerTransferStatus.Unavailable)
+            .Where(listing => !listing.Player.IsInjured)
             .ToList();
+        var buyers = GetAiTransferBuyers(state, selectedTeam)
+            .OrderByDescending(buyer => buyer.ActivityWeight + _random.NextDouble())
+            .Take(GetBuyerPoolSize(windowPhase))
+            .ToList();
+        var completedTransfers = 0;
+        var maxTransfers = GetAiTransferRoundLimit(windowPhase);
+        var movedPlayerIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var listing in listings)
+        foreach (var buyer in buyers)
         {
-            var buyer = GetAllTeams(state)
-                .Where(item => item.Team != listing.Team && item.Team != selectedTeam)
-                .OrderBy(_ => _random.Next())
-                .FirstOrDefault();
+            if (completedTransfers >= maxTransfers)
+            {
+                break;
+            }
 
-            if (buyer.Team is null)
+            var candidate = SelectAiTransferCandidate(state, buyer, listings, movedPlayerIds, windowPhase);
+            if (candidate is null)
             {
                 continue;
             }
 
-            var finance = _financeService.GetOrCreateFinance(state, buyer.LeagueId, buyer.Team);
-            if (finance.AvailableTransferBudget < listing.MarketValue)
+            if (CompleteTransfer(state, candidate.Listing, buyer.LeagueId, buyer.Team, candidate.Fee, currentRound, candidate.Reason))
             {
-                continue;
-            }
-
-            if (CompleteTransfer(state, listing, buyer.LeagueId, buyer.Team, RoundFee(listing.MarketValue), currentRound, "AI Transfer"))
-            {
-                return;
+                movedPlayerIds.Add(candidate.Listing.Player.PlayerId);
+                completedTransfers++;
+                AddMajorTransferNotification(state, candidate, currentRound);
             }
         }
+    }
+
+    private List<AiTransferBuyer> GetAiTransferBuyers(TransferMarketState state, Team selectedTeam)
+    {
+        return GetAllTeams(state)
+            .Where(item => item.Team != selectedTeam)
+            .Select(item =>
+            {
+                var finance = _financeService.GetOrCreateFinance(state, item.LeagueId, item.Team);
+                var averageRating = GetTeamAverageRating(item.Team);
+                var reputation = ClubFinanceService.GetReputationScore(item.Team.Name, averageRating);
+                return new AiTransferBuyer(
+                    item.LeagueId,
+                    item.Team,
+                    finance,
+                    averageRating,
+                    reputation,
+                    ClubFinanceService.GetTransferActivityWeight(item.Team.Name, finance.AvailableTransferBudget, averageRating),
+                    ClubFinanceService.IsBigClub(item.Team.Name),
+                    ClubFinanceService.IsEliteClub(item.Team.Name));
+            })
+            .Where(buyer => buyer.Finance.AvailableTransferBudget >= 5_000_000m)
+            .ToList();
+    }
+
+    private AiTransferCandidate? SelectAiTransferCandidate(
+        TransferMarketState state,
+        AiTransferBuyer buyer,
+        IReadOnlyList<TransferPlayerListing> listings,
+        ISet<string> movedPlayerIds,
+        TransferWindowPhase windowPhase)
+    {
+        var candidates = listings
+            .Where(listing => !movedPlayerIds.Contains(listing.Player.PlayerId))
+            .Where(listing => listing.Team != buyer.Team)
+            .Where(listing => CanAiClubTargetPlayer(buyer, listing, windowPhase))
+            .Select(listing =>
+            {
+                var needScore = GetSquadNeedScore(buyer.Team, listing.Player);
+                var fee = CalculateAiTransferFee(listing, buyer, windowPhase, needScore);
+                var score = ScoreAiTransferTarget(buyer, listing, needScore, fee, windowPhase);
+                return new AiTransferCandidate(listing, buyer, needScore, score, fee, CreateAiTransferType(buyer, listing, needScore, windowPhase));
+            })
+            .Where(candidate => candidate.Fee <= buyer.Finance.AvailableTransferBudget)
+            .Where(candidate => candidate.TargetScore > 0)
+            .Where(candidate => CanSellingClubReleasePlayer(candidate.Listing, candidate.Fee))
+            .Where(candidate => WouldPlayerAcceptAiMove(candidate.Listing, buyer, candidate.Fee))
+            .OrderByDescending(candidate => candidate.TargetScore + _random.NextDouble() * 6)
+            .Take(8)
+            .ToList();
+
+        if (candidates.Count == 0)
+        {
+            return null;
+        }
+
+        var selected = candidates[_random.Next(Math.Min(3, candidates.Count))];
+        return _random.NextDouble() <= GetAiCompletionChance(selected, windowPhase)
+            ? selected
+            : null;
+    }
+
+    private static bool CanAiClubTargetPlayer(AiTransferBuyer buyer, TransferPlayerListing listing, TransferWindowPhase windowPhase)
+    {
+        var player = listing.Player;
+        if (player.ContractStatus is PlayerContractStatus.FreeAgent or PlayerContractStatus.Expired)
+        {
+            return true;
+        }
+
+        if (player.Role is PlayerRole.KeyPlayer && !buyer.IsEliteClub && player.OverallRating >= 86)
+        {
+            return false;
+        }
+
+        if (windowPhase is TransferWindowPhase.January or TransferWindowPhase.JanuaryDeadline &&
+            player.Role is PlayerRole.KeyPlayer &&
+            player.TransferStatus != PlayerTransferStatus.Listed)
+        {
+            return false;
+        }
+
+        if (buyer.IsBigClub)
+        {
+            return player.OverallRating >= 76 ||
+                player.PotentialOverall >= 84 ||
+                player.TransferStatus == PlayerTransferStatus.Listed ||
+                PlayerContractService.GetYearsRemaining(player) <= 1;
+        }
+
+        return player.Role is PlayerRole.Rotation or PlayerRole.Backup or PlayerRole.Prospect ||
+            player.TransferStatus == PlayerTransferStatus.Listed ||
+            player.OverallRating <= buyer.AverageRating + 2;
+    }
+
+    private decimal CalculateAiTransferFee(
+        TransferPlayerListing listing,
+        AiTransferBuyer buyer,
+        TransferWindowPhase windowPhase,
+        double needScore)
+    {
+        var player = listing.Player;
+        var sellingAverageRating = GetTeamAverageRating(listing.Team);
+        var sellingReputation = ClubFinanceService.GetReputationScore(listing.Team.Name, sellingAverageRating);
+        var isWonderkid = player.Age is <= 23 && player.PotentialOverall >= 86;
+        var isUrgent = needScore >= 18 ||
+            windowPhase is TransferWindowPhase.SummerDeadline or TransferWindowPhase.JanuaryDeadline ||
+            buyer.Team.Players.Concat(buyer.Team.Substitutes).Any(candidate => candidate.Position == player.Position && candidate.IsInjured);
+        var modifier = 0.90m + (decimal)_random.NextDouble() * 0.30m;
+
+        if (buyer.IsEliteClub)
+        {
+            modifier += 0.18m;
+        }
+        else if (buyer.IsBigClub)
+        {
+            modifier += 0.10m;
+        }
+
+        if (isUrgent)
+        {
+            modifier += windowPhase is TransferWindowPhase.January or TransferWindowPhase.JanuaryDeadline ? 0.16m : 0.24m;
+        }
+
+        if (isWonderkid)
+        {
+            modifier += 0.20m + (decimal)_random.NextDouble() * 0.30m;
+        }
+
+        if (ClubFinanceService.IsBigClub(listing.Team.Name))
+        {
+            modifier += 0.18m;
+        }
+
+        if (buyer.IsBigClub && ClubFinanceService.IsBigClub(listing.Team.Name) &&
+            buyer.LeagueId.Equals(listing.LeagueId, StringComparison.OrdinalIgnoreCase))
+        {
+            modifier += 0.28m;
+        }
+
+        modifier += player.Role switch
+        {
+            PlayerRole.KeyPlayer => 0.28m,
+            PlayerRole.Starter => 0.14m,
+            PlayerRole.Backup => -0.06m,
+            _ => 0.0m
+        };
+
+        if (sellingReputation > buyer.Reputation)
+        {
+            modifier += 0.08m;
+        }
+
+        if (windowPhase == TransferWindowPhase.January && !isUrgent)
+        {
+            modifier -= 0.06m;
+        }
+
+        var minimumSellerFee = listing.AskingPrice * (isUrgent ? 0.98m : 0.90m);
+        if (player.Role == PlayerRole.KeyPlayer)
+        {
+            minimumSellerFee = Math.Max(minimumSellerFee, listing.AskingPrice * 1.08m);
+        }
+
+        return RoundFee(Math.Max(listing.MarketValue * Math.Clamp(modifier, 0.90m, 1.90m), minimumSellerFee));
+    }
+
+    private static double ScoreAiTransferTarget(
+        AiTransferBuyer buyer,
+        TransferPlayerListing listing,
+        double needScore,
+        decimal fee,
+        TransferWindowPhase windowPhase)
+    {
+        var player = listing.Player;
+        var positionGroup = buyer.Team.Players.Concat(buyer.Team.Substitutes)
+            .Where(candidate => candidate.Position == player.Position)
+            .ToList();
+        var bestCurrent = positionGroup.Count == 0 ? 0 : positionGroup.Max(candidate => candidate.OverallRating);
+        var agingStarterBonus = positionGroup.Any(candidate => candidate.IsStarter && candidate.Age >= 31) && player.Age is <= 27 ? 7 : 0;
+        var poorFormBonus = positionGroup.Count(candidate => candidate.FormStatus is PlayerFormStatus.Poor or PlayerFormStatus.VeryPoor) * 2.5;
+        var potentialBonus = player.Age is <= 23 ? Math.Max(0, (player.PotentialOverall ?? player.OverallRating) - player.OverallRating) * 0.9 : 0;
+        var starUpgradeBonus = buyer.IsBigClub && player.OverallRating >= bestCurrent ? 8 : 0;
+        var listedBonus = player.TransferStatus == PlayerTransferStatus.Listed ? 5 : 0;
+        var deadlineBonus = windowPhase is TransferWindowPhase.SummerDeadline or TransferWindowPhase.JanuaryDeadline ? 4 : 0;
+        var affordabilityPenalty = fee > buyer.Finance.AvailableTransferBudget * 0.70m ? 10 : 0;
+
+        return needScore +
+            Math.Max(0, player.OverallRating - buyer.AverageRating) +
+            agingStarterBonus +
+            poorFormBonus +
+            potentialBonus +
+            starUpgradeBonus +
+            listedBonus +
+            deadlineBonus -
+            affordabilityPenalty;
+    }
+
+    private static bool CanSellingClubReleasePlayer(TransferPlayerListing listing, decimal fee)
+    {
+        if (listing.Team.Name == "Free Agents")
+        {
+            return true;
+        }
+
+        var player = listing.Player;
+        var remainingPositionPlayers = listing.Team.Players.Concat(listing.Team.Substitutes)
+            .Where(candidate => candidate.PlayerId != player.PlayerId && candidate.Position == player.Position)
+            .ToList();
+        var minimumDepth = player.Position switch
+        {
+            Position.Goalkeeper => 1,
+            Position.Forward => 2,
+            _ => 3
+        };
+
+        if (remainingPositionPlayers.Count < minimumDepth && fee < listing.AskingPrice * 1.55m)
+        {
+            return false;
+        }
+
+        var replacementRating = remainingPositionPlayers.OrderByDescending(candidate => candidate.OverallRating).FirstOrDefault()?.OverallRating ?? 0;
+        var isCriticalStarter = listing.Team.Players.Contains(player) &&
+            player.Role is PlayerRole.KeyPlayer or PlayerRole.Starter &&
+            replacementRating < player.OverallRating - 4;
+        if (isCriticalStarter && fee < listing.AskingPrice * (player.Role == PlayerRole.KeyPlayer ? 1.40m : 1.20m))
+        {
+            return false;
+        }
+
+        return player.TransferStatus == PlayerTransferStatus.Listed ||
+            player.Role is PlayerRole.Backup or PlayerRole.Prospect or PlayerRole.Rotation ||
+            fee >= listing.AskingPrice * 0.98m;
+    }
+
+    private static bool WouldPlayerAcceptAiMove(TransferPlayerListing listing, AiTransferBuyer buyer, decimal fee)
+    {
+        var player = listing.Player;
+        var sellerAverageRating = GetTeamAverageRating(listing.Team);
+        var sellerReputation = ClubFinanceService.GetReputationScore(listing.Team.Name, sellerAverageRating);
+        var proposedWage = PlayerContractService.EstimateWeeklyWage(player, buyer.LeagueId);
+        var currentWage = player.WeeklyWage ?? proposedWage * 0.85m;
+        var sameLeagueBigMove = buyer.LeagueId.Equals(listing.LeagueId, StringComparison.OrdinalIgnoreCase) &&
+            buyer.IsBigClub &&
+            ClubFinanceService.IsBigClub(listing.Team.Name);
+        var score = buyer.Reputation - sellerReputation;
+
+        if (proposedWage > currentWage * 1.15m)
+        {
+            score += 8;
+        }
+
+        if (buyer.IsBigClub)
+        {
+            score += 9;
+        }
+
+        if (player.TransferStatus == PlayerTransferStatus.Listed || player.Morale < 40)
+        {
+            score += 12;
+        }
+
+        if (player.Role is PlayerRole.Backup or PlayerRole.Prospect)
+        {
+            score += 8;
+        }
+
+        if (player.Role is PlayerRole.KeyPlayer or PlayerRole.Starter)
+        {
+            score -= buyer.Reputation >= sellerReputation ? 2 : 8;
+        }
+
+        if (sameLeagueBigMove)
+        {
+            score -= 8;
+        }
+
+        if (fee >= listing.AskingPrice * 1.35m)
+        {
+            score += 5;
+        }
+
+        return score >= -2;
+    }
+
+    private static double GetAiCompletionChance(AiTransferCandidate candidate, TransferWindowPhase windowPhase)
+    {
+        var chance = candidate.Buyer.IsEliteClub ? 0.78 : candidate.Buyer.IsBigClub ? 0.66 : 0.42;
+        chance += Math.Clamp(candidate.NeedScore / 80.0, 0.0, 0.18);
+        if (candidate.Listing.Player.TransferStatus == PlayerTransferStatus.Listed)
+        {
+            chance += 0.10;
+        }
+
+        if (windowPhase is TransferWindowPhase.SummerDeadline or TransferWindowPhase.JanuaryDeadline)
+        {
+            chance += 0.12;
+        }
+        else if (windowPhase == TransferWindowPhase.January)
+        {
+            chance -= 0.08;
+        }
+
+        if (candidate.Listing.Player.Role == PlayerRole.KeyPlayer)
+        {
+            chance -= 0.12;
+        }
+
+        return Math.Clamp(chance, 0.12, 0.86);
+    }
+
+    private static int GetAiTransferRoundLimit(TransferWindowPhase windowPhase)
+    {
+        return windowPhase switch
+        {
+            TransferWindowPhase.SummerDeadline => 6,
+            TransferWindowPhase.Summer => 4,
+            TransferWindowPhase.JanuaryDeadline => 4,
+            TransferWindowPhase.January => 2,
+            _ => 0
+        };
+    }
+
+    private static int GetBuyerPoolSize(TransferWindowPhase windowPhase)
+    {
+        return windowPhase switch
+        {
+            TransferWindowPhase.SummerDeadline => 24,
+            TransferWindowPhase.Summer => 18,
+            TransferWindowPhase.JanuaryDeadline => 18,
+            TransferWindowPhase.January => 12,
+            _ => 0
+        };
+    }
+
+    private static string CreateAiTransferType(AiTransferBuyer buyer, TransferPlayerListing listing, double needScore, TransferWindowPhase windowPhase)
+    {
+        if (windowPhase is TransferWindowPhase.SummerDeadline or TransferWindowPhase.JanuaryDeadline)
+        {
+            return "Deadline Transfer";
+        }
+
+        if (buyer.IsBigClub && ClubFinanceService.IsBigClub(listing.Team.Name))
+        {
+            return "Major Transfer";
+        }
+
+        if (listing.Player.Age is <= 23 && listing.Player.PotentialOverall >= 86)
+        {
+            return "Wonderkid Transfer";
+        }
+
+        return needScore >= 18 ? "Replacement Transfer" : "AI Transfer";
+    }
+
+    private void AddMajorTransferNotification(TransferMarketState state, AiTransferCandidate candidate, int currentRound)
+    {
+        if (candidate.Fee < 35_000_000m &&
+            !candidate.Buyer.IsBigClub &&
+            !ClubFinanceService.IsBigClub(candidate.Listing.Team.Name))
+        {
+            return;
+        }
+
+        var message = candidate.Reason == "Major Transfer"
+            ? $"{candidate.Buyer.Team.Name} completed a major move for {candidate.Listing.Player.Name} from {candidate.Listing.Team.Name} for {FormatMoney(candidate.Fee)}."
+            : $"{candidate.Buyer.Team.Name} signed {candidate.Listing.Player.Name} from {candidate.Listing.Team.Name} for {FormatMoney(candidate.Fee)}.";
+        AddNotification(state, TransferNotificationType.TransferCompleted, message, currentRound);
     }
 
     public void ListPlayer(TransferMarketState state, League activeLeague, Team selectedTeam, Player player, int currentRound)
@@ -1099,6 +1482,13 @@ public class TransferMarketService
         return state.Leagues.SelectMany(league => league.Teams.Select(team => (league.LeagueId, team)));
     }
 
+    private static double GetTeamAverageRating(Team team)
+    {
+        return team.Players.Concat(team.Substitutes)
+            .DefaultIfEmpty()
+            .Average(player => player?.OverallRating ?? 72);
+    }
+
     private Team FindTeam(TransferMarketState state, string leagueId, string clubName)
     {
         return state.Leagues
@@ -1465,4 +1855,22 @@ public class TransferMarketService
             ? $"€{value / 1_000_000:0.#}M"
             : $"€{value / 1_000:0}K";
     }
+
+    private sealed record AiTransferBuyer(
+        string LeagueId,
+        Team Team,
+        ClubFinance Finance,
+        double AverageRating,
+        int Reputation,
+        double ActivityWeight,
+        bool IsBigClub,
+        bool IsEliteClub);
+
+    private sealed record AiTransferCandidate(
+        TransferPlayerListing Listing,
+        AiTransferBuyer Buyer,
+        double NeedScore,
+        double TargetScore,
+        decimal Fee,
+        string Reason);
 }

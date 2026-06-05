@@ -44,6 +44,7 @@ public enum EventType
     Exhaustion,
     AddedTime,
     TimeWasting,
+    TacticalChange,
     Halftime,
     Fulltime
 }

@@ -7,6 +7,7 @@ public class AiManagerService
 {
     private readonly SquadSelectionService _squadSelectionService;
     private readonly FatigueService _fatigueService;
+    private readonly InMatchFormationService _formationService = new();
 
     public AiManagerService()
         : this(new SquadSelectionService(), new FatigueService())
@@ -222,7 +223,7 @@ public class AiManagerService
             minute is >= 60 and <= 85 && minute % 5 == 0;
     }
 
-    private static void AdjustTactics(Team team, Match match, int minute)
+    private void AdjustTactics(Team team, Match match, int minute)
     {
         if (IsLosing(match, team) && minute >= MatchConstants.HalftimeMinute)
         {
@@ -245,9 +246,16 @@ public class AiManagerService
                 team.Tactics.Mentality = minute >= 78 ? Mentality.AllOutAttack : Mentality.Attacking;
             }
 
-            if (minute == MatchConstants.HalftimeMinute && team.Formation != "4-3-3")
+            if (minute >= 78)
             {
-                team.Formation = "4-3-3";
+                ApplyBestFormation(team, (team.Name.GetHashCode() & int.MaxValue) % 2 == 0
+                    ? ["4-2-4", "3-4-3"]
+                    : ["3-4-3", "4-2-4"]);
+            }
+            else if (minute == MatchConstants.HalftimeMinute &&
+                !string.Equals(FormationCatalogService.NormalizeFormationName(team.Formation), "4-3-3 Attack", StringComparison.OrdinalIgnoreCase))
+            {
+                ApplyBestFormation(team, MapAttackingFormations(team.Formation));
             }
         }
 
@@ -264,6 +272,10 @@ public class AiManagerService
                 team.Tactics.PressingIntensity = Math.Clamp(team.Tactics.PressingIntensity - 8, 1, 100);
                 team.Tactics.Mentality = Mentality.Defensive;
             }
+
+            ApplyBestFormation(team, minute >= 80
+                ? ["5-4-1", "5-3-2", "4-5-1"]
+                : MapDefensiveFormations(team.Formation));
         }
 
         var opponent = team == match.HomeTeam ? match.AwayTeam : match.HomeTeam;
@@ -271,6 +283,47 @@ public class AiManagerService
         {
             team.Tactics.DefensiveLine = Math.Max(45, team.Tactics.DefensiveLine - 14);
         }
+
+        if (team == match.AwayTeam &&
+            minute >= 60 &&
+            !IsWinning(match, team) &&
+            team.Tactics.DefensiveLine >= 55 &&
+            match.HomeStats.TotalShots > match.AwayStats.TotalShots + 3)
+        {
+            team.Tactics.DefensiveLine = Math.Max(35, team.Tactics.DefensiveLine - 15);
+            ApplyBestFormation(team, ["4-5-1", "5-4-1"]);
+        }
+    }
+
+    private void ApplyBestFormation(Team team, IEnumerable<string> candidates)
+    {
+        var formation = _formationService.ChooseBestFormation(team, candidates);
+        if (!string.IsNullOrWhiteSpace(formation))
+        {
+            _ = _formationService.ApplyFormation(team, formation);
+        }
+    }
+
+    private static IReadOnlyList<string> MapAttackingFormations(string currentFormation)
+    {
+        return FormationCatalogService.NormalizeFormationName(currentFormation) switch
+        {
+            "4-2-3-1 Wide" or "4-2-3-1 Narrow" => ["4-3-3 Attack", "4-2-4"],
+            "4-4-2" => ["4-2-4", "4-3-3 Attack"],
+            "5-4-1" => ["3-4-3", "4-2-4"],
+            _ => ["4-3-3 Attack", "4-2-4", "3-4-3"]
+        };
+    }
+
+    private static IReadOnlyList<string> MapDefensiveFormations(string currentFormation)
+    {
+        return FormationCatalogService.NormalizeFormationName(currentFormation) switch
+        {
+            "4-3-3 Attack" or "4-3-3 Holding" or "4-3-3 Flat" => ["4-5-1", "5-4-1"],
+            "4-2-3-1 Wide" or "4-2-3-1 Narrow" => ["5-4-1", "4-5-1"],
+            "3-4-3" => ["5-3-2", "5-4-1"],
+            _ => ["5-4-1", "5-3-2", "4-5-1"]
+        };
     }
 
     private static bool IsHumanControlled(Team team, MatchSimulationOptions options)

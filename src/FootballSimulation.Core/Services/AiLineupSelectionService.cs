@@ -9,6 +9,7 @@ public static class AiLineupSelectionService
     {
         ArgumentNullException.ThrowIfNull(team);
 
+        team.Formation = SelectPreferredFormation(team);
         var slots = FormationSlotService.GetSlots(team.Formation);
         var allPlayers = team.Players
             .Concat(team.Substitutes)
@@ -16,37 +17,27 @@ public static class AiLineupSelectionService
             .Select(group => group.First())
             .ToList();
         var availablePlayers = allPlayers.Where(IsAvailableForSelection).ToList();
-        var selectedPlayers = new List<Player>();
-        var usedNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        var currentSlotByPlayerName = team.Players
-            .Select((player, index) => new
-            {
-                player.Name,
-                Slot = index < slots.Count ? slots[index] : string.Empty
-            })
-            .Where(item => !string.IsNullOrWhiteSpace(item.Slot))
-            .GroupBy(item => item.Name, StringComparer.OrdinalIgnoreCase)
-            .ToDictionary(group => group.Key, group => group.First().Slot, StringComparer.OrdinalIgnoreCase);
-
-        foreach (var slot in slots)
+        var assignment = NaturalPositionAssignmentService.Assign(availablePlayers, slots, allowEmergencyAssignments: true);
+        if (!assignment.Success)
         {
-            var selectedPlayer = ChooseForSlot(availablePlayers, usedNames, currentSlotByPlayerName, slot, allowEmergency: false) ??
-                ChooseForSlot(availablePlayers, usedNames, currentSlotByPlayerName, slot, allowEmergency: true) ??
-                ChooseFallbackForSlot(availablePlayers, usedNames, slot);
-            if (selectedPlayer is null)
-            {
-                Debug.WriteLine($"[AiLineup] No natural {slot} available for {team.Name}.");
-                continue;
-            }
-
-            usedNames.Add(selectedPlayer.Name);
-            selectedPlayer.IsStarter = true;
-            selectedPlayer.IsOnPitch = true;
-            PositionSuitabilityService.EnsurePositionMetadata(selectedPlayer, slot);
-            selectedPlayers.Add(selectedPlayer);
+            Debug.WriteLine($"[AiLineup] {team.Name}: {string.Join("; ", assignment.Warnings)}");
+            return;
         }
 
-        foreach (var player in allPlayers.Where(player => !usedNames.Contains(player.Name)))
+        var selectedPlayers = assignment.Assignments
+            .Select(item =>
+            {
+                item.Player.IsStarter = true;
+                item.Player.IsOnPitch = true;
+                PositionSuitabilityService.EnsurePositionMetadata(item.Player, item.Slot);
+                return item.Player;
+            })
+            .ToList();
+        var usedPlayerIds = selectedPlayers
+            .Select(CreatePlayerKey)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var player in allPlayers.Where(player => !usedPlayerIds.Contains(CreatePlayerKey(player))))
         {
             player.IsStarter = false;
             player.IsOnPitch = false;
@@ -54,75 +45,58 @@ public static class AiLineupSelectionService
 
         team.Players = selectedPlayers;
         team.Substitutes = allPlayers
-            .Where(player => !usedNames.Contains(player.Name))
+            .Where(player => !usedPlayerIds.Contains(CreatePlayerKey(player)))
             .OrderByDescending(IsAvailableForSelection)
             .ThenByDescending(player => player.OverallRating)
             .ThenBy(player => player.SquadNumber <= 0 ? int.MaxValue : player.SquadNumber)
             .ToList();
     }
 
-    private static Player? ChooseForSlot(
-        IEnumerable<Player> players,
-        ISet<string> usedNames,
-        IReadOnlyDictionary<string, string> currentSlotByPlayerName,
-        string slot,
-        bool allowEmergency)
-    {
-        var candidates = players
-            .Where(player => !usedNames.Contains(player.Name))
-            .Select(player => new
-            {
-                Player = player,
-                Compatibility = PositionCompatibilityService.GetCompatibilityScore(player, slot)
-            })
-            .Where(candidate => candidate.Compatibility > PositionCompatibilityService.Impossible)
-            .Where(candidate => allowEmergency || candidate.Compatibility > PositionCompatibilityService.Emergency)
-            .ToList();
-
-        if (candidates.Count == 0)
-        {
-            return null;
-        }
-
-        return candidates
-            .OrderByDescending(candidate => candidate.Compatibility)
-            .ThenByDescending(candidate =>
-                currentSlotByPlayerName.TryGetValue(candidate.Player.Name, out var currentSlot) &&
-                string.Equals(currentSlot, slot, StringComparison.OrdinalIgnoreCase))
-            .ThenByDescending(candidate => candidate.Player.OverallRating)
-            .ThenBy(candidate => candidate.Player.SquadNumber <= 0 ? int.MaxValue : candidate.Player.SquadNumber)
-            .Select(candidate => candidate.Player)
-            .FirstOrDefault();
-    }
-
-    private static Player? ChooseFallbackForSlot(
-        IEnumerable<Player> players,
-        ISet<string> usedNames,
-        string slot)
-    {
-        var normalizedSlot = PositionSuitabilityService.NormalizeExactPosition(slot);
-        if (normalizedSlot == "GK")
-        {
-            return null;
-        }
-
-        var fallback = players
-            .Where(player => !usedNames.Contains(player.Name))
-            .Where(player => !PositionSuitabilityService.IsGoalkeeperCapable(player))
-            .OrderByDescending(player => player.OverallRating)
-            .ThenBy(player => player.SquadNumber <= 0 ? int.MaxValue : player.SquadNumber)
-            .FirstOrDefault();
-
-        if (fallback is not null)
-        {
-            Debug.WriteLine($"[AiLineup] Fallback selected {fallback.Name} for {slot}.");
-        }
-
-        return fallback;
-    }
-
     private static bool IsAvailableForSelection(Player player)
     {
         return !player.IsInjured && !player.IsSuspended && !player.IsSentOff;
+    }
+
+    private static string CreatePlayerKey(Player player)
+    {
+        return !string.IsNullOrWhiteSpace(player.PlayerId)
+            ? player.PlayerId
+            : $"{player.Name}|{player.SquadNumber}";
+    }
+
+    public static string SelectPreferredFormation(Team team)
+    {
+        ArgumentNullException.ThrowIfNull(team);
+
+        if (team.Tactics.Mentality == Mentality.AllOutAttack)
+        {
+            return PickByTeamName(team, "4-2-4", "3-4-3");
+        }
+
+        if (team.Tactics.Mentality is Mentality.Defensive or Mentality.UltraDefensive)
+        {
+            return PickByTeamName(team, "5-4-1", "5-3-2");
+        }
+
+        var averageOverall = team.Players
+            .Concat(team.Substitutes)
+            .DefaultIfEmpty()
+            .Average(player => player?.OverallRating ?? 72);
+        if (averageOverall >= 83)
+        {
+            return PickByTeamName(team, "4-3-3 Holding", "4-2-3-1 Wide", "4-3-3 Attack");
+        }
+
+        if (averageOverall <= 74 || team.Tactics.Tempo >= 70 && team.Tactics.DefensiveLine <= 45)
+        {
+            return PickByTeamName(team, "4-4-2", "5-3-2", "5-4-1");
+        }
+
+        return FormationCatalogService.NormalizeFormationName(team.Formation);
+    }
+
+    private static string PickByTeamName(Team team, params string[] formations)
+    {
+        return formations[(team.Name.GetHashCode() & int.MaxValue) % formations.Length];
     }
 }

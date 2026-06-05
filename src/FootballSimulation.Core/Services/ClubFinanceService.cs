@@ -9,7 +9,9 @@ public class ClubFinanceService
         "Real Madrid",
         "Manchester City",
         "Paris Saint-Germain",
-        "PSG"
+        "PSG",
+        "Bayern Munich",
+        "Barcelona"
     };
 
     private static readonly HashSet<string> BigClubs = new(StringComparer.OrdinalIgnoreCase)
@@ -25,9 +27,12 @@ public class ClubFinanceService
         "Juventus",
         "Atletico Madrid",
         "Borussia Dortmund",
+        "Bayer Leverkusen",
         "Tottenham Hotspur",
         "Newcastle United",
         "Napoli",
+        "Benfica",
+        "Porto",
         "Roma",
         "Marseille",
         "Monaco"
@@ -105,12 +110,12 @@ public class ClubFinanceService
 
     public static decimal GetBaseBudget(string clubName, double averageRating)
     {
-        if (EliteClubs.Contains(clubName))
+        if (IsEliteClub(clubName))
         {
             return 180_000_000m;
         }
 
-        if (BigClubs.Contains(clubName))
+        if (IsBigClub(clubName))
         {
             return 120_000_000m;
         }
@@ -124,11 +129,68 @@ public class ClubFinanceService
         };
     }
 
+    public static bool IsEliteClub(string clubName)
+    {
+        return EliteClubs.Contains(NormalizeClubAlias(clubName));
+    }
+
+    public static bool IsBigClub(string clubName)
+    {
+        var normalized = NormalizeClubAlias(clubName);
+        return BigClubs.Contains(normalized) || EliteClubs.Contains(normalized);
+    }
+
+    public static int GetReputationScore(string clubName, double averageRating)
+    {
+        if (IsEliteClub(clubName))
+        {
+            return 96;
+        }
+
+        if (IsBigClub(clubName))
+        {
+            return 88;
+        }
+
+        return averageRating switch
+        {
+            >= 82 => 82,
+            >= 78 => 76,
+            >= 74 => 68,
+            _ => 58
+        };
+    }
+
+    public static double GetTransferActivityWeight(string clubName, decimal availableBudget, double averageRating)
+    {
+        var weight = IsEliteClub(clubName) ? 3.2 : IsBigClub(clubName) ? 2.35 : 1.0;
+        weight += availableBudget switch
+        {
+            >= 150_000_000m => 0.85,
+            >= 90_000_000m => 0.55,
+            >= 50_000_000m => 0.25,
+            _ => 0.0
+        };
+        weight += averageRating switch
+        {
+            >= 83 => 0.45,
+            >= 79 => 0.25,
+            _ => 0.0
+        };
+
+        return weight;
+    }
+
     public static decimal CalculateWageSpent(Team team)
     {
         return team.Players
             .Concat(team.Substitutes)
             .Sum(player => player.WeeklyWage ?? 0);
+    }
+
+    private static string NormalizeClubAlias(string clubName)
+    {
+        return clubName.Equals("Paris Saint-Germain", StringComparison.OrdinalIgnoreCase) ? "PSG" : clubName;
     }
 
     private static BudgetRolloverSummary CreateBudgetRolloverSummary(

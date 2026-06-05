@@ -1,6 +1,8 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -39,6 +41,7 @@ public partial class MatchLiveView : UserControl
     private readonly TransferMarketService _transferMarketService = new();
     private readonly SquadSelectionService _squadSelectionService = new();
     private readonly MatchEventFactory _matchEventFactory = new();
+    private readonly InMatchFormationService _inMatchFormationService = new();
     private readonly FormationLayoutService _formationLayoutService = new();
     private readonly PlayerFormStatusService _playerFormStatusService = new();
     private readonly ObservableCollection<MatchFeedItem> _visibleEvents = [];
@@ -58,6 +61,7 @@ public partial class MatchLiveView : UserControl
     private bool _isCompactLiveMatchView;
     private bool _hasStoredExpandedWindowSize;
     private bool _isCancellingPendingSubstitution;
+    private bool _isLoadingFormationControls;
     private bool _hasLoggedMinute24OpponentStamina;
     private Player? _selectedStarterForSubstitution;
     private Player? _selectedBenchForSubstitution;
@@ -272,10 +276,36 @@ public partial class MatchLiveView : UserControl
 
     private void InitializeTacticalControls()
     {
+        ActionFormationComboBox.ItemsSource = CreateFormationOptionsView();
+        TacticalFormationComboBox.ItemsSource = CreateFormationOptionsView();
+
         if (_state.SelectedTeam is not null)
         {
+            LoadFormationControls(_state.SelectedTeam.Formation);
             ActionTacticalSettingsPanel.LoadTactics(_state.SelectedTeam.Tactics);
             TacticalSettingsPanel.LoadTactics(_state.SelectedTeam.Tactics);
+        }
+    }
+
+    private static ICollectionView CreateFormationOptionsView()
+    {
+        var view = CollectionViewSource.GetDefaultView(FormationCatalogService.GetFormations().ToList());
+        view.GroupDescriptions.Add(new PropertyGroupDescription(nameof(FormationOption.Category)));
+        return view;
+    }
+
+    private void LoadFormationControls(string formation)
+    {
+        _isLoadingFormationControls = true;
+        try
+        {
+            var normalizedFormation = FormationCatalogService.NormalizeFormationName(formation);
+            ActionFormationComboBox.SelectedValue = normalizedFormation;
+            TacticalFormationComboBox.SelectedValue = normalizedFormation;
+        }
+        finally
+        {
+            _isLoadingFormationControls = false;
         }
     }
 
@@ -564,6 +594,7 @@ public partial class MatchLiveView : UserControl
     private void LoadPausedActionPanel()
     {
         var userTeam = GetUserTeam();
+        LoadFormationControls(userTeam.Formation);
         ActionTacticalSettingsPanel.LoadTactics(userTeam.Tactics);
         RefreshPausedSubstitutionViews();
         if (HasMandatoryInjurySubstitution())
@@ -629,6 +660,69 @@ public partial class MatchLiveView : UserControl
         ApplyTacticalLiveModifiers(userTeam);
     }
 
+    private void FormationComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_isLoadingFormationControls ||
+            sender is not ComboBox comboBox ||
+            comboBox.SelectedValue is not string selectedFormation)
+        {
+            return;
+        }
+
+        ApplyUserFormationChange(selectedFormation);
+    }
+
+    private void ApplyUserFormationChange(string selectedFormation)
+    {
+        if (_state.CurrentMatch is null)
+        {
+            return;
+        }
+
+        var userTeam = GetUserTeam();
+        var normalizedFormation = FormationCatalogService.NormalizeFormationName(selectedFormation);
+        var previousFormation = FormationCatalogService.NormalizeFormationName(userTeam.Formation);
+        if (string.Equals(previousFormation, normalizedFormation, StringComparison.OrdinalIgnoreCase))
+        {
+            LoadFormationControls(userTeam.Formation);
+            return;
+        }
+
+        var result = _inMatchFormationService.ApplyFormation(userTeam, normalizedFormation);
+        if (!result.Success)
+        {
+            LoadFormationControls(userTeam.Formation);
+            PausedActionStatusTextBlock.Text = result.Warnings.FirstOrDefault() ?? "Formation change rejected.";
+            return;
+        }
+
+        LoadFormationControls(result.Formation);
+        ApplyTacticalLiveModifiers(userTeam);
+        RefreshPlayerPanels();
+
+        var tacticalChangeEvent = CreateTacticalChangeEvent(userTeam, result.Formation);
+        _state.CurrentMatch.Events.Add(tacticalChangeEvent);
+        InsertFeedItemAtTop(CreateFeedItem(tacticalChangeEvent, _state.CurrentMatch));
+        UpdateLiveStatusFromEvent(tacticalChangeEvent);
+
+        PausedActionStatusTextBlock.Text = result.Warnings.Count > 0
+            ? $"{userTeam.Name} switch to {result.Formation}. {result.Warnings[0]}"
+            : $"{userTeam.Name} switch to {result.Formation}.";
+    }
+
+    private MatchEvent CreateTacticalChangeEvent(Team team, string formation)
+    {
+        var minute = _state.CurrentMatch?.CurrentMinute ?? 0;
+        return new MatchEvent
+        {
+            Minute = minute,
+            EventType = EventType.TacticalChange,
+            HomeScore = _state.CurrentMatch?.HomeScore,
+            AwayScore = _state.CurrentMatch?.AwayScore,
+            Description = $"{team.Name} switch to {formation}."
+        };
+    }
+
     private void MakeSubstitutionButton_Click(object sender, RoutedEventArgs e)
     {
         if (_state.CurrentMatch is null || _state.SelectedTeam is null)
@@ -678,6 +772,7 @@ public partial class MatchLiveView : UserControl
 
         var userTeam = GetUserTeam();
         TacticalOverlayStatusTextBlock.Text = $"{MatchEngine.FormatDisplayMinute(_state.CurrentMatch, _state.CurrentMatch.CurrentMinute)} | Adjust tactics for the next phase of play.";
+        LoadFormationControls(userTeam.Formation);
         TacticalSettingsPanel.LoadTactics(userTeam.Tactics);
 
         TacticalAdjustmentOverlay.Visibility = Visibility.Visible;
@@ -696,6 +791,7 @@ public partial class MatchLiveView : UserControl
         var userTeam = GetUserTeam();
         TacticalSettingsPanel.ApplyTo(userTeam.Tactics);
         ApplyTacticalLiveModifiers(userTeam);
+        LoadFormationControls(userTeam.Formation);
 
         TacticalAdjustmentOverlay.Visibility = Visibility.Collapsed;
         _isPausedForTacticalAdjustment = false;
@@ -1803,55 +1899,58 @@ public partial class MatchLiveView : UserControl
         IReadOnlyList<PitchPosition> formationPositions)
     {
         var remainingPlayers = players.ToList();
+        var remainingPositions = formationPositions.ToList();
         var assignments = new List<PitchSlotAssignment>();
-        foreach (var position in formationPositions)
+
+        foreach (var player in players)
         {
-            var selectedPlayer = SelectPlayerForSlot(remainingPlayers, position.ExactPosition);
-            if (selectedPlayer is null)
+            PositionSuitabilityService.EnsurePositionMetadata(player);
+            var assignedPosition = PositionSuitabilityService.NormalizeExactPosition(player.AssignedPosition);
+            var position = remainingPositions.FirstOrDefault(candidate =>
+                candidate.ExactPosition.Equals(assignedPosition, StringComparison.OrdinalIgnoreCase));
+            if (position is null)
             {
                 continue;
             }
 
-            assignments.Add(new PitchSlotAssignment(selectedPlayer, position));
-            remainingPlayers.Remove(selectedPlayer);
+            assignments.Add(new PitchSlotAssignment(player, position));
+            remainingPlayers.Remove(player);
+            remainingPositions.Remove(position);
+        }
+
+        if (remainingPlayers.Count == 0 || remainingPositions.Count == 0)
+        {
+            return assignments;
+        }
+
+        var naturalAssignment = NaturalPositionAssignmentService.Assign(
+            remainingPlayers,
+            remainingPositions.Select(position => position.ExactPosition).ToList(),
+            allowEmergencyAssignments: true);
+        if (naturalAssignment.Success)
+        {
+            foreach (var assignment in naturalAssignment.Assignments)
+            {
+                var position = remainingPositions.FirstOrDefault(candidate =>
+                    candidate.ExactPosition.Equals(assignment.Slot, StringComparison.OrdinalIgnoreCase));
+                if (position is null)
+                {
+                    continue;
+                }
+
+                assignments.Add(new PitchSlotAssignment(assignment.Player, position));
+                remainingPositions.Remove(position);
+            }
+
+            return assignments;
+        }
+
+        foreach (var pair in remainingPlayers.Zip(remainingPositions))
+        {
+            assignments.Add(new PitchSlotAssignment(pair.First, pair.Second));
         }
 
         return assignments;
-    }
-
-    private static Player? SelectPlayerForSlot(List<Player> remainingPlayers, string exactPosition)
-    {
-        var normalizedSlot = PositionSuitabilityService.NormalizeExactPosition(exactPosition);
-        if (normalizedSlot == "GK")
-        {
-            return remainingPlayers.FirstOrDefault(PositionSuitabilityService.IsGoalkeeperCapable);
-        }
-
-        var selectedPlayer = remainingPlayers
-            .Where(player => !PositionSuitabilityService.IsGoalkeeperCapable(player))
-            .Select(player => new
-            {
-                Player = player,
-                Compatibility = PositionCompatibilityService.GetCompatibilityScore(player, normalizedSlot)
-            })
-            .Where(candidate => candidate.Compatibility > PositionCompatibilityService.Impossible)
-            .OrderByDescending(candidate => candidate.Compatibility)
-            .ThenByDescending(candidate => candidate.Player.OverallRating)
-            .ThenBy(candidate => candidate.Player.SquadNumber <= 0 ? int.MaxValue : candidate.Player.SquadNumber)
-            .Select(candidate => candidate.Player)
-            .FirstOrDefault();
-
-        if (selectedPlayer is null)
-        {
-            System.Diagnostics.Debug.WriteLine($"[LineupWarning] No compatible player available for {normalizedSlot} pitch slot.");
-            selectedPlayer = remainingPlayers
-                .Where(player => !PositionSuitabilityService.IsGoalkeeperCapable(player))
-                .OrderByDescending(player => player.OverallRating)
-                .ThenBy(player => player.SquadNumber <= 0 ? int.MaxValue : player.SquadNumber)
-                .FirstOrDefault();
-        }
-
-        return selectedPlayer;
     }
 
     private LivePlayerIconViewModel CreatePitchIcon(
@@ -2374,7 +2473,7 @@ public partial class MatchLiveView : UserControl
 
     private static string TargetIcon() => char.ConvertFromUtf32(0x1F3AF);
 
-    private static string HeaderIcon() => $"{SoccerBallIcon()}↕";
+    private static string HeaderIcon() => char.ConvertFromUtf32(0x1F9E0);
 
     private static string StopIcon() => char.ConvertFromUtf32(0x1F6D1);
 
@@ -2411,6 +2510,8 @@ public partial class MatchLiveView : UserControl
     private static string BatteryIcon() => char.ConvertFromUtf32(0x1F50B);
 
     private static string RotateIcon() => char.ConvertFromUtf32(0x1F504);
+
+    private static string ClipboardIcon() => char.ConvertFromUtf32(0x1F4CB);
 
     private static string ClockIcon() => char.ConvertFromUtf32(0x23F1);
 
@@ -2752,6 +2853,7 @@ public partial class MatchLiveView : UserControl
             case EventType.RivalryAtmosphere:
             case EventType.Weather:
             case EventType.Exhaustion:
+            case EventType.TacticalChange:
                 attackingTeam = _currentPossessionTeam;
                 defendingTeam = GetOpposingTeam(attackingTeam);
                 status = attackingTeam is null ? LiveMatchStatus.Neutral : _currentLiveStatus;
@@ -3317,6 +3419,7 @@ public partial class MatchLiveView : UserControl
                 : "Referee controversy",
             EventType.Exhaustion => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "looks exhausted", "Stamina dropping"),
             EventType.Substitution => CreateSubstitutionHeadline(matchEvent),
+            EventType.TacticalChange => "Tactical change",
             EventType.Halftime => "Halftime",
             EventType.Fulltime => "Full time",
             EventType.Miss => IsPenaltyResult(matchEvent)
@@ -3363,6 +3466,7 @@ public partial class MatchLiveView : UserControl
             EventType.TimeWasting => "The clock keeps ticking.",
             EventType.Exhaustion => "Fatigue is showing.",
             EventType.Substitution => "Fresh legs arrive.",
+            EventType.TacticalChange => string.Empty,
             EventType.AddedTime => "Minimum stoppage time confirmed.",
             _ => string.Empty
         };
@@ -3808,6 +3912,7 @@ public partial class MatchLiveView : UserControl
             EventType.CrowdMomentum => AttackStyle(MegaphoneIcon(), "CROWD MOMENTUM"),
             EventType.Exhaustion => MissStyle(BatteryIcon(), "EXHAUSTION"),
             EventType.Substitution => NeutralStyle(RotateIcon(), "SUBSTITUTION"),
+            EventType.TacticalChange => NeutralStyle(ClipboardIcon(), "TACTICAL CHANGE"),
             EventType.Halftime => NeutralStyle(PauseIcon(), "HALFTIME"),
             EventType.Fulltime => MatchBoundaryStyle(CheckeredFlagIcon(), "FULLTIME"),
             _ => NeutralStyle(BulletIcon(), "EVENT")
@@ -4061,6 +4166,7 @@ public partial class MatchLiveView : UserControl
             or EventType.Confrontation
             or EventType.Exhaustion
             or EventType.TimeWasting
+            or EventType.TacticalChange
             or EventType.Substitution
             or EventType.Halftime
             or EventType.Fulltime;
@@ -4181,7 +4287,7 @@ public partial class MatchLiveView : UserControl
             NationalityName = nationality.Name,
             ShirtNumberText = player.SquadNumber > 0 ? $"#{player.SquadNumber}" : string.Empty,
             Position = exactPosition,
-            OverallText = $"OVR {GetOverallRating(player)}",
+            OverallText = $"OVR {PositionSuitabilityService.GetEffectiveOverall(player)}",
             GrowthText = PlayerGrowthDisplayHelper.CreateGrowthText(player),
             Stamina = stamina,
             StaminaBrush = GetStaminaBrush(stamina),

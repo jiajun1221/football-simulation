@@ -59,7 +59,7 @@ public class CompetitionProgressionService
         }
         else if (fixture.Competition == CompetitionType.ChampionsLeague)
         {
-            UpdateChampionsLeagueGroupTable(league, fixture);
+            UpdateChampionsLeagueLeaguePhaseTable(league, fixture);
             TryCreateChampionsLeagueKnockoutRound(league);
         }
     }
@@ -215,7 +215,7 @@ public class CompetitionProgressionService
             .ToList();
     }
 
-    private static void UpdateChampionsLeagueGroupTable(League league, Fixture fixture)
+    private static void UpdateChampionsLeagueLeaguePhaseTable(League league, Fixture fixture)
     {
         if (fixture.Result is null)
         {
@@ -223,19 +223,11 @@ public class CompetitionProgressionService
         }
 
         var state = GetOrCreateState(league, CompetitionType.ChampionsLeague);
-        var groupName = string.IsNullOrWhiteSpace(fixture.KnockoutRoundKey) ? "Group A" : fixture.KnockoutRoundKey;
-        var group = state.ChampionsLeagueGroups.FirstOrDefault(group =>
-            group.Name.Equals(groupName, StringComparison.OrdinalIgnoreCase));
-        if (group is null)
-        {
-            group = new ChampionsLeagueGroup { Name = groupName };
-            state.ChampionsLeagueGroups.Add(group);
-        }
-
-        var homeRow = GetOrCreateStandingRow(group, fixture.HomeTeam.Name);
-        var awayRow = GetOrCreateStandingRow(group, fixture.AwayTeam.Name);
+        var homeRow = GetOrCreateStandingRow(state.Standings, fixture.HomeTeam.Name);
+        var awayRow = GetOrCreateStandingRow(state.Standings, fixture.AwayTeam.Name);
         ApplyStandingResult(homeRow, fixture.Result.HomeScore, fixture.Result.AwayScore);
         ApplyStandingResult(awayRow, fixture.Result.AwayScore, fixture.Result.HomeScore);
+        state.Standings = SortStandings(state.Standings);
     }
 
     private void TryCreateChampionsLeagueKnockoutRound(League league)
@@ -246,21 +238,21 @@ public class CompetitionProgressionService
             return;
         }
 
-        var groupFixtures = league.Fixtures
+        var leaguePhaseFixtures = league.Fixtures
             .Where(fixture => fixture.Competition == CompetitionType.ChampionsLeague && !fixture.IsKnockout)
             .ToList();
-        if (groupFixtures.Count == 0 || groupFixtures.Any(fixture => !fixture.IsPlayed))
+        if (leaguePhaseFixtures.Count == 0 || leaguePhaseFixtures.Any(fixture => !fixture.IsPlayed))
         {
             return;
         }
 
         var state = GetOrCreateState(league, CompetitionType.ChampionsLeague);
-        var qualifiers = state.ChampionsLeagueGroups
-            .SelectMany(group => group.Table
-                .OrderByDescending(row => row.Points)
-                .ThenByDescending(row => row.GoalDifference)
-                .ThenByDescending(row => row.GoalsFor)
-                .Take(2))
+        state.Standings = SortStandings(state.Standings);
+        var directRoundOf16 = state.Standings.Take(8).ToList();
+        var playoffPlaces = state.Standings.Skip(8).Take(16).ToList();
+        var eliminated = state.Standings.Skip(24).ToList();
+        var qualifiers = directRoundOf16
+            .Concat(playoffPlaces.Take(8))
             .Select(row => ResolveTeam(league, row.TeamName))
             .Where(team => team is not null)
             .Cast<Team>()
@@ -272,6 +264,20 @@ public class CompetitionProgressionService
         }
 
         state.QualifiedTeamNames = qualifiers.Select(team => team.Name).ToList();
+        state.EliminatedTeamNames = eliminated.Select(row => row.TeamName).ToList();
+        state.ProgressRecords.Add(new CompetitionProgressRecord
+        {
+            Competition = CompetitionType.ChampionsLeague,
+            RoundName = "League Phase",
+            QualifiedTeamNames = directRoundOf16.Select(row => row.TeamName).ToList(),
+            EliminatedTeamNames = eliminated.Select(row => row.TeamName).ToList()
+        });
+        state.ProgressRecords.Add(new CompetitionProgressRecord
+        {
+            Competition = CompetitionType.ChampionsLeague,
+            RoundName = "League Phase Playoff Places",
+            QualifiedTeamNames = playoffPlaces.Select(row => row.TeamName).ToList()
+        });
         state.CurrentRoundName = "Round of 16";
         league.Fixtures.AddRange(_calendarService.GenerateNextCupRoundFixtures(
             CompetitionType.ChampionsLeague,
@@ -287,9 +293,9 @@ public class CompetitionProgressionService
             .ToList();
     }
 
-    private static CompetitionStandingRow GetOrCreateStandingRow(ChampionsLeagueGroup group, string teamName)
+    private static CompetitionStandingRow GetOrCreateStandingRow(List<CompetitionStandingRow> table, string teamName)
     {
-        var row = group.Table.FirstOrDefault(row => row.TeamName.Equals(teamName, StringComparison.OrdinalIgnoreCase));
+        var row = table.FirstOrDefault(row => row.TeamName.Equals(teamName, StringComparison.OrdinalIgnoreCase));
         if (row is not null)
         {
             return row;
@@ -298,10 +304,20 @@ public class CompetitionProgressionService
         row = new CompetitionStandingRow
         {
             TeamName = teamName,
-            GroupName = group.Name
+            GroupName = "League Phase"
         };
-        group.Table.Add(row);
+        table.Add(row);
         return row;
+    }
+
+    private static List<CompetitionStandingRow> SortStandings(IEnumerable<CompetitionStandingRow> table)
+    {
+        return table
+            .OrderByDescending(row => row.Points)
+            .ThenByDescending(row => row.GoalDifference)
+            .ThenByDescending(row => row.GoalsFor)
+            .ThenBy(row => row.TeamName)
+            .ToList();
     }
 
     private static void ApplyStandingResult(CompetitionStandingRow row, int goalsFor, int goalsAgainst)

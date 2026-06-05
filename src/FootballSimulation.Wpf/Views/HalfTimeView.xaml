@@ -624,7 +624,7 @@
                                                       ShadowDepth="2"
                                                       Opacity="0.26" />
                                 </Border.Effect>
-                                <StackPanel Width="122">
+                                <StackPanel Width="168">
                                     <TextBlock Text="Formation ⚽"
                                                FontSize="10"
                                                FontWeight="Bold"
@@ -633,7 +633,21 @@
                                     <ComboBox x:Name="FormationComboBox"
                                               Height="28"
                                               FontSize="12"
-                                              SelectionChanged="FormationComboBox_SelectionChanged" />
+                                              SelectionChanged="FormationComboBox_SelectionChanged">
+                                        <ComboBox.GroupStyle>
+                                            <GroupStyle>
+                                                <GroupStyle.HeaderTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Name}"
+                                                                   FontSize="10"
+                                                                   FontWeight="Black"
+                                                                   Foreground="#2563EB"
+                                                                   Margin="6,6,0,3" />
+                                                    </DataTemplate>
+                                                </GroupStyle.HeaderTemplate>
+                                            </GroupStyle>
+                                        </ComboBox.GroupStyle>
+                                    </ComboBox>
                                 </StackPanel>
                             </Border>
                         </Grid>

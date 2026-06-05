@@ -126,7 +126,8 @@ public static class PositionCompatibilityService
             {
                 "RWB" => 100,
                 "RB" => 90,
-                "RW" => 60,
+                "RM" => 60,
+                "RW" => 40,
                 "CB" => 45,
                 _ => Impossible
             },
@@ -134,7 +135,8 @@ public static class PositionCompatibilityService
             {
                 "LWB" => 100,
                 "LB" => 90,
-                "LW" => 60,
+                "LM" => 60,
+                "LW" => 40,
                 "CB" => 45,
                 _ => Impossible
             },
@@ -151,17 +153,35 @@ public static class PositionCompatibilityService
                 "CAM" or "CDM" => 60,
                 _ => Impossible
             },
+            "LM" => playerPosition switch
+            {
+                "LM" => 100,
+                "LW" => 90,
+                "LWB" or "LB" => 65,
+                "CM" or "CAM" => 55,
+                _ => Impossible
+            },
+            "RM" => playerPosition switch
+            {
+                "RM" => 100,
+                "RW" => 90,
+                "RWB" or "RB" => 65,
+                "CM" or "CAM" => 55,
+                _ => Impossible
+            },
             "CAM" => playerPosition switch
             {
                 "CAM" => 100,
                 "CM" => 60,
-                "LW" or "RW" or "CF" => 60,
+                "LM" or "RM" or "LW" or "RW" or "CF" => 60,
                 _ => Impossible
             },
             "LW" => playerPosition switch
             {
                 "LW" => 100,
+                "LM" => 90,
                 "RW" => 60,
+                "ST" => 45,
                 "LWB" => 60,
                 "CAM" or "CF" => 60,
                 _ => Impossible
@@ -169,7 +189,9 @@ public static class PositionCompatibilityService
             "RW" => playerPosition switch
             {
                 "RW" => 100,
+                "RM" => 90,
                 "LW" => 60,
+                "ST" => 45,
                 "RWB" => 60,
                 "CAM" or "CF" => 60,
                 _ => Impossible
@@ -177,8 +199,9 @@ public static class PositionCompatibilityService
             "ST" => playerPosition switch
             {
                 "ST" => 100,
-                "CF" => 60,
-                "LW" or "RW" => Emergency,
+                "CF" => 90,
+                "CAM" => 55,
+                "LW" or "RW" => 45,
                 _ => Impossible
             },
             "CF" => playerPosition switch

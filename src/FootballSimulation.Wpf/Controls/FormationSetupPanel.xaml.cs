@@ -1,6 +1,8 @@
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Data;
 using FootballSimulation.Models;
 using FootballSimulation.Services;
 using FootballSimulation.Wpf.Helpers;
@@ -11,7 +13,6 @@ namespace FootballSimulation.Wpf.Controls;
 
 public partial class FormationSetupPanel : UserControl
 {
-    private static readonly string[] SupportedFormations = ["4-3-3", "4-2-3-1", "4-4-2", "3-5-2"];
     private const double PitchCardWidth = 116;
     private const double PitchCardHeight = 66;
 
@@ -29,7 +30,9 @@ public partial class FormationSetupPanel : UserControl
     public FormationSetupPanel()
     {
         InitializeComponent();
-        FormationComboBox.ItemsSource = SupportedFormations;
+        FormationComboBox.DisplayMemberPath = nameof(FormationOption.Name);
+        FormationComboBox.SelectedValuePath = nameof(FormationOption.Name);
+        FormationComboBox.ItemsSource = CreateFormationOptionsView();
     }
 
     public event EventHandler? SetupChanged;
@@ -38,7 +41,7 @@ public partial class FormationSetupPanel : UserControl
     {
         _team = team;
         _isLoadingSetup = true;
-        FormationComboBox.SelectedItem = SupportedFormations.Contains(team.Formation) ? team.Formation : "4-3-3";
+        FormationComboBox.SelectedValue = FormationCatalogService.NormalizeFormationName(team.Formation);
         TacticalSettingsPanel.LoadTactics(team.Tactics);
         _pitchSlots = team.Players.Count == 11 ? team.Players.ToList() : OrderPlayersForPitch(team.Players, team.Formation).ToList();
         team.Players = _pitchSlots.ToList();
@@ -51,9 +54,22 @@ public partial class FormationSetupPanel : UserControl
     public void ApplyCurrentSetup()
     {
         if (_team is null) { return; }
-        if (FormationComboBox.SelectedItem is string formation) { _team.Formation = formation; }
+        if (FormationComboBox.SelectedValue is string formation) { _team.Formation = formation; }
         _team.Players = _pitchSlots.ToList();
         TacticalSettingsPanel.ApplyTo(_team.Tactics);
+    }
+
+    private static ICollectionView CreateFormationOptionsView()
+    {
+        var view = CollectionViewSource.GetDefaultView(FormationCatalogService.GetFormations().ToList());
+        view.GroupDescriptions.Add(new PropertyGroupDescription(nameof(FormationOption.Category)));
+        return view;
+    }
+
+    private string GetSelectedFormation()
+    {
+        return FormationComboBox.SelectedValue as string
+            ?? FormationCatalogService.NormalizeFormationName(_team?.Formation);
     }
 
     public void RefreshEditor()
@@ -108,6 +124,11 @@ public partial class FormationSetupPanel : UserControl
         {
             PresetNameTextBox.Text = preset.Name;
         }
+        else if (string.IsNullOrWhiteSpace(PresetNameTextBox.Text) ||
+            PresetNameTextBox.Text.Equals("Match Plan", StringComparison.OrdinalIgnoreCase))
+        {
+            PresetNameTextBox.Text = GetNextSuggestedPresetName();
+        }
 
         UpdatePresetButtonStates(presets.Count);
     }
@@ -129,8 +150,20 @@ public partial class FormationSetupPanel : UserControl
         RenamePresetButton.IsEnabled = hasSelectedPreset && hasPresetName;
         DeletePresetButton.IsEnabled = hasSelectedPreset;
         PresetSlotUsageTextBlock.Text = atLimit
-            ? "3/3 preset slots used. Overwrite or delete one to save a new setup."
-            : $"{count}/3 preset slots used.";
+            ? "5/5 setup slots used. Overwrite or delete one to save a new setup."
+            : $"{count}/5 setup slots used. Suggested slots: Default, Attacking, Defensive, Counter Attack, Custom.";
+    }
+
+    private string GetNextSuggestedPresetName()
+    {
+        if (_team is null)
+        {
+            return FormationPresetService.SuggestedPresetNames[0];
+        }
+
+        return FormationPresetService.SuggestedPresetNames
+            .FirstOrDefault(name => !_team.FormationPresets.Any(preset => preset.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
+            ?? FormationPresetService.SuggestedPresetNames[^1];
     }
 
     private void PresetComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -240,7 +273,7 @@ public partial class FormationSetupPanel : UserControl
     {
         if (_team is null || PitchCanvas.ActualWidth <= 0 || PitchCanvas.ActualHeight <= 0) { return; }
         PitchCanvas.Children.Clear();
-        var formation = FormationComboBox.SelectedItem as string ?? _team.Formation;
+        var formation = GetSelectedFormation();
         var positions = _formationLayoutService.GetPositions(formation);
         AssignFormationPositions(positions);
 
@@ -259,7 +292,7 @@ public partial class FormationSetupPanel : UserControl
     private void AssignFormationPositions(IReadOnlyList<PitchPosition>? positions = null)
     {
         if (_team is null) { return; }
-        positions ??= _formationLayoutService.GetPositions(FormationComboBox.SelectedItem as string ?? _team.Formation);
+        positions ??= _formationLayoutService.GetPositions(GetSelectedFormation());
         for (var index = 0; index < _pitchSlots.Count && index < positions.Count; index++)
         {
             if (CanPlayerOccupySlot(_pitchSlots[index], positions[index].ExactPosition))
@@ -387,7 +420,7 @@ public partial class FormationSetupPanel : UserControl
 
     private void FormationComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (_team is not null && FormationComboBox.SelectedItem is string formation)
+        if (_team is not null && FormationComboBox.SelectedValue is string formation)
         {
             _team.Formation = formation;
             if (!_isLoadingSetup)
@@ -486,7 +519,7 @@ public partial class FormationSetupPanel : UserControl
         var firstIndex = _pitchSlots.IndexOf(first);
         var secondIndex = _pitchSlots.IndexOf(second);
         if (firstIndex < 0 || secondIndex < 0) { return; }
-        var positions = _formationLayoutService.GetPositions(FormationComboBox.SelectedItem as string ?? _team.Formation);
+        var positions = _formationLayoutService.GetPositions(GetSelectedFormation());
         var firstSlot = secondIndex < positions.Count ? positions[secondIndex].ExactPosition : string.Empty;
         var secondSlot = firstIndex < positions.Count ? positions[firstIndex].ExactPosition : string.Empty;
         var hardBlockMessage = CreateHardSwapBlockMessage(first, firstSlot, second, secondSlot);

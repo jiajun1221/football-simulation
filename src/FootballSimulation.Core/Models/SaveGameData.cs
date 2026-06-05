@@ -14,6 +14,7 @@ public class SaveGameData
     public List<PlayerSeasonStats> PlayerStats { get; set; } = [];
     public List<PlayerCompetitionStats> PlayerCompetitionStats { get; set; } = [];
     public List<SeasonCompetitionState> CompetitionStates { get; set; } = [];
+    public List<YouthAcademy> YouthAcademies { get; set; } = [];
     public List<SeasonArchive> SeasonHistory { get; set; } = [];
     public List<ClubMatchSetup> ClubMatchSetups { get; set; } = [];
     public TransferMarketState TransferMarketState { get; set; } = new();

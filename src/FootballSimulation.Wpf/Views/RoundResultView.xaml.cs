@@ -70,11 +70,14 @@ public partial class RoundResultView : UserControl
     private void NextButton_Click(object sender, RoutedEventArgs e)
     {
         var isSeasonComplete = _seasonCompletionService.IsLeagueComplete(_state.League);
+        if (isSeasonComplete && _state.League is not null)
+        {
+            _state.League.IsCompleted = true;
+        }
+
         _state.CurrentFixture = null;
         _state.CurrentMatch = null;
-        _navigate(isSeasonComplete
-            ? new EndSeasonResultView(_state, _navigate)
-            : new DashboardView(_state, _navigate));
+        _navigate(new DashboardView(_state, _navigate));
     }
 
     private RoundResultRow CreateRoundResultRow(Fixture fixture, Team? selectedTeam)

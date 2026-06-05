@@ -12,6 +12,8 @@ public class GameSessionService
     private readonly InjuryRecoveryService _injuryRecoveryService = new();
     private readonly FatigueService _fatigueService = new();
     private readonly PlayerGrowthService _playerGrowthService = new();
+    private readonly YouthAcademyService _youthAcademyService = new();
+    private readonly YouthScoutService _youthScoutService = new();
 
     public GameSessionService()
         : this(new LeagueEngine(), new PlayerFormPersistenceService())
@@ -152,6 +154,13 @@ public class GameSessionService
             var gap = Math.Max(1, GetFixtureCalendarRound(nextFixture) - completedCalendarRound);
             _fatigueService.RecoverTeamForNewMatch(team, CalculateRecoveryPoints(gap));
         }
+
+        if (completedCalendarRound % 4 == 0)
+        {
+            _youthAcademyService.ApplyDevelopment(league);
+        }
+
+        _youthScoutService.AdvanceScoutingAfterCompletedCalendarSlot(league, completedCalendarRound);
     }
 
     private void ApplyGrowthForCompletedMatches(IEnumerable<Match> matches)

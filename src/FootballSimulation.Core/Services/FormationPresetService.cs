@@ -4,15 +4,16 @@ namespace FootballSimulation.Services;
 
 public class FormationPresetService
 {
-    public const int MaxPresets = 3;
+    public const int MaxPresets = 5;
     public const int MaxPresetNameLength = 24;
+    public static readonly IReadOnlyList<string> SuggestedPresetNames = ["Default", "Attacking", "Defensive", "Counter Attack", "Custom"];
 
     public FormationPresetOperationResult SaveNewPreset(Team team, string name)
     {
         ArgumentNullException.ThrowIfNull(team);
         if (team.FormationPresets.Count >= MaxPresets)
         {
-            return FormationPresetOperationResult.Failed("You can save up to 3 formation presets. Overwrite or delete one first.");
+            return FormationPresetOperationResult.Failed("You can save up to 5 formation presets. Overwrite or delete one first.");
         }
 
         var validation = ValidatePresetName(name);
@@ -101,7 +102,9 @@ public class FormationPresetService
         var starters = new List<Player>();
         var warnings = new List<string>();
 
-        team.Formation = string.IsNullOrWhiteSpace(preset.Formation) ? team.Formation : preset.Formation;
+        team.Formation = string.IsNullOrWhiteSpace(preset.Formation)
+            ? FormationCatalogService.NormalizeFormationName(team.Formation)
+            : FormationCatalogService.NormalizeFormationName(preset.Formation);
         TacticalProfileService.CopyTo(preset.Tactics, team.Tactics);
 
         foreach (var slot in preset.StartingXI)
@@ -198,7 +201,7 @@ public class FormationPresetService
         {
             Id = string.IsNullOrWhiteSpace(presetId) ? Guid.NewGuid().ToString("N") : presetId,
             Name = NormalizePresetName(name),
-            Formation = string.IsNullOrWhiteSpace(team.Formation) ? "4-3-3" : team.Formation,
+            Formation = FormationCatalogService.NormalizeFormationName(team.Formation),
             StartingXI = team.Players
                 .Take(11)
                 .Select((player, index) => new FormationPresetSlot

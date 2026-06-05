@@ -105,6 +105,51 @@ public static class PlayerNationalityDisplayService
         return fallback;
     }
 
+    public static NationalityDisplayInfo Resolve(YouthPlayer player)
+    {
+        if (!string.IsNullOrWhiteSpace(player.FlagImagePath) &&
+            !IsDefaultOrGenericUnitedKingdomFlag(player.FlagImagePath))
+        {
+            var resolved = new NationalityDisplayInfo(
+                string.IsNullOrWhiteSpace(player.NationalityCode) ? "UN" : player.NationalityCode.Trim(),
+                string.IsNullOrWhiteSpace(player.NationalityName) ? "Unknown nationality" : player.NationalityName.Trim(),
+                NormalizeFlagPath(player.FlagImagePath));
+            ApplyToYouthPlayer(player, resolved);
+            return resolved;
+        }
+
+        if (!string.IsNullOrWhiteSpace(player.NationalityName) &&
+            CountryAliases.TryGetValue(player.NationalityName.Trim(), out var aliasInfo))
+        {
+            return WithYouthPlayerOverrides(player, aliasInfo);
+        }
+
+        if (!string.IsNullOrWhiteSpace(player.NationalityName) &&
+            CodeByCountry.TryGetValue(player.NationalityName.Trim(), out var codeFromName) &&
+            CountryByCode.TryGetValue(codeFromName, out var nameInfo))
+        {
+            return WithYouthPlayerOverrides(player, nameInfo);
+        }
+
+        if (!string.IsNullOrWhiteSpace(player.NationalityCode) &&
+            CountryByCode.TryGetValue(player.NationalityCode.Trim(), out var codeInfo))
+        {
+            return WithYouthPlayerOverrides(player, codeInfo);
+        }
+
+        if (!string.IsNullOrWhiteSpace(player.Nationality) &&
+            CodeByCountry.TryGetValue(player.Nationality.Trim(), out var legacyCode) &&
+            CountryByCode.TryGetValue(legacyCode, out var legacyInfo))
+        {
+            return WithYouthPlayerOverrides(player, legacyInfo);
+        }
+
+        Debug.WriteLine($"Missing nationality flag for youth player '{player.Name}'. Using default flag.");
+        var fallback = Flag("UN", "Unknown nationality", "default");
+        ApplyToYouthPlayer(player, fallback);
+        return fallback;
+    }
+
     private static NationalityDisplayInfo WithPlayerOverrides(Player player, NationalityDisplayInfo info)
     {
         var resolved = info with
@@ -123,7 +168,33 @@ public static class PlayerNationalityDisplayService
         return resolved;
     }
 
+    private static NationalityDisplayInfo WithYouthPlayerOverrides(YouthPlayer player, NationalityDisplayInfo info)
+    {
+        var resolved = info with
+        {
+            FlagImagePath = string.IsNullOrWhiteSpace(player.FlagImagePath) ||
+                IsDefaultOrGenericUnitedKingdomFlag(player.FlagImagePath)
+                    ? info.FlagImagePath
+                    : NormalizeFlagPath(player.FlagImagePath.Trim()),
+            Name = string.IsNullOrWhiteSpace(player.NationalityName) ||
+                player.NationalityName.Equals("Unknown nationality", StringComparison.OrdinalIgnoreCase) ||
+                player.NationalityName.Equals("United Kingdom", StringComparison.OrdinalIgnoreCase)
+                    ? info.Name
+                    : player.NationalityName.Trim()
+        };
+        ApplyToYouthPlayer(player, resolved);
+        return resolved;
+    }
+
     private static void ApplyToPlayer(Player player, NationalityDisplayInfo info)
+    {
+        player.NationalityCode = info.Code;
+        player.NationalityName = info.Name;
+        player.Nationality = info.Name;
+        player.FlagImagePath = info.FlagImagePath;
+    }
+
+    private static void ApplyToYouthPlayer(YouthPlayer player, NationalityDisplayInfo info)
     {
         player.NationalityCode = info.Code;
         player.NationalityName = info.Name;
@@ -154,6 +225,18 @@ public static class PlayerNationalityDisplayService
     private static NationalityDisplayInfo Flag(string code, string name, string slug)
     {
         return new NationalityDisplayInfo(code, name, $"/Assets/Flags/{slug}.png");
+    }
+
+    private static string NormalizeFlagPath(string flagImagePath)
+    {
+        if (string.IsNullOrWhiteSpace(flagImagePath) ||
+            flagImagePath.StartsWith("/", StringComparison.Ordinal) ||
+            flagImagePath.StartsWith("pack://", StringComparison.OrdinalIgnoreCase))
+        {
+            return flagImagePath;
+        }
+
+        return $"/{flagImagePath.TrimStart('/')}";
     }
 }
 

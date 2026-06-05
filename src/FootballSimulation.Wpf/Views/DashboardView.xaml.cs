@@ -18,6 +18,8 @@ public partial class DashboardView : UserControl
     private readonly RecentResultService _recentResultService = new();
     private readonly SaveGameService _saveGameService = new();
     private readonly TransferMarketService _transferMarketService = new();
+    private readonly YouthAcademyService _youthAcademyService = new();
+    private readonly YouthScoutService _youthScoutService = new();
     private readonly SeasonCompletionService _seasonCompletionService = new();
     private CompetitionType? _fixtureFilter;
     private const string ClubsAssetPath = "Assets/Clubs";
@@ -82,20 +84,32 @@ public partial class DashboardView : UserControl
         LeagueTableDataGrid.ItemsSource = CreateLeagueTableRows(_state.League, _state.SelectedTeam);
         LoadSelectedClubStats(_state.League, _state.SelectedTeam);
 
-        var nextFixture = FindNextFixtureForTeamOrDefault(_state.League, _state.SelectedTeam);
+        var seasonComplete = IsSeasonCompleted(_state.League);
+        if (seasonComplete)
+        {
+            _state.League.IsCompleted = true;
+        }
+
+        var nextFixture = seasonComplete
+            ? null
+            : FindNextFixtureForTeamOrDefault(_state.League, _state.SelectedTeam);
         _state.CurrentFixture = nextFixture;
         if (nextFixture is null)
         {
-            LoadNoUpcomingMatch();
+            LoadNoUpcomingMatch(seasonComplete);
         }
         else
         {
             LoadUpcomingMatch(nextFixture, _state.SelectedTeam);
         }
 
-        UpcomingFixturesItemsControl.ItemsSource = CreateUpcomingFixtureRows(_state.League, _state.SelectedTeam);
-        LoadUnavailablePlayers(_state.SelectedTeam);
-        RunTransferMarketRoundProcessing();
+        UpcomingFixturesItemsControl.ItemsSource = seasonComplete
+            ? []
+            : CreateUpcomingFixtureRows(_state.League, _state.SelectedTeam);
+        if (!seasonComplete)
+        {
+            RunTransferMarketRoundProcessing();
+        }
     }
 
     private void EnsureFixtureFilterOptions()
@@ -107,13 +121,15 @@ public partial class DashboardView : UserControl
 
         var options = new List<FixtureFilterOption>
         {
-            new("All", null),
+            new("All Fixtures", null),
             new("Premier League", CompetitionType.PremierLeague),
             new("FA Cup", CompetitionType.FACup),
             new("League Cup", CompetitionType.LeagueCup),
             new("Champions League", CompetitionType.ChampionsLeague)
         };
         FixtureFilterComboBox.DisplayMemberPath = nameof(FixtureFilterOption.Label);
+        FixtureFilterComboBox.SelectedValuePath = nameof(FixtureFilterOption.Competition);
+        TextSearch.SetTextPath(FixtureFilterComboBox, nameof(FixtureFilterOption.Label));
         FixtureFilterComboBox.ItemsSource = options;
         FixtureFilterComboBox.SelectedIndex = 0;
     }
@@ -127,7 +143,9 @@ public partial class DashboardView : UserControl
 
         if (_state.League is not null && _state.SelectedTeam is not null)
         {
-            UpcomingFixturesItemsControl.ItemsSource = CreateUpcomingFixtureRows(_state.League, _state.SelectedTeam);
+            UpcomingFixturesItemsControl.ItemsSource = IsSeasonCompleted(_state.League)
+                ? []
+                : CreateUpcomingFixtureRows(_state.League, _state.SelectedTeam);
         }
     }
 
@@ -143,6 +161,12 @@ public partial class DashboardView : UserControl
         _transferMarketService.RunAiTransferActivity(
             _state.TransferMarket,
             _state.League,
+            _state.SelectedTeam,
+            GetCurrentRoundForTransferProcessing());
+        _youthAcademyService.EnsureAcademies(_state.League);
+        _youthScoutService.RunAiScoutingActivity(
+            _state.League,
+            _state.TransferMarket,
             _state.SelectedTeam,
             GetCurrentRoundForTransferProcessing());
     }
@@ -163,14 +187,19 @@ public partial class DashboardView : UserControl
 
     private void PrepareMatchButton_Click(object sender, RoutedEventArgs e)
     {
-        if (_state.CurrentFixture is null)
+        if (IsSeasonCompleted(_state.League))
         {
-            if (_seasonCompletionService.IsLeagueComplete(_state.League))
+            if (_state.League is not null)
             {
-                _navigate(new EndSeasonResultView(_state, _navigate));
-                return;
+                _state.League.IsCompleted = true;
             }
 
+            OpenSeasonResultFlow();
+            return;
+        }
+
+        if (_state.CurrentFixture is null)
+        {
             MessageBox.Show("No upcoming fixture was found.");
             return;
         }
@@ -184,6 +213,19 @@ public partial class DashboardView : UserControl
         }
 
         _navigate(new PreMatchView(_state, _navigate));
+    }
+
+    private void OpenSeasonResultFlow()
+    {
+        if (_state.League is null || _state.SelectedTeam is null)
+        {
+            MessageBox.Show("No completed season was found.");
+            return;
+        }
+
+        _navigate(IsSelectedClubChampion(_state.League, _state.SelectedTeam)
+            ? new ChampionCelebrationView(_state, _navigate)
+            : new EndSeasonResultView(_state, _navigate));
     }
 
     private void SaveGameButton_Click(object sender, RoutedEventArgs e)
@@ -221,6 +263,19 @@ public partial class DashboardView : UserControl
         _state.TransferMarket ??= _transferMarketService.CreateInitialState(_state.League);
         _transferMarketService.BindActiveLeague(_state.TransferMarket, _state.League);
         _navigate(new TransferMarketView(_state, _navigate));
+    }
+
+    private void YouthAcademyButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_state.League is null || _state.SelectedTeam is null)
+        {
+            return;
+        }
+
+        _state.TransferMarket ??= _transferMarketService.CreateInitialState(_state.League);
+        _transferMarketService.BindActiveLeague(_state.TransferMarket, _state.League);
+        _youthAcademyService.EnsureAcademies(_state.League);
+        _navigate(new YouthAcademyView(_state, _navigate));
     }
 
     public void SaveGame()
@@ -299,6 +354,7 @@ public partial class DashboardView : UserControl
         var isHome = fixture.HomeTeam == selectedTeam;
         var venue = GetVenueName(fixture.HomeTeam);
 
+        UpcomingMatchTitleTextBlock.Text = "Upcoming Match";
         UpcomingRoundTextBlock.Text = $"{CompetitionDisplayService.GetShortName(fixture.Competition)}{Environment.NewLine}{GetFixtureRoundText(fixture)}";
         UpcomingHomeNameTextBlock.Text = fixture.HomeTeam.Name;
         UpcomingAwayNameTextBlock.Text = fixture.AwayTeam.Name;
@@ -311,22 +367,30 @@ public partial class DashboardView : UserControl
         PrepareMatchButton.IsEnabled = true;
     }
 
-    private void LoadNoUpcomingMatch()
+    private void LoadNoUpcomingMatch(bool seasonComplete)
     {
-        UpcomingRoundTextBlock.Text = "Season complete";
-        UpcomingHomeNameTextBlock.Text = "-";
-        UpcomingAwayNameTextBlock.Text = "-";
+        UpcomingMatchTitleTextBlock.Text = seasonComplete ? "Season Finished" : "Upcoming Match";
+        UpcomingRoundTextBlock.Text = seasonComplete ? "Final Table" : "No fixture";
+        UpcomingHomeNameTextBlock.Text = seasonComplete ? _state.SelectedTeam?.Name ?? "-" : "-";
+        UpcomingAwayNameTextBlock.Text = seasonComplete ? "Season Finished" : "-";
         UpcomingHomeLogoImage.Source = null;
         UpcomingAwayLogoImage.Source = null;
-        VenueTextBlock.Text = _seasonCompletionService.IsLeagueComplete(_state.League)
-            ? "All league fixtures have been played."
+        if (seasonComplete && _state.SelectedTeam is not null)
+        {
+            UpcomingHomeLogoImage.Source = CreateImageSource(GetClubLogoPath(_state.SelectedTeam.Name));
+        }
+
+        VenueTextBlock.Text = seasonComplete
+            ? "All league fixtures have been played. View the season results."
             : "No upcoming fixture was found.";
-        HomeAwayBadgeTextBlock.Text = "-";
-        HomeAwayBadge.Background = new SolidColorBrush(Color.FromRgb(100, 116, 139));
-        PrepareMatchButton.Content = _seasonCompletionService.IsLeagueComplete(_state.League)
-            ? "View Season Results"
+        HomeAwayBadgeTextBlock.Text = seasonComplete ? "SEASON COMPLETE" : "-";
+        HomeAwayBadge.Background = seasonComplete
+            ? new SolidColorBrush(Color.FromRgb(183, 121, 31))
+            : new SolidColorBrush(Color.FromRgb(100, 116, 139));
+        PrepareMatchButton.Content = seasonComplete
+            ? "Season Result"
             : "Prepare Match";
-        PrepareMatchButton.IsEnabled = _seasonCompletionService.IsLeagueComplete(_state.League);
+        PrepareMatchButton.IsEnabled = seasonComplete;
     }
 
     private void LoadSelectedClubStats(League league, Team selectedTeam)
@@ -353,55 +417,6 @@ public partial class DashboardView : UserControl
             .ToList();
     }
 
-    private void LoadUnavailablePlayers(Team selectedTeam)
-    {
-        var unavailablePlayers = selectedTeam.Players
-            .Concat(selectedTeam.Substitutes)
-            .Where(player => player.IsSuspended || player.IsInjured)
-            .Distinct()
-            .OrderByDescending(player => player.IsSuspended)
-            .ThenBy(player => player.SquadNumber <= 0 ? int.MaxValue : player.SquadNumber)
-            .Select(CreateUnavailablePlayerRow)
-            .ToList();
-
-        UnavailablePlayersItemsControl.ItemsSource = unavailablePlayers;
-        UnavailablePlayersPanel.Visibility = unavailablePlayers.Count == 0
-            ? Visibility.Collapsed
-            : Visibility.Visible;
-    }
-
-    private static UnavailablePlayerRow CreateUnavailablePlayerRow(Player player)
-    {
-        if (player.IsSuspended)
-        {
-            var matchesText = player.SuspendedMatches == 1 ? "1 match" : $"{player.SuspendedMatches} matches";
-            return new UnavailablePlayerRow
-            {
-                Icon = RedCardIcon(),
-                Text = $"{player.Name} - Suspended ({matchesText})",
-                BadgeText = "SUSPENDED",
-                Tooltip = $"Unavailable - suspended for {matchesText}"
-            };
-        }
-
-        var recoveryText = player.IsSeasonEndingInjury
-            ? "season"
-            : player.InjuryRecoveryMatches == 1 ? "1 match" : $"{Math.Max(1, player.InjuryRecoveryMatches)} matches";
-
-        return new UnavailablePlayerRow
-        {
-            Icon = "+",
-            Text = $"{player.Name} - Injured ({recoveryText})",
-            BadgeText = "INJURED",
-            Tooltip = $"Unavailable - injured for {recoveryText}"
-        };
-    }
-
-    private static string RedCardIcon()
-    {
-        return char.ConvertFromUtf32(0x1F7E5);
-    }
-
     private List<UpcomingFixtureRow> CreateUpcomingFixtureRows(League league, Team selectedTeam)
     {
         var fixtures = league.Fixtures
@@ -416,15 +431,17 @@ public partial class DashboardView : UserControl
             {
                 var isHome = fixture.HomeTeam == selectedTeam;
                 var opponent = isHome ? fixture.AwayTeam : fixture.HomeTeam;
+                var opponentLogoPath = GetClubLogoPath(opponent.Name);
                 return new UpcomingFixtureRow
                 {
-                    RoundText = $"{CompetitionDisplayService.GetShortName(fixture.Competition)} {GetFixtureRoundText(fixture)}",
+                    RoundText = GetFixtureCardRoundText(fixture),
                     HomeAwayText = isHome ? "HOME" : "AWAY",
                     SummaryText = $"{CreateClubCode(opponent.Name)} {(isHome ? "H" : "A")} {CompetitionDisplayService.GetShortName(fixture.Competition)}",
                     OpponentShortName = CreateShortClubName(opponent.Name),
                     OpponentName = CreateTwoLineText(opponent.Name),
-                    VenueText = $"{CompetitionDisplayService.GetName(fixture.Competition)} - {GetVenueName(fixture.HomeTeam)}",
-                    OpponentLogoPath = GetClubLogoPath(opponent.Name),
+                    VenueText = CompetitionDisplayService.GetName(fixture.Competition),
+                    OpponentLogoPath = opponentLogoPath,
+                    OpponentLogoSource = CreateImageSource(opponentLogoPath),
                     HomeAwayBrush = CompetitionDisplayService.GetColor(fixture.Competition),
                     HomeAwayForeground = GetHomeAwayBadgeForeground(isHome)
                 };
@@ -444,6 +461,23 @@ public partial class DashboardView : UserControl
                 HomeAwayForeground = ThemeManager.GetBrushHex("AppMutedTextBrush", "#94A3B8")
             }]
             : fixtures;
+    }
+
+    private bool IsSeasonCompleted(League? league)
+    {
+        return league is not null &&
+            (league.IsCompleted || _seasonCompletionService.IsLeagueComplete(league));
+    }
+
+    private static bool IsSelectedClubChampion(League league, Team selectedTeam)
+    {
+        var champion = league.Table
+            .OrderByDescending(entry => entry.Points)
+            .ThenByDescending(entry => entry.GoalDifference)
+            .ThenByDescending(entry => entry.GoalsFor)
+            .FirstOrDefault();
+        return champion is not null &&
+            champion.TeamName.Equals(selectedTeam.Name, StringComparison.OrdinalIgnoreCase);
     }
 
     private static string GetHomeAwayBadgeBackground(bool isHome)
@@ -551,6 +585,36 @@ public partial class DashboardView : UserControl
         return string.IsNullOrWhiteSpace(fixture.RoundName)
             ? $"Round {fixture.RoundNumber}"
             : fixture.RoundName;
+    }
+
+    private static string GetFixtureCardRoundText(Fixture fixture)
+    {
+        if (fixture.Competition == CompetitionType.ChampionsLeague &&
+            TryGetChampionsLeagueMatchday(fixture, out var matchday))
+        {
+            return $"UCL MD{matchday}";
+        }
+
+        return $"{CompetitionDisplayService.GetShortName(fixture.Competition)} {GetFixtureRoundText(fixture)}";
+    }
+
+    private static bool TryGetChampionsLeagueMatchday(Fixture fixture, out int matchday)
+    {
+        matchday = 0;
+        var marker = "MD";
+        var index = fixture.RoundName.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+        if (index >= 0 && int.TryParse(new string(fixture.RoundName[(index + marker.Length)..].TakeWhile(char.IsDigit).ToArray()), out matchday))
+        {
+            return true;
+        }
+
+        if (fixture.Competition == CompetitionType.ChampionsLeague && fixture.RoundNumber is >= 1 and <= 8)
+        {
+            matchday = fixture.RoundNumber;
+            return true;
+        }
+
+        return false;
     }
 
     private static SolidColorBrush CreateBrush(string hex)
@@ -718,14 +782,6 @@ public partial class DashboardView : UserControl
         public string BadgeBrush { get; init; } = "#9AA3AF";
     }
 
-    private sealed class UnavailablePlayerRow
-    {
-        public string Icon { get; init; } = string.Empty;
-        public string Text { get; init; } = string.Empty;
-        public string BadgeText { get; init; } = string.Empty;
-        public string Tooltip { get; init; } = string.Empty;
-    }
-
     private sealed class UpcomingFixtureRow
     {
         public string RoundText { get; init; } = string.Empty;
@@ -735,9 +791,16 @@ public partial class DashboardView : UserControl
         public string OpponentName { get; init; } = string.Empty;
         public string VenueText { get; init; } = string.Empty;
         public string OpponentLogoPath { get; init; } = string.Empty;
+        public ImageSource? OpponentLogoSource { get; init; }
         public string HomeAwayBrush { get; init; } = "#E1E5EA";
         public string HomeAwayForeground { get; init; } = "#64748B";
     }
 
-    private sealed record FixtureFilterOption(string Label, CompetitionType? Competition);
+    private sealed record FixtureFilterOption(string Label, CompetitionType? Competition)
+    {
+        public override string ToString()
+        {
+            return Label;
+        }
+    }
 }

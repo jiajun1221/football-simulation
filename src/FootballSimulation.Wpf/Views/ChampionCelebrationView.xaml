@@ -1,0 +1,162 @@
+<UserControl x:Class="FootballSimulation.Wpf.Views.ChampionCelebrationView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="#07110B">
+    <Grid>
+        <Grid.Background>
+            <ImageBrush ImageSource="pack://application:,,,/Assets/Backgrounds/main-menu-stadium.png"
+                        Stretch="UniformToFill" />
+        </Grid.Background>
+
+        <Rectangle Fill="#B0071110" />
+        <Rectangle>
+            <Rectangle.Fill>
+                <RadialGradientBrush Center="0.5,0.42" GradientOrigin="0.5,0.42" RadiusX="0.74" RadiusY="0.74">
+                    <GradientStop Color="#66FACC15" Offset="0" />
+                    <GradientStop Color="#22071110" Offset="0.46" />
+                    <GradientStop Color="#DD071110" Offset="1" />
+                </RadialGradientBrush>
+            </Rectangle.Fill>
+        </Rectangle>
+
+        <Canvas IsHitTestVisible="False">
+            <TextBlock Text="✦" Foreground="#FDE68A" FontSize="28" Canvas.Left="90" Canvas.Top="70" Opacity="0.85" />
+            <TextBlock Text="✦" Foreground="#FBBF24" FontSize="18" Canvas.Right="130" Canvas.Top="92" Opacity="0.75" />
+            <TextBlock Text="✦" Foreground="#FEF3C7" FontSize="22" Canvas.Left="190" Canvas.Bottom="110" Opacity="0.70" />
+            <TextBlock Text="✦" Foreground="#F59E0B" FontSize="24" Canvas.Right="220" Canvas.Bottom="150" Opacity="0.65" />
+        </Canvas>
+
+        <Border MaxWidth="760"
+                Margin="34"
+                Padding="34"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                CornerRadius="28"
+                Background="#CC071A12"
+                BorderBrush="#D6B15E"
+                BorderThickness="1.5">
+            <Border.Effect>
+                <DropShadowEffect Color="#000000"
+                                  BlurRadius="28"
+                                  ShadowDepth="8"
+                                  Opacity="0.36" />
+            </Border.Effect>
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" HorizontalAlignment="Center">
+                    <Border Width="92"
+                            Height="92"
+                            CornerRadius="46"
+                            Background="#F8FAFC"
+                            BorderBrush="#FACC15"
+                            BorderThickness="3"
+                            Padding="10"
+                            HorizontalAlignment="Center">
+                        <Image x:Name="ClubLogoImage"
+                               Stretch="Uniform" />
+                    </Border>
+
+                    <TextBlock Text="Premier League Champions"
+                               Foreground="#FDE68A"
+                               FontSize="34"
+                               FontWeight="Black"
+                               TextAlignment="Center"
+                               Margin="0,18,0,0" />
+                    <TextBlock x:Name="ClubNameTextBlock"
+                               Foreground="#FFFFFF"
+                               FontSize="46"
+                               FontWeight="Black"
+                               TextAlignment="Center"
+                               Margin="0,4,0,0" />
+                    <TextBlock x:Name="SeasonTextBlock"
+                               Foreground="#FCD34D"
+                               FontSize="18"
+                               FontWeight="Bold"
+                               TextAlignment="Center"
+                               Margin="0,6,0,0" />
+                </StackPanel>
+
+                <Viewbox Grid.Row="1"
+                         Width="250"
+                         Height="260"
+                         HorizontalAlignment="Center"
+                         Margin="0,24,0,14">
+                    <Grid Width="260" Height="280">
+                        <Ellipse Width="228" Height="42" Fill="#8A5B13" Opacity="0.45" Canvas.Left="16" Canvas.Top="228" />
+                        <Path Fill="#FACC15"
+                              Stroke="#FFF7AD"
+                              StrokeThickness="4"
+                              Data="M 84 36 L 176 36 L 162 142 C 158 172 142 188 130 188 C 118 188 102 172 98 142 Z" />
+                        <Path Stroke="#FDE68A"
+                              StrokeThickness="14"
+                              StrokeStartLineCap="Round"
+                              StrokeEndLineCap="Round"
+                              Fill="Transparent"
+                              Data="M 86 62 C 48 62 42 98 72 118" />
+                        <Path Stroke="#FDE68A"
+                              StrokeThickness="14"
+                              StrokeStartLineCap="Round"
+                              StrokeEndLineCap="Round"
+                              Fill="Transparent"
+                              Data="M 174 62 C 212 62 218 98 188 118" />
+                        <Rectangle Width="36" Height="54" Fill="#D97706" RadiusX="8" RadiusY="8" HorizontalAlignment="Center" Margin="0,178,0,0" VerticalAlignment="Top" />
+                        <Border Width="130" Height="28" CornerRadius="10" Background="#F59E0B" BorderBrush="#FFF7AD" BorderThickness="3" HorizontalAlignment="Center" Margin="0,224,0,0" VerticalAlignment="Top" />
+                        <Border Width="168" Height="24" CornerRadius="10" Background="#B45309" BorderBrush="#FDE68A" BorderThickness="2" HorizontalAlignment="Center" Margin="0,246,0,0" VerticalAlignment="Top" />
+                        <TextBlock Text="PL"
+                                   Foreground="#78350F"
+                                   FontSize="34"
+                                   FontWeight="Black"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Top"
+                                   Margin="0,88,0,0" />
+                    </Grid>
+                </Viewbox>
+
+                <TextBlock x:Name="CelebrationTextBlock"
+                           Grid.Row="2"
+                           Foreground="#FFF7ED"
+                           FontSize="21"
+                           FontWeight="SemiBold"
+                           TextAlignment="Center"
+                           TextWrapping="Wrap"
+                           Margin="0,0,0,24" />
+
+                <Border Grid.Row="3"
+                        Background="#33FACC15"
+                        BorderBrush="#D6B15E"
+                        BorderThickness="1"
+                        CornerRadius="18"
+                        Padding="18"
+                        Margin="0,0,0,26">
+                    <TextBlock Text="The final whistle confirms a title-winning campaign. Enjoy the lap of honour before reviewing the full season."
+                               Foreground="#FEF3C7"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               TextAlignment="Center"
+                               TextWrapping="Wrap" />
+                </Border>
+
+                <Button Grid.Row="4"
+                        Content="Next"
+                        Width="190"
+                        Height="48"
+                        HorizontalAlignment="Center"
+                        Background="#FACC15"
+                        Foreground="#111827"
+                        BorderBrush="#FDE68A"
+                        BorderThickness="1"
+                        FontSize="16"
+                        FontWeight="Black"
+                        Click="NextButton_Click" />
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

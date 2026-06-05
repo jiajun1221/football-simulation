@@ -5,7 +5,7 @@ namespace FootballSimulation.Services;
 public class FatigueService
 {
     private const double BaseStaminaLossPerMinute = 0.32;
-    private const double MaximumDynamicStaminaLossPerMinute = 0.72;
+    private const double MaximumDynamicStaminaLossPerMinute = 0.82;
     private const int MinimumMatchStartRecoveryPoints = 50;
     private const int MaximumMatchStartRecoveryPoints = 60;
 
@@ -30,6 +30,7 @@ public class FatigueService
                 * GetPositionMultiplier(player.Position)
                 * GetStaminaResistanceMultiplier(player.Stamina)
                 * GetPositionSuitabilityFatigueMultiplier(player)
+                * GetFormationStaminaMultiplier(team, player)
                 * GetTraitFatigueMultiplier(player)
                 * GetActivityMultiplier(match, team, player);
 
@@ -130,6 +131,46 @@ public class FatigueService
             defensiveActions;
 
         return Math.Clamp(1.0 + activityScore * 0.015, 1.0, 1.18);
+    }
+
+    private static double GetFormationStaminaMultiplier(Team team, Player player)
+    {
+        var slots = FormationSlotService.GetSlots(team.Formation);
+        var attackerCount = slots.Count(IsAttackingSlot);
+        var defenderCount = slots.Count(IsDefensiveSlot);
+        var assignedSlot = PositionSuitabilityService.NormalizeExactPosition(player.AssignedPosition);
+
+        if (IsAttackingSlot(assignedSlot))
+        {
+            return attackerCount >= 4 ? 1.16 : attackerCount >= 3 ? 1.08 : 1.0;
+        }
+
+        if (IsMidfieldSlot(assignedSlot))
+        {
+            return slots.Count(IsMidfieldSlot) >= 5 ? 1.05 : 1.0;
+        }
+
+        if (IsDefensiveSlot(assignedSlot))
+        {
+            return defenderCount >= 5 ? 0.94 : 1.0;
+        }
+
+        return 1.0;
+    }
+
+    private static bool IsAttackingSlot(string slot)
+    {
+        return slot is "ST" or "CF" or "LW" or "RW";
+    }
+
+    private static bool IsMidfieldSlot(string slot)
+    {
+        return slot is "CDM" or "CM" or "CAM" or "LM" or "RM";
+    }
+
+    private static bool IsDefensiveSlot(string slot)
+    {
+        return slot is "CB" or "LB" or "RB" or "LWB" or "RWB";
     }
 
     private static double GetTraitFatigueMultiplier(Player player)

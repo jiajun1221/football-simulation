@@ -10,6 +10,15 @@ public static class ClubLogoService
     private const string ClubsAssetPath = "Assets/Clubs";
     private const string DefaultLogoPath = "pack://application:,,,/Assets/Clubs/default.png";
 
+    private static readonly string[] CrossLeagueLogoFolders =
+    [
+        "premier-league",
+        "la-liga",
+        "serie-a",
+        "bundesliga",
+        "ligue-1"
+    ];
+
     private static readonly Dictionary<string, string> ImportedLogoFileNames = new(StringComparer.OrdinalIgnoreCase)
     {
         ["AFC Bournemouth"] = "AFC Bournemouth.png",
@@ -100,6 +109,13 @@ public static class ClubLogoService
         }
 
         yield return $"pack://application:,,,/{ClubsAssetPath}/{slug}.png";
+        foreach (var folder in CrossLeagueLogoFolders)
+        {
+            if (!folder.Equals(leagueId, StringComparison.OrdinalIgnoreCase))
+            {
+                yield return $"pack://application:,,,/{ClubsAssetPath}/{folder}/{slug}.png";
+            }
+        }
 
         if (ImportedLogoFileNames.TryGetValue(clubName, out var importedFileName))
         {

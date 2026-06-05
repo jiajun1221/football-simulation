@@ -11,6 +11,8 @@ public class SeasonRolloverService
     private readonly LeagueTableService _leagueTableService;
     private readonly LeagueScheduleService _leagueScheduleService;
     private readonly SeasonCalendarService _seasonCalendarService = new();
+    private readonly YouthAcademyService _youthAcademyService = new();
+    private readonly YouthScoutService _youthScoutService = new();
 
     public SeasonRolloverService()
         : this(
@@ -77,8 +79,11 @@ public class SeasonRolloverService
         league.PlayerStats = [];
         league.PlayerCompetitionStats = [];
         league.CompetitionStates = _seasonCalendarService.CreateInitialCompetitionStates(league.Teams);
+        league.IsCompleted = false;
 
         ApplyOffseasonPlayerReset(league.Teams);
+        _youthAcademyService.ApplySeasonRollover(league);
+        _youthScoutService.EnsureScoutNetwork(league);
         UpdateTransferMarket(league, transferMarketState, promotedClubs);
 
         return new SeasonRolloverResult(

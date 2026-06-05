@@ -1,0 +1,753 @@
+<UserControl x:Class="FootballSimulation.Wpf.Views.YouthAcademyView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{DynamicResource AppPageBackground}">
+    <UserControl.Resources>
+        <DropShadowEffect x:Key="YouthButtonShadow"
+                          BlurRadius="12"
+                          ShadowDepth="2"
+                          Opacity="0.16"
+                          Color="#0F172A" />
+
+        <Style x:Key="PanelCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource AppCardBackground}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AppCardBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="16" />
+            <Setter Property="Padding" Value="16" />
+        </Style>
+
+        <Style x:Key="OvrBadgeBorderStyle" TargetType="Border">
+            <Setter Property="Background" Value="#041B3D" />
+            <Setter Property="BorderBrush" Value="#0B2A5B" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="MinWidth" Value="42" />
+            <Setter Property="Height" Value="26" />
+            <Setter Property="Padding" Value="8,0" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="CenteredGridTextStyle" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+        </Style>
+
+        <Style x:Key="CenteredValueTextStyle" TargetType="TextBlock" BasedOn="{StaticResource CenteredGridTextStyle}">
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+
+        <Style x:Key="LeftAlignedColumnHeaderStyle" TargetType="DataGridColumnHeader">
+            <Setter Property="Height" Value="42" />
+            <Setter Property="Padding" Value="10,6" />
+            <Setter Property="Background" Value="{DynamicResource AppCardBackground}" />
+            <Setter Property="Foreground" Value="{DynamicResource AppMutedTextBrush}" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AppCardBorderBrush}" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+
+        <DataTemplate x:Key="YouthPlayerCellTemplate">
+            <TextBlock Text="{Binding Name}"
+                       ToolTip="{Binding Name}"
+                       FontWeight="SemiBold"
+                       Foreground="{DynamicResource AppTextBrush}"
+                       VerticalAlignment="Center"
+                       TextTrimming="CharacterEllipsis" />
+        </DataTemplate>
+
+        <DataTemplate x:Key="NationalityCellTemplate">
+            <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <Image Source="{Binding NationalityFlagImagePath}"
+                       ToolTip="{Binding NationalityName}"
+                       Width="24"
+                       Height="16"
+                       Stretch="UniformToFill"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center" />
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="PotentialBadgeTemplate">
+            <Border Background="{Binding PotentialBadgeBackground}"
+                    CornerRadius="10"
+                    Height="24"
+                    Padding="8,0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    ToolTip="{Binding Potential}">
+                <TextBlock Text="{Binding PotentialBadgeText}"
+                           Foreground="{Binding PotentialBadgeForeground}"
+                           FontSize="11"
+                           FontWeight="SemiBold"
+                           VerticalAlignment="Center" />
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="DevelopmentBadgeTemplate">
+            <Border Background="{Binding DevelopmentBadgeBackground}"
+                    CornerRadius="10"
+                    Height="24"
+                    Padding="8,0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                <TextBlock Text="{Binding Development}"
+                           Foreground="{Binding DevelopmentBadgeForeground}"
+                           FontSize="11"
+                           FontWeight="SemiBold"
+                           VerticalAlignment="Center" />
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="StatusCellTemplate">
+            <Border Background="{Binding StatusBrush}"
+                    CornerRadius="10"
+                    Height="24"
+                    Padding="9,0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    ToolTip="{Binding StatusTooltip}">
+                <TextBlock Text="{Binding Status}"
+                           Foreground="{Binding StatusForeground}"
+                           FontSize="11"
+                           FontWeight="SemiBold"
+                           VerticalAlignment="Center" />
+            </Border>
+        </DataTemplate>
+
+        <Style x:Key="PrimaryActionButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="32" />
+            <Setter Property="Padding" Value="16,0" />
+            <Setter Property="Margin" Value="0,0,8,0" />
+            <Setter Property="Background" Value="#041B3D" />
+            <Setter Property="Foreground" Value="#FFFFFF" />
+            <Setter Property="BorderBrush" Value="#041B3D" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="12"
+                                Padding="{TemplateBinding Padding}">
+                            <TextBlock x:Name="ButtonText"
+                                       Text="{TemplateBinding Content}"
+                                       Foreground="{TemplateBinding Foreground}"
+                                       FontSize="{TemplateBinding FontSize}"
+                                       FontWeight="{TemplateBinding FontWeight}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       TextAlignment="Center"
+                                       TextTrimming="CharacterEllipsis" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#0B2A5B" />
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#0B2A5B" />
+                                <Setter TargetName="ButtonBorder" Property="Effect" Value="{StaticResource YouthButtonShadow}" />
+                                <Setter TargetName="ButtonText" Property="Foreground" Value="#FFFFFF" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#031632" />
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#031632" />
+                                <Setter TargetName="ButtonText" Property="Foreground" Value="#FFFFFF" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#D1D5DB" />
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#D1D5DB" />
+                                <Setter TargetName="ButtonText" Property="Foreground" Value="#6B7280" />
+                                <Setter Property="Foreground" Value="#6B7280" />
+                                <Setter Property="Cursor" Value="No" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SecondaryActionButtonStyle" TargetType="Button" BasedOn="{StaticResource PrimaryActionButtonStyle}">
+            <Setter Property="Background" Value="#FFFFFF" />
+            <Setter Property="Foreground" Value="#041B3D" />
+            <Setter Property="BorderBrush" Value="#CBD5E1" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="12"
+                                Padding="{TemplateBinding Padding}">
+                            <TextBlock x:Name="ButtonText"
+                                       Text="{TemplateBinding Content}"
+                                       Foreground="{TemplateBinding Foreground}"
+                                       FontSize="{TemplateBinding FontSize}"
+                                       FontWeight="{TemplateBinding FontWeight}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       TextAlignment="Center"
+                                       TextTrimming="CharacterEllipsis" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#F8FAFC" />
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#94A3B8" />
+                                <Setter TargetName="ButtonBorder" Property="Effect" Value="{StaticResource YouthButtonShadow}" />
+                                <Setter TargetName="ButtonText" Property="Foreground" Value="#041B3D" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#E2E8F0" />
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#64748B" />
+                                <Setter TargetName="ButtonText" Property="Foreground" Value="#041B3D" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#D1D5DB" />
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#D1D5DB" />
+                                <Setter TargetName="ButtonText" Property="Foreground" Value="#6B7280" />
+                                <Setter Property="Foreground" Value="#6B7280" />
+                                <Setter Property="Cursor" Value="No" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="TabButtonStyle" TargetType="RadioButton">
+            <Setter Property="Height" Value="38" />
+            <Setter Property="MinWidth" Value="118" />
+            <Setter Property="Padding" Value="14,0" />
+            <Setter Property="Margin" Value="0,0,4,0" />
+            <Setter Property="Background" Value="#FFFFFF" />
+            <Setter Property="Foreground" Value="#041B3D" />
+            <Setter Property="BorderBrush" Value="#CBD5E1" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="SegmentBorder"
+                                Height="{TemplateBinding Height}"
+                                MinWidth="{TemplateBinding MinWidth}"
+                                Padding="{TemplateBinding Padding}"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="12">
+                            <TextBlock x:Name="SegmentText"
+                                       Text="{TemplateBinding Content}"
+                                       Foreground="{TemplateBinding Foreground}"
+                                       FontWeight="{TemplateBinding FontWeight}"
+                                       FontSize="{TemplateBinding FontSize}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="SegmentBorder" Property="Background" Value="#F8FAFC" />
+                                <Setter TargetName="SegmentBorder" Property="BorderBrush" Value="#94A3B8" />
+                                <Setter TargetName="SegmentText" Property="Foreground" Value="#041B3D" />
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="SegmentBorder" Property="Background" Value="#041B3D" />
+                                <Setter TargetName="SegmentBorder" Property="BorderBrush" Value="#041B3D" />
+                                <Setter TargetName="SegmentBorder" Property="Effect" Value="{StaticResource YouthButtonShadow}" />
+                                <Setter TargetName="SegmentText" Property="Foreground" Value="#FFFFFF" />
+                                <Setter Property="Foreground" Value="#FFFFFF" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="SegmentBorder" Property="Background" Value="#D1D5DB" />
+                                <Setter TargetName="SegmentBorder" Property="BorderBrush" Value="#D1D5DB" />
+                                <Setter TargetName="SegmentText" Property="Foreground" Value="#6B7280" />
+                                <Setter Property="Foreground" Value="#6B7280" />
+                                <Setter Property="Cursor" Value="No" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ModernTabControlStyle" TargetType="TabControl">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabControl">
+                        <ContentPresenter ContentSource="SelectedContent" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ModernGridStyle" TargetType="DataGrid">
+            <Setter Property="AutoGenerateColumns" Value="False" />
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="HeadersVisibility" Value="Column" />
+            <Setter Property="GridLinesVisibility" Value="None" />
+            <Setter Property="RowHeight" Value="58" />
+            <Setter Property="AlternationCount" Value="2" />
+            <Setter Property="Background" Value="{DynamicResource AppCardBackground}" />
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AppCardBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CanUserAddRows" Value="False" />
+            <Setter Property="CanUserResizeRows" Value="False" />
+            <Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
+            <Setter Property="SelectionMode" Value="Single" />
+            <Setter Property="SelectionUnit" Value="FullRow" />
+            <Setter Property="ColumnHeaderStyle">
+                <Setter.Value>
+                    <Style TargetType="DataGridColumnHeader">
+                        <Setter Property="Height" Value="42" />
+                        <Setter Property="Padding" Value="10,6" />
+                        <Setter Property="Background" Value="{DynamicResource AppCardBackground}" />
+                        <Setter Property="Foreground" Value="{DynamicResource AppMutedTextBrush}" />
+                        <Setter Property="FontWeight" Value="SemiBold" />
+                        <Setter Property="BorderBrush" Value="{DynamicResource AppCardBorderBrush}" />
+                        <Setter Property="BorderThickness" Value="0,0,0,1" />
+                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                        <Setter Property="VerticalContentAlignment" Value="Center" />
+                    </Style>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="CellStyle">
+                <Setter.Value>
+                    <Style TargetType="DataGridCell">
+                        <Setter Property="Padding" Value="6,0" />
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="VerticalContentAlignment" Value="Center" />
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                    </Style>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="RowStyle">
+                <Setter.Value>
+                    <Style TargetType="DataGridRow">
+                        <Setter Property="Background" Value="{DynamicResource AppCardBackground}" />
+                        <Setter Property="BorderBrush" Value="{DynamicResource AppCardBorderBrush}" />
+                        <Setter Property="BorderThickness" Value="0,0,0,1" />
+                        <Style.Triggers>
+                            <Trigger Property="AlternationIndex" Value="1">
+                                <Setter Property="Background" Value="{DynamicResource TableAlternateRowBackground}" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#E0F2FE" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#DBEAFE" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="22,16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <DockPanel Margin="0,0,0,14">
+            <Button DockPanel.Dock="Right"
+                    Content="Back to Dashboard"
+                    Style="{StaticResource SecondaryActionButtonStyle}"
+                    Width="158"
+                    Click="BackButton_Click" />
+            <StackPanel>
+                <TextBlock Text="Youth Academy"
+                           Foreground="{DynamicResource AppTextBrush}"
+                           FontSize="28"
+                           FontWeight="Bold" />
+                <TextBlock x:Name="AcademySummaryTextBlock"
+                           Foreground="{DynamicResource AppMutedTextBrush}"
+                           FontSize="13"
+                           Margin="0,4,0,0" />
+            </StackPanel>
+        </DockPanel>
+
+        <Border Grid.Row="1"
+                Background="{DynamicResource AppSecondaryCardBackground}"
+                CornerRadius="14"
+                Padding="4"
+                HorizontalAlignment="Left"
+                Margin="0,0,0,14">
+            <StackPanel Orientation="Horizontal">
+                <RadioButton x:Name="AcademySquadTabButton"
+                             Content="Academy Squad"
+                             Tag="0"
+                             GroupName="YouthAcademyTabs"
+                             IsChecked="True"
+                             Style="{StaticResource TabButtonStyle}"
+                             Click="YouthTabButton_Click" />
+                <RadioButton x:Name="YouthScoutTabButton"
+                             Content="Youth Scout"
+                             Tag="1"
+                             GroupName="YouthAcademyTabs"
+                             Style="{StaticResource TabButtonStyle}"
+                             Click="YouthTabButton_Click" />
+            </StackPanel>
+        </Border>
+
+        <TabControl x:Name="YouthTabControl"
+                    Grid.Row="2"
+                    SelectedIndex="0"
+                    Style="{StaticResource ModernTabControlStyle}"
+                    SelectionChanged="YouthTabControl_SelectionChanged">
+            <TabItem>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="70*" />
+                        <ColumnDefinition Width="30*" />
+                    </Grid.ColumnDefinitions>
+                    <DataGrid x:Name="AcademyPlayersDataGrid"
+                              Grid.Column="0"
+                              Style="{StaticResource ModernGridStyle}"
+                              SelectionChanged="AcademyPlayersDataGrid_SelectionChanged">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="No." Binding="{Binding Number}" Width="54" ElementStyle="{StaticResource CenteredValueTextStyle}" />
+                            <DataGridTemplateColumn Header="Player" Width="1.35*" IsReadOnly="True" HeaderStyle="{StaticResource LeftAlignedColumnHeaderStyle}">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <StaticResource ResourceKey="YouthPlayerCellTemplate" />
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Nat" Width="42" IsReadOnly="True">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <StaticResource ResourceKey="NationalityCellTemplate" />
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Pos" Binding="{Binding Position}" Width="48" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                            <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="48" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                            <DataGridTemplateColumn Header="OVR" Width="60" IsReadOnly="True">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Style="{StaticResource OvrBadgeBorderStyle}">
+                                            <TextBlock Text="{Binding OverallText}" Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Potential" Width="92" IsReadOnly="True">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <StaticResource ResourceKey="PotentialBadgeTemplate" />
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Dev." Width="86" IsReadOnly="True">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <StaticResource ResourceKey="DevelopmentBadgeTemplate" />
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="90" ElementStyle="{StaticResource CenteredValueTextStyle}" />
+                            <DataGridTemplateColumn Header="Status" Width="92" IsReadOnly="True">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <StaticResource ResourceKey="StatusCellTemplate" />
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <Border Grid.Column="1"
+                            Style="{StaticResource PanelCardStyle}"
+                            Margin="14,0,0,0">
+                        <Grid>
+                            <StackPanel x:Name="SelectedYouthEmptyPanel"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center">
+                                <TextBlock Text="Select a youth player"
+                                           Foreground="{DynamicResource AppTextBrush}"
+                                           FontSize="18"
+                                           FontWeight="Bold"
+                                           TextAlignment="Center" />
+                                <TextBlock Text="Details will appear here."
+                                           Foreground="{DynamicResource AppMutedTextBrush}"
+                                           FontSize="12"
+                                           Margin="0,6,0,0"
+                                           TextAlignment="Center" />
+                            </StackPanel>
+
+                            <StackPanel x:Name="SelectedYouthDetailPanel"
+                                        Visibility="Collapsed">
+                                <TextBlock x:Name="SelectedYouthNameTextBlock"
+                                           Foreground="{DynamicResource AppTextBrush}"
+                                           FontSize="22"
+                                           FontWeight="Bold"
+                                           TextWrapping="Wrap" />
+                                <StackPanel Orientation="Horizontal" Margin="0,8,0,12">
+                                    <Image x:Name="SelectedYouthFlagImage"
+                                           Width="26"
+                                           Height="17"
+                                           Stretch="UniformToFill"
+                                           Margin="0,0,8,0"
+                                           VerticalAlignment="Center" />
+                                    <TextBlock x:Name="SelectedYouthNationalityTextBlock"
+                                               Foreground="{DynamicResource AppMutedTextBrush}"
+                                               FontSize="12"
+                                               VerticalAlignment="Center" />
+                                </StackPanel>
+
+                                <UniformGrid Columns="2" Margin="0,0,0,12">
+                                    <StackPanel Margin="0,0,8,8">
+                                        <TextBlock Text="Age" Foreground="{DynamicResource AppMutedTextBrush}" FontSize="11" FontWeight="SemiBold" />
+                                        <TextBlock x:Name="SelectedYouthAgeTextBlock" Foreground="{DynamicResource AppTextBrush}" FontWeight="Bold" />
+                                    </StackPanel>
+                                    <StackPanel Margin="0,0,0,8">
+                                        <TextBlock Text="Position" Foreground="{DynamicResource AppMutedTextBrush}" FontSize="11" FontWeight="SemiBold" />
+                                        <TextBlock x:Name="SelectedYouthPositionTextBlock" Foreground="{DynamicResource AppTextBrush}" FontWeight="Bold" />
+                                    </StackPanel>
+                                    <StackPanel Margin="0,0,8,8">
+                                        <TextBlock Text="OVR" Foreground="{DynamicResource AppMutedTextBrush}" FontSize="11" FontWeight="SemiBold" />
+                                        <Border Style="{StaticResource OvrBadgeBorderStyle}" HorizontalAlignment="Left" Margin="0,3,0,0">
+                                            <TextBlock x:Name="SelectedYouthOverallTextBlock" Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
+                                    </StackPanel>
+                                    <StackPanel Margin="0,0,0,8">
+                                        <TextBlock Text="Potential" Foreground="{DynamicResource AppMutedTextBrush}" FontSize="11" FontWeight="SemiBold" />
+                                        <TextBlock x:Name="SelectedYouthPotentialTextBlock" Foreground="{DynamicResource AppTextBrush}" FontWeight="Bold" />
+                                    </StackPanel>
+                                    <StackPanel Margin="0,0,8,8">
+                                        <TextBlock Text="Development" Foreground="{DynamicResource AppMutedTextBrush}" FontSize="11" FontWeight="SemiBold" />
+                                        <TextBlock x:Name="SelectedYouthDevelopmentTextBlock" Foreground="{DynamicResource AppTextBrush}" FontWeight="Bold" />
+                                    </StackPanel>
+                                    <StackPanel Margin="0,0,0,8">
+                                        <TextBlock Text="Market Value" Foreground="{DynamicResource AppMutedTextBrush}" FontSize="11" FontWeight="SemiBold" />
+                                        <TextBlock x:Name="SelectedYouthValueTextBlock" Foreground="{DynamicResource AppTextBrush}" FontWeight="Bold" />
+                                    </StackPanel>
+                                </UniformGrid>
+
+                                <TextBlock Text="Traits"
+                                           Foreground="{DynamicResource AppMutedTextBrush}"
+                                           FontSize="11"
+                                           FontWeight="SemiBold" />
+                                <TextBlock x:Name="SelectedYouthTraitsTextBlock"
+                                           Foreground="{DynamicResource AppTextBrush}"
+                                           FontWeight="SemiBold"
+                                           TextWrapping="Wrap"
+                                           Margin="0,3,0,12" />
+
+                                <TextBlock Text="Scout Report"
+                                           Foreground="{DynamicResource AppMutedTextBrush}"
+                                           FontSize="11"
+                                           FontWeight="SemiBold" />
+                                <TextBlock x:Name="SelectedYouthScoutReportTextBlock"
+                                           Foreground="{DynamicResource AppTextBrush}"
+                                           TextWrapping="Wrap"
+                                           Margin="0,3,0,16" />
+
+                                <Button Content="Promote to Senior Squad"
+                                        Style="{StaticResource PrimaryActionButtonStyle}"
+                                        HorizontalAlignment="Stretch"
+                                        Margin="0,0,0,8"
+                                        Click="PromoteButton_Click" />
+                                <TextBlock x:Name="AcademyStatusTextBlock"
+                                           Foreground="{DynamicResource AppMutedTextBrush}"
+                                           TextWrapping="Wrap"
+                                           Margin="0,12,0,0" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <TabItem>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="34*" />
+                        <ColumnDefinition Width="66*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0"
+                            Style="{StaticResource PanelCardStyle}"
+                            Margin="0,0,14,0">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <StackPanel Margin="0,0,0,8">
+                                <TextBlock Text="Scout Assignments"
+                                           Foreground="{DynamicResource AppTextBrush}"
+                                           FontSize="16"
+                                           FontWeight="Bold" />
+                                <TextBlock Text="Each scout completes a report after 3 club matches."
+                                           Foreground="{DynamicResource AppMutedTextBrush}"
+                                           FontSize="11"
+                                           Margin="0,2,0,0" />
+                            </StackPanel>
+
+                            <ScrollViewer Grid.Row="1"
+                                          VerticalScrollBarVisibility="Auto"
+                                          HorizontalScrollBarVisibility="Disabled">
+                                <ItemsControl x:Name="ScoutAssignmentsItemsControl">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="{DynamicResource AppSecondaryCardBackground}"
+                                                    BorderBrush="{DynamicResource AppCardBorderBrush}"
+                                                    BorderThickness="1"
+                                                    CornerRadius="12"
+                                                    Padding="8"
+                                                    Margin="0,0,0,6">
+                                                <StackPanel>
+                                                    <Grid Margin="0,0,0,4">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <StackPanel>
+                                                            <TextBlock Text="{Binding ScoutName}"
+                                                                       Foreground="{DynamicResource AppTextBrush}"
+                                                                       FontWeight="Bold"
+                                                                       FontSize="13" />
+                                                            <TextBlock Text="{Binding ScoutSummaryText}"
+                                                                       Foreground="{DynamicResource AppMutedTextBrush}"
+                                                                       FontSize="10"
+                                                                       Margin="0,1,0,0" />
+                                                        </StackPanel>
+                                                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                            <Image Source="{Binding CountryFlagImagePath}"
+                                                                   ToolTip="{Binding AssignedCountry}"
+                                                                   Width="22"
+                                                                   Height="14"
+                                                                   Stretch="UniformToFill"
+                                                                   Margin="0,0,5,0" />
+                                                            <TextBlock Text="{Binding AssignedCountry}"
+                                                                       Foreground="{DynamicResource AppTextBrush}"
+                                                                       FontSize="11"
+                                                                       FontWeight="SemiBold"
+                                                                       VerticalAlignment="Center" />
+                                                        </StackPanel>
+                                                    </Grid>
+
+                                                    <TextBlock Text="{Binding ProgressText}"
+                                                               Foreground="{DynamicResource AppMutedTextBrush}"
+                                                               FontSize="11"
+                                                               Margin="0,0,0,2" />
+                                                    <ProgressBar Minimum="0"
+                                                                 Maximum="{Binding RequiredMatches}"
+                                                                 Value="{Binding ProgressMatches}"
+                                                                 Height="5"
+                                                                 Margin="0,0,0,6" />
+
+                                                    <Grid Margin="0,0,0,6">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="8" />
+                                                            <ColumnDefinition Width="*" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <StackPanel>
+                                                            <TextBlock Text="Country"
+                                                                       Foreground="{DynamicResource AppMutedTextBrush}"
+                                                                       FontSize="10"
+                                                                       FontWeight="SemiBold" />
+                                                            <ComboBox ItemsSource="{Binding AvailableCountries}"
+                                                                      DisplayMemberPath="Name"
+                                                                      SelectedValuePath="Code"
+                                                                      SelectedItem="{Binding SelectedCountry, Mode=TwoWay}"
+                                                                      IsEnabled="{Binding CanAssign}"
+                                                                      Height="24"
+                                                                      FontSize="11" />
+                                                        </StackPanel>
+                                                        <StackPanel Grid.Column="2">
+                                                            <TextBlock Text="Focus"
+                                                                       Foreground="{DynamicResource AppMutedTextBrush}"
+                                                                       FontSize="10"
+                                                                       FontWeight="SemiBold" />
+                                                            <ComboBox ItemsSource="{Binding AvailableFocuses}"
+                                                                      DisplayMemberPath="Label"
+                                                                      SelectedValuePath="Value"
+                                                                      SelectedItem="{Binding SelectedPrimaryFocus, Mode=TwoWay}"
+                                                                      IsEnabled="{Binding CanAssign}"
+                                                                      Height="24"
+                                                                      FontSize="11" />
+                                                        </StackPanel>
+                                                    </Grid>
+                                                    <Button Content="{Binding AssignButtonText}"
+                                                            Style="{StaticResource SecondaryActionButtonStyle}"
+                                                            Height="26"
+                                                            HorizontalAlignment="Stretch"
+                                                            Margin="0"
+                                                            FontSize="11"
+                                                            IsEnabled="{Binding CanAssign}"
+                                                            CommandParameter="{Binding}"
+                                                            Click="AssignScoutCountryButton_Click" />
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Column="1"
+                            Style="{StaticResource PanelCardStyle}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="Scout Reports"
+                                               Foreground="{DynamicResource AppTextBrush}"
+                                               FontSize="18"
+                                               FontWeight="Bold" />
+                                    <TextBlock x:Name="YouthScoutStatusTextBlock"
+                                               Foreground="{DynamicResource AppMutedTextBrush}"
+                                               FontSize="12"
+                                               Margin="0,4,0,0"
+                                               TextWrapping="Wrap" />
+                                </StackPanel>
+                                <Button Grid.Column="1"
+                                        Content="Sign Prospect"
+                                        Style="{StaticResource PrimaryActionButtonStyle}"
+                                        Click="SignScoutProspectButton_Click" />
+                            </Grid>
+
+                            <DataGrid x:Name="ScoutProspectsDataGrid"
+                                      Grid.Row="1"
+                                      Style="{StaticResource ModernGridStyle}">
+                                <DataGrid.Columns>
+                                    <DataGridTemplateColumn Header="Nat" Width="42" IsReadOnly="True">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <StaticResource ResourceKey="NationalityCellTemplate" />
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="1.15*" />
+                                    <DataGridTextColumn Header="Scout" Binding="{Binding ScoutName}" Width="88" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                                    <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="48" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                                    <DataGridTextColumn Header="Pos" Binding="{Binding Position}" Width="48" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                                    <DataGridTextColumn Header="OVR" Binding="{Binding Overall}" Width="56" ElementStyle="{StaticResource CenteredValueTextStyle}" />
+                                    <DataGridTextColumn Header="Potential" Binding="{Binding Potential}" Width="88" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                                    <DataGridTextColumn Header="Traits" Binding="{Binding Traits}" Width="1.05*" />
+                                    <DataGridTextColumn Header="Cost" Binding="{Binding SigningCost}" Width="78" ElementStyle="{StaticResource CenteredValueTextStyle}" />
+                                    <DataGridTextColumn Header="Scout Notes" Binding="{Binding ScoutNotes}" Width="1.8*" />
+                                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="74" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</UserControl>

@@ -10,7 +10,7 @@ public class MultiCompetitionSeasonTests
     [Fact]
     public void SeasonCalendar_IncludesAllFourCompetitions()
     {
-        var league = CreateLeague(teamCount: 8);
+        var league = CreateLeague(teamCount: 20);
 
         Assert.Contains(league.Fixtures, fixture => fixture.Competition == CompetitionType.PremierLeague && fixture.AffectsLeagueTable);
         Assert.Contains(league.Fixtures, fixture => fixture.Competition == CompetitionType.FACup && fixture.IsKnockout);
@@ -22,7 +22,7 @@ public class MultiCompetitionSeasonTests
     [Fact]
     public void NextFixture_UsesCalendarOrderAcrossCompetitions()
     {
-        var league = CreateLeague(teamCount: 8);
+        var league = CreateLeague(teamCount: 20);
         var selectedTeam = league.Teams[0];
         var expected = league.Fixtures
             .Where(fixture => IsTeamInFixture(fixture, selectedTeam))
@@ -74,15 +74,48 @@ public class MultiCompetitionSeasonTests
     }
 
     [Fact]
-    public void ChampionsLeague_GroupCompletionCreatesRoundOf16()
+    public void ChampionsLeague_LeaguePhaseUsesSwissStyleEuropeanOpponents()
+    {
+        var league = CreateLeague(teamCount: 20);
+        var selectedTeam = league.Teams.First(team => team.Name == "Chelsea");
+        var uclFixtures = league.Fixtures
+            .Where(fixture => fixture.Competition == CompetitionType.ChampionsLeague && !fixture.IsKnockout)
+            .ToList();
+        var selectedFixtures = uclFixtures
+            .Where(fixture => IsTeamInFixture(fixture, selectedTeam))
+            .ToList();
+        var opponentNames = selectedFixtures
+            .Select(fixture => fixture.HomeTeam.Name == selectedTeam.Name ? fixture.AwayTeam.Name : fixture.HomeTeam.Name)
+            .ToList();
+        var englishOpponents = opponentNames.Count(name => name is "Arsenal" or "Manchester City" or "Liverpool" or "Manchester United" or "Tottenham Hotspur");
+
+        Assert.Equal(36, league.CompetitionStates.First(state => state.Competition == CompetitionType.ChampionsLeague).Standings.Count);
+        Assert.All(league.CompetitionStates.First(state => state.Competition == CompetitionType.ChampionsLeague).Standings, row =>
+        {
+            Assert.Equal(8, uclFixtures.Count(fixture => fixture.HomeTeam.Name == row.TeamName || fixture.AwayTeam.Name == row.TeamName));
+        });
+        Assert.Equal(8, selectedFixtures.Count);
+        Assert.Equal(4, selectedFixtures.Count(fixture => fixture.HomeTeam.Name == selectedTeam.Name));
+        Assert.Equal(4, selectedFixtures.Count(fixture => fixture.AwayTeam.Name == selectedTeam.Name));
+        Assert.Equal(8, opponentNames.Distinct(StringComparer.OrdinalIgnoreCase).Count());
+        Assert.True(englishOpponents <= 1, $"Expected at most one English UCL opponent but found: {string.Join(", ", opponentNames)}");
+        Assert.All(selectedFixtures, fixture =>
+        {
+            Assert.StartsWith("League Phase MD", fixture.RoundName);
+            Assert.False(fixture.AffectsLeagueTable);
+        });
+    }
+
+    [Fact]
+    public void ChampionsLeague_LeaguePhaseCompletionCreatesRoundOf16()
     {
         var progression = new CompetitionProgressionService();
         var league = CreateLeague(teamCount: 8);
-        var groupFixtures = league.Fixtures
+        var leaguePhaseFixtures = league.Fixtures
             .Where(fixture => fixture.Competition == CompetitionType.ChampionsLeague && !fixture.IsKnockout)
             .ToList();
 
-        foreach (var fixture in groupFixtures)
+        foreach (var fixture in leaguePhaseFixtures)
         {
             CompleteFixture(progression, league, fixture, homeScore: 1, awayScore: 0);
         }
@@ -91,9 +124,10 @@ public class MultiCompetitionSeasonTests
             fixture.Competition == CompetitionType.ChampionsLeague &&
             fixture.RoundName == "Round of 16" &&
             fixture.IsKnockout);
-        Assert.Equal(8, league.CompetitionStates
-            .First(state => state.Competition == CompetitionType.ChampionsLeague)
-            .ChampionsLeagueGroups.Count);
+        var state = league.CompetitionStates.First(state => state.Competition == CompetitionType.ChampionsLeague);
+        Assert.Equal(36, state.Standings.Count);
+        Assert.Equal("Round of 16", state.CurrentRoundName);
+        Assert.NotEmpty(state.ProgressRecords);
     }
 
     [Fact]

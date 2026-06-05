@@ -1,9 +1,11 @@
 using System.Diagnostics;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Data;
 using FootballSimulation.Engine;
 using FootballSimulation.Models;
 using FootballSimulation.Services;
@@ -16,8 +18,6 @@ namespace FootballSimulation.Wpf.Views;
 
 public partial class HalfTimeView : UserControl
 {
-    private static readonly string[] SupportedFormations = ["4-3-3", "4-2-3-1", "4-4-2", "3-5-2"];
-
     private readonly GameFlowState _state;
     private readonly Action<UserControl> _navigate;
     private readonly FormationLayoutService _formationLayoutService = new();
@@ -91,10 +91,23 @@ public partial class HalfTimeView : UserControl
 
     private void LoadFormationSelector(Team team)
     {
-        FormationComboBox.ItemsSource = SupportedFormations;
-        FormationComboBox.SelectedItem = SupportedFormations.Contains(team.Formation)
-            ? team.Formation
-            : "4-3-3";
+        FormationComboBox.DisplayMemberPath = nameof(FormationOption.Name);
+        FormationComboBox.SelectedValuePath = nameof(FormationOption.Name);
+        FormationComboBox.ItemsSource = CreateFormationOptionsView();
+        FormationComboBox.SelectedValue = FormationCatalogService.NormalizeFormationName(team.Formation);
+    }
+
+    private static ICollectionView CreateFormationOptionsView()
+    {
+        var view = CollectionViewSource.GetDefaultView(FormationCatalogService.GetFormations().ToList());
+        view.GroupDescriptions.Add(new PropertyGroupDescription(nameof(FormationOption.Category)));
+        return view;
+    }
+
+    private string GetSelectedFormation(Team team)
+    {
+        return FormationComboBox.SelectedValue as string
+            ?? FormationCatalogService.NormalizeFormationName(team.Formation);
     }
 
     private void LoadTactics(TeamTactics tactics)
@@ -116,7 +129,7 @@ public partial class HalfTimeView : UserControl
 
         PitchCanvas.Children.Clear();
 
-        var formation = FormationComboBox.SelectedItem as string ?? _state.SelectedTeam.Formation;
+        var formation = GetSelectedFormation(_state.SelectedTeam);
         var positions = _formationLayoutService.GetPositions(formation);
         var assignments = CreatePitchSlotAssignments(_pitchSlots, positions);
         ApplyPitchSlotAssignments(assignments);
@@ -140,7 +153,7 @@ public partial class HalfTimeView : UserControl
             return;
         }
 
-        positions ??= _formationLayoutService.GetPositions(FormationComboBox.SelectedItem as string ?? _state.SelectedTeam.Formation);
+        positions ??= _formationLayoutService.GetPositions(GetSelectedFormation(_state.SelectedTeam));
 
         for (var index = 0; index < _pitchSlots.Count && index < positions.Count; index++)
         {
@@ -323,7 +336,7 @@ public partial class HalfTimeView : UserControl
 
     private void FormationComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (_state.SelectedTeam is not null && FormationComboBox.SelectedItem is string formation)
+        if (_state.SelectedTeam is not null && FormationComboBox.SelectedValue is string formation)
         {
             _state.SelectedTeam.Formation = formation;
             if (!_isLoadingSetup)
@@ -1175,7 +1188,7 @@ public partial class HalfTimeView : UserControl
             return;
         }
 
-        var positions = _formationLayoutService.GetPositions(FormationComboBox.SelectedItem as string ?? _state.SelectedTeam.Formation);
+        var positions = _formationLayoutService.GetPositions(GetSelectedFormation(_state.SelectedTeam));
         var draggedTargetSlot = targetIndex < positions.Count ? positions[targetIndex].ExactPosition : string.Empty;
         var targetTargetSlot = draggedIndex < positions.Count ? positions[draggedIndex].ExactPosition : string.Empty;
         var hardBlockMessage = CreateHardSwapBlockMessage(draggedPlayer, draggedTargetSlot, targetPlayer, targetTargetSlot);
@@ -1332,7 +1345,7 @@ public partial class HalfTimeView : UserControl
 
     private void SaveSetup(Team team)
     {
-        if (FormationComboBox.SelectedItem is string formation)
+        if (FormationComboBox.SelectedValue is string formation)
         {
             team.Formation = formation;
         }

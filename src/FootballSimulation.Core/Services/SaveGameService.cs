@@ -6,7 +6,7 @@ namespace FootballSimulation.Services;
 
 public class SaveGameService
 {
-    public const int CurrentSaveVersion = 4;
+    public const int CurrentSaveVersion = 6;
     public const int MaxSaveSlots = 3;
 
     private const string SaveFolderName = "WPFFootballSimulator";
@@ -110,7 +110,8 @@ public class SaveGameService
                 LeagueId = string.IsNullOrWhiteSpace(league.LeagueId) ? LeagueDataService.DefaultLeagueId : league.LeagueId,
                 Name = league.Name,
                 Season = league.Season,
-                Table = league.Table
+                Table = league.Table,
+                IsCompleted = league.IsCompleted
             },
             Teams = league.Teams,
             Fixtures = league.Fixtures,
@@ -122,6 +123,7 @@ public class SaveGameService
                 ? league.PlayerCompetitionStats
                 : new PlayerSeasonStatsService().RebuildCompetitionStats(league),
             CompetitionStates = league.CompetitionStates,
+            YouthAcademies = league.YouthAcademies,
             SeasonHistory = league.SeasonHistory,
             ClubMatchSetups = CreateClubMatchSetups(league.Teams),
             TransferMarketState = transferMarketState ?? new TransferMarketState()
@@ -176,7 +178,9 @@ public class SaveGameService
                     Table = data.LeagueState.Table
                 }),
             CompetitionStates = data.CompetitionStates ?? [],
-            SeasonHistory = data.SeasonHistory ?? []
+            YouthAcademies = data.YouthAcademies ?? [],
+            SeasonHistory = data.SeasonHistory ?? [],
+            IsCompleted = data.LeagueState.IsCompleted
         };
     }
 
@@ -321,6 +325,7 @@ public class SaveGameService
         data.PlayerStats ??= [];
         data.PlayerCompetitionStats ??= [];
         data.CompetitionStates ??= [];
+        data.YouthAcademies ??= [];
         data.ClubMatchSetups ??= [];
         data.TransferMarketState ??= new TransferMarketState();
 
@@ -364,6 +369,7 @@ public class SaveGameService
 
         EnsureCompleteDoubleRoundRobinFixtures(data, teamsByName);
         EnsureCompetitionStates(data);
+        EnsureYouthAcademies(data);
 
         foreach (var match in data.MatchHistory)
         {
@@ -424,6 +430,22 @@ public class SaveGameService
         }
 
         data.CompetitionStates = new SeasonCalendarService().CreateInitialCompetitionStates(data.Teams);
+    }
+
+    private static void EnsureYouthAcademies(SaveGameData data)
+    {
+        new YouthAcademyService().EnsureAcademies(
+            data.YouthAcademies,
+            data.Teams,
+            string.IsNullOrWhiteSpace(data.LeagueState.LeagueId)
+                ? string.IsNullOrWhiteSpace(data.LeagueId) ? LeagueDataService.DefaultLeagueId : data.LeagueId
+                : data.LeagueState.LeagueId,
+            data.LeagueState.Season);
+        var scoutService = new YouthScoutService();
+        foreach (var academy in data.YouthAcademies)
+        {
+            scoutService.EnsureScoutNetwork(academy);
+        }
     }
 
     private static void ApplyMissingFixtureTeamData(Team team)

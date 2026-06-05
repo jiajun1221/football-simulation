@@ -283,6 +283,85 @@ public class TransferMarketServiceTests
     }
 
     [Fact]
+    public void RunAiTransferActivity_OpenWindowCreatesVisibleAiTransfers()
+    {
+        var league = CreateLeague("premier-league");
+        var selectedTeam = league.Teams.Single(team => team.Name == "Chelsea");
+        var service = new TransferMarketService(seed: 12);
+        var state = service.CreateInitialState(league);
+
+        service.RunAiTransferActivity(state, league, selectedTeam, currentRound: 1);
+
+        Assert.NotEmpty(state.TransferHistory);
+        Assert.All(state.TransferHistory, item => Assert.NotEqual(selectedTeam.Name, item.FromClubName));
+        Assert.Contains(state.Inbox, item => item.Type == TransferNotificationType.TransferCompleted);
+    }
+
+    [Fact]
+    public void RunAiTransferActivity_ClosedWindowDoesNotCompleteAiTransfers()
+    {
+        var league = CreateLeague("premier-league");
+        var selectedTeam = league.Teams.Single(team => team.Name == "Chelsea");
+        var service = new TransferMarketService(seed: 12);
+        var state = service.CreateInitialState(league);
+
+        service.RunAiTransferActivity(state, league, selectedTeam, currentRound: 7);
+
+        Assert.Empty(state.TransferHistory);
+    }
+
+    [Fact]
+    public void RunAiTransferActivity_BigClubTransfersCanHappenBetweenBigClubs()
+    {
+        var league = CreateLeague("premier-league");
+        var selectedTeam = league.Teams.Single(team => team.Name == "Chelsea");
+        var service = new TransferMarketService(seed: 42);
+        var state = service.CreateInitialState(league);
+
+        foreach (var round in Enumerable.Range(1, 4))
+        {
+            service.RunAiTransferActivity(state, league, selectedTeam, round);
+        }
+
+        Assert.Contains(state.TransferHistory, item =>
+            ClubFinanceService.IsBigClub(item.FromClubName) &&
+            ClubFinanceService.IsBigClub(item.ToClubName));
+    }
+
+    [Fact]
+    public void RunAiTransferActivity_UserClubPlayersAreNotAutoSold()
+    {
+        var league = CreateLeague("premier-league");
+        var selectedTeam = league.Teams.Single(team => team.Name == "Chelsea");
+        var service = new TransferMarketService(seed: 99);
+        var state = service.CreateInitialState(league);
+        var protectedPlayerIds = selectedTeam.Players.Concat(selectedTeam.Substitutes)
+            .Select(player => player.PlayerId)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var round in Enumerable.Range(1, 4))
+        {
+            service.RunAiTransferActivity(state, league, selectedTeam, round);
+        }
+
+        Assert.All(protectedPlayerIds, playerId =>
+            Assert.Contains(selectedTeam.Players.Concat(selectedTeam.Substitutes), player => player.PlayerId == playerId));
+        Assert.DoesNotContain(state.TransferHistory, item => item.FromClubName == selectedTeam.Name);
+    }
+
+    [Fact]
+    public void TransferWindowService_IdentifiesDeadlineRounds()
+    {
+        var league = CreateLeague("premier-league");
+        var windowService = new TransferWindowService();
+
+        Assert.Equal(TransferWindowPhase.Summer, windowService.GetWindowPhase(league, currentRound: 1));
+        Assert.Equal(TransferWindowPhase.SummerDeadline, windowService.GetWindowPhase(league, currentRound: 4));
+        Assert.Equal(TransferWindowPhase.Closed, windowService.GetWindowPhase(league, currentRound: 7));
+        Assert.Equal(TransferWindowPhase.JanuaryDeadline, windowService.GetWindowPhase(league, currentRound: 22));
+    }
+
+    [Fact]
     public void SaveGame_RestoresTransferMarketState()
     {
         var saveDirectory = Path.Combine(Path.GetTempPath(), "football-transfer-tests", Guid.NewGuid().ToString("N"));

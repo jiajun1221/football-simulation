@@ -221,6 +221,7 @@ public class MatchEngineScoringTests
 
                 var nextPossessionEvent = events
                     .Skip(index + 1)
+                    .TakeWhile(matchEvent => matchEvent.Minute == events[index].Minute)
                     .FirstOrDefault(matchEvent =>
                         matchEvent.EventType is EventType.Attack
                             or EventType.Kickoff

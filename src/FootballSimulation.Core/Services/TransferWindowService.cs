@@ -2,6 +2,15 @@ using FootballSimulation.Models;
 
 namespace FootballSimulation.Services;
 
+public enum TransferWindowPhase
+{
+    Closed,
+    Summer,
+    SummerDeadline,
+    January,
+    JanuaryDeadline
+}
+
 public class TransferWindowService
 {
     private const int SummerWindowEndRound = 4;
@@ -28,6 +37,32 @@ public class TransferWindowService
     public bool IsWindowOpen(League league, int currentRound)
     {
         return GetWindowInfo(league, currentRound).IsOpen;
+    }
+
+    public TransferWindowPhase GetWindowPhase(League league, int currentRound)
+    {
+        var maxRound = Math.Max(1, league.Fixtures.Count == 0 ? 1 : league.Fixtures.Max(fixture => fixture.RoundNumber));
+        var normalizedRound = Math.Clamp(currentRound, 1, maxRound);
+        var windows = GetWindows(maxRound);
+        var summer = windows[0];
+        var january = windows[1];
+
+        if (normalizedRound >= summer.Start && normalizedRound <= summer.End)
+        {
+            return normalizedRound == summer.End ? TransferWindowPhase.SummerDeadline : TransferWindowPhase.Summer;
+        }
+
+        if (normalizedRound >= january.Start && normalizedRound <= january.End)
+        {
+            return normalizedRound == january.End ? TransferWindowPhase.JanuaryDeadline : TransferWindowPhase.January;
+        }
+
+        return TransferWindowPhase.Closed;
+    }
+
+    public bool IsDeadlineRound(League league, int currentRound)
+    {
+        return GetWindowPhase(league, currentRound) is TransferWindowPhase.SummerDeadline or TransferWindowPhase.JanuaryDeadline;
     }
 
     private static List<(int Start, int End)> GetWindows(int maxRound)
