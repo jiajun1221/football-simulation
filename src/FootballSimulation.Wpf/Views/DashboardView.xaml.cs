@@ -223,9 +223,23 @@ public partial class DashboardView : UserControl
             return;
         }
 
-        _navigate(IsSelectedClubChampion(_state.League, _state.SelectedTeam)
-            ? new ChampionCelebrationView(_state, _navigate)
-            : new EndSeasonResultView(_state, _navigate));
+        TrophyCelebrationService.EnqueueSeasonResultCelebration(_state);
+        try
+        {
+            _navigate(_state.TrophyCelebrationQueue.Count > 0
+                ? new ChampionCelebrationView(_state, _navigate, () => new EndSeasonResultView(_state, _navigate))
+                : new EndSeasonResultView(_state, _navigate));
+        }
+        catch (Exception ex)
+        {
+            _state.TrophyCelebrationQueue.Clear();
+            MessageBox.Show(
+                $"The trophy celebration could not be opened, so the Season Overview will be shown instead.{Environment.NewLine}{Environment.NewLine}{ex.Message}",
+                "Season Result",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+            _navigate(new EndSeasonResultView(_state, _navigate));
+        }
     }
 
     private void SaveGameButton_Click(object sender, RoutedEventArgs e)
@@ -467,17 +481,6 @@ public partial class DashboardView : UserControl
     {
         return league is not null &&
             (league.IsCompleted || _seasonCompletionService.IsLeagueComplete(league));
-    }
-
-    private static bool IsSelectedClubChampion(League league, Team selectedTeam)
-    {
-        var champion = league.Table
-            .OrderByDescending(entry => entry.Points)
-            .ThenByDescending(entry => entry.GoalDifference)
-            .ThenByDescending(entry => entry.GoalsFor)
-            .FirstOrDefault();
-        return champion is not null &&
-            champion.TeamName.Equals(selectedTeam.Name, StringComparison.OrdinalIgnoreCase);
     }
 
     private static string GetHomeAwayBadgeBackground(bool isHome)

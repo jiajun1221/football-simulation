@@ -5,7 +5,13 @@ public enum CompetitionType
     PremierLeague,
     FACup,
     LeagueCup,
-    ChampionsLeague
+    ChampionsLeague,
+    CopaDelRey,
+    DfbPokal,
+    CoppaItalia,
+    CoupeDeFrance,
+    EuropaLeague,
+    ConferenceLeague
 }
 
 public enum FixtureImportance
@@ -83,6 +89,12 @@ public static class CompetitionNames
             CompetitionType.FACup => "FA Cup",
             CompetitionType.LeagueCup => "League Cup",
             CompetitionType.ChampionsLeague => "Champions League",
+            CompetitionType.CopaDelRey => "Copa del Rey",
+            CompetitionType.DfbPokal => "DFB-Pokal",
+            CompetitionType.CoppaItalia => "Coppa Italia",
+            CompetitionType.CoupeDeFrance => "Coupe de France",
+            CompetitionType.EuropaLeague => "Europa League",
+            CompetitionType.ConferenceLeague => "Conference League",
             _ => competition.ToString()
         };
     }

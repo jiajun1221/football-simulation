@@ -14,4 +14,6 @@ public class League
     public List<YouthAcademy> YouthAcademies { get; set; } = [];
     public List<SeasonArchive> SeasonHistory { get; set; } = [];
     public bool IsCompleted { get; set; }
+    public bool HasShownLeagueTrophyCelebration { get; set; }
+    public List<string> ShownTrophyCelebrationKeys { get; set; } = [];
 }

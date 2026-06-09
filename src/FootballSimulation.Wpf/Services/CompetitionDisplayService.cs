@@ -17,6 +17,12 @@ public static class CompetitionDisplayService
             CompetitionType.FACup => "FA",
             CompetitionType.LeagueCup => "LC",
             CompetitionType.ChampionsLeague => "UCL",
+            CompetitionType.CopaDelRey => "CDR",
+            CompetitionType.DfbPokal => "DFB",
+            CompetitionType.CoppaItalia => "CI",
+            CompetitionType.CoupeDeFrance => "CDF",
+            CompetitionType.EuropaLeague => "UEL",
+            CompetitionType.ConferenceLeague => "UECL",
             _ => competition.ToString()
         };
     }
@@ -29,6 +35,12 @@ public static class CompetitionDisplayService
             CompetitionType.FACup => "#DC2626",
             CompetitionType.LeagueCup => "#16A34A",
             CompetitionType.ChampionsLeague => "#1D4ED8",
+            CompetitionType.CopaDelRey => "#B91C1C",
+            CompetitionType.DfbPokal => "#111827",
+            CompetitionType.CoppaItalia => "#15803D",
+            CompetitionType.CoupeDeFrance => "#2563EB",
+            CompetitionType.EuropaLeague => "#F97316",
+            CompetitionType.ConferenceLeague => "#16A34A",
             _ => "#64748B"
         };
     }

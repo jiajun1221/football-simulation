@@ -7,4 +7,6 @@ public class LeagueState
     public string Season { get; set; } = string.Empty;
     public List<LeagueTableEntry> Table { get; set; } = [];
     public bool IsCompleted { get; set; }
+    public bool HasShownLeagueTrophyCelebration { get; set; }
+    public List<string> ShownTrophyCelebrationKeys { get; set; } = [];
 }

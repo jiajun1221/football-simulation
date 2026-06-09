@@ -111,7 +111,9 @@ public class SaveGameService
                 Name = league.Name,
                 Season = league.Season,
                 Table = league.Table,
-                IsCompleted = league.IsCompleted
+                IsCompleted = league.IsCompleted,
+                HasShownLeagueTrophyCelebration = league.HasShownLeagueTrophyCelebration,
+                ShownTrophyCelebrationKeys = league.ShownTrophyCelebrationKeys
             },
             Teams = league.Teams,
             Fixtures = league.Fixtures,
@@ -180,7 +182,9 @@ public class SaveGameService
             CompetitionStates = data.CompetitionStates ?? [],
             YouthAcademies = data.YouthAcademies ?? [],
             SeasonHistory = data.SeasonHistory ?? [],
-            IsCompleted = data.LeagueState.IsCompleted
+            IsCompleted = data.LeagueState.IsCompleted,
+            HasShownLeagueTrophyCelebration = data.LeagueState.HasShownLeagueTrophyCelebration,
+            ShownTrophyCelebrationKeys = data.LeagueState.ShownTrophyCelebrationKeys ?? []
         };
     }
 

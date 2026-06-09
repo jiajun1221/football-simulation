@@ -21,6 +21,7 @@
     <Resource Include="Assets\Flags\*.png" />
     <Resource Include="Assets\Leagues\*.png" />
     <Resource Include="Assets\Players\*.png" />
+    <Resource Include="Assets\Trophies\*.png" />
   </ItemGroup>
 
 </Project>

@@ -98,7 +98,18 @@ public partial class MatchResultView : UserControl
 
     private void NextButton_Click(object sender, RoutedEventArgs e)
     {
-        _navigate(new RoundResultView(_state, _navigate));
+        TrophyCelebrationService.EnqueuePostMatchCelebrations(_state, TrophyCelebrationNextRoute.RoundResult);
+        try
+        {
+            _navigate(_state.TrophyCelebrationQueue.Count > 0
+                ? new ChampionCelebrationView(_state, _navigate, () => new RoundResultView(_state, _navigate))
+                : new RoundResultView(_state, _navigate));
+        }
+        catch
+        {
+            _state.TrophyCelebrationQueue.Clear();
+            _navigate(new RoundResultView(_state, _navigate));
+        }
     }
 
     private string CreateResultHeader()

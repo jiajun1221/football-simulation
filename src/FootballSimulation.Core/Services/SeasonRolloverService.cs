@@ -80,6 +80,8 @@ public class SeasonRolloverService
         league.PlayerCompetitionStats = [];
         league.CompetitionStates = _seasonCalendarService.CreateInitialCompetitionStates(league.Teams);
         league.IsCompleted = false;
+        league.HasShownLeagueTrophyCelebration = false;
+        league.ShownTrophyCelebrationKeys = [];
 
         ApplyOffseasonPlayerReset(league.Teams);
         _youthAcademyService.ApplySeasonRollover(league);

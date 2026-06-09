@@ -196,8 +196,8 @@
                     BorderThickness="1"
                     CornerRadius="12"
                     Padding="10"
-                    Margin="0,0,8,8"
-                    Width="240">
+                    Margin="0,0,10,10"
+                    HorizontalAlignment="Stretch">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="34" />
@@ -350,10 +350,17 @@
                         <Border Style="{StaticResource ResultCard}" Margin="0,16,0,0">
                             <StackPanel>
                                 <TextBlock Text="Season Highlights" Style="{StaticResource SectionTitle}" />
-                                <ItemsControl x:Name="HighlightsItemsControl" ItemTemplate="{StaticResource HighlightCardTemplate}">
+                                <ItemsControl x:Name="HighlightsItemsControl"
+                                              HorizontalAlignment="Stretch"
+                                              ItemTemplate="{StaticResource HighlightCardTemplate}">
+                                    <ItemsControl.ItemContainerStyle>
+                                        <Style TargetType="ContentPresenter">
+                                            <Setter Property="HorizontalAlignment" Value="Stretch" />
+                                        </Style>
+                                    </ItemsControl.ItemContainerStyle>
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
-                                            <WrapPanel />
+                                            <UniformGrid Columns="2" />
                                         </ItemsPanelTemplate>
                                     </ItemsControl.ItemsPanel>
                                 </ItemsControl>

@@ -16,4 +16,5 @@ public class GameFlowState
     public int? CurrentSaveSlotNumber { get; set; }
     public MatchSpeed CurrentMatchSpeed { get; set; } = MatchSpeed.Medium;
     public bool IsCompactLiveMatchView { get; set; }
+    public Queue<TrophyCelebrationEvent> TrophyCelebrationQueue { get; } = new();
 }
