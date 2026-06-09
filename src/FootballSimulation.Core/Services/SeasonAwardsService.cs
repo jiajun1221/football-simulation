@@ -4,6 +4,13 @@ namespace FootballSimulation.Services;
 
 public class SeasonAwardsService
 {
+    private const int PlayerOfSeasonMinimumAppearances = 15;
+    private const double PlayerOfSeasonMinimumAverageRating = 7.0;
+    private const int YoungPlayerMinimumAppearances = 10;
+    private const int YoungPlayerMaximumAge = 23;
+    private const int StandardStatMinimumAppearances = 5;
+    private const int GoldenGloveMinimumAppearances = 10;
+
     private static readonly string[] BestXiSlots =
     [
         "GK",
@@ -49,10 +56,9 @@ public class SeasonAwardsService
 
     public SeasonAwards CreateAwards(League league, IReadOnlyList<ArchivedPlayerStatRow> stats)
     {
-        var matchesPerTeam = Math.Max(1, league.Teams.Count - 1) * 2;
-        var minimumAppearances = Math.Max(1, (int)Math.Ceiling(matchesPerTeam * 0.5));
         var scoredPlayers = stats
-            .Where(stat => stat.Appearances >= minimumAppearances)
+            .Where(stat => stat.Appearances >= PlayerOfSeasonMinimumAppearances)
+            .Where(stat => stat.AverageRating >= PlayerOfSeasonMinimumAverageRating)
             .Select(stat => new
             {
                 Stat = stat,
@@ -64,8 +70,18 @@ public class SeasonAwardsService
             .ToList();
 
         var playerOfSeason = scoredPlayers.FirstOrDefault();
-        var youngPlayer = scoredPlayers
-            .Where(item => FindPlayer(league, item.Stat.PlayerId, item.Stat.PlayerName)?.Age <= 23)
+        var youngPlayer = stats
+            .Where(stat => stat.Appearances >= YoungPlayerMinimumAppearances)
+            .Select(stat => new
+            {
+                Stat = stat,
+                Player = FindPlayer(league, stat.PlayerId, stat.PlayerName),
+                Score = CalculatePlayerOfSeasonScore(stat)
+            })
+            .Where(item => item.Player?.Age <= YoungPlayerMaximumAge)
+            .OrderByDescending(item => item.Score)
+            .ThenByDescending(item => item.Stat.AverageRating)
+            .ThenByDescending(item => item.Stat.Goals + item.Stat.Assists)
             .FirstOrDefault();
 
         return new SeasonAwards
@@ -140,9 +156,16 @@ public class SeasonAwardsService
             });
         }
 
-        AddPlayerLeader(highlights, stats, "Top Scorer", "GOLDEN BOOT", stat => stat.Goals, "goals");
-        AddPlayerLeader(highlights, stats, "Assist King", "ASSIST", stat => stat.Assists, "assists");
-        AddPlayerLeader(highlights, stats, "Best Goalkeeper", "GLOVE", stat => stat.Saves + stat.CleanSheets * 4, "goalkeeper score");
+        AddPlayerLeader(highlights, stats, "Top Scorer", "GOLDEN BOOT", stat => stat.Goals, "goals", StandardStatMinimumAppearances);
+        AddPlayerLeader(highlights, stats, "Assist King", "ASSIST", stat => stat.Assists, "assists", StandardStatMinimumAppearances);
+        AddPlayerLeader(
+            highlights,
+            stats.Where(stat => stat.Position == Position.Goalkeeper).ToList(),
+            "Best Goalkeeper",
+            "GLOVE",
+            stat => stat.Saves + stat.CleanSheets * 4,
+            "goalkeeper score",
+            GoldenGloveMinimumAppearances);
 
         var worstDisciplinaryTeam = stats
             .GroupBy(stat => stat.TeamName)
@@ -445,9 +468,11 @@ public class SeasonAwardsService
         string title,
         string icon,
         Func<ArchivedPlayerStatRow, int> selector,
-        string suffix)
+        string suffix,
+        int minimumAppearances)
     {
         var leader = stats
+            .Where(stat => stat.Appearances >= minimumAppearances)
             .OrderByDescending(selector)
             .ThenByDescending(stat => stat.AverageRating)
             .FirstOrDefault();

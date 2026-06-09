@@ -26,12 +26,12 @@
             <TextBlock Text="✦" Foreground="#F59E0B" FontSize="24" Canvas.Right="220" Canvas.Bottom="150" Opacity="0.65" />
         </Canvas>
 
-        <Border MaxWidth="760"
-                Margin="34"
-                Padding="34"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                CornerRadius="28"
+        <Viewbox Margin="18"
+                 Stretch="Uniform"
+                 StretchDirection="DownOnly">
+        <Border Width="720"
+                Padding="22"
+                CornerRadius="24"
                 Background="#CC071A12"
                 BorderBrush="#D6B15E"
                 BorderThickness="1.5">
@@ -52,13 +52,13 @@
                 </Grid.RowDefinitions>
 
                 <StackPanel Grid.Row="0" HorizontalAlignment="Center">
-                    <Border Width="92"
-                            Height="92"
-                            CornerRadius="46"
+                    <Border Width="66"
+                            Height="66"
+                            CornerRadius="33"
                             Background="#F8FAFC"
                             BorderBrush="#FACC15"
-                            BorderThickness="3"
-                            Padding="10"
+                            BorderThickness="2.5"
+                            Padding="8"
                             HorizontalAlignment="Center">
                         <Image x:Name="ClubLogoImage"
                                Stretch="Uniform" />
@@ -66,79 +66,51 @@
 
                     <TextBlock Text="Premier League Champions"
                                Foreground="#FDE68A"
-                               FontSize="34"
+                               FontSize="28"
                                FontWeight="Black"
                                TextAlignment="Center"
-                               Margin="0,18,0,0" />
+                               Margin="0,12,0,0" />
                     <TextBlock x:Name="ClubNameTextBlock"
                                Foreground="#FFFFFF"
-                               FontSize="46"
+                               FontSize="38"
                                FontWeight="Black"
                                TextAlignment="Center"
-                               Margin="0,4,0,0" />
+                               Margin="0,2,0,0" />
                     <TextBlock x:Name="SeasonTextBlock"
                                Foreground="#FCD34D"
-                               FontSize="18"
+                               FontSize="14"
                                FontWeight="Bold"
                                TextAlignment="Center"
-                               Margin="0,6,0,0" />
+                               Margin="0,3,0,0" />
                 </StackPanel>
 
-                <Viewbox Grid.Row="1"
-                         Width="250"
-                         Height="260"
-                         HorizontalAlignment="Center"
-                         Margin="0,24,0,14">
-                    <Grid Width="260" Height="280">
-                        <Ellipse Width="228" Height="42" Fill="#8A5B13" Opacity="0.45" Canvas.Left="16" Canvas.Top="228" />
-                        <Path Fill="#FACC15"
-                              Stroke="#FFF7AD"
-                              StrokeThickness="4"
-                              Data="M 84 36 L 176 36 L 162 142 C 158 172 142 188 130 188 C 118 188 102 172 98 142 Z" />
-                        <Path Stroke="#FDE68A"
-                              StrokeThickness="14"
-                              StrokeStartLineCap="Round"
-                              StrokeEndLineCap="Round"
-                              Fill="Transparent"
-                              Data="M 86 62 C 48 62 42 98 72 118" />
-                        <Path Stroke="#FDE68A"
-                              StrokeThickness="14"
-                              StrokeStartLineCap="Round"
-                              StrokeEndLineCap="Round"
-                              Fill="Transparent"
-                              Data="M 174 62 C 212 62 218 98 188 118" />
-                        <Rectangle Width="36" Height="54" Fill="#D97706" RadiusX="8" RadiusY="8" HorizontalAlignment="Center" Margin="0,178,0,0" VerticalAlignment="Top" />
-                        <Border Width="130" Height="28" CornerRadius="10" Background="#F59E0B" BorderBrush="#FFF7AD" BorderThickness="3" HorizontalAlignment="Center" Margin="0,224,0,0" VerticalAlignment="Top" />
-                        <Border Width="168" Height="24" CornerRadius="10" Background="#B45309" BorderBrush="#FDE68A" BorderThickness="2" HorizontalAlignment="Center" Margin="0,246,0,0" VerticalAlignment="Top" />
-                        <TextBlock Text="PL"
-                                   Foreground="#78350F"
-                                   FontSize="34"
-                                   FontWeight="Black"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Top"
-                                   Margin="0,88,0,0" />
-                    </Grid>
-                </Viewbox>
+                <Image Grid.Row="1"
+                       Source="pack://application:,,,/Assets/Leagues/premier-league-trophy.png"
+                       Width="190"
+                       Height="220"
+                       Stretch="Uniform"
+                       HorizontalAlignment="Center"
+                       Margin="0,12,0,8" />
 
                 <TextBlock x:Name="CelebrationTextBlock"
                            Grid.Row="2"
                            Foreground="#FFF7ED"
-                           FontSize="21"
+                           FontSize="18"
                            FontWeight="SemiBold"
                            TextAlignment="Center"
                            TextWrapping="Wrap"
-                           Margin="0,0,0,24" />
+                           Margin="0,0,0,12" />
 
                 <Border Grid.Row="3"
                         Background="#33FACC15"
                         BorderBrush="#D6B15E"
                         BorderThickness="1"
-                        CornerRadius="18"
-                        Padding="18"
-                        Margin="0,0,0,26">
+                        CornerRadius="14"
+                        Padding="10"
+                        Margin="0,0,0,14">
                     <TextBlock Text="The final whistle confirms a title-winning campaign. Enjoy the lap of honour before reviewing the full season."
                                Foreground="#FEF3C7"
-                               FontSize="14"
+                               FontSize="12"
                                FontWeight="SemiBold"
                                TextAlignment="Center"
                                TextWrapping="Wrap" />
@@ -146,8 +118,8 @@
 
                 <Button Grid.Row="4"
                         Content="Next"
-                        Width="190"
-                        Height="48"
+                        Width="180"
+                        Height="42"
                         HorizontalAlignment="Center"
                         Background="#FACC15"
                         Foreground="#111827"
@@ -158,5 +130,6 @@
                         Click="NextButton_Click" />
             </Grid>
         </Border>
+        </Viewbox>
     </Grid>
 </UserControl>
