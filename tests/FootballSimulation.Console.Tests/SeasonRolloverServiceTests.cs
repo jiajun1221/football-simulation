@@ -43,9 +43,11 @@ public class SeasonRolloverServiceTests
         {
             saveGameService.SaveGame(1, SaveGameService.CreateSaveData(league, selectedTeam));
 
+            var saveSlot = saveGameService.GetSaveSlots().Single(slot => slot.SlotNumber == 1);
             var loadedData = saveGameService.LoadGame(1);
             var loadedLeague = SaveGameService.CreateLeague(loadedData!);
 
+            Assert.Equal("2025-26", saveSlot.Season);
             Assert.NotNull(loadedData);
             Assert.Single(loadedData!.SeasonHistory);
             Assert.Single(loadedLeague.SeasonHistory);

@@ -79,6 +79,7 @@ public partial class DashboardView : UserControl
         }
 
         SelectedTeamTextBlock.Text = _state.SelectedTeam.Name;
+        SeasonTextBlock.Text = $"Season {FormatSeasonLabel(_state.League.Season)}";
         EnsureFixtureFilterOptions();
         SelectedClubLogoImage.Source = CreateImageSource(GetClubLogoPath(_state.SelectedTeam.Name));
         LeagueTableDataGrid.ItemsSource = CreateLeagueTableRows(_state.League, _state.SelectedTeam);
@@ -561,6 +562,13 @@ public partial class DashboardView : UserControl
 
         var words = cleanedName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         return words.Length == 0 ? cleanedName : words[0];
+    }
+
+    private static string FormatSeasonLabel(string season)
+    {
+        return string.IsNullOrWhiteSpace(season)
+            ? "-"
+            : season.Trim().Replace('-', '/');
     }
 
     private static bool IsTeamInFixture(Fixture fixture, Team team)

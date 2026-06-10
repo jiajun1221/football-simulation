@@ -229,6 +229,7 @@ public class SaveGameService
                     ? data.LeagueId
                     : data.LeagueState.LeagueId,
                 LeagueName = data.LeagueState.Name,
+                Season = data.LeagueState.Season,
                 SelectedClubName = data.SelectedClubName,
                 CurrentRound = data.CurrentRound,
                 LeaguePosition = tableEntry?.Position,

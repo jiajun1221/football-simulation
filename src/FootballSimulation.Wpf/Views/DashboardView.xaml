@@ -296,7 +296,7 @@
                                    Foreground="{DynamicResource AppTextBrush}"
                                    Margin="0,2,0,0" />
                         <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
-                            <TextBlock Text="Season 2025/26"
+                            <TextBlock x:Name="SeasonTextBlock"
                                        FontSize="12"
                                        Foreground="{DynamicResource AppMutedTextBrush}"
                                        FontWeight="SemiBold"

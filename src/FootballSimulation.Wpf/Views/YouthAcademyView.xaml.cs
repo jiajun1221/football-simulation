@@ -4,6 +4,8 @@ using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using FootballSimulation.Models;
 using FootballSimulation.Services;
+using FootballSimulation.Wpf.Helpers;
+using FootballSimulation.Wpf.Models;
 using FootballSimulation.Wpf.Services;
 using FootballSimulation.Wpf.State;
 
@@ -361,6 +363,13 @@ public partial class YouthAcademyView : UserControl
 
     private sealed record StatusDisplay(string Text, string Tooltip, string Background, string Foreground);
 
+    private sealed record ProspectStatusDisplay(
+        string Text,
+        string Tooltip,
+        string Background,
+        string BorderBrush,
+        string Foreground);
+
     private sealed record ScoutFocusOption(YouthScoutPositionFocus Value, string Label)
     {
         public override string ToString()
@@ -444,13 +453,21 @@ public partial class YouthAcademyView : UserControl
         public string Position { get; init; } = string.Empty;
         public int Overall { get; init; }
         public string Potential { get; init; } = string.Empty;
-        public string Traits { get; init; } = string.Empty;
+        public string PotentialBadgeText { get; init; } = string.Empty;
+        public string PotentialBadgeBackground { get; init; } = "#E5E7EB";
+        public string PotentialBadgeForeground { get; init; } = "#374151";
+        public IReadOnlyList<PlayerTraitBadge> TraitBadges { get; init; } = [];
         public string SigningCost { get; init; } = string.Empty;
-        public string ScoutNotes { get; init; } = string.Empty;
         public string Status { get; init; } = string.Empty;
+        public string StatusTooltip { get; init; } = string.Empty;
+        public string StatusBrush { get; init; } = "#E2E8F0";
+        public string StatusBorderBrush { get; init; } = "#CBD5E1";
+        public string StatusForeground { get; init; } = "#334155";
 
         public static ScoutProspectRow From(YouthScoutReport report, YouthScoutProspect prospect)
         {
+            var status = CreateStatus(prospect);
+            var potentialBadge = CreatePotentialBadge(prospect.PotentialMax);
             return new ScoutProspectRow
             {
                 ReportId = report.ReportId,
@@ -463,11 +480,35 @@ public partial class YouthAcademyView : UserControl
                 Position = prospect.PreferredPosition,
                 Overall = prospect.CurrentOVR,
                 Potential = $"{prospect.PotentialMin}-{prospect.PotentialMax}",
-                Traits = prospect.Traits.Count == 0 ? "-" : string.Join(", ", prospect.Traits.Take(2)),
+                PotentialBadgeText = potentialBadge.Text,
+                PotentialBadgeBackground = potentialBadge.Background,
+                PotentialBadgeForeground = potentialBadge.Foreground,
+                TraitBadges = PlayerTraitBadgeHelper.Create(prospect.Traits, maxVisibleTraits: 4),
                 SigningCost = FormatMoney(prospect.SigningCost),
-                ScoutNotes = prospect.ScoutNotes,
-                Status = prospect.IsSigned ? "Signed" : "Available"
+                Status = status.Text,
+                StatusTooltip = status.Tooltip,
+                StatusBrush = status.Background,
+                StatusBorderBrush = status.BorderBrush,
+                StatusForeground = status.Foreground
             };
+        }
+
+        private static ProspectStatusDisplay CreateStatus(YouthScoutProspect prospect)
+        {
+            return prospect.IsSigned
+                ? new ProspectStatusDisplay("Signed", "This prospect has already been signed.", "#E0F2FE", "#7DD3FC", "#075985")
+                : new ProspectStatusDisplay("Available", "This prospect is available to sign.", "#DCFCE7", "#86EFAC", "#166534");
+        }
+
+        private static BadgeDisplay CreatePotentialBadge(int potentialMax)
+        {
+            return potentialMax >= 90
+                ? new BadgeDisplay("Elite", "#7C3AED", "#FFFFFF")
+                : potentialMax >= 85
+                    ? new BadgeDisplay("Exciting", "#10B981", "#FFFFFF")
+                    : potentialMax >= 75
+                        ? new BadgeDisplay("Good", "#3B82F6", "#FFFFFF")
+                        : new BadgeDisplay("Normal", "#E5E7EB", "#374151");
         }
     }
 

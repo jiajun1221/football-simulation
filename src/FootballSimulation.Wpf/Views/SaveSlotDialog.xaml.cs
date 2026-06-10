@@ -77,13 +77,20 @@ public partial class SaveSlotDialog : Window
             SlotNumber = slot.SlotNumber,
             SlotTitle = $"Slot {slot.SlotNumber}",
             ClubName = slot.SelectedClubName,
-            SummaryText = $"Round {slot.CurrentRound} | Position #{slot.LeaguePosition?.ToString(CultureInfo.CurrentCulture) ?? "-"} | Points {slot.Points?.ToString(CultureInfo.CurrentCulture) ?? "-"}",
+            SummaryText = $"Season {FormatSeasonLabel(slot.Season)} | Round {slot.CurrentRound} | Position #{slot.LeaguePosition?.ToString(CultureInfo.CurrentCulture) ?? "-"} | Points {slot.Points?.ToString(CultureInfo.CurrentCulture) ?? "-"}",
             SavedAtText = slot.SavedAt.HasValue
                 ? $"Saved: {slot.SavedAt.Value.ToString("dd MMM yyyy, h:mm tt", CultureInfo.CurrentCulture)}"
                 : string.Empty,
             ButtonText = "Overwrite",
             RequiresOverwriteConfirmation = true
         };
+    }
+
+    private static string FormatSeasonLabel(string season)
+    {
+        return string.IsNullOrWhiteSpace(season)
+            ? "-"
+            : season.Trim().Replace('-', '/');
     }
 
     private sealed class SaveSlotRow

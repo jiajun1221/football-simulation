@@ -115,6 +115,13 @@
                                    TextWrapping="Wrap"
                                    Margin="0,12,0,8" />
 
+                        <TextBlock Text="{Binding SeasonText}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AppMutedTextBrush}"
+                                   TextAlignment="Center"
+                                   Margin="0,0,0,4" />
+
                         <TextBlock Text="{Binding RoundText}"
                                    FontSize="14"
                                    FontWeight="SemiBold"

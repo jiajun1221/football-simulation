@@ -39,6 +39,14 @@
             <Setter Property="FontWeight" Value="Bold" />
         </Style>
 
+        <Style x:Key="LeftCenteredGridTextStyle" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="TextAlignment" Value="Left" />
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+
         <Style x:Key="LeftAlignedColumnHeaderStyle" TargetType="DataGridColumnHeader">
             <Setter Property="Height" Value="42" />
             <Setter Property="Padding" Value="10,6" />
@@ -105,6 +113,106 @@
 
         <DataTemplate x:Key="StatusCellTemplate">
             <Border Background="{Binding StatusBrush}"
+                    CornerRadius="10"
+                    Height="24"
+                    Padding="9,0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    ToolTip="{Binding StatusTooltip}">
+                <TextBlock Text="{Binding Status}"
+                           Foreground="{Binding StatusForeground}"
+                           FontSize="11"
+                           FontWeight="SemiBold"
+                           VerticalAlignment="Center" />
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="ScoutTraitIconBadgeTemplate">
+            <Border Width="24"
+                    Height="24"
+                    Background="{Binding Background}"
+                    CornerRadius="12"
+                    Margin="0,0,4,0"
+                    ToolTip="{Binding TooltipText}">
+                <TextBlock Text="{Binding Icon}"
+                           Foreground="{Binding Foreground}"
+                           FontFamily="{Binding FontFamily}"
+                           FontSize="12"
+                           FontWeight="Black"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           TextAlignment="Center" />
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="ScoutTraitsCellTemplate">
+            <Grid VerticalAlignment="Center">
+                <ItemsControl ItemsSource="{Binding TraitBadges}"
+                              ItemTemplate="{StaticResource ScoutTraitIconBadgeTemplate}"
+                              HorizontalAlignment="Left"
+                              VerticalAlignment="Center">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.Style>
+                        <Style TargetType="ItemsControl">
+                            <Setter Property="Visibility" Value="Visible" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding TraitBadges.Count}" Value="0">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ItemsControl.Style>
+                </ItemsControl>
+                <TextBlock Text="-"
+                           Foreground="{DynamicResource AppMutedTextBrush}"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Center">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding TraitBadges.Count}" Value="0">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="ScoutPotentialCellTemplate">
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                <TextBlock Text="{Binding Potential}"
+                           Foreground="{DynamicResource AppTextBrush}"
+                           FontWeight="SemiBold"
+                           VerticalAlignment="Center"
+                           Margin="0,0,8,0" />
+                <Border Background="{Binding PotentialBadgeBackground}"
+                        CornerRadius="10"
+                        Height="24"
+                        Padding="8,0"
+                        VerticalAlignment="Center"
+                        ToolTip="{Binding Potential}">
+                    <TextBlock Text="{Binding PotentialBadgeText}"
+                               Foreground="{Binding PotentialBadgeForeground}"
+                               FontSize="11"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center" />
+                </Border>
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate x:Key="ScoutStatusBadgeTemplate">
+            <Border Background="{Binding StatusBrush}"
+                    BorderBrush="{Binding StatusBorderBrush}"
+                    BorderThickness="1"
                     CornerRadius="10"
                     Height="24"
                     Padding="9,0"
@@ -732,16 +840,27 @@
                                             <StaticResource ResourceKey="NationalityCellTemplate" />
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
-                                    <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="1.15*" />
+                                    <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="1.15*" ElementStyle="{StaticResource LeftCenteredGridTextStyle}" />
                                     <DataGridTextColumn Header="Scout" Binding="{Binding ScoutName}" Width="88" ElementStyle="{StaticResource CenteredGridTextStyle}" />
                                     <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="48" ElementStyle="{StaticResource CenteredGridTextStyle}" />
                                     <DataGridTextColumn Header="Pos" Binding="{Binding Position}" Width="48" ElementStyle="{StaticResource CenteredGridTextStyle}" />
                                     <DataGridTextColumn Header="OVR" Binding="{Binding Overall}" Width="56" ElementStyle="{StaticResource CenteredValueTextStyle}" />
-                                    <DataGridTextColumn Header="Potential" Binding="{Binding Potential}" Width="88" ElementStyle="{StaticResource CenteredGridTextStyle}" />
-                                    <DataGridTextColumn Header="Traits" Binding="{Binding Traits}" Width="1.05*" />
+                                    <DataGridTemplateColumn Header="Potential" Width="142" IsReadOnly="True">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <StaticResource ResourceKey="ScoutPotentialCellTemplate" />
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Traits" Width="104" IsReadOnly="True">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <StaticResource ResourceKey="ScoutTraitsCellTemplate" />
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
                                     <DataGridTextColumn Header="Cost" Binding="{Binding SigningCost}" Width="78" ElementStyle="{StaticResource CenteredValueTextStyle}" />
-                                    <DataGridTextColumn Header="Scout Notes" Binding="{Binding ScoutNotes}" Width="1.8*" />
-                                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="74" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                                    <DataGridTemplateColumn Header="Status" Width="92" IsReadOnly="True">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <StaticResource ResourceKey="ScoutStatusBadgeTemplate" />
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
                                 </DataGrid.Columns>
                             </DataGrid>
                         </Grid>

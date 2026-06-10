@@ -10,6 +10,7 @@ public class SaveGameSlotInfo
     public DateTime? SavedAt { get; set; }
     public string LeagueId { get; set; } = string.Empty;
     public string LeagueName { get; set; } = string.Empty;
+    public string Season { get; set; } = string.Empty;
     public string SelectedClubName { get; set; } = string.Empty;
     public int CurrentRound { get; set; }
     public int? LeaguePosition { get; set; }

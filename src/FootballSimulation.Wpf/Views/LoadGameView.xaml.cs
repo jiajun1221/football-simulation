@@ -154,6 +154,7 @@ public partial class LoadGameView : UserControl
             SlotTitle = $"Slot {slot.SlotNumber}",
             ClubName = slot.SelectedClubName,
             LogoPath = ClubLogoService.GetClubLogoPath(slot.SelectedClubName, slot.LeagueId),
+            SeasonText = $"Season {FormatSeasonLabel(slot.Season)}",
             RoundText = $"Round {slot.CurrentRound}",
             PositionText = slot.LeaguePosition.HasValue ? $"Position #{slot.LeaguePosition}" : "Position -",
             PointsText = slot.Points.HasValue ? $"Points {slot.Points}" : "Points -",
@@ -176,6 +177,13 @@ public partial class LoadGameView : UserControl
         }
 
         return string.Empty;
+    }
+
+    private static string FormatSeasonLabel(string season)
+    {
+        return string.IsNullOrWhiteSpace(season)
+            ? "-"
+            : season.Trim().Replace('-', '/');
     }
 
     private static IEnumerable<string> GetLogoCandidatePaths(string clubName)
@@ -214,6 +222,7 @@ public partial class LoadGameView : UserControl
         public string SlotTitle { get; init; } = string.Empty;
         public string ClubName { get; init; } = string.Empty;
         public string LogoPath { get; init; } = string.Empty;
+        public string SeasonText { get; init; } = string.Empty;
         public string RoundText { get; init; } = string.Empty;
         public string PositionText { get; init; } = string.Empty;
         public string PointsText { get; init; } = string.Empty;
