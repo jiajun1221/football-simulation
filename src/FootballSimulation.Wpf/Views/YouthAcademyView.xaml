@@ -330,6 +330,54 @@
             </Setter>
         </Style>
 
+        <Style x:Key="DangerActionButtonStyle" TargetType="Button" BasedOn="{StaticResource PrimaryActionButtonStyle}">
+            <Setter Property="Background" Value="#FEF2F2" />
+            <Setter Property="Foreground" Value="#B91C1C" />
+            <Setter Property="BorderBrush" Value="#FCA5A5" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="12"
+                                Padding="{TemplateBinding Padding}">
+                            <TextBlock x:Name="ButtonText"
+                                       Text="{TemplateBinding Content}"
+                                       Foreground="{TemplateBinding Foreground}"
+                                       FontSize="{TemplateBinding FontSize}"
+                                       FontWeight="{TemplateBinding FontWeight}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       TextAlignment="Center"
+                                       TextTrimming="CharacterEllipsis" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#FEE2E2" />
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#EF4444" />
+                                <Setter TargetName="ButtonBorder" Property="Effect" Value="{StaticResource YouthButtonShadow}" />
+                                <Setter TargetName="ButtonText" Property="Foreground" Value="#991B1B" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#FECACA" />
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#DC2626" />
+                                <Setter TargetName="ButtonText" Property="Foreground" Value="#7F1D1D" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#D1D5DB" />
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#D1D5DB" />
+                                <Setter TargetName="ButtonText" Property="Foreground" Value="#6B7280" />
+                                <Setter Property="Foreground" Value="#6B7280" />
+                                <Setter Property="Cursor" Value="No" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="TabButtonStyle" TargetType="RadioButton">
             <Setter Property="Height" Value="38" />
             <Setter Property="MinWidth" Value="118" />
@@ -662,6 +710,11 @@
                                         HorizontalAlignment="Stretch"
                                         Margin="0,0,0,8"
                                         Click="PromoteButton_Click" />
+                                <Button Content="Release Player"
+                                        Style="{StaticResource DangerActionButtonStyle}"
+                                        HorizontalAlignment="Stretch"
+                                        Margin="0,0,0,8"
+                                        Click="ReleasePlayerButton_Click" />
                                 <TextBlock x:Name="AcademyStatusTextBlock"
                                            Foreground="{DynamicResource AppMutedTextBrush}"
                                            TextWrapping="Wrap"

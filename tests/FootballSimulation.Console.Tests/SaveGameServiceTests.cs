@@ -91,9 +91,15 @@ public class SaveGameServiceTests
             .ToDictionary(player => player.Name, player => player.FlagImagePath);
         var expectedContractYears = selectedTeam.Players.Concat(selectedTeam.Substitutes)
             .ToDictionary(player => player.Name, player => player.ContractEndYear);
+        var expectedPreferredPositions = selectedTeam.Players.Concat(selectedTeam.Substitutes)
+            .ToDictionary(player => player.Name, player => player.PreferredPosition);
         foreach (var player in league.Teams.SelectMany(team => team.Players.Concat(team.Substitutes)))
         {
             player.Age = null;
+            player.Position = Position.Midfielder;
+            player.PreferredPosition = "CM";
+            player.SecondaryPositions = [];
+            player.AssignedPosition = "CM";
             player.NationalityCode = string.Empty;
             player.NationalityName = string.Empty;
             player.Nationality = string.Empty;
@@ -115,10 +121,138 @@ public class SaveGameServiceTests
         foreach (var player in restoredChelsea.Players.Concat(restoredChelsea.Substitutes))
         {
             Assert.Equal(expectedAges[player.Name], player.Age);
+            Assert.Equal(expectedPreferredPositions[player.Name], player.PreferredPosition);
             Assert.Equal(expectedFlagPaths[player.Name], player.FlagImagePath);
             Assert.Equal(expectedContractYears[player.Name], player.ContractEndYear);
             Assert.NotNull(player.WeeklyWage);
             Assert.True(player.WeeklyWage > 0);
+        }
+    }
+
+    [Fact]
+    public void LoadGame_CorrectsLegacyEstevaoAge()
+    {
+        var saveDirectory = CreateTempSaveDirectory();
+        var saveGameService = new SaveGameService(saveDirectory);
+        var chelsea = new Team
+        {
+            Name = "Chelsea",
+            Players =
+            [
+                new Player
+                {
+                    PlayerId = "premier-league:chelsea:estevao:41",
+                    Name = "Estevao",
+                    SquadNumber = 41,
+                    Position = Position.Forward,
+                    PreferredPosition = "RW",
+                    OverallRating = 83,
+                    BaseOverallRating = 78,
+                    Age = 25
+                }
+            ]
+        };
+        var league = new League
+        {
+            LeagueId = LeagueDataService.DefaultLeagueId,
+            Name = GameSessionService.PremierLeagueName,
+            Season = "2026-27",
+            Teams = [chelsea]
+        };
+        var transferMarket = new TransferMarketState();
+
+        try
+        {
+            saveGameService.SaveGame(1, SaveGameService.CreateSaveData(league, chelsea, transferMarket));
+
+            var loadedData = saveGameService.LoadGame(1);
+            var loadedLeague = SaveGameService.CreateLeague(loadedData!);
+            var loadedPlayer = loadedLeague.Teams.Single().Players.Single();
+            var loadedTransferPlayer = loadedData!.TransferMarketState.Leagues
+                .Single(leagueState => leagueState.LeagueId == LeagueDataService.DefaultLeagueId)
+                .Teams.Single()
+                .Players.Single();
+
+            Assert.Equal(19, loadedPlayer.Age);
+            Assert.Equal(19, loadedTransferPlayer.Age);
+        }
+        finally
+        {
+            DeleteDirectory(saveDirectory);
+        }
+    }
+
+    [Fact]
+    public void LoadGame_CorrectsLegacyPlayerPositions()
+    {
+        var saveDirectory = CreateTempSaveDirectory();
+        var saveGameService = new SaveGameService(saveDirectory);
+        var manchesterUnited = CreateTeamWithPlayer(
+            "Manchester United",
+            "premier-league:manchesterunited:brunofernandes:8",
+            "Bruno Fernandes",
+            preferredPosition: "CDM");
+        var parisSaintGermain = CreateTeamWithPlayer(
+            "Paris Saint-Germain",
+            "ligue-1:parissaintgermain:vitinha:6",
+            "Vitinha",
+            preferredPosition: "CDM",
+            secondaryPositions: ["CM", "CB"]);
+        var manchesterCity = CreateTeamWithPlayer(
+            "Manchester City",
+            "premier-league:manchestercity:rodri:16",
+            "Rodri",
+            preferredPosition: "CM");
+        var arsenal = CreateTeamWithPlayer(
+            "Arsenal",
+            "premier-league:arsenal:martinodegaard:8",
+            "Martin Odegaard",
+            preferredPosition: "CM");
+        var genoa = CreateTeamWithPlayer(
+            "Genoa",
+            "serie-a:genoa:vitinha:9",
+            "Vitinha",
+            Position.Forward,
+            preferredPosition: "ST",
+            secondaryPositions: ["LW", "RW"]);
+        var league = new League
+        {
+            LeagueId = LeagueDataService.DefaultLeagueId,
+            Name = GameSessionService.PremierLeagueName,
+            Season = "2026-27",
+            Teams = [manchesterUnited, parisSaintGermain, manchesterCity, arsenal, genoa]
+        };
+        var transferMarket = new TransferMarketState();
+
+        try
+        {
+            saveGameService.SaveGame(1, SaveGameService.CreateSaveData(league, manchesterUnited, transferMarket));
+
+            var loadedData = saveGameService.LoadGame(1);
+            var loadedLeague = SaveGameService.CreateLeague(loadedData!);
+            var loadedPlayers = loadedLeague.Teams
+                .SelectMany(team => team.Players)
+                .ToDictionary(player => player.PlayerId, player => player);
+            var transferPlayers = loadedData!.TransferMarketState.Leagues
+                .SelectMany(leagueState => leagueState.Teams)
+                .SelectMany(team => team.Players)
+                .ToDictionary(player => player.PlayerId, player => player);
+
+            Assert.Equal("CAM", loadedPlayers["premier-league:manchesterunited:brunofernandes:8"].PreferredPosition);
+            Assert.Equal("CM", loadedPlayers["ligue-1:parissaintgermain:vitinha:6"].PreferredPosition);
+            Assert.Equal("CDM", loadedPlayers["premier-league:manchestercity:rodri:16"].PreferredPosition);
+            Assert.Equal("CAM", loadedPlayers["premier-league:arsenal:martinodegaard:8"].PreferredPosition);
+            Assert.Equal("ST", loadedPlayers["serie-a:genoa:vitinha:9"].PreferredPosition);
+
+            Assert.Equal("CAM", transferPlayers["premier-league:manchesterunited:brunofernandes:8"].PreferredPosition);
+            Assert.Equal("CM", transferPlayers["ligue-1:parissaintgermain:vitinha:6"].PreferredPosition);
+            Assert.Equal("CDM", transferPlayers["premier-league:manchestercity:rodri:16"].PreferredPosition);
+            Assert.Equal("CAM", transferPlayers["premier-league:arsenal:martinodegaard:8"].PreferredPosition);
+            Assert.Equal("ST", transferPlayers["serie-a:genoa:vitinha:9"].PreferredPosition);
+        }
+        finally
+        {
+            DeleteDirectory(saveDirectory);
         }
     }
 
@@ -325,6 +459,35 @@ public class SaveGameServiceTests
     private static string CreateTempSaveDirectory()
     {
         return Path.Combine(Path.GetTempPath(), $"football-save-tests-{Guid.NewGuid():N}");
+    }
+
+    private static Team CreateTeamWithPlayer(
+        string teamName,
+        string playerId,
+        string playerName,
+        Position position = Position.Midfielder,
+        string preferredPosition = "CM",
+        IReadOnlyList<string>? secondaryPositions = null)
+    {
+        return new Team
+        {
+            Name = teamName,
+            Players =
+            [
+                new Player
+                {
+                    PlayerId = playerId,
+                    Name = playerName,
+                    Position = position,
+                    PreferredPosition = preferredPosition,
+                    AssignedPosition = preferredPosition,
+                    SecondaryPositions = secondaryPositions?.ToList() ?? [],
+                    OverallRating = 85,
+                    BaseOverallRating = 85,
+                    Age = 26
+                }
+            ]
+        };
     }
 
     private static void DeleteDirectory(string directoryPath)

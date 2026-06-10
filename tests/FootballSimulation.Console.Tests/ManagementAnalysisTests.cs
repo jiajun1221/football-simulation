@@ -43,6 +43,31 @@ public class ManagementAnalysisTests
     }
 
     [Fact]
+    public void PostMatchAnalysisService_SelectsManOfTheMatchFromWinningTeam()
+    {
+        var match = new Match
+        {
+            HomeTeam = new Team { Name = "Chelsea" },
+            AwayTeam = new Team { Name = "Nottingham Forest" },
+            HomeScore = 2,
+            AwayScore = 0,
+            PlayerPerformances =
+            [
+                new PlayerMatchPerformance { PlayerName = "Angus Gunn", TeamName = "Nottingham Forest", Rating = 10.0, Saves = 11 },
+                new PlayerMatchPerformance { PlayerName = "Cole Palmer", TeamName = "Chelsea", Rating = 9.0, Goals = 2 },
+                new PlayerMatchPerformance { PlayerName = "Reece James", TeamName = "Chelsea", Rating = 8.7 }
+            ]
+        };
+        var service = new PostMatchAnalysisService();
+
+        var summary = service.CreateSummary(match);
+
+        Assert.NotNull(summary.ManOfTheMatch);
+        Assert.Equal("Cole Palmer", summary.ManOfTheMatch.PlayerName);
+        Assert.Equal("Chelsea", summary.ManOfTheMatch.TeamName);
+    }
+
+    [Fact]
     public void RecentResultService_ReturnsOnlyPlayedFixturesForSelectedTeam()
     {
         var seedDataService = new SeedDataService();

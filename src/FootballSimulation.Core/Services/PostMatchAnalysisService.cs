@@ -14,7 +14,7 @@ public class PostMatchAnalysisService
             .ThenBy(performance => performance.YellowCards + performance.RedCards + performance.Fouls + performance.Offsides)
             .ToList();
 
-        var manOfTheMatch = adjustedPerformances.FirstOrDefault();
+        var manOfTheMatch = SelectManOfTheMatch(match, adjustedPerformances);
 
         return new PostMatchSummary
         {
@@ -25,6 +25,32 @@ public class PostMatchAnalysisService
                 ? "No player performances were recorded."
                 : CreateManOfTheMatchReason(manOfTheMatch, match)
         };
+    }
+
+    private static PlayerMatchPerformance? SelectManOfTheMatch(
+        Match match,
+        IReadOnlyList<PlayerMatchPerformance> adjustedPerformances)
+    {
+        var winningTeamName = GetWinningTeamName(match);
+        var candidatePool = string.IsNullOrWhiteSpace(winningTeamName)
+            ? adjustedPerformances
+            : adjustedPerformances
+                .Where(performance => performance.TeamName.Equals(winningTeamName, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+        return candidatePool.FirstOrDefault() ?? adjustedPerformances.FirstOrDefault();
+    }
+
+    private static string GetWinningTeamName(Match match)
+    {
+        if (match.HomeScore == match.AwayScore)
+        {
+            return string.Empty;
+        }
+
+        return match.HomeScore > match.AwayScore
+            ? match.HomeTeam.Name
+            : match.AwayTeam.Name;
     }
 
     private static PlayerMatchPerformance CreateAdjustedPerformance(Match match, PlayerMatchPerformance performance)

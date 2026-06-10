@@ -189,6 +189,21 @@ public class YouthAcademyService
         return new YouthOperationResult(true, $"{youthPlayer.Name} promoted to the senior squad.", youthPlayer, player);
     }
 
+    public YouthOperationResult ReleaseYouthPlayer(League league, Team team, string youthPlayerId)
+    {
+        EnsureAcademies(league);
+        var academy = GetAcademy(league, team.Name);
+        var youthPlayer = academy.YouthPlayers.FirstOrDefault(player =>
+            player.PlayerId.Equals(youthPlayerId, StringComparison.OrdinalIgnoreCase));
+        if (youthPlayer is null)
+        {
+            return new YouthOperationResult(false, "Youth player not found.");
+        }
+
+        academy.YouthPlayers.Remove(youthPlayer);
+        return new YouthOperationResult(true, $"{youthPlayer.Name} released from the youth academy.", youthPlayer);
+    }
+
     public bool CanPromote(Team team, YouthPlayer youthPlayer, out string reason)
     {
         if (youthPlayer.Age < MinimumPromotionAge)

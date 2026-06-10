@@ -837,6 +837,7 @@ public class TransferMarketService
                 NeedScore = GetSquadNeedScore(item.Team, player)
             })
             .Where(item => item.Finance.AvailableTransferBudget >= fee)
+            .Where(item => item.Finance.AvailableWageBudget >= PlayerContractService.EstimateWeeklyWage(player, item.LeagueId))
             .Where(item => item.NeedScore > 0)
             .OrderByDescending(item => item.NeedScore)
             .ThenByDescending(item => item.Finance.AvailableTransferBudget)
@@ -1217,7 +1218,7 @@ public class TransferMarketService
 
         var buyer = FindTeam(state, offer.ToLeagueId, offer.ToClubName);
         var fee = offer.CounterFee ?? offer.Fee;
-        if (!CompleteTransfer(state, listing, offer.ToLeagueId, buyer, fee, currentRound, type))
+        if (!CompleteTransfer(state, listing, offer.ToLeagueId, buyer, fee, currentRound, type, enforceBuyerBudget: offer.IsUserOffer))
         {
             offer.Status = OfferStatus.Withdrawn;
             offer.Message = $"{offer.ToClubName} could not complete the transfer for {offer.PlayerName}.";
@@ -1239,7 +1240,8 @@ public class TransferMarketService
         Team buyingTeam,
         decimal fee,
         int currentRound,
-        string type)
+        string type,
+        bool enforceBuyerBudget = true)
     {
         var sellingTeam = listing.Team;
         var player = listing.Player;
@@ -1247,13 +1249,13 @@ public class TransferMarketService
         var sellerFinance = _financeService.GetOrCreateFinance(state, listing.LeagueId, sellingTeam);
         var proposedWage = PlayerContractService.EstimateWeeklyWage(player, toLeagueId);
 
-        if (buyerFinance.AvailableTransferBudget < fee)
+        if (enforceBuyerBudget && buyerFinance.AvailableTransferBudget < fee)
         {
             AddNotification(state, TransferNotificationType.InsufficientBudget, $"{buyingTeam.Name} cannot afford {player.Name}.", currentRound);
             return false;
         }
 
-        if (buyerFinance.AvailableWageBudget < proposedWage)
+        if (enforceBuyerBudget && buyerFinance.AvailableWageBudget < proposedWage)
         {
             AddNotification(state, TransferNotificationType.InsufficientBudget, $"{buyingTeam.Name} cannot afford {player.Name}'s wage demands.", currentRound);
             return false;

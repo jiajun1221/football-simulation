@@ -37,6 +37,8 @@ public partial class FormationSetupPanel : UserControl
 
     public event EventHandler? SetupChanged;
 
+    public bool ShowUnavailablePlayers { get; set; } = true;
+
     public void LoadTeam(Team team)
     {
         _team = team;
@@ -408,6 +410,14 @@ public partial class FormationSetupPanel : UserControl
     private void RefreshUnavailablePlayers()
     {
         if (_team is null) { return; }
+        if (!ShowUnavailablePlayers)
+        {
+            UnavailableListBox.ItemsSource = null;
+            UnavailableTitleTextBlock.Visibility = Visibility.Collapsed;
+            UnavailableListBox.Visibility = Visibility.Collapsed;
+            return;
+        }
+
         var unavailable = _team.Players.Concat(_team.Substitutes)
             .Where(player => player.IsInjured || player.IsSuspended || player.IsSentOff)
             .Distinct()

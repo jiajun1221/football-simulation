@@ -178,6 +178,30 @@ public partial class YouthAcademyView : UserControl
         PersistCurrentSaveSlot();
     }
 
+    private void ReleasePlayerButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_state.League is null || _state.SelectedTeam is null ||
+            AcademyPlayersDataGrid.SelectedItem is not YouthPlayerRow row)
+        {
+            return;
+        }
+
+        var confirmation = MessageBox.Show(
+            $"Release {row.Name} from the youth academy? This cannot be undone.",
+            "Release Youth Player",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+        if (confirmation != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        var result = _academyService.ReleaseYouthPlayer(_state.League, _state.SelectedTeam, row.Player.PlayerId);
+        AcademyStatusTextBlock.Text = result.Message;
+        LoadAcademy();
+        PersistCurrentSaveSlot();
+    }
+
     private void AssignScoutCountryButton_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not Button { CommandParameter: ScoutAssignmentRow row })

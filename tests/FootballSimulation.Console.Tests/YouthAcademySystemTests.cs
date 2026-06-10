@@ -61,6 +61,27 @@ public class YouthAcademySystemTests
     }
 
     [Fact]
+    public void ApplyDevelopment_UsesDevelopmentRateForOvrGrowth()
+    {
+        var academy = new YouthAcademy
+        {
+            ClubName = "Chelsea",
+            AcademyLevel = AcademyLevel.Silver,
+            TrainingFocus = YouthTrainingFocus.Balanced
+        };
+        var slowProspect = CreateComparableProspect("Slow Prospect", YouthDevelopmentRate.Slow);
+        var explosiveProspect = CreateComparableProspect("Explosive Prospect", YouthDevelopmentRate.Explosive);
+        var service = new YouthDevelopmentService();
+
+        service.ApplyDevelopment(slowProspect, academy, months: 6);
+        service.ApplyDevelopment(explosiveProspect, academy, months: 6);
+
+        Assert.True(explosiveProspect.CurrentOVR > slowProspect.CurrentOVR);
+        Assert.True(explosiveProspect.DevelopmentProgress > slowProspect.DevelopmentProgress ||
+            explosiveProspect.CurrentOVR - slowProspect.CurrentOVR > 1);
+    }
+
+    [Fact]
     public void PromoteYouthPlayer_AddsProspectToSeniorSubstitutes()
     {
         var league = CreateLeague();
@@ -253,5 +274,24 @@ public class YouthAcademySystemTests
                 throw new InvalidOperationException("Fixture simulation did not complete.");
             }
         }
+    }
+
+    private static YouthPlayer CreateComparableProspect(string name, YouthDevelopmentRate developmentRate)
+    {
+        return new YouthPlayer
+        {
+            PlayerId = Guid.NewGuid().ToString("N"),
+            Name = name,
+            Age = 17,
+            Position = Position.Midfielder,
+            PreferredPosition = "CM",
+            CurrentOVR = 58,
+            PotentialMin = 84,
+            PotentialMax = 92,
+            HiddenTruePotential = 92,
+            PotentialTier = YouthPotentialTier.ExcitingProspect,
+            Personality = YouthPersonality.Professional,
+            DevelopmentRate = developmentRate
+        };
     }
 }

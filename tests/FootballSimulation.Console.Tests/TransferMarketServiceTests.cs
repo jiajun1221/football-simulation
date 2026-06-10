@@ -227,6 +227,31 @@ public class TransferMarketServiceTests
     }
 
     [Fact]
+    public void AcceptAiOffer_CompletesExistingCommittedOfferEvenIfBuyerBudgetChanged()
+    {
+        var league = CreateLeague("premier-league");
+        var selectedTeam = league.Teams.Single(team => team.Name == "Chelsea");
+        var service = new TransferMarketService();
+        var state = service.CreateInitialState(league);
+        var player = selectedTeam.Players.Concat(selectedTeam.Substitutes).OrderBy(player => player.OverallRating).First();
+        var offer = service.CreateAiOfferForUserPlayer(state, league, selectedTeam, player, currentRound: 1);
+        var buyer = state.Leagues
+            .Single(item => item.LeagueId == offer.ToLeagueId)
+            .Teams
+            .Single(team => team.Name == offer.ToClubName);
+        var buyerFinance = service.GetFinance(state, offer.ToLeagueId, buyer);
+        buyerFinance.TransferSpent = buyerFinance.ClubTransferBudget + buyerFinance.TransferIncome;
+        buyerFinance.WageSpent = buyerFinance.ClubWageBudget;
+
+        service.AcceptOffer(state, offer.OfferId, league, currentRound: 1);
+
+        Assert.Equal(OfferStatus.Completed, offer.Status);
+        Assert.DoesNotContain(selectedTeam.Players.Concat(selectedTeam.Substitutes), squadPlayer => squadPlayer.PlayerId == player.PlayerId);
+        Assert.Contains(buyer.Substitutes, squadPlayer => squadPlayer.PlayerId == player.PlayerId);
+        Assert.Contains(state.TransferHistory, item => item.PlayerId == player.PlayerId && item.ToClubName == buyer.Name);
+    }
+
+    [Fact]
     public void ProcessAgreedTransfers_MovesPlayerWhenWindowOpens()
     {
         var league = CreateLeague("premier-league");

@@ -375,6 +375,7 @@
 
             <TabItem Header="Formation">
                 <controls:FormationSetupPanel x:Name="FormationSetupPanel"
+                                              ShowUnavailablePlayers="False"
                                               SetupChanged="FormationSetupPanel_SetupChanged" />
             </TabItem>
         </TabControl>

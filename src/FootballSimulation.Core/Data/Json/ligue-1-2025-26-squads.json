@@ -7108,11 +7108,11 @@
         {
           "name": "Vitinha",
           "squadNumber": 6,
-          "position": "CDM",
-          "preferredPosition": "CDM",
+          "position": "CM",
+          "preferredPosition": "CM",
           "secondaryPositions": [
-            "CM",
-            "CB"
+            "CDM",
+            "CAM"
           ],
           "preferredFoot": "Right",
           "disciplineRating": 44,

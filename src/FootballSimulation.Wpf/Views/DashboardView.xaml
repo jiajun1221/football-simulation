@@ -110,6 +110,35 @@
             </Setter>
         </Style>
 
+        <Style x:Key="DashboardNotificationDotStyle" TargetType="Border">
+            <Setter Property="Width" Value="10" />
+            <Setter Property="Height" Value="10" />
+            <Setter Property="CornerRadius" Value="5" />
+            <Setter Property="Background" Value="#EF4444" />
+            <Setter Property="BorderBrush" Value="#FFFFFF" />
+            <Setter Property="BorderThickness" Value="2" />
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="VerticalAlignment" Value="Top" />
+            <Setter Property="Margin" Value="0,5,8,0" />
+            <Setter Property="IsHitTestVisible" Value="False" />
+            <Setter Property="Visibility" Value="Collapsed" />
+        </Style>
+
+        <Style x:Key="DashboardNotificationBadgeStyle" TargetType="Border">
+            <Setter Property="MinWidth" Value="20" />
+            <Setter Property="Height" Value="20" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="Padding" Value="6,0" />
+            <Setter Property="Background" Value="#EF4444" />
+            <Setter Property="BorderBrush" Value="#FFFFFF" />
+            <Setter Property="BorderThickness" Value="2" />
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="VerticalAlignment" Value="Top" />
+            <Setter Property="Margin" Value="0,-7,-7,0" />
+            <Setter Property="IsHitTestVisible" Value="False" />
+            <Setter Property="Visibility" Value="Collapsed" />
+        </Style>
+
         <Style x:Key="ModernDataGrid" TargetType="DataGrid">
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
@@ -474,12 +503,24 @@
                                 Margin="0,0,6,8"
                                 Click="MySquadButton_Click" />
 
-                        <Button Content="💼 Transfer Market"
-                                Grid.Row="2"
-                                Grid.Column="1"
-                                Style="{StaticResource DashboardWhiteActionButton}"
-                                Margin="0,0,0,8"
-                                Click="TransferMarketButton_Click" />
+                        <Grid Grid.Row="2"
+                              Grid.Column="1"
+                              Margin="0,0,0,8">
+                            <Button Content="💼 Transfer Market"
+                                    Style="{StaticResource DashboardWhiteActionButton}"
+                                    Click="TransferMarketButton_Click" />
+                            <Border x:Name="TransferMarketNotificationBadge"
+                                    Style="{StaticResource DashboardNotificationBadgeStyle}"
+                                    ToolTip="Pending transfer offers need a decision.">
+                                <TextBlock x:Name="TransferMarketNotificationCountTextBlock"
+                                           Foreground="#FFFFFF"
+                                           FontSize="10"
+                                           FontWeight="Black"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           TextAlignment="Center" />
+                            </Border>
+                        </Grid>
 
                         <Button Content="📊 Player Stats"
                                 Grid.Row="3"
@@ -488,11 +529,15 @@
                                 Margin="0,0,6,0"
                                 Click="PlayerStatsButton_Click" />
 
-                        <Button Content="🎓 Youth Academy"
-                                Grid.Row="3"
-                                Grid.Column="1"
-                                Style="{StaticResource DashboardWhiteActionButton}"
-                                Click="YouthAcademyButton_Click" />
+                        <Grid Grid.Row="3"
+                              Grid.Column="1">
+                            <Button Content="🎓 Youth Academy"
+                                    Style="{StaticResource DashboardWhiteActionButton}"
+                                    Click="YouthAcademyButton_Click" />
+                            <Border x:Name="YouthAcademyNotificationDot"
+                                    Style="{StaticResource DashboardNotificationDotStyle}"
+                                    ToolTip="Scout report completed." />
+                        </Grid>
                     </Grid>
 
                 </StackPanel>

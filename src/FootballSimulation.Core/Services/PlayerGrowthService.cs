@@ -62,6 +62,12 @@ public class PlayerGrowthService
 
     private static int CalculateGrowthPoints(Match match, Team team, Player player, PlayerMatchPerformance performance)
     {
+        var isAtOrAbovePotentialCap = IsAtOrAbovePotentialCap(player);
+        if (isAtOrAbovePotentialCap && !CanEarnOverCapGrowth(player, performance))
+        {
+            return 0;
+        }
+
         var basePoints = performance.Rating switch
         {
             >= 8.5 => 40,
@@ -70,9 +76,13 @@ public class PlayerGrowthService
             _ => 0
         };
 
+        var minutesPlayed = GetMinutesPlayed(match, performance);
+        var youngBaselineGrowthPoints = isAtOrAbovePotentialCap
+            ? 0
+            : CalculateYoungBaselineGrowthPoints(player, minutesPlayed);
         if (basePoints == 0)
         {
-            return 0;
+            return youngBaselineGrowthPoints;
         }
 
         var contributionBonus = player.Position == Position.Goalkeeper
@@ -85,7 +95,7 @@ public class PlayerGrowthService
             PlayerFormStatus.Poor or PlayerFormStatus.VeryPoor => -5,
             _ => 0
         };
-        var minutesMultiplier = GetMinutesPlayed(match, performance) switch
+        var minutesMultiplier = minutesPlayed switch
         {
             >= 75 => 1.0,
             >= 45 => 0.75,
@@ -94,8 +104,41 @@ public class PlayerGrowthService
         };
         var ageMultiplier = GetAgeGrowthMultiplier(player);
         var total = (basePoints + contributionBonus + formBonus) * minutesMultiplier * ageMultiplier;
+        if (isAtOrAbovePotentialCap)
+        {
+            total *= GetOverCapGrowthMultiplier(player);
+        }
+        else
+        {
+            total = Math.Max(total, youngBaselineGrowthPoints);
+        }
 
         return Math.Clamp((int)Math.Round(total), 0, 60);
+    }
+
+    private static int CalculateYoungBaselineGrowthPoints(Player player, int minutesPlayed)
+    {
+        if (player.Age is not < 30)
+        {
+            return 0;
+        }
+
+        var ageBase = player.Age switch
+        {
+            <= 21 => 4,
+            <= 24 => 3,
+            <= 27 => 2,
+            _ => 1
+        };
+        var minutesMultiplier = minutesPlayed switch
+        {
+            >= 75 => 1.0,
+            >= 45 => 0.75,
+            >= 20 => 0.50,
+            _ => 0.25
+        };
+
+        return Math.Max(1, (int)Math.Round(ageBase * minutesMultiplier));
     }
 
     private static int CalculateOutfieldBonus(PlayerMatchPerformance performance)
@@ -158,14 +201,14 @@ public class PlayerGrowthService
 
     private static bool CanGrow(Player player)
     {
-        return player.OverallRating < Math.Min(99, GetPotentialCap(player));
+        return player.OverallRating < 99;
     }
 
     private static int GetPotentialCap(Player player)
     {
         if (player.PotentialOverall.HasValue)
         {
-            return Math.Max(player.OverallRating, player.PotentialOverall.Value);
+            return Math.Min(99, player.PotentialOverall.Value);
         }
 
         if (player.Age is null)
@@ -181,6 +224,28 @@ public class PlayerGrowthService
             <= 27 => Math.Min(99, baseOverall + 5),
             <= 30 => Math.Min(99, baseOverall + 3),
             _ => Math.Min(99, baseOverall + 1)
+        };
+    }
+
+    private static bool IsAtOrAbovePotentialCap(Player player)
+    {
+        return player.OverallRating >= GetPotentialCap(player);
+    }
+
+    private static bool CanEarnOverCapGrowth(Player player, PlayerMatchPerformance performance)
+    {
+        return player.Age is < 30 && performance.Rating >= 8.5;
+    }
+
+    private static double GetOverCapGrowthMultiplier(Player player)
+    {
+        return player.Age switch
+        {
+            <= 21 => 0.18,
+            <= 24 => 0.10,
+            <= 27 => 0.06,
+            < 30 => 0.03,
+            _ => 0.0
         };
     }
 

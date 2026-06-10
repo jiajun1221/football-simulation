@@ -111,6 +111,8 @@ public partial class DashboardView : UserControl
         {
             RunTransferMarketRoundProcessing();
         }
+
+        UpdateDashboardNotifications();
     }
 
     private void EnsureFixtureFilterOptions()
@@ -170,6 +172,50 @@ public partial class DashboardView : UserControl
             _state.TransferMarket,
             _state.SelectedTeam,
             GetCurrentRoundForTransferProcessing());
+    }
+
+    private void UpdateDashboardNotifications()
+    {
+        var pendingTransferOfferCount = GetPendingIncomingTransferOfferCount();
+        TransferMarketNotificationCountTextBlock.Text = pendingTransferOfferCount.ToString();
+        TransferMarketNotificationBadge.Visibility = pendingTransferOfferCount > 0
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+        YouthAcademyNotificationDot.Visibility = HasCompletedScoutReportNotification()
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+    }
+
+    private int GetPendingIncomingTransferOfferCount()
+    {
+        if (_state.TransferMarket is null || _state.SelectedTeam is null)
+        {
+            return 0;
+        }
+
+        return _state.TransferMarket.Offers.Count(offer => IsPendingIncomingOffer(offer, _state.SelectedTeam));
+    }
+
+    private static bool IsPendingIncomingOffer(TransferOffer offer, Team selectedTeam)
+    {
+        return !offer.IsUserOffer &&
+            offer.FromClubName.Equals(selectedTeam.Name, StringComparison.OrdinalIgnoreCase) &&
+            offer.Status is OfferStatus.Pending or OfferStatus.PendingUntilWindowOpens or OfferStatus.Countered;
+    }
+
+    private bool HasCompletedScoutReportNotification()
+    {
+        if (_state.League is null || _state.SelectedTeam is null)
+        {
+            return false;
+        }
+
+        _youthAcademyService.EnsureAcademies(_state.League);
+        var academy = _youthAcademyService.GetAcademy(_state.League, _state.SelectedTeam.Name);
+        _youthScoutService.EnsureScoutNetwork(academy);
+        return academy.ScoutAssignments.Any(assignment =>
+            assignment.ProgressMatches >= assignment.RequiredMatches &&
+            !string.IsNullOrWhiteSpace(assignment.ActiveReportId));
     }
 
     private int GetCurrentRoundForTransferProcessing()

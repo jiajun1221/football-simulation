@@ -444,9 +444,14 @@ public partial class MatchLiveView : UserControl
                         await PlayGoalEffectAsync(feedItem.TeamName, cancellationToken);
                     }
 
-        if (matchEvent.EventType == EventType.Injury && TryEnterMandatoryInjuryPause(matchEvent))
+        if (matchEvent.EventType == EventType.Injury)
         {
-            return;
+            if (TryEnterMandatoryInjuryPause(matchEvent))
+            {
+                return;
+            }
+
+            TryMakeImmediateOpponentInjurySubstitution(matchEvent);
         }
 
         if (IsSubstitutionStoppageEvent(matchEvent.EventType))
@@ -637,6 +642,88 @@ public partial class MatchLiveView : UserControl
         RefreshPlayerPanels();
         UpdatePlaybackControls();
         return true;
+    }
+
+    private bool TryMakeImmediateOpponentInjurySubstitution(MatchEvent matchEvent)
+    {
+        if (_state.CurrentMatch is null || _state.SelectedTeam is null || string.IsNullOrWhiteSpace(matchEvent.PrimaryPlayerName))
+        {
+            return false;
+        }
+
+        var opponentTeam = GetOpponentTeam();
+        var injuredPlayer = GetActivePitchPlayers(opponentTeam)
+            .FirstOrDefault(player => string.Equals(player.Name, matchEvent.PrimaryPlayerName, StringComparison.OrdinalIgnoreCase));
+        if (injuredPlayer is null || !injuredPlayer.IsInjured)
+        {
+            return false;
+        }
+
+        if (_squadSelectionService.CountTeamSubstitutions(_state.CurrentMatch, opponentTeam.Name) >= MatchConstants.MaxSubstitutionsPerTeam)
+        {
+            return false;
+        }
+
+        var substitute = ChooseOpponentInjuryReplacement(opponentTeam, injuredPlayer);
+        if (substitute is null)
+        {
+            return false;
+        }
+
+        var minute = Math.Max(1, _state.CurrentMatch.CurrentMinute);
+        PositionSuitabilityService.EnsurePositionMetadata(injuredPlayer);
+        var incomingAssignedPosition = injuredPlayer.AssignedPosition;
+        var swapResult = _squadSelectionService.SwapStarterWithSubstitute(
+            opponentTeam,
+            injuredPlayer,
+            substitute,
+            _state.CurrentMatch,
+            minute);
+        if (!swapResult.Success)
+        {
+            return false;
+        }
+
+        injuredPlayer.AssignedPosition = injuredPlayer.PreferredPosition;
+        PositionSuitabilityService.EnsurePositionMetadata(substitute, incomingAssignedPosition);
+        ApplySubstitutionImpact(opponentTeam, injuredPlayer, substitute);
+        _state.CurrentMatch.SuperSubBoosts[substitute.Name] = minute + 10;
+
+        var substitutionEvent = _matchEventFactory.CreateStoppageSubstitution(
+            minute,
+            opponentTeam,
+            injuredPlayer,
+            substitute,
+            EventType.Injury);
+        _state.CurrentMatch.Events.Add(substitutionEvent);
+        InsertFeedItemAtTop(CreateFeedItem(substitutionEvent, _state.CurrentMatch));
+        UpdateLiveStatusFromEvent(substitutionEvent);
+        RefreshPlayerPanels();
+        return true;
+    }
+
+    private Player? ChooseOpponentInjuryReplacement(Team opponentTeam, Player injuredPlayer)
+    {
+        PositionSuitabilityService.EnsurePositionMetadata(injuredPlayer);
+        var outgoingSlot = PositionSuitabilityService.NormalizeExactPosition(injuredPlayer.AssignedPosition);
+        if (string.IsNullOrWhiteSpace(outgoingSlot))
+        {
+            outgoingSlot = PositionSuitabilityService.GetDefaultExactPosition(injuredPlayer.Position);
+        }
+
+        return opponentTeam.Substitutes
+            .Where(substitute => IsAvailableSubstituteForTeam(opponentTeam, substitute))
+            .Where(substitute => !string.Equals(outgoingSlot, "GK", StringComparison.OrdinalIgnoreCase) || PositionSuitabilityService.IsGoalkeeperCapable(substitute))
+            .OrderByDescending(substitute => GetOpponentInjuryReplacementScore(substitute, injuredPlayer, outgoingSlot))
+            .FirstOrDefault();
+    }
+
+    private static double GetOpponentInjuryReplacementScore(Player substitute, Player injuredPlayer, string outgoingSlot)
+    {
+        var compatibility = PositionCompatibilityService.GetCompatibilityScore(substitute, outgoingSlot);
+        var samePositionBonus = substitute.Position == injuredPlayer.Position ? 25 : 0;
+        var goalkeeperPenalty = substitute.Position == Position.Goalkeeper && injuredPlayer.Position != Position.Goalkeeper ? 80 : 0;
+        return substitute.OverallRating + compatibility * 3 + samePositionBonus - goalkeeperPenalty;
     }
 
     private bool HasMandatoryInjurySubstitution()
@@ -1313,16 +1400,26 @@ public partial class MatchLiveView : UserControl
 
     private bool IsAvailableSubstitute(Player player)
     {
+        return IsAvailableSubstituteForTeam(GetUserTeam(), player);
+    }
+
+    private bool IsAvailableSubstituteForTeam(Team team, Player player)
+    {
         if (player.IsSentOff || player.IsSuspended || player.IsInjured)
         {
             return false;
         }
 
         return _state.CurrentMatch is null ||
-            !_squadSelectionService.WasPlayerSubstitutedOff(_state.CurrentMatch, GetUserTeam().Name, player.Name);
+            !_squadSelectionService.WasPlayerSubstitutedOff(_state.CurrentMatch, team.Name, player.Name);
     }
 
     private void ApplyManualSubstitutionImpact(Player playerOff, Player playerOn)
+    {
+        ApplySubstitutionImpact(GetUserTeam(), playerOff, playerOn);
+    }
+
+    private void ApplySubstitutionImpact(Team team, Player playerOff, Player playerOn)
     {
         playerOff.LiveMatchModifier = 1.0;
 
@@ -1330,8 +1427,8 @@ public partial class MatchLiveView : UserControl
         if (suitability < 1.0)
         {
             playerOn.LiveMatchModifier = Math.Clamp(0.92 * suitability, 0.75, 1.15);
-            GetOrCreateLivePerformance(GetUserTeam(), playerOn).Rating -= 0.15;
-            SyncLivePlayerRating(playerOn.Name, GetUserTeam());
+            GetOrCreateLivePerformance(team, playerOn).Rating -= 0.15;
+            SyncLivePlayerRating(playerOn.Name, team);
             return;
         }
 

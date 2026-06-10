@@ -24,10 +24,26 @@ public class PlayerGrowthServiceTests
     }
 
     [Fact]
-    public void ApplyMatchGrowth_PoorPerformanceAddsNoGrowth()
+    public void ApplyMatchGrowth_YoungPoorPerformerStillGetsSlowBaselineGrowth()
     {
         var service = new PlayerGrowthService();
         var player = CreatePlayer("Quiet Player", overall: 78, age: 22);
+        var opponent = CreatePlayer("Opponent", overall: 78, age: 25);
+        var team = CreateTeam("Chelsea", player);
+        var opponentTeam = CreateTeam("Liverpool", opponent);
+
+        service.ApplyMatchGrowth(CreateMatch(team, opponentTeam, player, rating: 5.8));
+
+        Assert.Equal(78, player.OverallRating);
+        Assert.InRange(player.GrowthPoints, 1, 5);
+        Assert.Equal(0, player.LastMatchOverallIncrease);
+    }
+
+    [Fact]
+    public void ApplyMatchGrowth_OlderPoorPerformerAddsNoGrowth()
+    {
+        var service = new PlayerGrowthService();
+        var player = CreatePlayer("Quiet Veteran", overall: 78, age: 30);
         var opponent = CreatePlayer("Opponent", overall: 78, age: 25);
         var team = CreateTeam("Chelsea", player);
         var opponentTeam = CreateTeam("Liverpool", opponent);
@@ -98,6 +114,60 @@ public class PlayerGrowthServiceTests
         Assert.Equal(79, player.OverallRating);
         Assert.True(player.Finishing > 78 || player.Attack > 78);
         Assert.Equal(78, player.Defense);
+    }
+
+    [Fact]
+    public void ApplyMatchGrowth_YoungStrongPerformerCanGrowOverPotentialCapSlowly()
+    {
+        var service = new PlayerGrowthService();
+        var player = CreatePlayer("Over Cap Star", overall: 94, age: 24);
+        player.PotentialOverall = 92;
+        player.GrowthPoints = 95;
+        var opponent = CreatePlayer("Opponent", overall: 78, age: 25);
+        var team = CreateTeam("Chelsea", player);
+        var opponentTeam = CreateTeam("Liverpool", opponent);
+
+        service.ApplyMatchGrowth(CreateMatch(team, opponentTeam, player, rating: 9.4, goals: 2, assists: 1));
+
+        Assert.Equal(95, player.OverallRating);
+        Assert.Equal(1, player.LastMatchOverallIncrease);
+        Assert.InRange(player.GrowthPoints, 0, 20);
+    }
+
+    [Fact]
+    public void ApplyMatchGrowth_PrimeAgeStrongPerformerCanGrowOverPotentialCapVerySlowly()
+    {
+        var service = new PlayerGrowthService();
+        var player = CreatePlayer("Over Cap Prime Player", overall: 94, age: 27);
+        player.PotentialOverall = 92;
+        player.GrowthPoints = 99;
+        var opponent = CreatePlayer("Opponent", overall: 78, age: 25);
+        var team = CreateTeam("Chelsea", player);
+        var opponentTeam = CreateTeam("Liverpool", opponent);
+
+        service.ApplyMatchGrowth(CreateMatch(team, opponentTeam, player, rating: 10.0, goals: 3, assists: 2));
+
+        Assert.Equal(95, player.OverallRating);
+        Assert.Equal(1, player.LastMatchOverallIncrease);
+        Assert.InRange(player.GrowthPoints, 0, 10);
+    }
+
+    [Fact]
+    public void ApplyMatchGrowth_ThirtyYearOldDoesNotDevelopOverPotentialCap()
+    {
+        var service = new PlayerGrowthService();
+        var player = CreatePlayer("Over Cap Veteran", overall: 94, age: 30);
+        player.PotentialOverall = 92;
+        player.GrowthPoints = 99;
+        var opponent = CreatePlayer("Opponent", overall: 78, age: 25);
+        var team = CreateTeam("Chelsea", player);
+        var opponentTeam = CreateTeam("Liverpool", opponent);
+
+        service.ApplyMatchGrowth(CreateMatch(team, opponentTeam, player, rating: 10.0, goals: 3, assists: 2));
+
+        Assert.Equal(94, player.OverallRating);
+        Assert.Equal(99, player.GrowthPoints);
+        Assert.Equal(0, player.LastMatchOverallIncrease);
     }
 
     private static Match CreateMatch(Team team, Team opponentTeam, Player player, double rating, int goals = 0, int assists = 0)

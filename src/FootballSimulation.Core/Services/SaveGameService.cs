@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using FootballSimulation.Models;
@@ -11,6 +13,14 @@ public class SaveGameService
 
     private const string SaveFolderName = "WPFFootballSimulator";
     private const string SaveSubfolderName = "Saves";
+
+    private static readonly KnownPositionCorrection[] KnownPositionCorrections =
+    [
+        new("vitinha", "parissaintgermain", Position.Midfielder, "CM", ["CDM", "CAM"]),
+        new("brunofernandes", "manchesterunited", Position.Midfielder, "CAM", ["CM"]),
+        new("rodri", "manchestercity", Position.Midfielder, "CDM", ["CM", "CB"]),
+        new("martinodegaard", "arsenal", Position.Midfielder, "CAM", ["CM"])
+    ];
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -63,6 +73,7 @@ public class SaveGameService
         var data = ReadSaveData(slotPath);
         ValidateSaveVersion(data);
         RehydrateReferences(data);
+        ApplyKnownPlayerDataCorrections(data);
         return data;
     }
 
@@ -137,7 +148,7 @@ public class SaveGameService
         ArgumentNullException.ThrowIfNull(data);
         RehydrateReferences(data);
 
-        return new League
+        var league = new League
         {
             LeagueId = string.IsNullOrWhiteSpace(data.LeagueState.LeagueId)
                 ? string.IsNullOrWhiteSpace(data.LeagueId) ? LeagueDataService.DefaultLeagueId : data.LeagueId
@@ -186,6 +197,9 @@ public class SaveGameService
             HasShownLeagueTrophyCelebration = data.LeagueState.HasShownLeagueTrophyCelebration,
             ShownTrophyCelebrationKeys = data.LeagueState.ShownTrophyCelebrationKeys ?? []
         };
+
+        ApplyKnownPlayerDataCorrections(league);
+        return league;
     }
 
     public string GetSlotPath(int slotNumber)
@@ -254,6 +268,129 @@ public class SaveGameService
         var data = JsonSerializer.Deserialize<SaveGameData>(json, JsonOptions);
         return data ?? throw new InvalidDataException("The save file is empty or invalid.");
     }
+
+    private static void ApplyKnownPlayerDataCorrections(League league)
+    {
+        var seasonStartYear = TryGetSeasonStartYear(league.Season);
+        ApplyKnownPlayerDataCorrections(league.Teams, seasonStartYear);
+    }
+
+    private static void ApplyKnownPlayerDataCorrections(SaveGameData data)
+    {
+        var seasonStartYear = TryGetSeasonStartYear(data.LeagueState.Season);
+        ApplyKnownPlayerDataCorrections(data.Teams, seasonStartYear);
+        foreach (var league in data.TransferMarketState.Leagues)
+        {
+            ApplyKnownPlayerDataCorrections(league.Teams, seasonStartYear);
+        }
+
+        ApplyKnownPlayerDataCorrections(data.TransferMarketState.FreeAgents, seasonStartYear);
+    }
+
+    private static void ApplyKnownPlayerDataCorrections(IEnumerable<Team> teams, int? seasonStartYear)
+    {
+        foreach (var team in teams)
+        {
+            foreach (var player in team.Players.Concat(team.Substitutes))
+            {
+                ApplyKnownPlayerDataCorrections(player, seasonStartYear, team.Name);
+            }
+        }
+    }
+
+    private static void ApplyKnownPlayerDataCorrections(IEnumerable<Player> players, int? seasonStartYear)
+    {
+        foreach (var player in players)
+        {
+            ApplyKnownPlayerDataCorrections(player, seasonStartYear, teamName: string.Empty);
+        }
+    }
+
+    private static void ApplyKnownPlayerDataCorrections(Player player, int? seasonStartYear, string teamName)
+    {
+        if (IsEstevao(player) && seasonStartYear.HasValue)
+        {
+            player.Age = Math.Clamp(seasonStartYear.Value - 2007, 16, 45);
+        }
+
+        ApplyKnownPositionCorrection(player, teamName);
+    }
+
+    private static void ApplyKnownPositionCorrection(Player player, string teamName)
+    {
+        var correction = KnownPositionCorrections.FirstOrDefault(item => IsPositionCorrectionMatch(player, teamName, item));
+        if (correction is null)
+        {
+            return;
+        }
+
+        player.Position = correction.Position;
+        player.PreferredPosition = correction.PreferredPosition;
+        player.SecondaryPositions = correction.SecondaryPositions
+            .Where(position => !position.Equals(correction.PreferredPosition, StringComparison.OrdinalIgnoreCase))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    private static bool IsPositionCorrectionMatch(Player player, string teamName, KnownPositionCorrection correction)
+    {
+        var playerMatches = player.PlayerId.Contains(correction.PlayerKey, StringComparison.OrdinalIgnoreCase) ||
+            NormalizePlayerKey(player.Name).Equals(correction.PlayerKey, StringComparison.OrdinalIgnoreCase);
+        if (!playerMatches)
+        {
+            return false;
+        }
+
+        var normalizedTeamName = NormalizePlayerKey(teamName);
+        return normalizedTeamName.Equals(correction.TeamKey, StringComparison.OrdinalIgnoreCase) ||
+            player.PlayerId.Contains(correction.TeamKey, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsEstevao(Player player)
+    {
+        return player.PlayerId.Contains("estevao", StringComparison.OrdinalIgnoreCase) ||
+            NormalizePlayerKey(player.Name).Equals("estevao", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string NormalizePlayerKey(string value)
+    {
+        var normalized = value.Normalize(NormalizationForm.FormD);
+        var builder = new StringBuilder(normalized.Length);
+        foreach (var character in normalized)
+        {
+            if (CharUnicodeInfo.GetUnicodeCategory(character) == UnicodeCategory.NonSpacingMark)
+            {
+                continue;
+            }
+
+            if (char.IsLetterOrDigit(character))
+            {
+                builder.Append(char.ToLowerInvariant(character));
+            }
+        }
+
+        return builder.ToString();
+    }
+
+    private static int? TryGetSeasonStartYear(string season)
+    {
+        if (string.IsNullOrWhiteSpace(season))
+        {
+            return null;
+        }
+
+        var startYearText = season.Trim().Replace('/', '-').Split('-', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+        return int.TryParse(startYearText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var year)
+            ? year
+            : null;
+    }
+
+    private sealed record KnownPositionCorrection(
+        string PlayerKey,
+        string TeamKey,
+        Position Position,
+        string PreferredPosition,
+        IReadOnlyList<string> SecondaryPositions);
 
     private static void ValidateSaveVersion(SaveGameData data)
     {
@@ -563,6 +700,7 @@ public class SaveGameService
                     continue;
                 }
 
+                ApplyPositionDataFromSource(player, sourcePlayer);
                 PlayerContractService.ApplyContractData(
                     player,
                     leagueId,
@@ -584,6 +722,23 @@ public class SaveGameService
                     _ = PlayerNationalityDataService.TryApply(player);
                 }
             }
+        }
+    }
+
+    private static void ApplyPositionDataFromSource(Player player, Player sourcePlayer)
+    {
+        var oldPreferredPosition = player.PreferredPosition;
+        player.Position = sourcePlayer.Position;
+        player.PreferredPosition = sourcePlayer.PreferredPosition;
+        player.SecondaryPositions = sourcePlayer.SecondaryPositions
+            .Where(position => !position.Equals(sourcePlayer.PreferredPosition, StringComparison.OrdinalIgnoreCase))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (string.IsNullOrWhiteSpace(player.AssignedPosition) ||
+            player.AssignedPosition.Equals(oldPreferredPosition, StringComparison.OrdinalIgnoreCase))
+        {
+            player.AssignedPosition = sourcePlayer.PreferredPosition;
         }
     }
 

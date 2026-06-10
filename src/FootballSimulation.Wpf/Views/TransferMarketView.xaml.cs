@@ -819,10 +819,14 @@ public partial class TransferMarketView : UserControl
 
         var listings = _transferMarketService.GetAllPlayerListings(_state.TransferMarket, _state.League?.PlayerStats).ToList();
         OffersDataGrid.ItemsSource = _state.TransferMarket.Offers
-            .OrderByDescending(offer => offer.CreatedRound)
-            .Select(offer =>
+            .Select((offer, index) => new { Offer = offer, Index = index })
+            .OrderByDescending(item => IsPendingIncomingOffer(item.Offer))
+            .ThenByDescending(item => item.Offer.CreatedRound)
+            .ThenByDescending(item => item.Index)
+            .Select(item =>
             {
-                var listing = listings.FirstOrDefault(item => item.Player.PlayerId == offer.PlayerId);
+                var offer = item.Offer;
+                var listing = listings.FirstOrDefault(listingItem => listingItem.Player.PlayerId == offer.PlayerId);
                 var nationality = ResolveNationality(listing?.Player, offer.PlayerName);
                 return new TransferOfferRow(
                     offer,
@@ -842,6 +846,14 @@ public partial class TransferMarketView : UserControl
             .ToList();
     }
 
+    private bool IsPendingIncomingOffer(TransferOffer offer)
+    {
+        return _state.SelectedTeam is not null &&
+            !offer.IsUserOffer &&
+            offer.FromClubName.Equals(_state.SelectedTeam.Name, StringComparison.OrdinalIgnoreCase) &&
+            offer.Status is OfferStatus.Pending or OfferStatus.PendingUntilWindowOpens or OfferStatus.Countered;
+    }
+
     private void RefreshHistory()
     {
         if (_state.TransferMarket is null)
@@ -851,9 +863,11 @@ public partial class TransferMarketView : UserControl
 
         var listings = _transferMarketService.GetAllPlayerListings(_state.TransferMarket, _state.League?.PlayerStats).ToList();
         HistoryDataGrid.ItemsSource = _state.TransferMarket.TransferHistory
-            .OrderByDescending(item => item.RoundNumber)
-            .Select(item =>
+            .Select((item, index) => new { Item = item, Index = index })
+            .OrderByDescending(entry => entry.Index)
+            .Select(entry =>
             {
+                var item = entry.Item;
                 var listing = listings.FirstOrDefault(candidate => candidate.Player.PlayerId == item.PlayerId);
                 var nationality = ResolveNationality(listing?.Player, item.PlayerName);
                 return new TransferHistoryRow(
