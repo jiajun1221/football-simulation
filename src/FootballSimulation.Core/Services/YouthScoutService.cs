@@ -137,6 +137,7 @@ public class YouthScoutService
             {
                 prospect.SecondaryPositions ??= [];
                 prospect.Traits ??= [];
+                prospect.WeeklyWage = prospect.WeeklyWage > 0 ? prospect.WeeklyWage : CalculateWeeklyWage(prospect);
             }
         }
     }
@@ -179,6 +180,7 @@ public class YouthScoutService
             return new YouthOperationResult(false, "Country is not available for scouting.");
         }
 
+        var clearedReportCount = ClearScoutReports(academy, scoutId);
         assignment.AssignedCountry = country.Name;
         assignment.CountryCode = country.Code;
         assignment.FlagImagePath = country.FlagImagePath;
@@ -187,7 +189,8 @@ public class YouthScoutService
         assignment.ProgressMatches = 0;
         assignment.ActiveReportId = string.Empty;
         assignment.LastProgressRound = 0;
-        return new YouthOperationResult(true, $"{assignment.ScoutName} assigned to {country.Name} with {FormatFocusLabel(assignment.PrimaryFocus)} focus.");
+        var clearMessage = clearedReportCount > 0 ? " Previous report cleared." : string.Empty;
+        return new YouthOperationResult(true, $"{assignment.ScoutName} assigned to {country.Name} with {FormatFocusLabel(assignment.PrimaryFocus)} focus.{clearMessage}");
     }
 
     public IReadOnlyList<YouthScoutReport> AdvanceScoutingAfterCompletedCalendarSlot(League league, int completedCalendarRound)
@@ -271,10 +274,11 @@ public class YouthScoutService
             return new YouthOperationResult(false, $"{prospect.Name} has already signed.");
         }
 
+        prospect.WeeklyWage = prospect.WeeklyWage > 0 ? prospect.WeeklyWage : CalculateWeeklyWage(prospect);
         var finance = _financeService.GetOrCreateFinance(transferMarketState, league.LeagueId, team);
-        if (finance.AvailableTransferBudget < prospect.SigningCost)
+        if (finance.AvailableWageBudget < prospect.WeeklyWage)
         {
-            return new YouthOperationResult(false, "Insufficient transfer budget.", Fee: prospect.SigningCost);
+            return new YouthOperationResult(false, "Insufficient wage budget.", Fee: prospect.WeeklyWage);
         }
 
         var youthPlayer = CreateYouthPlayerFromProspect(prospect, academy, league.Season);
@@ -282,7 +286,7 @@ public class YouthScoutService
         prospect.IsSigned = true;
         prospect.SignedByClubId = academy.ClubId;
         prospect.SignedByClubName = academy.ClubName;
-        finance.TransferSpent += prospect.SigningCost;
+        finance.YouthWageSpent += prospect.WeeklyWage;
         academy.IntakeHistory.Add(new YouthIntakeRecord
         {
             Season = league.Season,
@@ -292,7 +296,7 @@ public class YouthScoutService
             Summary = $"Scouted signing: {youthPlayer.Name}, {youthPlayer.PreferredPosition}, potential {youthPlayer.PotentialMin}-{youthPlayer.PotentialMax}."
         });
 
-        return new YouthOperationResult(true, $"You signed {prospect.Name} for {FormatMoney(prospect.SigningCost)}.", youthPlayer, Fee: prospect.SigningCost);
+        return new YouthOperationResult(true, $"You signed {prospect.Name} on {FormatWeeklyWage(prospect.WeeklyWage)}.", youthPlayer);
     }
 
     public void RunAiScoutingActivity(League league, TransferMarketState transferMarketState, Team selectedTeam, int currentRound)
@@ -313,8 +317,9 @@ public class YouthScoutService
                 continue;
             }
 
+            target.Prospect.WeeklyWage = target.Prospect.WeeklyWage > 0 ? target.Prospect.WeeklyWage : CalculateWeeklyWage(target.Prospect);
             var finance = _financeService.GetOrCreateFinance(transferMarketState, league.LeagueId, team);
-            if (finance.AvailableTransferBudget < target.Prospect.SigningCost)
+            if (finance.AvailableWageBudget < target.Prospect.WeeklyWage)
             {
                 continue;
             }
@@ -335,6 +340,12 @@ public class YouthScoutService
             var country = Countries[seed % Countries.Length];
             _ = AssignCountry(academy, assignment.ScoutId, country.Name);
         }
+    }
+
+    private static int ClearScoutReports(YouthAcademy academy, string scoutId)
+    {
+        return academy.ScoutReports.RemoveAll(report =>
+            report.ScoutId.Equals(scoutId, StringComparison.OrdinalIgnoreCase));
     }
 
     private YouthScoutReport GenerateReport(YouthAcademy academy, YouthScoutAssignment assignment, string season, int currentRound)
@@ -408,6 +419,7 @@ public class YouthScoutService
             Traits = PickTraits(position, tier, profile.TraitBiases, random),
         };
         prospect.SigningCost = CalculateSigningCost(prospect);
+        prospect.WeeklyWage = CalculateWeeklyWage(prospect);
         prospect.ScoutNotes = CreateScoutNotes(prospect, index);
         return prospect;
     }
@@ -435,6 +447,7 @@ public class YouthScoutService
             DevelopmentRate = prospect.DevelopmentRate,
             PotentialTier = prospect.PotentialTier,
             MarketValue = prospect.SigningCost,
+            WeeklyWage = prospect.WeeklyWage > 0 ? prospect.WeeklyWage : CalculateWeeklyWage(prospect),
             ClubId = academy.ClubId,
             ClubName = academy.ClubName,
             ScoutReport = prospect.ScoutNotes,
@@ -547,6 +560,26 @@ public class YouthScoutService
 
         return Math.Clamp(Math.Round(baseCost / 50_000m, 0) * 50_000m, 500_000m, 8_000_000m);
     }
+
+    private static decimal CalculateWeeklyWage(YouthScoutProspect prospect)
+    {
+        var baseWage = prospect.PotentialMax switch
+        {
+            >= 94 => 12_000m,
+            >= 90 => 8_000m,
+            >= 86 => 5_000m,
+            >= 80 => 3_000m,
+            _ => 1_500m
+        };
+        baseWage += Math.Max(0, prospect.CurrentOVR - 55) * 350m;
+        if (prospect.Age <= 16)
+        {
+            baseWage *= 0.85m;
+        }
+
+        return Math.Clamp(Math.Round(baseWage / 500m, 0) * 500m, 1_000m, 18_000m);
+    }
+
 
     private static List<PlayerTrait> PickTraits(string slot, YouthPotentialTier tier, IReadOnlyList<PlayerTrait> countryBiases, Random random)
     {
@@ -782,6 +815,13 @@ public class YouthScoutService
         return value >= 1_000_000m
             ? $"€{value / 1_000_000m:0.#}M"
             : $"€{value / 1_000m:0}K";
+    }
+
+    private static string FormatWeeklyWage(decimal value)
+    {
+        return value >= 1_000_000m
+            ? $"€{value / 1_000_000m:0.#}M/w"
+            : $"€{value / 1_000m:0.#}K/w";
     }
 
     private static string NormalizeId(string value)

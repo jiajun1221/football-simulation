@@ -908,7 +908,7 @@
                                             <StaticResource ResourceKey="ScoutTraitsCellTemplate" />
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
-                                    <DataGridTextColumn Header="Cost" Binding="{Binding SigningCost}" Width="78" ElementStyle="{StaticResource CenteredValueTextStyle}" />
+                                    <DataGridTextColumn Header="Wage" Binding="{Binding WeeklyWage}" Width="78" ElementStyle="{StaticResource CenteredValueTextStyle}" />
                                     <DataGridTemplateColumn Header="Status" Width="92" IsReadOnly="True">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <StaticResource ResourceKey="ScoutStatusBadgeTemplate" />

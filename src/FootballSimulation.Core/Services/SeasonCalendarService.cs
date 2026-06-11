@@ -64,13 +64,44 @@ public class SeasonCalendarService
         new("Sparta Prague", "Czech Republic", 4, 73),
         new("Red Star Belgrade", "Serbia", 4, 73),
         new("Sturm Graz", "Austria", 4, 72),
-        new("Slovan Bratislava", "Slovakia", 4, 71)
+        new("Slovan Bratislava", "Slovakia", 4, 71),
+
+        // Reserve clubs fill slots when a user's league team misses UCL qualification after rollover.
+        new("Athletic Club", "Spain", 1, 80),
+        new("Villarreal", "Spain", 1, 81),
+        new("Roma", "Italy", 1, 81),
+        new("Eintracht Frankfurt", "Germany", 1, 80),
+        new("Lille", "France", 1, 79),
+        new("Newcastle United", "England", 1, 81),
+
+        new("Real Sociedad", "Spain", 2, 79),
+        new("Lazio", "Italy", 2, 79),
+        new("Stuttgart", "Germany", 2, 78),
+        new("Lyon", "France", 2, 78),
+        new("Aston Villa", "England", 2, 80),
+        new("Sevilla", "Spain", 2, 76),
+
+        new("Fiorentina", "Italy", 3, 76),
+        new("Freiburg", "Germany", 3, 75),
+        new("Nice", "France", 3, 75),
+        new("Brentford", "England", 3, 75),
+        new("Valencia", "Spain", 3, 75),
+        new("Mainz 05", "Germany", 3, 74),
+
+        new("Real Betis", "Spain", 4, 76),
+        new("Torino", "Italy", 4, 74),
+        new("FC Koln", "Germany", 4, 73),
+        new("Auxerre", "France", 4, 72),
+        new("Wolverhampton Wanderers", "England", 4, 74)
     ];
 
     private static readonly Dictionary<string, UclClubDefinition> ChampionsLeagueClubByName = ChampionsLeagueClubPool
         .ToDictionary(club => club.Name, StringComparer.OrdinalIgnoreCase);
 
-    public List<Fixture> GenerateSeasonFixtures(IReadOnlyList<Team> premierLeagueTeams, string season)
+    public List<Fixture> GenerateSeasonFixtures(
+        IReadOnlyList<Team> premierLeagueTeams,
+        string season,
+        IReadOnlyCollection<string>? championsLeagueQualifiedTeamNames = null)
     {
         ArgumentNullException.ThrowIfNull(premierLeagueTeams);
 
@@ -90,7 +121,7 @@ public class SeasonCalendarService
             calendarRound: 21,
             baseOverall: 64,
             season));
-        fixtures.AddRange(CreateChampionsLeagueLeaguePhaseFixtures(premierLeagueTeams, season));
+        fixtures.AddRange(CreateChampionsLeagueLeaguePhaseFixtures(premierLeagueTeams, season, championsLeagueQualifiedTeamNames));
 
         return fixtures
             .OrderBy(fixture => fixture.CalendarRound)
@@ -100,10 +131,12 @@ public class SeasonCalendarService
             .ToList();
     }
 
-    public List<SeasonCompetitionState> CreateInitialCompetitionStates(IReadOnlyList<Team> premierLeagueTeams)
+    public List<SeasonCompetitionState> CreateInitialCompetitionStates(
+        IReadOnlyList<Team> premierLeagueTeams,
+        IReadOnlyCollection<string>? championsLeagueQualifiedTeamNames = null)
     {
         var leagueTeams = premierLeagueTeams.Select(team => team.Name).ToList();
-        var uclTeams = CreateChampionsLeagueEntrants(premierLeagueTeams)
+        var uclTeams = CreateChampionsLeagueEntrants(premierLeagueTeams, championsLeagueQualifiedTeamNames)
             .Select(entry => entry.Team.Name)
             .ToList();
 
@@ -201,9 +234,12 @@ public class SeasonCalendarService
             .ToList();
     }
 
-    private static List<Fixture> CreateChampionsLeagueLeaguePhaseFixtures(IReadOnlyList<Team> premierLeagueTeams, string season)
+    private static List<Fixture> CreateChampionsLeagueLeaguePhaseFixtures(
+        IReadOnlyList<Team> premierLeagueTeams,
+        string season,
+        IReadOnlyCollection<string>? championsLeagueQualifiedTeamNames)
     {
-        var entrants = CreateChampionsLeagueEntrants(premierLeagueTeams);
+        var entrants = CreateChampionsLeagueEntrants(premierLeagueTeams, championsLeagueQualifiedTeamNames);
         if (entrants.Count < 8)
         {
             return [];
@@ -237,8 +273,20 @@ public class SeasonCalendarService
         return state;
     }
 
-    private static IEnumerable<Team> SelectChampionsLeagueTeams(IReadOnlyList<Team> premierLeagueTeams)
+    private static IEnumerable<Team> SelectChampionsLeagueTeams(
+        IReadOnlyList<Team> premierLeagueTeams,
+        IReadOnlyCollection<string>? championsLeagueQualifiedTeamNames)
     {
+        if (championsLeagueQualifiedTeamNames is not null)
+        {
+            return championsLeagueQualifiedTeamNames
+                .Select(name => premierLeagueTeams.FirstOrDefault(team => team.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
+                .Where(team => team is not null)
+                .Cast<Team>()
+                .DistinctBy(team => team.Name, StringComparer.OrdinalIgnoreCase)
+                .Take(4);
+        }
+
         var preferred = new[] { "Chelsea", "Arsenal", "Manchester City", "Liverpool", "Manchester United", "Tottenham Hotspur" };
         return preferred
             .Select(name => premierLeagueTeams.FirstOrDefault(team => team.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
@@ -250,9 +298,12 @@ public class SeasonCalendarService
             .Take(4);
     }
 
-    private static List<UclTeamEntry> CreateChampionsLeagueEntrants(IReadOnlyList<Team> premierLeagueTeams)
+    private static List<UclTeamEntry> CreateChampionsLeagueEntrants(
+        IReadOnlyList<Team> premierLeagueTeams,
+        IReadOnlyCollection<string>? championsLeagueQualifiedTeamNames = null)
     {
-        var selectedPremierLeagueTeams = SelectChampionsLeagueTeams(premierLeagueTeams).ToList();
+        var availableEuropeanTeams = LoadAvailableEuropeanTeamsByName();
+        var selectedPremierLeagueTeams = SelectChampionsLeagueTeams(premierLeagueTeams, championsLeagueQualifiedTeamNames).ToList();
         var entries = selectedPremierLeagueTeams
             .Select(team =>
             {
@@ -263,21 +314,22 @@ public class SeasonCalendarService
             .ToList();
 
         var selectedNames = entries.Select(entry => entry.Team.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var currentLeagueTeamNames = premierLeagueTeams.Select(team => team.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var useQualifiedLeagueTeamsOnly = championsLeagueQualifiedTeamNames is not null;
         foreach (var pot in Enumerable.Range(1, 4))
         {
             foreach (var definition in ChampionsLeagueClubPool.Where(definition => definition.Pot == pot))
             {
                 if (selectedNames.Contains(definition.Name) ||
+                    (useQualifiedLeagueTeamsOnly && currentLeagueTeamNames.Contains(definition.Name)) ||
                     entries.Count(entry => entry.Pot == pot) >= 9)
                 {
                     continue;
                 }
 
-                entries.Add(new UclTeamEntry(
-                    PlaceholderTeamFactory.Create(definition.Name, definition.Strength, venueSuffix: "Arena"),
-                    definition.Country,
-                    definition.Pot,
-                    definition.Strength));
+                var team = availableEuropeanTeams.GetValueOrDefault(definition.Name) ??
+                    PlaceholderTeamFactory.Create(definition.Name, definition.Strength, venueSuffix: "Arena", country: definition.Country);
+                entries.Add(new UclTeamEntry(team, definition.Country, definition.Pot, definition.Strength));
                 selectedNames.Add(definition.Name);
             }
         }
@@ -287,6 +339,22 @@ public class SeasonCalendarService
             .ThenByDescending(entry => entry.Strength)
             .ThenBy(entry => entry.Team.Name)
             .ToList();
+    }
+
+    private static Dictionary<string, Team> LoadAvailableEuropeanTeamsByName()
+    {
+        try
+        {
+            var dataService = new LeagueDataService();
+            return dataService.LoadSquadSourceDefinitions()
+                .SelectMany(dataService.LoadTeams)
+                .GroupBy(team => team.Name, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            return new Dictionary<string, Team>(StringComparer.OrdinalIgnoreCase);
+        }
     }
 
     private static List<UclPairing> CreateSwissPhasePairings(IReadOnlyList<UclTeamEntry> entrants)
@@ -444,16 +512,20 @@ public class SeasonCalendarService
     {
         var homeCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         var awayCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-        var matchdayUsage = new Dictionary<string, HashSet<int>>(StringComparer.OrdinalIgnoreCase);
         var calendarRounds = new[] { 5, 13, 23, 33, 43, 53, 63, 73 };
         var fixtures = new List<Fixture>();
+        var scheduledPairings = AssignMatchdays(pairings);
 
-        foreach (var pairing in pairings.OrderBy(pairing => pairing.First.Pot + pairing.Second.Pot).ThenBy(pairing => pairing.First.Team.Name))
+        foreach (var scheduledPairing in scheduledPairings
+            .OrderBy(item => item.Matchday)
+            .ThenBy(item => item.Pairing.First.Pot + item.Pairing.Second.Pot)
+            .ThenBy(item => item.Pairing.First.Team.Name)
+            .ThenBy(item => item.Pairing.Second.Team.Name))
         {
+            var pairing = scheduledPairing.Pairing;
             var home = ChooseHomeTeam(pairing.First, pairing.Second, homeCounts, awayCounts);
             var away = home.Team.Name.Equals(pairing.First.Team.Name, StringComparison.OrdinalIgnoreCase) ? pairing.Second : pairing.First;
-            var matchday = ChooseMatchday(home.Team.Name, away.Team.Name, matchdayUsage);
-            MarkMatchday(home.Team.Name, away.Team.Name, matchday, matchdayUsage);
+            var matchday = scheduledPairing.Matchday;
             homeCounts[home.Team.Name] = homeCounts.GetValueOrDefault(home.Team.Name) + 1;
             awayCounts[away.Team.Name] = awayCounts.GetValueOrDefault(away.Team.Name) + 1;
 
@@ -475,6 +547,128 @@ public class SeasonCalendarService
         }
 
         return fixtures;
+    }
+
+    private static List<ScheduledUclPairing> AssignMatchdays(IReadOnlyList<UclPairing> pairings)
+    {
+        var assignedMatchdays = new int[pairings.Count];
+        var matchdayCounts = new int[9];
+        var teamMatchdayUsage = pairings
+            .SelectMany(pairing => new[] { pairing.First.Team.Name, pairing.Second.Team.Name })
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(teamName => teamName, _ => new HashSet<int>(), StringComparer.OrdinalIgnoreCase);
+
+        if (!TryAssignMatchday(pairings, assignedMatchdays, matchdayCounts, teamMatchdayUsage, assignedCount: 0))
+        {
+            throw new InvalidOperationException("Unable to create a balanced Champions League matchday schedule.");
+        }
+
+        return pairings
+            .Select((pairing, index) => new ScheduledUclPairing(pairing, assignedMatchdays[index]))
+            .ToList();
+    }
+
+    private static bool TryAssignMatchday(
+        IReadOnlyList<UclPairing> pairings,
+        int[] assignedMatchdays,
+        int[] matchdayCounts,
+        Dictionary<string, HashSet<int>> teamMatchdayUsage,
+        int assignedCount)
+    {
+        if (assignedCount == pairings.Count)
+        {
+            return true;
+        }
+
+        var selectedIndex = -1;
+        List<int>? selectedOptions = null;
+        for (var index = 0; index < pairings.Count; index++)
+        {
+            if (assignedMatchdays[index] != 0)
+            {
+                continue;
+            }
+
+            var options = GetAvailableMatchdays(pairings[index], matchdayCounts, teamMatchdayUsage).ToList();
+            if (options.Count == 0)
+            {
+                return false;
+            }
+
+            if (selectedOptions is null || options.Count < selectedOptions.Count)
+            {
+                selectedIndex = index;
+                selectedOptions = options;
+                if (options.Count == 1)
+                {
+                    break;
+                }
+            }
+        }
+
+        if (selectedIndex < 0 || selectedOptions is null)
+        {
+            return false;
+        }
+
+        foreach (var matchday in selectedOptions.OrderBy(matchday => matchdayCounts[matchday]).ThenBy(matchday => matchday))
+        {
+            AssignMatchday(pairings[selectedIndex], selectedIndex, matchday, assignedMatchdays, matchdayCounts, teamMatchdayUsage);
+            if (TryAssignMatchday(pairings, assignedMatchdays, matchdayCounts, teamMatchdayUsage, assignedCount + 1))
+            {
+                return true;
+            }
+
+            UnassignMatchday(pairings[selectedIndex], selectedIndex, matchday, assignedMatchdays, matchdayCounts, teamMatchdayUsage);
+        }
+
+        return false;
+    }
+
+    private static IEnumerable<int> GetAvailableMatchdays(
+        UclPairing pairing,
+        IReadOnlyList<int> matchdayCounts,
+        IReadOnlyDictionary<string, HashSet<int>> teamMatchdayUsage)
+    {
+        var firstTeamName = pairing.First.Team.Name;
+        var secondTeamName = pairing.Second.Team.Name;
+        for (var matchday = 1; matchday <= 8; matchday++)
+        {
+            if (matchdayCounts[matchday] < 18 &&
+                !teamMatchdayUsage[firstTeamName].Contains(matchday) &&
+                !teamMatchdayUsage[secondTeamName].Contains(matchday))
+            {
+                yield return matchday;
+            }
+        }
+    }
+
+    private static void AssignMatchday(
+        UclPairing pairing,
+        int pairingIndex,
+        int matchday,
+        int[] assignedMatchdays,
+        IList<int> matchdayCounts,
+        IDictionary<string, HashSet<int>> teamMatchdayUsage)
+    {
+        assignedMatchdays[pairingIndex] = matchday;
+        matchdayCounts[matchday]++;
+        teamMatchdayUsage[pairing.First.Team.Name].Add(matchday);
+        teamMatchdayUsage[pairing.Second.Team.Name].Add(matchday);
+    }
+
+    private static void UnassignMatchday(
+        UclPairing pairing,
+        int pairingIndex,
+        int matchday,
+        int[] assignedMatchdays,
+        IList<int> matchdayCounts,
+        IDictionary<string, HashSet<int>> teamMatchdayUsage)
+    {
+        assignedMatchdays[pairingIndex] = 0;
+        matchdayCounts[matchday]--;
+        teamMatchdayUsage[pairing.First.Team.Name].Remove(matchday);
+        teamMatchdayUsage[pairing.Second.Team.Name].Remove(matchday);
     }
 
     private static UclTeamEntry ChooseHomeTeam(
@@ -509,53 +703,6 @@ public class SeasonCalendarService
         }
 
         return firstHome <= secondHome ? first : second;
-    }
-
-    private static int ChooseMatchday(
-        string homeTeamName,
-        string awayTeamName,
-        IReadOnlyDictionary<string, HashSet<int>> matchdayUsage)
-    {
-        for (var matchday = 1; matchday <= 8; matchday++)
-        {
-            if (!HasMatchdayUsage(homeTeamName, matchday, matchdayUsage) &&
-                !HasMatchdayUsage(awayTeamName, matchday, matchdayUsage))
-            {
-                return matchday;
-            }
-        }
-
-        return 1;
-    }
-
-    private static void MarkMatchday(
-        string homeTeamName,
-        string awayTeamName,
-        int matchday,
-        IDictionary<string, HashSet<int>> matchdayUsage)
-    {
-        if (!matchdayUsage.TryGetValue(homeTeamName, out var homeUsage))
-        {
-            homeUsage = [];
-            matchdayUsage[homeTeamName] = homeUsage;
-        }
-
-        if (!matchdayUsage.TryGetValue(awayTeamName, out var awayUsage))
-        {
-            awayUsage = [];
-            matchdayUsage[awayTeamName] = awayUsage;
-        }
-
-        homeUsage.Add(matchday);
-        awayUsage.Add(matchday);
-    }
-
-    private static bool HasMatchdayUsage(
-        string teamName,
-        int matchday,
-        IReadOnlyDictionary<string, HashSet<int>> matchdayUsage)
-    {
-        return matchdayUsage.TryGetValue(teamName, out var usage) && usage.Contains(matchday);
     }
 
     private static int GetTeamStrength(Team team)
@@ -627,4 +774,6 @@ public class SeasonCalendarService
     private sealed record UclTeamEntry(Team Team, string Country, int Pot, int Strength);
 
     private sealed record UclPairing(UclTeamEntry First, UclTeamEntry Second);
+
+    private sealed record ScheduledUclPairing(UclPairing Pairing, int Matchday);
 }

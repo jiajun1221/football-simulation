@@ -119,6 +119,7 @@ public class YouthPlayer
     public YouthDevelopmentRate DevelopmentRate { get; set; } = YouthDevelopmentRate.Normal;
     public YouthPotentialTier PotentialTier { get; set; } = YouthPotentialTier.GoodProspect;
     public decimal MarketValue { get; set; }
+    public decimal WeeklyWage { get; set; }
     public string ClubId { get; set; } = string.Empty;
     public string ClubName { get; set; } = string.Empty;
     public bool IsPromoted { get; set; }
@@ -206,6 +207,7 @@ public class YouthScoutProspect
     public YouthDevelopmentRate DevelopmentRate { get; set; } = YouthDevelopmentRate.Normal;
     public YouthPotentialTier PotentialTier { get; set; } = YouthPotentialTier.GoodProspect;
     public decimal SigningCost { get; set; }
+    public decimal WeeklyWage { get; set; }
     public string ScoutNotes { get; set; } = string.Empty;
     public bool IsSigned { get; set; }
     public string SignedByClubId { get; set; } = string.Empty;

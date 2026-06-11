@@ -61,9 +61,10 @@ public class ClubFinance
     public decimal TransferSpent { get; set; }
     public decimal TransferIncome { get; set; }
     public decimal WageSpent { get; set; }
+    public decimal YouthWageSpent { get; set; }
 
     public decimal AvailableTransferBudget => Math.Max(0, ClubTransferBudget + TransferIncome - TransferSpent);
-    public decimal AvailableWageBudget => Math.Max(0, ClubWageBudget - WageSpent);
+    public decimal AvailableWageBudget => Math.Max(0, ClubWageBudget - WageSpent - YouthWageSpent);
 }
 
 public class TransferOffer

@@ -53,6 +53,7 @@ public class SeasonRolloverService
 
         transferMarketState ??= new TransferMarketState();
         var sortedTable = _leagueTableService.SortTable(league.Table);
+        var championsLeagueQualifiedTeamNames = GetChampionsLeagueQualifiedTeamNames(sortedTable);
         var archive = _awardsService.CreateArchive(league, selectedTeam);
         var selectedSummary = ApplyBudgetRolloverForCompletedLeague(league, selectedTeam, transferMarketState, sortedTable);
         archive.BudgetSummary = selectedSummary;
@@ -75,10 +76,10 @@ public class SeasonRolloverService
 
         league.Season = nextSeason;
         league.Table = _leagueTableService.CreateTable(league.Teams);
-        league.Fixtures = _seasonCalendarService.GenerateSeasonFixtures(league.Teams, nextSeason);
+        league.Fixtures = _seasonCalendarService.GenerateSeasonFixtures(league.Teams, nextSeason, championsLeagueQualifiedTeamNames);
         league.PlayerStats = [];
         league.PlayerCompetitionStats = [];
-        league.CompetitionStates = _seasonCalendarService.CreateInitialCompetitionStates(league.Teams);
+        league.CompetitionStates = _seasonCalendarService.CreateInitialCompetitionStates(league.Teams, championsLeagueQualifiedTeamNames);
         league.IsCompleted = false;
         league.HasShownLeagueTrophyCelebration = false;
         league.ShownTrophyCelebrationKeys = [];
@@ -196,6 +197,16 @@ public class SeasonRolloverService
             .Select((entry, index) => new { entry.TeamName, Position = index + 1 })
             .FirstOrDefault(item => item.TeamName.Equals(teamName, StringComparison.OrdinalIgnoreCase))
             ?.Position ?? 0;
+    }
+
+    private static List<string> GetChampionsLeagueQualifiedTeamNames(IReadOnlyList<LeagueTableEntry> sortedTable)
+    {
+        return sortedTable
+            .Take(4)
+            .Select(entry => entry.TeamName)
+            .Where(teamName => !string.IsNullOrWhiteSpace(teamName))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
     }
 
     private static void ApplyOffseasonPlayerReset(IEnumerable<Team> teams)

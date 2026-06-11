@@ -99,9 +99,79 @@ public class SeasonRolloverServiceTests
         Assert.Contains(result.League.Fixtures, fixture => fixture.Competition == CompetitionType.FACup);
         Assert.Contains(result.League.Fixtures, fixture => fixture.Competition == CompetitionType.LeagueCup);
         Assert.Contains(result.League.Fixtures, fixture => fixture.Competition == CompetitionType.ChampionsLeague);
+        var expectedUclLeagueTeams = result.Archive.FinalTable
+            .OrderBy(row => row.Position)
+            .Take(4)
+            .Select(row => row.TeamName)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var actualUclLeagueTeams = result.League.CompetitionStates
+            .Single(state => state.Competition == CompetitionType.ChampionsLeague)
+            .QualifiedTeamNames
+            .Where(teamName => result.League.Teams.Any(team => team.Name.Equals(teamName, StringComparison.OrdinalIgnoreCase)))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        Assert.True(
+            expectedUclLeagueTeams.SetEquals(actualUclLeagueTeams),
+            $"Expected UCL league teams: {string.Join(", ", expectedUclLeagueTeams)}. Actual: {string.Join(", ", actualUclLeagueTeams)}.");
         Assert.Equal("2026-27", result.TransferMarketState.ActiveSeason);
         Assert.Contains(result.League.Teams, team => team.Name == result.SelectedTeam.Name);
         Assert.True(result.Archive.BudgetSummary.NewBudget > 0);
+    }
+
+    [Fact]
+    public void StartNextSeason_UsesLastSeasonTopFourForChampionsLeague()
+    {
+        var leagueEngine = new LeagueEngine();
+        var dataService = new LeagueDataService();
+        var definition = dataService.GetLeagueDefinition("premier-league");
+        var teams = dataService.LoadTeams(definition).Take(8).ToList();
+        var selectedTeam = teams[0];
+        var league = leagueEngine.CreateLeague("premier-league", GameSessionService.PremierLeagueName, "2025-26", teams);
+        league.Table = teams
+            .Select((team, index) => new LeagueTableEntry
+            {
+                TeamName = team.Name,
+                Played = 14,
+                Wins = Math.Max(0, 7 - index),
+                Draws = 0,
+                Losses = index,
+                GoalsFor = 40 - index,
+                GoalsAgainst = 10 + index,
+                Points = (8 - index) * 3
+            })
+            .ToList();
+        foreach (var fixture in league.Fixtures)
+        {
+            fixture.IsPlayed = true;
+        }
+
+        var expectedQualifiedTeamNames = league.Table
+            .OrderByDescending(row => row.Points)
+            .ThenByDescending(row => row.GoalDifference)
+            .Take(4)
+            .Select(row => row.TeamName)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        var result = new SeasonRolloverService().StartNextSeason(
+            league,
+            selectedTeam,
+            new TransferMarketService().CreateInitialState(league));
+
+        var uclState = result.League.CompetitionStates.Single(state => state.Competition == CompetitionType.ChampionsLeague);
+        var actualQualifiedLeagueTeamNames = uclState.QualifiedTeamNames
+            .Where(teamName => result.League.Teams.Any(team => team.Name.Equals(teamName, StringComparison.OrdinalIgnoreCase)))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var nonQualifiedLeagueTeamNames = result.League.Teams
+            .Select(team => team.Name)
+            .Where(teamName => !expectedQualifiedTeamNames.Contains(teamName))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        Assert.True(
+            expectedQualifiedTeamNames.SetEquals(actualQualifiedLeagueTeamNames),
+            $"Expected UCL league teams: {string.Join(", ", expectedQualifiedTeamNames)}. Actual: {string.Join(", ", actualQualifiedLeagueTeamNames)}.");
+        Assert.DoesNotContain(uclState.QualifiedTeamNames, nonQualifiedLeagueTeamNames.Contains);
+        Assert.DoesNotContain(result.League.Fixtures.Where(fixture => fixture.Competition == CompetitionType.ChampionsLeague), fixture =>
+            nonQualifiedLeagueTeamNames.Contains(fixture.HomeTeam.Name) ||
+            nonQualifiedLeagueTeamNames.Contains(fixture.AwayTeam.Name));
     }
 
     [Fact]

@@ -977,6 +977,7 @@
                                 IsEnabled="False"
                                 Click="ContinueButton_Click" />
                     </StackPanel>
+
                 </Grid>
             </Border>
 

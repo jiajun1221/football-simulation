@@ -133,6 +133,7 @@ public class YouthAcademySystemTests
                 Assert.False(string.IsNullOrWhiteSpace(prospect.NationalityName));
                 Assert.False(string.IsNullOrWhiteSpace(prospect.PreferredPosition));
                 Assert.InRange(prospect.SigningCost, 500_000m, 8_000_000m);
+                Assert.InRange(prospect.WeeklyWage, 1_000m, 18_000m);
             });
         });
     }
@@ -163,6 +164,34 @@ public class YouthAcademySystemTests
     }
 
     [Fact]
+    public void YouthScout_NewAssignmentClearsPreviousReportFromSameScout()
+    {
+        var league = CreateLeague();
+        var service = new YouthScoutService();
+        var academy = league.YouthAcademies.First();
+        service.EnsureScoutNetwork(academy);
+        var scout = academy.ScoutAssignments.First();
+
+        service.AdvanceScoutingAfterClubMatch(academy, league.Season, currentRound: 1);
+        service.AdvanceScoutingAfterClubMatch(academy, league.Season, currentRound: 2);
+        service.AdvanceScoutingAfterClubMatch(academy, league.Season, currentRound: 3);
+        var otherScoutReportCount = academy.ScoutReports.Count(report =>
+            !report.ScoutId.Equals(scout.ScoutId, StringComparison.OrdinalIgnoreCase));
+
+        var assignResult = service.AssignScoutingPlan(
+            academy,
+            scout.ScoutId,
+            "Brazil",
+            YouthScoutPositionFocus.ST);
+
+        Assert.True(assignResult.Success, assignResult.Message);
+        Assert.DoesNotContain(academy.ScoutReports, report =>
+            report.ScoutId.Equals(scout.ScoutId, StringComparison.OrdinalIgnoreCase));
+        Assert.Equal(otherScoutReportCount, academy.ScoutReports.Count);
+        Assert.Contains("Previous report cleared", assignResult.Message);
+    }
+
+    [Fact]
     public void YouthScout_SignProspectAddsPlayerToAcademy()
     {
         var league = CreateLeague();
@@ -176,6 +205,12 @@ public class YouthAcademySystemTests
         var report = academy.ScoutReports.First();
         var prospect = report.Prospects.First();
         var startingCount = academy.YouthPlayers.Count;
+        var finance = transferState.ClubFinances.Single(item =>
+            item.LeagueId.Equals(league.LeagueId, StringComparison.OrdinalIgnoreCase) &&
+            item.ClubName.Equals(selectedTeam.Name, StringComparison.OrdinalIgnoreCase));
+        finance.TransferSpent = finance.ClubTransferBudget + finance.TransferIncome;
+        var startingTransferSpent = finance.TransferSpent;
+        var startingYouthWageSpent = finance.YouthWageSpent;
 
         var result = service.SignProspect(
             league,
@@ -188,7 +223,10 @@ public class YouthAcademySystemTests
         Assert.True(result.Success, result.Message);
         Assert.True(prospect.IsSigned);
         Assert.Equal(startingCount + 1, academy.YouthPlayers.Count);
-        Assert.Contains(academy.YouthPlayers, player => player.Name == prospect.Name);
+        var signedPlayer = academy.YouthPlayers.Single(player => player.Name == prospect.Name);
+        Assert.Equal(prospect.WeeklyWage, signedPlayer.WeeklyWage);
+        Assert.Equal(startingTransferSpent, finance.TransferSpent);
+        Assert.Equal(startingYouthWageSpent + prospect.WeeklyWage, finance.YouthWageSpent);
     }
 
     [Fact]

@@ -201,6 +201,25 @@ public class LeagueEngine
         return results;
     }
 
+    public List<Match> SimulateRemainingFixturesForCompetitionRound(
+        League league,
+        Fixture completedFixture,
+        int? seed = null,
+        MatchSimulationOptions? options = null)
+    {
+        var results = new List<Match>();
+        var roundFixtures = league.Fixtures
+            .Where(fixture => !fixture.IsPlayed && IsSameCompetitionRound(fixture, completedFixture))
+            .ToList();
+
+        foreach (var fixture in roundFixtures)
+        {
+            results.Add(SimulateFixture(league, fixture, seed, options));
+        }
+
+        return results;
+    }
+
     private void CompleteFixtureProgression(League league, Fixture fixture, Match result, int? seed = null)
     {
         _competitionProgressionService.EnsureFixtureMetadata(fixture);
@@ -266,5 +285,22 @@ public class LeagueEngine
     private static int GetFixtureCalendarRound(Fixture fixture)
     {
         return fixture.CalendarRound > 0 ? fixture.CalendarRound : fixture.RoundNumber;
+    }
+
+    private static bool IsSameCompetitionRound(Fixture fixture, Fixture completedFixture)
+    {
+        if (fixture.Competition != completedFixture.Competition)
+        {
+            return false;
+        }
+
+        if (fixture.Competition == CompetitionType.PremierLeague ||
+            fixture.Competition == CompetitionType.ChampionsLeague && !fixture.IsKnockout && !completedFixture.IsKnockout)
+        {
+            return fixture.RoundNumber == completedFixture.RoundNumber;
+        }
+
+        return !string.IsNullOrWhiteSpace(fixture.RoundName) &&
+            fixture.RoundName.Equals(completedFixture.RoundName, StringComparison.OrdinalIgnoreCase);
     }
 }

@@ -110,20 +110,6 @@
             </Setter>
         </Style>
 
-        <Style x:Key="DashboardNotificationDotStyle" TargetType="Border">
-            <Setter Property="Width" Value="10" />
-            <Setter Property="Height" Value="10" />
-            <Setter Property="CornerRadius" Value="5" />
-            <Setter Property="Background" Value="#EF4444" />
-            <Setter Property="BorderBrush" Value="#FFFFFF" />
-            <Setter Property="BorderThickness" Value="2" />
-            <Setter Property="HorizontalAlignment" Value="Right" />
-            <Setter Property="VerticalAlignment" Value="Top" />
-            <Setter Property="Margin" Value="0,5,8,0" />
-            <Setter Property="IsHitTestVisible" Value="False" />
-            <Setter Property="Visibility" Value="Collapsed" />
-        </Style>
-
         <Style x:Key="DashboardNotificationBadgeStyle" TargetType="Border">
             <Setter Property="MinWidth" Value="20" />
             <Setter Property="Height" Value="20" />
@@ -134,9 +120,17 @@
             <Setter Property="BorderThickness" Value="2" />
             <Setter Property="HorizontalAlignment" Value="Right" />
             <Setter Property="VerticalAlignment" Value="Top" />
-            <Setter Property="Margin" Value="0,-7,-7,0" />
+            <Setter Property="Margin" Value="0,-7,5,0" />
             <Setter Property="IsHitTestVisible" Value="False" />
             <Setter Property="Visibility" Value="Collapsed" />
+        </Style>
+
+        <Style x:Key="TableToggleButton" TargetType="Button" BasedOn="{StaticResource DashboardWhiteActionButton}">
+            <Setter Property="Height" Value="30" />
+            <Setter Property="MinWidth" Value="112" />
+            <Setter Property="Padding" Value="12,0" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Margin" Value="0,0,8,0" />
         </Style>
 
         <Style x:Key="ModernDataGrid" TargetType="DataGrid">
@@ -534,9 +528,17 @@
                             <Button Content="🎓 Youth Academy"
                                     Style="{StaticResource DashboardWhiteActionButton}"
                                     Click="YouthAcademyButton_Click" />
-                            <Border x:Name="YouthAcademyNotificationDot"
-                                    Style="{StaticResource DashboardNotificationDotStyle}"
-                                    ToolTip="Scout report completed." />
+                            <Border x:Name="YouthAcademyNotificationBadge"
+                                    Style="{StaticResource DashboardNotificationBadgeStyle}"
+                                    ToolTip="Scout report completed.">
+                                <TextBlock Text="!"
+                                           Foreground="#FFFFFF"
+                                           FontSize="11"
+                                           FontWeight="Black"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           TextAlignment="Center" />
+                            </Border>
                         </Grid>
                     </Grid>
 
@@ -558,12 +560,27 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Text="League Table"
-                               FontSize="25"
-                               FontWeight="Bold"
-                               Foreground="{DynamicResource AppTextBrush}" />
+                    <StackPanel Orientation="Horizontal"
+                                VerticalAlignment="Center">
+                        <TextBlock x:Name="TableTitleTextBlock"
+                                   Text="League Table"
+                                   FontSize="25"
+                                   FontWeight="Bold"
+                                   Foreground="{DynamicResource AppTextBrush}"
+                                   Margin="0,0,18,0" />
+                        <Button x:Name="LeagueTableTabButton"
+                                Content="League"
+                                Style="{StaticResource TableToggleButton}"
+                                Click="LeagueTableTabButton_Click" />
+                        <Button x:Name="ChampionsLeagueTableTabButton"
+                                Content="Champions League"
+                                Style="{StaticResource TableToggleButton}"
+                                MinWidth="150"
+                                Click="ChampionsLeagueTableTabButton_Click" />
+                    </StackPanel>
 
-                    <StackPanel Grid.Column="1"
+                    <StackPanel x:Name="LastFiveLegendPanel"
+                                Grid.Column="1"
                                 Orientation="Horizontal"
                                 VerticalAlignment="Center">
                         <TextBlock Text="Last 5:"
@@ -582,7 +599,8 @@
                     </StackPanel>
                 </Grid>
 
-                <StackPanel Grid.Row="1"
+                <StackPanel x:Name="LeagueTableLegendPanel"
+                            Grid.Row="1"
                             Orientation="Horizontal"
                             Margin="0,0,0,14">
                     <StackPanel Orientation="Horizontal" Margin="0,0,18,0">
@@ -600,6 +618,25 @@
                     <StackPanel Orientation="Horizontal">
                         <Border Width="10" Height="10" Background="#EF4444" Margin="0,0,6,0" VerticalAlignment="Center" />
                         <TextBlock Text="Relegation" Foreground="{DynamicResource AppMutedTextBrush}" FontSize="12" />
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel x:Name="ChampionsLeagueLegendPanel"
+                            Grid.Row="1"
+                            Orientation="Horizontal"
+                            Margin="0,0,0,14"
+                            Visibility="Collapsed">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,18,0">
+                        <Border Width="10" Height="10" Background="#3B82F6" Margin="0,0,6,0" VerticalAlignment="Center" />
+                        <TextBlock Text="Top 8: Round of 16" Foreground="{DynamicResource AppMutedTextBrush}" FontSize="12" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,18,0">
+                        <Border Width="10" Height="10" Background="#F97316" Margin="0,0,6,0" VerticalAlignment="Center" />
+                        <TextBlock Text="9-24: Playoff places" Foreground="{DynamicResource AppMutedTextBrush}" FontSize="12" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Border Width="10" Height="10" Background="#EF4444" Margin="0,0,6,0" VerticalAlignment="Center" />
+                        <TextBlock Text="25-36: Eliminated" Foreground="{DynamicResource AppMutedTextBrush}" FontSize="12" />
                     </StackPanel>
                 </StackPanel>
 
@@ -653,7 +690,7 @@
                         <DataGridTextColumn Header="GA" Binding="{Binding GoalsAgainst}" Width="46" />
                         <DataGridTextColumn Header="GD" Binding="{Binding GoalDifference}" Width="50" />
                         <DataGridTextColumn Header="Pts" Binding="{Binding Points}" Width="52" />
-                        <DataGridTemplateColumn Header="Last 5" Width="122">
+                        <DataGridTemplateColumn x:Name="LastFiveColumn" Header="Last 5" Width="122">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <ItemsControl ItemsSource="{Binding LastFive}"

@@ -4,11 +4,16 @@ namespace FootballSimulation.Services;
 
 public class RecentResultService
 {
-    public List<RecentMatchResult> GetRecentResults(League league, Team selectedTeam, int count = 5)
+    public List<RecentMatchResult> GetRecentResults(
+        League league,
+        Team selectedTeam,
+        int count = 5,
+        CompetitionType? competition = null)
     {
         return league.Fixtures
             .Where(fixture => fixture.IsPlayed && fixture.Result is not null && IsTeamInFixture(fixture, selectedTeam))
-            .OrderByDescending(fixture => fixture.RoundNumber)
+            .Where(fixture => competition is null || fixture.Competition == competition)
+            .OrderByDescending(GetFixtureSortRound)
             .Take(count)
             .Select(fixture => CreateRecentResult(fixture, selectedTeam))
             .ToList();
@@ -33,6 +38,14 @@ public class RecentResultService
 
     private static bool IsTeamInFixture(Fixture fixture, Team team)
     {
-        return fixture.HomeTeam == team || fixture.AwayTeam == team;
+        return fixture.HomeTeam == team ||
+            fixture.AwayTeam == team ||
+            fixture.HomeTeam.Name.Equals(team.Name, StringComparison.OrdinalIgnoreCase) ||
+            fixture.AwayTeam.Name.Equals(team.Name, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static int GetFixtureSortRound(Fixture fixture)
+    {
+        return fixture.CalendarRound > 0 ? fixture.CalendarRound : fixture.RoundNumber;
     }
 }

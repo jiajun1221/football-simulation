@@ -61,7 +61,7 @@ public class GameSessionService
     {
         var fixture = FindNextFixtureForTeam(league, selectedTeam);
         var result = _leagueEngine.SimulateFixture(league, fixture, options: CreateUserMatchOptions(selectedTeam));
-        var remainingResults = _leagueEngine.SimulateRemainingFixturesForCalendarSlot(league, GetFixtureCalendarRound(fixture));
+        var remainingResults = _leagueEngine.SimulateRemainingFixturesForCompetitionRound(league, fixture);
         ApplyGrowthForCompletedMatches([result, .. remainingResults]);
         AdvanceRecoveryAfterCalendarSlot(league, fixture);
         _playerFormPersistenceService.SaveActiveSquadFormStatuses(league.Teams, league.LeagueId);
@@ -104,7 +104,7 @@ public class GameSessionService
     {
         var humanTeam = selectedTeam ?? fixture.HomeTeam;
         var result = _leagueEngine.SimulateFixtureSecondHalf(league, fixture, match, options: CreateUserMatchOptions(humanTeam));
-        var remainingResults = _leagueEngine.SimulateRemainingFixturesForCalendarSlot(league, GetFixtureCalendarRound(fixture));
+        var remainingResults = _leagueEngine.SimulateRemainingFixturesForCompetitionRound(league, fixture);
         ApplyGrowthForCompletedMatches([result, .. remainingResults]);
         AdvanceRecoveryAfterCalendarSlot(league, fixture);
         _playerFormPersistenceService.SaveActiveSquadFormStatuses(league.Teams, league.LeagueId);
@@ -115,7 +115,7 @@ public class GameSessionService
     public void CompleteSelectedTeamLiveMatch(League league, Fixture fixture, Match match)
     {
         _leagueEngine.CompleteLiveFixture(league, fixture, match);
-        var remainingResults = _leagueEngine.SimulateRemainingFixturesForCalendarSlot(league, GetFixtureCalendarRound(fixture));
+        var remainingResults = _leagueEngine.SimulateRemainingFixturesForCompetitionRound(league, fixture);
         ApplyGrowthForCompletedMatches([match, .. remainingResults]);
         AdvanceRecoveryAfterCalendarSlot(league, fixture);
         _playerFormPersistenceService.SaveActiveSquadFormStatuses(league.Teams, league.LeagueId);

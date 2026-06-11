@@ -257,6 +257,112 @@ public class SaveGameServiceTests
     }
 
     [Fact]
+    public void LoadGame_RepairsPlaceholderOpponentNamesFromChampionsLeagueSquadSource()
+    {
+        var saveDirectory = CreateTempSaveDirectory();
+        var saveGameService = new SaveGameService(saveDirectory);
+        var dataService = new LeagueDataService();
+        var teams = dataService.LoadTeams(LeagueDataService.DefaultLeagueId);
+        var selectedTeam = teams.Single(team => team.Name == "Chelsea");
+        var benficaPlaceholder = PlaceholderTeamFactory.Create("Benfica", 82, venueSuffix: "Arena", country: "Portugal");
+        var league = new League
+        {
+            LeagueId = LeagueDataService.DefaultLeagueId,
+            Name = GameSessionService.PremierLeagueName,
+            Season = "2026-27",
+            Teams = teams,
+            Fixtures =
+            [
+                new Fixture
+                {
+                    Competition = CompetitionType.ChampionsLeague,
+                    CalendarRound = 1,
+                    RoundNumber = 1,
+                    RoundName = "League Phase MD1",
+                    HomeTeam = benficaPlaceholder,
+                    AwayTeam = selectedTeam
+                }
+            ]
+        };
+        var sourceBenfica = dataService.LoadSquadSourceDefinitions()
+            .SelectMany(dataService.LoadTeams)
+            .Single(team => team.Name == "Benfica");
+        var sourceBenficaNames = sourceBenfica.Players
+            .Concat(sourceBenfica.Substitutes)
+            .Select(player => player.Name)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        try
+        {
+            saveGameService.SaveGame(1, SaveGameService.CreateSaveData(league, selectedTeam));
+
+            var loadedData = saveGameService.LoadGame(1);
+            var restoredBenfica = loadedData!.Fixtures.Single(fixture => fixture.Competition == CompetitionType.ChampionsLeague).HomeTeam;
+            var restoredNames = restoredBenfica.Players.Concat(restoredBenfica.Substitutes).Select(player => player.Name).ToList();
+
+            Assert.DoesNotContain(restoredNames, name => name.Contains("Benfica Player", StringComparison.OrdinalIgnoreCase));
+            Assert.All(restoredNames, name => Assert.Contains(name, sourceBenficaNames));
+        }
+        finally
+        {
+            DeleteDirectory(saveDirectory);
+        }
+    }
+
+    [Fact]
+    public void LoadGame_RepairsPlaceholderOpponentPositionsFromRealSquadData()
+    {
+        var saveDirectory = CreateTempSaveDirectory();
+        var saveGameService = new SaveGameService(saveDirectory);
+        var dataService = new LeagueDataService();
+        var teams = dataService.LoadTeams(LeagueDataService.DefaultLeagueId);
+        var selectedTeam = teams.Single(team => team.Name == "Chelsea");
+        var juventusPlaceholder = PlaceholderTeamFactory.Create("Juventus", 84, venueSuffix: "Arena", country: "Italy");
+        var league = new League
+        {
+            LeagueId = LeagueDataService.DefaultLeagueId,
+            Name = GameSessionService.PremierLeagueName,
+            Season = "2026-27",
+            Teams = teams,
+            Fixtures =
+            [
+                new Fixture
+                {
+                    Competition = CompetitionType.ChampionsLeague,
+                    CalendarRound = 1,
+                    RoundNumber = 1,
+                    RoundName = "League Phase MD1",
+                    HomeTeam = juventusPlaceholder,
+                    AwayTeam = selectedTeam
+                }
+            ]
+        };
+
+        try
+        {
+            saveGameService.SaveGame(1, SaveGameService.CreateSaveData(league, selectedTeam));
+
+            var loadedData = saveGameService.LoadGame(1);
+            var restoredJuventus = loadedData!.Fixtures.Single(fixture => fixture.Competition == CompetitionType.ChampionsLeague).HomeTeam;
+            var restoredPlayers = restoredJuventus.Players.Concat(restoredJuventus.Substitutes).ToList();
+            var locatelli = restoredPlayers.Single(player => player.Name == "Manuel Locatelli");
+            var vlahovic = restoredPlayers.Single(player => player.Name.Contains("Vlah", StringComparison.OrdinalIgnoreCase));
+
+            Assert.DoesNotContain(restoredPlayers, player => player.PlayerId.StartsWith("placeholder-", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(Position.Midfielder, locatelli.Position);
+            Assert.Equal("CDM", locatelli.PreferredPosition);
+            Assert.Equal("CDM", locatelli.AssignedPosition);
+            Assert.Equal(Position.Forward, vlahovic.Position);
+            Assert.Equal("ST", vlahovic.PreferredPosition);
+            Assert.Equal("ST", vlahovic.AssignedPosition);
+        }
+        finally
+        {
+            DeleteDirectory(saveDirectory);
+        }
+    }
+
+    [Fact]
     public void CreateLeague_RepairsLegacyHalfSeasonFixtureList()
     {
         var dataService = new LeagueDataService();

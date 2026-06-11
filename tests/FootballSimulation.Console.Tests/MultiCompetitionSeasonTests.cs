@@ -107,6 +107,80 @@ public class MultiCompetitionSeasonTests
     }
 
     [Fact]
+    public void ChampionsLeague_LeaguePhaseSchedulesEveryClubOncePerMatchday()
+    {
+        var league = CreateLeague(teamCount: 20);
+        var uclTeamNames = league.CompetitionStates
+            .First(state => state.Competition == CompetitionType.ChampionsLeague)
+            .Standings
+            .Select(row => row.TeamName)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var fixturesByMatchday = league.Fixtures
+            .Where(fixture => fixture.Competition == CompetitionType.ChampionsLeague && !fixture.IsKnockout)
+            .GroupBy(fixture => fixture.RoundNumber)
+            .ToList();
+
+        Assert.Equal(8, fixturesByMatchday.Count);
+        Assert.All(fixturesByMatchday, matchday =>
+        {
+            var matchdayTeamNames = matchday
+                .SelectMany(fixture => new[] { fixture.HomeTeam.Name, fixture.AwayTeam.Name })
+                .ToList();
+
+            Assert.Equal(18, matchday.Count());
+            Assert.Equal(uclTeamNames.Count, matchdayTeamNames.Count);
+            Assert.Equal(uclTeamNames.Count, matchdayTeamNames.Distinct(StringComparer.OrdinalIgnoreCase).Count());
+            Assert.True(
+                uclTeamNames.SetEquals(matchdayTeamNames),
+                $"Matchday {matchday.Key} does not include every UCL club exactly once.");
+        });
+    }
+
+    [Fact]
+    public void ChampionsLeague_CompletedUserMatchdayLevelsPlayedCountForEveryClub()
+    {
+        var engine = new LeagueEngine();
+        var league = CreateLeague(teamCount: 20, engine);
+        var selectedFixture = league.Fixtures.First(fixture =>
+            fixture.Competition == CompetitionType.ChampionsLeague &&
+            !fixture.IsKnockout &&
+            fixture.RoundNumber == 1);
+
+        engine.SimulateFixture(league, selectedFixture, seed: 27);
+        engine.SimulateRemainingFixturesForCompetitionRound(league, selectedFixture, seed: 28);
+
+        var uclState = league.CompetitionStates.First(state => state.Competition == CompetitionType.ChampionsLeague);
+        Assert.All(uclState.Standings, row => Assert.Equal(1, row.Played));
+        Assert.DoesNotContain(league.Fixtures.Where(fixture =>
+            fixture.Competition == CompetitionType.ChampionsLeague &&
+            !fixture.IsKnockout &&
+            fixture.RoundNumber == selectedFixture.RoundNumber), fixture => !fixture.IsPlayed);
+    }
+
+    [Fact]
+    public void ChampionsLeague_LeaguePhaseUsesRealSquadNamesForAllEntrants()
+    {
+        var league = CreateLeague(teamCount: 20);
+        var uclTeams = league.Fixtures
+            .Where(fixture => fixture.Competition == CompetitionType.ChampionsLeague)
+            .SelectMany(fixture => new[] { fixture.HomeTeam, fixture.AwayTeam })
+            .GroupBy(team => team.Name, StringComparer.OrdinalIgnoreCase)
+            .Select(group => group.First())
+            .ToList();
+
+        Assert.Equal(36, uclTeams.Count);
+        Assert.All(uclTeams, team =>
+        {
+            Assert.Equal(11, team.Players.Count);
+            Assert.InRange(team.Substitutes.Count, 7, 12);
+            Assert.DoesNotContain(team.Players.Concat(team.Substitutes), player =>
+                player.Name.Contains(" Player ", StringComparison.OrdinalIgnoreCase));
+            Assert.DoesNotContain(team.Players.Concat(team.Substitutes), player =>
+                player.PlayerId.StartsWith("placeholder-", StringComparison.OrdinalIgnoreCase));
+        });
+    }
+
+    [Fact]
     public void ChampionsLeague_LeaguePhaseCompletionCreatesRoundOf16()
     {
         var progression = new CompetitionProgressionService();

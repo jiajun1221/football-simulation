@@ -99,6 +99,30 @@ public class LeagueDataServiceTests
         Assert.Equal(league.Table.Count, restoredLeague.Table.Count);
     }
 
+    [Fact]
+    public void LoadSquadSourceDefinitions_IncludesNonPlayableChampionsLeagueSquads()
+    {
+        var dataService = new LeagueDataService();
+
+        var definition = dataService.LoadSquadSourceDefinitions()
+            .Single(league => league.LeagueId == "champions-league");
+        var teams = dataService.LoadTeams(definition);
+
+        Assert.False(definition.IsAvailable);
+        Assert.Equal(17, teams.Count);
+        Assert.Contains(teams, team => team.Name == "Benfica");
+        Assert.Contains(teams, team => team.Name == "Slovan Bratislava");
+        Assert.All(teams, team =>
+        {
+            Assert.Equal(11, team.Players.Count);
+            Assert.InRange(team.Substitutes.Count, 7, 12);
+            Assert.DoesNotContain(team.Players.Concat(team.Substitutes), player =>
+                player.Name.Contains(" Player ", StringComparison.OrdinalIgnoreCase));
+            Assert.Contains(team.Players, player => player.Position == Position.Goalkeeper);
+            Assert.Contains(team.Substitutes, player => player.Position == Position.Goalkeeper);
+        });
+    }
+
     public static IEnumerable<object[]> EnabledLeagues()
     {
         return EnabledLeagueIds.Select(leagueId => new object[] { leagueId });

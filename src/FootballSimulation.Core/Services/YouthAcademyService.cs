@@ -255,7 +255,9 @@ public class YouthAcademyService
             Traits = youthPlayer.Traits.ToList(),
             PreferredFoot = youthPlayer.PreferredPosition is "LB" or "LW" ? "Left" : "Right",
             ContractEndYear = PlayerContractService.DefaultSeasonEndYear + 3,
-            WeeklyWage = Math.Max(1_000, Math.Round(youthPlayer.MarketValue / 3_500m, 0)),
+            WeeklyWage = youthPlayer.WeeklyWage > 0
+                ? youthPlayer.WeeklyWage
+                : Math.Max(1_000, Math.Round(youthPlayer.MarketValue / 3_500m, 0)),
             TransferStatus = PlayerTransferStatus.None,
             IsStarter = false,
             IsOnPitch = false
@@ -351,6 +353,9 @@ public class YouthAcademyService
         player.MarketValue = player.MarketValue > 0
             ? player.MarketValue
             : YouthMarketValueCalculator.CalculateMarketValue(player, academy);
+        player.WeeklyWage = player.WeeklyWage > 0
+            ? player.WeeklyWage
+            : Math.Max(1_000m, Math.Round(player.MarketValue / 3_500m, 0));
     }
 
     private static int CalculateIntakeCount(YouthAcademy academy)

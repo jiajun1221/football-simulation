@@ -29,6 +29,14 @@ public class LeagueDataService
             .ToList();
     }
 
+    public IReadOnlyList<LeagueDefinition> LoadSquadSourceDefinitions()
+    {
+        var index = ReadLeagueIndex();
+        return index.Leagues
+            .Where(league => !string.IsNullOrWhiteSpace(league.SquadFile))
+            .ToList();
+    }
+
     public LeagueDefinition GetLeagueDefinition(string? leagueId)
     {
         var normalizedLeagueId = NormalizeLeagueId(leagueId);
@@ -57,6 +65,10 @@ public class LeagueDataService
     public List<Team> LoadTeams(LeagueDefinition definition)
     {
         ArgumentNullException.ThrowIfNull(definition);
+        if (string.IsNullOrWhiteSpace(definition.SquadFile))
+        {
+            throw new InvalidOperationException($"{definition.Name} does not have a configured squad file.");
+        }
 
         var squadFilePath = Path.Combine(GetDataFolder(), definition.SquadFile);
         var squadsFile = ReadJsonFile<LeagueSquadsFile>(squadFilePath);

@@ -220,9 +220,14 @@ public partial class YouthAcademyView : UserControl
 
     private void SignScoutProspectButton_Click(object sender, RoutedEventArgs e)
     {
-        if (_state.League is null || _state.SelectedTeam is null || _state.TransferMarket is null ||
-            ScoutProspectsDataGrid.SelectedItem is not ScoutProspectRow row)
+        if (_state.League is null || _state.SelectedTeam is null || _state.TransferMarket is null)
         {
+            return;
+        }
+
+        if (ScoutProspectsDataGrid.SelectedItem is not ScoutProspectRow row)
+        {
+            YouthScoutStatusTextBlock.Text = "Select an available scout prospect before signing.";
             return;
         }
 
@@ -233,9 +238,9 @@ public partial class YouthAcademyView : UserControl
             row.ReportId,
             row.ProspectId,
             GetCurrentRound());
-        YouthScoutStatusTextBlock.Text = result.Message;
         LoadAcademySquad();
         LoadYouthScout();
+        YouthScoutStatusTextBlock.Text = result.Message;
         PersistCurrentSaveSlot();
     }
 
@@ -271,6 +276,13 @@ public partial class YouthAcademyView : UserControl
         return value >= 1_000_000m
             ? $"€{value / 1_000_000m:0.#}M"
             : $"€{value / 1_000m:0}K";
+    }
+
+    private static string FormatWeeklyWage(decimal value)
+    {
+        return value >= 1_000_000m
+            ? $"€{value / 1_000_000m:0.#}M/w"
+            : $"€{value / 1_000m:0.#}K/w";
     }
 
     private static string FormatScoutFocus(YouthScoutPositionFocus focus)
@@ -481,7 +493,7 @@ public partial class YouthAcademyView : UserControl
         public string PotentialBadgeBackground { get; init; } = "#E5E7EB";
         public string PotentialBadgeForeground { get; init; } = "#374151";
         public IReadOnlyList<PlayerTraitBadge> TraitBadges { get; init; } = [];
-        public string SigningCost { get; init; } = string.Empty;
+        public string WeeklyWage { get; init; } = string.Empty;
         public string Status { get; init; } = string.Empty;
         public string StatusTooltip { get; init; } = string.Empty;
         public string StatusBrush { get; init; } = "#E2E8F0";
@@ -508,7 +520,7 @@ public partial class YouthAcademyView : UserControl
                 PotentialBadgeBackground = potentialBadge.Background,
                 PotentialBadgeForeground = potentialBadge.Foreground,
                 TraitBadges = PlayerTraitBadgeHelper.Create(prospect.Traits, maxVisibleTraits: 4),
-                SigningCost = FormatMoney(prospect.SigningCost),
+                WeeklyWage = FormatWeeklyWage(prospect.WeeklyWage),
                 Status = status.Text,
                 StatusTooltip = status.Tooltip,
                 StatusBrush = status.Background,

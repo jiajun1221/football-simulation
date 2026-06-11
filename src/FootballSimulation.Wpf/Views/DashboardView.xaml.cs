@@ -22,6 +22,7 @@ public partial class DashboardView : UserControl
     private readonly YouthScoutService _youthScoutService = new();
     private readonly SeasonCompletionService _seasonCompletionService = new();
     private CompetitionType? _fixtureFilter;
+    private DashboardTableView _activeTableView = DashboardTableView.League;
     private const string ClubsAssetPath = "Assets/Clubs";
     private const string DefaultLogoPath = "pack://application:,,,/Assets/Clubs/default.png";
 
@@ -82,7 +83,7 @@ public partial class DashboardView : UserControl
         SeasonTextBlock.Text = $"Season {FormatSeasonLabel(_state.League.Season)}";
         EnsureFixtureFilterOptions();
         SelectedClubLogoImage.Source = CreateImageSource(GetClubLogoPath(_state.SelectedTeam.Name));
-        LeagueTableDataGrid.ItemsSource = CreateLeagueTableRows(_state.League, _state.SelectedTeam);
+        RefreshSelectedTableView();
         LoadSelectedClubStats(_state.League, _state.SelectedTeam);
 
         var seasonComplete = IsSeasonCompleted(_state.League);
@@ -152,6 +153,58 @@ public partial class DashboardView : UserControl
         }
     }
 
+    private void LeagueTableTabButton_Click(object sender, RoutedEventArgs e)
+    {
+        _activeTableView = DashboardTableView.League;
+        RefreshSelectedTableView();
+    }
+
+    private void ChampionsLeagueTableTabButton_Click(object sender, RoutedEventArgs e)
+    {
+        _activeTableView = DashboardTableView.ChampionsLeague;
+        RefreshSelectedTableView();
+    }
+
+    private void RefreshSelectedTableView()
+    {
+        if (_state.League is null || _state.SelectedTeam is null)
+        {
+            return;
+        }
+
+        var hasChampionsLeagueTable = GetChampionsLeagueState(_state.League)?.Standings.Count > 0;
+        ChampionsLeagueTableTabButton.IsEnabled = hasChampionsLeagueTable;
+        if (_activeTableView == DashboardTableView.ChampionsLeague && !hasChampionsLeagueTable)
+        {
+            _activeTableView = DashboardTableView.League;
+        }
+
+        var showingChampionsLeague = _activeTableView == DashboardTableView.ChampionsLeague;
+        TableTitleTextBlock.Text = showingChampionsLeague ? "Champions League Table" : "League Table";
+        LeagueTableLegendPanel.Visibility = showingChampionsLeague ? Visibility.Collapsed : Visibility.Visible;
+        ChampionsLeagueLegendPanel.Visibility = showingChampionsLeague ? Visibility.Visible : Visibility.Collapsed;
+        LastFiveLegendPanel.Visibility = Visibility.Visible;
+        LastFiveColumn.Visibility = Visibility.Visible;
+        LeagueTableDataGrid.ItemsSource = showingChampionsLeague
+            ? CreateChampionsLeagueTableRows(_state.League, _state.SelectedTeam)
+            : CreateLeagueTableRows(_state.League, _state.SelectedTeam);
+        ApplyTableTabVisuals();
+    }
+
+    private void ApplyTableTabVisuals()
+    {
+        ApplyTableTabVisual(LeagueTableTabButton, _activeTableView == DashboardTableView.League);
+        ApplyTableTabVisual(ChampionsLeagueTableTabButton, _activeTableView == DashboardTableView.ChampionsLeague);
+    }
+
+    private static void ApplyTableTabVisual(Button button, bool isActive)
+    {
+        button.Background = CreateBrush(isActive ? "#030712" : "#FFFFFF");
+        button.Foreground = CreateBrush(isActive ? "#FFFFFF" : "#061226");
+        button.BorderBrush = CreateBrush(isActive ? "#030712" : "#CBD5E1");
+        button.FontWeight = isActive ? FontWeights.Black : FontWeights.Bold;
+    }
+
     private void RunTransferMarketRoundProcessing()
     {
         if (_state.League is null || _state.SelectedTeam is null)
@@ -181,7 +234,7 @@ public partial class DashboardView : UserControl
         TransferMarketNotificationBadge.Visibility = pendingTransferOfferCount > 0
             ? Visibility.Visible
             : Visibility.Collapsed;
-        YouthAcademyNotificationDot.Visibility = HasCompletedScoutReportNotification()
+        YouthAcademyNotificationBadge.Visibility = HasCompletedScoutReportNotification()
             ? Visibility.Visible
             : Visibility.Collapsed;
     }
@@ -383,7 +436,7 @@ public partial class DashboardView : UserControl
                 var team = league.Teams.FirstOrDefault(candidate => candidate.Name == entry.TeamName);
                 var recentResults = team is null
                     ? new List<ResultBadge>()
-                    : _recentResultService.GetRecentResults(league, team)
+                    : _recentResultService.GetRecentResults(league, team, competition: CompetitionType.PremierLeague)
                         .OrderBy(result => result.RoundNumber)
                         .Select(CreateResultBadge)
                         .ToList();
@@ -408,6 +461,95 @@ public partial class DashboardView : UserControl
                 };
             })
             .ToList();
+    }
+
+    private List<LeagueTableRow> CreateChampionsLeagueTableRows(League league, Team selectedTeam)
+    {
+        var state = GetChampionsLeagueState(league);
+        if (state is null)
+        {
+            return [];
+        }
+
+        var sortedStandings = state.Standings
+            .OrderByDescending(row => row.Points)
+            .ThenByDescending(row => row.GoalDifference)
+            .ThenByDescending(row => row.GoalsFor)
+            .ThenBy(row => row.TeamName)
+            .ToList();
+        return sortedStandings
+            .Select((entry, index) =>
+            {
+                var position = index + 1;
+                var recentResults = CreateChampionsLeagueRecentResults(league, entry.TeamName);
+                return new LeagueTableRow
+                {
+                    Position = position,
+                    Club = entry.TeamName,
+                    LogoPath = GetClubLogoPath(entry.TeamName),
+                    Played = entry.Played,
+                    Wins = entry.Wins,
+                    Draws = entry.Draws,
+                    Losses = entry.Losses,
+                    GoalsFor = entry.GoalsFor,
+                    GoalsAgainst = entry.GoalsAgainst,
+                    GoalDifference = entry.GoalDifference,
+                    Points = entry.Points,
+                    LastFive = recentResults,
+                    IsSelectedTeam = entry.TeamName.Equals(selectedTeam.Name, StringComparison.OrdinalIgnoreCase),
+                    ZoneBrush = GetChampionsLeagueZoneBrush(position),
+                    RowBackground = GetRowBackground(position)
+                };
+            })
+            .ToList();
+    }
+
+    private static List<ResultBadge> CreateChampionsLeagueRecentResults(League league, string teamName)
+    {
+        return league.Fixtures
+            .Where(fixture =>
+                fixture.Competition == CompetitionType.ChampionsLeague &&
+                fixture.IsPlayed &&
+                fixture.Result is not null &&
+                IsTeamInFixture(fixture, teamName))
+            .OrderByDescending(fixture => GetFixtureSortRound(fixture))
+            .Take(5)
+            .OrderBy(fixture => GetFixtureSortRound(fixture))
+            .Select(fixture => CreateResultBadge(CreateRecentResult(fixture, teamName)))
+            .ToList();
+    }
+
+    private static RecentMatchResult CreateRecentResult(Fixture fixture, string teamName)
+    {
+        var match = fixture.Result!;
+        var isHome = fixture.HomeTeam.Name.Equals(teamName, StringComparison.OrdinalIgnoreCase);
+        var selectedGoals = isHome ? match.HomeScore : match.AwayScore;
+        var opponentGoals = isHome ? match.AwayScore : match.HomeScore;
+        var opponent = isHome ? fixture.AwayTeam : fixture.HomeTeam;
+
+        return new RecentMatchResult
+        {
+            RoundNumber = fixture.RoundNumber,
+            OpponentName = opponent.Name,
+            ScoreText = $"{selectedGoals} - {opponentGoals}",
+            ResultType = selectedGoals > opponentGoals ? "W" : selectedGoals < opponentGoals ? "L" : "D"
+        };
+    }
+
+    private static bool IsTeamInFixture(Fixture fixture, string teamName)
+    {
+        return fixture.HomeTeam.Name.Equals(teamName, StringComparison.OrdinalIgnoreCase) ||
+            fixture.AwayTeam.Name.Equals(teamName, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static int GetFixtureSortRound(Fixture fixture)
+    {
+        return fixture.CalendarRound > 0 ? fixture.CalendarRound : fixture.RoundNumber;
+    }
+
+    private static SeasonCompetitionState? GetChampionsLeagueState(League league)
+    {
+        return league.CompetitionStates.FirstOrDefault(state => state.Competition == CompetitionType.ChampionsLeague);
     }
 
     private void LoadUpcomingMatch(Fixture fixture, Team selectedTeam)
@@ -472,7 +614,7 @@ public partial class DashboardView : UserControl
         PositionStatTextBlock.Text = $"#{tableEntry.Position}";
         PointsStatTextBlock.Text = $"{tableEntry.Entry.Points} pts";
         GoalDifferenceStatTextBlock.Text = FormatGoalDifference(tableEntry.Entry.GoalDifference);
-        ClubFormItemsControl.ItemsSource = _recentResultService.GetRecentResults(league, selectedTeam)
+        ClubFormItemsControl.ItemsSource = _recentResultService.GetRecentResults(league, selectedTeam, competition: CompetitionType.PremierLeague)
             .OrderBy(result => result.RoundNumber)
             .Select(CreateResultBadge)
             .ToList();
@@ -755,6 +897,21 @@ public partial class DashboardView : UserControl
         return position > tableSize - 3 ? "#EF4444" : "Transparent";
     }
 
+    private static string GetChampionsLeagueZoneBrush(int position)
+    {
+        if (position <= 8)
+        {
+            return "#3B82F6";
+        }
+
+        if (position <= 24)
+        {
+            return "#F97316";
+        }
+
+        return "#EF4444";
+    }
+
     private static string GetRowBackground(int position)
     {
         return position % 2 == 0
@@ -859,5 +1016,11 @@ public partial class DashboardView : UserControl
         {
             return Label;
         }
+    }
+
+    private enum DashboardTableView
+    {
+        League,
+        ChampionsLeague
     }
 }

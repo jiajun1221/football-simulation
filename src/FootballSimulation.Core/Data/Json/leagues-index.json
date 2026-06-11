@@ -106,10 +106,10 @@
       "shortName": "UCL",
       "country": "Europe",
       "season": "2025-26",
-      "squadFile": "",
+      "squadFile": "champions-league-2025-26-squads.json",
       "logoPath": "/Assets/Leagues/champions-league.png",
       "isAvailable": false,
-      "isPlaceholder": true
+      "isPlaceholder": false
     }
   ]
 }

@@ -8,7 +8,7 @@ namespace FootballSimulation.Wpf.Services;
 public static class ClubLogoService
 {
     private const string ClubsAssetPath = "Assets/Clubs";
-    private const string DefaultLogoPath = "pack://application:,,,/Assets/Clubs/default.png";
+    private const string DefaultLogoPath = "pack://application:,,,/Assets/App/football-logo.png";
 
     private static readonly string[] CrossLeagueLogoFolders =
     [

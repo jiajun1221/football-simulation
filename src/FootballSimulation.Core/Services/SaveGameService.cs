@@ -392,6 +392,8 @@ public class SaveGameService
         string PreferredPosition,
         IReadOnlyList<string> SecondaryPositions);
 
+    private sealed record SourceTeamIdentity(Team Team, string Country);
+
     private static void ValidateSaveVersion(SaveGameData data)
     {
         if (data.SaveVersion is < 1 or > CurrentSaveVersion)
@@ -472,6 +474,7 @@ public class SaveGameService
         data.TransferMarketState ??= new TransferMarketState();
 
         BackfillPlayerDataFromLeagueData(data);
+        RepairPlaceholderTeams(data);
         foreach (var team in data.Teams)
         {
             foreach (var player in team.Players.Concat(team.Substitutes))
@@ -519,6 +522,7 @@ public class SaveGameService
         }
 
         RehydrateTransferMarketReferences(data);
+        RepairPlaceholderTeams(data);
         data.MatchHistory = CreateMatchHistory(data.Fixtures);
     }
 
@@ -723,6 +727,121 @@ public class SaveGameService
                 }
             }
         }
+    }
+
+    private static void RepairPlaceholderTeams(SaveGameData data)
+    {
+        var sourceTeams = LoadAvailableSourceTeamsByName();
+        foreach (var team in EnumerateSavedTeams(data))
+        {
+            if (!PlaceholderTeamFactory.HasPlaceholderNames(team))
+            {
+                continue;
+            }
+
+            if (sourceTeams.TryGetValue(team.Name, out var sourceTeam))
+            {
+                if (PlaceholderTeamFactory.RepairPlaceholderNames(team, sourceTeam.Team, sourceTeam.Country))
+                {
+                    NormalizeRepairedTeam(team);
+                }
+            }
+            else
+            {
+                if (PlaceholderTeamFactory.RepairPlaceholderNames(team))
+                {
+                    NormalizeRepairedTeam(team);
+                }
+            }
+        }
+    }
+
+    private static void NormalizeRepairedTeam(Team team)
+    {
+        foreach (var player in team.Players.Concat(team.Substitutes))
+        {
+            PositionSuitabilityService.EnsurePositionMetadata(player);
+            PlayerAttributeService.ApplyMissingAttributes(player);
+        }
+
+        _ = LineupValidationService.RepairGoalkeeperSlot(team);
+    }
+
+    private static IEnumerable<Team> EnumerateSavedTeams(SaveGameData data)
+    {
+        foreach (var team in data.Teams)
+        {
+            yield return team;
+        }
+
+        foreach (var fixture in data.Fixtures)
+        {
+            if (fixture.HomeTeam is not null)
+            {
+                yield return fixture.HomeTeam;
+            }
+
+            if (fixture.AwayTeam is not null)
+            {
+                yield return fixture.AwayTeam;
+            }
+        }
+
+        foreach (var match in data.MatchHistory)
+        {
+            if (match.HomeTeam is not null)
+            {
+                yield return match.HomeTeam;
+            }
+
+            if (match.AwayTeam is not null)
+            {
+                yield return match.AwayTeam;
+            }
+        }
+
+        foreach (var league in data.TransferMarketState.Leagues)
+        {
+            foreach (var team in league.Teams)
+            {
+                yield return team;
+            }
+        }
+    }
+
+    private static Dictionary<string, SourceTeamIdentity> LoadAvailableSourceTeamsByName()
+    {
+        var result = new Dictionary<string, SourceTeamIdentity>(StringComparer.OrdinalIgnoreCase);
+        var dataService = new LeagueDataService();
+        IReadOnlyList<LeagueDefinition> definitions;
+        try
+        {
+            definitions = dataService.LoadSquadSourceDefinitions();
+        }
+        catch
+        {
+            return result;
+        }
+
+        foreach (var definition in definitions)
+        {
+            List<Team> teams;
+            try
+            {
+                teams = dataService.LoadTeams(definition);
+            }
+            catch
+            {
+                continue;
+            }
+
+            foreach (var team in teams)
+            {
+                result.TryAdd(team.Name, new SourceTeamIdentity(team, definition.Country));
+            }
+        }
+
+        return result;
     }
 
     private static void ApplyPositionDataFromSource(Player player, Player sourcePlayer)
