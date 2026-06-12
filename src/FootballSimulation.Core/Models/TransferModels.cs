@@ -141,6 +141,7 @@ public class TransferSearchCriteria
 {
     public string PlayerName { get; set; } = string.Empty;
     public string ClubName { get; set; } = string.Empty;
+    public string Nationality { get; set; } = string.Empty;
     public string LeagueId { get; set; } = string.Empty;
     public string Position { get; set; } = string.Empty;
     public int? MinimumOverall { get; set; }

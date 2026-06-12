@@ -6,4 +6,5 @@ public class MatchSimulationOptions
     public bool EnableAiSubstitutions { get; set; } = true;
     public bool EnableDynamicFatigue { get; set; } = true;
     public bool EnableInjuries { get; set; } = true;
+    public bool PreserveMatchStartStamina { get; set; }
 }

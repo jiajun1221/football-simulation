@@ -101,6 +101,29 @@ public class YouthAcademySystemTests
     }
 
     [Fact]
+    public void PromoteYouthPlayer_KeepsSeniorDisplayedOverallAlignedWithYouthOverall()
+    {
+        var league = CreateLeague();
+        var team = league.Teams[0];
+        var academy = new YouthAcademyService().GetAcademy(league, team.Name);
+        var prospect = academy.YouthPlayers[0];
+        prospect.Age = 16;
+        prospect.Position = Position.Defender;
+        prospect.PreferredPosition = "CB";
+        prospect.CurrentOVR = 70;
+        prospect.HiddenTruePotential = 86;
+
+        var result = new YouthAcademyService().PromoteYouthPlayer(league, team, prospect.PlayerId);
+        var seniorPlayer = team.Substitutes.Single(player => player.PlayerId == prospect.PlayerId);
+
+        Assert.True(result.Success, result.Message);
+        Assert.InRange(seniorPlayer.Attack, 45, 60);
+        Assert.InRange(seniorPlayer.Defense, 70, 80);
+        Assert.InRange(PlayerOverallCalculator.CalculateOverall(seniorPlayer), 69, 71);
+        Assert.InRange(seniorPlayer.OverallRating, 69, 71);
+    }
+
+    [Fact]
     public void YouthScout_GeneratesCountryReportAfterThreeClubMatches()
     {
         var league = CreateLeague();

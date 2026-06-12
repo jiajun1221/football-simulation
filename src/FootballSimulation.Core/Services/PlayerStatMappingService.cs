@@ -70,6 +70,8 @@ public class PlayerStatMappingService
             IsSeasonEndingInjury = injuryState.IsSeasonEnding,
             SuspendedMatches = GetSuspendedMatches(record.SuspendedMatches, record.IsSuspended),
             MatchesPlayedRecently = Math.Max(0, record.MatchesPlayedRecently ?? 0),
+            SeasonFatigue = Math.Clamp(record.SeasonFatigue ?? 0, 0, 100),
+            ConsecutiveStarts = Math.Max(0, record.ConsecutiveStarts ?? 0),
             Finishing = CalculateFinishing(position, preferredPosition, overall)
         };
         PlayerContractService.ApplyContractData(
@@ -151,6 +153,8 @@ public class PlayerStatMappingService
             IsSeasonEndingInjury = injuryState.IsSeasonEnding,
             SuspendedMatches = GetSuspendedMatches(record.SuspendedMatches, record.IsSuspended),
             MatchesPlayedRecently = Math.Max(0, record.MatchesPlayedRecently ?? 0),
+            SeasonFatigue = Math.Clamp(record.SeasonFatigue ?? 0, 0, 100),
+            ConsecutiveStarts = Math.Max(0, record.ConsecutiveStarts ?? 0),
             Finishing = CalculateFinishing(position, preferredPosition, overall)
         };
         PlayerContractService.ApplyContractData(

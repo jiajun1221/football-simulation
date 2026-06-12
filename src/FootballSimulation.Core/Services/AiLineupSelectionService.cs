@@ -17,7 +17,11 @@ public static class AiLineupSelectionService
             .Select(group => group.First())
             .ToList();
         var availablePlayers = allPlayers.Where(IsAvailableForSelection).ToList();
-        var assignment = NaturalPositionAssignmentService.Assign(availablePlayers, slots, allowEmergencyAssignments: true);
+        var assignment = NaturalPositionAssignmentService.Assign(
+            availablePlayers,
+            slots,
+            allowEmergencyAssignments: true,
+            candidateScoreAdjustment: CalculateFatigueRotationScoreAdjustment);
         if (!assignment.Success)
         {
             Debug.WriteLine($"[AiLineup] {team.Name}: {string.Join("; ", assignment.Warnings)}");
@@ -47,6 +51,7 @@ public static class AiLineupSelectionService
         team.Substitutes = allPlayers
             .Where(player => !usedPlayerIds.Contains(CreatePlayerKey(player)))
             .OrderByDescending(IsAvailableForSelection)
+            .ThenByDescending(GetFreshnessScore)
             .ThenByDescending(player => player.OverallRating)
             .ThenBy(player => player.SquadNumber <= 0 ? int.MaxValue : player.SquadNumber)
             .ToList();
@@ -55,6 +60,38 @@ public static class AiLineupSelectionService
     private static bool IsAvailableForSelection(Player player)
     {
         return !player.IsInjured && !player.IsSuspended && !player.IsSentOff;
+    }
+
+    private static int CalculateFatigueRotationScoreAdjustment(Player player, string slot)
+    {
+        var staminaPenalty = player.Stamina switch
+        {
+            < 45 => 520,
+            < 55 => 380,
+            < 70 => (int)Math.Round((70 - player.Stamina) * 10),
+            _ => 0
+        };
+        var seasonFatiguePenalty = player.SeasonFatigue switch
+        {
+            >= 85 => 360,
+            >= 70 => 240,
+            >= 55 => 130,
+            >= 40 => 60,
+            _ => 0
+        };
+        var loadPenalty = Math.Min(7, player.MatchesPlayedRecently) * 35;
+        var consecutiveStartPenalty = player.ConsecutiveStarts >= 8
+            ? 220
+            : player.ConsecutiveStarts >= 5
+                ? 110
+                : 0;
+
+        return -(staminaPenalty + seasonFatiguePenalty + loadPenalty + consecutiveStartPenalty);
+    }
+
+    private static double GetFreshnessScore(Player player)
+    {
+        return player.Stamina - player.SeasonFatigue * 0.35 - player.MatchesPlayedRecently * 3.0;
     }
 
     private static string CreatePlayerKey(Player player)

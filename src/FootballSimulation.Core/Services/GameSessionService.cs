@@ -63,7 +63,7 @@ public class GameSessionService
         var result = _leagueEngine.SimulateFixture(league, fixture, options: CreateUserMatchOptions(selectedTeam));
         var remainingResults = _leagueEngine.SimulateRemainingFixturesForCompetitionRound(league, fixture);
         ApplyGrowthForCompletedMatches([result, .. remainingResults]);
-        AdvanceRecoveryAfterCalendarSlot(league, fixture);
+        AdvanceRecoveryAfterCalendarSlot(league, fixture, [result, .. remainingResults]);
         _playerFormPersistenceService.SaveActiveSquadFormStatuses(league.Teams, league.LeagueId);
 
         return result;
@@ -106,7 +106,7 @@ public class GameSessionService
         var result = _leagueEngine.SimulateFixtureSecondHalf(league, fixture, match, options: CreateUserMatchOptions(humanTeam));
         var remainingResults = _leagueEngine.SimulateRemainingFixturesForCompetitionRound(league, fixture);
         ApplyGrowthForCompletedMatches([result, .. remainingResults]);
-        AdvanceRecoveryAfterCalendarSlot(league, fixture);
+        AdvanceRecoveryAfterCalendarSlot(league, fixture, [result, .. remainingResults]);
         _playerFormPersistenceService.SaveActiveSquadFormStatuses(league.Teams, league.LeagueId);
 
         return result;
@@ -117,7 +117,7 @@ public class GameSessionService
         _leagueEngine.CompleteLiveFixture(league, fixture, match);
         var remainingResults = _leagueEngine.SimulateRemainingFixturesForCompetitionRound(league, fixture);
         ApplyGrowthForCompletedMatches([match, .. remainingResults]);
-        AdvanceRecoveryAfterCalendarSlot(league, fixture);
+        AdvanceRecoveryAfterCalendarSlot(league, fixture, [match, .. remainingResults]);
         _playerFormPersistenceService.SaveActiveSquadFormStatuses(league.Teams, league.LeagueId);
     }
 
@@ -125,17 +125,17 @@ public class GameSessionService
     {
         var results = _leagueEngine.SimulateRemainingFixturesInRound(league, roundNumber);
         ApplyGrowthForCompletedMatches(results);
-        AdvanceRecoveryAfterCalendarSlot(league, roundNumber);
+        AdvanceRecoveryAfterCalendarSlot(league, roundNumber, results);
         _playerFormPersistenceService.SaveActiveSquadFormStatuses(league.Teams, league.LeagueId);
         return results;
     }
 
-    private void AdvanceRecoveryAfterCalendarSlot(League league, Fixture completedFixture)
+    private void AdvanceRecoveryAfterCalendarSlot(League league, Fixture completedFixture, IReadOnlyCollection<Match> completedMatches)
     {
-        AdvanceRecoveryAfterCalendarSlot(league, GetFixtureCalendarRound(completedFixture));
+        AdvanceRecoveryAfterCalendarSlot(league, GetFixtureCalendarRound(completedFixture), completedMatches);
     }
 
-    private void AdvanceRecoveryAfterCalendarSlot(League league, int completedCalendarRound)
+    private void AdvanceRecoveryAfterCalendarSlot(League league, int completedCalendarRound, IReadOnlyCollection<Match> completedMatches)
     {
         _injuryRecoveryService.AdvanceRecoveryAfterCompletedRound(league.Teams);
 
@@ -147,12 +147,12 @@ public class GameSessionService
                 .FirstOrDefault();
             if (nextFixture is null)
             {
-                _fatigueService.RecoverTeamForNewMatch(team, 60);
+                _fatigueService.RecoverTeamAfterCompletedMatches(team, 14, completedMatches);
                 continue;
             }
 
             var gap = Math.Max(1, GetFixtureCalendarRound(nextFixture) - completedCalendarRound);
-            _fatigueService.RecoverTeamForNewMatch(team, CalculateRecoveryPoints(gap));
+            _fatigueService.RecoverTeamAfterCompletedMatches(team, gap, completedMatches);
         }
 
         if (completedCalendarRound % 4 == 0)
@@ -198,7 +198,8 @@ public class GameSessionService
     {
         return new MatchSimulationOptions
         {
-            HumanControlledTeamName = selectedTeam.Name
+            HumanControlledTeamName = selectedTeam.Name,
+            PreserveMatchStartStamina = true
         };
     }
 }

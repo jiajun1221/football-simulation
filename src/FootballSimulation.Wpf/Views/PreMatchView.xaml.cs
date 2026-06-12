@@ -427,6 +427,9 @@ public partial class PreMatchView : UserControl
             FormBadgeText = form.Text,
             FormBadgeBackground = form.Background,
             FormBadgeForeground = form.Foreground,
+            FatigueWarningText = CreateFatigueWarningText(player),
+            FatigueWarningTooltip = CreateFatigueWarningTooltip(player),
+            FatigueWarningBadgeBackground = GetFatigueWarningBadgeBackground(player),
             TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits),
             CardBackground = cardBackground,
             CardBorderBrush = cardBorder,
@@ -659,6 +662,9 @@ public partial class PreMatchView : UserControl
             StatusText = CreateUnavailableStatusText(player),
             StatusBadgeBackground = player.IsSuspended || player.IsSentOff ? "#7F1D1D" : "#B91C1C",
             Tooltip = CreateUnavailableTooltip(player),
+            FatigueWarningText = CreateFatigueWarningText(player),
+            FatigueWarningTooltip = CreateFatigueWarningTooltip(player),
+            FatigueWarningBadgeBackground = GetFatigueWarningBadgeBackground(player),
             TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits)
         };
     }
@@ -1527,6 +1533,59 @@ public partial class PreMatchView : UserControl
         return player.IsInjured ? "Injured" : string.Empty;
     }
 
+    private static string CreateFatigueWarningText(Player player)
+    {
+        if (player.IsInjured || player.IsSuspended || player.IsSentOff)
+        {
+            return string.Empty;
+        }
+
+        if (player.Stamina < 50 || player.SeasonFatigue >= 80)
+        {
+            return "Risk";
+        }
+
+        if (player.ConsecutiveStarts >= 8)
+        {
+            return "Load";
+        }
+
+        if (player.Stamina < 70 ||
+            (!HasFullStaminaBar(player) && (player.SeasonFatigue >= 60 || player.MatchesPlayedRecently >= 4)))
+        {
+            return "Tired";
+        }
+
+        return string.Empty;
+    }
+
+    private static bool HasFullStaminaBar(Player player)
+    {
+        return player.Stamina >= 99.5;
+    }
+
+    private static string CreateFatigueWarningTooltip(Player player)
+    {
+        return CreateFatigueWarningText(player) switch
+        {
+            "Risk" => $"{player.Name} is at increased injury risk.",
+            "Load" => $"{player.Name} has started {player.ConsecutiveStarts} consecutive matches.",
+            "Tired" => $"{player.Name} is showing signs of fatigue.",
+            _ => string.Empty
+        };
+    }
+
+    private static string GetFatigueWarningBadgeBackground(Player player)
+    {
+        return CreateFatigueWarningText(player) switch
+        {
+            "Risk" => "#DC2626",
+            "Load" => "#F97316",
+            "Tired" => "#F59E0B",
+            _ => "#F59E0B"
+        };
+    }
+
     private static string CreateUnavailableTooltip(Player player)
     {
         if (player.IsSuspended || player.IsSentOff)
@@ -1596,6 +1655,9 @@ public partial class PreMatchView : UserControl
         public string StatusText { get; init; } = string.Empty;
         public string StatusBadgeBackground { get; init; } = "#B91C1C";
         public string Tooltip { get; init; } = string.Empty;
+        public string FatigueWarningText { get; init; } = string.Empty;
+        public string FatigueWarningTooltip { get; init; } = string.Empty;
+        public string FatigueWarningBadgeBackground { get; init; } = "#F59E0B";
         public IReadOnlyList<PlayerTraitBadge> TraitBadges { get; init; } = [];
     }
 }

@@ -9,6 +9,8 @@ public class Player : INotifyPropertyChanged
     private double _stamina = 100;
     private PlayerFormStatus _formStatus = PlayerFormStatus.Average;
     private int _suspendedMatches;
+    private int _seasonFatigue;
+    private int _consecutiveStarts;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -139,6 +141,18 @@ public class Player : INotifyPropertyChanged
         set => SuspendedMatches = value ? Math.Max(1, SuspendedMatches) : 0;
     }
     public int MatchesPlayedRecently { get; set; }
+    public int SeasonFatigue
+    {
+        get => _seasonFatigue;
+        set => SetSeasonFatigue(value);
+    }
+
+    public int ConsecutiveStarts
+    {
+        get => _consecutiveStarts;
+        set => SetConsecutiveStarts(value);
+    }
+
     public int Finishing { get; set; }
     public int YellowCards { get; set; }
     public bool IsSentOff { get; set; }
@@ -157,6 +171,30 @@ public class Player : INotifyPropertyChanged
         OnPropertyChanged(nameof(Stamina));
         OnPropertyChanged(nameof(CurrentStamina));
         OnPropertyChanged(nameof(Fatigue));
+    }
+
+    private void SetSeasonFatigue(int value)
+    {
+        var normalizedValue = Math.Clamp(value, 0, 100);
+        if (_seasonFatigue == normalizedValue)
+        {
+            return;
+        }
+
+        _seasonFatigue = normalizedValue;
+        OnPropertyChanged(nameof(SeasonFatigue));
+    }
+
+    private void SetConsecutiveStarts(int value)
+    {
+        var normalizedValue = Math.Max(0, value);
+        if (_consecutiveStarts == normalizedValue)
+        {
+            return;
+        }
+
+        _consecutiveStarts = normalizedValue;
+        OnPropertyChanged(nameof(ConsecutiveStarts));
     }
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)

@@ -275,6 +275,7 @@ public class YouthAcademyService
         player.Dribbling = attributes.Dribbling;
         player.Defending = attributes.Defending;
         player.Physical = attributes.Physical;
+        RepairSeniorOverallAttributes(player, youthPlayer.CurrentOVR);
         player.ReleaseClause = PlayerContractService.EstimateReleaseClause(player, youthPlayer.MarketValue, string.Empty);
         return player;
     }
@@ -332,6 +333,120 @@ public class YouthAcademyService
         }
 
         return score;
+    }
+
+    public static void RepairSeniorOverallAttributes(Player player, int overall)
+    {
+        ArgumentNullException.ThrowIfNull(player);
+
+        player.Attack = CalculateAttack(player.Position, player.PreferredPosition, overall);
+        player.Defense = CalculateDefense(player.Position, player.PreferredPosition, overall);
+        player.Passing = CalculatePassing(player.Position, player.PreferredPosition, overall);
+        player.Finishing = CalculateFinishing(player.Position, player.PreferredPosition, overall);
+        player.OverallRating = PlayerOverallCalculator.CalculateOverall(player);
+        player.BaseOverallRating = player.OverallRating;
+    }
+
+    private static int CalculateAttack(Position position, string exactPosition, int overall)
+    {
+        return NormalizeExactPosition(exactPosition) switch
+        {
+            "GK" => ClampStat(overall - 55),
+            "CB" => ClampStat(overall - 18),
+            "LB" or "RB" => ClampStat(overall - 8),
+            "CDM" => ClampStat(overall - 10),
+            "CM" => ClampStat(overall - 2),
+            "CAM" => ClampStat(overall + 2),
+            "LW" or "RW" => ClampStat(overall + 4),
+            "ST" => ClampStat(overall + 3),
+            _ => position switch
+            {
+                Position.Goalkeeper => ClampStat(overall - 55),
+                Position.Defender => ClampStat(overall - 14),
+                Position.Midfielder => ClampStat(overall - 2),
+                Position.Forward => ClampStat(overall + 3),
+                _ => overall
+            }
+        };
+    }
+
+    private static int CalculateDefense(Position position, string exactPosition, int overall)
+    {
+        return NormalizeExactPosition(exactPosition) switch
+        {
+            "GK" => ClampStat(overall),
+            "CB" => ClampStat(overall + 7),
+            "LB" or "RB" => ClampStat(overall + 5),
+            "CDM" => ClampStat(overall + 4),
+            "CM" => ClampStat(overall - 2),
+            "CAM" => ClampStat(overall - 18),
+            "LW" or "RW" => ClampStat(overall - 18),
+            "ST" => ClampStat(overall - 22),
+            _ => position switch
+            {
+                Position.Goalkeeper => ClampStat(overall),
+                Position.Defender => ClampStat(overall + 7),
+                Position.Midfielder => ClampStat(overall - 3),
+                Position.Forward => ClampStat(overall - 22),
+                _ => overall
+            }
+        };
+    }
+
+    private static int CalculatePassing(Position position, string exactPosition, int overall)
+    {
+        return NormalizeExactPosition(exactPosition) switch
+        {
+            "GK" => ClampStat(overall - 16),
+            "CB" => ClampStat(overall + 1),
+            "LB" or "RB" => ClampStat(overall + 3),
+            "CDM" => ClampStat(overall + 2),
+            "CM" => ClampStat(overall + 5),
+            "CAM" => ClampStat(overall + 3),
+            "LW" or "RW" => ClampStat(overall),
+            "ST" => ClampStat(overall - 3),
+            _ => position switch
+            {
+                Position.Goalkeeper => ClampStat(overall - 16),
+                Position.Defender => ClampStat(overall + 2),
+                Position.Midfielder => ClampStat(overall + 4),
+                Position.Forward => ClampStat(overall - 3),
+                _ => overall
+            }
+        };
+    }
+
+    private static int CalculateFinishing(Position position, string exactPosition, int overall)
+    {
+        return NormalizeExactPosition(exactPosition) switch
+        {
+            "GK" => ClampStat(overall - 65),
+            "CB" => ClampStat(overall - 22),
+            "LB" or "RB" => ClampStat(overall - 17),
+            "CDM" => ClampStat(overall - 18),
+            "CM" => ClampStat(overall - 10),
+            "CAM" => ClampStat(overall + 1),
+            "LW" or "RW" => ClampStat(overall + 1),
+            "ST" => ClampStat(overall + 5),
+            _ => position switch
+            {
+                Position.Goalkeeper => ClampStat(overall - 65),
+                Position.Defender => ClampStat(overall - 20),
+                Position.Midfielder => ClampStat(overall - 9),
+                Position.Forward => ClampStat(overall + 5),
+                _ => overall
+            }
+        };
+    }
+
+    private static string NormalizeExactPosition(string position)
+    {
+        return PositionSuitabilityService.NormalizeExactPosition(position);
+    }
+
+    private static int ClampStat(int value)
+    {
+        return Math.Clamp(value, 1, 100);
     }
 
     private static void NormalizeYouthPlayer(YouthPlayer player, YouthAcademy academy)

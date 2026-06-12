@@ -219,6 +219,8 @@ public class SeasonRolloverService
             player.NewlyInjuredThisMatch = false;
             player.NewlySuspendedThisMatch = false;
             player.MatchesPlayedRecently = 0;
+            player.SeasonFatigue = 0;
+            player.ConsecutiveStarts = 0;
             player.LiveMatchModifier = 1.0;
             player.Stamina = Math.Max(player.Stamina, 92);
 

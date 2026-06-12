@@ -1412,6 +1412,7 @@ public class TransferMarketService
     {
         return MatchesText(listing.Player.Name, criteria.PlayerName) &&
             MatchesText(listing.Team.Name, criteria.ClubName) &&
+            MatchesNationality(listing.Player, criteria.Nationality) &&
             MatchesText(listing.LeagueId, criteria.LeagueId) &&
             MatchesPosition(listing.Player, criteria.Position) &&
             (!criteria.MinimumOverall.HasValue || listing.Player.OverallRating >= criteria.MinimumOverall.Value) &&
@@ -1425,6 +1426,20 @@ public class TransferMarketService
     private static bool MatchesText(string value, string filter)
     {
         return string.IsNullOrWhiteSpace(filter) || value.Contains(filter.Trim(), StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool MatchesNationality(Player player, string filter)
+    {
+        if (string.IsNullOrWhiteSpace(filter))
+        {
+            return true;
+        }
+
+        var normalizedFilter = filter.Trim();
+        return MatchesText(player.NationalityName, normalizedFilter) ||
+            MatchesText(player.Nationality, normalizedFilter) ||
+            MatchesText(player.NationalityCode, normalizedFilter) ||
+            MatchesText(player.FlagEmoji, normalizedFilter);
     }
 
     private static bool MatchesPosition(Player player, string position)

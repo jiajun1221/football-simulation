@@ -314,6 +314,27 @@ public class SaveGameService
         }
 
         ApplyKnownPositionCorrection(player, teamName);
+        RepairMissingSeniorOverallAttributes(player);
+    }
+
+    private static void RepairMissingSeniorOverallAttributes(Player player)
+    {
+        if (player.OverallRating < YouthAcademyService.MinimumPromotionOverall)
+        {
+            return;
+        }
+
+        var calculatedOverall = PlayerOverallCalculator.CalculateOverall(player);
+        var hasMissingCoreAttributes = player.Attack <= 1 ||
+            player.Defense <= 1 ||
+            player.Passing <= 1 ||
+            player.Finishing <= 1;
+        if (!hasMissingCoreAttributes && calculatedOverall >= player.OverallRating - 12)
+        {
+            return;
+        }
+
+        YouthAcademyService.RepairSeniorOverallAttributes(player, player.OverallRating);
     }
 
     private static void ApplyKnownPositionCorrection(Player player, string teamName)

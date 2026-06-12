@@ -60,6 +60,35 @@ public class TacticalRealismTests
     }
 
     [Fact]
+    public void TacticalInsightService_DoesNotMarkFullStaminaPlayerAsTired()
+    {
+        var player = new Player
+        {
+            Name = "Rested Midfielder",
+            Position = Position.Midfielder,
+            Stamina = 100,
+            SeasonFatigue = 70,
+            MatchesPlayedRecently = 4
+        };
+        var selectedTeam = new Team
+        {
+            Name = "Selected FC",
+            Players = [player],
+            Tactics = new TeamTactics()
+        };
+        var opponent = new Team
+        {
+            Name = "Opponent FC",
+            Players = [],
+            Tactics = new TeamTactics()
+        };
+
+        var insight = new TacticalInsightService().GenerateInsight(selectedTeam, opponent);
+
+        Assert.DoesNotContain(insight.Warnings, warning => warning.Contains($"{player.Name} is showing signs of fatigue", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void TacticalPresets_WriteExpectedIdentityValues()
     {
         var gegenpress = TacticalProfileService.GetPresets().First(preset => preset.Key == "gegenpress");

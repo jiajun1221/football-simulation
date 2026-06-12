@@ -20,6 +20,94 @@ public class FatigueServiceTests
     }
 
     [Fact]
+    public void RecoverTeamAfterCompletedMatches_UsesAgeBasedCalendarGapRecovery()
+    {
+        var team = CreateTeam();
+        var player = team.Players[0];
+        player.Age = 27;
+        player.Stamina = 62;
+        var match = new Match
+        {
+            HomeTeam = team,
+            AwayTeam = CreateTeam("Away"),
+            CurrentMinute = 90,
+            PlayerPerformances =
+            [
+                new PlayerMatchPerformance
+                {
+                    TeamName = team.Name,
+                    PlayerName = player.Name,
+                    WasSubstitute = false
+                }
+            ]
+        };
+
+        new FatigueService().RecoverTeamAfterCompletedMatches(team, calendarGap: 2, [match]);
+
+        Assert.Equal(74, player.Stamina, precision: 4);
+    }
+
+    [Fact]
+    public void RecoverTeamAfterCompletedMatches_RecoversUnusedSubstitutesMoreThanFullMatchStarters()
+    {
+        var team = CreateTeam();
+        var starter = team.Players[0];
+        var unusedSubstitute = team.Substitutes[0];
+        starter.Age = 27;
+        unusedSubstitute.Age = 27;
+        starter.Stamina = 60;
+        unusedSubstitute.Stamina = 60;
+        var match = new Match
+        {
+            HomeTeam = team,
+            AwayTeam = CreateTeam("Away"),
+            CurrentMinute = 90,
+            PlayerPerformances =
+            [
+                new PlayerMatchPerformance
+                {
+                    TeamName = team.Name,
+                    PlayerName = starter.Name,
+                    WasSubstitute = false
+                }
+            ]
+        };
+
+        new FatigueService().RecoverTeamAfterCompletedMatches(team, calendarGap: 2, [match]);
+
+        Assert.True(unusedSubstitute.Stamina > starter.Stamina);
+    }
+
+    [Fact]
+    public void RecoverTeamAfterCompletedMatches_FullMatchRestClearsHighSeasonFatigue()
+    {
+        var team = CreateTeam();
+        var starter = team.Players[0];
+        var restedPlayer = team.Substitutes[0];
+        restedPlayer.Age = 27;
+        restedPlayer.SeasonFatigue = 90;
+        var match = new Match
+        {
+            HomeTeam = team,
+            AwayTeam = CreateTeam("Away"),
+            CurrentMinute = 90,
+            PlayerPerformances =
+            [
+                new PlayerMatchPerformance
+                {
+                    TeamName = team.Name,
+                    PlayerName = starter.Name,
+                    WasSubstitute = false
+                }
+            ]
+        };
+
+        new FatigueService().RecoverTeamAfterCompletedMatches(team, calendarGap: 1, [match]);
+
+        Assert.True(restedPlayer.SeasonFatigue < 60, $"Season fatigue was {restedPlayer.SeasonFatigue}.");
+    }
+
+    [Fact]
     public void CreateLiveMatch_StartsBothTeamsAndBenchesAtFullMatchStamina()
     {
         var team = CreateTeam("Home");
@@ -130,6 +218,35 @@ public class FatigueServiceTests
         var activeAwayAverage = opponent.Players.Where(player => player.IsOnPitch).Average(player => player.Stamina);
         Assert.True(activeAwayAverage >= 45, $"Away average stamina was {activeAwayAverage:0.0}%.");
         Assert.True(activeAwayAverage >= activeHomeAverage - 8, $"Away stamina {activeAwayAverage:0.0}% was too far below home {activeHomeAverage:0.0}%.");
+    }
+
+    [Fact]
+    public void AdvanceMatch_GoalkeeperStaminaDrainsMuchSlowerThanOutfieldPlayers()
+    {
+        var team = CreateTeam("Home");
+        var opponent = CreateTeam("Away");
+        team.Tactics.Tempo = 90;
+        team.Tactics.PressingIntensity = 90;
+        opponent.Tactics.Tempo = 90;
+        opponent.Tactics.PressingIntensity = 90;
+        var engine = new MatchEngine();
+        var options = new MatchSimulationOptions
+        {
+            EnableAiSubstitutions = false,
+            EnableDynamicFatigue = true,
+            EnableInjuries = false
+        };
+        var match = engine.CreateLiveMatch(team, opponent, options);
+
+        engine.AdvanceMatch(match, 1, 70, includeFulltime: false, options: options);
+
+        var goalkeeper = team.Players.Single(player => player.Position == Position.Goalkeeper);
+        var outfieldAverage = team.Players
+            .Where(player => player.Position != Position.Goalkeeper)
+            .Average(player => player.Stamina);
+        Assert.True(
+            goalkeeper.Stamina >= outfieldAverage + 12,
+            $"GK stamina {goalkeeper.Stamina:0.0}% should stay well above outfield average {outfieldAverage:0.0}%.");
     }
 
     [Fact]

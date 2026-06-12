@@ -96,6 +96,96 @@ public class InjuryRiskServiceTests
     }
 
     [Fact]
+    public void ApplyPostMatchLoad_AddsSeasonFatigueFromMinutesAndTactics()
+    {
+        var service = new InjuryRiskService();
+        var starter = CreatePlayer("Starter", Position.Midfielder, 82);
+        starter.Age = 27;
+        var homeTeam = new Team
+        {
+            Name = "Home",
+            Players = [starter],
+            Tactics = new TeamTactics
+            {
+                PressingIntensity = 85,
+                Mentality = Mentality.Attacking
+            }
+        };
+        var awayTeam = CreateTeam("Away", CreatePlayer("Away Player", Position.Defender, 80));
+        var match = new Match
+        {
+            HomeTeam = homeTeam,
+            AwayTeam = awayTeam,
+            CurrentMinute = 90,
+            PlayerPerformances =
+            [
+                new PlayerMatchPerformance
+                {
+                    TeamName = homeTeam.Name,
+                    PlayerName = starter.Name,
+                    WasSubstitute = false
+                }
+            ]
+        };
+
+        service.ApplyPostMatchLoad(match);
+
+        Assert.Equal(13, starter.SeasonFatigue);
+        Assert.Equal(1, starter.ConsecutiveStarts);
+    }
+
+    [Fact]
+    public void ApplyPostMatchLoad_TreatsExtraTimeAsVeryHeavyFatigue()
+    {
+        var service = new InjuryRiskService();
+        var starter = CreatePlayer("Starter", Position.Midfielder, 82);
+        starter.Age = 27;
+        var homeTeam = new Team
+        {
+            Name = "Home",
+            Players = [starter],
+            Tactics = new TeamTactics()
+        };
+        var awayTeam = CreateTeam("Away", CreatePlayer("Away Player", Position.Defender, 80));
+        var match = new Match
+        {
+            HomeTeam = homeTeam,
+            AwayTeam = awayTeam,
+            CurrentMinute = 120,
+            PlayerPerformances =
+            [
+                new PlayerMatchPerformance
+                {
+                    TeamName = homeTeam.Name,
+                    PlayerName = starter.Name,
+                    WasSubstitute = false
+                }
+            ]
+        };
+
+        service.ApplyPostMatchLoad(match);
+
+        Assert.Equal(15, starter.SeasonFatigue);
+        Assert.Equal(2, starter.MatchesPlayedRecently);
+    }
+
+    [Fact]
+    public void FatigueInjuryRiskMultiplier_ScalesWithLowStaminaAndSeasonFatigue()
+    {
+        var freshPlayer = CreatePlayer("Fresh", Position.Midfielder, 82);
+        freshPlayer.Stamina = 90;
+        freshPlayer.SeasonFatigue = 10;
+        var tiredPlayer = CreatePlayer("Tired", Position.Midfielder, 82);
+        tiredPlayer.Stamina = 45;
+        tiredPlayer.SeasonFatigue = 85;
+
+        var freshRisk = InjuryRiskService.GetFatigueInjuryRiskMultiplier(freshPlayer);
+        var tiredRisk = InjuryRiskService.GetFatigueInjuryRiskMultiplier(tiredPlayer);
+
+        Assert.True(tiredRisk > freshRisk * 4);
+    }
+
+    [Fact]
     public void ApplyInjury_SetsRecoveryMetadataAndRemovesMatchStamina()
     {
         var player = CreatePlayer("Injured Player", Position.Forward, 84);

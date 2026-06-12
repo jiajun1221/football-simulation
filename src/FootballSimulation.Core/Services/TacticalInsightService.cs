@@ -60,6 +60,27 @@ public class TacticalInsightService
             insight.Warnings.Add($"{tiredStarters.Count} starter(s) look tired. High pressing may create second-half problems.");
         }
 
+        foreach (var player in selectedTeam.Players.Where(player => !player.IsInjured && !player.IsSuspended).Take(11))
+        {
+            if (player.Stamina < 50 || player.SeasonFatigue >= 80)
+            {
+                insight.Warnings.Add($"{player.Name} is at increased injury risk.");
+                continue;
+            }
+
+            if (player.ConsecutiveStarts >= 8)
+            {
+                insight.Warnings.Add($"{player.Name} has started {player.ConsecutiveStarts} consecutive matches.");
+                continue;
+            }
+
+            if (player.Stamina < 70 ||
+                (!HasFullStaminaBar(player) && (player.SeasonFatigue >= 60 || player.MatchesPlayedRecently >= 4)))
+            {
+                insight.Warnings.Add($"{player.Name} is showing signs of fatigue.");
+            }
+        }
+
         var unavailableStarters = selectedTeam.Players.Where(player => player.IsInjured || player.IsSuspended).ToList();
         if (unavailableStarters.Count > 0)
         {
@@ -120,5 +141,10 @@ public class TacticalInsightService
         return player.OverallRating > 0
             ? player.OverallRating
             : (int)Math.Round((player.Attack + player.Defense + player.Passing + player.Stamina + player.Finishing) / 5.0);
+    }
+
+    private static bool HasFullStaminaBar(Player player)
+    {
+        return player.Stamina >= 99.5;
     }
 }

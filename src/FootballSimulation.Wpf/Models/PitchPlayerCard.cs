@@ -27,6 +27,9 @@ public class PitchPlayerCard
     public string FormBadgeText { get; init; } = string.Empty;
     public string FormBadgeBackground { get; init; } = "#E1E5EA";
     public string FormBadgeForeground { get; init; } = "#465364";
+    public string FatigueWarningText { get; init; } = string.Empty;
+    public string FatigueWarningTooltip { get; init; } = string.Empty;
+    public string FatigueWarningBadgeBackground { get; init; } = "#F59E0B";
     public IReadOnlyList<PlayerTraitBadge> TraitBadges { get; init; } = [];
     public IReadOnlyList<PlayerCardStatusBadge> CardStatusBadges { get; init; } = [];
     public string CardBackground { get; init; } = "#FFFFFF";

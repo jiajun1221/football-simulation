@@ -22,7 +22,8 @@ public static class NaturalPositionAssignmentService
     public static NaturalPositionAssignmentResult Assign(
         IReadOnlyList<Player> players,
         IReadOnlyList<string> slots,
-        bool allowEmergencyAssignments = true)
+        bool allowEmergencyAssignments = true,
+        Func<Player, string, int>? candidateScoreAdjustment = null)
     {
         var normalizedSlots = slots
             .Select(PositionSuitabilityService.NormalizeExactPosition)
@@ -34,7 +35,7 @@ public static class NaturalPositionAssignmentService
         }
 
         var candidatesBySlot = normalizedSlots
-            .Select((slot, index) => new SlotCandidateSet(index, slot, CreateCandidates(players, slot, allowEmergencyAssignments)))
+            .Select((slot, index) => new SlotCandidateSet(index, slot, CreateCandidates(players, slot, allowEmergencyAssignments, candidateScoreAdjustment)))
             .ToList();
         if (candidatesBySlot.Any(set => set.Candidates.Count == 0))
         {
@@ -87,13 +88,14 @@ public static class NaturalPositionAssignmentService
     private static List<AssignmentCandidate> CreateCandidates(
         IReadOnlyList<Player> players,
         string slot,
-        bool allowEmergencyAssignments)
+        bool allowEmergencyAssignments,
+        Func<Player, string, int>? candidateScoreAdjustment)
     {
         var candidates = players
             .Select(player =>
             {
                 var compatibility = PositionCompatibilityService.GetCompatibilityScore(player, slot);
-                return new AssignmentCandidate(player, SlotIndex: -1, compatibility, CalculateCandidateScore(player, slot, compatibility));
+                return new AssignmentCandidate(player, SlotIndex: -1, compatibility, CalculateCandidateScore(player, slot, compatibility, candidateScoreAdjustment));
             })
             .Where(candidate => candidate.Compatibility > PositionCompatibilityService.Impossible)
             .Where(candidate => allowEmergencyAssignments || candidate.Compatibility > PositionCompatibilityService.Emergency)
@@ -108,23 +110,26 @@ public static class NaturalPositionAssignmentService
             return candidates;
         }
 
-        return CreateLastResortCandidates(players, slot);
+        return CreateLastResortCandidates(players, slot, candidateScoreAdjustment);
     }
 
-    private static List<AssignmentCandidate> CreateLastResortCandidates(IReadOnlyList<Player> players, string slot)
+    private static List<AssignmentCandidate> CreateLastResortCandidates(
+        IReadOnlyList<Player> players,
+        string slot,
+        Func<Player, string, int>? candidateScoreAdjustment)
     {
         if (slot == "GK")
         {
             return players
                 .Where(PositionSuitabilityService.IsGoalkeeperCapable)
-                .Select(player => new AssignmentCandidate(player, -1, PositionCompatibilityService.Emergency, CalculateCandidateScore(player, slot, PositionCompatibilityService.Emergency)))
+                .Select(player => new AssignmentCandidate(player, -1, PositionCompatibilityService.Emergency, CalculateCandidateScore(player, slot, PositionCompatibilityService.Emergency, candidateScoreAdjustment)))
                 .ToList();
         }
 
         return players
             .Where(player => !PositionSuitabilityService.IsGoalkeeperCapable(player))
             .Where(player => !IsAbsurdOutfieldAssignment(player, slot))
-            .Select(player => new AssignmentCandidate(player, -1, PositionCompatibilityService.Emergency, CalculateCandidateScore(player, slot, PositionCompatibilityService.Emergency)))
+            .Select(player => new AssignmentCandidate(player, -1, PositionCompatibilityService.Emergency, CalculateCandidateScore(player, slot, PositionCompatibilityService.Emergency, candidateScoreAdjustment)))
             .OrderByDescending(candidate => candidate.Score)
             .Take(CandidateLimitPerSlot)
             .ToList();
@@ -142,7 +147,11 @@ public static class NaturalPositionAssignmentService
         };
     }
 
-    private static int CalculateCandidateScore(Player player, string slot, int compatibility)
+    private static int CalculateCandidateScore(
+        Player player,
+        string slot,
+        int compatibility,
+        Func<Player, string, int>? candidateScoreAdjustment)
     {
         if (compatibility <= PositionCompatibilityService.Impossible)
         {
@@ -151,7 +160,8 @@ public static class NaturalPositionAssignmentService
 
         var naturalRankBonus = GetNaturalRankBonus(player, slot);
         var penalty = PositionSuitabilityService.GetOutOfPositionPenalty(player, slot);
-        return compatibility * 100 + PlayerOverallCalculator.CalculateOverall(player) * 3 + naturalRankBonus - penalty * 30;
+        var adjustment = candidateScoreAdjustment?.Invoke(player, slot) ?? 0;
+        return compatibility * 100 + PlayerOverallCalculator.CalculateOverall(player) * 3 + naturalRankBonus - penalty * 30 + adjustment;
     }
 
     private static int GetNaturalRankBonus(Player player, string slot)

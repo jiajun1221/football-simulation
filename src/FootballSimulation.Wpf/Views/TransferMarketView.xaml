@@ -615,6 +615,10 @@
                                     <TextBox x:Name="SearchClubTextBox" Style="{StaticResource ModernTextBoxStyle}" />
                                 </StackPanel>
                                 <StackPanel Width="150" Margin="0,0,8,0">
+                                    <TextBlock Text="Nationality" Style="{StaticResource FilterLabelStyle}" />
+                                    <TextBox x:Name="SearchNationalityTextBox" Style="{StaticResource ModernTextBoxStyle}" />
+                                </StackPanel>
+                                <StackPanel Width="150" Margin="0,0,8,0">
                                     <TextBlock Text="Trait" Style="{StaticResource FilterLabelStyle}" />
                                     <TextBox x:Name="SearchTraitTextBox" Style="{StaticResource ModernTextBoxStyle}" />
                                 </StackPanel>

@@ -49,4 +49,6 @@ public class SquadPlayerRecord
     public bool? IsSuspended { get; set; }
     public int? SuspendedMatches { get; set; }
     public int? MatchesPlayedRecently { get; set; }
+    public int? SeasonFatigue { get; set; }
+    public int? ConsecutiveStarts { get; set; }
 }

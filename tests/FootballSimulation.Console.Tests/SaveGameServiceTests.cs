@@ -183,6 +183,56 @@ public class SaveGameServiceTests
     }
 
     [Fact]
+    public void LoadGame_RepairsPromotedYouthPlayerOverallAttributes()
+    {
+        var saveDirectory = CreateTempSaveDirectory();
+        var saveGameService = new SaveGameService(saveDirectory);
+        var teams = new LeagueSeedDataService().CreateLeagueTeams();
+        var chelsea = teams[0];
+        var promotedYouth = new Player
+        {
+            PlayerId = "youth-andre-fernandes",
+            Name = "Andre Fernandes",
+            Position = Position.Defender,
+            PreferredPosition = "CB",
+            AssignedPosition = "CB",
+            OverallRating = 70,
+            BaseOverallRating = 70,
+            Age = 17,
+            Role = PlayerRole.Prospect,
+            Passing = 70,
+            Stamina = 88
+        };
+        chelsea.Substitutes.Add(promotedYouth);
+        var league = new League
+        {
+            LeagueId = LeagueDataService.DefaultLeagueId,
+            Name = GameSessionService.PremierLeagueName,
+            Season = "2025-26",
+            Teams = teams
+        };
+
+        try
+        {
+            saveGameService.SaveGame(1, SaveGameService.CreateSaveData(league, chelsea));
+
+            var loadedData = saveGameService.LoadGame(1);
+            var loadedLeague = SaveGameService.CreateLeague(loadedData!);
+            var loadedPlayer = loadedLeague.Teams
+                .Single(team => team.Name == chelsea.Name)
+                .Substitutes
+                .Single(player => player.PlayerId == promotedYouth.PlayerId);
+
+            Assert.InRange(loadedPlayer.Defense, 70, 80);
+            Assert.InRange(PlayerOverallCalculator.CalculateOverall(loadedPlayer), 69, 71);
+        }
+        finally
+        {
+            DeleteDirectory(saveDirectory);
+        }
+    }
+
+    [Fact]
     public void LoadGame_CorrectsLegacyPlayerPositions()
     {
         var saveDirectory = CreateTempSaveDirectory();

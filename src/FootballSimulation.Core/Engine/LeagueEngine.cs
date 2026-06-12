@@ -272,7 +272,16 @@ public class LeagueEngine
 
     private static MatchSimulationOptions CreateOptions(MatchSimulationOptions? options)
     {
-        return options ?? new MatchSimulationOptions();
+        if (options is null)
+        {
+            return new MatchSimulationOptions
+            {
+                PreserveMatchStartStamina = true
+            };
+        }
+
+        options.PreserveMatchStartStamina = true;
+        return options;
     }
 
     private static Random CreatePreparationRandom(int? matchSeed)

@@ -141,7 +141,19 @@ public class MatchDramaService
         };
 
         var repeatedLoadBonus = player.MatchesPlayedRecently >= 4 ? 0.010 : 0.0;
-        return Math.Clamp((0.010 + lowStaminaBonus + fatigueBonus + repeatedLoadBonus) * traitModifier, 0.004, 0.085);
+        var seasonFatigueBonus = player.SeasonFatigue >= 80
+            ? 0.026
+            : player.SeasonFatigue >= 60
+                ? 0.014
+                : player.SeasonFatigue >= 40
+                    ? 0.006
+                    : 0.0;
+        return Math.Clamp(
+            (0.010 + lowStaminaBonus + fatigueBonus + repeatedLoadBonus + seasonFatigueBonus) *
+            traitModifier *
+            InjuryRiskService.GetFatigueInjuryRiskMultiplier(player),
+            0.004,
+            0.145);
     }
 
     private static double GetPlayerInjuryRisk(Player player)
@@ -150,13 +162,14 @@ public class MatchDramaService
         var lowStaminaRisk = Math.Max(0.0, 55.0 - player.Stamina) * 0.9;
         var traitRisk = player.Traits.Contains(PlayerTrait.InjuryProne) ? 26.0 : 0.0;
         var workloadRisk = Math.Max(0, player.MatchesPlayedRecently - 2) * 8.0;
+        var seasonFatigueRisk = player.SeasonFatigue * 0.35;
         var physicalProtection = Math.Max(0, attributes.Physical - 70) * 0.18;
         var duelRisk =
             (player.Traits.Contains(PlayerTrait.DivesIntoTackles) ? 5.0 : 0.0) +
             (player.Traits.Contains(PlayerTrait.Rapid) || player.Traits.Contains(PlayerTrait.SpeedDribbler) ? 4.0 : 0.0) +
             (player.Traits.Contains(PlayerTrait.PowerHeader) || player.Traits.Contains(PlayerTrait.AerialThreat) ? 3.0 : 0.0);
 
-        return Math.Max(0.0, lowStaminaRisk + traitRisk + workloadRisk + duelRisk - physicalProtection);
+        return Math.Max(0.0, lowStaminaRisk + traitRisk + workloadRisk + seasonFatigueRisk + duelRisk - physicalProtection);
     }
 
     private static string ChooseInjuryCause(MatchEventContext context, Player player)

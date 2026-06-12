@@ -51,6 +51,7 @@ public partial class TransferMarketView : UserControl
     {
         SearchNameTextBox.Text = string.Empty;
         SearchClubTextBox.Text = string.Empty;
+        SearchNationalityTextBox.Text = string.Empty;
         SearchLeagueComboBox.SelectedIndex = 0;
         SearchPositionComboBox.SelectedIndex = 0;
         SearchMinOvrComboBox.SelectedIndex = 0;
@@ -763,6 +764,7 @@ public partial class TransferMarketView : UserControl
         {
             PlayerName = SearchNameTextBox.Text,
             ClubName = SearchClubTextBox.Text,
+            Nationality = SearchNationalityTextBox.Text,
             LeagueId = GetSelectedComboTag(SearchLeagueComboBox),
             Position = GetSelectedComboTag(SearchPositionComboBox),
             Trait = SearchTraitTextBox.Text,

@@ -111,8 +111,9 @@ public class MatchEngine
         ValidateTeam(homeTeam, nameof(homeTeam));
         ValidateTeam(awayTeam, nameof(awayTeam));
 
-        ResetTeamStamina(homeTeam);
-        ResetTeamStamina(awayTeam);
+        var simulationOptions = CreateOptions(options);
+        ResetTeamStamina(homeTeam, simulationOptions.PreserveMatchStartStamina);
+        ResetTeamStamina(awayTeam, simulationOptions.PreserveMatchStartStamina);
 
         var match = CreateMatch(homeTeam, awayTeam);
         AssignWeather(match, _random);
@@ -173,8 +174,9 @@ public class MatchEngine
 
         if (resetPlayers)
         {
-            ResetTeamStamina(homeTeam);
-            ResetTeamStamina(awayTeam);
+            var simulationOptions = CreateOptions(options);
+            ResetTeamStamina(homeTeam, simulationOptions.PreserveMatchStartStamina);
+            ResetTeamStamina(awayTeam, simulationOptions.PreserveMatchStartStamina);
         }
 
         var random = CreateRandom(seed);
@@ -5439,13 +5441,13 @@ public class MatchEngine
         return (random.NextDouble() * range) - (range / 2.0);
     }
 
-    private void ResetTeamStamina(Team team)
+    private void ResetTeamStamina(Team team, bool preserveMatchStartStamina)
     {
         var starters = team.Players.ToHashSet();
 
         foreach (var player in team.Players.Concat(team.Substitutes))
         {
-            player.Stamina = 100;
+            player.Stamina = preserveMatchStartStamina ? Math.Clamp(player.Stamina, 0, 100) : 100;
             player.LiveMatchModifier = 1.0;
             player.YellowCards = 0;
             player.IsSentOff = false;
@@ -5481,7 +5483,7 @@ public class MatchEngine
 
         foreach (var player in GetActivePitchPlayers(team))
         {
-            player.Stamina = Math.Max(0.0, player.Stamina - staminaLoss);
+            player.Stamina = Math.Max(0.0, player.Stamina - staminaLoss * GetPositionFatiguePressureMultiplier(player));
         }
 
         ApplyVenueFatiguePressure(team, match);
@@ -5499,8 +5501,13 @@ public class MatchEngine
         var extraLoss = MatchConstants.StaminaLossPerMinute * (modifier - 1.0) * 0.35;
         foreach (var player in GetActivePitchPlayers(team))
         {
-            player.Stamina = Math.Max(0.0, player.Stamina - extraLoss);
+            player.Stamina = Math.Max(0.0, player.Stamina - extraLoss * GetPositionFatiguePressureMultiplier(player));
         }
+    }
+
+    private static double GetPositionFatiguePressureMultiplier(Player player)
+    {
+        return player.Position == Position.Goalkeeper ? 0.25 : 1.0;
     }
 
     private void ApplySecondWindIfNeeded(Team team, Match match)
