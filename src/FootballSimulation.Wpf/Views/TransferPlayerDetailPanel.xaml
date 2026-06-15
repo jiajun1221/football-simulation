@@ -566,6 +566,11 @@
                         Margin="0,0,6,0"
                         Visibility="Collapsed"
                         Click="CaptainActionButton_Click" />
+                <Button x:Name="LockActionButton"
+                        Style="{StaticResource DetailCornerActionButtonStyle}"
+                        Margin="0,0,6,0"
+                        Visibility="Collapsed"
+                        Click="LockActionButton_Click" />
                 <Button x:Name="CornerActionButton"
                         Style="{StaticResource DetailCornerActionButtonStyle}"
                         Visibility="Collapsed"

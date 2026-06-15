@@ -19,7 +19,12 @@ public class SaveGameService
         new("vitinha", "parissaintgermain", Position.Midfielder, "CM", ["CDM", "CAM"]),
         new("brunofernandes", "manchesterunited", Position.Midfielder, "CAM", ["CM"]),
         new("rodri", "manchestercity", Position.Midfielder, "CDM", ["CM", "CB"]),
-        new("martinodegaard", "arsenal", Position.Midfielder, "CAM", ["CM"])
+        new("martinodegaard", "arsenal", Position.Midfielder, "CAM", ["CM"]),
+        new("joaopedro", "chelsea", Position.Forward, "CF", ["ST", "CAM", "LW"]),
+        new("kaihavertz", "arsenal", Position.Forward, "CF", ["ST", "CAM", "LW", "RW"]),
+        new("matheuscunha", "manchesterunited", Position.Forward, "CF", ["ST", "CAM", "LW"]),
+        new("julianalvarez", "atleticomadrid", Position.Forward, "CF", ["ST", "CAM", "LW", "RW"]),
+        new("christophernkunku", "acmilan", Position.Forward, "CF", ["ST", "CAM", "LW", "RW"])
     ];
 
     private static readonly JsonSerializerOptions JsonOptions = new()
@@ -345,12 +350,18 @@ public class SaveGameService
             return;
         }
 
+        var oldPreferredPosition = player.PreferredPosition;
         player.Position = correction.Position;
         player.PreferredPosition = correction.PreferredPosition;
         player.SecondaryPositions = correction.SecondaryPositions
             .Where(position => !position.Equals(correction.PreferredPosition, StringComparison.OrdinalIgnoreCase))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
+        if (string.IsNullOrWhiteSpace(player.AssignedPosition) ||
+            player.AssignedPosition.Equals(oldPreferredPosition, StringComparison.OrdinalIgnoreCase))
+        {
+            player.AssignedPosition = correction.PreferredPosition;
+        }
     }
 
     private static bool IsPositionCorrectionMatch(Player player, string teamName, KnownPositionCorrection correction)

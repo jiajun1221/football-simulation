@@ -146,9 +146,14 @@ public static class PositionSuitabilityService
             return 0;
         }
 
+        if (IsFullyAdaptedCenterForwardRole(naturalPositions, slot))
+        {
+            return 0;
+        }
+
         if (naturalPositions.Skip(1).Contains(slot, StringComparer.OrdinalIgnoreCase))
         {
-            return 1;
+            return 0;
         }
 
         return naturalPositions
@@ -206,7 +211,7 @@ public static class PositionSuitabilityService
             "CAM" => playerPosition switch
             {
                 "CM" => 2,
-                "CF" => 2,
+                "CF" => 0,
                 "LW" or "RW" or "LM" or "RM" => 4,
                 _ => 99
             },
@@ -227,7 +232,7 @@ public static class PositionSuitabilityService
             },
             "ST" => playerPosition switch
             {
-                "CF" => 2,
+                "CF" => 0,
                 "CAM" => 5,
                 "LW" or "RW" => 6,
                 _ => 99
@@ -240,6 +245,12 @@ public static class PositionSuitabilityService
             },
             _ => 15
         };
+    }
+
+    private static bool IsFullyAdaptedCenterForwardRole(IEnumerable<string> naturalPositions, string slot)
+    {
+        return slot is "ST" or "CAM" &&
+            naturalPositions.Contains("CF", StringComparer.OrdinalIgnoreCase);
     }
 
     private static int GetBaseOverall(Player player)

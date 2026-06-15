@@ -82,6 +82,31 @@ public class YouthAcademySystemTests
     }
 
     [Fact]
+    public void ApplyDevelopment_UnderTwentyProspectInSixtyToSeventyEightBandDevelopsVeryFast()
+    {
+        var academy = new YouthAcademy
+        {
+            ClubName = "Chelsea",
+            AcademyLevel = AcademyLevel.Silver,
+            TrainingFocus = YouthTrainingFocus.Balanced
+        };
+        var eligibleProspect = CreateComparableProspect("Eligible Prospect", YouthDevelopmentRate.Normal);
+        eligibleProspect.Age = 18;
+        eligibleProspect.CurrentOVR = 65;
+        var normalProspect = CreateComparableProspect("Normal Prospect", YouthDevelopmentRate.Normal);
+        normalProspect.Age = 20;
+        normalProspect.CurrentOVR = 65;
+        var service = new YouthDevelopmentService();
+
+        service.ApplyDevelopment(eligibleProspect, academy, months: 3);
+        service.ApplyDevelopment(normalProspect, academy, months: 3);
+
+        Assert.True(
+            eligibleProspect.CurrentOVR - 65 > normalProspect.CurrentOVR - 65 ||
+            eligibleProspect.DevelopmentProgress > normalProspect.DevelopmentProgress * 2);
+    }
+
+    [Fact]
     public void PromoteYouthPlayer_AddsProspectToSeniorSubstitutes()
     {
         var league = CreateLeague();

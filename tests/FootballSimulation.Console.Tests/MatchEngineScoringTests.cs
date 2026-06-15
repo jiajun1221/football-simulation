@@ -434,6 +434,28 @@ public class MatchEngineScoringTests
     }
 
     [Fact]
+    public void SimulateFirstHalf_DelaysHalftimeUntilAllAddedTimeEventsFinish()
+    {
+        var seedDataService = new SeedDataService();
+        var engine = new MatchEngine();
+
+        for (var seed = 1; seed <= 120; seed++)
+        {
+            var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+            var result = engine.SimulateFirstHalf(homeTeam, awayTeam, seed: seed);
+            var halftime = Assert.Single(result.Events, matchEvent => matchEvent.EventType == EventType.Halftime);
+            var eventsAfterHalftime = result.Events
+                .Where(matchEvent => matchEvent.Minute > halftime.Minute)
+                .ToList();
+
+            Assert.Equal(result.CurrentMinute, halftime.Minute);
+            Assert.True(
+                eventsAfterHalftime.Count == 0,
+                $"Seed {seed}: halftime appeared before later first-half events.");
+        }
+    }
+
+    [Fact]
     public void SimulateMatch_SecondHalfCanFinishInAddedTime()
     {
         var seedDataService = new SeedDataService();

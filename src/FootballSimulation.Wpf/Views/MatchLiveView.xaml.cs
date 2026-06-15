@@ -67,6 +67,7 @@ public partial class MatchLiveView : UserControl
     private Player? _selectedBenchForSubstitution;
     private Player? _mandatoryInjurySubstitutionPlayer;
     private Team? _currentPossessionTeam;
+    private ActiveBallIndicator? _activeBallIndicator;
     private LiveMatchStatus _currentLiveStatus = LiveMatchStatus.Neutral;
     private MatchTeamColorPalettes? _matchTeamColors;
     private EventType? _lastDisplayedEventType;
@@ -77,6 +78,12 @@ public partial class MatchLiveView : UserControl
     private double _expandedWindowMinWidth;
 
     private sealed record PitchSlotAssignment(Player Player, PitchPosition Position);
+    private sealed record ActiveBallIndicator(
+        string PlayerKey,
+        string Brush,
+        string BorderBrush,
+        string Foreground,
+        string Tooltip);
     private WindowState _expandedWindowState;
 
     public MatchLiveView(GameFlowState state, Action<UserControl> navigate, bool isSecondHalf)
@@ -354,6 +361,11 @@ public partial class MatchLiveView : UserControl
                 {
                     await PlayPendingEventsAsync(cancellationToken);
                     RefreshPlayerPanels();
+                    if (_isPlaybackPaused)
+                    {
+                        return;
+                    }
+
                     continue;
                 }
 
@@ -380,6 +392,10 @@ public partial class MatchLiveView : UserControl
 
                 await PlayPendingEventsAsync(cancellationToken);
                 RefreshPlayerPanels();
+                if (_isPlaybackPaused)
+                {
+                    return;
+                }
             }
 
             await CompletePhaseAsync();
@@ -425,7 +441,8 @@ public partial class MatchLiveView : UserControl
         RecordDisplayedPitchRating(matchEvent);
         SyncLivePlayerStaminaForActivePlayers();
         _lastDisplayedEventType = matchEvent.EventType;
-        if (ShouldRefreshPitchAfterEvent(matchEvent.EventType))
+        UpdateActiveBallIndicator(matchEvent);
+        if (ShouldRefreshPitchAfterEvent(matchEvent.EventType) || _activeBallIndicator is not null)
         {
             RefreshPlayerPanels();
         }
@@ -518,6 +535,7 @@ public partial class MatchLiveView : UserControl
     {
         CancelPlayback();
         _pendingPlaybackEvents.Clear();
+        _activeBallIndicator = null;
 
         if (_state.CurrentMatch is not null &&
             _state.League is not null &&
@@ -2078,6 +2096,9 @@ public partial class MatchLiveView : UserControl
         var formBadge = PlayerFormBadgeHelper.Create(GetDisplayedFormStatus(liveStats.CurrentRating));
         var ratingBadgeColors = GetRatingBadgeColors(liveStats.CurrentRating, formBadge);
         var nationality = PlayerNationalityDisplayService.Resolve(player);
+        var activeBallIndicator = string.Equals(_activeBallIndicator?.PlayerKey, playerKey, StringComparison.OrdinalIgnoreCase)
+            ? _activeBallIndicator
+            : null;
 
         return new LivePlayerIconViewModel
         {
@@ -2121,6 +2142,12 @@ public partial class MatchLiveView : UserControl
             RedBadgeText = redCards > 0 ? RedCardIcon() : string.Empty,
             InjuryBadgeText = displayedStats.Injuries > 0 ? InjuryIcon() : string.Empty,
             PendingSubOutBadgeText = IsPendingSubOut(team, player) ? "↓" : string.Empty,
+            HasBallIndicator = activeBallIndicator is not null,
+            BallIndicatorText = activeBallIndicator is null ? string.Empty : SoccerBallIcon(),
+            BallIndicatorBrush = activeBallIndicator?.Brush ?? "#FFFFFF",
+            BallIndicatorBorderBrush = activeBallIndicator?.BorderBrush ?? "#111827",
+            BallIndicatorForeground = activeBallIndicator?.Foreground ?? "#111827",
+            BallIndicatorTooltip = activeBallIndicator?.Tooltip ?? string.Empty,
             DetailText = BuildPlayerDetailText(player, performance, liveStats.CurrentRating, stamina, displayedStats.DefensiveContributions),
             CardsText = yellowCards == 0 && redCards == 0 ? "None" : $"Y{yellowCards} R{redCards}",
             InjuryStatusText = displayedStats.Injuries > 0 ? "Injured" : "Fit",
@@ -2839,6 +2866,151 @@ public partial class MatchLiveView : UserControl
         return IsSameTeam(team, _state.CurrentMatch.HomeTeam)
             ? _matchTeamColors.Home
             : _matchTeamColors.Away;
+    }
+
+    private void UpdateActiveBallIndicator(MatchEvent matchEvent)
+    {
+        var nextIndicator = CreateActiveBallIndicator(matchEvent);
+        if (nextIndicator is not null)
+        {
+            _activeBallIndicator = nextIndicator;
+            return;
+        }
+
+        if (ShouldClearActiveBallIndicator(matchEvent.EventType))
+        {
+            _activeBallIndicator = null;
+        }
+    }
+
+    private ActiveBallIndicator? CreateActiveBallIndicator(MatchEvent matchEvent)
+    {
+        if (_state.CurrentMatch is null)
+        {
+            return null;
+        }
+
+        var eventTeam = ResolveEventTeam(matchEvent);
+        var playerName = GetBallIndicatorPlayerName(matchEvent);
+        if (string.IsNullOrWhiteSpace(playerName))
+        {
+            return null;
+        }
+
+        var playerContext = ResolvePlayerContext(playerName, eventTeam);
+        if (playerContext is null || !playerContext.Value.Player.IsOnPitch || playerContext.Value.Player.IsSentOff)
+        {
+            return null;
+        }
+
+        var playerKey = CreatePlayerId(playerContext.Value.Team, playerContext.Value.Player);
+        var (brush, borderBrush, foreground, label) = GetBallIndicatorVisual(matchEvent);
+        return new ActiveBallIndicator(
+            playerKey,
+            brush,
+            borderBrush,
+            foreground,
+            $"{playerContext.Value.Player.Name}: {label}");
+    }
+
+    private static string? GetBallIndicatorPlayerName(MatchEvent matchEvent)
+    {
+        if (IsSavedPenaltyEvent(matchEvent))
+        {
+            return PreferPlayerName(matchEvent.SecondaryPlayerName, matchEvent.PrimaryPlayerName);
+        }
+
+        return matchEvent.EventType switch
+        {
+            EventType.Save or EventType.GoalkeeperHeroics => PreferPlayerName(matchEvent.SecondaryPlayerName, matchEvent.PrimaryPlayerName),
+            EventType.Tackle
+                or EventType.Interception
+                or EventType.Pressure
+                or EventType.BlockedPass
+                or EventType.DefensiveStop
+                or EventType.Turnover => PreferPlayerName(matchEvent.PrimaryPlayerName, matchEvent.SecondaryPlayerName),
+            EventType.Goal
+                or EventType.WonderGoal
+                or EventType.Shot
+                or EventType.Miss
+                or EventType.Woodwork
+                or EventType.Penalty
+                or EventType.PenaltyTaker
+                or EventType.Attack
+                or EventType.ChanceCreated
+                or EventType.CornerKick
+                or EventType.SetPieceDanger
+                or EventType.LateDrama
+                or EventType.CrowdMomentum
+                or EventType.BadPass
+                or EventType.Miscontrol
+                or EventType.Offside => PreferPlayerName(matchEvent.PrimaryPlayerName, matchEvent.SecondaryPlayerName),
+            _ => null
+        };
+    }
+
+    private static (string Brush, string BorderBrush, string Foreground, string Label) GetBallIndicatorVisual(MatchEvent matchEvent)
+    {
+        if (IsScoringEvent(matchEvent))
+        {
+            return ("#22C55E", "#BBF7D0", "#FFFFFF", "goal scored");
+        }
+
+        if (IsBlueBallWinEvent(matchEvent.EventType) || IsSavedPenaltyEvent(matchEvent))
+        {
+            return ("#2563EB", "#BFDBFE", "#FFFFFF", "ball won");
+        }
+
+        if (IsShotBallEvent(matchEvent.EventType))
+        {
+            return ("#F97316", "#FED7AA", "#111827", "shot taken");
+        }
+
+        return ("#FFFFFF", "#111827", "#111827", "in possession");
+    }
+
+    private static bool IsBlueBallWinEvent(EventType eventType)
+    {
+        return eventType is EventType.Save
+            or EventType.GoalkeeperHeroics
+            or EventType.Tackle
+            or EventType.Interception
+            or EventType.Pressure
+            or EventType.BlockedPass
+            or EventType.DefensiveStop
+            or EventType.Turnover;
+    }
+
+    private static bool IsShotBallEvent(EventType eventType)
+    {
+        return eventType is EventType.Shot
+            or EventType.Miss
+            or EventType.Woodwork
+            or EventType.Penalty;
+    }
+
+    private static bool IsSavedPenaltyEvent(MatchEvent matchEvent)
+    {
+        return matchEvent.EventType == EventType.Penalty &&
+            IsPenaltyResult(matchEvent) &&
+            !matchEvent.Description.Contains("scores", StringComparison.OrdinalIgnoreCase) &&
+            (matchEvent.Description.Contains("save", StringComparison.OrdinalIgnoreCase) ||
+                matchEvent.Description.Contains("saved", StringComparison.OrdinalIgnoreCase) ||
+                matchEvent.Description.Contains("denies", StringComparison.OrdinalIgnoreCase) ||
+                matchEvent.Description.Contains("stops", StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static bool ShouldClearActiveBallIndicator(EventType eventType)
+    {
+        return eventType is EventType.Halftime
+            or EventType.Fulltime;
+    }
+
+    private static string? PreferPlayerName(string? primaryPlayerName, string? fallbackPlayerName)
+    {
+        return string.IsNullOrWhiteSpace(primaryPlayerName)
+            ? fallbackPlayerName
+            : primaryPlayerName;
     }
 
     private void UpdateLiveStatusFromEvent(MatchEvent matchEvent)

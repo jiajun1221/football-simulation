@@ -121,7 +121,13 @@ public class SaveGameServiceTests
         foreach (var player in restoredChelsea.Players.Concat(restoredChelsea.Substitutes))
         {
             Assert.Equal(expectedAges[player.Name], player.Age);
-            Assert.Equal(expectedPreferredPositions[player.Name], player.PreferredPosition);
+            var isJoaoPedro = player.PlayerId.Contains("joao-pedro", StringComparison.OrdinalIgnoreCase) ||
+                (player.Name.Contains("Jo", StringComparison.OrdinalIgnoreCase) &&
+                    player.Name.Contains("Pedro", StringComparison.OrdinalIgnoreCase));
+            var expectedPreferredPosition = isJoaoPedro
+                ? "CF"
+                : expectedPreferredPositions[player.Name];
+            Assert.Equal(expectedPreferredPosition, player.PreferredPosition);
             Assert.Equal(expectedFlagPaths[player.Name], player.FlagImagePath);
             Assert.Equal(expectedContractYears[player.Name], player.ContractEndYear);
             Assert.NotNull(player.WeeklyWage);
@@ -610,6 +616,50 @@ public class SaveGameServiceTests
 
         Assert.Throws<ArgumentOutOfRangeException>(() => saveGameService.GetSlotPath(0));
         Assert.Throws<ArgumentOutOfRangeException>(() => saveGameService.GetSlotPath(4));
+    }
+
+    [Fact]
+    public void LoadGame_CorrectsKnownCenterForwardProfiles()
+    {
+        var saveDirectory = CreateTempSaveDirectory();
+        var saveGameService = new SaveGameService(saveDirectory);
+        var team = CreateTeamWithPlayer(
+            "Chelsea",
+            "premier-league:chelsea:joao-pedro:10",
+            "Joao Pedro",
+            Position.Forward,
+            "ST",
+            ["LW", "RW"]);
+        var saveData = new SaveGameData
+        {
+            LeagueId = "premier-league",
+            SelectedClubName = team.Name,
+            LeagueState = new LeagueState
+            {
+                LeagueId = "premier-league",
+                Name = "Premier League",
+                Season = "2025-26",
+                Table = []
+            },
+            Teams = [team]
+        };
+
+        try
+        {
+            saveGameService.SaveGame(1, saveData);
+
+            var loadedPlayer = saveGameService.LoadGame(1)!.Teams.Single().Players.Single();
+
+            Assert.Equal(Position.Forward, loadedPlayer.Position);
+            Assert.Equal("CF", loadedPlayer.PreferredPosition);
+            Assert.Equal("CF", loadedPlayer.AssignedPosition);
+            Assert.Contains("ST", loadedPlayer.SecondaryPositions);
+            Assert.Contains("CAM", loadedPlayer.SecondaryPositions);
+        }
+        finally
+        {
+            DeleteDirectory(saveDirectory);
+        }
     }
 
     private static string CreateTempSaveDirectory()

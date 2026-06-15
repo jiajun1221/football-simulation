@@ -70,6 +70,8 @@ public class PlayerStatMappingService
             IsSeasonEndingInjury = injuryState.IsSeasonEnding,
             SuspendedMatches = GetSuspendedMatches(record.SuspendedMatches, record.IsSuspended),
             MatchesPlayedRecently = Math.Max(0, record.MatchesPlayedRecently ?? 0),
+            RecentMatchMinutes = NormalizeRecentMatchMinutes(record.RecentMatchMinutes),
+            ConsecutiveFullMatches = Math.Max(0, record.ConsecutiveFullMatches ?? 0),
             SeasonFatigue = Math.Clamp(record.SeasonFatigue ?? 0, 0, 100),
             ConsecutiveStarts = Math.Max(0, record.ConsecutiveStarts ?? 0),
             Finishing = CalculateFinishing(position, preferredPosition, overall)
@@ -153,6 +155,8 @@ public class PlayerStatMappingService
             IsSeasonEndingInjury = injuryState.IsSeasonEnding,
             SuspendedMatches = GetSuspendedMatches(record.SuspendedMatches, record.IsSuspended),
             MatchesPlayedRecently = Math.Max(0, record.MatchesPlayedRecently ?? 0),
+            RecentMatchMinutes = NormalizeRecentMatchMinutes(record.RecentMatchMinutes),
+            ConsecutiveFullMatches = Math.Max(0, record.ConsecutiveFullMatches ?? 0),
             SeasonFatigue = Math.Clamp(record.SeasonFatigue ?? 0, 0, 100),
             ConsecutiveStarts = Math.Max(0, record.ConsecutiveStarts ?? 0),
             Finishing = CalculateFinishing(position, preferredPosition, overall)
@@ -175,6 +179,14 @@ public class PlayerStatMappingService
             .Select(name => Enum.Parse<PlayerTrait>(name, ignoreCase: true))
             .Distinct()
             .ToList();
+    }
+
+    private static List<int> NormalizeRecentMatchMinutes(IEnumerable<int>? minutes)
+    {
+        return minutes?
+            .Select(minute => Math.Clamp(minute, 0, 120))
+            .TakeLast(5)
+            .ToList() ?? [];
     }
 
     private static PlayerAttributeRatings CreateAttributes(
@@ -354,7 +366,7 @@ public class PlayerStatMappingService
             "goalkeeper" or "gk" => Position.Goalkeeper,
             "defender" or "defence" or "defense" or "df" or "def" or "lb" or "rb" or "cb" => Position.Defender,
             "midfielder" or "midfield" or "mf" or "mid" or "cm" or "cam" or "cdm" => Position.Midfielder,
-            "forward" or "striker" or "winger" or "fw" or "fwd" or "lw" or "rw" or "st" => Position.Forward,
+            "forward" or "striker" or "winger" or "fw" or "fwd" or "lw" or "rw" or "st" or "cf" => Position.Forward,
             _ => Position.Midfielder
         };
     }
@@ -371,6 +383,7 @@ public class PlayerStatMappingService
             "CAM" => ClampStat(overall + 2),
             "LW" or "RW" => ClampStat(overall + 4),
             "ST" => ClampStat(overall + 3),
+            "CF" => ClampStat(overall + 2),
             _ => position switch
             {
                 Position.Goalkeeper => ClampStat(overall - 55),
@@ -394,6 +407,7 @@ public class PlayerStatMappingService
             "CAM" => ClampStat(overall - 18),
             "LW" or "RW" => ClampStat(overall - 18),
             "ST" => ClampStat(overall - 22),
+            "CF" => ClampStat(overall - 18),
             _ => position switch
             {
                 Position.Goalkeeper => ClampStat(overall),
@@ -417,6 +431,7 @@ public class PlayerStatMappingService
             "CAM" => ClampStat(overall + 3),
             "LW" or "RW" => ClampStat(overall),
             "ST" => ClampStat(overall - 3),
+            "CF" => ClampStat(overall + 2),
             _ => position switch
             {
                 Position.Goalkeeper => ClampStat(overall - 16),
@@ -452,6 +467,7 @@ public class PlayerStatMappingService
             "CAM" => ClampStat(overall + 1),
             "LW" or "RW" => ClampStat(overall + 1),
             "ST" => ClampStat(overall + 5),
+            "CF" => ClampStat(overall + 3),
             _ => position switch
             {
                 Position.Goalkeeper => ClampStat(overall - 65),

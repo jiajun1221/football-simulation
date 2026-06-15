@@ -1112,9 +1112,11 @@
         {
           "name": "Julián Alvarez",
           "squadNumber": 9,
-          "position": "ST",
-          "preferredPosition": "ST",
+          "position": "CF",
+          "preferredPosition": "CF",
           "secondaryPositions": [
+            "ST",
+            "CAM",
             "LW",
             "RW"
           ],

@@ -141,6 +141,15 @@ public class Player : INotifyPropertyChanged
         set => SuspendedMatches = value ? Math.Max(1, SuspendedMatches) : 0;
     }
     public int MatchesPlayedRecently { get; set; }
+    public List<int> RecentMatchMinutes { get; set; } = [];
+    public int ConsecutiveFullMatches { get; set; }
+
+    [JsonIgnore]
+    public int LastMatchMinutes => RecentMatchMinutes.Count == 0 ? 0 : RecentMatchMinutes[^1];
+
+    [JsonIgnore]
+    public int MinutesInLastFiveMatches => RecentMatchMinutes.TakeLast(5).Sum();
+
     public int SeasonFatigue
     {
         get => _seasonFatigue;

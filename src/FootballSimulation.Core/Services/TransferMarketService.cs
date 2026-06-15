@@ -226,6 +226,11 @@ public class TransferMarketService
         Player player,
         int currentRound)
     {
+        if (player.RejectTransferOffers || player.TransferStatus == PlayerTransferStatus.Unavailable)
+        {
+            throw new InvalidOperationException($"{player.Name} is marked as untouchable.");
+        }
+
         var marketValue = _valueCalculator.CalculateMarketValue(player, activeLeague.LeagueId, activeLeague.PlayerStats);
         var fee = RoundFee(marketValue * GetAiOfferFeeModifier(player));
         var buyer = SelectAiBuyerForPlayer(state, selectedTeam, player, fee);

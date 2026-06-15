@@ -28,6 +28,7 @@ public partial class SquadOverviewView : UserControl
         SquadDetailPanel.TransferListToggled += SquadDetailPanel_TransferListToggled;
         SquadDetailPanel.ContractRenewalRequested += SquadDetailPanel_ContractRenewalRequested;
         SquadDetailPanel.CaptainAssignmentRequested += SquadDetailPanel_CaptainAssignmentRequested;
+        SquadDetailPanel.TransferLockToggled += SquadDetailPanel_TransferLockToggled;
         _toastTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2.4) };
         _toastTimer.Tick += (_, _) =>
         {
@@ -240,7 +241,40 @@ public partial class SquadOverviewView : UserControl
             status.Brush,
             status.Tooltip,
             CanAssignCaptain: true,
-            IsCaptain: player.IsCaptain));
+            IsCaptain: player.IsCaptain,
+            CanToggleTransferLock: !HasAgreedTransfer(player),
+            IsTransferLocked: player.RejectTransferOffers));
+    }
+
+    private void SquadDetailPanel_TransferLockToggled(object? sender, EventArgs e)
+    {
+        if (_selectedRow is null)
+        {
+            return;
+        }
+
+        var player = _selectedRow.Listing.Player;
+        if (HasAgreedTransfer(player))
+        {
+            MessageBox.Show(
+                "This player already has a transfer agreed for the next window.",
+                "Transfer Agreed",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+            return;
+        }
+
+        player.RejectTransferOffers = !player.RejectTransferOffers;
+        if (player.RejectTransferOffers && player.TransferStatus == PlayerTransferStatus.Listed)
+        {
+            player.TransferStatus = PlayerTransferStatus.None;
+        }
+
+        PersistCurrentSaveSlot();
+        LoadSquad();
+        ShowCaptainToast(player.RejectTransferOffers
+            ? $"{player.Name} is now marked untouchable."
+            : $"{player.Name} can now receive transfer offers.");
     }
 
     private void SquadDetailPanel_TransferListToggled(object? sender, EventArgs e)
@@ -261,7 +295,13 @@ public partial class SquadOverviewView : UserControl
             return;
         }
 
+        if (!player.IsListedForSale && player.RejectTransferOffers)
+        {
+            player.RejectTransferOffers = false;
+        }
+
         player.IsListedForSale = !player.IsListedForSale;
+        PersistCurrentSaveSlot();
         LoadSquad();
     }
 

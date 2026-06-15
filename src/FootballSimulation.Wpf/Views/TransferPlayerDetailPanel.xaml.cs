@@ -19,6 +19,7 @@ public partial class TransferPlayerDetailPanel : UserControl
     public event EventHandler? CounterOfferRequested;
     public event EventHandler? ContractRenewalRequested;
     public event EventHandler? CaptainAssignmentRequested;
+    public event EventHandler? TransferLockToggled;
 
     private bool _usesTransferListToggle;
 
@@ -45,6 +46,7 @@ public partial class TransferPlayerDetailPanel : UserControl
         DetailContentPanel.Visibility = Visibility.Collapsed;
         CornerActionButton.Visibility = Visibility.Collapsed;
         CaptainActionButton.Visibility = Visibility.Collapsed;
+        LockActionButton.Visibility = Visibility.Collapsed;
     }
 
     public void ShowPlayer(TransferPlayerDetailContext context)
@@ -57,6 +59,7 @@ public partial class TransferPlayerDetailPanel : UserControl
         DetailContentPanel.Visibility = Visibility.Visible;
         UpdateCornerAction(context);
         UpdateCaptainAction(context);
+        UpdateLockAction(context);
         ClubLogoImage.Source = ClubLogoService.LoadClubLogo(listing.Team.Name, listing.LeagueId);
         NameTextBlock.Text = player.Name;
         ClubTextBlock.Text = $"{listing.Team.Name} · {listing.LeagueName} · {player.PreferredPosition} · Age {player.Age?.ToString(CultureInfo.InvariantCulture) ?? "N/A"}";
@@ -238,6 +241,28 @@ public partial class TransferPlayerDetailPanel : UserControl
         SetActionGlow(CaptainActionButton, context.IsCaptain ? "#FACC15" : "#0F172A", context.IsCaptain ? 0.50 : 0.45);
     }
 
+    private void UpdateLockAction(TransferPlayerDetailContext context)
+    {
+        var showLockAction = context.Mode is TransferDetailMode.Squad &&
+            context.IsOwnPlayer &&
+            context.CanToggleTransferLock;
+
+        LockActionButton.Visibility = showLockAction ? Visibility.Visible : Visibility.Collapsed;
+        if (!showLockAction)
+        {
+            return;
+        }
+
+        LockActionButton.Content = context.IsTransferLocked ? "🔒" : "🔓";
+        LockActionButton.Background = ToBrush(context.IsTransferLocked ? "#111827" : "#061226");
+        LockActionButton.Foreground = ToBrush(context.IsTransferLocked ? "#FACC15" : "#FFFFFF");
+        LockActionButton.BorderBrush = ToBrush(context.IsTransferLocked ? "#FACC15" : "#233756");
+        LockActionButton.ToolTip = context.IsTransferLocked
+            ? "Untouchable: AI clubs will not send new offers. Click to unlock."
+            : "Mark as untouchable: block future AI transfer offers.";
+        SetActionGlow(LockActionButton, context.IsTransferLocked ? "#FACC15" : "#0F172A", context.IsTransferLocked ? 0.50 : 0.45);
+    }
+
     private static void SetActionGlow(Button button, string color, double opacity)
     {
         button.Effect = new System.Windows.Media.Effects.DropShadowEffect
@@ -268,6 +293,11 @@ public partial class TransferPlayerDetailPanel : UserControl
     private void CaptainActionButton_Click(object sender, RoutedEventArgs e)
     {
         CaptainAssignmentRequested?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void LockActionButton_Click(object sender, RoutedEventArgs e)
+    {
+        TransferLockToggled?.Invoke(this, EventArgs.Empty);
     }
 
     private void AcceptOfferButton_Click(object sender, RoutedEventArgs e)
@@ -408,4 +438,6 @@ public sealed record TransferPlayerDetailContext(
     TransferOffer? Offer = null,
     TransferHistoryItem? HistoryItem = null,
     bool CanAssignCaptain = false,
-    bool IsCaptain = false);
+    bool IsCaptain = false,
+    bool CanToggleTransferLock = false,
+    bool IsTransferLocked = false);

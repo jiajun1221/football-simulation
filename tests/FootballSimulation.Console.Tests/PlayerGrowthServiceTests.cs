@@ -18,7 +18,7 @@ public class PlayerGrowthServiceTests
         service.ApplyMatchGrowth(CreateMatch(team, opponentTeam, player, rating: 8.6));
         service.ApplyMatchGrowth(CreateMatch(team, opponentTeam, player, rating: 8.6));
 
-        Assert.Equal(79, player.OverallRating);
+        Assert.Equal(80, player.OverallRating);
         Assert.True(player.GrowthPoints > 0);
         Assert.True(player.Attack > 78);
     }
@@ -70,6 +70,39 @@ public class PlayerGrowthServiceTests
         Assert.Equal(79, player.OverallRating);
         Assert.Equal(1, player.LastMatchOverallIncrease);
         Assert.True(player.GrowthPoints >= 50);
+    }
+
+    [Fact]
+    public void ApplyMatchGrowth_UnderTwentyProspectInSixtyToSeventyEightBandGrowsVeryFast()
+    {
+        var service = new PlayerGrowthService();
+        var player = CreatePlayer("Breakout Teen", overall: 70, age: 18);
+        var opponent = CreatePlayer("Opponent", overall: 78, age: 25);
+        var team = CreateTeam("Chelsea", player);
+        var opponentTeam = CreateTeam("Liverpool", opponent);
+
+        service.ApplyMatchGrowth(CreateMatch(team, opponentTeam, player, rating: 8.7, goals: 1));
+
+        Assert.Equal(71, player.OverallRating);
+        Assert.Equal(1, player.LastMatchOverallIncrease);
+        Assert.True(player.LastMatchGrowthPoints >= 100);
+    }
+
+    [Theory]
+    [InlineData(79, 18)]
+    [InlineData(70, 20)]
+    public void ApplyMatchGrowth_ProspectAccelerationStopsOutsideAgeOrOverallWindow(int overall, int age)
+    {
+        var service = new PlayerGrowthService();
+        var player = CreatePlayer("Normal Growth Player", overall, age);
+        var opponent = CreatePlayer("Opponent", overall: 78, age: 25);
+        var team = CreateTeam("Chelsea", player);
+        var opponentTeam = CreateTeam("Liverpool", opponent);
+
+        service.ApplyMatchGrowth(CreateMatch(team, opponentTeam, player, rating: 8.7));
+
+        Assert.Equal(overall, player.OverallRating);
+        Assert.True(player.LastMatchGrowthPoints < 100);
     }
 
     [Fact]

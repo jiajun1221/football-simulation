@@ -404,6 +404,7 @@ public partial class PreMatchView : UserControl
                     : teamColors.BorderColor;
         var textForeground = player.IsInjured ? "#8F1F1F" : teamColors.TextColor;
         var nationality = PlayerNationalityDisplayService.Resolve(player);
+        var fatigueBadge = CreateFatigueBadge(player);
 
         return new PitchPlayerCard
         {
@@ -427,9 +428,9 @@ public partial class PreMatchView : UserControl
             FormBadgeText = form.Text,
             FormBadgeBackground = form.Background,
             FormBadgeForeground = form.Foreground,
-            FatigueWarningText = CreateFatigueWarningText(player),
-            FatigueWarningTooltip = CreateFatigueWarningTooltip(player),
-            FatigueWarningBadgeBackground = GetFatigueWarningBadgeBackground(player),
+            FatigueWarningText = fatigueBadge.Text,
+            FatigueWarningTooltip = fatigueBadge.Tooltip,
+            FatigueWarningBadgeBackground = fatigueBadge.Background,
             TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits),
             CardBackground = cardBackground,
             CardBorderBrush = cardBorder,
@@ -632,6 +633,7 @@ public partial class PreMatchView : UserControl
         var teamColors = TeamColorService.GetPalette(_state.SelectedTeam);
         var nationality = PlayerNationalityDisplayService.Resolve(player);
         var isAvailable = IsAvailableForSelection(player);
+        var fatigueBadge = CreateFatigueBadge(player);
 
         return new BenchPlayerCard
         {
@@ -662,9 +664,9 @@ public partial class PreMatchView : UserControl
             StatusText = CreateUnavailableStatusText(player),
             StatusBadgeBackground = player.IsSuspended || player.IsSentOff ? "#7F1D1D" : "#B91C1C",
             Tooltip = CreateUnavailableTooltip(player),
-            FatigueWarningText = CreateFatigueWarningText(player),
-            FatigueWarningTooltip = CreateFatigueWarningTooltip(player),
-            FatigueWarningBadgeBackground = GetFatigueWarningBadgeBackground(player),
+            FatigueWarningText = fatigueBadge.Text,
+            FatigueWarningTooltip = fatigueBadge.Tooltip,
+            FatigueWarningBadgeBackground = fatigueBadge.Background,
             TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits)
         };
     }
@@ -766,7 +768,7 @@ public partial class PreMatchView : UserControl
         var opponent = _state.CurrentFixture.HomeTeam == _state.SelectedTeam
             ? _state.CurrentFixture.AwayTeam
             : _state.CurrentFixture.HomeTeam;
-        var insight = _tacticalInsightService.GenerateInsight(_state.SelectedTeam, opponent);
+        var insight = _tacticalInsightService.GenerateInsight(_state.SelectedTeam, opponent, GetFixtureRestGapDays());
 
         TacticalInsightInfoIcon.ToolTip =
             $"Tactical Insight{Environment.NewLine}{Environment.NewLine}" +
@@ -1533,57 +1535,39 @@ public partial class PreMatchView : UserControl
         return player.IsInjured ? "Injured" : string.Empty;
     }
 
-    private static string CreateFatigueWarningText(Player player)
+    private FatigueBadgeResult CreateFatigueBadge(Player player)
     {
-        if (player.IsInjured || player.IsSuspended || player.IsSentOff)
-        {
-            return string.Empty;
-        }
-
-        if (player.Stamina < 50 || player.SeasonFatigue >= 80)
-        {
-            return "Risk";
-        }
-
-        if (player.ConsecutiveStarts >= 8)
-        {
-            return "Load";
-        }
-
-        if (player.Stamina < 70 ||
-            (!HasFullStaminaBar(player) && (player.SeasonFatigue >= 60 || player.MatchesPlayedRecently >= 4)))
-        {
-            return "Tired";
-        }
-
-        return string.Empty;
+        return FatigueBadgeService.Evaluate(player, GetFixtureRestGapDays());
     }
 
-    private static bool HasFullStaminaBar(Player player)
+    private int? GetFixtureRestGapDays()
     {
-        return player.Stamina >= 99.5;
+        if (_state.League is null || _state.SelectedTeam is null || _state.CurrentFixture is null)
+        {
+            return null;
+        }
+
+        var currentRound = GetFixtureCalendarRound(_state.CurrentFixture);
+        var previousFixture = _state.League.Fixtures
+            .Where(fixture => fixture.IsPlayed && IsTeamInFixture(fixture, _state.SelectedTeam))
+            .Where(fixture => GetFixtureCalendarRound(fixture) < currentRound)
+            .OrderByDescending(GetFixtureCalendarRound)
+            .FirstOrDefault();
+
+        return previousFixture is null
+            ? null
+            : Math.Max(1, currentRound - GetFixtureCalendarRound(previousFixture));
     }
 
-    private static string CreateFatigueWarningTooltip(Player player)
+    private static int GetFixtureCalendarRound(Fixture fixture)
     {
-        return CreateFatigueWarningText(player) switch
-        {
-            "Risk" => $"{player.Name} is at increased injury risk.",
-            "Load" => $"{player.Name} has started {player.ConsecutiveStarts} consecutive matches.",
-            "Tired" => $"{player.Name} is showing signs of fatigue.",
-            _ => string.Empty
-        };
+        return fixture.CalendarRound > 0 ? fixture.CalendarRound : fixture.RoundNumber;
     }
 
-    private static string GetFatigueWarningBadgeBackground(Player player)
+    private static bool IsTeamInFixture(Fixture fixture, Team team)
     {
-        return CreateFatigueWarningText(player) switch
-        {
-            "Risk" => "#DC2626",
-            "Load" => "#F97316",
-            "Tired" => "#F59E0B",
-            _ => "#F59E0B"
-        };
+        return fixture.HomeTeam.Name.Equals(team.Name, StringComparison.OrdinalIgnoreCase) ||
+            fixture.AwayTeam.Name.Equals(team.Name, StringComparison.OrdinalIgnoreCase);
     }
 
     private static string CreateUnavailableTooltip(Player player)

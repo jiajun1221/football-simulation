@@ -149,6 +149,27 @@
                     <StackPanel Grid.Row="2"
                                 Orientation="Horizontal"
                                 Margin="0,3,0,0">
+                        <Border Background="{Binding FatigueWarningBadgeBackground}"
+                                CornerRadius="7"
+                                Padding="5,1"
+                                HorizontalAlignment="Left"
+                                Margin="0,0,2,0"
+                                ToolTip="{Binding FatigueWarningTooltip}">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding FatigueWarningText}" Value="">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <TextBlock Text="{Binding FatigueWarningText}"
+                                       Foreground="#FFFFFF"
+                                       FontSize="7"
+                                       FontWeight="Bold" />
+                        </Border>
                         <Border Background="{Binding FormBadgeBackground}"
                                 CornerRadius="7"
                                 Padding="5,1"
@@ -309,6 +330,27 @@
                     <StackPanel Grid.Row="2"
                                 Orientation="Horizontal"
                                 Margin="0,3,0,0">
+                        <Border Background="{Binding FatigueWarningBadgeBackground}"
+                                CornerRadius="7"
+                                Padding="5,1"
+                                HorizontalAlignment="Left"
+                                Margin="0,0,2,0"
+                                ToolTip="{Binding FatigueWarningTooltip}">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding FatigueWarningText}" Value="">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <TextBlock Text="{Binding FatigueWarningText}"
+                                       Foreground="#FFFFFF"
+                                       FontSize="7"
+                                       FontWeight="Bold" />
+                        </Border>
                         <Border Background="{Binding BenchFormBadgeBackground}"
                                 CornerRadius="7"
                                 Padding="5,1"

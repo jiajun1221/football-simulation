@@ -330,6 +330,8 @@ public class MatchEngine
                 TryApplyAiManagerDecisions(simulationState, random, minute, stoppageType: simulationState.LastFeedEventType);
             }
 
+            AddStoppageForNewEvents(simulationState, eventsBeforeMinute, random, minute);
+
             if (minute == GetFirstHalfEndMinute(match))
             {
                 match.CurrentPhase = MatchPhase.Halftime;
@@ -337,7 +339,6 @@ public class MatchEngine
                 TryApplyAiManagerDecisions(simulationState, random, minute, suppressFeedEvent: true);
             }
 
-            AddStoppageForNewEvents(simulationState, eventsBeforeMinute, random, minute);
             if (includeFulltime && minute == GetSecondHalfEndMinute(match))
             {
                 match.CurrentPhase = MatchPhase.Fulltime;

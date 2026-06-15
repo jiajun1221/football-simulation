@@ -4,12 +4,12 @@ namespace FootballSimulation.Services;
 
 public class TacticalInsightService
 {
-    public TacticalInsight GenerateInsight(Team selectedTeam, Team opponent)
+    public TacticalInsight GenerateInsight(Team selectedTeam, Team opponent, int? fixtureGapDays = null)
     {
         var insight = new TacticalInsight();
         AddOpponentThreats(insight, opponent);
         AddLikelyTactics(insight, opponent);
-        AddWarnings(insight, selectedTeam, opponent);
+        AddWarnings(insight, selectedTeam, opponent, fixtureGapDays);
         AddRecommendations(insight, selectedTeam, opponent);
 
         return insight;
@@ -52,9 +52,11 @@ public class TacticalInsightService
         }
     }
 
-    private static void AddWarnings(TacticalInsight insight, Team selectedTeam, Team opponent)
+    private static void AddWarnings(TacticalInsight insight, Team selectedTeam, Team opponent, int? fixtureGapDays)
     {
-        var tiredStarters = selectedTeam.Players.Where(player => player.Stamina < 55).ToList();
+        var tiredStarters = selectedTeam.Players
+            .Where(player => FatigueBadgeService.Evaluate(player, fixtureGapDays).Text is "Risk" or "Tired")
+            .ToList();
         if (tiredStarters.Count > 0)
         {
             insight.Warnings.Add($"{tiredStarters.Count} starter(s) look tired. High pressing may create second-half problems.");
@@ -62,22 +64,10 @@ public class TacticalInsightService
 
         foreach (var player in selectedTeam.Players.Where(player => !player.IsInjured && !player.IsSuspended).Take(11))
         {
-            if (player.Stamina < 50 || player.SeasonFatigue >= 80)
+            var badge = FatigueBadgeService.Evaluate(player, fixtureGapDays);
+            if (!string.IsNullOrWhiteSpace(badge.Text))
             {
-                insight.Warnings.Add($"{player.Name} is at increased injury risk.");
-                continue;
-            }
-
-            if (player.ConsecutiveStarts >= 8)
-            {
-                insight.Warnings.Add($"{player.Name} has started {player.ConsecutiveStarts} consecutive matches.");
-                continue;
-            }
-
-            if (player.Stamina < 70 ||
-                (!HasFullStaminaBar(player) && (player.SeasonFatigue >= 60 || player.MatchesPlayedRecently >= 4)))
-            {
-                insight.Warnings.Add($"{player.Name} is showing signs of fatigue.");
+                insight.Warnings.Add($"{player.Name}: {badge.Text} - {badge.Tooltip.Replace(Environment.NewLine, " / ")}.");
             }
         }
 
@@ -143,8 +133,4 @@ public class TacticalInsightService
             : (int)Math.Round((player.Attack + player.Defense + player.Passing + player.Stamina + player.Finishing) / 5.0);
     }
 
-    private static bool HasFullStaminaBar(Player player)
-    {
-        return player.Stamina >= 99.5;
-    }
 }

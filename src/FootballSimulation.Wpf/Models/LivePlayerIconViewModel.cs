@@ -47,6 +47,12 @@ public class LivePlayerIconViewModel
     public string RedBadgeText { get; init; } = string.Empty;
     public string InjuryBadgeText { get; init; } = string.Empty;
     public string PendingSubOutBadgeText { get; init; } = string.Empty;
+    public bool HasBallIndicator { get; init; }
+    public string BallIndicatorText { get; init; } = string.Empty;
+    public string BallIndicatorBrush { get; init; } = "#FFFFFF";
+    public string BallIndicatorBorderBrush { get; init; } = "#111827";
+    public string BallIndicatorForeground { get; init; } = "#111827";
+    public string BallIndicatorTooltip { get; init; } = string.Empty;
     public string DetailText { get; init; } = string.Empty;
     public string CardsText { get; init; } = "None";
     public string InjuryStatusText { get; init; } = string.Empty;

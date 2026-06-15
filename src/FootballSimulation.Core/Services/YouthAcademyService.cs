@@ -359,6 +359,7 @@ public class YouthAcademyService
             "CAM" => ClampStat(overall + 2),
             "LW" or "RW" => ClampStat(overall + 4),
             "ST" => ClampStat(overall + 3),
+            "CF" => ClampStat(overall + 2),
             _ => position switch
             {
                 Position.Goalkeeper => ClampStat(overall - 55),
@@ -382,6 +383,7 @@ public class YouthAcademyService
             "CAM" => ClampStat(overall - 18),
             "LW" or "RW" => ClampStat(overall - 18),
             "ST" => ClampStat(overall - 22),
+            "CF" => ClampStat(overall - 18),
             _ => position switch
             {
                 Position.Goalkeeper => ClampStat(overall),
@@ -405,6 +407,7 @@ public class YouthAcademyService
             "CAM" => ClampStat(overall + 3),
             "LW" or "RW" => ClampStat(overall),
             "ST" => ClampStat(overall - 3),
+            "CF" => ClampStat(overall + 2),
             _ => position switch
             {
                 Position.Goalkeeper => ClampStat(overall - 16),
@@ -428,6 +431,7 @@ public class YouthAcademyService
             "CAM" => ClampStat(overall + 1),
             "LW" or "RW" => ClampStat(overall + 1),
             "ST" => ClampStat(overall + 5),
+            "CF" => ClampStat(overall + 3),
             _ => position switch
             {
                 Position.Goalkeeper => ClampStat(overall - 65),
@@ -523,7 +527,8 @@ public class YouthDevelopmentService
             GetAcademyMultiplier(academy.AcademyLevel) *
             GetDevelopmentRateMultiplier(player.DevelopmentRate) *
             GetPersonalityMultiplier(player.Personality) *
-            GetTrainingFocusMultiplier(player, academy.TrainingFocus);
+            GetTrainingFocusMultiplier(player, academy.TrainingFocus) *
+            GetEmergingProspectAcademyMultiplier(player);
 
         player.DevelopmentProgress += monthlyGrowth * Math.Max(1, months);
         while (player.DevelopmentProgress >= 1.0 && player.CurrentOVR < player.HiddenTruePotential)
@@ -555,6 +560,13 @@ public class YouthDevelopmentService
             18 => 0.86,
             _ => 0.72
         };
+    }
+
+    private static double GetEmergingProspectAcademyMultiplier(YouthPlayer player)
+    {
+        return player.Age < 20 && player.CurrentOVR is >= 60 and <= 78
+            ? 2.35
+            : 1.0;
     }
 
     private static double GetAcademyMultiplier(AcademyLevel level)
@@ -596,7 +608,7 @@ public class YouthDevelopmentService
         return focus switch
         {
             YouthTrainingFocus.Technical when player.PreferredPosition is "CM" or "CAM" or "LW" or "RW" => 1.10,
-            YouthTrainingFocus.Physical when player.PreferredPosition is "CB" or "CDM" or "ST" => 1.08,
+            YouthTrainingFocus.Physical when player.PreferredPosition is "CB" or "CDM" or "ST" or "CF" => 1.08,
             YouthTrainingFocus.Attacking when player.Position == Position.Forward => 1.10,
             YouthTrainingFocus.Defensive when player.Position is Position.Defender or Position.Goalkeeper => 1.10,
             YouthTrainingFocus.Playmaking when player.PreferredPosition is "CM" or "CAM" => 1.12,

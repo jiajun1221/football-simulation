@@ -142,6 +142,11 @@ public class PlayerFormPersistenceService
             record.InjurySeverity = player.InjurySeverity?.ToString();
             record.InjuryRecoveryMatches = player.IsInjured ? player.InjuryRecoveryMatches : null;
             record.IsSeasonEndingInjury = player.IsSeasonEndingInjury ? true : null;
+            record.MatchesPlayedRecently = player.MatchesPlayedRecently;
+            record.RecentMatchMinutes = player.RecentMatchMinutes.TakeLast(5).ToList();
+            record.ConsecutiveFullMatches = player.ConsecutiveFullMatches;
+            record.SeasonFatigue = player.SeasonFatigue;
+            record.ConsecutiveStarts = player.ConsecutiveStarts;
         }
     }
 }

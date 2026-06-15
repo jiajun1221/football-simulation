@@ -81,7 +81,7 @@
     { "id": "chelsea-moises-caicedo", "teamId": "chelsea", "name": "Moises Caicedo", "squadNumber": 25, "position": "Midfielder", "overallRating": 87, "isStarter": true },
     { "id": "chelsea-enzo-fernandez", "teamId": "chelsea", "name": "Enzo Fernandez", "squadNumber": 8, "position": "Midfielder", "overallRating": 84, "isStarter": true },
     { "id": "chelsea-cole-palmer", "teamId": "chelsea", "name": "Cole Palmer", "squadNumber": 20, "position": "Midfielder", "overallRating": 87, "isStarter": true },
-    { "id": "chelsea-joao-pedro", "teamId": "chelsea", "name": "Joao Pedro", "squadNumber": 10, "position": "Forward", "overallRating": 79, "isStarter": true },
+    { "id": "chelsea-joao-pedro", "teamId": "chelsea", "name": "Joao Pedro", "squadNumber": 10, "position": "Forward", "preferredPosition": "CF", "secondaryPositions": ["ST", "CAM", "LW"], "overallRating": 79, "isStarter": true },
     { "id": "chelsea-liam-delap", "teamId": "chelsea", "name": "Liam Delap", "squadNumber": 9, "position": "Forward", "overallRating": 78, "isStarter": true },
     { "id": "chelsea-pedro-neto", "teamId": "chelsea", "name": "Pedro Neto", "squadNumber": 7, "position": "Forward", "overallRating": 80, "isStarter": true },
 
@@ -167,7 +167,7 @@
     { "id": "manchester-united-manuel-ugarte", "teamId": "manchester-united", "name": "Manuel Ugarte", "squadNumber": 25, "position": "Midfielder", "overallRating": 79, "isStarter": true },
     { "id": "manchester-united-bryan-mbeumo", "teamId": "manchester-united", "name": "Bryan Mbeumo", "squadNumber": 19, "position": "Forward", "overallRating": 85, "isStarter": true },
     { "id": "manchester-united-benjamin-sesko", "teamId": "manchester-united", "name": "Benjamin Sesko", "squadNumber": 30, "position": "Forward", "overallRating": 80, "isStarter": true },
-    { "id": "manchester-united-matheus-cunha", "teamId": "manchester-united", "name": "Matheus Cunha", "squadNumber": 10, "position": "Forward", "overallRating": 83, "isStarter": true },
+    { "id": "manchester-united-matheus-cunha", "teamId": "manchester-united", "name": "Matheus Cunha", "squadNumber": 10, "position": "Forward", "preferredPosition": "CF", "secondaryPositions": ["ST", "CAM", "LW"], "overallRating": 83, "isStarter": true },
 
     { "id": "newcastle-united-nick-pope", "teamId": "newcastle-united", "name": "Nick Pope", "squadNumber": 1, "position": "Goalkeeper", "overallRating": 81, "isStarter": true },
     { "id": "newcastle-united-kieran-trippier", "teamId": "newcastle-united", "name": "Kieran Trippier", "squadNumber": 2, "position": "Defender", "overallRating": 80, "isStarter": true },

@@ -221,8 +221,12 @@ public sealed class InjuryRiskService
                 player.SeasonFatigue + CalculateSeasonFatigueIncrease(player, team, performance, minutesPlayed),
                 0,
                 100);
+            UpdateRecentMinuteHistory(player, minutesPlayed);
             player.ConsecutiveStarts = performance is { WasSubstitute: false } && minutesPlayed > 0
                 ? player.ConsecutiveStarts + 1
+                : 0;
+            player.ConsecutiveFullMatches = minutesPlayed >= 90
+                ? player.ConsecutiveFullMatches + 1
                 : 0;
             player.MatchesPlayedRecently = minutesPlayed switch
             {
@@ -232,6 +236,15 @@ public sealed class InjuryRiskService
                 >= 25 => player.MatchesPlayedRecently,
                 _ => Math.Max(0, player.MatchesPlayedRecently - 1)
             };
+        }
+    }
+
+    private static void UpdateRecentMinuteHistory(Player player, int minutesPlayed)
+    {
+        player.RecentMatchMinutes.Add(Math.Clamp(minutesPlayed, 0, 120));
+        if (player.RecentMatchMinutes.Count > 5)
+        {
+            player.RecentMatchMinutes.RemoveRange(0, player.RecentMatchMinutes.Count - 5);
         }
     }
 

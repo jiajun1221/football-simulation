@@ -213,6 +213,8 @@ public static class PlaceholderTeamFactory
             IsSeasonEndingInjury = sourcePlayer.IsSeasonEndingInjury,
             SuspendedMatches = sourcePlayer.SuspendedMatches,
             MatchesPlayedRecently = sourcePlayer.MatchesPlayedRecently,
+            RecentMatchMinutes = sourcePlayer.RecentMatchMinutes.ToList(),
+            ConsecutiveFullMatches = sourcePlayer.ConsecutiveFullMatches,
             SeasonFatigue = sourcePlayer.SeasonFatigue,
             ConsecutiveStarts = sourcePlayer.ConsecutiveStarts,
             Finishing = sourcePlayer.Finishing,

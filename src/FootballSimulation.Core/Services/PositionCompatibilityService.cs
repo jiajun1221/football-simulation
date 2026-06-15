@@ -33,6 +33,11 @@ public static class PositionCompatibilityService
             return 100;
         }
 
+        if (IsFullyAdaptedCenterForwardRole(naturalPositions, slot))
+        {
+            return 100;
+        }
+
         if (naturalPositions.Skip(1).Contains(slot, StringComparer.OrdinalIgnoreCase))
         {
             return 85;
@@ -49,8 +54,10 @@ public static class PositionCompatibilityService
     public static bool CanPlayPosition(Player player, string exactPosition)
     {
         var slot = PositionSuitabilityService.NormalizeExactPosition(exactPosition);
+        var naturalPositions = PositionSuitabilityService.GetNaturalExactPositions(player);
         return !string.IsNullOrWhiteSpace(slot) &&
-            PositionSuitabilityService.GetNaturalExactPositions(player).Contains(slot, StringComparer.OrdinalIgnoreCase);
+            (naturalPositions.Contains(slot, StringComparer.OrdinalIgnoreCase) ||
+                IsFullyAdaptedCenterForwardRole(naturalPositions, slot));
     }
 
     public static bool CanOccupySlot(Player player, string exactPosition, bool allowOutOfPosition = true)
@@ -172,8 +179,9 @@ public static class PositionCompatibilityService
             "CAM" => playerPosition switch
             {
                 "CAM" => 100,
+                "CF" => 100,
                 "CM" => 60,
-                "LM" or "RM" or "LW" or "RW" or "CF" => 60,
+                "LM" or "RM" or "LW" or "RW" => 60,
                 _ => Impossible
             },
             "LW" => playerPosition switch
@@ -199,7 +207,7 @@ public static class PositionCompatibilityService
             "ST" => playerPosition switch
             {
                 "ST" => 100,
-                "CF" => 90,
+                "CF" => 100,
                 "CAM" => 55,
                 "LW" or "RW" => 45,
                 _ => Impossible
@@ -213,5 +221,11 @@ public static class PositionCompatibilityService
             },
             _ => Emergency
         };
+    }
+
+    private static bool IsFullyAdaptedCenterForwardRole(IEnumerable<string> naturalPositions, string slot)
+    {
+        return slot is "ST" or "CAM" &&
+            naturalPositions.Contains("CF", StringComparer.OrdinalIgnoreCase);
     }
 }

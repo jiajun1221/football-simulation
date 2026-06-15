@@ -375,6 +375,25 @@ public class TransferMarketServiceTests
     }
 
     [Fact]
+    public void EvaluateListedPlayersForOffers_SkipsLockedUserPlayers()
+    {
+        var league = CreateLeague("premier-league");
+        var selectedTeam = league.Teams.Single(team => team.Name == "Chelsea");
+        var service = new TransferMarketService(seed: 12);
+        var state = service.CreateInitialState(league);
+        foreach (var player in selectedTeam.Players.Concat(selectedTeam.Substitutes))
+        {
+            player.TransferStatus = PlayerTransferStatus.Listed;
+            player.RejectTransferOffers = true;
+        }
+
+        var offers = service.EvaluateListedPlayersForOffers(state, league, selectedTeam, currentRound: 1);
+
+        Assert.Empty(offers);
+        Assert.Empty(state.Offers);
+    }
+
+    [Fact]
     public void TransferWindowService_IdentifiesDeadlineRounds()
     {
         var league = CreateLeague("premier-league");

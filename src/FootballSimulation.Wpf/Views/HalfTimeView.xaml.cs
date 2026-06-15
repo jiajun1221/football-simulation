@@ -289,6 +289,7 @@ public partial class HalfTimeView : UserControl
         var textForeground = teamColors.TextColor;
         var positionBackground = teamColors.SecondaryColor;
         var nationality = PlayerNationalityDisplayService.Resolve(player);
+        var fatigueBadge = CreateFatigueBadge(player);
 
         return new PitchPlayerCard
         {
@@ -312,6 +313,9 @@ public partial class HalfTimeView : UserControl
             FormBadgeText = form.Text,
             FormBadgeBackground = form.Background,
             FormBadgeForeground = form.Foreground,
+            FatigueWarningText = fatigueBadge.Text,
+            FatigueWarningTooltip = fatigueBadge.Tooltip,
+            FatigueWarningBadgeBackground = fatigueBadge.Background,
             TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits),
             CardStatusBadges = CreateCardStatusBadges(player, pendingIn: false),
             CardBackground = teamColors.PrimaryColor,
@@ -460,6 +464,7 @@ public partial class HalfTimeView : UserControl
         var form = PlayerFormBadgeHelper.Create(player.FormStatus);
         var teamColors = TeamColorService.GetPalette(_state.SelectedTeam);
         var nationality = PlayerNationalityDisplayService.Resolve(player);
+        var fatigueBadge = CreateFatigueBadge(player);
 
         return new BenchPlayerCard
         {
@@ -478,6 +483,9 @@ public partial class HalfTimeView : UserControl
             BenchFormBadgeText = form.Text,
             BenchFormBadgeBackground = form.Background,
             BenchFormBadgeForeground = form.Foreground,
+            FatigueWarningText = fatigueBadge.Text,
+            FatigueWarningTooltip = fatigueBadge.Tooltip,
+            FatigueWarningBadgeBackground = fatigueBadge.Background,
             CardBackground = teamColors.PrimaryColor,
             CardBorderBrush = teamColors.BorderColor,
             TextForeground = teamColors.TextColor,
@@ -706,7 +714,7 @@ public partial class HalfTimeView : UserControl
         var opponent = _state.CurrentFixture.HomeTeam == _state.SelectedTeam
             ? _state.CurrentFixture.AwayTeam
             : _state.CurrentFixture.HomeTeam;
-        var insight = _tacticalInsightService.GenerateInsight(_state.SelectedTeam, opponent);
+        var insight = _tacticalInsightService.GenerateInsight(_state.SelectedTeam, opponent, GetFixtureRestGapDays());
 
         TacticalInsightInfoIcon.ToolTip =
             $"Tactical Insight{Environment.NewLine}{Environment.NewLine}" +
@@ -745,6 +753,41 @@ public partial class HalfTimeView : UserControl
             >= 25 => "#E8872E",
             _ => "#D94343"
         };
+    }
+
+    private FatigueBadgeResult CreateFatigueBadge(Player player)
+    {
+        return FatigueBadgeService.Evaluate(player, GetFixtureRestGapDays());
+    }
+
+    private int? GetFixtureRestGapDays()
+    {
+        if (_state.League is null || _state.SelectedTeam is null || _state.CurrentFixture is null)
+        {
+            return null;
+        }
+
+        var currentRound = GetFixtureCalendarRound(_state.CurrentFixture);
+        var previousFixture = _state.League.Fixtures
+            .Where(fixture => fixture.IsPlayed && IsTeamInFixture(fixture, _state.SelectedTeam))
+            .Where(fixture => GetFixtureCalendarRound(fixture) < currentRound)
+            .OrderByDescending(GetFixtureCalendarRound)
+            .FirstOrDefault();
+
+        return previousFixture is null
+            ? null
+            : Math.Max(1, currentRound - GetFixtureCalendarRound(previousFixture));
+    }
+
+    private static int GetFixtureCalendarRound(Fixture fixture)
+    {
+        return fixture.CalendarRound > 0 ? fixture.CalendarRound : fixture.RoundNumber;
+    }
+
+    private static bool IsTeamInFixture(Fixture fixture, Team team)
+    {
+        return fixture.HomeTeam.Name.Equals(team.Name, StringComparison.OrdinalIgnoreCase) ||
+            fixture.AwayTeam.Name.Equals(team.Name, StringComparison.OrdinalIgnoreCase);
     }
 
     private double GetEstimatedPassAccuracy(Team? team, double rating, double stamina)
@@ -1551,6 +1594,9 @@ public partial class HalfTimeView : UserControl
         public string BenchFormBadgeText { get; init; } = string.Empty;
         public string BenchFormBadgeBackground { get; init; } = "#E1E5EA";
         public string BenchFormBadgeForeground { get; init; } = "#465364";
+        public string FatigueWarningText { get; init; } = string.Empty;
+        public string FatigueWarningTooltip { get; init; } = string.Empty;
+        public string FatigueWarningBadgeBackground { get; init; } = "#F59E0B";
         public string CardBackground { get; init; } = "White";
         public string CardBorderBrush { get; init; } = "#D6DFEA";
         public string TextForeground { get; init; } = "#102033";

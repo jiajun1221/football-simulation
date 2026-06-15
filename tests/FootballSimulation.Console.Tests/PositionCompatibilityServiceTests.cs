@@ -67,6 +67,22 @@ public class PositionCompatibilityServiceTests
         Assert.Equal(1.0, PositionSuitabilityService.GetEffectivenessMultiplier(player));
     }
 
+    [Theory]
+    [InlineData("ST")]
+    [InlineData("CAM")]
+    public void CenterForward_FullyAdaptsToStrikerAndAttackingMidfielder(string targetSlot)
+    {
+        var player = CreatePlayer("Center Forward", Position.Forward, "CF");
+
+        PositionSuitabilityService.EnsurePositionMetadata(player, targetSlot);
+
+        Assert.True(PositionCompatibilityService.CanPlayPosition(player, targetSlot));
+        Assert.Equal(100, PositionCompatibilityService.GetCompatibilityScore(player, targetSlot));
+        Assert.Equal(0, PositionSuitabilityService.GetOutOfPositionPenalty(player, targetSlot));
+        Assert.Equal(1.0, PositionSuitabilityService.GetEffectivenessMultiplier(player));
+        Assert.False(PositionSuitabilityService.IsOutOfPosition(player));
+    }
+
     private static Player CreatePlayer(string name, Position position, string preferredPosition)
     {
         return new Player

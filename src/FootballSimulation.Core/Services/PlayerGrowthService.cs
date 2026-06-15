@@ -110,10 +110,11 @@ public class PlayerGrowthService
         }
         else
         {
+            total *= GetEmergingProspectPerformanceMultiplier(player, performance);
             total = Math.Max(total, youngBaselineGrowthPoints);
         }
 
-        return Math.Clamp((int)Math.Round(total), 0, 60);
+        return Math.Clamp((int)Math.Round(total), 0, GetMatchGrowthPointCap(player));
     }
 
     private static int CalculateYoungBaselineGrowthPoints(Player player, int minutesPlayed)
@@ -138,7 +139,8 @@ public class PlayerGrowthService
             _ => 0.25
         };
 
-        return Math.Max(1, (int)Math.Round(ageBase * minutesMultiplier));
+        var accelerationMultiplier = IsEmergingProspectGrowthWindow(player) ? 2.0 : 1.0;
+        return Math.Max(1, (int)Math.Round(ageBase * minutesMultiplier * accelerationMultiplier));
     }
 
     private static int CalculateOutfieldBonus(PlayerMatchPerformance performance)
@@ -197,6 +199,33 @@ public class PlayerGrowthService
             >= 27 => 0.90,
             _ => 1.0
         };
+    }
+
+    private static bool IsEmergingProspectGrowthWindow(Player player)
+    {
+        return player.Age is < 20 &&
+            player.OverallRating is >= 60 and <= 78;
+    }
+
+    private static double GetEmergingProspectPerformanceMultiplier(Player player, PlayerMatchPerformance performance)
+    {
+        if (!IsEmergingProspectGrowthWindow(player))
+        {
+            return 1.0;
+        }
+
+        return performance.Rating switch
+        {
+            >= 8.5 => 2.45,
+            >= 7.3 => 2.05,
+            >= 6.2 => 1.55,
+            _ => 1.0
+        };
+    }
+
+    private static int GetMatchGrowthPointCap(Player player)
+    {
+        return IsEmergingProspectGrowthWindow(player) ? 150 : 60;
     }
 
     private static bool CanGrow(Player player)

@@ -123,6 +123,24 @@ public class LeagueDataServiceTests
         });
     }
 
+    [Theory]
+    [InlineData("premier-league", "Kai Havertz")]
+    [InlineData("premier-league", "Matheus Cunha")]
+    [InlineData("la-liga", "Julián Alvarez")]
+    [InlineData("serie-a", "Christopher Nkunku")]
+    public void LoadTeams_MapsCenterForwardProfilesToCf(string leagueId, string playerName)
+    {
+        var player = new LeagueDataService()
+            .LoadTeams(leagueId)
+            .SelectMany(team => team.Players.Concat(team.Substitutes))
+            .Single(player => player.Name.Equals(playerName, StringComparison.OrdinalIgnoreCase));
+
+        Assert.Equal(Position.Forward, player.Position);
+        Assert.Equal("CF", player.PreferredPosition);
+        Assert.Contains("ST", player.SecondaryPositions);
+        Assert.Contains("CAM", player.SecondaryPositions);
+    }
+
     public static IEnumerable<object[]> EnabledLeagues()
     {
         return EnabledLeagueIds.Select(leagueId => new object[] { leagueId });
