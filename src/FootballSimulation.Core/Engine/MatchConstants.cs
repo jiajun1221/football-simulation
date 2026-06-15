@@ -5,6 +5,7 @@ public static class MatchConstants
     public const int DefaultMatchDurationMinutes = 90;
     public const int HalftimeMinute = 45;
     public const int MaxSubstitutionsPerTeam = 5;
+    public const int ExtraTimeSubstitutionBonus = 1;
     public const double StaminaLossPerMinute = 0.30;
     public const double MinimumStaminaModifier = 0.75;
     public const double MaximumStaminaModifier = 1.00;

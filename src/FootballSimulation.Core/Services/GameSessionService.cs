@@ -90,6 +90,8 @@ public class GameSessionService
         int endMinute,
         bool includeFulltime)
     {
+        var options = CreateUserMatchOptions(selectedTeam);
+        options.IsExtraTimeSegment = startMinute > 90 || endMinute > 90;
         return _leagueEngine.AdvanceLiveFixture(
             league,
             fixture,
@@ -97,7 +99,7 @@ public class GameSessionService
             startMinute,
             endMinute,
             includeFulltime,
-            options: CreateUserMatchOptions(selectedTeam));
+            options: options);
     }
 
     public Match SimulateSelectedTeamSecondHalf(League league, Fixture fixture, Match match, Team? selectedTeam = null)

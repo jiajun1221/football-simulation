@@ -1,6 +1,7 @@
 <UserControl x:Class="FootballSimulation.Wpf.Views.YouthAcademyView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:FootballSimulation.Wpf.Controls"
              Background="{DynamicResource AppPageBackground}">
     <UserControl.Resources>
         <DropShadowEffect x:Key="YouthButtonShadow"
@@ -70,13 +71,12 @@
 
         <DataTemplate x:Key="NationalityCellTemplate">
             <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                <Image Source="{Binding NationalityFlagImagePath}"
-                       ToolTip="{Binding NationalityName}"
-                       Width="24"
-                       Height="16"
-                       Stretch="UniformToFill"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center" />
+                <controls:FlagBadge FlagSource="{Binding NationalityFlagImagePath}"
+                                    ToolTip="{Binding NationalityName}"
+                                    Width="24"
+                                    Height="16"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center" />
             </Grid>
         </DataTemplate>
 
@@ -645,12 +645,11 @@
                                            FontWeight="Bold"
                                            TextWrapping="Wrap" />
                                 <StackPanel Orientation="Horizontal" Margin="0,8,0,12">
-                                    <Image x:Name="SelectedYouthFlagImage"
-                                           Width="26"
-                                           Height="17"
-                                           Stretch="UniformToFill"
-                                           Margin="0,0,8,0"
-                                           VerticalAlignment="Center" />
+                                    <controls:FlagBadge x:Name="SelectedYouthFlagImage"
+                                                        Width="24"
+                                                        Height="16"
+                                                        Margin="0,0,8,0"
+                                                        VerticalAlignment="Center" />
                                     <TextBlock x:Name="SelectedYouthNationalityTextBlock"
                                                Foreground="{DynamicResource AppMutedTextBrush}"
                                                FontSize="12"
@@ -690,11 +689,32 @@
                                            Foreground="{DynamicResource AppMutedTextBrush}"
                                            FontSize="11"
                                            FontWeight="SemiBold" />
-                                <TextBlock x:Name="SelectedYouthTraitsTextBlock"
-                                           Foreground="{DynamicResource AppTextBrush}"
-                                           FontWeight="SemiBold"
-                                           TextWrapping="Wrap"
-                                           Margin="0,3,0,12" />
+                                <Grid Margin="0,3,0,12">
+                                    <ItemsControl x:Name="SelectedYouthTraitsItemsControl"
+                                                  ItemTemplate="{StaticResource ScoutTraitIconBadgeTemplate}"
+                                                  HorizontalAlignment="Left">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.Style>
+                                            <Style TargetType="ItemsControl">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Items.Count, RelativeSource={RelativeSource Self}}" Value="0">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ItemsControl.Style>
+                                    </ItemsControl>
+                                    <TextBlock x:Name="SelectedYouthNoTraitsTextBlock"
+                                               Text="-"
+                                               Foreground="{DynamicResource AppMutedTextBrush}"
+                                               FontWeight="SemiBold"
+                                               Visibility="Collapsed" />
+                                </Grid>
 
                                 <TextBlock Text="Scout Report"
                                            Foreground="{DynamicResource AppMutedTextBrush}"
@@ -780,12 +800,11 @@
                                                                        Margin="0,1,0,0" />
                                                         </StackPanel>
                                                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                                            <Image Source="{Binding CountryFlagImagePath}"
-                                                                   ToolTip="{Binding AssignedCountry}"
-                                                                   Width="22"
-                                                                   Height="14"
-                                                                   Stretch="UniformToFill"
-                                                                   Margin="0,0,5,0" />
+                                                            <controls:FlagBadge FlagSource="{Binding CountryFlagImagePath}"
+                                                                                ToolTip="{Binding AssignedCountry}"
+                                                                                Width="24"
+                                                                                Height="16"
+                                                                                Margin="0,0,5,0" />
                                                             <TextBlock Text="{Binding AssignedCountry}"
                                                                        Foreground="{DynamicResource AppTextBrush}"
                                                                        FontSize="11"

@@ -65,7 +65,7 @@ public partial class TransferPlayerDetailPanel : UserControl
         ClubTextBlock.Text = $"{listing.Team.Name} · {listing.LeagueName} · {player.PreferredPosition} · Age {player.Age?.ToString(CultureInfo.InvariantCulture) ?? "N/A"}";
         OverallBadgeTextBlock.Text = player.OverallRating.ToString(CultureInfo.InvariantCulture);
         var nationality = PlayerNationalityDisplayService.Resolve(player);
-        NationalityFlagImage.Source = new System.Windows.Media.Imaging.BitmapImage(new Uri(nationality.FlagImagePath, UriKind.Relative));
+        NationalityFlagImage.FlagSource = nationality.FlagImagePath;
         NationalityBadgeTextBlock.Text = nationality.Name;
         NationalityBadgeBorder.ToolTip = nationality.Name;
 

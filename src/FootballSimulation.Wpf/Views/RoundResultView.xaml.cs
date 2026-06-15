@@ -64,6 +64,18 @@ public partial class RoundResultView : UserControl
             .OrderBy(fixture => fixture.Competition)
             .Select(fixture => CreateRoundResultRow(fixture, _state.SelectedTeam))
             .ToList();
+        if (ShouldShowMatchBracket(_state.CurrentFixture))
+        {
+            RightPanelTitleTextBlock.Text = "Match Bracket";
+            LeagueTableDataGrid.Visibility = Visibility.Collapsed;
+            BracketScrollViewer.Visibility = Visibility.Visible;
+            BracketItemsControl.ItemsSource = CreateBracketRoundGroups(_state.League, _state.CurrentFixture, _state.SelectedTeam);
+            return;
+        }
+
+        RightPanelTitleTextBlock.Text = "Updated League Table";
+        BracketScrollViewer.Visibility = Visibility.Collapsed;
+        LeagueTableDataGrid.Visibility = Visibility.Visible;
         LeagueTableDataGrid.ItemsSource = CreateLeagueTableRows(_state.League, _state.SelectedTeam);
     }
 
@@ -122,6 +134,130 @@ public partial class RoundResultView : UserControl
                     string.Equals(entry.TeamName, selectedTeam.Name, StringComparison.OrdinalIgnoreCase)
             })
             .ToList();
+    }
+
+    private List<BracketRoundGroup> CreateBracketRoundGroups(League league, Fixture currentFixture, Team? selectedTeam)
+    {
+        var roundOrder = GetCompetitionRoundOrder(league, currentFixture.Competition);
+        return league.Fixtures
+            .Where(fixture => fixture.Competition == currentFixture.Competition && fixture.IsKnockout)
+            .Where(fixture => currentFixture.Competition != CompetitionType.ChampionsLeague ||
+                !fixture.KnockoutRoundKey.Equals("League Phase", StringComparison.OrdinalIgnoreCase))
+            .GroupBy(GetBracketRoundName, StringComparer.OrdinalIgnoreCase)
+            .Select(group =>
+            {
+                var fixtures = group
+                    .OrderBy(GetFixtureCalendarRound)
+                    .ThenBy(fixture => fixture.RoundNumber)
+                    .ThenBy(fixture => fixture.HomeTeam.Name)
+                    .Select(fixture => CreateBracketMatchRow(fixture, selectedTeam))
+                    .ToList();
+                return new BracketRoundGroup
+                {
+                    RoundName = group.Key,
+                    SummaryText = CreateBracketRoundSummary(fixtures),
+                    SortOrder = GetRoundSortOrder(roundOrder, group.Key, group.Min(GetFixtureCalendarRound)),
+                    Matches = fixtures
+                };
+            })
+            .OrderBy(group => group.SortOrder)
+            .ThenBy(group => group.RoundName)
+            .ToList();
+    }
+
+    private BracketMatchRow CreateBracketMatchRow(Fixture fixture, Team? selectedTeam)
+    {
+        var winner = fixture.WinningTeamName;
+        var homeWon = !string.IsNullOrWhiteSpace(winner) &&
+            winner.Equals(fixture.HomeTeam.Name, StringComparison.OrdinalIgnoreCase);
+        var awayWon = !string.IsNullOrWhiteSpace(winner) &&
+            winner.Equals(fixture.AwayTeam.Name, StringComparison.OrdinalIgnoreCase);
+        var isSelectedTeamMatch = selectedTeam is not null &&
+            (fixture.HomeTeam.Name.Equals(selectedTeam.Name, StringComparison.OrdinalIgnoreCase) ||
+                fixture.AwayTeam.Name.Equals(selectedTeam.Name, StringComparison.OrdinalIgnoreCase));
+
+        return new BracketMatchRow
+        {
+            HomeTeamName = fixture.HomeTeam.Name,
+            AwayTeamName = fixture.AwayTeam.Name,
+            HomeLogoPath = GetClubLogoPath(fixture.HomeTeam.Name),
+            AwayLogoPath = GetClubLogoPath(fixture.AwayTeam.Name),
+            HomeSeedText = homeWon ? "Advanced" : "Home",
+            AwaySeedText = awayWon ? "Advanced" : "Away",
+            ScoreText = CreateBracketScoreText(fixture),
+            HomeFontWeight = homeWon ? "Black" : "SemiBold",
+            AwayFontWeight = awayWon ? "Black" : "SemiBold",
+            RowBackground = isSelectedTeamMatch
+                ? ThemeManager.GetBrushHex("TableCurrentClubBackground", "#FEF3C7")
+                : ThemeManager.GetBrushHex("AppSecondaryCardBackground", "#F8FAFC"),
+            BorderBrush = isSelectedTeamMatch
+                ? ThemeManager.GetBrushHex("AppHighlightBrush", "#FACC15")
+                : ThemeManager.GetBrushHex("AppBorderBrush", "#D8E0EA"),
+            BorderThickness = isSelectedTeamMatch ? new Thickness(2) : new Thickness(1)
+        };
+    }
+
+    private static string CreateBracketRoundSummary(IReadOnlyCollection<BracketMatchRow> matches)
+    {
+        var completed = matches.Count(match => match.ScoreText != "vs");
+        return completed == matches.Count
+            ? $"{matches.Count} matches completed"
+            : $"{completed}/{matches.Count} matches completed";
+    }
+
+    private static string CreateBracketScoreText(Fixture fixture)
+    {
+        if (fixture.Result is null)
+        {
+            return "vs";
+        }
+
+        var score = $"{fixture.Result.HomeScore}-{fixture.Result.AwayScore}";
+        if (fixture.PenaltyHomeScore.HasValue && fixture.PenaltyAwayScore.HasValue)
+        {
+            return $"{score}\n{fixture.PenaltyHomeScore}-{fixture.PenaltyAwayScore} pens";
+        }
+
+        if (fixture.ExtraTimeHomeScore.HasValue && fixture.ExtraTimeAwayScore.HasValue &&
+            (fixture.ExtraTimeHomeScore != fixture.Result.HomeScore || fixture.ExtraTimeAwayScore != fixture.Result.AwayScore))
+        {
+            return $"{fixture.ExtraTimeHomeScore}-{fixture.ExtraTimeAwayScore}\nAET";
+        }
+
+        return score;
+    }
+
+    private static List<string> GetCompetitionRoundOrder(League league, CompetitionType competition)
+    {
+        return league.CompetitionStates
+            .FirstOrDefault(state => state.Competition == competition)
+            ?.RoundOrder ?? [];
+    }
+
+    private static int GetRoundSortOrder(IReadOnlyList<string> roundOrder, string roundName, int fallbackCalendarRound)
+    {
+        var orderIndex = roundOrder
+            .Select((name, index) => new { name, index })
+            .FirstOrDefault(item => item.name.Equals(roundName, StringComparison.OrdinalIgnoreCase))
+            ?.index;
+        return orderIndex.HasValue ? orderIndex.Value * 1000 : 10_000 + fallbackCalendarRound;
+    }
+
+    private static string GetBracketRoundName(Fixture fixture)
+    {
+        if (!string.IsNullOrWhiteSpace(fixture.KnockoutRoundKey) &&
+            !fixture.KnockoutRoundKey.Equals("League Phase", StringComparison.OrdinalIgnoreCase))
+        {
+            return fixture.KnockoutRoundKey;
+        }
+
+        return GetFixtureRoundText(fixture);
+    }
+
+    private static bool ShouldShowMatchBracket(Fixture fixture)
+    {
+        return fixture.IsKnockout &&
+            fixture.Competition is CompetitionType.FACup or CompetitionType.LeagueCup or CompetitionType.ChampionsLeague;
     }
 
     private string GetClubLogoPath(string clubName)
@@ -223,5 +359,29 @@ public partial class RoundResultView : UserControl
         public int GoalDifference { get; init; }
         public int Points { get; init; }
         public bool IsSelectedTeam { get; init; }
+    }
+
+    private sealed class BracketRoundGroup
+    {
+        public string RoundName { get; init; } = string.Empty;
+        public string SummaryText { get; init; } = string.Empty;
+        public int SortOrder { get; init; }
+        public IReadOnlyList<BracketMatchRow> Matches { get; init; } = [];
+    }
+
+    private sealed class BracketMatchRow
+    {
+        public string HomeTeamName { get; init; } = string.Empty;
+        public string AwayTeamName { get; init; } = string.Empty;
+        public string HomeLogoPath { get; init; } = string.Empty;
+        public string AwayLogoPath { get; init; } = string.Empty;
+        public string HomeSeedText { get; init; } = string.Empty;
+        public string AwaySeedText { get; init; } = string.Empty;
+        public string ScoreText { get; init; } = string.Empty;
+        public string HomeFontWeight { get; init; } = "SemiBold";
+        public string AwayFontWeight { get; init; } = "SemiBold";
+        public string RowBackground { get; init; } = "#F8FAFC";
+        public string BorderBrush { get; init; } = "#D8E0EA";
+        public Thickness BorderThickness { get; init; } = new(1);
     }
 }

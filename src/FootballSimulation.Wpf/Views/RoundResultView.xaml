@@ -77,6 +77,107 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+
+        <DataTemplate x:Key="BracketMatchTemplate">
+            <Border Margin="0,0,0,8"
+                    Padding="10"
+                    CornerRadius="12"
+                    Background="{Binding RowBackground}"
+                    BorderBrush="{Binding BorderBrush}"
+                    BorderThickness="{Binding BorderThickness}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="96" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Image Source="{Binding HomeLogoPath}"
+                               Width="24"
+                               Height="24"
+                               Stretch="Uniform"
+                               Margin="0,0,8,0" />
+                        <StackPanel>
+                            <TextBlock Text="{Binding HomeTeamName}"
+                                       Foreground="{DynamicResource AppTextBrush}"
+                                       FontSize="12"
+                                       FontWeight="{Binding HomeFontWeight}"
+                                       TextTrimming="CharacterEllipsis" />
+                            <TextBlock Text="{Binding HomeSeedText}"
+                                       Foreground="{DynamicResource AppMutedTextBrush}"
+                                       FontSize="9" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <Border Grid.Column="1"
+                            Background="{DynamicResource AppPrimaryBrush}"
+                            CornerRadius="10"
+                            Padding="8,5"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center">
+                        <TextBlock Text="{Binding ScoreText}"
+                                   Foreground="White"
+                                   FontSize="13"
+                                   FontWeight="Black"
+                                   TextAlignment="Center" />
+                    </Border>
+
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <StackPanel HorizontalAlignment="Right">
+                            <TextBlock Text="{Binding AwayTeamName}"
+                                       Foreground="{DynamicResource AppTextBrush}"
+                                       FontSize="12"
+                                       FontWeight="{Binding AwayFontWeight}"
+                                       TextAlignment="Right"
+                                       TextTrimming="CharacterEllipsis" />
+                            <TextBlock Text="{Binding AwaySeedText}"
+                                       Foreground="{DynamicResource AppMutedTextBrush}"
+                                       FontSize="9"
+                                       TextAlignment="Right" />
+                        </StackPanel>
+                        <Image Source="{Binding AwayLogoPath}"
+                               Width="24"
+                               Height="24"
+                               Stretch="Uniform"
+                               Margin="8,0,0,0" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="BracketRoundTemplate">
+            <Border Margin="0,0,14,0"
+                    MinWidth="250"
+                    MaxWidth="330">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Border Background="{DynamicResource AppSecondaryCardBackground}"
+                            BorderBrush="{DynamicResource AppBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="12"
+                            Padding="10,6"
+                            Margin="0,0,0,10">
+                        <StackPanel>
+                            <TextBlock Text="{Binding RoundName}"
+                                       Foreground="{DynamicResource AppTextBrush}"
+                                       FontSize="14"
+                                       FontWeight="Black" />
+                            <TextBlock Text="{Binding SummaryText}"
+                                       Foreground="{DynamicResource AppMutedTextBrush}"
+                                       FontSize="10"
+                                       Margin="0,2,0,0" />
+                        </StackPanel>
+                    </Border>
+                    <ItemsControl Grid.Row="1"
+                                  ItemsSource="{Binding Matches}"
+                                  ItemTemplate="{StaticResource BracketMatchTemplate}" />
+                </Grid>
+            </Border>
+        </DataTemplate>
     </UserControl.Resources>
 
     <Grid Margin="24"
@@ -240,7 +341,8 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <TextBlock Text="Updated League Table"
+                    <TextBlock x:Name="RightPanelTitleTextBlock"
+                               Text="Updated League Table"
                                FontSize="22"
                                FontWeight="Bold"
                                Foreground="{DynamicResource AppTextBrush}"
@@ -276,6 +378,20 @@
                             <DataGridTextColumn Header="Pts" Binding="{Binding Points}" Width="56" ElementStyle="{StaticResource CenteredCellText}" />
                         </DataGrid.Columns>
                     </DataGrid>
+                    <ScrollViewer x:Name="BracketScrollViewer"
+                                  Grid.Row="1"
+                                  HorizontalScrollBarVisibility="Auto"
+                                  VerticalScrollBarVisibility="Auto"
+                                  Visibility="Collapsed">
+                        <ItemsControl x:Name="BracketItemsControl"
+                                      ItemTemplate="{StaticResource BracketRoundTemplate}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
+                    </ScrollViewer>
                 </Grid>
             </Border>
         </Grid>

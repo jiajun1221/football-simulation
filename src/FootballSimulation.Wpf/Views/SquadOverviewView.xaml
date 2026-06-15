@@ -117,13 +117,12 @@
 
         <DataTemplate x:Key="NationalityCellTemplate">
             <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                <Image Source="{Binding NationalityFlagImagePath}"
-                       ToolTip="{Binding NationalityName}"
-                       Width="24"
-                       Height="16"
-                       Stretch="UniformToFill"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center" />
+                <controls:FlagBadge FlagSource="{Binding NationalityFlagImagePath}"
+                                    ToolTip="{Binding NationalityName}"
+                                    Width="24"
+                                    Height="16"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center" />
             </Grid>
         </DataTemplate>
 

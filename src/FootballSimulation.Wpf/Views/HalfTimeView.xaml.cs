@@ -20,6 +20,7 @@ public partial class HalfTimeView : UserControl
 {
     private readonly GameFlowState _state;
     private readonly Action<UserControl> _navigate;
+    private readonly MatchSetupMode _setupMode;
     private readonly FormationLayoutService _formationLayoutService = new();
     private readonly TacticalInsightService _tacticalInsightService = new();
     private readonly SquadSelectionService _squadSelectionService = new();
@@ -37,11 +38,17 @@ public partial class HalfTimeView : UserControl
     private sealed record PendingHalftimeSubstitution(Player Starter, Player Substitute, string AssignedPosition);
 
     public HalfTimeView(GameFlowState state, Action<UserControl> navigate)
+        : this(state, navigate, MatchSetupMode.Halftime)
+    {
+    }
+
+    public HalfTimeView(GameFlowState state, Action<UserControl> navigate, MatchSetupMode setupMode)
     {
         InitializeComponent();
 
         _state = state;
         _navigate = navigate;
+        _setupMode = setupMode;
 
         LoadHalfTime();
     }
@@ -50,8 +57,27 @@ public partial class HalfTimeView : UserControl
     {
         if (_state.CurrentMatch is not null)
         {
+            _state.CurrentMatch.CurrentPhase = _setupMode switch
+            {
+                MatchSetupMode.ExtraTimeSetup => MatchPhase.ExtraTimeFirstHalf,
+                MatchSetupMode.ExtraTimeHalftime => MatchPhase.ExtraTimeHalftime,
+                _ => _state.CurrentMatch.CurrentPhase
+            };
             ScoreTextBlock.Text = $"{_state.CurrentMatch.HomeTeam.Name} {_state.CurrentMatch.HomeScore} - {_state.CurrentMatch.AwayScore} {_state.CurrentMatch.AwayTeam.Name}";
         }
+
+        SetupTitleTextBlock.Text = _setupMode switch
+        {
+            MatchSetupMode.ExtraTimeSetup => "Extra Time Setup",
+            MatchSetupMode.ExtraTimeHalftime => "Extra Time Half-Time Setup",
+            _ => "Half-Time Setup"
+        };
+        StartSecondHalfButton.Content = _setupMode switch
+        {
+            MatchSetupMode.ExtraTimeSetup => "Continue to Extra Time",
+            MatchSetupMode.ExtraTimeHalftime => "Continue Extra Time",
+            _ => "Start Second Half"
+        };
 
         if (_state.SelectedTeam is null)
         {
@@ -377,9 +403,10 @@ public partial class HalfTimeView : UserControl
         var pendingCountAfterChange = existingStarterPlan is null
             ? _pendingHalftimeSubstitutions.Count + 1
             : _pendingHalftimeSubstitutions.Count;
-        if (usedSubstitutions + pendingCountAfterChange > MatchConstants.MaxSubstitutionsPerTeam)
+        var maxSubstitutions = GetMaxSubstitutions();
+        if (usedSubstitutions + pendingCountAfterChange > maxSubstitutions)
         {
-            MessageBox.Show($"Maximum substitutions reached ({MatchConstants.MaxSubstitutionsPerTeam}/5).");
+            MessageBox.Show($"Maximum substitutions reached ({maxSubstitutions}/{maxSubstitutions}).");
             return;
         }
 
@@ -436,8 +463,8 @@ public partial class HalfTimeView : UserControl
         SubstituteListBox.ItemsSource = benchCards;
         SubstituteListBox.IsEnabled = benchCards.Count > 0;
         SubstitutionStatusTextBlock.Text = _pendingHalftimeSubstitutions.Count == 0
-            ? $"{GetUsedSubstitutions()}/5 used"
-            : $"{GetUsedSubstitutions()}/5 used · {_pendingHalftimeSubstitutions.Count} queued";
+            ? $"{GetUsedSubstitutions()}/{GetMaxSubstitutions()} used"
+            : $"{GetUsedSubstitutions()}/{GetMaxSubstitutions()} used · {_pendingHalftimeSubstitutions.Count} queued";
     }
 
     private bool IsAvailableSubstitute(Player player)
@@ -454,8 +481,8 @@ public partial class HalfTimeView : UserControl
     private void RefreshPendingSubstitutions()
     {
         SubstitutionStatusTextBlock.Text = _pendingHalftimeSubstitutions.Count == 0
-            ? $"{GetUsedSubstitutions()}/5 used"
-            : $"{GetUsedSubstitutions()}/5 used · {_pendingHalftimeSubstitutions.Count} queued";
+            ? $"{GetUsedSubstitutions()}/{GetMaxSubstitutions()} used"
+            : $"{GetUsedSubstitutions()}/{GetMaxSubstitutions()} used · {_pendingHalftimeSubstitutions.Count} queued";
     }
 
     private BenchPlayerCard CreateBenchPlayerCard(Player player)
@@ -566,6 +593,13 @@ public partial class HalfTimeView : UserControl
             : _squadSelectionService.CountTeamSubstitutions(_state.CurrentMatch, _state.SelectedTeam.Name);
     }
 
+    private int GetMaxSubstitutions()
+    {
+        return _state.CurrentMatch is null
+            ? MatchConstants.MaxSubstitutionsPerTeam
+            : _squadSelectionService.GetMaxSubstitutionsForMatch(_state.CurrentMatch);
+    }
+
     private void UpdateSelectedPlayerDetails()
     {
         if (_selectedStarter is null)
@@ -590,7 +624,7 @@ public partial class HalfTimeView : UserControl
         SelectedPlayerCard.DataContext = _selectedStarter;
 
         var selectedNationality = PlayerNationalityDisplayService.Resolve(_selectedStarter);
-        SelectedPlayerFlagImage.Source = CreateImageSource(selectedNationality.FlagImagePath);
+        SelectedPlayerFlagImage.FlagSource = selectedNationality.FlagImagePath;
         SelectedPlayerFlagImage.ToolTip = selectedNationality.Name;
         SelectedPlayerNameTextBlock.Text = _selectedStarter.Name;
         SelectedPlayerMetaTextBlock.Text = $"{team?.Name ?? _state.SelectedTeam?.Name ?? "Team"} | {_selectedStarter.AssignedPosition}";
@@ -1346,7 +1380,27 @@ public partial class HalfTimeView : UserControl
             SaveSetup(_state.SelectedTeam);
         }
 
-        _navigate(new MatchLiveView(_state, _navigate, isSecondHalf: true));
+        _navigate(new MatchLiveView(_state, _navigate, GetNextLiveSegment()));
+    }
+
+    private LiveMatchSegment GetNextLiveSegment()
+    {
+        return _setupMode switch
+        {
+            MatchSetupMode.ExtraTimeSetup => LiveMatchSegment.ExtraTimeFirstHalf,
+            MatchSetupMode.ExtraTimeHalftime => LiveMatchSegment.ExtraTimeSecondHalf,
+            _ => LiveMatchSegment.SecondHalf
+        };
+    }
+
+    private int GetSubstitutionMinute()
+    {
+        return _setupMode switch
+        {
+            MatchSetupMode.ExtraTimeSetup => 90,
+            MatchSetupMode.ExtraTimeHalftime => 105,
+            _ => MatchConstants.HalftimeMinute
+        };
     }
 
     private bool ApplyPendingHalftimeSubstitutions()
@@ -1364,7 +1418,7 @@ public partial class HalfTimeView : UserControl
                 pendingSubstitution.Starter,
                 pendingSubstitution.Substitute,
                 _state.CurrentMatch,
-                MatchConstants.HalftimeMinute);
+                GetSubstitutionMinute());
             if (!result.Success)
             {
                 MessageBox.Show(result.Message);

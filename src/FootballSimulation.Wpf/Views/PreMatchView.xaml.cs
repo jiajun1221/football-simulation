@@ -692,7 +692,7 @@ public partial class PreMatchView : UserControl
 
         SelectedPlayerImage.Source = CreateImageSource(GetPlayerImagePath(_selectedStarter));
         var selectedNationality = PlayerNationalityDisplayService.Resolve(_selectedStarter);
-        SelectedPlayerFlagImage.Source = CreateImageSource(selectedNationality.FlagImagePath);
+        SelectedPlayerFlagImage.FlagSource = selectedNationality.FlagImagePath;
         SelectedPlayerFlagImage.ToolTip = selectedNationality.Name;
         SelectedPlayerNumberTextBlock.Text = _selectedStarter.SquadNumber > 0 ? $"#{_selectedStarter.SquadNumber}" : "No squad number";
         SelectedPlayerNameTextBlock.Text = _selectedStarter.Name;

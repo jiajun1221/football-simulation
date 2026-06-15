@@ -16,5 +16,21 @@ public class GameFlowState
     public int? CurrentSaveSlotNumber { get; set; }
     public MatchSpeed CurrentMatchSpeed { get; set; } = MatchSpeed.Medium;
     public bool IsCompactLiveMatchView { get; set; }
+    public LiveMatchSegment CurrentLiveMatchSegment { get; set; } = LiveMatchSegment.FirstHalf;
     public Queue<TrophyCelebrationEvent> TrophyCelebrationQueue { get; } = new();
+}
+
+public enum LiveMatchSegment
+{
+    FirstHalf,
+    SecondHalf,
+    ExtraTimeFirstHalf,
+    ExtraTimeSecondHalf
+}
+
+public enum MatchSetupMode
+{
+    Halftime,
+    ExtraTimeSetup,
+    ExtraTimeHalftime
 }

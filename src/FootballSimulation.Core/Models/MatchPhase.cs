@@ -6,5 +6,9 @@ public enum MatchPhase
     FirstHalf,
     Halftime,
     SecondHalf,
+    ExtraTimeFirstHalf,
+    ExtraTimeHalftime,
+    ExtraTimeSecondHalf,
+    PenaltyShootout,
     Fulltime
 }

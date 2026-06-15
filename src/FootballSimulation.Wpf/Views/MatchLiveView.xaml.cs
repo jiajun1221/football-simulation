@@ -28,6 +28,8 @@ public partial class MatchLiveView : UserControl
     private const int MaxSpeedLevel = 4;
     private const int FirstHalfEndMinute = 45;
     private const int FullTimeMinute = 90;
+    private const int ExtraTimeHalfEndMinute = 105;
+    private const int ExtraTimeEndMinute = 120;
     private const double PlayerIconSlotWidth = 72;
     private const double PlayerIconSlotHeight = 76;
     private const int MaxPendingSubstitutions = 3;
@@ -36,7 +38,7 @@ public partial class MatchLiveView : UserControl
 
     private readonly GameFlowState _state;
     private readonly Action<UserControl> _navigate;
-    private readonly bool _isSecondHalf;
+    private readonly LiveMatchSegment _segment;
     private readonly GameSessionService _gameSessionService = new();
     private readonly TransferMarketService _transferMarketService = new();
     private readonly SquadSelectionService _squadSelectionService = new();
@@ -87,12 +89,18 @@ public partial class MatchLiveView : UserControl
     private WindowState _expandedWindowState;
 
     public MatchLiveView(GameFlowState state, Action<UserControl> navigate, bool isSecondHalf)
+        : this(state, navigate, isSecondHalf ? LiveMatchSegment.SecondHalf : LiveMatchSegment.FirstHalf)
+    {
+    }
+
+    public MatchLiveView(GameFlowState state, Action<UserControl> navigate, LiveMatchSegment segment)
     {
         InitializeComponent();
 
         _state = state;
         _navigate = navigate;
-        _isSecondHalf = isSecondHalf;
+        _segment = segment;
+        _state.CurrentLiveMatchSegment = segment;
 
         MatchEventsListBox.ItemsSource = _visibleEvents;
         PitchPlayersItemsControl.ItemsSource = _pitchPlayers;
@@ -232,7 +240,7 @@ public partial class MatchLiveView : UserControl
             return false;
         }
 
-        if (!_isSecondHalf)
+        if (_segment == LiveMatchSegment.FirstHalf)
         {
             if (_state.CurrentMatch is null || !IsCurrentMatchForFixture(_state.CurrentMatch, _state.CurrentFixture))
             {
@@ -318,12 +326,26 @@ public partial class MatchLiveView : UserControl
 
     private void PrepareContinueButton()
     {
-        ContinueButton.Content = _isSecondHalf ? "End" : "Continue";
+        ContinueButton.Content = GetContinueButtonText();
         ContinueButton.Visibility = Visibility.Collapsed;
         ContinueButton.IsEnabled = false;
         CompactContinueButton.Content = ContinueButton.Content;
         CompactContinueButton.Visibility = Visibility.Collapsed;
         CompactContinueButton.IsEnabled = false;
+    }
+
+    private string GetContinueButtonText()
+    {
+        return _segment switch
+        {
+            LiveMatchSegment.FirstHalf => "Continue",
+            LiveMatchSegment.SecondHalf when ShouldRouteToExtraTimeSetup() => "Continue to Extra Time",
+            LiveMatchSegment.SecondHalf => "End",
+            LiveMatchSegment.ExtraTimeFirstHalf => "Continue Extra Time",
+            LiveMatchSegment.ExtraTimeSecondHalf when ShouldRouteToPenaltyResultPreview() => "Continue to Match Result",
+            LiveMatchSegment.ExtraTimeSecondHalf => "End",
+            _ => "Continue"
+        };
     }
 
     private async Task ResumePlaybackAsync()
@@ -370,7 +392,7 @@ public partial class MatchLiveView : UserControl
                 }
 
                 var nextMinute = _state.CurrentMatch.CurrentMinute + 1;
-                var includeFulltime = _isSecondHalf && nextMinute >= GetPhaseEndMinute();
+                var includeFulltime = ShouldAddFulltimeEvent(nextMinute);
                 var existingEventCount = _state.CurrentMatch.Events.Count;
 
                 _state.CurrentMatch = _gameSessionService.AdvanceSelectedTeamLiveMatch(
@@ -381,6 +403,7 @@ public partial class MatchLiveView : UserControl
                     nextMinute,
                     nextMinute,
                     includeFulltime);
+                ApplyCurrentSegmentPhase();
 
                 PhaseTextBlock.Text = CreatePhaseLabel(_state.CurrentMatch.CurrentMinute);
                 UpdateVenueLabel(_state.CurrentMatch);
@@ -486,7 +509,9 @@ public partial class MatchLiveView : UserControl
             return;
         }
 
-        if (_isSecondHalf && !_fixtureCompleted)
+        StoreExtraTimeResultIfNeeded();
+
+        if (ShouldCompleteFixtureAtSegmentEnd() && !_fixtureCompleted)
         {
             _gameSessionService.CompleteSelectedTeamLiveMatch(_state.League, _state.CurrentFixture, _state.CurrentMatch);
             if (_state.SelectedTeam is not null)
@@ -503,6 +528,7 @@ public partial class MatchLiveView : UserControl
             _fixtureCompleted = true;
         }
 
+        ContinueButton.Content = GetContinueButtonText();
         ContinueButton.Visibility = Visibility.Visible;
         ContinueButton.IsEnabled = true;
         CompactContinueButton.Content = ContinueButton.Content;
@@ -522,13 +548,25 @@ public partial class MatchLiveView : UserControl
         _hasNavigated = true;
         CancelPlayback();
 
-        if (_isSecondHalf)
+        if (_segment == LiveMatchSegment.FirstHalf)
         {
-            _navigate(new MatchResultView(_state, _navigate));
+            _navigate(new HalfTimeView(_state, _navigate));
             return;
         }
 
-        _navigate(new HalfTimeView(_state, _navigate));
+        if (_segment == LiveMatchSegment.SecondHalf && ShouldRouteToExtraTimeSetup())
+        {
+            _navigate(new HalfTimeView(_state, _navigate, MatchSetupMode.ExtraTimeSetup));
+            return;
+        }
+
+        if (_segment == LiveMatchSegment.ExtraTimeFirstHalf)
+        {
+            _navigate(new HalfTimeView(_state, _navigate, MatchSetupMode.ExtraTimeHalftime));
+            return;
+        }
+
+        _navigate(new MatchResultView(_state, _navigate));
     }
 
     private async void SkipButton_Click(object sender, RoutedEventArgs e)
@@ -546,7 +584,7 @@ public partial class MatchLiveView : UserControl
             while (_state.CurrentMatch.CurrentMinute < GetPhaseEndMinute())
             {
                 var nextMinute = _state.CurrentMatch.CurrentMinute + 1;
-                var includeFulltime = _isSecondHalf && nextMinute >= GetPhaseEndMinute();
+                var includeFulltime = ShouldAddFulltimeEvent(nextMinute);
                 _state.CurrentMatch = _gameSessionService.AdvanceSelectedTeamLiveMatch(
                     _state.League,
                     _state.CurrentFixture,
@@ -555,6 +593,7 @@ public partial class MatchLiveView : UserControl
                     nextMinute,
                     nextMinute,
                     includeFulltime);
+                ApplyCurrentSegmentPhase();
             }
 
             SetScore(_state.CurrentMatch.HomeScore, _state.CurrentMatch.AwayScore);
@@ -677,7 +716,8 @@ public partial class MatchLiveView : UserControl
             return false;
         }
 
-        if (_squadSelectionService.CountTeamSubstitutions(_state.CurrentMatch, opponentTeam.Name) >= MatchConstants.MaxSubstitutionsPerTeam)
+        if (_squadSelectionService.CountTeamSubstitutions(_state.CurrentMatch, opponentTeam.Name) >=
+            _squadSelectionService.GetMaxSubstitutionsForMatch(_state.CurrentMatch))
         {
             return false;
         }
@@ -846,8 +886,9 @@ public partial class MatchLiveView : UserControl
         LiveBenchListBox.ItemsSource = CreateSubstitutionPlayerCards(userTeam.Substitutes.Where(IsAvailableSubstitute), showPendingState: false, userTeam);
 
         var usedSubstitutions = _squadSelectionService.CountTeamSubstitutions(_state.CurrentMatch, userTeam.Name);
+        var maxSubstitutions = _squadSelectionService.GetMaxSubstitutionsForMatch(_state.CurrentMatch);
         SubstitutionOverlayStatusTextBlock.Text =
-            $"{MatchEngine.FormatDisplayMinute(_state.CurrentMatch, _state.CurrentMatch.CurrentMinute)} | {usedSubstitutions}/5 substitutions used. Choose one starter and one substitute.";
+            $"{MatchEngine.FormatDisplayMinute(_state.CurrentMatch, _state.CurrentMatch.CurrentMinute)} | {usedSubstitutions}/{maxSubstitutions} substitutions used. Choose one starter and one substitute.";
 
         ConfirmSubstitutionButton.IsEnabled = false;
         SubstitutionOverlay.Visibility = Visibility.Visible;
@@ -1637,7 +1678,7 @@ public partial class MatchLiveView : UserControl
 
         var userTeam = GetUserTeam();
         var usedSubstitutions = _squadSelectionService.CountTeamSubstitutions(_state.CurrentMatch, userTeam.Name);
-        return MatchConstants.MaxSubstitutionsPerTeam - usedSubstitutions;
+        return _squadSelectionService.GetMaxSubstitutionsForMatch(_state.CurrentMatch) - usedSubstitutions;
     }
 
     private void CancelPlayback()
@@ -2741,22 +2782,116 @@ public partial class MatchLiveView : UserControl
             : _state.CurrentMatch.HomeTeam;
     }
 
+    private bool ShouldAddFulltimeEvent(int nextMinute)
+    {
+        return _segment == LiveMatchSegment.SecondHalf && nextMinute >= GetPhaseEndMinute();
+    }
+
+    private void ApplyCurrentSegmentPhase()
+    {
+        if (_state.CurrentMatch is null)
+        {
+            return;
+        }
+
+        _state.CurrentMatch.CurrentPhase = _segment switch
+        {
+            LiveMatchSegment.ExtraTimeFirstHalf => MatchPhase.ExtraTimeFirstHalf,
+            LiveMatchSegment.ExtraTimeSecondHalf => MatchPhase.ExtraTimeSecondHalf,
+            LiveMatchSegment.SecondHalf when _state.CurrentMatch.CurrentPhase != MatchPhase.Fulltime => MatchPhase.SecondHalf,
+            LiveMatchSegment.FirstHalf => MatchPhase.FirstHalf,
+            _ => _state.CurrentMatch.CurrentPhase
+        };
+    }
+
+    private bool ShouldCompleteFixtureAtSegmentEnd()
+    {
+        if (_state.CurrentMatch is null || _state.CurrentFixture is null)
+        {
+            return false;
+        }
+
+        return _segment switch
+        {
+            LiveMatchSegment.SecondHalf => !ShouldRouteToExtraTimeSetup(),
+            LiveMatchSegment.ExtraTimeSecondHalf => !ShouldRouteToPenaltyResultPreview(),
+            _ => false
+        };
+    }
+
+    private bool ShouldRouteToExtraTimeSetup()
+    {
+        return _segment == LiveMatchSegment.SecondHalf &&
+            _state.CurrentFixture is not null &&
+            _state.CurrentMatch is not null &&
+            IsKnockoutFixture(_state.CurrentFixture) &&
+            _state.CurrentMatch.HomeScore == _state.CurrentMatch.AwayScore;
+    }
+
+    private bool ShouldRouteToPenaltyResultPreview()
+    {
+        return _segment == LiveMatchSegment.ExtraTimeSecondHalf &&
+            _state.CurrentFixture is not null &&
+            _state.CurrentMatch is not null &&
+            IsKnockoutFixture(_state.CurrentFixture) &&
+            _state.CurrentMatch.HomeScore == _state.CurrentMatch.AwayScore;
+    }
+
+    private void StoreExtraTimeResultIfNeeded()
+    {
+        if (_segment != LiveMatchSegment.ExtraTimeSecondHalf ||
+            _state.CurrentFixture is null ||
+            _state.CurrentMatch is null ||
+            !IsKnockoutFixture(_state.CurrentFixture))
+        {
+            return;
+        }
+
+        _state.CurrentFixture.ExtraTimeHomeScore = _state.CurrentMatch.HomeScore;
+        _state.CurrentFixture.ExtraTimeAwayScore = _state.CurrentMatch.AwayScore;
+    }
+
+    private static bool IsKnockoutFixture(Fixture fixture)
+    {
+        return fixture.IsKnockout;
+    }
+
     private int GetPhaseEndMinute()
     {
         if (_state.CurrentMatch is null)
         {
-            return _isSecondHalf ? FullTimeMinute : FirstHalfEndMinute;
+            return _segment switch
+            {
+                LiveMatchSegment.SecondHalf => FullTimeMinute,
+                LiveMatchSegment.ExtraTimeFirstHalf => ExtraTimeHalfEndMinute,
+                LiveMatchSegment.ExtraTimeSecondHalf => ExtraTimeEndMinute,
+                _ => FirstHalfEndMinute
+            };
         }
 
-        return _isSecondHalf
-            ? FullTimeMinute + _state.CurrentMatch.FirstHalfAddedMinutes + _state.CurrentMatch.SecondHalfAddedMinutes
-            : FirstHalfEndMinute + _state.CurrentMatch.FirstHalfAddedMinutes;
+        return _segment switch
+        {
+            LiveMatchSegment.SecondHalf => FullTimeMinute + _state.CurrentMatch.FirstHalfAddedMinutes + _state.CurrentMatch.SecondHalfAddedMinutes,
+            LiveMatchSegment.ExtraTimeFirstHalf => ExtraTimeHalfEndMinute,
+            LiveMatchSegment.ExtraTimeSecondHalf => ExtraTimeEndMinute,
+            _ => FirstHalfEndMinute + _state.CurrentMatch.FirstHalfAddedMinutes
+        };
     }
 
     private string CreatePhaseLabel(int currentMinute)
     {
-        var phaseText = _isSecondHalf ? "Second Half" : "First Half";
+        var phaseText = _segment switch
+        {
+            LiveMatchSegment.SecondHalf => "Second Half",
+            LiveMatchSegment.ExtraTimeFirstHalf or LiveMatchSegment.ExtraTimeSecondHalf => "Extra Time",
+            _ => "First Half"
+        };
         if (_state.CurrentMatch is null)
+        {
+            return $"{phaseText} - {currentMinute}'";
+        }
+
+        if (_segment is LiveMatchSegment.ExtraTimeFirstHalf or LiveMatchSegment.ExtraTimeSecondHalf)
         {
             return $"{phaseText} - {currentMinute}'";
         }

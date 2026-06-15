@@ -27,6 +27,7 @@ public static class PlayerNationalityDisplayService
         ["GH"] = Flag("GH", "Ghana", "ghana"),
         ["HR"] = Flag("HR", "Croatia", "croatia"),
         ["IT"] = Flag("IT", "Italy", "italy"),
+        ["JP"] = Flag("JP", "Japan", "japan"),
         ["MA"] = Flag("MA", "Morocco", "morocco"),
         ["NG"] = Flag("NG", "Nigeria", "nigeria"),
         ["NIR"] = Flag("GB-NIR", "Northern Ireland", "northern-ireland"),

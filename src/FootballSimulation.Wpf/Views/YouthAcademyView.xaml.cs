@@ -152,7 +152,7 @@ public partial class YouthAcademyView : UserControl
         SelectedYouthEmptyPanel.Visibility = Visibility.Collapsed;
         SelectedYouthDetailPanel.Visibility = Visibility.Visible;
         SelectedYouthNameTextBlock.Text = row.Name;
-        SelectedYouthFlagImage.Source = CreateImageSource(row.NationalityFlagImagePath);
+        SelectedYouthFlagImage.FlagSource = row.NationalityFlagImagePath;
         SelectedYouthNationalityTextBlock.Text = row.NationalityName;
         SelectedYouthAgeTextBlock.Text = row.Age.ToString(CultureInfo.InvariantCulture);
         SelectedYouthPositionTextBlock.Text = row.Position;
@@ -160,7 +160,10 @@ public partial class YouthAcademyView : UserControl
         SelectedYouthPotentialTextBlock.Text = row.Potential;
         SelectedYouthDevelopmentTextBlock.Text = row.Development;
         SelectedYouthValueTextBlock.Text = row.Value;
-        SelectedYouthTraitsTextBlock.Text = row.Traits;
+        SelectedYouthTraitsItemsControl.ItemsSource = row.TraitBadges;
+        SelectedYouthNoTraitsTextBlock.Visibility = row.TraitBadges.Count == 0
+            ? Visibility.Visible
+            : Visibility.Collapsed;
         SelectedYouthScoutReportTextBlock.Text = row.ScoutReport;
     }
 
@@ -318,6 +321,7 @@ public partial class YouthAcademyView : UserControl
         public string Development => Player.DevelopmentRate.ToString();
         public string Personality => Player.Personality.ToString();
         public string Traits => Player.Traits.Count == 0 ? "-" : string.Join(", ", Player.Traits.Take(2));
+        public IReadOnlyList<PlayerTraitBadge> TraitBadges => PlayerTraitBadgeHelper.Create(Player.Traits, maxVisibleTraits: 6);
         public string Value { get; private init; } = string.Empty;
         public string ScoutReport => Player.ScoutReport;
         public string PotentialBadgeText { get; private init; } = string.Empty;

@@ -1,0 +1,51 @@
+<UserControl x:Class="FootballSimulation.Wpf.Views.PenaltyShootoutView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{DynamicResource AppPageBackground}">
+    <Grid Margin="28">
+        <Border MaxWidth="760"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Background="{DynamicResource AppCardBackground}"
+                BorderBrush="{DynamicResource AppBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="24"
+                Padding="32">
+            <StackPanel>
+                <TextBlock Text="Penalty Shootout"
+                           Foreground="{DynamicResource AppTextBrush}"
+                           FontSize="34"
+                           FontWeight="Black"
+                           TextAlignment="Center" />
+                <TextBlock x:Name="FixtureTextBlock"
+                           Foreground="{DynamicResource AppMutedTextBrush}"
+                           FontSize="15"
+                           FontWeight="SemiBold"
+                           TextAlignment="Center"
+                           TextWrapping="Wrap"
+                           Margin="0,8,0,20" />
+                <TextBlock x:Name="ShootoutSummaryTextBlock"
+                           Foreground="{DynamicResource AppTextBrush}"
+                           FontSize="22"
+                           FontWeight="Black"
+                           TextAlignment="Center"
+                           TextWrapping="Wrap"
+                           Margin="0,0,0,10" />
+                <TextBlock x:Name="ShootoutDetailTextBlock"
+                           Foreground="{DynamicResource AppMutedTextBrush}"
+                           FontSize="14"
+                           TextAlignment="Center"
+                           TextWrapping="Wrap"
+                           Margin="0,0,0,26" />
+                <Button x:Name="PrimaryActionButton"
+                        Content="Start Shootout"
+                        Style="{StaticResource PrimaryTextButton}"
+                        Width="230"
+                        Height="46"
+                        HorizontalAlignment="Center"
+                        FontWeight="Bold"
+                        Click="PrimaryActionButton_Click" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

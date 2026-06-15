@@ -5464,6 +5464,7 @@ public class MatchEngine
             _fatigueService.ApplyMinuteFatigue(team, match);
             ApplyVenueFatiguePressure(team, match);
             ApplySecondWindIfNeeded(team, match);
+            ApplyExtraTimeFatiguePressure(team, match, options);
             return;
         }
 
@@ -5489,6 +5490,22 @@ public class MatchEngine
 
         ApplyVenueFatiguePressure(team, match);
         ApplySecondWindIfNeeded(team, match);
+        ApplyExtraTimeFatiguePressure(team, match, options);
+    }
+
+    private static void ApplyExtraTimeFatiguePressure(Team team, Match match, MatchSimulationOptions options)
+    {
+        if (!options.IsExtraTimeSegment && match.CurrentMinute <= MatchConstants.DefaultMatchDurationMinutes)
+        {
+            return;
+        }
+
+        foreach (var player in GetActivePitchPlayers(team))
+        {
+            var lowStaminaPressure = player.Stamina < 50 ? 0.16 : player.Stamina < 65 ? 0.10 : 0.06;
+            player.Stamina = Math.Max(0.0, player.Stamina - lowStaminaPressure * GetPositionFatiguePressureMultiplier(player));
+            player.LiveMatchModifier = Math.Clamp(player.LiveMatchModifier - 0.0015, 0.70, 1.15);
+        }
     }
 
     private static void ApplyVenueFatiguePressure(Team team, Match match)

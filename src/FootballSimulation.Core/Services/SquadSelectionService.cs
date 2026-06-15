@@ -51,9 +51,10 @@ public class SquadSelectionService
         }
 
         if (match is not null && substitutionMinute.HasValue &&
-            CountTeamSubstitutions(match, team.Name) >= MatchConstants.MaxSubstitutionsPerTeam)
+            CountTeamSubstitutions(match, team.Name) >= GetMaxSubstitutionsForMatch(match))
         {
-            return SquadSwapResult.Failed($"Maximum substitutions reached ({MatchConstants.MaxSubstitutionsPerTeam}/5).");
+            var maxSubstitutions = GetMaxSubstitutionsForMatch(match);
+            return SquadSwapResult.Failed($"Maximum substitutions reached ({maxSubstitutions}/{maxSubstitutions}).");
         }
 
         team.Players[starterIndex] = substitute;
@@ -77,6 +78,19 @@ public class SquadSelectionService
     {
         return match.Substitutions.Count(substitution =>
             string.Equals(substitution.TeamName, teamName, StringComparison.OrdinalIgnoreCase));
+    }
+
+    public int GetMaxSubstitutionsForMatch(Match match)
+    {
+        return IsExtraTimeMatch(match)
+            ? MatchConstants.MaxSubstitutionsPerTeam + MatchConstants.ExtraTimeSubstitutionBonus
+            : MatchConstants.MaxSubstitutionsPerTeam;
+    }
+
+    private static bool IsExtraTimeMatch(Match match)
+    {
+        return match.CurrentMinute > MatchConstants.DefaultMatchDurationMinutes ||
+            match.CurrentPhase is MatchPhase.ExtraTimeFirstHalf or MatchPhase.ExtraTimeHalftime or MatchPhase.ExtraTimeSecondHalf or MatchPhase.PenaltyShootout;
     }
 
     public bool WasPlayerSubstitutedOff(Match match, string teamName, string playerName)

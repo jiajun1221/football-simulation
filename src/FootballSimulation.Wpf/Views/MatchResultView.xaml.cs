@@ -66,7 +66,7 @@ public partial class MatchResultView : UserControl
 
         HomeTeamTextBlock.Text = match.HomeTeam.Name;
         AwayTeamTextBlock.Text = match.AwayTeam.Name;
-        ScoreTextBlock.Text = $"{match.HomeScore} - {match.AwayScore}";
+        ScoreTextBlock.Text = CreateScoreText(match);
         ApplyTeamHeaderColors(match.HomeTeam, HomeTeamTextBlock, HomeTeamLogoBorder);
         ApplyTeamHeaderColors(match.AwayTeam, AwayTeamTextBlock, AwayTeamLogoBorder);
         HomePlayersTitleTextBlock.Text = $"{match.HomeTeam.Name} Players";
@@ -74,6 +74,7 @@ public partial class MatchResultView : UserControl
         HomeTeamLogoImage.Source = CreateLogoSource(match.HomeTeam.Name);
         AwayTeamLogoImage.Source = CreateLogoSource(match.AwayTeam.Name);
         ResultHeaderTextBlock.Text = CreateResultHeader();
+        NextButton.Content = IsPenaltyShootoutPending() ? "Continue to Penalty Shootout" : "Next";
 
         var totalGoals = match.HomeScore + match.AwayScore;
         HomeScorersContentControl.Content = CreateGoalSummaryPanel(match, match.HomeTeam, totalGoals, summary.ManOfTheMatch);
@@ -91,6 +92,27 @@ public partial class MatchResultView : UserControl
         logoBorder.BorderBrush = ToBrush(colors.BorderColor);
     }
 
+    private string CreateScoreText(Match match)
+    {
+        var fixture = _state.CurrentFixture;
+        if (fixture?.PenaltyHomeScore is not null && fixture.PenaltyAwayScore is not null)
+        {
+            var winner = string.IsNullOrWhiteSpace(fixture.WinningTeamName)
+                ? fixture.PenaltyHomeScore > fixture.PenaltyAwayScore ? match.HomeTeam.Name : match.AwayTeam.Name
+                : fixture.WinningTeamName;
+            return $"{match.HomeScore} - {match.AwayScore}\n{winner} win {fixture.PenaltyHomeScore} - {fixture.PenaltyAwayScore} on penalties";
+        }
+
+        if (fixture?.ExtraTimeHomeScore is not null &&
+            fixture.ExtraTimeAwayScore is not null &&
+            match.HomeScore != match.AwayScore)
+        {
+            return $"{match.HomeScore} - {match.AwayScore} AET";
+        }
+
+        return $"{match.HomeScore} - {match.AwayScore}";
+    }
+
     private static Brush ToBrush(string color)
     {
         return (Brush)new BrushConverter().ConvertFromString(color)!;
@@ -98,6 +120,12 @@ public partial class MatchResultView : UserControl
 
     private void NextButton_Click(object sender, RoutedEventArgs e)
     {
+        if (IsPenaltyShootoutPending())
+        {
+            _navigate(new PenaltyShootoutView(_state, _navigate));
+            return;
+        }
+
         TrophyCelebrationService.EnqueuePostMatchCelebrations(_state, TrophyCelebrationNextRoute.RoundResult);
         try
         {
@@ -124,6 +152,19 @@ public partial class MatchResultView : UserControl
             ? $"Round {fixture.RoundNumber}"
             : fixture.RoundName;
         return $"FULL TIME - {CompetitionDisplayService.GetName(fixture.Competition)} - {roundText}";
+    }
+
+    private bool IsPenaltyShootoutPending()
+    {
+        var fixture = _state.CurrentFixture;
+        var match = _state.CurrentMatch;
+        return fixture is not null &&
+            match is not null &&
+            fixture.IsKnockout &&
+            fixture.PenaltyHomeScore is null &&
+            fixture.PenaltyAwayScore is null &&
+            _state.CurrentLiveMatchSegment == LiveMatchSegment.ExtraTimeSecondHalf &&
+            match.HomeScore == match.AwayScore;
     }
 
     private static ScorerPanel CreateGoalSummaryPanel(Match match, Team team, int totalGoals, PlayerMatchPerformance? manOfTheMatch)

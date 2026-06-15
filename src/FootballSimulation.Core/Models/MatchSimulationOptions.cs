@@ -7,4 +7,5 @@ public class MatchSimulationOptions
     public bool EnableDynamicFatigue { get; set; } = true;
     public bool EnableInjuries { get; set; } = true;
     public bool PreserveMatchStartStamina { get; set; }
+    public bool IsExtraTimeSegment { get; set; }
 }
