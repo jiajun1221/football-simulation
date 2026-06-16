@@ -138,31 +138,31 @@
                             </Style.Triggers>
                         </Style>
                     </Grid.Style>
-                    <Ellipse Width="18"
-                             Height="18"
-                             Fill="{Binding BallIndicatorBrush}"
-                             Stroke="{Binding BallIndicatorBorderBrush}"
-                             StrokeThickness="2"
-                             HorizontalAlignment="Center"
-                             VerticalAlignment="Center"
-                             Effect="{Binding BallIndicatorEffect}"
-                             RenderTransformOrigin="0.5,0.5">
-                        <Ellipse.RenderTransform>
+                    <TextBlock Text="{Binding BallIndicatorText}"
+                               Foreground="{Binding BallIndicatorForeground}"
+                               FontFamily="Segoe UI Emoji"
+                               FontSize="17"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               TextAlignment="Center"
+                               Effect="{Binding BallIndicatorEffect}"
+                               RenderTransformOrigin="0.5,0.5">
+                        <TextBlock.RenderTransform>
                             <RotateTransform />
-                        </Ellipse.RenderTransform>
-                        <Ellipse.Triggers>
-                        <EventTrigger RoutedEvent="Loaded">
-                            <BeginStoryboard>
-                                <Storyboard RepeatBehavior="Forever">
-                                    <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
-                                                     From="0"
-                                                     To="360"
-                                                     Duration="0:0:1.1" />
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </EventTrigger>
-                        </Ellipse.Triggers>
-                    </Ellipse>
+                        </TextBlock.RenderTransform>
+                        <TextBlock.Triggers>
+                            <EventTrigger RoutedEvent="Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard RepeatBehavior="Forever">
+                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                                                         From="0"
+                                                         To="360"
+                                                         Duration="0:0:1.1" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </TextBlock.Triggers>
+                    </TextBlock>
                 </Grid>
 
                 <Border Grid.Row="2"
