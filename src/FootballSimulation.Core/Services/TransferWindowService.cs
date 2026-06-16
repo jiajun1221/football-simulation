@@ -28,10 +28,11 @@ public class TransferWindowService
                 true,
                 "Open",
                 Math.Max(0, activeWindow.End - normalizedRound + 1),
-                string.Empty);
+                string.Empty,
+                GetWindowId(league, currentRound));
         }
 
-        return new TransferWindowInfo(false, "Closed", 0, "Transfer window is closed");
+        return new TransferWindowInfo(false, "Closed", 0, "Transfer window is closed", string.Empty);
     }
 
     public bool IsWindowOpen(League league, int currentRound)
@@ -63,6 +64,23 @@ public class TransferWindowService
     public bool IsDeadlineRound(League league, int currentRound)
     {
         return GetWindowPhase(league, currentRound) is TransferWindowPhase.SummerDeadline or TransferWindowPhase.JanuaryDeadline;
+    }
+
+    public string GetWindowId(League league, int currentRound)
+    {
+        return GetWindowPhase(league, currentRound) switch
+        {
+            TransferWindowPhase.Summer or TransferWindowPhase.SummerDeadline => CreateWindowId(league, "summer"),
+            TransferWindowPhase.January or TransferWindowPhase.JanuaryDeadline => CreateWindowId(league, "january"),
+            _ => string.Empty
+        };
+    }
+
+    private static string CreateWindowId(League league, string windowName)
+    {
+        var leagueId = string.IsNullOrWhiteSpace(league.LeagueId) ? "league" : league.LeagueId;
+        var season = string.IsNullOrWhiteSpace(league.Season) ? "season" : league.Season;
+        return $"{leagueId}:{season}:{windowName}";
     }
 
     private static List<(int Start, int End)> GetWindows(int maxRound)

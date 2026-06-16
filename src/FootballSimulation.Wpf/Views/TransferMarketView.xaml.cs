@@ -872,6 +872,11 @@ public partial class TransferMarketView : UserControl
                 var item = entry.Item;
                 var listing = listings.FirstOrDefault(candidate => candidate.Player.PlayerId == item.PlayerId);
                 var nationality = ResolveNationality(listing?.Player, item.PlayerName);
+                var typeText = _state.League is not null &&
+                    !string.IsNullOrWhiteSpace(item.WindowId) &&
+                    item.WindowId.Equals(_transferMarketService.GetWindowInfo(_state.League, GetCurrentRound()).WindowId, StringComparison.OrdinalIgnoreCase)
+                        ? "Recently transferred"
+                        : item.Type;
                 return new TransferHistoryRow(
                     item,
                     listing,
@@ -885,7 +890,7 @@ public partial class TransferMarketView : UserControl
                     item.ToClubName,
                     ClubLogoService.GetClubLogoPath(item.ToClubName, item.ToLeagueId),
                     TransferMarketService.FormatMoney(item.Fee),
-                    item.Type);
+                    typeText);
             })
             .ToList();
     }
@@ -906,6 +911,8 @@ public partial class TransferMarketView : UserControl
             ? new TransferWindowInfo(false, "Window Closed", 0, "No active league.")
             : _transferMarketService.GetWindowInfo(_state.League, GetCurrentRound());
         var isShortlisted = _state.TransferMarket?.ShortlistedPlayerIds.Contains(player.PlayerId, StringComparer.OrdinalIgnoreCase) == true;
+        var hasTransferredThisWindow = _state.TransferMarket is not null && _state.League is not null &&
+            _transferMarketService.HasTransferredThisWindow(_state.TransferMarket, _state.League, player, GetCurrentRound());
         var status = CreateStatusDisplay(player);
 
         _selectedListing = listing;
@@ -927,7 +934,8 @@ public partial class TransferMarketView : UserControl
             status.Tooltip,
             recommendationReason,
             offer,
-            historyItem));
+            historyItem,
+            HasTransferredThisWindow: hasTransferredThisWindow));
     }
 
     private void UpdateActionAvailability()
@@ -1300,6 +1308,7 @@ public partial class TransferMarketView : UserControl
         {
             "Offer Received" => "Offer",
             "Transfer Agreed" => "Agreed",
+            "Recently Transferred" => "Recent",
             _ => status
         };
     }
@@ -1319,6 +1328,12 @@ public partial class TransferMarketView : UserControl
         if (HasAgreedTransfer(player))
         {
             yield return "Transfer Agreed";
+        }
+
+        if (_state.TransferMarket is not null && _state.League is not null &&
+            _transferMarketService.HasTransferredThisWindow(_state.TransferMarket, _state.League, player, GetCurrentRound()))
+        {
+            yield return "Recently Transferred";
         }
 
         if (HasActiveAiOffer(player))
@@ -1351,6 +1366,7 @@ public partial class TransferMarketView : UserControl
             "Listed" => "#2563EB",
             "Offer Received" => "#8B5CF6",
             "Negotiating" => "#F59E0B",
+            "Recently Transferred" => "#64748B",
             "Injured" => "#EF4444",
             "Banned" => "#991B1B",
             "Transfer Agreed" => "#0EA5E9",

@@ -18,8 +18,7 @@ public class MatchEventFactory
     {
         var safeShooter = !string.Equals(playmaker.Name, shooter.Name, StringComparison.OrdinalIgnoreCase)
             ? shooter
-            : attackingTeam.Players.FirstOrDefault(candidate =>
-                !string.Equals(candidate.Name, playmaker.Name, StringComparison.OrdinalIgnoreCase));
+            : ResolveFirstDistinctOutfieldTeammate(attackingTeam, playmaker);
 
         var description = safeShooter is null
             ? $"{attackingTeam.Name} build an attack through {GetDisplayName(playmaker.Name)}."
@@ -1530,14 +1529,24 @@ public class MatchEventFactory
     private static Player? ResolveDistinctTeammate(Team team, Player actor, Player? preferred, Random random)
     {
         if (preferred is not null &&
-            !string.Equals(preferred.Name, actor.Name, StringComparison.OrdinalIgnoreCase))
+            !string.Equals(preferred.Name, actor.Name, StringComparison.OrdinalIgnoreCase) &&
+            IsOutfieldPlayer(preferred))
         {
             return preferred;
         }
 
         var alternatives = team.Players
-            .Where(candidate => !string.Equals(candidate.Name, actor.Name, StringComparison.OrdinalIgnoreCase))
+            .Where(candidate =>
+                !string.Equals(candidate.Name, actor.Name, StringComparison.OrdinalIgnoreCase) &&
+                IsOutfieldPlayer(candidate))
             .ToList();
+
+        if (alternatives.Count == 0)
+        {
+            alternatives = team.Players
+                .Where(candidate => !string.Equals(candidate.Name, actor.Name, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
 
         if (alternatives.Count == 0)
         {
@@ -1545,6 +1554,20 @@ public class MatchEventFactory
         }
 
         return alternatives[random.Next(alternatives.Count)];
+    }
+
+    private static Player? ResolveFirstDistinctOutfieldTeammate(Team team, Player actor)
+    {
+        return team.Players.FirstOrDefault(candidate =>
+                !string.Equals(candidate.Name, actor.Name, StringComparison.OrdinalIgnoreCase) &&
+                IsOutfieldPlayer(candidate)) ??
+            team.Players.FirstOrDefault(candidate =>
+                !string.Equals(candidate.Name, actor.Name, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static bool IsOutfieldPlayer(Player player)
+    {
+        return !PositionSuitabilityService.IsGoalkeeperCapable(player);
     }
 
     private static string? GetAssistCandidateName(Player shooter, Player? chanceCreator)

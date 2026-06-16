@@ -67,6 +67,12 @@ public enum YouthScoutRating
     EliteScout
 }
 
+public enum AcademyHistoryEventType
+{
+    Signed,
+    Promoted
+}
+
 public enum YouthScoutPositionFocus
 {
     AnyPosition,
@@ -93,6 +99,7 @@ public class YouthAcademy
     public YouthTrainingFocus TrainingFocus { get; set; } = YouthTrainingFocus.Balanced;
     public List<YouthPlayer> YouthPlayers { get; set; } = [];
     public List<YouthIntakeRecord> IntakeHistory { get; set; } = [];
+    public List<AcademyHistoryRecord> AcademyHistory { get; set; } = [];
     public List<YouthTransferRecord> TransferHistory { get; set; } = [];
     public List<YouthScoutAssignment> ScoutAssignments { get; set; } = [];
     public List<YouthScoutReport> ScoutReports { get; set; } = [];
@@ -151,6 +158,30 @@ public class YouthTransferRecord
     public string ToClubName { get; set; } = string.Empty;
     public decimal Fee { get; set; }
     public string Type { get; set; } = "Youth";
+}
+
+public class AcademyHistoryRecord
+{
+    public string HistoryId { get; set; } = Guid.NewGuid().ToString("N");
+    public AcademyHistoryEventType EventType { get; set; } = AcademyHistoryEventType.Signed;
+    public string Season { get; set; } = string.Empty;
+    public int CalendarRound { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public string PlayerId { get; set; } = string.Empty;
+    public string PlayerName { get; set; } = string.Empty;
+    public string NationalityCode { get; set; } = string.Empty;
+    public string NationalityName { get; set; } = string.Empty;
+    public string FlagImagePath { get; set; } = string.Empty;
+    public int Age { get; set; }
+    public Position Position { get; set; }
+    public string PreferredPosition { get; set; } = string.Empty;
+    public int Overall { get; set; }
+    public int PotentialMin { get; set; }
+    public int PotentialMax { get; set; }
+    public YouthDevelopmentRate DevelopmentRate { get; set; } = YouthDevelopmentRate.Normal;
+    public decimal MarketValue { get; set; }
+    public string Source { get; set; } = string.Empty;
+    public string Notes { get; set; } = string.Empty;
 }
 
 public class YouthScoutAssignment

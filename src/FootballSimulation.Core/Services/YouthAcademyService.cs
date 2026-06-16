@@ -53,6 +53,7 @@ public class YouthAcademyService
             academy.ClubName = team.Name;
             academy.YouthPlayers ??= [];
             academy.IntakeHistory ??= [];
+            academy.AcademyHistory ??= [];
             academy.TransferHistory ??= [];
             academy.ScoutAssignments ??= [];
             academy.ScoutReports ??= [];
@@ -60,6 +61,8 @@ public class YouthAcademyService
             {
                 NormalizeYouthPlayer(player, academy);
             }
+
+            BackfillAcademyHistory(academy, season);
 
             foreach (var report in academy.ScoutReports)
             {
@@ -90,6 +93,14 @@ public class YouthAcademyService
             foreach (var player in players)
             {
                 academy.YouthPlayers.Add(player);
+                RecordAcademyHistory(
+                    academy,
+                    player,
+                    AcademyHistoryEventType.Signed,
+                    season,
+                    1,
+                    "Seasonal Intake",
+                    $"Joined academy intake with {player.CurrentOVR} OVR and {player.PotentialMin}-{player.PotentialMax} potential.");
                 createdPlayers.Add(player);
             }
 
@@ -125,6 +136,14 @@ public class YouthAcademyService
 
         var player = _generator.GenerateScoutDiscovery(academy, team, league.Season, currentRound);
         academy.YouthPlayers.Add(player);
+        RecordAcademyHistory(
+            academy,
+            player,
+            AcademyHistoryEventType.Signed,
+            league.Season,
+            currentRound,
+            "Scout Discovery",
+            $"Discovered by scouts with {player.CurrentOVR} OVR and {player.PotentialMin}-{player.PotentialMax} potential.");
         academy.IntakeHistory.Add(new YouthIntakeRecord
         {
             Season = league.Season,
@@ -166,7 +185,7 @@ public class YouthAcademyService
         ApplyAiAcademyLogic(league);
     }
 
-    public YouthOperationResult PromoteYouthPlayer(League league, Team team, string youthPlayerId)
+    public YouthOperationResult PromoteYouthPlayer(League league, Team team, string youthPlayerId, int currentRound = 0)
     {
         EnsureAcademies(league);
         var academy = GetAcademy(league, team.Name);
@@ -184,6 +203,14 @@ public class YouthAcademyService
 
         var player = CreateSeniorPlayer(youthPlayer, team);
         team.Substitutes.Add(player);
+        RecordAcademyHistory(
+            academy,
+            youthPlayer,
+            AcademyHistoryEventType.Promoted,
+            league.Season,
+            currentRound,
+            "Senior Promotion",
+            $"Promoted to senior squad as #{player.SquadNumber} with {player.OverallRating} OVR.");
         youthPlayer.IsPromoted = true;
         academy.YouthPlayers.Remove(youthPlayer);
         return new YouthOperationResult(true, $"{youthPlayer.Name} promoted to the senior squad.", youthPlayer, player);
@@ -287,10 +314,93 @@ public class YouthAcademyService
             academy.ClubName.Equals(clubName, StringComparison.OrdinalIgnoreCase));
     }
 
+    public void RecordAcademySigning(
+        YouthAcademy academy,
+        YouthPlayer player,
+        string season,
+        int currentRound,
+        string source,
+        string notes)
+    {
+        RecordAcademyHistory(academy, player, AcademyHistoryEventType.Signed, season, currentRound, source, notes);
+    }
+
     public static YouthAcademy? FindAcademy(IEnumerable<YouthAcademy> academies, string clubName)
     {
         return academies.FirstOrDefault(academy =>
             academy.ClubName.Equals(clubName, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static void BackfillAcademyHistory(YouthAcademy academy, string season)
+    {
+        foreach (var player in academy.YouthPlayers.Where(player => !player.IsPromoted))
+        {
+            if (HasHistoryRecord(academy, player.PlayerId, player.Name, AcademyHistoryEventType.Signed))
+            {
+                continue;
+            }
+
+            RecordAcademyHistory(
+                academy,
+                player,
+                AcademyHistoryEventType.Signed,
+                season,
+                player.IntakeSeason > 0 ? player.IntakeSeason : 1,
+                "Existing Academy",
+                $"Already in academy with {player.CurrentOVR} OVR and {player.PotentialMin}-{player.PotentialMax} potential.");
+        }
+    }
+
+    private static void RecordAcademyHistory(
+        YouthAcademy academy,
+        YouthPlayer player,
+        AcademyHistoryEventType eventType,
+        string season,
+        int currentRound,
+        string source,
+        string notes)
+    {
+        academy.AcademyHistory ??= [];
+        if (HasHistoryRecord(academy, player.PlayerId, player.Name, eventType))
+        {
+            return;
+        }
+
+        academy.AcademyHistory.Add(new AcademyHistoryRecord
+        {
+            EventType = eventType,
+            Season = season,
+            CalendarRound = Math.Max(0, currentRound),
+            PlayerId = player.PlayerId,
+            PlayerName = player.Name,
+            NationalityCode = player.NationalityCode,
+            NationalityName = player.NationalityName,
+            FlagImagePath = player.FlagImagePath,
+            Age = player.Age,
+            Position = player.Position,
+            PreferredPosition = player.PreferredPosition,
+            Overall = player.CurrentOVR,
+            PotentialMin = player.PotentialMin,
+            PotentialMax = player.PotentialMax,
+            DevelopmentRate = player.DevelopmentRate,
+            MarketValue = player.MarketValue,
+            Source = source,
+            Notes = notes
+        });
+    }
+
+    private static bool HasHistoryRecord(
+        YouthAcademy academy,
+        string playerId,
+        string playerName,
+        AcademyHistoryEventType eventType)
+    {
+        academy.AcademyHistory ??= [];
+        return academy.AcademyHistory.Any(record =>
+            record.EventType == eventType &&
+            (!string.IsNullOrWhiteSpace(playerId) &&
+                record.PlayerId.Equals(playerId, StringComparison.OrdinalIgnoreCase) ||
+                record.PlayerName.Equals(playerName, StringComparison.OrdinalIgnoreCase)));
     }
 
     private void ApplyAiAcademyLogic(League league)

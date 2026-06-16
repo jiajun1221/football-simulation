@@ -1,3 +1,5 @@
+using System.Windows.Media.Effects;
+
 namespace FootballSimulation.Wpf.Models;
 
 public class LivePlayerIconViewModel
@@ -52,6 +54,7 @@ public class LivePlayerIconViewModel
     public string BallIndicatorBrush { get; init; } = "#FFFFFF";
     public string BallIndicatorBorderBrush { get; init; } = "#111827";
     public string BallIndicatorForeground { get; init; } = "#111827";
+    public DropShadowEffect? BallIndicatorEffect { get; init; }
     public string BallIndicatorTooltip { get; init; } = string.Empty;
     public string DetailText { get; init; } = string.Empty;
     public string CardsText { get; init; } = "None";

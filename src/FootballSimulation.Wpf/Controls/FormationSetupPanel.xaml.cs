@@ -46,7 +46,7 @@ public partial class FormationSetupPanel : UserControl
         FormationComboBox.SelectedValue = FormationCatalogService.NormalizeFormationName(team.Formation);
         TacticalSettingsPanel.LoadTactics(team.Tactics);
         _pitchSlots = team.Players.Count == 11 ? team.Players.ToList() : OrderPlayersForPitch(team.Players, team.Formation).ToList();
-        team.Players = _pitchSlots.ToList();
+        ApplyPitchSlotsToTeam();
         AssignFormationPositions();
         RefreshAll();
         RefreshPresetControls();
@@ -57,8 +57,52 @@ public partial class FormationSetupPanel : UserControl
     {
         if (_team is null) { return; }
         if (FormationComboBox.SelectedValue is string formation) { _team.Formation = formation; }
-        _team.Players = _pitchSlots.ToList();
+        ApplyPitchSlotsToTeam();
         TacticalSettingsPanel.ApplyTo(_team.Tactics);
+    }
+
+    private void ApplyPitchSlotsToTeam()
+    {
+        if (_team is null)
+        {
+            return;
+        }
+
+        var pitchPlayers = _pitchSlots
+            .Where(player => player is not null)
+            .DistinctBy(CreateRosterKey)
+            .ToList();
+        var pitchKeys = pitchPlayers
+            .Select(CreateRosterKey)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var remainingPlayers = _team.Players
+            .Concat(_team.Substitutes)
+            .Where(player => !pitchKeys.Contains(CreateRosterKey(player)))
+            .DistinctBy(CreateRosterKey)
+            .ToList();
+
+        foreach (var player in pitchPlayers)
+        {
+            player.IsStarter = true;
+            player.IsOnPitch = true;
+        }
+
+        foreach (var player in remainingPlayers)
+        {
+            player.IsStarter = false;
+            player.IsOnPitch = false;
+        }
+
+        _pitchSlots = pitchPlayers;
+        _team.Players = pitchPlayers;
+        _team.Substitutes = remainingPlayers;
+    }
+
+    private static string CreateRosterKey(Player player)
+    {
+        return !string.IsNullOrWhiteSpace(player.PlayerId)
+            ? player.PlayerId
+            : player.Name;
     }
 
     private static ICollectionView CreateFormationOptionsView()
@@ -436,7 +480,7 @@ public partial class FormationSetupPanel : UserControl
             if (!_isLoadingSetup)
             {
                 _pitchSlots = OrderPlayersForPitch(_pitchSlots, formation).Take(11).ToList();
-                _team.Players = _pitchSlots.ToList();
+                ApplyPitchSlotsToTeam();
             }
         }
         RefreshAll();
@@ -511,7 +555,7 @@ public partial class FormationSetupPanel : UserControl
     private void SwapStarterWithSub(Player starter, Player substitute)
     {
         if (_team is null) { return; }
-        _team.Players = _pitchSlots.ToList();
+        ApplyPitchSlotsToTeam();
         var slot = starter.AssignedPosition;
         var result = _squadSelectionService.SwapStarterWithSubstitute(_team, starter, substitute);
         if (!result.Success) { MessageBox.Show(result.Message); return; }
@@ -540,7 +584,7 @@ public partial class FormationSetupPanel : UserControl
         }
         var outOfPositionWarning = CreateOutOfPositionSwapWarning(first, firstSlot, second, secondSlot);
         (_pitchSlots[firstIndex], _pitchSlots[secondIndex]) = (_pitchSlots[secondIndex], _pitchSlots[firstIndex]);
-        _team.Players = _pitchSlots.ToList();
+        ApplyPitchSlotsToTeam();
         AssignFormationPositions();
         RefreshAll();
         NotifyChanged();

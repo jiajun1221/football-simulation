@@ -260,6 +260,12 @@ public partial class HalfTimeView : UserControl
         if (selectedPlayer is null)
         {
             Debug.WriteLine($"[LineupWarning] No compatible player available for {normalizedSlot} pitch slot.");
+            selectedPlayer = remainingPlayers
+                .Where(player => !PositionSuitabilityService.IsGoalkeeperCapable(player))
+                .OrderByDescending(player => player.OverallRating)
+                .ThenByDescending(player => player.Attack + player.Passing + player.Finishing)
+                .ThenBy(player => player.SquadNumber <= 0 ? int.MaxValue : player.SquadNumber)
+                .FirstOrDefault();
         }
 
         return selectedPlayer;

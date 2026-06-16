@@ -340,6 +340,12 @@ public partial class PreMatchView : UserControl
         if (selectedPlayer is null)
         {
             Debug.WriteLine($"[LineupWarning] No compatible player available for {normalizedSlot} pitch slot.");
+            selectedPlayer = remainingPlayers
+                .Where(player => !PositionSuitabilityService.IsGoalkeeperCapable(player))
+                .OrderByDescending(player => player.OverallRating)
+                .ThenByDescending(player => player.Attack + player.Passing + player.Finishing)
+                .ThenBy(player => player.SquadNumber <= 0 ? int.MaxValue : player.SquadNumber)
+                .FirstOrDefault();
         }
 
         return selectedPlayer;
@@ -1319,6 +1325,45 @@ public partial class PreMatchView : UserControl
 
         SaveSetup(_state.SelectedTeam);
         _navigate(new MatchLiveView(_state, _navigate, isSecondHalf: false));
+    }
+
+    private void TestPenaltyShootoutButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_state.SelectedTeam is null || _state.CurrentFixture is null)
+        {
+            MessageBox.Show("No fixture is available for penalty shootout practice.");
+            return;
+        }
+
+        var goalkeeperValidation = ReconcileUnavailablePlayers(_state.SelectedTeam);
+        if (!goalkeeperValidation.IsValid)
+        {
+            MessageBox.Show(goalkeeperValidation.Message ?? LineupValidationService.NoAvailableGoalkeeperMessage);
+            return;
+        }
+
+        SaveSetup(_state.SelectedTeam);
+        var previousMatch = _state.CurrentMatch;
+        var previousSegment = _state.CurrentLiveMatchSegment;
+        var fixture = _state.CurrentFixture;
+        _state.CurrentMatch = new Match
+        {
+            HomeTeam = fixture.HomeTeam,
+            AwayTeam = fixture.AwayTeam,
+            HomeScore = 2,
+            AwayScore = 2,
+            CurrentMinute = 120,
+            CurrentPhase = MatchPhase.PenaltyShootout
+        };
+        _state.CurrentLiveMatchSegment = LiveMatchSegment.ExtraTimeSecondHalf;
+
+        _navigate(new PenaltyShootoutView(
+            _state,
+            _navigate,
+            isPracticeMode: true,
+            practiceReturnFactory: () => new PreMatchView(_state, _navigate),
+            previousMatch,
+            previousSegment));
     }
 
     private void BackToDashboardButton_Click(object sender, RoutedEventArgs e)

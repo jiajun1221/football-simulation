@@ -96,6 +96,7 @@ public class TransferMarketService
         leagueState.Teams = activeLeague.Teams;
         EnsureTeamPlayers(activeLeague.Teams, activeLeague.LeagueId);
         EnrichMissingPlayerData(activeLeague.Teams, activeLeague.LeagueId);
+        SyncSquadsFromTransferHistory(state);
 
         foreach (var team in activeLeague.Teams)
         {
@@ -180,10 +181,21 @@ public class TransferMarketService
             return CreateBlockedOffer(state, playerId, selectedTeam, fee, currentRound, TransferNotificationType.WindowClosed, "Transfer window is closed.");
         }
 
+        RefreshTransferWindowStatuses(state, activeLeague, currentRound);
         var listing = GetAllListings(state, activeLeague.PlayerStats).First(item => item.Player.PlayerId == playerId);
         if (listing.Team == selectedTeam)
         {
             return CreateBlockedOffer(state, playerId, selectedTeam, fee, currentRound, TransferNotificationType.Info, "You cannot bid for your own player.");
+        }
+
+        if (HasTransferredThisWindow(state, activeLeague, listing.Player, currentRound))
+        {
+            return CreateBlockedOffer(state, playerId, selectedTeam, fee, currentRound, TransferNotificationType.Info, "Player already moved during this transfer window.");
+        }
+
+        if (HasActiveOfferForPlayer(state, playerId))
+        {
+            return CreateBlockedOffer(state, playerId, selectedTeam, fee, currentRound, TransferNotificationType.Info, "Player already has an active transfer deal.");
         }
 
         var buyerFinance = _financeService.GetOrCreateFinance(state, activeLeague.LeagueId, selectedTeam);
@@ -203,8 +215,10 @@ public class TransferMarketService
             PlayerId = listing.Player.PlayerId,
             PlayerName = listing.Player.Name,
             FromLeagueId = listing.LeagueId,
+            FromClubId = GetClubId(listing.LeagueId, listing.Team.Name),
             FromClubName = listing.Team.Name,
             ToLeagueId = activeLeague.LeagueId,
+            ToClubId = GetClubId(activeLeague.LeagueId, selectedTeam.Name),
             ToClubName = selectedTeam.Name,
             Fee = fee,
             WeeklyWage = proposedWage,
@@ -226,9 +240,20 @@ public class TransferMarketService
         Player player,
         int currentRound)
     {
+        RefreshTransferWindowStatuses(state, activeLeague, currentRound);
         if (player.RejectTransferOffers || player.TransferStatus == PlayerTransferStatus.Unavailable)
         {
             throw new InvalidOperationException($"{player.Name} is marked as untouchable.");
+        }
+
+        if (HasTransferredThisWindow(state, activeLeague, player, currentRound))
+        {
+            throw new InvalidOperationException($"{player.Name} already moved during this transfer window.");
+        }
+
+        if (HasActiveOfferForPlayer(state, player.PlayerId))
+        {
+            throw new InvalidOperationException($"{player.Name} already has an active transfer deal.");
         }
 
         var marketValue = _valueCalculator.CalculateMarketValue(player, activeLeague.LeagueId, activeLeague.PlayerStats);
@@ -259,8 +284,10 @@ public class TransferMarketService
             PlayerId = player.PlayerId,
             PlayerName = player.Name,
             FromLeagueId = activeLeague.LeagueId,
+            FromClubId = GetClubId(activeLeague.LeagueId, selectedTeam.Name),
             FromClubName = selectedTeam.Name,
             ToLeagueId = buyerLeagueId,
+            ToClubId = GetClubId(buyerLeagueId, buyerTeam.Name),
             ToClubName = buyerTeam.Name,
             Fee = fee,
             Status = isWindowOpen ? OfferStatus.Pending : OfferStatus.PendingUntilWindowOpens,
@@ -297,7 +324,10 @@ public class TransferMarketService
         var maxOffers = _random.Next(1, 4);
         var targets = selectedTeam.Players.Concat(selectedTeam.Substitutes)
             .Where(player => !player.RejectTransferOffers)
-            .Where(player => player.TransferStatus != PlayerTransferStatus.Transferred)
+            .Where(player => player.TransferStatus is not PlayerTransferStatus.Transferred and not PlayerTransferStatus.RecentlyTransferred)
+            .Where(player => !HasTransferredThisWindow(state, activeLeague, player, currentRound))
+            .Where(player => !HasActiveOfferForPlayer(state, player.PlayerId))
+            .Where(player => player.TransferStatus == PlayerTransferStatus.Listed || player.InjuryRecoveryMatches <= 4)
             .Where(player => !existingPlayerIds.Contains(player.PlayerId))
             .OrderByDescending(player => player.TransferStatus == PlayerTransferStatus.Listed)
             .ThenBy(_ => _random.Next())
@@ -343,6 +373,7 @@ public class TransferMarketService
     public void RunAiTransferActivity(TransferMarketState state, League activeLeague, Team selectedTeam, int currentRound)
     {
         var windowPhase = _windowService.GetWindowPhase(activeLeague, currentRound);
+        RefreshTransferWindowStatuses(state, activeLeague, currentRound);
         if (windowPhase != TransferWindowPhase.Closed)
         {
             ProcessAgreedTransfers(state, activeLeague, currentRound);
@@ -377,6 +408,9 @@ public class TransferMarketService
             .Where(listing => listing.Team != selectedTeam)
             .Where(listing => listing.Team.Name != "Free Agents")
             .Where(listing => listing.Player.TransferStatus != PlayerTransferStatus.Unavailable)
+            .Where(listing => listing.Player.TransferStatus != PlayerTransferStatus.RecentlyTransferred)
+            .Where(listing => !HasTransferredThisWindow(state, activeLeague, listing.Player, currentRound))
+            .Where(listing => !HasActiveOfferForPlayer(state, listing.Player.PlayerId))
             .Where(listing => !listing.Player.IsInjured)
             .ToList();
         var buyers = GetAiTransferBuyers(state, selectedTeam)
@@ -400,7 +434,15 @@ public class TransferMarketService
                 continue;
             }
 
-            if (CompleteTransfer(state, candidate.Listing, buyer.LeagueId, buyer.Team, candidate.Fee, currentRound, candidate.Reason))
+            if (CompleteTransfer(
+                state,
+                candidate.Listing,
+                buyer.LeagueId,
+                buyer.Team,
+                candidate.Fee,
+                currentRound,
+                _windowService.GetWindowId(activeLeague, currentRound),
+                candidate.Reason))
             {
                 movedPlayerIds.Add(candidate.Listing.Player.PlayerId);
                 completedTransfers++;
@@ -442,6 +484,7 @@ public class TransferMarketService
         var candidates = listings
             .Where(listing => !movedPlayerIds.Contains(listing.Player.PlayerId))
             .Where(listing => listing.Team != buyer.Team)
+            .Where(listing => !PlayerBelongsToTeam(listing.Player, buyer.LeagueId, buyer.Team))
             .Where(listing => CanAiClubTargetPlayer(buyer, listing, windowPhase))
             .Select(listing =>
             {
@@ -795,6 +838,7 @@ public class TransferMarketService
             return;
         }
 
+        RefreshTransferWindowStatuses(state, activeLeague, currentRound);
         foreach (var offer in state.Offers
             .Where(offer => offer.Status == OfferStatus.AgreedForNextWindow)
             .ToList())
@@ -824,6 +868,17 @@ public class TransferMarketService
         return state.Offers.Any(offer =>
             offer.PlayerId.Equals(playerId, StringComparison.OrdinalIgnoreCase) &&
             offer.Status is OfferStatus.Pending or OfferStatus.PendingUntilWindowOpens or OfferStatus.Countered or OfferStatus.AgreedForNextWindow);
+    }
+
+    private static void WithdrawActiveTransferDealsForPlayer(TransferMarketState state, string playerId)
+    {
+        foreach (var offer in state.Offers.Where(offer =>
+            offer.PlayerId.Equals(playerId, StringComparison.OrdinalIgnoreCase) &&
+            offer.Status is OfferStatus.Pending or OfferStatus.PendingUntilWindowOpens or OfferStatus.Countered or OfferStatus.AgreedForNextWindow))
+        {
+            offer.Status = OfferStatus.Withdrawn;
+            offer.Message = "Withdrawn because the player has already moved during this transfer window.";
+        }
     }
 
     private (string LeagueId, Team Team, double NeedScore)? SelectAiBuyerForPlayer(
@@ -1192,7 +1247,7 @@ public class TransferMarketService
             return;
         }
 
-        if (!CompleteTransfer(state, listing, activeLeague.LeagueId, selectedTeam, offerFee, currentRound, "Permanent"))
+        if (!CompleteTransfer(state, listing, activeLeague.LeagueId, selectedTeam, offerFee, currentRound, _windowService.GetWindowId(activeLeague, currentRound), "Permanent"))
         {
             offer.Status = OfferStatus.Withdrawn;
             offer.Message = $"{selectedTeam.Name} could not complete the transfer for {listing.Player.Name}.";
@@ -1223,7 +1278,16 @@ public class TransferMarketService
 
         var buyer = FindTeam(state, offer.ToLeagueId, offer.ToClubName);
         var fee = offer.CounterFee ?? offer.Fee;
-        if (!CompleteTransfer(state, listing, offer.ToLeagueId, buyer, fee, currentRound, type, enforceBuyerBudget: offer.IsUserOffer))
+        if (!CompleteTransfer(
+            state,
+            listing,
+            offer.ToLeagueId,
+            buyer,
+            fee,
+            currentRound,
+            _windowService.GetWindowId(activeLeague, currentRound),
+            type,
+            enforceBuyerBudget: offer.IsUserOffer))
         {
             offer.Status = OfferStatus.Withdrawn;
             offer.Message = $"{offer.ToClubName} could not complete the transfer for {offer.PlayerName}.";
@@ -1245,6 +1309,7 @@ public class TransferMarketService
         Team buyingTeam,
         decimal fee,
         int currentRound,
+        string windowId,
         string type,
         bool enforceBuyerBudget = true)
     {
@@ -1266,47 +1331,169 @@ public class TransferMarketService
             return false;
         }
 
+        if (string.IsNullOrWhiteSpace(windowId) || HasTransferredThisWindow(state, player, windowId))
+        {
+            AddNotification(state, TransferNotificationType.Info, $"{player.Name} already moved during this transfer window.", currentRound);
+            return false;
+        }
+
         if (state.FreeAgents.Remove(player))
         {
             fee = 0;
             type = "Free Agent";
         }
-        else
-        {
-            RemovePlayerFromTeam(sellingTeam, player);
-        }
 
-        player.TransferStatus = PlayerTransferStatus.None;
         player.ContractEndYear = PlayerContractService.DefaultSeasonEndYear + GetNewSigningContractYears(player);
         player.WeeklyWage = proposedWage;
         player.ReleaseClause = PlayerContractService.EstimateReleaseClause(player, fee, toLeagueId);
         player.ContractStatus = PlayerContractStatus.Active;
-        player.IsStarter = false;
-        player.IsOnPitch = false;
-        buyingTeam.Substitutes.Add(player);
 
-        buyerFinance.TransferSpent += fee;
-        sellerFinance.TransferIncome += fee;
-        buyerFinance.WageSpent = ClubFinanceService.CalculateWageSpent(buyingTeam);
-        sellerFinance.WageSpent = ClubFinanceService.CalculateWageSpent(sellingTeam);
-
-        state.TransferHistory.Add(new TransferHistoryItem
+        var transfer = new TransferHistoryItem
         {
             RoundNumber = currentRound,
             PlayerId = player.PlayerId,
             PlayerName = player.Name,
             FromLeagueId = listing.LeagueId,
+            FromClubId = GetClubId(listing.LeagueId, sellingTeam.Name),
             FromClubName = sellingTeam.Name,
             ToLeagueId = toLeagueId,
+            ToClubId = GetClubId(toLeagueId, buyingTeam.Name),
             ToClubName = buyingTeam.Name,
+            WindowId = windowId,
             Fee = fee,
             WeeklyWage = player.WeeklyWage,
             ContractEndYear = player.ContractEndYear,
             SquadRole = player.Role,
             Type = type
-        });
+        };
+
+        if (!ApplyCompletedTransfer(state, transfer, player, saveHistory: true))
+        {
+            return false;
+        }
+
+        WithdrawActiveTransferDealsForPlayer(state, player.PlayerId);
+        buyerFinance.TransferSpent += fee;
+        sellerFinance.TransferIncome += fee;
+        buyerFinance.WageSpent = ClubFinanceService.CalculateWageSpent(buyingTeam);
+        sellerFinance.WageSpent = ClubFinanceService.CalculateWageSpent(sellingTeam);
 
         AddNotification(state, TransferNotificationType.TransferCompleted, $"Transfer completed: {player.Name} joined {buyingTeam.Name} for {FormatMoney(fee)}.", currentRound);
+        return true;
+    }
+
+    public void SyncSquadsFromTransferHistory(TransferMarketState state)
+    {
+        foreach (var transfer in state.TransferHistory
+            .Where(transfer => !string.IsNullOrWhiteSpace(transfer.PlayerId))
+            .OrderBy(transfer => transfer.RoundNumber)
+            .ToList())
+        {
+            var player = FindPlayerOrDefault(state, transfer.PlayerId);
+            if (player is null)
+            {
+                continue;
+            }
+
+            ApplyCompletedTransfer(state, transfer, player, saveHistory: false);
+        }
+    }
+
+    public bool HasTransferredThisWindow(TransferMarketState state, League activeLeague, Player player, int currentRound)
+    {
+        var windowId = _windowService.GetWindowId(activeLeague, currentRound);
+        return HasTransferredThisWindow(state, player, windowId);
+    }
+
+    public void RefreshTransferWindowStatuses(TransferMarketState state, League activeLeague, int currentRound)
+    {
+        var windowId = _windowService.GetWindowId(activeLeague, currentRound);
+        if (string.IsNullOrWhiteSpace(windowId))
+        {
+            return;
+        }
+
+        foreach (var player in state.Leagues
+            .SelectMany(league => league.Teams)
+            .SelectMany(team => team.Players.Concat(team.Substitutes))
+            .Concat(state.FreeAgents))
+        {
+            if (player.TransferStatus == PlayerTransferStatus.RecentlyTransferred &&
+                !player.LastTransferWindowId.Equals(windowId, StringComparison.OrdinalIgnoreCase))
+            {
+                player.TransferStatus = PlayerTransferStatus.None;
+            }
+        }
+    }
+
+    private static bool HasTransferredThisWindow(TransferMarketState state, Player player, string windowId)
+    {
+        return !string.IsNullOrWhiteSpace(windowId) &&
+            (player.LastTransferWindowId.Equals(windowId, StringComparison.OrdinalIgnoreCase) ||
+                state.TransferHistory.Any(history =>
+                    history.PlayerId.Equals(player.PlayerId, StringComparison.OrdinalIgnoreCase) &&
+                    history.WindowId.Equals(windowId, StringComparison.OrdinalIgnoreCase)));
+    }
+
+    private bool ApplyCompletedTransfer(
+        TransferMarketState state,
+        TransferHistoryItem transfer,
+        Player player,
+        bool saveHistory)
+    {
+        var windowId = transfer.WindowId;
+        if (saveHistory && HasTransferredThisWindow(state, player, windowId))
+        {
+            return false;
+        }
+
+        var fromTeam = FindTeamOrDefault(state, transfer.FromLeagueId, transfer.FromClubId, transfer.FromClubName);
+        var toTeam = FindTeamOrDefault(state, transfer.ToLeagueId, transfer.ToClubId, transfer.ToClubName);
+        if (toTeam is null)
+        {
+            return false;
+        }
+
+        var affectedTeams = new HashSet<Team>();
+        foreach (var team in GetAllTeams(state).Select(item => item.Team))
+        {
+            if (TeamContainsPlayer(team, player))
+            {
+                RemovePlayerFromTeam(team, player);
+                affectedTeams.Add(team);
+            }
+        }
+
+        state.FreeAgents.RemoveAll(candidate => candidate.PlayerId.Equals(player.PlayerId, StringComparison.OrdinalIgnoreCase));
+
+        player.PreviousClubId = string.IsNullOrWhiteSpace(transfer.FromClubId)
+            ? fromTeam is null ? player.ClubId : GetClubId(transfer.FromLeagueId, fromTeam.Name)
+            : transfer.FromClubId;
+        player.ClubId = string.IsNullOrWhiteSpace(transfer.ToClubId)
+            ? GetClubId(transfer.ToLeagueId, toTeam.Name)
+            : transfer.ToClubId;
+        player.LastTransferRound = transfer.RoundNumber;
+        player.LastTransferWindowId = windowId;
+        player.TransferStatus = PlayerTransferStatus.RecentlyTransferred;
+        player.IsStarter = false;
+        player.IsOnPitch = false;
+
+        if (!TeamContainsPlayer(toTeam, player))
+        {
+            toTeam.Substitutes.Add(player);
+        }
+
+        affectedTeams.Add(toTeam);
+        foreach (var team in affectedTeams)
+        {
+            RepairClubLineup(team);
+        }
+
+        if (saveHistory)
+        {
+            state.TransferHistory.Add(transfer);
+        }
+
         return true;
     }
 
@@ -1338,6 +1525,44 @@ public class TransferMarketService
         replacement.IsStarter = true;
         replacement.IsOnPitch = true;
         team.Players.Add(replacement);
+    }
+
+    private static void RepairClubLineup(Team team)
+    {
+        foreach (var player in team.Players)
+        {
+            player.IsStarter = true;
+            player.IsOnPitch = true;
+        }
+
+        foreach (var player in team.Substitutes)
+        {
+            player.IsStarter = false;
+            player.IsOnPitch = false;
+        }
+
+        while (team.Players.Count < 11 && team.Substitutes.Count > 0)
+        {
+            var replacement = team.Substitutes
+                .OrderByDescending(player => player.OverallRating)
+                .First();
+            team.Substitutes.Remove(replacement);
+            replacement.IsStarter = true;
+            replacement.IsOnPitch = true;
+            team.Players.Add(replacement);
+        }
+    }
+
+    private static bool TeamContainsPlayer(Team team, Player player)
+    {
+        return team.Players.Concat(team.Substitutes)
+            .Any(candidate => candidate.PlayerId.Equals(player.PlayerId, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static bool PlayerBelongsToTeam(Player player, string leagueId, Team team)
+    {
+        return player.ClubId.Equals(GetClubId(leagueId, team.Name), StringComparison.OrdinalIgnoreCase) ||
+            TeamContainsPlayer(team, player);
     }
 
     private TransferOffer CreateBlockedOffer(
@@ -1519,12 +1744,34 @@ public class TransferMarketService
             .First(team => team.Name.Equals(clubName, StringComparison.OrdinalIgnoreCase));
     }
 
+    private Team? FindTeamOrDefault(TransferMarketState state, string leagueId, string clubId, string clubName)
+    {
+        return state.Leagues
+            .Where(league => string.IsNullOrWhiteSpace(leagueId) || league.LeagueId.Equals(leagueId, StringComparison.OrdinalIgnoreCase))
+            .SelectMany(league => league.Teams.Select(team => new
+            {
+                league.LeagueId,
+                Team = team,
+                ClubId = GetClubId(league.LeagueId, team.Name)
+            }))
+            .FirstOrDefault(item =>
+                (!string.IsNullOrWhiteSpace(clubId) && item.ClubId.Equals(clubId, StringComparison.OrdinalIgnoreCase)) ||
+                (!string.IsNullOrWhiteSpace(clubName) && item.Team.Name.Equals(clubName, StringComparison.OrdinalIgnoreCase)))?.Team;
+    }
+
     private Player FindPlayer(TransferMarketState state, string playerId)
+    {
+        return FindPlayerOrDefault(state, playerId) ??
+            throw new InvalidOperationException($"Player '{playerId}' was not found in the transfer market.");
+    }
+
+    private static Player? FindPlayerOrDefault(TransferMarketState state, string playerId)
     {
         return state.Leagues
             .SelectMany(league => league.Teams)
             .SelectMany(team => team.Players.Concat(team.Substitutes))
-            .First(player => player.PlayerId.Equals(playerId, StringComparison.OrdinalIgnoreCase));
+            .Concat(state.FreeAgents)
+            .FirstOrDefault(player => player.PlayerId.Equals(playerId, StringComparison.OrdinalIgnoreCase));
     }
 
     private static string GetStatusText(Player player)
@@ -1540,6 +1787,7 @@ public class TransferMarketService
             PlayerTransferStatus.Negotiating => "Negotiating",
             PlayerTransferStatus.Unavailable => "Unavailable",
             PlayerTransferStatus.Transferred => "Transferred",
+            PlayerTransferStatus.RecentlyTransferred => "Recently Transferred",
             _ => player.IsInjured ? "Injured" : "Available"
         };
     }
@@ -1823,6 +2071,7 @@ public class TransferMarketService
             foreach (var player in team.Players.Concat(team.Substitutes))
             {
                 EnsurePlayerId(player, leagueId, team.Name);
+                player.ClubId = GetClubId(leagueId, team.Name);
                 PlayerAttributeService.ApplyMissingAttributes(player);
                 PlayerContractService.EnsureContract(player, leagueId);
                 if (player.TransferStatus == PlayerTransferStatus.Transferred)
@@ -1841,6 +2090,12 @@ public class TransferMarketService
         }
 
         player.PlayerId = $"{leagueId}:{NormalizeKey(teamName)}:{NormalizeKey(player.Name)}:{player.SquadNumber}";
+    }
+
+    private static string GetClubId(string leagueId, string teamName)
+    {
+        var normalizedLeague = string.IsNullOrWhiteSpace(leagueId) ? "league" : leagueId;
+        return $"{normalizedLeague}:{NormalizeKey(teamName)}";
     }
 
     private static string NormalizeKey(string value)

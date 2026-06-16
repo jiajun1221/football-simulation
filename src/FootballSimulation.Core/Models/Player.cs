@@ -36,6 +36,10 @@ public class Player : INotifyPropertyChanged
     public int? Age { get; set; }
     public int? PotentialOverall { get; set; }
     public PlayerTransferStatus TransferStatus { get; set; } = PlayerTransferStatus.None;
+    public string ClubId { get; set; } = string.Empty;
+    public string PreviousClubId { get; set; } = string.Empty;
+    public int? LastTransferRound { get; set; }
+    public string LastTransferWindowId { get; set; } = string.Empty;
     public int? ContractEndYear { get; set; }
     public decimal? WeeklyWage { get; set; }
     public decimal? ReleaseClause { get; set; }

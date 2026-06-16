@@ -342,7 +342,7 @@ public partial class MatchLiveView : UserControl
             LiveMatchSegment.SecondHalf when ShouldRouteToExtraTimeSetup() => "Continue to Extra Time",
             LiveMatchSegment.SecondHalf => "End",
             LiveMatchSegment.ExtraTimeFirstHalf => "Continue Extra Time",
-            LiveMatchSegment.ExtraTimeSecondHalf when ShouldRouteToPenaltyResultPreview() => "Continue to Match Result",
+            LiveMatchSegment.ExtraTimeSecondHalf when ShouldRouteToPenaltyResultPreview() => "Continue to Penalty Shootout",
             LiveMatchSegment.ExtraTimeSecondHalf => "End",
             _ => "Continue"
         };
@@ -563,6 +563,12 @@ public partial class MatchLiveView : UserControl
         if (_segment == LiveMatchSegment.ExtraTimeFirstHalf)
         {
             _navigate(new HalfTimeView(_state, _navigate, MatchSetupMode.ExtraTimeHalftime));
+            return;
+        }
+
+        if (_segment == LiveMatchSegment.ExtraTimeSecondHalf && ShouldRouteToPenaltyResultPreview())
+        {
+            _navigate(new PenaltyShootoutView(_state, _navigate));
             return;
         }
 
@@ -2187,7 +2193,8 @@ public partial class MatchLiveView : UserControl
             BallIndicatorText = activeBallIndicator is null ? string.Empty : SoccerBallIcon(),
             BallIndicatorBrush = activeBallIndicator?.Brush ?? "#FFFFFF",
             BallIndicatorBorderBrush = activeBallIndicator?.BorderBrush ?? "#111827",
-            BallIndicatorForeground = activeBallIndicator?.Foreground ?? "#111827",
+            BallIndicatorForeground = activeBallIndicator?.Brush ?? "#FFFFFF",
+            BallIndicatorEffect = CreateBallIndicatorEffect(activeBallIndicator?.Brush),
             BallIndicatorTooltip = activeBallIndicator?.Tooltip ?? string.Empty,
             DetailText = BuildPlayerDetailText(player, performance, liveStats.CurrentRating, stamina, displayedStats.DefensiveContributions),
             CardsText = yellowCards == 0 && redCards == 0 ? "None" : $"Y{yellowCards} R{redCards}",
@@ -2219,6 +2226,22 @@ public partial class MatchLiveView : UserControl
         }
 
         return ("#102033", formBadge.Background, formBadge.Background);
+    }
+
+    private static DropShadowEffect? CreateBallIndicatorEffect(string? color)
+    {
+        if (string.IsNullOrWhiteSpace(color))
+        {
+            return null;
+        }
+
+        return new DropShadowEffect
+        {
+            Color = (Color)ColorConverter.ConvertFromString(color)!,
+            BlurRadius = 8,
+            ShadowDepth = 0,
+            Opacity = 0.75
+        };
     }
 
     private static PlayerFormStatus GetDisplayedFormStatus(double rating)

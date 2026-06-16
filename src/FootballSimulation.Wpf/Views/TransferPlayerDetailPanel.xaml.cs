@@ -170,12 +170,17 @@ public partial class TransferPlayerDetailPanel : UserControl
             tooltip = "This player is already in your squad";
         }
 
+        if (context.HasTransferredThisWindow && (context.Mode is TransferDetailMode.Market or TransferDetailMode.Scout))
+        {
+            tooltip = "Player already moved during this transfer window.";
+        }
+
         var canRespondToOffer = context.Offer is not null &&
             context.Offer.Status is OfferStatus.Pending or OfferStatus.PendingUntilWindowOpens or OfferStatus.Countered;
         var isPreWindowAiOffer = context.Offer is { IsUserOffer: false, Status: OfferStatus.PendingUntilWindowOpens or OfferStatus.Countered } &&
             !context.IsTransferWindowOpen;
 
-        MakeOfferButton.IsEnabled = context.IsTransferWindowOpen && !context.IsOwnPlayer;
+        MakeOfferButton.IsEnabled = context.IsTransferWindowOpen && !context.IsOwnPlayer && !context.HasTransferredThisWindow;
         OfferFeeTextBox.IsEnabled = MakeOfferButton.IsEnabled;
         AcceptOfferButton.Content = isPreWindowAiOffer ? "Accept Agreement" : "Accept";
         AcceptOfferButton.Width = isPreWindowAiOffer ? 142 : 90;
@@ -440,4 +445,5 @@ public sealed record TransferPlayerDetailContext(
     bool CanAssignCaptain = false,
     bool IsCaptain = false,
     bool CanToggleTransferLock = false,
-    bool IsTransferLocked = false);
+    bool IsTransferLocked = false,
+    bool HasTransferredThisWindow = false);

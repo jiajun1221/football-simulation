@@ -50,6 +50,7 @@ public partial class YouthAcademyView : UserControl
         AcademySummaryTextBlock.Text = $"{academy.ClubName} | {academy.AcademyLevel} Academy | Reputation {academy.Reputation} | {academy.YouthPlayers.Count} youth players";
         LoadAcademySquad();
         LoadYouthScout();
+        LoadAcademyHistory();
     }
 
     private void EnsureState()
@@ -103,6 +104,20 @@ public partial class YouthAcademyView : UserControl
             : $"{prospectRows.Count} scouted prospects available across completed reports.";
     }
 
+    private void LoadAcademyHistory()
+    {
+        var academy = GetSelectedAcademy();
+        var rows = academy.AcademyHistory
+            .OrderByDescending(record => record.CreatedAt)
+            .ThenByDescending(record => record.CalendarRound)
+            .Select(AcademyHistoryRow.From)
+            .ToList();
+        AcademyHistoryDataGrid.ItemsSource = rows;
+        AcademyHistoryStatusTextBlock.Text = rows.Count == 0
+            ? "Academy history will record future signings and promotions."
+            : $"{rows.Count} academy events recorded.";
+    }
+
     private YouthAcademy GetSelectedAcademy()
     {
         if (_state.League is null || _state.SelectedTeam is null)
@@ -131,6 +146,7 @@ public partial class YouthAcademyView : UserControl
     {
         AcademySquadTabButton.IsChecked = YouthTabControl.SelectedIndex == 0;
         YouthScoutTabButton.IsChecked = YouthTabControl.SelectedIndex == 1;
+        AcademyHistoryTabButton.IsChecked = YouthTabControl.SelectedIndex == 2;
     }
 
     private void AcademyPlayersDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -175,7 +191,7 @@ public partial class YouthAcademyView : UserControl
             return;
         }
 
-        var result = _academyService.PromoteYouthPlayer(_state.League, _state.SelectedTeam, row.Player.PlayerId);
+        var result = _academyService.PromoteYouthPlayer(_state.League, _state.SelectedTeam, row.Player.PlayerId, GetCurrentRound());
         AcademyStatusTextBlock.Text = result.Message;
         LoadAcademy();
         PersistCurrentSaveSlot();
@@ -243,6 +259,7 @@ public partial class YouthAcademyView : UserControl
             GetCurrentRound());
         LoadAcademySquad();
         LoadYouthScout();
+        LoadAcademyHistory();
         YouthScoutStatusTextBlock.Text = result.Message;
         PersistCurrentSaveSlot();
     }
@@ -396,6 +413,61 @@ public partial class YouthAcademyView : UserControl
             }
 
             return new StatusDisplay("Academy", "Developing in the academy", "#64748B", "#FFFFFF");
+        }
+    }
+
+    private sealed class AcademyHistoryRow
+    {
+        public string DateText { get; private init; } = string.Empty;
+        public string RoundText { get; private init; } = string.Empty;
+        public string EventText { get; private init; } = string.Empty;
+        public string EventBrush { get; private init; } = "#64748B";
+        public string EventForeground { get; private init; } = "#FFFFFF";
+        public string Name { get; private init; } = string.Empty;
+        public string NationalityFlagImagePath { get; private init; } = string.Empty;
+        public string NationalityName { get; private init; } = string.Empty;
+        public string Position { get; private init; } = string.Empty;
+        public string AgeText { get; private init; } = string.Empty;
+        public string OverallText { get; private init; } = string.Empty;
+        public string Potential { get; private init; } = string.Empty;
+        public string Development { get; private init; } = string.Empty;
+        public string Value { get; private init; } = string.Empty;
+        public string Source { get; private init; } = string.Empty;
+        public string Notes { get; private init; } = string.Empty;
+
+        public static AcademyHistoryRow From(AcademyHistoryRecord record)
+        {
+            var eventDisplay = CreateEventDisplay(record.EventType);
+            return new AcademyHistoryRow
+            {
+                DateText = record.CreatedAt.ToString("dd MMM yyyy", CultureInfo.InvariantCulture),
+                RoundText = record.CalendarRound > 0
+                    ? $"{record.Season} | Round {record.CalendarRound}"
+                    : record.Season,
+                EventText = eventDisplay.Text,
+                EventBrush = eventDisplay.Background,
+                EventForeground = eventDisplay.Foreground,
+                Name = record.PlayerName,
+                NationalityFlagImagePath = record.FlagImagePath,
+                NationalityName = string.IsNullOrWhiteSpace(record.NationalityName) ? record.NationalityCode : record.NationalityName,
+                Position = record.PreferredPosition,
+                AgeText = record.Age > 0 ? record.Age.ToString(CultureInfo.InvariantCulture) : "-",
+                OverallText = record.Overall > 0 ? record.Overall.ToString(CultureInfo.InvariantCulture) : "-",
+                Potential = record.PotentialMax > 0 ? $"{record.PotentialMin}-{record.PotentialMax}" : "-",
+                Development = record.DevelopmentRate.ToString(),
+                Value = record.MarketValue > 0 ? FormatMoney(record.MarketValue) : "-",
+                Source = record.Source,
+                Notes = record.Notes
+            };
+        }
+
+        private static BadgeDisplay CreateEventDisplay(AcademyHistoryEventType eventType)
+        {
+            return eventType switch
+            {
+                AcademyHistoryEventType.Promoted => new BadgeDisplay("Promoted", "#3B82F6", "#FFFFFF"),
+                _ => new BadgeDisplay("Signed", "#10B981", "#FFFFFF")
+            };
         }
     }
 

@@ -6,6 +6,7 @@ public enum PlayerTransferStatus
     Listed,
     Negotiating,
     Transferred,
+    RecentlyTransferred,
     Unavailable
 }
 
@@ -73,8 +74,10 @@ public class TransferOffer
     public string PlayerId { get; set; } = string.Empty;
     public string PlayerName { get; set; } = string.Empty;
     public string FromLeagueId { get; set; } = string.Empty;
+    public string FromClubId { get; set; } = string.Empty;
     public string FromClubName { get; set; } = string.Empty;
     public string ToLeagueId { get; set; } = string.Empty;
+    public string ToClubId { get; set; } = string.Empty;
     public string ToClubName { get; set; } = string.Empty;
     public decimal Fee { get; set; }
     public decimal? CounterFee { get; set; }
@@ -96,9 +99,12 @@ public class TransferHistoryItem
     public string PlayerId { get; set; } = string.Empty;
     public string PlayerName { get; set; } = string.Empty;
     public string FromLeagueId { get; set; } = string.Empty;
+    public string FromClubId { get; set; } = string.Empty;
     public string FromClubName { get; set; } = string.Empty;
     public string ToLeagueId { get; set; } = string.Empty;
+    public string ToClubId { get; set; } = string.Empty;
     public string ToClubName { get; set; } = string.Empty;
+    public string WindowId { get; set; } = string.Empty;
     public decimal Fee { get; set; }
     public decimal? WeeklyWage { get; set; }
     public int? ContractEndYear { get; set; }
@@ -180,4 +186,5 @@ public record TransferWindowInfo(
     bool IsOpen,
     string StatusText,
     int RoundsRemaining,
-    string Tooltip);
+    string Tooltip,
+    string WindowId = "");

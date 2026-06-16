@@ -127,6 +127,29 @@
             </Border>
         </DataTemplate>
 
+        <DataTemplate x:Key="HistoryEventCellTemplate">
+            <Border Background="{Binding EventBrush}"
+                    CornerRadius="10"
+                    Height="24"
+                    Padding="9,0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                <TextBlock Text="{Binding EventText}"
+                           Foreground="{Binding EventForeground}"
+                           FontSize="11"
+                           FontWeight="SemiBold"
+                           VerticalAlignment="Center" />
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="HistoryNotesCellTemplate">
+            <TextBlock Text="{Binding Notes}"
+                       ToolTip="{Binding Notes}"
+                       Foreground="{DynamicResource AppTextBrush}"
+                       VerticalAlignment="Center"
+                       TextTrimming="CharacterEllipsis" />
+        </DataTemplate>
+
         <DataTemplate x:Key="ScoutTraitIconBadgeTemplate">
             <Border Width="24"
                     Height="24"
@@ -558,6 +581,12 @@
                              GroupName="YouthAcademyTabs"
                              Style="{StaticResource TabButtonStyle}"
                              Click="YouthTabButton_Click" />
+                <RadioButton x:Name="AcademyHistoryTabButton"
+                             Content="Academy History"
+                             Tag="2"
+                             GroupName="YouthAcademyTabs"
+                             Style="{StaticResource TabButtonStyle}"
+                             Click="YouthTabButton_Click" />
             </StackPanel>
         </Border>
 
@@ -938,6 +967,86 @@
                         </Grid>
                     </Border>
                 </Grid>
+            </TabItem>
+
+            <TabItem>
+                <Border Style="{StaticResource PanelCardStyle}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <DockPanel Margin="0,0,0,12">
+                            <TextBlock x:Name="AcademyHistoryStatusTextBlock"
+                                       DockPanel.Dock="Right"
+                                       Foreground="{DynamicResource AppMutedTextBrush}"
+                                       FontSize="12"
+                                       VerticalAlignment="Center" />
+                            <StackPanel>
+                                <TextBlock Text="Academy History"
+                                           Foreground="{DynamicResource AppTextBrush}"
+                                           FontSize="18"
+                                           FontWeight="Bold" />
+                                <TextBlock Text="Tracks academy signings and promotions so players can be audited later."
+                                           Foreground="{DynamicResource AppMutedTextBrush}"
+                                           FontSize="12"
+                                           Margin="0,3,0,0" />
+                            </StackPanel>
+                        </DockPanel>
+
+                        <DataGrid x:Name="AcademyHistoryDataGrid"
+                                  Grid.Row="1"
+                                  Style="{StaticResource ModernGridStyle}">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Date" Binding="{Binding DateText}" Width="108" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                                <DataGridTextColumn Header="Season / Round" Binding="{Binding RoundText}" Width="142" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                                <DataGridTemplateColumn Header="Event" Width="96" IsReadOnly="True">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <StaticResource ResourceKey="HistoryEventCellTemplate" />
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Player" Width="1.25*" IsReadOnly="True" HeaderStyle="{StaticResource LeftAlignedColumnHeaderStyle}">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Name}"
+                                                       ToolTip="{Binding Name}"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource AppTextBrush}"
+                                                       VerticalAlignment="Center"
+                                                       TextTrimming="CharacterEllipsis" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Nat" Width="42" IsReadOnly="True">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <StaticResource ResourceKey="NationalityCellTemplate" />
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Pos" Binding="{Binding Position}" Width="48" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                                <DataGridTextColumn Header="Age" Binding="{Binding AgeText}" Width="48" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                                <DataGridTemplateColumn Header="OVR" Width="60" IsReadOnly="True">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border Style="{StaticResource OvrBadgeBorderStyle}">
+                                                <TextBlock Text="{Binding OverallText}" Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Potential" Binding="{Binding Potential}" Width="84" ElementStyle="{StaticResource CenteredValueTextStyle}" />
+                                <DataGridTextColumn Header="Dev." Binding="{Binding Development}" Width="86" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                                <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="90" ElementStyle="{StaticResource CenteredValueTextStyle}" />
+                                <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="132" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                                <DataGridTemplateColumn Header="Notes" Width="1.5*" IsReadOnly="True" HeaderStyle="{StaticResource LeftAlignedColumnHeaderStyle}">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <StaticResource ResourceKey="HistoryNotesCellTemplate" />
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </Border>
             </TabItem>
         </TabControl>
     </Grid>

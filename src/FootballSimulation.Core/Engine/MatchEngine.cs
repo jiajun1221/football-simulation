@@ -2471,7 +2471,7 @@ public class MatchEngine
 
     private static Player ResolveDistinctAttackingPlayer(Team attackingTeam, Player attacker, Random random)
     {
-        var candidates = attackingTeam.Players
+        var candidates = GetActiveOutfieldPlayers(attackingTeam)
             .Where(player => !string.Equals(player.Name, attacker.Name, StringComparison.OrdinalIgnoreCase))
             .ToList();
 
@@ -3655,6 +3655,7 @@ public class MatchEngine
         var candidates = GetAvailablePlayers(attackingTeam)
             .Where(player =>
                 !string.Equals(player.Name, creator.Name, StringComparison.OrdinalIgnoreCase) &&
+                IsOutfieldPlayer(player) &&
                 (player.Position is Position.Forward or Position.Midfielder ||
                     player.Traits.Contains(PlayerTrait.PowerHeader) ||
                     player.Traits.Contains(PlayerTrait.AerialThreat)))
@@ -4983,7 +4984,7 @@ public class MatchEngine
 
     private static Player ChoosePenaltyTaker(Team team)
     {
-        return GetActivePitchPlayers(team)
+        return GetActiveOutfieldPlayers(team)
             .Where(player => !player.IsInjured)
             .OrderByDescending(player =>
                 player.Finishing +
@@ -4997,10 +4998,11 @@ public class MatchEngine
 
     private static (Player Primary, Player Secondary) ChooseSetPieceTakers(Team team)
     {
-        var activePlayers = GetActivePitchPlayers(team).ToList();
+        var activePlayers = GetActiveOutfieldPlayers(team).ToList();
         if (activePlayers.Count == 0)
         {
-            return (team.Players[0], team.Players[0]);
+            var fallback = GetActivePitchPlayers(team).FirstOrDefault() ?? team.Players[0];
+            return (fallback, fallback);
         }
 
         var takers = activePlayers
@@ -5042,7 +5044,7 @@ public class MatchEngine
 
     private static Player ChooseCornerTaker(Team team, Player preferredTaker)
     {
-        return GetActivePitchPlayers(team)
+        return GetActiveOutfieldPlayers(team)
             .Where(player => !player.IsInjured && player.Position is Position.Midfielder or Position.Forward)
             .OrderByDescending(player =>
                 player.Passing * 1.15 +
@@ -5050,7 +5052,9 @@ public class MatchEngine
                 (player.Traits.Contains(PlayerTrait.DeadBallSpecialist) ? 14 : 0) +
                 (player.Traits.Contains(PlayerTrait.EarlyCrosser) ? 12 : 0) +
                 (player.Traits.Contains(PlayerTrait.LongPasser) ? 8 : 0))
-            .FirstOrDefault() ?? preferredTaker;
+            .FirstOrDefault() ??
+            GetActiveOutfieldPlayers(team).OrderByDescending(player => player.Passing).FirstOrDefault() ??
+            preferredTaker;
     }
 
     private static Player ChooseCornerTarget(Team team, Player taker, Random random)
@@ -5060,7 +5064,7 @@ public class MatchEngine
 
     private static Player ChooseAerialTarget(Team team, Player taker, Random random, double allowSamePlayerChance)
     {
-        var activePlayers = GetActivePitchPlayers(team)
+        var activePlayers = GetActiveOutfieldPlayers(team)
             .Where(player => !player.IsInjured)
             .ToList();
 
@@ -5204,12 +5208,18 @@ public class MatchEngine
     {
         var candidates = GetAvailablePlayers(team)
             .Where(player =>
-                player.Position is Position.Midfielder or Position.Forward ||
-                player.Traits.Contains(PlayerTrait.LongPasser) ||
-                player.Traits.Contains(PlayerTrait.EarlyCrosser) ||
-                player.Traits.Contains(PlayerTrait.LongThrower) ||
-                player.Traits.Contains(PlayerTrait.Playmaker))
+                IsOutfieldPlayer(player) &&
+                (player.Position is Position.Midfielder or Position.Forward ||
+                    player.Traits.Contains(PlayerTrait.LongPasser) ||
+                    player.Traits.Contains(PlayerTrait.EarlyCrosser) ||
+                    player.Traits.Contains(PlayerTrait.LongThrower) ||
+                    player.Traits.Contains(PlayerTrait.Playmaker)))
             .ToList();
+
+        if (candidates.Count == 0)
+        {
+            candidates = GetAvailablePlayers(team).Where(IsOutfieldPlayer).ToList();
+        }
 
         if (candidates.Count == 0)
         {
@@ -5236,11 +5246,17 @@ public class MatchEngine
     {
         var candidates = GetAvailablePlayers(team)
             .Where(player =>
-                player.Position is Position.Forward or Position.Midfielder ||
-                player.Traits.Contains(PlayerTrait.PowerHeader) ||
-                player.Traits.Contains(PlayerTrait.AerialThreat) ||
-                (player.Position == Position.Defender && random.NextDouble() < 0.18))
+                IsOutfieldPlayer(player) &&
+                (player.Position is Position.Forward or Position.Midfielder ||
+                    player.Traits.Contains(PlayerTrait.PowerHeader) ||
+                    player.Traits.Contains(PlayerTrait.AerialThreat) ||
+                    (player.Position == Position.Defender && random.NextDouble() < 0.18)))
             .ToList();
+
+        if (candidates.Count == 0)
+        {
+            candidates = GetAvailablePlayers(team).Where(IsOutfieldPlayer).ToList();
+        }
 
         if (candidates.Count == 0)
         {
@@ -5600,6 +5616,16 @@ public class MatchEngine
     private static IEnumerable<Player> GetActivePitchPlayers(Team team)
     {
         return team.Players.Where(player => player.IsOnPitch && !player.IsSentOff && !player.IsInjured && !player.IsSuspended);
+    }
+
+    private static IEnumerable<Player> GetActiveOutfieldPlayers(Team team)
+    {
+        return GetActivePitchPlayers(team).Where(IsOutfieldPlayer);
+    }
+
+    private static bool IsOutfieldPlayer(Player player)
+    {
+        return !PositionSuitabilityService.IsGoalkeeperCapable(player);
     }
 
     private static MatchTeamStats GetTeamStats(Match match, Team team)

@@ -873,6 +873,37 @@ public class MatchEngineScoringTests
     }
 
     [Fact]
+    public void SimulateMatch_AttackingThreatEventsDoNotUseGoalkeepers()
+    {
+        var seedDataService = new SeedDataService();
+        var engine = new MatchEngine();
+
+        for (var seed = 1; seed <= 160; seed++)
+        {
+            var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+            MakeGoalkeepersTemptingAttackers(homeTeam);
+            MakeGoalkeepersTemptingAttackers(awayTeam);
+
+            var result = engine.SimulateMatch(homeTeam, awayTeam, seed: seed);
+            var goalkeeperNames = result.HomeTeam.Players
+                .Concat(result.AwayTeam.Players)
+                .Where(player => player.Position == Position.Goalkeeper)
+                .Select(player => player.Name)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            var invalidEvent = result.Events.FirstOrDefault(matchEvent =>
+                IsAttackingThreatEvent(matchEvent.EventType) &&
+                EventUsesGoalkeeperForAttackingTeam(matchEvent, result, goalkeeperNames));
+
+            Assert.True(
+                invalidEvent is null,
+                invalidEvent is null
+                    ? string.Empty
+                    : $"Seed {seed}: goalkeeper was used in attacking threat event: {invalidEvent.EventType} - {invalidEvent.Description}");
+        }
+    }
+
+    [Fact]
     public void SimulateMatch_DoesNotEmitRepeatedSetPieceFeedForSameSequence()
     {
         var seedDataService = new SeedDataService();
@@ -948,6 +979,60 @@ public class MatchEngineScoringTests
             || matchEvent.EventType == EventType.WonderGoal
             || (matchEvent.EventType == EventType.Penalty
                 && matchEvent.Description.Contains("scores", StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static bool IsAttackingThreatEvent(EventType eventType)
+    {
+        return eventType is EventType.Attack
+            or EventType.ChanceCreated
+            or EventType.Shot
+            or EventType.Goal
+            or EventType.WonderGoal
+            or EventType.Miss
+            or EventType.Woodwork
+            or EventType.CornerKick
+            or EventType.SetPieceDanger;
+    }
+
+    private static void MakeGoalkeepersTemptingAttackers(Team team)
+    {
+        foreach (var goalkeeper in team.Players.Where(player => player.Position == Position.Goalkeeper))
+        {
+            goalkeeper.Attack = 99;
+            goalkeeper.Finishing = 99;
+            goalkeeper.Passing = 99;
+            goalkeeper.Physical = 99;
+            goalkeeper.CurrentForm = 99;
+            goalkeeper.OverallRating = 99;
+            goalkeeper.Traits =
+            [
+                PlayerTrait.PowerHeader,
+                PlayerTrait.AerialThreat,
+                PlayerTrait.DeadBallSpecialist,
+                PlayerTrait.LongShotTaker,
+                PlayerTrait.Playmaker,
+                PlayerTrait.EarlyCrosser
+            ];
+        }
+    }
+
+    private static bool EventUsesGoalkeeperForAttackingTeam(MatchEvent matchEvent, Match match, HashSet<string> goalkeeperNames)
+    {
+        var attackingTeam = FindEventTeamName(matchEvent, match);
+        if (string.IsNullOrWhiteSpace(attackingTeam))
+        {
+            return false;
+        }
+
+        return IsGoalkeeperForTeam(matchEvent.PrimaryPlayerName, attackingTeam, match, goalkeeperNames) ||
+            IsGoalkeeperForTeam(matchEvent.SecondaryPlayerName, attackingTeam, match, goalkeeperNames);
+    }
+
+    private static bool IsGoalkeeperForTeam(string? playerName, string teamName, Match match, HashSet<string> goalkeeperNames)
+    {
+        return !string.IsNullOrWhiteSpace(playerName) &&
+            goalkeeperNames.Contains(playerName) &&
+            string.Equals(FindPlayerTeamName(playerName, match), teamName, StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool IsSoloChanceDescription(string description)

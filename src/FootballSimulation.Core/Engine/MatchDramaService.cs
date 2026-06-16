@@ -383,6 +383,7 @@ public class MatchDramaService
     private static Player ChooseAttackingPlayer(Team team, Random random)
     {
         var players = GetActivePlayers(team)
+            .Where(IsOutfieldPlayer)
             .Where(player => player.Position is Position.Forward or Position.Midfielder)
             .OrderByDescending(player =>
             {
@@ -397,7 +398,12 @@ public class MatchDramaService
             .Take(4)
             .ToList();
 
-        var activePlayers = GetActivePlayers(team);
+        var activePlayers = GetActiveOutfieldPlayers(team);
+        if (activePlayers.Count == 0)
+        {
+            activePlayers = GetActivePlayers(team);
+        }
+
         return players.Count == 0 ? activePlayers[random.Next(activePlayers.Count)] : players[random.Next(players.Count)];
     }
 
@@ -413,13 +419,19 @@ public class MatchDramaService
             .Take(5)
             .ToList();
 
-        var activePlayers = GetActivePlayers(team);
+        var activePlayers = GetActiveOutfieldPlayers(team);
+        if (activePlayers.Count == 0)
+        {
+            activePlayers = GetActivePlayers(team);
+        }
+
         return players.Count == 0 ? activePlayers[random.Next(activePlayers.Count)] : players[random.Next(players.Count)];
     }
 
     private static Player ChooseSetPiecePlayer(Team team, Random random)
     {
         var player = GetActivePlayers(team)
+            .Where(IsOutfieldPlayer)
             .Where(candidate => candidate.Traits.Contains(PlayerTrait.DeadBallSpecialist) || candidate.Traits.Contains(PlayerTrait.AerialThreat))
             .OrderByDescending(candidate =>
             {
@@ -455,9 +467,21 @@ public class MatchDramaService
             : team.Players.Where(player => !player.IsSentOff && !player.IsSuspended).ToList();
     }
 
+    private static List<Player> GetActiveOutfieldPlayers(Team team)
+    {
+        return GetActivePlayers(team)
+            .Where(IsOutfieldPlayer)
+            .ToList();
+    }
+
     private static bool IsActivePlayer(Player player)
     {
         return player.IsOnPitch && !player.IsSentOff && !player.IsSuspended && !player.IsInjured;
+    }
+
+    private static bool IsOutfieldPlayer(Player player)
+    {
+        return !PositionSuitabilityService.IsGoalkeeperCapable(player);
     }
 }
 

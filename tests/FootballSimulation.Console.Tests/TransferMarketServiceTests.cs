@@ -375,6 +375,88 @@ public class TransferMarketServiceTests
     }
 
     [Fact]
+    public void RunAiTransferActivity_DoesNotTransferSamePlayerTwiceInOneWindow()
+    {
+        var league = CreateLeague("premier-league");
+        var selectedTeam = league.Teams.Single(team => team.Name == "Chelsea");
+        var service = new TransferMarketService(seed: 42);
+        var state = service.CreateInitialState(league);
+
+        foreach (var round in Enumerable.Range(1, 4))
+        {
+            service.RunAiTransferActivity(state, league, selectedTeam, round);
+        }
+
+        Assert.DoesNotContain(
+            state.TransferHistory
+                .Where(item => !string.IsNullOrWhiteSpace(item.WindowId))
+                .GroupBy(item => $"{item.PlayerId}|{item.WindowId}", StringComparer.OrdinalIgnoreCase),
+            group => group.Count() > 1);
+    }
+
+    [Fact]
+    public void MakeUserOffer_BlocksPlayerWhoAlreadyMovedThisWindow()
+    {
+        var league = CreateLeague("premier-league");
+        var firstBuyer = league.Teams.Single(team => team.Name == "Chelsea");
+        var secondBuyer = league.Teams.First(team => team.Name != firstBuyer.Name);
+        var service = new TransferMarketService();
+        var state = service.CreateInitialState(league);
+        var target = league.Teams
+            .Where(team => team.Name != firstBuyer.Name && team.Name != secondBuyer.Name)
+            .SelectMany(team => team.Substitutes)
+            .OrderByDescending(player => player.OverallRating)
+            .First();
+        service.GetFinance(state, league.LeagueId, firstBuyer).ClubTransferBudget = 1_000_000_000m;
+        service.GetFinance(state, league.LeagueId, firstBuyer).ClubWageBudget = 5_000_000m;
+        service.GetFinance(state, league.LeagueId, secondBuyer).ClubTransferBudget = 1_000_000_000m;
+        service.GetFinance(state, league.LeagueId, secondBuyer).ClubWageBudget = 5_000_000m;
+        var askingPrice = service
+            .SearchPlayers(state, new TransferSearchCriteria { PlayerName = target.Name }, league.PlayerStats)
+            .First(item => item.Player.PlayerId == target.PlayerId)
+            .AskingPrice;
+
+        var completedOffer = service.MakeUserOffer(state, league, firstBuyer, target.PlayerId, askingPrice * 2, currentRound: 1);
+        var blockedOffer = service.MakeUserOffer(state, league, secondBuyer, target.PlayerId, askingPrice * 2, currentRound: 1);
+
+        Assert.Equal(OfferStatus.Completed, completedOffer.Status);
+        Assert.Equal(OfferStatus.Rejected, blockedOffer.Status);
+        Assert.Contains("already moved", blockedOffer.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Single(state.TransferHistory, item => item.PlayerId == target.PlayerId);
+        Assert.Contains(firstBuyer.Substitutes, player => player.PlayerId == target.PlayerId);
+        Assert.DoesNotContain(secondBuyer.Players.Concat(secondBuyer.Substitutes), player => player.PlayerId == target.PlayerId);
+    }
+
+    [Fact]
+    public void SyncSquadsFromTransferHistory_RepairsCurrentSquads()
+    {
+        var league = CreateLeague("premier-league");
+        var buyer = league.Teams.Single(team => team.Name == "Chelsea");
+        var service = new TransferMarketService();
+        var state = service.CreateInitialState(league);
+        var seller = league.Teams.First(team => team.Name != buyer.Name);
+        var target = seller.Substitutes.OrderByDescending(player => player.OverallRating).First();
+        service.GetFinance(state, league.LeagueId, buyer).ClubTransferBudget = 1_000_000_000m;
+        service.GetFinance(state, league.LeagueId, buyer).ClubWageBudget = 5_000_000m;
+        var askingPrice = service
+            .SearchPlayers(state, new TransferSearchCriteria { PlayerName = target.Name }, league.PlayerStats)
+            .First(item => item.Player.PlayerId == target.PlayerId)
+            .AskingPrice;
+
+        service.MakeUserOffer(state, league, buyer, target.PlayerId, askingPrice * 2, currentRound: 1);
+        var movedPlayer = buyer.Substitutes.Single(player => player.PlayerId == target.PlayerId);
+        buyer.Substitutes.Remove(movedPlayer);
+        seller.Substitutes.Add(movedPlayer);
+        movedPlayer.ClubId = string.Empty;
+
+        service.SyncSquadsFromTransferHistory(state);
+
+        Assert.DoesNotContain(seller.Players.Concat(seller.Substitutes), player => player.PlayerId == target.PlayerId);
+        Assert.Contains(buyer.Substitutes, player => player.PlayerId == target.PlayerId);
+        Assert.Equal(state.TransferHistory.Single(item => item.PlayerId == target.PlayerId).ToClubId, movedPlayer.ClubId);
+    }
+
+    [Fact]
     public void EvaluateListedPlayersForOffers_SkipsLockedUserPlayers()
     {
         var league = CreateLeague("premier-league");

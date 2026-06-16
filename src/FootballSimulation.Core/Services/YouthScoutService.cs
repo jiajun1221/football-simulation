@@ -283,6 +283,13 @@ public class YouthScoutService
 
         var youthPlayer = CreateYouthPlayerFromProspect(prospect, academy, league.Season);
         academy.YouthPlayers.Add(youthPlayer);
+        _academyService.RecordAcademySigning(
+            academy,
+            youthPlayer,
+            league.Season,
+            currentRound,
+            "Scout Signing",
+            $"Signed from {report.Country} scout report on {FormatWeeklyWage(prospect.WeeklyWage)}.");
         prospect.IsSigned = true;
         prospect.SignedByClubId = academy.ClubId;
         prospect.SignedByClubName = academy.ClubName;
