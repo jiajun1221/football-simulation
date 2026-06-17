@@ -45,7 +45,29 @@ public partial class FormationSetupPanel : UserControl
         _isLoadingSetup = true;
         FormationComboBox.SelectedValue = FormationCatalogService.NormalizeFormationName(team.Formation);
         TacticalSettingsPanel.LoadTactics(team.Tactics);
-        _pitchSlots = team.Players.Count == 11 ? team.Players.ToList() : OrderPlayersForPitch(team.Players, team.Formation).ToList();
+        var roster = GetDistinctRoster(team);
+        if (team.Players.Count == 11)
+        {
+            _pitchSlots = team.Players
+                .DistinctBy(CreateRosterKey)
+                .ToList();
+            if (_pitchSlots.Count < 11)
+            {
+                var pitchKeys = _pitchSlots
+                    .Select(CreateRosterKey)
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+                _pitchSlots.AddRange(OrderPlayersForPitch(
+                    roster.Where(player => !pitchKeys.Contains(CreateRosterKey(player))),
+                    team.Formation).Take(11 - _pitchSlots.Count));
+            }
+        }
+        else
+        {
+            _pitchSlots = OrderPlayersForPitch(roster, team.Formation)
+                .Take(11)
+                .ToList();
+        }
+
         ApplyPitchSlotsToTeam();
         AssignFormationPositions();
         RefreshAll();
@@ -71,6 +93,7 @@ public partial class FormationSetupPanel : UserControl
         var pitchPlayers = _pitchSlots
             .Where(player => player is not null)
             .DistinctBy(CreateRosterKey)
+            .Take(11)
             .ToList();
         var pitchKeys = pitchPlayers
             .Select(CreateRosterKey)
@@ -96,6 +119,14 @@ public partial class FormationSetupPanel : UserControl
         _pitchSlots = pitchPlayers;
         _team.Players = pitchPlayers;
         _team.Substitutes = remainingPlayers;
+    }
+
+    private static List<Player> GetDistinctRoster(Team team)
+    {
+        return team.Players
+            .Concat(team.Substitutes)
+            .DistinctBy(CreateRosterKey)
+            .ToList();
     }
 
     private static string CreateRosterKey(Player player)
@@ -341,7 +372,7 @@ public partial class FormationSetupPanel : UserControl
         positions ??= _formationLayoutService.GetPositions(GetSelectedFormation());
         for (var index = 0; index < _pitchSlots.Count && index < positions.Count; index++)
         {
-            if (CanPlayerOccupySlot(_pitchSlots[index], positions[index].ExactPosition))
+            if (CanAssignPlayerToSlot(_pitchSlots[index], positions[index].ExactPosition))
             {
                 PositionSuitabilityService.EnsurePositionMetadata(_pitchSlots[index], positions[index].ExactPosition);
             }
@@ -374,6 +405,9 @@ public partial class FormationSetupPanel : UserControl
     {
         PositionSuitabilityService.EnsurePositionMetadata(player, slot);
         var form = PlayerFormBadgeHelper.Create(player.FormStatus);
+        var suitability = PositionSuitabilityService.GetEffectivenessMultiplier(player);
+        var isOutOfPosition = PositionSuitabilityService.IsOutOfPosition(player);
+        var ratingVisual = GetRatingVisual(player, suitability);
         var colors = TeamColorService.GetPalette(_team);
         var nationality = PlayerNationalityDisplayService.Resolve(player);
         return new PitchPlayerCard
@@ -384,8 +418,8 @@ public partial class FormationSetupPanel : UserControl
             FlagImagePath = nationality.FlagImagePath,
             NationalityName = nationality.Name,
             PositionText = slot,
-            OverallText = $"OVR {PlayerOverallCalculator.CalculateOverall(player)}",
-            OverallForeground = colors.TextColor,
+            OverallText = $"OVR {ratingVisual.Rating}",
+            OverallForeground = isOutOfPosition ? ratingVisual.Foreground : colors.TextColor,
             TextForeground = colors.TextColor,
             MutedForeground = colors.TextColor,
             PositionBackground = colors.SecondaryColor,
@@ -397,7 +431,11 @@ public partial class FormationSetupPanel : UserControl
             FormBadgeForeground = form.Foreground,
             TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits),
             CardBackground = colors.PrimaryColor,
-            CardBorderBrush = player == _selectedStarter ? colors.SelectedGlowColor : colors.BorderColor,
+            CardBorderBrush = player == _selectedStarter
+                ? colors.SelectedGlowColor
+                : isOutOfPosition
+                    ? ratingVisual.Foreground
+                    : colors.BorderColor,
             CardBorderThickness = player == _selectedStarter ? new Thickness(3) : new Thickness(1)
         };
     }
@@ -479,7 +517,10 @@ public partial class FormationSetupPanel : UserControl
             _team.Formation = formation;
             if (!_isLoadingSetup)
             {
-                _pitchSlots = OrderPlayersForPitch(_pitchSlots, formation).Take(11).ToList();
+                _pitchSlots = _pitchSlots
+                    .DistinctBy(CreateRosterKey)
+                    .Take(11)
+                    .ToList();
                 ApplyPitchSlotsToTeam();
             }
         }
@@ -638,6 +679,22 @@ public partial class FormationSetupPanel : UserControl
     private static bool IsAvailable(Player player) => !player.IsInjured && !player.IsSuspended && !player.IsSentOff;
     private static string GetStaminaBrush(Player player) => player.Stamina < 35 ? "#EF4444" : player.Stamina < 60 ? "#F59E0B" : "#22C55E";
     private static bool CanPlayerOccupySlot(Player player, string slot) => PositionSuitabilityService.NormalizeExactPosition(slot) == "GK" ? PositionSuitabilityService.IsGoalkeeperCapable(player) : !PositionSuitabilityService.IsGoalkeeperCapable(player) && PositionCompatibilityService.GetCompatibilityScore(player, slot) > PositionCompatibilityService.Impossible;
+    private static bool CanAssignPlayerToSlot(Player player, string slot) => PositionCompatibilityService.CanOccupySlot(player, slot, allowOutOfPosition: true);
+
+    private static RatingVisual GetRatingVisual(Player player, double suitability)
+    {
+        if (suitability >= 1.0)
+        {
+            return new RatingVisual(PlayerOverallCalculator.CalculateOverall(player), "#071A2E", "#102033");
+        }
+
+        if (suitability >= 0.90)
+        {
+            return new RatingVisual(PositionSuitabilityService.GetEffectiveOverall(player), "#F59E0B", "#F59E0B");
+        }
+
+        return new RatingVisual(PositionSuitabilityService.GetEffectiveOverall(player), "#EF4444", "#EF4444");
+    }
 
     private static string? CreateHardSwapBlockMessage(Player firstPlayer, string firstTargetSlot, Player secondPlayer, string secondTargetSlot)
     {
@@ -729,6 +786,7 @@ public partial class FormationSetupPanel : UserControl
 
     private enum DragSource { StartingXi, Substitute }
     private sealed record DraggedPlayerInfo(Player Player, DragSource Source);
+    private sealed record RatingVisual(int Rating, string Foreground, string Background);
 
     private sealed class BenchPlayerCard
     {

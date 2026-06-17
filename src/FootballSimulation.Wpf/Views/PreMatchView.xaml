@@ -912,15 +912,6 @@
                             Margin="0,8,0,0"
                             FontWeight="SemiBold"
                             Click="StartFirstHalfButton_Click" />
-                    <Button Content="Test Penalty Shootout"
-                            Style="{StaticResource PrimaryTextButton}"
-                            Height="36"
-                            Margin="0,8,0,0"
-                            FontSize="12"
-                            FontWeight="SemiBold"
-                            Opacity="0.86"
-                            ToolTip="Practice-only shortcut: opens penalties at 2-2 after extra time without completing the fixture."
-                            Click="TestPenaltyShootoutButton_Click" />
             </StackPanel>
         </Border>
     </Grid>

@@ -313,13 +313,43 @@ public class SaveGameService
 
     private static void ApplyKnownPlayerDataCorrections(Player player, int? seasonStartYear, string teamName)
     {
-        if (IsEstevao(player) && seasonStartYear.HasValue)
+        if (IsEstevao(player))
         {
-            player.Age = Math.Clamp(seasonStartYear.Value - 2007, 16, 45);
+            if (seasonStartYear.HasValue)
+            {
+                player.Age = Math.Clamp(seasonStartYear.Value - 2007, 16, 45);
+            }
+
+            ApplyEstevaoRatingCorrection(player);
         }
 
         ApplyKnownPositionCorrection(player, teamName);
         RepairMissingSeniorOverallAttributes(player);
+    }
+
+    private static void ApplyEstevaoRatingCorrection(Player player)
+    {
+        player.OverallRating = Math.Max(player.OverallRating, 78);
+        player.BaseOverallRating = Math.Max(player.BaseOverallRating, 78);
+        player.PotentialOverall = Math.Max(player.PotentialOverall ?? 0, 88);
+        player.Position = Position.Forward;
+        player.PreferredPosition = "RW";
+        player.AssignedPosition = string.IsNullOrWhiteSpace(player.AssignedPosition)
+            ? "RW"
+            : player.AssignedPosition;
+        player.SecondaryPositions = ["LW", "CAM"];
+        player.NationalityName = string.IsNullOrWhiteSpace(player.NationalityName) ? "Brazil" : player.NationalityName;
+        player.NationalityCode = string.IsNullOrWhiteSpace(player.NationalityCode) ? "BR" : player.NationalityCode;
+        player.FlagImagePath = string.IsNullOrWhiteSpace(player.FlagImagePath) ? "/Assets/Flags/brazil.png" : player.FlagImagePath;
+        player.Pace = Math.Max(player.Pace, 90);
+        player.Shooting = Math.Max(player.Shooting, 74);
+        player.Passing = Math.Max(player.Passing, 73);
+        player.Dribbling = Math.Max(player.Dribbling, 82);
+        player.Defending = Math.Max(player.Defending, 33);
+        player.Physical = Math.Max(player.Physical, 57);
+        player.Attack = Math.Max(player.Attack, 78);
+        player.Defense = Math.Max(player.Defense, 35);
+        player.Finishing = Math.Max(player.Finishing, 74);
     }
 
     private static void RepairMissingSeniorOverallAttributes(Player player)

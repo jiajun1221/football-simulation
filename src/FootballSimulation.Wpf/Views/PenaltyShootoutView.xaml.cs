@@ -1247,7 +1247,7 @@ public partial class PenaltyShootoutView : UserControl
             var style = tone switch
             {
                 FeedTone.Start => new FeedStyle("●", "START", "#0F172A", "#020617", "#1E293B", "#FFFFFF", "#FFFFFF", "#020617", "#FFFFFF", "#FFFFFF", "#CBD5E1"),
-                FeedTone.Step => new FeedStyle("⚪", "STEP UP", "#FFFFFF", "#CBD5E1", "#F8FAFC", "#0F172A", "#0F172A", "#E2E8F0", "#0F172A", "#0F172A", "#334155"),
+                FeedTone.Step => new FeedStyle("👟", "STEP UP", "#EFF6FF", "#93C5FD", "#DBEAFE", "#1D4ED8", "#1E3A8A", "#BFDBFE", "#1E3A8A", "#0F172A", "#334155"),
                 FeedTone.Shot => new FeedStyle("🎯", "SHOT", "#F97316", "#C2410C", "#FFEDD5", "#C2410C", "#FFFFFF", "#C2410C", "#FFFFFF", "#FFFFFF", "#FFEDD5"),
                 FeedTone.Goal => new FeedStyle("⚽", "GOAL", "#16A34A", "#15803D", "#DCFCE7", "#166534", "#FFFFFF", "#15803D", "#FFFFFF", "#FFFFFF", "#DCFCE7"),
                 FeedTone.Miss => new FeedStyle("🧤", "SAVED / MISS", "#DC2626", "#991B1B", "#FEE2E2", "#991B1B", "#FFFFFF", "#991B1B", "#FFFFFF", "#FFFFFF", "#FEE2E2"),

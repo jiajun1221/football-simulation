@@ -72,22 +72,38 @@ public partial class PreMatchView : UserControl
 
     private void InitializePitchSlots()
     {
-        if (_state.SelectedTeam is null)
+        var team = _state.SelectedTeam;
+        if (team is null)
         {
             _pitchSlots = [];
             return;
         }
 
-        if (_state.SelectedTeam.Players.Count == 11)
+        var roster = GetDistinctRoster(team);
+        if (team.Players.Count == 11)
         {
-            _pitchSlots = _state.SelectedTeam.Players.ToList();
+            _pitchSlots = team.Players
+                .DistinctBy(CreateRosterKey)
+                .ToList();
+
+            if (_pitchSlots.Count < 11)
+            {
+                var pitchKeys = _pitchSlots
+                    .Select(CreateRosterKey)
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+                _pitchSlots.AddRange(OrderPlayersForPitch(
+                    roster.Where(player => !pitchKeys.Contains(CreateRosterKey(player))),
+                    team.Formation).Take(11 - _pitchSlots.Count));
+            }
         }
         else
         {
-            _pitchSlots = OrderPlayersForPitch(_state.SelectedTeam.Players, _state.SelectedTeam.Formation).ToList();
-            _state.SelectedTeam.Players = _pitchSlots.ToList();
+            _pitchSlots = OrderPlayersForPitch(roster, team.Formation)
+                .Take(11)
+                .ToList();
         }
 
+        ApplyPitchSlotsToTeam();
         AssignFormationPositions();
     }
 
@@ -307,12 +323,76 @@ public partial class PreMatchView : UserControl
             PositionSuitabilityService.EnsurePositionMetadata(assignment.Player, assignment.Position.ExactPosition);
         }
 
-        var assignedPlayers = assignments.Select(assignment => assignment.Player).ToList();
-        var remainingPlayers = _pitchSlots
-            .Where(player => !assignedPlayers.Contains(player))
+        var assignedPlayers = assignments
+            .Select(assignment => assignment.Player)
+            .DistinctBy(CreateRosterKey)
             .ToList();
-        _pitchSlots = assignedPlayers.Concat(remainingPlayers).ToList();
-        _state.SelectedTeam.Players = _pitchSlots.ToList();
+        var assignedKeys = assignedPlayers
+            .Select(CreateRosterKey)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var remainingPitchPlayers = _pitchSlots
+            .Where(player => !assignedKeys.Contains(CreateRosterKey(player)))
+            .DistinctBy(CreateRosterKey)
+            .ToList();
+        _pitchSlots = assignedPlayers
+            .Concat(remainingPitchPlayers)
+            .Take(11)
+            .ToList();
+        ApplyPitchSlotsToTeam();
+    }
+
+    private void ApplyPitchSlotsToTeam()
+    {
+        var team = _state.SelectedTeam;
+        if (team is null)
+        {
+            return;
+        }
+
+        var pitchPlayers = _pitchSlots
+            .Where(player => player is not null)
+            .DistinctBy(CreateRosterKey)
+            .Take(11)
+            .ToList();
+        var pitchKeys = pitchPlayers
+            .Select(CreateRosterKey)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var remainingPlayers = team.Players
+            .Concat(team.Substitutes)
+            .Where(player => !pitchKeys.Contains(CreateRosterKey(player)))
+            .DistinctBy(CreateRosterKey)
+            .ToList();
+
+        foreach (var player in pitchPlayers)
+        {
+            player.IsStarter = true;
+            player.IsOnPitch = true;
+        }
+
+        foreach (var player in remainingPlayers)
+        {
+            player.IsStarter = false;
+            player.IsOnPitch = false;
+        }
+
+        _pitchSlots = pitchPlayers;
+        team.Players = pitchPlayers;
+        team.Substitutes = remainingPlayers;
+    }
+
+    private static List<Player> GetDistinctRoster(Team team)
+    {
+        return team.Players
+            .Concat(team.Substitutes)
+            .DistinctBy(CreateRosterKey)
+            .ToList();
+    }
+
+    private static string CreateRosterKey(Player player)
+    {
+        return !string.IsNullOrWhiteSpace(player.PlayerId)
+            ? player.PlayerId
+            : player.Name;
     }
 
     private static Player? SelectPlayerForSlot(List<Player> remainingPlayers, string exactPosition)
@@ -494,8 +574,10 @@ public partial class PreMatchView : UserControl
             _state.SelectedTeam.Formation = formation;
             if (!_isLoadingSetup)
             {
-                _pitchSlots = OrderPlayersForPitch(_state.SelectedTeam.Players, formation).ToList();
-                _state.SelectedTeam.Players = _pitchSlots.ToList();
+                _pitchSlots = OrderPlayersForPitch(_pitchSlots, formation)
+                    .Take(11)
+                    .ToList();
+                ApplyPitchSlotsToTeam();
                 SaveSetup(_state.SelectedTeam);
             }
         }
@@ -556,7 +638,7 @@ public partial class PreMatchView : UserControl
             return;
         }
 
-        _state.SelectedTeam.Players = _pitchSlots.ToList();
+        ApplyPitchSlotsToTeam();
         PositionSuitabilityService.EnsurePositionMetadata(starter);
         PositionSuitabilityService.EnsurePositionMetadata(substitute);
         var incomingAssignedPosition = starter.AssignedPosition;
@@ -1210,7 +1292,7 @@ public partial class PreMatchView : UserControl
         var outOfPositionWarning = CreateOutOfPositionSwapWarning(draggedPlayer, draggedTargetSlot, targetPlayer, targetTargetSlot);
 
         (_pitchSlots[draggedIndex], _pitchSlots[targetIndex]) = (_pitchSlots[targetIndex], _pitchSlots[draggedIndex]);
-        _state.SelectedTeam.Players = _pitchSlots.ToList();
+        ApplyPitchSlotsToTeam();
         AssignFormationPositions();
 
         Debug.WriteLine(
@@ -1323,6 +1405,7 @@ public partial class PreMatchView : UserControl
             return;
         }
 
+        ApplyPitchSlotsToTeam();
         SaveSetup(_state.SelectedTeam);
         _navigate(new MatchLiveView(_state, _navigate, isSecondHalf: false));
     }
@@ -1342,6 +1425,7 @@ public partial class PreMatchView : UserControl
             return;
         }
 
+        ApplyPitchSlotsToTeam();
         SaveSetup(_state.SelectedTeam);
         var previousMatch = _state.CurrentMatch;
         var previousSegment = _state.CurrentLiveMatchSegment;

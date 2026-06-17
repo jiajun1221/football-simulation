@@ -475,7 +475,10 @@ function createFallbackPlayer(entry, team, rating, countries, usedNumbers, sourc
   const position = rating?.position ?? sourcePlayer?.preferredPosition ?? sourcePlayer?.position ?? 'CM';
   const nat = rating?.nat ?? sourcePlayer?.nationalityName ?? 'England';
   const [nationalityCode, flagImagePath] = countries.get(nat) ?? countryFallbacks.get(nat) ?? ['GB-ENG', '/Assets/Flags/england.png'];
-  const squadNumber = sourcePlayer?.squadNumber && !usedNumbers.has(sourcePlayer.squadNumber)
+  const preferredSquadNumber = getPreferredSquadNumber(displayName);
+  const squadNumber = preferredSquadNumber && !usedNumbers.has(preferredSquadNumber)
+    ? preferredSquadNumber
+    : sourcePlayer?.squadNumber && !usedNumbers.has(sourcePlayer.squadNumber)
     ? sourcePlayer.squadNumber
     : nextSquadNumber(usedNumbers, position);
 
@@ -487,7 +490,7 @@ function createFallbackPlayer(entry, team, rating, countries, usedNumbers, sourc
     squadNumber,
     position,
     preferredPosition: position,
-    secondaryPositions: secondaryPositions(position),
+    secondaryPositions: getKnownSecondaryPositions(displayName) ?? secondaryPositions(position),
     preferredFoot: null,
     nationality: null,
     nationalityCode,
@@ -496,8 +499,8 @@ function createFallbackPlayer(entry, team, rating, countries, usedNumbers, sourc
     flagImagePath,
     disciplineRating: null,
     overallRating: rating?.overallRating ?? sourcePlayer?.overallRating ?? estimateOverall(position),
-    age: sourcePlayer?.age ?? estimateAge(entry, rating),
-    potentialOverall: sourcePlayer?.potentialOverall ?? estimatePotential(rating?.overallRating ?? sourcePlayer?.overallRating ?? estimateOverall(position)),
+    age: getKnownAge(displayName) ?? sourcePlayer?.age ?? estimateAge(entry, rating),
+    potentialOverall: getKnownPotential(displayName) ?? sourcePlayer?.potentialOverall ?? estimatePotential(rating?.overallRating ?? sourcePlayer?.overallRating ?? estimateOverall(position)),
     pace: rating?.pace ?? sourcePlayer?.pace ?? null,
     shooting: rating?.shooting ?? sourcePlayer?.shooting ?? null,
     passing: rating?.passing ?? sourcePlayer?.passing ?? null,
@@ -531,6 +534,22 @@ function createFallbackPlayer(entry, team, rating, countries, usedNumbers, sourc
     seasonFatigue: 0,
     consecutiveStarts: 0
   };
+}
+
+function getPreferredSquadNumber(playerName) {
+  return normalizeKey(playerName) === 'estevao' ? 41 : null;
+}
+
+function getKnownAge(playerName) {
+  return normalizeKey(playerName) === 'estevao' ? 19 : null;
+}
+
+function getKnownPotential(playerName) {
+  return normalizeKey(playerName) === 'estevao' ? 88 : null;
+}
+
+function getKnownSecondaryPositions(playerName) {
+  return normalizeKey(playerName) === 'estevao' ? ['LW', 'CAM'] : null;
 }
 
 function nextSquadNumber(usedNumbers, position) {
@@ -664,11 +683,16 @@ function selectPlayers(team, official, eaPlayers, countries, allKnownPlayers) {
         eaMatch,
         currentIndex,
         currentStarter,
+        priority: getPriorityPlayerScore(team.name, entry),
         overall: currentMatch?.candidate.overallRating ?? eaMatch?.candidate.overallRating ?? 0
       };
     })
     .filter(candidate => candidate.currentMatch || candidate.eaMatch)
     .sort((left, right) => {
+      if (left.priority !== right.priority) {
+        return right.priority - left.priority;
+      }
+
       if (left.currentStarter !== right.currentStarter) {
         return left.currentStarter ? -1 : 1;
       }
@@ -714,6 +738,16 @@ function selectPlayers(team, official, eaPlayers, countries, allKnownPlayers) {
     removed,
     omittedRegistered
   };
+}
+
+function getPriorityPlayerScore(teamName, entry) {
+  if (normalizeKey(teamName) !== 'chelsea') {
+    return 0;
+  }
+
+  return entry.candidateNames.some(name => normalizeKey(name) === 'estevao')
+    ? 100
+    : 0;
 }
 
 function compareSelectionPriority(left, right) {
@@ -952,7 +986,7 @@ function sanitizePrimaryPositions(team) {
     const primary = normalizePrimaryPosition(player.preferredPosition ?? player.position);
     player.position = primary;
     player.preferredPosition = primary;
-    player.secondaryPositions = (player.secondaryPositions ?? [])
+    player.secondaryPositions = (getKnownSecondaryPositions(player.name) ?? player.secondaryPositions ?? [])
       .map(normalizePrimaryPosition)
       .filter(position => position && position !== primary)
       .filter((position, index, positions) => positions.indexOf(position) === index);
