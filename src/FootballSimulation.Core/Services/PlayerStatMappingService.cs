@@ -21,7 +21,11 @@ public class PlayerStatMappingService
             record.InjurySeverity,
             record.InjuryRecoveryMatches,
             record.IsSeasonEndingInjury);
-        var traits = MapTraits(record.Traits);
+        var traits = PlayerTraitAssignmentService.EnsureMinimumTraits(
+            MapTraits(record.Traits),
+            position,
+            preferredPosition,
+            record.Name);
         var attributes = CreateAttributes(record, position, preferredPosition, overall, traits, stamina);
 
         var player = new Player
@@ -102,7 +106,11 @@ public class PlayerStatMappingService
             record.InjurySeverity,
             record.InjuryRecoveryMatches,
             record.IsSeasonEndingInjury);
-        var traits = MapTraits(record.Traits);
+        var traits = PlayerTraitAssignmentService.EnsureMinimumTraits(
+            MapTraits(record.Traits),
+            position,
+            preferredPosition,
+            record.Name);
         var attributes = CreateAttributes(record, position, preferredPosition, overall, traits, stamina);
 
         var player = new Player

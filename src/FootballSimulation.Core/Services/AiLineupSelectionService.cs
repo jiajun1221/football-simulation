@@ -66,24 +66,24 @@ public static class AiLineupSelectionService
     {
         var staminaPenalty = player.Stamina switch
         {
-            < 45 => 520,
-            < 55 => 380,
-            < 70 => (int)Math.Round((70 - player.Stamina) * 10),
+            < 45 => 420,
+            < 55 => 260,
+            < 68 => (int)Math.Round((68 - player.Stamina) * 6),
             _ => 0
         };
         var seasonFatiguePenalty = player.SeasonFatigue switch
         {
-            >= 85 => 360,
-            >= 70 => 240,
-            >= 55 => 130,
-            >= 40 => 60,
+            >= 88 => 260,
+            >= 75 => 160,
+            >= 60 => 80,
+            >= 45 => 35,
             _ => 0
         };
-        var loadPenalty = Math.Min(7, player.MatchesPlayedRecently) * 35;
-        var consecutiveStartPenalty = player.ConsecutiveStarts >= 8
-            ? 220
-            : player.ConsecutiveStarts >= 5
-                ? 110
+        var loadPenalty = Math.Min(6, player.MatchesPlayedRecently) * 18;
+        var consecutiveStartPenalty = player.ConsecutiveStarts >= 10
+            ? 150
+            : player.ConsecutiveStarts >= 7
+                ? 70
                 : 0;
 
         return -(staminaPenalty + seasonFatiguePenalty + loadPenalty + consecutiveStartPenalty);
@@ -91,7 +91,7 @@ public static class AiLineupSelectionService
 
     private static double GetFreshnessScore(Player player)
     {
-        return player.Stamina - player.SeasonFatigue * 0.35 - player.MatchesPlayedRecently * 3.0;
+        return player.Stamina - player.SeasonFatigue * 0.22 - player.MatchesPlayedRecently * 1.8;
     }
 
     private static string CreatePlayerKey(Player player)

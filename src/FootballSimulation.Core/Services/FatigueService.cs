@@ -4,16 +4,16 @@ namespace FootballSimulation.Services;
 
 public class FatigueService
 {
-    private const double BaseStaminaLossPerMinute = 0.32;
-    private const double MaximumDynamicStaminaLossPerMinute = 0.82;
-    private const int MinimumMatchStartRecoveryPoints = 50;
-    private const int MaximumMatchStartRecoveryPoints = 60;
-    private const int FullRestRecoveryBonus = 15;
-    private const int UnusedSubstituteRecoveryBonus = 12;
-    private const int EarlySubstitutionRecoveryBonus = 8;
-    private const int ManagedSubstitutionRecoveryBonus = 5;
-    private const int FullMatchRestSeasonFatigueRecovery = 45;
-    private const int OffWeekSeasonFatigueRecovery = 28;
+    private const double BaseStaminaLossPerMinute = 0.24;
+    private const double MaximumDynamicStaminaLossPerMinute = 0.62;
+    private const int MinimumMatchStartRecoveryPoints = 65;
+    private const int MaximumMatchStartRecoveryPoints = 78;
+    private const int FullRestRecoveryBonus = 22;
+    private const int UnusedSubstituteRecoveryBonus = 18;
+    private const int EarlySubstitutionRecoveryBonus = 12;
+    private const int ManagedSubstitutionRecoveryBonus = 8;
+    private const int FullMatchRestSeasonFatigueRecovery = 55;
+    private const int OffWeekSeasonFatigueRecovery = 36;
 
     public void RecoverTeamForNewMatch(Team team, int? recoveryPoints = null)
     {
@@ -54,7 +54,7 @@ public class FatigueService
         var baseRecovery = GetDailyRecovery(player) * Math.Min(days, 7);
         var adjustedRecovery = baseRecovery * GetSeasonFatigueRecoveryMultiplier(player.SeasonFatigue);
         var restBonus = CalculateRestRecoveryBonus(player, performance, teamPlayedMatch);
-        var longRestBonus = days >= 7 ? 12 : days >= 4 ? 4 : 0;
+        var longRestBonus = days >= 7 ? 16 : days >= 4 ? 8 : 0;
 
         return Math.Clamp((int)Math.Round(adjustedRecovery + restBonus + longRestBonus), 0, 100);
     }
@@ -106,8 +106,8 @@ public class FatigueService
         {
             <= 25 => 0.72,
             < 40 => 0.86,
-            >= 85 => 1.36,
-            > 70 => 1.20,
+            >= 85 => 1.24,
+            > 70 => 1.12,
             _ => 1.00
         };
     }
@@ -117,9 +117,9 @@ public class FatigueService
         return position switch
         {
             Position.Goalkeeper => 0.28,
-            Position.Defender => 1.02,
-            Position.Midfielder => 1.08,
-            Position.Forward => 1.10,
+            Position.Defender => 0.96,
+            Position.Midfielder => 1.02,
+            Position.Forward => 1.04,
             _ => 1.00
         };
     }
@@ -225,9 +225,9 @@ public class FatigueService
         return player.SeasonFatigue switch
         {
             <= 40 => 1.0,
-            <= 60 => 1.06,
-            <= 80 => 1.14,
-            _ => 1.24
+            <= 60 => 1.03,
+            <= 80 => 1.08,
+            _ => 1.16
         };
     }
 
@@ -235,10 +235,10 @@ public class FatigueService
     {
         return (player.Age ?? 25) switch
         {
-            <= 22 => 8,
-            <= 29 => 6,
-            <= 34 => 4,
-            _ => 3
+            <= 22 => 11,
+            <= 29 => 9,
+            <= 34 => 7,
+            _ => 5
         };
     }
 
@@ -247,10 +247,10 @@ public class FatigueService
         return seasonFatigue switch
         {
             <= 20 => 1.0,
-            <= 40 => 0.90,
-            <= 60 => 0.75,
-            <= 80 => 0.60,
-            _ => 0.45
+            <= 40 => 0.95,
+            <= 60 => 0.86,
+            <= 80 => 0.76,
+            _ => 0.64
         };
     }
 
@@ -281,29 +281,29 @@ public class FatigueService
     private static int CalculateSeasonFatigueRecovery(Player player, int calendarGap, PlayerMatchPerformance? performance, bool teamPlayedMatch)
     {
         var days = Math.Max(1, calendarGap);
-        var longRestBonus = days >= 7 ? 5 : days >= 4 ? 2 : 0;
+        var longRestBonus = days >= 7 ? 8 : days >= 4 ? 4 : 0;
         var ageRecovery = (player.Age ?? 25) <= 22 ? 1 : 0;
         if (!teamPlayedMatch)
         {
-            return Math.Clamp(OffWeekSeasonFatigueRecovery + days * 3 + longRestBonus + ageRecovery, 0, 70);
+            return Math.Clamp(OffWeekSeasonFatigueRecovery + days * 4 + longRestBonus + ageRecovery, 0, 80);
         }
 
         if (performance is null)
         {
-            return Math.Clamp(FullMatchRestSeasonFatigueRecovery + days * 3 + longRestBonus + ageRecovery, 0, 70);
+            return Math.Clamp(FullMatchRestSeasonFatigueRecovery + days * 4 + longRestBonus + ageRecovery, 0, 80);
         }
 
         if (performance.WasSubbedOff && performance.SubstitutionMinute is int substitutionMinute)
         {
             var managedMinutesRecovery = substitutionMinute < 60
-                ? 12
+                ? 16
                 : substitutionMinute < 75
-                    ? 7
+                    ? 10
                     : 0;
-            return Math.Clamp(managedMinutesRecovery + days + longRestBonus + ageRecovery, 0, 28);
+            return Math.Clamp(managedMinutesRecovery + days * 2 + longRestBonus + ageRecovery, 0, 35);
         }
 
-        return Math.Clamp(days + longRestBonus + ageRecovery, 0, 18);
+        return Math.Clamp(days * 2 + longRestBonus + ageRecovery, 0, 24);
     }
 
     private static bool IsTeamInMatch(Match match, Team team)

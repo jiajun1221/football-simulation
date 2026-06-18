@@ -91,7 +91,7 @@ public class InjuryRiskServiceTests
 
         service.ApplyPostMatchLoad(match);
 
-        Assert.Equal(2, starter.MatchesPlayedRecently);
+        Assert.Equal(1, starter.MatchesPlayedRecently);
         Assert.Equal(2, unusedBench.MatchesPlayedRecently);
     }
 
@@ -130,7 +130,7 @@ public class InjuryRiskServiceTests
 
         service.ApplyPostMatchLoad(match);
 
-        Assert.Equal(13, starter.SeasonFatigue);
+        Assert.Equal(8, starter.SeasonFatigue);
         Assert.Equal(1, starter.ConsecutiveStarts);
     }
 
@@ -165,7 +165,7 @@ public class InjuryRiskServiceTests
 
         service.ApplyPostMatchLoad(match);
 
-        Assert.Equal(15, starter.SeasonFatigue);
+        Assert.Equal(10, starter.SeasonFatigue);
         Assert.Equal(2, starter.MatchesPlayedRecently);
     }
 
@@ -176,7 +176,7 @@ public class InjuryRiskServiceTests
         freshPlayer.Stamina = 90;
         freshPlayer.SeasonFatigue = 10;
         var tiredPlayer = CreatePlayer("Tired", Position.Midfielder, 82);
-        tiredPlayer.Stamina = 45;
+        tiredPlayer.Stamina = 35;
         tiredPlayer.SeasonFatigue = 85;
 
         var freshRisk = InjuryRiskService.GetFatigueInjuryRiskMultiplier(freshPlayer);

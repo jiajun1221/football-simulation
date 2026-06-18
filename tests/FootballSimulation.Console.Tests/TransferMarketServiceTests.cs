@@ -523,6 +523,70 @@ public class TransferMarketServiceTests
     }
 
     [Fact]
+    public void SyncSquadsFromTransferHistory_PreservesTargetClubStartingXiPlacement()
+    {
+        var transferredPlayer = new Player
+        {
+            PlayerId = "player-new-signing",
+            Name = "New Signing",
+            SquadNumber = 7,
+            Position = Position.Forward,
+            PreferredPosition = "RW",
+            AssignedPosition = "RW",
+            OverallRating = 82,
+            IsStarter = true,
+            IsOnPitch = true
+        };
+        var targetTeam = new Team
+        {
+            Name = "Target FC",
+            Players = [transferredPlayer],
+            Substitutes = [CreateTransferTestPlayer("target-bench", "Target Bench")]
+        };
+        var sourceTeam = new Team
+        {
+            Name = "Source FC",
+            Players = [CreateTransferTestPlayer("source-starter", "Source Starter")],
+            Substitutes = []
+        };
+        var state = new TransferMarketState
+        {
+            Leagues =
+            [
+                new TransferLeagueState
+                {
+                    LeagueId = "test-league",
+                    LeagueName = "Test League",
+                    Teams = [sourceTeam, targetTeam]
+                }
+            ],
+            TransferHistory =
+            [
+                new TransferHistoryItem
+                {
+                    PlayerId = transferredPlayer.PlayerId,
+                    PlayerName = transferredPlayer.Name,
+                    FromLeagueId = "test-league",
+                    FromClubName = sourceTeam.Name,
+                    ToLeagueId = "test-league",
+                    ToClubName = targetTeam.Name,
+                    WindowId = "summer",
+                    RoundNumber = 1
+                }
+            ]
+        };
+        var service = new TransferMarketService();
+
+        service.SyncSquadsFromTransferHistory(state);
+
+        Assert.Contains(transferredPlayer, targetTeam.Players);
+        Assert.DoesNotContain(transferredPlayer, targetTeam.Substitutes);
+        Assert.True(transferredPlayer.IsStarter);
+        Assert.True(transferredPlayer.IsOnPitch);
+        Assert.Single(targetTeam.Players.Concat(targetTeam.Substitutes), player => player.PlayerId == transferredPlayer.PlayerId);
+    }
+
+    [Fact]
     public void BindActiveLeague_FillsMissingPlayerDataFromLeagueData()
     {
         var league = CreateLeague("premier-league");
@@ -579,5 +643,19 @@ public class TransferMarketServiceTests
         var dataService = new LeagueDataService();
         var definition = dataService.GetLeagueDefinition(leagueId);
         return new GameSessionService().CreateLeague(definition, dataService.LoadTeams(definition));
+    }
+
+    private static Player CreateTransferTestPlayer(string playerId, string name)
+    {
+        return new Player
+        {
+            PlayerId = playerId,
+            Name = name,
+            SquadNumber = 1,
+            Position = Position.Midfielder,
+            PreferredPosition = "CM",
+            AssignedPosition = "CM",
+            OverallRating = 75
+        };
     }
 }

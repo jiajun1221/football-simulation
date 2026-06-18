@@ -24,12 +24,12 @@ public static class FatigueBadgeService
 
         if (hasFullStamina)
         {
-            if (player.SeasonFatigue >= 90)
+            if (player.SeasonFatigue >= 92)
             {
-                return CreateRisk("Season fatigue 90+");
+                return CreateRisk("Season fatigue 92+");
             }
 
-            if (player.ConsecutiveStarts >= 10)
+            if (player.ConsecutiveStarts >= 12)
             {
                 return CreateLoad($"Started {player.ConsecutiveStarts} consecutive matches");
             }
@@ -42,22 +42,22 @@ public static class FatigueBadgeService
             return CreateRisk($"Stamina {stamina}%");
         }
 
-        if (player.SeasonFatigue >= 85)
+        if (player.SeasonFatigue >= 90)
         {
-            return CreateRisk("Season fatigue 85+");
+            return CreateRisk("Season fatigue 90+");
         }
 
-        if (stamina < 60 && (effectiveRecentLoad >= 7 || player.SeasonFatigue >= 65))
+        if (stamina < 55 && (effectiveRecentLoad >= 6 || player.SeasonFatigue >= 70))
         {
             return CreateRisk($"Stamina {stamina}% with high workload");
         }
 
-        if (player.ConsecutiveFullMatches >= 3 && isLessThanFourDaysRest)
+        if (player.ConsecutiveFullMatches >= 4 && isLessThanFourDaysRest)
         {
-            return CreateRisk("Played 90 minutes in 3 straight matches with short rest");
+            return CreateRisk("Played 90 minutes in 4 straight matches with short rest");
         }
 
-        var loadReason = GetLoadReason(player);
+        var loadReason = GetLoadReason(player, effectiveRecentLoad);
         if (!string.IsNullOrWhiteSpace(loadReason))
         {
             if (stamina >= 90 && player.SeasonFatigue < 60)
@@ -75,24 +75,24 @@ public static class FatigueBadgeService
                 : FatigueBadgeResult.None;
         }
 
-        if (stamina < 65)
+        if (stamina < 60)
         {
             return CreateTired($"Stamina {stamina}%");
         }
 
-        if (stamina < 75 && player.SeasonFatigue >= 65)
+        if (stamina < 70 && player.SeasonFatigue >= 75)
         {
             return CreateTired($"Stamina {stamina}% with season fatigue {player.SeasonFatigue}");
         }
 
-        if (stamina < 80 && effectiveRecentLoad >= 6)
+        if (stamina < 76 && effectiveRecentLoad >= 6)
         {
             return CreateTired($"Stamina {stamina}% with high recent workload");
         }
 
-        if (player.ConsecutiveFullMatches >= 2 && isShortRest)
+        if (player.ConsecutiveFullMatches >= 3 && isShortRest)
         {
-            return CreateTired("Played 90 minutes in last 2 matches with short rest");
+            return CreateTired("Played 90 minutes in last 3 matches with short rest");
         }
 
         return FatigueBadgeResult.None;
@@ -114,19 +114,19 @@ public static class FatigueBadgeService
         };
     }
 
-    private static string GetLoadReason(Player player)
+    private static string GetLoadReason(Player player, int effectiveRecentLoad)
     {
-        if (player.ConsecutiveStarts >= 8)
+        if (player.ConsecutiveStarts >= 10)
         {
             return $"Started {player.ConsecutiveStarts} consecutive matches";
         }
 
-        if (player.MatchesPlayedRecently >= 8)
+        if (effectiveRecentLoad >= 7)
         {
-            return $"Recent match load {player.MatchesPlayedRecently}";
+            return $"Recent match load {effectiveRecentLoad}";
         }
 
-        if (player.MinutesInLastFiveMatches >= 400)
+        if (player.MinutesInLastFiveMatches >= 430)
         {
             return $"{player.MinutesInLastFiveMatches} minutes in last 5 matches";
         }

@@ -1454,27 +1454,46 @@ public class TransferMarketService
             return false;
         }
 
+        var targetTeamPlayer = FindPlayerInTeam(toTeam, player.PlayerId);
+        if (!saveHistory && targetTeamPlayer is not null)
+        {
+            var targetSyncAffectedTeams = new HashSet<Team>();
+            foreach (var team in GetAllTeams(state).Select(item => item.Team))
+            {
+                if (ReferenceEquals(team, toTeam))
+                {
+                    continue;
+                }
+
+                if (RemovePlayerFromTeamById(team, targetTeamPlayer.PlayerId))
+                {
+                    targetSyncAffectedTeams.Add(team);
+                }
+            }
+
+            state.FreeAgents.RemoveAll(candidate => candidate.PlayerId.Equals(targetTeamPlayer.PlayerId, StringComparison.OrdinalIgnoreCase));
+            ApplyTransferMetadata(targetTeamPlayer, transfer, fromTeam, toTeam, windowId);
+
+            foreach (var team in targetSyncAffectedTeams)
+            {
+                RepairClubLineup(team);
+            }
+
+            return true;
+        }
+
         var affectedTeams = new HashSet<Team>();
         foreach (var team in GetAllTeams(state).Select(item => item.Team))
         {
-            if (TeamContainsPlayer(team, player))
+            if (RemovePlayerFromTeamById(team, player.PlayerId))
             {
-                RemovePlayerFromTeam(team, player);
                 affectedTeams.Add(team);
             }
         }
 
         state.FreeAgents.RemoveAll(candidate => candidate.PlayerId.Equals(player.PlayerId, StringComparison.OrdinalIgnoreCase));
 
-        player.PreviousClubId = string.IsNullOrWhiteSpace(transfer.FromClubId)
-            ? fromTeam is null ? player.ClubId : GetClubId(transfer.FromLeagueId, fromTeam.Name)
-            : transfer.FromClubId;
-        player.ClubId = string.IsNullOrWhiteSpace(transfer.ToClubId)
-            ? GetClubId(transfer.ToLeagueId, toTeam.Name)
-            : transfer.ToClubId;
-        player.LastTransferRound = transfer.RoundNumber;
-        player.LastTransferWindowId = windowId;
-        player.TransferStatus = PlayerTransferStatus.RecentlyTransferred;
+        ApplyTransferMetadata(player, transfer, fromTeam, toTeam, windowId);
         player.IsStarter = false;
         player.IsOnPitch = false;
 
@@ -1495,6 +1514,42 @@ public class TransferMarketService
         }
 
         return true;
+    }
+
+    private static Player? FindPlayerInTeam(Team team, string playerId)
+    {
+        return team.Players.Concat(team.Substitutes)
+            .FirstOrDefault(candidate => candidate.PlayerId.Equals(playerId, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static bool RemovePlayerFromTeamById(Team team, string playerId)
+    {
+        var player = FindPlayerInTeam(team, playerId);
+        if (player is null)
+        {
+            return false;
+        }
+
+        RemovePlayerFromTeam(team, player);
+        return true;
+    }
+
+    private static void ApplyTransferMetadata(
+        Player player,
+        TransferHistoryItem transfer,
+        Team? fromTeam,
+        Team toTeam,
+        string windowId)
+    {
+        player.PreviousClubId = string.IsNullOrWhiteSpace(transfer.FromClubId)
+            ? fromTeam is null ? player.ClubId : GetClubId(transfer.FromLeagueId, fromTeam.Name)
+            : transfer.FromClubId;
+        player.ClubId = string.IsNullOrWhiteSpace(transfer.ToClubId)
+            ? GetClubId(transfer.ToLeagueId, toTeam.Name)
+            : transfer.ToClubId;
+        player.LastTransferRound = transfer.RoundNumber;
+        player.LastTransferWindowId = windowId;
+        player.TransferStatus = PlayerTransferStatus.RecentlyTransferred;
     }
 
     private static void RemovePlayerFromTeam(Team team, Player player)

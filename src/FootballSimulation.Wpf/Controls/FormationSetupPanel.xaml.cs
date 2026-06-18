@@ -131,9 +131,7 @@ public partial class FormationSetupPanel : UserControl
 
     private static string CreateRosterKey(Player player)
     {
-        return !string.IsNullOrWhiteSpace(player.PlayerId)
-            ? player.PlayerId
-            : player.Name;
+        return PlayerRosterKeyService.CreateKey(player);
     }
 
     private static ICollectionView CreateFormationOptionsView()
@@ -444,7 +442,13 @@ public partial class FormationSetupPanel : UserControl
     {
         if (_team is null) { return; }
         var filter = PositionSuitabilityService.NormalizeExactPosition(_selectedPositionFilter);
-        var players = _team.Substitutes.Where(IsAvailable).ToList();
+        var pitchKeys = _pitchSlots
+            .Select(CreateRosterKey)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var players = _team.Substitutes
+            .Where(player => !pitchKeys.Contains(CreateRosterKey(player)))
+            .Where(IsAvailable)
+            .ToList();
         if (!string.IsNullOrWhiteSpace(filter))
         {
             players = players
@@ -623,16 +627,11 @@ public partial class FormationSetupPanel : UserControl
             MessageBox.Show(hardBlockMessage);
             return;
         }
-        var outOfPositionWarning = CreateOutOfPositionSwapWarning(first, firstSlot, second, secondSlot);
         (_pitchSlots[firstIndex], _pitchSlots[secondIndex]) = (_pitchSlots[secondIndex], _pitchSlots[firstIndex]);
         ApplyPitchSlotsToTeam();
         AssignFormationPositions();
         RefreshAll();
         NotifyChanged();
-        if (!string.IsNullOrWhiteSpace(outOfPositionWarning))
-        {
-            MessageBox.Show(outOfPositionWarning, "Out Of Position", MessageBoxButton.OK, MessageBoxImage.Information);
-        }
     }
 
     private void SwapBenchPlayers(Player first, Player second)
@@ -722,56 +721,6 @@ public partial class FormationSetupPanel : UserControl
         }
 
         return $"{player.Name} cannot cover {normalizedSlot}. Choose a player who can play {normalizedSlot}.";
-    }
-
-    private static string? CreateOutOfPositionSwapWarning(Player firstPlayer, string firstTargetSlot, Player secondPlayer, string secondTargetSlot)
-    {
-        var firstWarning = CreateOutOfPositionWarningPart(firstPlayer, firstTargetSlot);
-        var secondWarning = CreateOutOfPositionWarningPart(secondPlayer, secondTargetSlot);
-        if (firstWarning is null && secondWarning is null)
-        {
-            return null;
-        }
-
-        var naturalFitText = CreateNaturalFitText(firstPlayer, firstTargetSlot, secondPlayer, secondTargetSlot);
-        var warningParts = new[] { firstWarning, secondWarning }
-            .Where(message => !string.IsNullOrWhiteSpace(message));
-        return $"{naturalFitText}{string.Join(" ", warningParts)} OVR will be reduced for out-of-position players.";
-    }
-
-    private static string CreateNaturalFitText(Player firstPlayer, string firstTargetSlot, Player secondPlayer, string secondTargetSlot)
-    {
-        var naturalFits = new[]
-            {
-                CreateNaturalFitPart(firstPlayer, firstTargetSlot),
-                CreateNaturalFitPart(secondPlayer, secondTargetSlot)
-            }
-            .Where(message => !string.IsNullOrWhiteSpace(message))
-            .ToList();
-
-        return naturalFits.Count == 0 ? string.Empty : $"{string.Join(", ", naturalFits)}. ";
-    }
-
-    private static string? CreateNaturalFitPart(Player player, string targetSlot)
-    {
-        var normalizedSlot = PositionSuitabilityService.NormalizeExactPosition(targetSlot);
-        return !string.IsNullOrWhiteSpace(normalizedSlot) &&
-            PositionCompatibilityService.CanPlayPosition(player, normalizedSlot)
-                ? $"{player.Name} can play {normalizedSlot}"
-                : null;
-    }
-
-    private static string? CreateOutOfPositionWarningPart(Player player, string targetSlot)
-    {
-        var normalizedSlot = PositionSuitabilityService.NormalizeExactPosition(targetSlot);
-        if (string.IsNullOrWhiteSpace(normalizedSlot) ||
-            normalizedSlot == "GK" ||
-            PositionCompatibilityService.CanPlayPosition(player, normalizedSlot))
-        {
-            return null;
-        }
-
-        return $"{player.Name} cannot naturally cover {normalizedSlot}.";
     }
 
     private static bool IsWithinPitchCard(DependencyObject? source)

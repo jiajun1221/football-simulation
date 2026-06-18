@@ -14,6 +14,9 @@ public class FormationSystemTests
         Assert.Contains(formations, formation => formation.Category == FormationCategory.Balanced && formation.Name == "4-3-3 Holding");
         Assert.Contains(formations, formation => formation.Category == FormationCategory.Defensive && formation.Name == "5-4-1");
         Assert.All(formations, formation => Assert.Equal(11, FormationSlotService.GetSlots(formation.Name).Count));
+        Assert.All(formations, formation =>
+            Assert.All(FormationSlotService.GetSlots(formation.Name), slot =>
+                Assert.False(string.IsNullOrWhiteSpace(PositionSuitabilityService.NormalizeExactPosition(slot)))));
     }
 
     [Theory]
@@ -137,6 +140,24 @@ public class FormationSystemTests
         Assert.Equal(2, team.Players.Count(player => player.AssignedPosition == "ST"));
         Assert.DoesNotContain(team.Players, player => player.Position == Position.Forward && player.AssignedPosition is "CB" or "CDM");
         Assert.DoesNotContain(team.Players, player => player.Position == Position.Defender && player.AssignedPosition == "ST");
+    }
+
+    [Fact]
+    public void InMatchFormationService_ApplyFormationToWideMidfieldShapeKeepsElevenPlayers()
+    {
+        var team = CreateTeam("Late Switch FC", "4-3-3 Attack", overall: 80);
+        var originalNames = team.Players.Select(player => player.Name).Order().ToList();
+        var service = new InMatchFormationService();
+
+        var result = service.ApplyFormation(team, "4-5-1");
+
+        Assert.True(result.Success, string.Join("; ", result.Warnings));
+        Assert.Equal("4-5-1", team.Formation);
+        Assert.Equal(11, team.Players.Count);
+        Assert.Equal(11, team.Players.Count(player => player.IsOnPitch && !player.IsSentOff));
+        Assert.Equal(originalNames, team.Players.Select(player => player.Name).Order().ToList());
+        Assert.Contains(team.Players, player => player.AssignedPosition == "LM");
+        Assert.Contains(team.Players, player => player.AssignedPosition == "RM");
     }
 
     [Fact]

@@ -86,15 +86,38 @@ public class LeagueTraitDataTests
         var players = LoadAllEnabledLeaguePlayers().ToList();
 
         Assert.All(players.Where(player => player.OverallRating < 78), player =>
-            Assert.InRange(player.Traits.Count, 0, 1));
+            Assert.InRange(player.Traits.Count, 1, 3));
         Assert.All(players.Where(player => player.OverallRating is >= 78 and < 82), player =>
-            Assert.InRange(player.Traits.Count, 0, 2));
+            Assert.InRange(player.Traits.Count, 1, 4));
         Assert.All(players.Where(player => player.OverallRating is >= 82 and < 86), player =>
-            Assert.InRange(player.Traits.Count, 0, 3));
+            Assert.InRange(player.Traits.Count, 1, 4));
         Assert.All(players.Where(player => player.OverallRating is >= 86 and < 90), player =>
-            Assert.InRange(player.Traits.Count, 0, 4));
+            Assert.InRange(player.Traits.Count, 1, 5));
         Assert.All(players.Where(player => player.OverallRating >= 90), player =>
-            Assert.InRange(player.Traits.Count, 0, 6));
+            Assert.InRange(player.Traits.Count, 1, 6));
+    }
+
+    [Fact]
+    public void EnabledLeagueTraits_GiveEveryPlayerAtLeastOneTrait()
+    {
+        var players = LoadAllEnabledLeaguePlayers().ToList();
+
+        Assert.All(players, player => Assert.NotEmpty(player.Traits));
+    }
+
+    [Fact]
+    public void PremierLeagueTraits_GiveEstevaoWingerTraits()
+    {
+        var chelsea = LoadTeamsFromSourceData("premier-league")
+            .Single(team => team.Name == "Chelsea");
+        var estevao = chelsea.Players
+            .Concat(chelsea.Substitutes)
+            .Single(player =>
+                player.Name.Equals("Estevao", StringComparison.OrdinalIgnoreCase) ||
+                player.Name.Equals("Estêvão", StringComparison.OrdinalIgnoreCase));
+
+        Assert.Contains(PlayerTrait.Rapid, estevao.Traits);
+        Assert.Contains(PlayerTrait.TechnicalDribbler, estevao.Traits);
     }
 
     private static IEnumerable<Player> LoadAllEnabledLeaguePlayers()

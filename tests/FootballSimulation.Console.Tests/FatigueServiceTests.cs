@@ -44,7 +44,7 @@ public class FatigueServiceTests
 
         new FatigueService().RecoverTeamAfterCompletedMatches(team, calendarGap: 2, [match]);
 
-        Assert.Equal(74, player.Stamina, precision: 4);
+        Assert.Equal(80, player.Stamina, precision: 4);
     }
 
     [Fact]
@@ -245,7 +245,7 @@ public class FatigueServiceTests
             .Where(player => player.Position != Position.Goalkeeper)
             .Average(player => player.Stamina);
         Assert.True(
-            goalkeeper.Stamina >= outfieldAverage + 12,
+            goalkeeper.Stamina >= outfieldAverage + 8,
             $"GK stamina {goalkeeper.Stamina:0.0}% should stay well above outfield average {outfieldAverage:0.0}%.");
     }
 

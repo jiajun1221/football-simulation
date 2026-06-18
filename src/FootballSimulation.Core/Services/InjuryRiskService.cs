@@ -4,7 +4,7 @@ namespace FootballSimulation.Services;
 
 public sealed class InjuryRiskService
 {
-    private const int MaximumRecentLoad = 7;
+    private const int MaximumRecentLoad = 6;
 
     public InjuryOccurrence? TryCreateMatchInjury(
         Match match,
@@ -97,16 +97,16 @@ public sealed class InjuryRiskService
         var physicalEventRisk = GetPhysicalEventRisk(previousEventType);
         var lateGameRisk = minute switch
         {
-            >= 82 => 0.0014,
-            >= 70 => 0.0008,
-            >= 55 => 0.00035,
+            >= 82 => 0.0010,
+            >= 70 => 0.00055,
+            >= 55 => 0.00025,
             _ => 0.0
         };
 
         return Math.Clamp(
-            0.00055 + averageRisk / 95000.0 + intensityRisk + physicalEventRisk + lateGameRisk,
+            0.00040 + averageRisk / 125000.0 + intensityRisk + physicalEventRisk + lateGameRisk,
             0.00025,
-            0.0075);
+            0.0055);
     }
 
     public double CalculatePlayerMatchInjuryWeight(
@@ -123,21 +123,21 @@ public sealed class InjuryRiskService
         var attributes = PlayerAttributeService.GetAttributes(player);
         var staminaRisk = player.Stamina switch
         {
-            <= 12 => 42.0,
-            <= 25 => 28.0,
-            <= 40 => 16.0,
-            <= 58 => 7.0,
+            <= 12 => 34.0,
+            <= 25 => 22.0,
+            <= 40 => 12.0,
+            <= 58 => 5.0,
             _ => 0.0
         };
         var minutesRisk = minute switch
         {
-            >= 82 => 9.0,
-            >= 70 => 5.0,
-            >= 55 => 2.0,
+            >= 82 => 7.0,
+            >= 70 => 3.5,
+            >= 55 => 1.5,
             _ => 0.0
         };
-        var loadRisk = Math.Min(MaximumRecentLoad, player.MatchesPlayedRecently) * 5.0;
-        var traitRisk = player.Traits.Contains(PlayerTrait.InjuryProne) ? 24.0 : 0.0;
+        var loadRisk = Math.Min(MaximumRecentLoad, player.MatchesPlayedRecently) * 3.5;
+        var traitRisk = player.Traits.Contains(PlayerTrait.InjuryProne) ? 20.0 : 0.0;
         var duelRisk =
             (player.Traits.Contains(PlayerTrait.DivesIntoTackles) ? 5.0 : 0.0) +
             (player.Traits.Contains(PlayerTrait.Rapid) || player.Traits.Contains(PlayerTrait.SpeedDribbler) ? 4.0 : 0.0) +
@@ -168,14 +168,14 @@ public sealed class InjuryRiskService
 
         var averageRecentLoad = availablePlayers.Average(player => Math.Min(MaximumRecentLoad, player.MatchesPlayedRecently));
         var averageSeasonFatigue = availablePlayers.Average(player => player.SeasonFatigue);
-        var highLoadPlayers = availablePlayers.Count(player => player.MatchesPlayedRecently >= 4);
+        var highLoadPlayers = availablePlayers.Count(player => player.MatchesPlayedRecently >= 5);
         var tacticalIntensity =
-            Math.Max(0, team.Tactics.Tempo - 65) / 9000.0 +
-            Math.Max(0, team.Tactics.PressingIntensity - 65) / 7000.0;
-        var congestedSeasonRisk = roundNumber >= 24 ? 0.002 : 0.0;
-        var loadRisk = averageRecentLoad / 1200.0 + averageSeasonFatigue / 16000.0 + highLoadPlayers / 5000.0;
+            Math.Max(0, team.Tactics.Tempo - 70) / 12000.0 +
+            Math.Max(0, team.Tactics.PressingIntensity - 70) / 9500.0;
+        var congestedSeasonRisk = roundNumber >= 28 ? 0.0012 : 0.0;
+        var loadRisk = averageRecentLoad / 1700.0 + averageSeasonFatigue / 22000.0 + highLoadPlayers / 7500.0;
 
-        return Math.Clamp(0.0025 + tacticalIntensity + loadRisk + congestedSeasonRisk, 0.001, 0.026);
+        return Math.Clamp(0.0016 + tacticalIntensity + loadRisk + congestedSeasonRisk, 0.0008, 0.017);
     }
 
     public static void ApplyInjury(Player player, string injuryCause, Random random)
@@ -231,7 +231,7 @@ public sealed class InjuryRiskService
             player.MatchesPlayedRecently = minutesPlayed switch
             {
                 >= 110 => Math.Min(MaximumRecentLoad, player.MatchesPlayedRecently + 2),
-                >= 80 => Math.Min(MaximumRecentLoad, player.MatchesPlayedRecently + (performance?.FatigueAtEnd >= 65 ? 2 : 1)),
+                >= 80 => Math.Min(MaximumRecentLoad, player.MatchesPlayedRecently + 1),
                 >= 55 => Math.Min(MaximumRecentLoad, player.MatchesPlayedRecently + 1),
                 >= 25 => player.MatchesPlayedRecently,
                 _ => Math.Max(0, player.MatchesPlayedRecently - 1)
@@ -273,14 +273,14 @@ public sealed class InjuryRiskService
 
         var minuteFatigue = minutesPlayed switch
         {
-            <= 30 => 2,
-            <= 60 => 4,
-            <= 90 => 8,
-            < 120 => 11,
-            _ => 15
+            <= 30 => 1,
+            <= 60 => 3,
+            <= 90 => 5,
+            < 120 => 8,
+            _ => 10
         };
-        var pressingFatigue = team.Tactics.PressingIntensity >= 80 ? 3 : 0;
-        var mentalityFatigue = team.Tactics.Mentality is Mentality.Attacking or Mentality.AllOutAttack ? 2 : 0;
+        var pressingFatigue = team.Tactics.PressingIntensity >= 85 ? 2 : 0;
+        var mentalityFatigue = team.Tactics.Mentality == Mentality.AllOutAttack ? 2 : team.Tactics.Mentality == Mentality.Attacking ? 1 : 0;
         var ageModifier = (player.Age ?? 25) switch
         {
             <= 22 => -1,
@@ -305,11 +305,11 @@ public sealed class InjuryRiskService
     {
         return stamina switch
         {
-            < 40 => 5.0,
-            < 50 => 3.0,
-            < 60 => 2.0,
-            < 70 => 1.5,
-            < 80 => 1.2,
+            < 40 => 3.4,
+            < 50 => 2.2,
+            < 60 => 1.6,
+            < 70 => 1.25,
+            < 80 => 1.08,
             _ => 1.0
         };
     }
@@ -319,10 +319,10 @@ public sealed class InjuryRiskService
         return seasonFatigue switch
         {
             <= 20 => 1.0,
-            <= 40 => 1.08,
-            <= 60 => 1.18,
-            <= 80 => 1.35,
-            _ => 1.65
+            <= 40 => 1.04,
+            <= 60 => 1.10,
+            <= 80 => 1.22,
+            _ => 1.42
         };
     }
 
@@ -402,7 +402,7 @@ public sealed class InjuryRiskService
     {
         return Math.Max(0, 62 - player.Stamina) * 0.85 +
             Math.Min(MaximumRecentLoad, player.MatchesPlayedRecently) * 4.5 +
-            player.SeasonFatigue * 0.18 +
+            player.SeasonFatigue * 0.12 +
             GetAgeConditionRisk(player) +
             (player.Traits.Contains(PlayerTrait.InjuryProne) ? 18 : 0) +
             (minute >= 75 ? 6 : 0);
@@ -410,18 +410,18 @@ public sealed class InjuryRiskService
 
     private static double CalculateMatchIntensityRisk(Team team)
     {
-        return Math.Max(0, team.Tactics.Tempo - 68) / 18000.0 +
-            Math.Max(0, team.Tactics.PressingIntensity - 68) / 12000.0 +
-            team.Players.Count(player => player.IsOnPitch && player.Traits.Contains(PlayerTrait.DivesIntoTackles)) * 0.00016;
+        return Math.Max(0, team.Tactics.Tempo - 72) / 22000.0 +
+            Math.Max(0, team.Tactics.PressingIntensity - 72) / 16000.0 +
+            team.Players.Count(player => player.IsOnPitch && player.Traits.Contains(PlayerTrait.DivesIntoTackles)) * 0.00012;
     }
 
     private static double CalculatePreparationInjuryWeight(Player player)
     {
         var attributes = PlayerAttributeService.GetAttributes(player);
-        var roleRisk = player.Role is PlayerRole.KeyPlayer or PlayerRole.Starter ? 5.0 : 0.0;
-        var loadRisk = Math.Min(MaximumRecentLoad, player.MatchesPlayedRecently) * 7.0;
-        var seasonFatigueRisk = player.SeasonFatigue * 0.45;
-        var traitRisk = player.Traits.Contains(PlayerTrait.InjuryProne) ? 26.0 : 0.0;
+        var roleRisk = player.Role is PlayerRole.KeyPlayer or PlayerRole.Starter ? 3.0 : 0.0;
+        var loadRisk = Math.Min(MaximumRecentLoad, player.MatchesPlayedRecently) * 4.5;
+        var seasonFatigueRisk = player.SeasonFatigue * 0.30;
+        var traitRisk = player.Traits.Contains(PlayerTrait.InjuryProne) ? 22.0 : 0.0;
         var ageRisk = GetAgePreparationRisk(player);
         var protection = Math.Max(0, attributes.Physical - 70) * 0.35 + (player.Traits.Contains(PlayerTrait.Engine) ? 8.0 : 0.0);
 

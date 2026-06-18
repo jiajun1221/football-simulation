@@ -27,11 +27,16 @@ public static class NaturalPositionAssignmentService
     {
         var normalizedSlots = slots
             .Select(PositionSuitabilityService.NormalizeExactPosition)
-            .Where(slot => !string.IsNullOrWhiteSpace(slot))
             .ToList();
         if (normalizedSlots.Count == 0)
         {
             return Failed("No formation slots are available.");
+        }
+
+        var invalidSlotIndex = normalizedSlots.FindIndex(string.IsNullOrWhiteSpace);
+        if (invalidSlotIndex >= 0)
+        {
+            return Failed($"Unknown formation slot {slots[invalidSlotIndex]}.");
         }
 
         var candidatesBySlot = normalizedSlots

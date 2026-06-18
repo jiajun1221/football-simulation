@@ -32,6 +32,7 @@ public static class PlayerAttributeService
 
     public static void ApplyMissingAttributes(Player player)
     {
+        PlayerTraitAssignmentService.EnsureMinimumTraits(player);
         var attributes = GetAttributes(player);
         player.Pace = player.Pace <= 0 ? attributes.Pace : player.Pace;
         player.Shooting = player.Shooting <= 0 ? attributes.Shooting : player.Shooting;

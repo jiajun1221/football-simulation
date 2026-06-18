@@ -31,7 +31,7 @@ public class FatigueBadgeServiceTests
     [Fact]
     public void Evaluate_ShowsRiskForLowStaminaWithHighFatigue()
     {
-        var player = CreatePlayer(stamina: 58, recentLoad: 6, seasonFatigue: 70);
+        var player = CreatePlayer(stamina: 52, recentLoad: 6, seasonFatigue: 70);
 
         var badge = FatigueBadgeService.Evaluate(player);
 
@@ -55,7 +55,7 @@ public class FatigueBadgeServiceTests
     [Fact]
     public void Evaluate_FullStaminaKeepsExtremeSeasonRisk()
     {
-        var player = CreatePlayer(stamina: 100, recentLoad: 4, seasonFatigue: 90);
+        var player = CreatePlayer(stamina: 100, recentLoad: 4, seasonFatigue: 92);
 
         var badge = FatigueBadgeService.Evaluate(player);
 
@@ -66,7 +66,7 @@ public class FatigueBadgeServiceTests
     public void Evaluate_FullStaminaKeepsExtremeConsecutiveStartLoad()
     {
         var player = CreatePlayer(stamina: 100, recentLoad: 4, seasonFatigue: 45);
-        player.ConsecutiveStarts = 10;
+        player.ConsecutiveStarts = 12;
 
         var badge = FatigueBadgeService.Evaluate(player);
 
@@ -95,11 +95,11 @@ public class FatigueBadgeServiceTests
     }
 
     [Fact]
-    public void Evaluate_ShortRestAfterTwoFullMatchesShowsTired()
+    public void Evaluate_ShortRestAfterThreeFullMatchesShowsTired()
     {
         var player = CreatePlayer(stamina: 82, recentLoad: 4, seasonFatigue: 45);
-        player.RecentMatchMinutes = [90, 90];
-        player.ConsecutiveFullMatches = 2;
+        player.RecentMatchMinutes = [90, 90, 90];
+        player.ConsecutiveFullMatches = 3;
 
         var badge = FatigueBadgeService.Evaluate(player, fixtureGapDays: 3);
 

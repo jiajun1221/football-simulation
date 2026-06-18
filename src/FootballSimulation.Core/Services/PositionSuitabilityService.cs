@@ -7,7 +7,7 @@ public static class PositionSuitabilityService
     private static readonly HashSet<string> ExactPositions =
     [
         "LW", "ST", "RW", "CF",
-        "CM", "CAM", "CDM",
+        "LM", "CM", "CAM", "CDM", "RM",
         "LB", "RB", "CB", "LWB", "RWB",
         "GK"
     ];

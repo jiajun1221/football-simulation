@@ -145,9 +145,9 @@ public class PlayerFormStatusService
 
         var staminaPenalty = player.Stamina switch
         {
-            < 20 => 0.30,
-            < 35 => 0.20,
-            < 60 => 0.10,
+            < 18 => 0.25,
+            < 32 => 0.16,
+            < 50 => 0.08,
             _ => 0.0
         };
 

@@ -16,10 +16,18 @@ public static class ClubMatchSetupService
                 .Select(player => new LineupSlotAssignment
                 {
                     Slot = PositionSuitabilityService.NormalizeExactPosition(player.AssignedPosition),
+                    PlayerId = player.PlayerId,
                     PlayerName = player.Name
                 })
                 .ToList(),
             Bench = team.Substitutes.Select(player => player.Name).ToList(),
+            BenchPlayers = team.Substitutes
+                .Select(player => new LineupPlayerRef
+                {
+                    PlayerId = player.PlayerId,
+                    PlayerName = player.Name
+                })
+                .ToList(),
             Tactics = CloneTactics(team.Tactics)
         };
     }
@@ -40,20 +48,30 @@ public static class ClubMatchSetupService
         TacticalProfileService.CopyTo(setup.Tactics, team.Tactics);
 
         var originalPlayers = team.Players.Concat(team.Substitutes)
-            .GroupBy(player => player.Name, StringComparer.OrdinalIgnoreCase)
+            .GroupBy(CreatePlayerKey, StringComparer.OrdinalIgnoreCase)
             .Select(group => group.First())
             .ToList();
-        var playersByName = originalPlayers.ToDictionary(player => player.Name, StringComparer.OrdinalIgnoreCase);
-        var usedNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var playersById = originalPlayers
+            .Where(player => !string.IsNullOrWhiteSpace(player.PlayerId))
+            .GroupBy(player => player.PlayerId, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
+        var playersByName = originalPlayers
+            .GroupBy(player => player.Name, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
+        var usedPlayerKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var starters = new List<Player>();
 
-        foreach (var assignment in setup.StartingXI)
+        foreach (var assignment in setup.StartingXI ?? [])
         {
-            var player = playersByName.TryGetValue(assignment.PlayerName, out var savedPlayer) &&
-                IsAvailableForSelection(savedPlayer)
-                    ? savedPlayer
-                    : ChooseReplacement(originalPlayers, usedNames, assignment.Slot);
-            if (player is null || !usedNames.Add(player.Name))
+            var player = ResolvePlayer(assignment.PlayerId, assignment.PlayerName, playersById, playersByName);
+            if (player is null ||
+                !IsAvailableForSelection(player) ||
+                usedPlayerKeys.Contains(CreatePlayerKey(player)))
+            {
+                player = ChooseReplacement(originalPlayers, usedPlayerKeys, assignment.Slot);
+            }
+
+            if (player is null || !usedPlayerKeys.Add(CreatePlayerKey(player)))
             {
                 continue;
             }
@@ -65,11 +83,11 @@ public static class ClubMatchSetupService
         while (starters.Count < 11)
         {
             var replacement = originalPlayers
-                .Where(player => IsAvailableForSelection(player) && !usedNames.Contains(player.Name))
+                .Where(player => IsAvailableForSelection(player) && !usedPlayerKeys.Contains(CreatePlayerKey(player)))
                 .OrderByDescending(player => player.OverallRating)
                 .ThenBy(player => player.SquadNumber <= 0 ? int.MaxValue : player.SquadNumber)
                 .FirstOrDefault();
-            if (replacement is null || !usedNames.Add(replacement.Name))
+            if (replacement is null || !usedPlayerKeys.Add(CreatePlayerKey(replacement)))
             {
                 break;
             }
@@ -80,11 +98,15 @@ public static class ClubMatchSetupService
         }
 
         var bench = new List<Player>();
-        foreach (var playerName in setup.Bench)
+        var savedBench = setup.BenchPlayers is { Count: > 0 }
+            ? setup.BenchPlayers
+            : (setup.Bench ?? []).Select(playerName => new LineupPlayerRef { PlayerName = playerName }).ToList();
+        foreach (var playerRef in savedBench)
         {
-            if (!playersByName.TryGetValue(playerName, out var player) ||
-                usedNames.Contains(player.Name) ||
-                bench.Any(existing => string.Equals(existing.Name, player.Name, StringComparison.OrdinalIgnoreCase)))
+            var player = ResolvePlayer(playerRef.PlayerId, playerRef.PlayerName, playersById, playersByName);
+            if (player is null ||
+                usedPlayerKeys.Contains(CreatePlayerKey(player)) ||
+                bench.Any(existing => string.Equals(CreatePlayerKey(existing), CreatePlayerKey(player), StringComparison.OrdinalIgnoreCase)))
             {
                 continue;
             }
@@ -95,8 +117,8 @@ public static class ClubMatchSetupService
 
         foreach (var player in originalPlayers)
         {
-            if (usedNames.Contains(player.Name) ||
-                bench.Any(existing => string.Equals(existing.Name, player.Name, StringComparison.OrdinalIgnoreCase)))
+            if (usedPlayerKeys.Contains(CreatePlayerKey(player)) ||
+                bench.Any(existing => string.Equals(CreatePlayerKey(existing), CreatePlayerKey(player), StringComparison.OrdinalIgnoreCase)))
             {
                 continue;
             }
@@ -109,11 +131,29 @@ public static class ClubMatchSetupService
         team.Substitutes = bench;
     }
 
-    private static Player? ChooseReplacement(IEnumerable<Player> players, ISet<string> usedNames, string slot)
+    private static Player? ResolvePlayer(
+        string playerId,
+        string playerName,
+        IReadOnlyDictionary<string, Player> playersById,
+        IReadOnlyDictionary<string, Player> playersByName)
+    {
+        if (!string.IsNullOrWhiteSpace(playerId) &&
+            playersById.TryGetValue(playerId, out var playerById))
+        {
+            return playerById;
+        }
+
+        return !string.IsNullOrWhiteSpace(playerName) &&
+            playersByName.TryGetValue(playerName, out var playerByName)
+                ? playerByName
+                : null;
+    }
+
+    private static Player? ChooseReplacement(IEnumerable<Player> players, ISet<string> usedPlayerKeys, string slot)
     {
         var normalizedSlot = PositionSuitabilityService.NormalizeExactPosition(slot);
         return players
-            .Where(player => IsAvailableForSelection(player) && !usedNames.Contains(player.Name))
+            .Where(player => IsAvailableForSelection(player) && !usedPlayerKeys.Contains(CreatePlayerKey(player)))
             .Where(player => PositionCompatibilityService.IsReasonableFit(player, normalizedSlot))
             .OrderByDescending(player => GetSlotFitScore(player, normalizedSlot))
             .ThenByDescending(player => player.OverallRating)
@@ -149,6 +189,13 @@ public static class ClubMatchSetupService
     private static bool IsAvailableForSelection(Player player)
     {
         return !player.IsInjured && !player.IsSuspended && !player.IsSentOff;
+    }
+
+    private static string CreatePlayerKey(Player player)
+    {
+        return !string.IsNullOrWhiteSpace(player.PlayerId)
+            ? player.PlayerId
+            : $"{player.Name}|{player.SquadNumber}|{PositionSuitabilityService.NormalizeExactPosition(player.PreferredPosition)}";
     }
 
     private static TeamTactics CloneTactics(TeamTactics source)

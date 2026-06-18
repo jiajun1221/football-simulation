@@ -889,7 +889,7 @@ public partial class MatchLiveView : UserControl
         var userTeam = GetUserTeam();
 
         LiveStarterListBox.ItemsSource = CreateSubstitutionPlayerCards(GetActivePitchPlayers(userTeam), showPendingState: false, userTeam);
-        LiveBenchListBox.ItemsSource = CreateSubstitutionPlayerCards(userTeam.Substitutes.Where(IsAvailableSubstitute), showPendingState: false, userTeam);
+        LiveBenchListBox.ItemsSource = CreateSubstitutionPlayerCards(GetAvailableBenchPlayers(userTeam), showPendingState: false, userTeam);
 
         var usedSubstitutions = _squadSelectionService.CountTeamSubstitutions(_state.CurrentMatch, userTeam.Name);
         var maxSubstitutions = _squadSelectionService.GetMaxSubstitutionsForMatch(_state.CurrentMatch);
@@ -1296,6 +1296,7 @@ public partial class MatchLiveView : UserControl
                 string.Equals(player.Name, pendingSubstitution.PlayerOut.Name, StringComparison.OrdinalIgnoreCase));
             var substitute = userTeam.Substitutes.FirstOrDefault(player =>
                 IsAvailableSubstitute(player) &&
+                IsBenchOnlyPlayer(userTeam, player) &&
                 string.Equals(player.Name, pendingSubstitution.PlayerIn.Name, StringComparison.OrdinalIgnoreCase));
 
             if (starter is null || substitute is null)
@@ -1337,7 +1338,7 @@ public partial class MatchLiveView : UserControl
             _selectedPitchPlayerKey = CreatePlayerId(userTeam, substitute);
         }
 
-        PausedBenchListBox.ItemsSource = CreateSubstitutionPlayerCards(userTeam.Substitutes.Where(IsAvailableSubstitute), showPendingState: true, userTeam);
+        PausedBenchListBox.ItemsSource = CreateSubstitutionPlayerCards(GetAvailableBenchPlayers(userTeam), showPendingState: true, userTeam);
         PausedActionStatusTextBlock.Text = $"{validatedSubstitutions.Count} substitution(s) confirmed.";
         ClearPendingSubstitutions();
         RefreshPlayerPanels();
@@ -1414,7 +1415,7 @@ public partial class MatchLiveView : UserControl
 
     private IEnumerable<Player> GetFilteredPausedBenchPlayers(Team userTeam)
     {
-        var availableSubstitutes = userTeam.Substitutes.Where(IsAvailableSubstitute).ToList();
+        var availableSubstitutes = GetAvailableBenchPlayers(userTeam).ToList();
         var selectedPlayer = GetSelectedActiveUserPlayer(userTeam);
         if (selectedPlayer is null)
         {
@@ -1439,6 +1440,23 @@ public partial class MatchLiveView : UserControl
             .ThenByDescending(GetOverallRating)
             .ThenBy(substitute => substitute.SquadNumber <= 0 ? int.MaxValue : substitute.SquadNumber)
             .ThenBy(substitute => substitute.Name);
+    }
+
+    private IEnumerable<Player> GetAvailableBenchPlayers(Team team)
+    {
+        return team.Substitutes
+            .Where(IsAvailableSubstitute)
+            .Where(player => IsBenchOnlyPlayer(team, player));
+    }
+
+    private static bool IsBenchOnlyPlayer(Team team, Player player)
+    {
+        var playerKey = PlayerRosterKeyService.CreateKey(player);
+        return !GetActivePitchPlayers(team)
+            .Any(activePlayer => string.Equals(
+                PlayerRosterKeyService.CreateKey(activePlayer),
+                playerKey,
+                StringComparison.OrdinalIgnoreCase));
     }
 
     private Player? GetSelectedActiveUserPlayer(Team userTeam)
@@ -2046,11 +2064,13 @@ public partial class MatchLiveView : UserControl
     private IEnumerable<LivePlayerIconViewModel> CreatePitchIcons(Team team, bool isHomeTeam, double pitchWidth, double pitchHeight)
     {
         var formationPositions = _formationLayoutService.GetPositions(team.Formation);
+        var preserveManualAssignments = _state.SelectedTeam is not null &&
+            string.Equals(team.Name, _state.SelectedTeam.Name, StringComparison.OrdinalIgnoreCase);
         var players = team.Players
             .Where(player => player.IsOnPitch && !player.IsSentOff)
             .ToList();
 
-        foreach (var assignment in CreatePitchSlotAssignments(players, formationPositions))
+        foreach (var assignment in CreatePitchSlotAssignments(players, formationPositions, preserveManualAssignments))
         {
             yield return CreatePitchIcon(team, assignment.Player, assignment.Position, isHomeTeam, pitchWidth, pitchHeight);
         }
@@ -2058,7 +2078,8 @@ public partial class MatchLiveView : UserControl
 
     private static List<PitchSlotAssignment> CreatePitchSlotAssignments(
         IReadOnlyList<Player> players,
-        IReadOnlyList<PitchPosition> formationPositions)
+        IReadOnlyList<PitchPosition> formationPositions,
+        bool preserveManualAssignments)
     {
         var remainingPlayers = players.ToList();
         var remainingPositions = formationPositions.ToList();
@@ -2075,13 +2096,23 @@ public partial class MatchLiveView : UserControl
                 continue;
             }
 
-            assignments.Add(new PitchSlotAssignment(player, position));
+            assignments.Add(CreatePitchSlotAssignment(player, position));
             remainingPlayers.Remove(player);
             remainingPositions.Remove(position);
         }
 
         if (remainingPlayers.Count == 0 || remainingPositions.Count == 0)
         {
+            return assignments;
+        }
+
+        if (preserveManualAssignments)
+        {
+            foreach (var pair in remainingPlayers.Zip(remainingPositions))
+            {
+                assignments.Add(CreatePitchSlotAssignment(pair.First, pair.Second));
+            }
+
             return assignments;
         }
 
@@ -2100,7 +2131,7 @@ public partial class MatchLiveView : UserControl
                     continue;
                 }
 
-                assignments.Add(new PitchSlotAssignment(assignment.Player, position));
+                assignments.Add(CreatePitchSlotAssignment(assignment.Player, position));
                 remainingPositions.Remove(position);
             }
 
@@ -2109,10 +2140,16 @@ public partial class MatchLiveView : UserControl
 
         foreach (var pair in remainingPlayers.Zip(remainingPositions))
         {
-            assignments.Add(new PitchSlotAssignment(pair.First, pair.Second));
+            assignments.Add(CreatePitchSlotAssignment(pair.First, pair.Second));
         }
 
         return assignments;
+    }
+
+    private static PitchSlotAssignment CreatePitchSlotAssignment(Player player, PitchPosition position)
+    {
+        PositionSuitabilityService.EnsurePositionMetadata(player, position.ExactPosition);
+        return new PitchSlotAssignment(player, position);
     }
 
     private LivePlayerIconViewModel CreatePitchIcon(
@@ -2123,7 +2160,7 @@ public partial class MatchLiveView : UserControl
         double pitchWidth,
         double pitchHeight)
     {
-        PositionSuitabilityService.EnsurePositionMetadata(player, formationPosition.ExactPosition);
+        PositionSuitabilityService.EnsurePositionMetadata(player);
         var performance = _state.CurrentMatch?.PlayerPerformances
             .FirstOrDefault(existing => existing.TeamName == team.Name && existing.PlayerName == player.Name);
         var currentStamina = GetStaminaPercentage(player);
