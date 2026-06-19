@@ -110,6 +110,39 @@
             </Setter>
         </Style>
 
+        <Style x:Key="DashboardIconActionButton" TargetType="Button">
+            <Setter Property="Height" Value="36" />
+            <Setter Property="Padding" Value="12,0" />
+            <Setter Property="Background" Value="#FFFFFF" />
+            <Setter Property="Foreground" Value="#061226" />
+            <Setter Property="BorderBrush" Value="#CBD5E1" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ActionBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="12"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              RecognizesAccessKey="True" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ActionBorder" Property="BorderBrush" Value="#60A5FA" />
+                                <Setter TargetName="ActionBorder" Property="Background" Value="#F8FAFC" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="DashboardNotificationBadgeStyle" TargetType="Border">
             <Setter Property="MinWidth" Value="20" />
             <Setter Property="Height" Value="20" />
@@ -469,6 +502,7 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -540,6 +574,25 @@
                                            TextAlignment="Center" />
                             </Border>
                         </Grid>
+
+                        <Button Grid.Row="4"
+                                Grid.Column="0"
+                                Style="{StaticResource DashboardIconActionButton}"
+                                Margin="0,8,6,0"
+                                Click="MatchResultsButton_Click">
+                            <StackPanel Orientation="Horizontal"
+                                        VerticalAlignment="Center">
+                                <Image Source="pack://application:,,,/Assets/App/football-logo.png"
+                                       Width="16"
+                                       Height="16"
+                                       Stretch="Uniform"
+                                       Margin="0,0,8,0" />
+                                <TextBlock Text="Match History"
+                                           Foreground="#061226"
+                                           FontWeight="Bold"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
                     </Grid>
 
                 </StackPanel>

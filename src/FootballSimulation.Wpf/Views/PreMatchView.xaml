@@ -671,6 +671,14 @@
                                                            VerticalAlignment="Center" />
                                             </Grid>
 
+                                            <TextBlock x:Name="SelectedPlayerConditionTextBlock"
+                                                       Foreground="{DynamicResource AppMutedTextBrush}"
+                                                       FontSize="8"
+                                                       FontWeight="SemiBold"
+                                                       TextWrapping="Wrap"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       Margin="0,3,0,0" />
+
                                             <UniformGrid Columns="4"
                                                          Margin="0,4,0,0">
                                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">

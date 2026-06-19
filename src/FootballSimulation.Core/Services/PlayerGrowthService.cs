@@ -56,6 +56,7 @@ public class PlayerGrowthService
 
         var previousOverall = player.OverallRating;
         IncreaseOverall(player);
+        PlayerTraitAssignmentService.UnlockOverallMilestoneTraits(player, previousOverall);
         player.GrowthPoints -= GrowthThreshold;
         player.LastMatchOverallIncrease = Math.Max(0, player.OverallRating - previousOverall);
     }

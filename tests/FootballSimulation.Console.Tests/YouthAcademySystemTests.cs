@@ -156,6 +156,50 @@ public class YouthAcademySystemTests
     }
 
     [Fact]
+    public void ApplyDevelopment_YouthPlayerCrossingEightyFiveUnlocksTrait()
+    {
+        var academy = new YouthAcademy
+        {
+            ClubName = "Chelsea",
+            AcademyLevel = AcademyLevel.Elite,
+            TrainingFocus = YouthTrainingFocus.Playmaking
+        };
+        var prospect = CreateComparableProspect("Breakout Midfielder", YouthDevelopmentRate.Normal);
+        prospect.CurrentOVR = 84;
+        prospect.HiddenTruePotential = 95;
+        prospect.DevelopmentProgress = 1.0;
+
+        new YouthDevelopmentService().ApplyDevelopment(prospect, academy);
+
+        Assert.Equal(85, prospect.CurrentOVR);
+        Assert.Contains(PlayerTrait.BoxToBox, prospect.Traits);
+        Assert.Contains(PlayerTrait.Playmaker, prospect.Traits);
+        Assert.Equal(2, prospect.Traits.Distinct().Count());
+    }
+
+    [Fact]
+    public void ApplyDevelopment_YouthPlayerCrossingNinetyUnlocksAnotherTrait()
+    {
+        var academy = new YouthAcademy
+        {
+            ClubName = "Chelsea",
+            AcademyLevel = AcademyLevel.Elite,
+            TrainingFocus = YouthTrainingFocus.Playmaking
+        };
+        var prospect = CreateComparableProspect("Elite Midfielder", YouthDevelopmentRate.Normal);
+        prospect.CurrentOVR = 89;
+        prospect.HiddenTruePotential = 95;
+        prospect.DevelopmentProgress = 1.0;
+        prospect.Traits = [PlayerTrait.BoxToBox, PlayerTrait.Playmaker];
+
+        new YouthDevelopmentService().ApplyDevelopment(prospect, academy);
+
+        Assert.Equal(90, prospect.CurrentOVR);
+        Assert.Contains(PlayerTrait.PressResistant, prospect.Traits);
+        Assert.Equal(3, prospect.Traits.Distinct().Count());
+    }
+
+    [Fact]
     public void PromoteYouthPlayer_AddsProspectToSeniorSubstitutes()
     {
         var league = CreateLeague();

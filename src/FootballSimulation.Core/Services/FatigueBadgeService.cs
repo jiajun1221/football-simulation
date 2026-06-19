@@ -26,7 +26,7 @@ public static class FatigueBadgeService
         {
             if (player.SeasonFatigue >= 92)
             {
-                return CreateRisk("Season fatigue 92+");
+                return CreateTired($"Full stamina with season fatigue {player.SeasonFatigue}");
             }
 
             if (player.ConsecutiveStarts >= 12)
@@ -49,7 +49,7 @@ public static class FatigueBadgeService
 
         if (player.SeasonFatigue >= 90)
         {
-            return stamina < 75 || player.SeasonFatigue >= 96
+            return stamina < 75
                 ? CreateRisk("Season fatigue 90+")
                 : CreateTired($"Stamina {stamina}% with season fatigue {player.SeasonFatigue}");
         }

@@ -51,6 +51,18 @@ public class FatigueBadgeServiceTests
     }
 
     [Fact]
+    public void Evaluate_ShowsTiredInsteadOfRiskForVeryHighHalftimeStaminaWithExtremeSeasonFatigue()
+    {
+        var player = CreatePlayer(stamina: 94, recentLoad: 5, seasonFatigue: 96);
+
+        var badge = FatigueBadgeService.Evaluate(player);
+
+        Assert.Equal("Tired", badge.Text);
+        Assert.Contains("Stamina 94%", badge.Tooltip);
+        Assert.Contains("season fatigue 96", badge.Tooltip);
+    }
+
+    [Fact]
     public void Evaluate_ShowsRiskForHeavySeasonFatigueOnlyAfterStaminaDropsFurther()
     {
         var player = CreatePlayer(stamina: 72, recentLoad: 5, seasonFatigue: 90);
@@ -74,13 +86,14 @@ public class FatigueBadgeServiceTests
     }
 
     [Fact]
-    public void Evaluate_FullStaminaKeepsExtremeSeasonRisk()
+    public void Evaluate_FullStaminaShowsTiredForExtremeSeasonFatigue()
     {
         var player = CreatePlayer(stamina: 100, recentLoad: 4, seasonFatigue: 92);
 
         var badge = FatigueBadgeService.Evaluate(player);
 
-        Assert.Equal("Risk", badge.Text);
+        Assert.Equal("Tired", badge.Text);
+        Assert.Contains("season fatigue 92", badge.Tooltip);
     }
 
     [Fact]

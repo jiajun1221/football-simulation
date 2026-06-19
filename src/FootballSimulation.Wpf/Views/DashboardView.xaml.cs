@@ -357,6 +357,16 @@ public partial class DashboardView : UserControl
         _navigate(new LeaguePlayerStatsView(_state, _navigate));
     }
 
+    private void MatchResultsButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_state.League is null || _state.SelectedTeam is null)
+        {
+            return;
+        }
+
+        _navigate(new MyTeamResultsView(_state, _navigate));
+    }
+
     private void MySquadButton_Click(object sender, RoutedEventArgs e)
     {
         if (_state.SelectedTeam is null)

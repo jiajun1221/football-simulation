@@ -625,6 +625,7 @@ public class YouthDevelopmentService
         ArgumentNullException.ThrowIfNull(player);
         ArgumentNullException.ThrowIfNull(academy);
 
+        var previousOverall = player.CurrentOVR;
         var potentialGap = Math.Max(0, player.HiddenTruePotential - player.CurrentOVR);
         if (potentialGap == 0)
         {
@@ -650,6 +651,8 @@ public class YouthDevelopmentService
             player.CurrentOVR++;
             player.DevelopmentProgress -= 1.0;
         }
+
+        PlayerTraitAssignmentService.UnlockOverallMilestoneTraits(player, previousOverall);
     }
 
     private static double GetPotentialMultiplier(YouthPlayer player)

@@ -73,6 +73,44 @@ public class PlayerGrowthServiceTests
     }
 
     [Fact]
+    public void ApplyMatchGrowth_YoungPlayerCrossingEightyFiveUnlocksTrait()
+    {
+        var service = new PlayerGrowthService();
+        var player = CreatePlayer("Breakout Winger", overall: 84, age: 18);
+        player.PreferredPosition = "RW";
+        player.Traits = [PlayerTrait.Rapid];
+        player.GrowthPoints = 95;
+        var opponent = CreatePlayer("Opponent", overall: 78, age: 25);
+        var team = CreateTeam("Chelsea", player);
+        var opponentTeam = CreateTeam("Liverpool", opponent);
+
+        service.ApplyMatchGrowth(CreateMatch(team, opponentTeam, player, rating: 10.0, goals: 2, assists: 2));
+
+        Assert.Equal(85, player.OverallRating);
+        Assert.Contains(PlayerTrait.TechnicalDribbler, player.Traits);
+        Assert.Equal(2, player.Traits.Distinct().Count());
+    }
+
+    [Fact]
+    public void ApplyMatchGrowth_YoungPlayerCrossingNinetyUnlocksAnotherTrait()
+    {
+        var service = new PlayerGrowthService();
+        var player = CreatePlayer("Elite Winger", overall: 89, age: 20);
+        player.PreferredPosition = "RW";
+        player.Traits = [PlayerTrait.Rapid, PlayerTrait.TechnicalDribbler];
+        player.GrowthPoints = 95;
+        var opponent = CreatePlayer("Opponent", overall: 78, age: 25);
+        var team = CreateTeam("Chelsea", player);
+        var opponentTeam = CreateTeam("Liverpool", opponent);
+
+        service.ApplyMatchGrowth(CreateMatch(team, opponentTeam, player, rating: 10.0, goals: 2, assists: 2));
+
+        Assert.Equal(90, player.OverallRating);
+        Assert.Contains(PlayerTrait.SpeedDribbler, player.Traits);
+        Assert.Equal(3, player.Traits.Distinct().Count());
+    }
+
+    [Fact]
     public void ApplyMatchGrowth_UnderTwentyProspectInSixtyToSeventyEightBandGrowsVeryFast()
     {
         var service = new PlayerGrowthService();

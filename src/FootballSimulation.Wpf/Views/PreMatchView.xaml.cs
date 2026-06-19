@@ -878,9 +878,11 @@ public partial class PreMatchView : UserControl
             ? (useDarkInjuryChip ? ThemeManager.GetBrushHex("FeedAttackBackground", "#3B1115") : "#FFD1D1")
             : (useDarkInjuryChip ? ThemeManager.GetBrushHex("AppSecondaryCardBackground", "#111827") : "#D9F1E1"));
         var staminaText = $"{GetStaminaPercentage(_selectedStarter)}% stamina";
+        var conditionText = GetConditionText(_selectedStarter);
         SelectedPlayerStaminaTextBlock.Text = staminaText;
         SelectedPlayerStaminaPercentTextBlock.Text = $"{GetStaminaPercentage(_selectedStarter)}%";
         SelectedPlayerStaminaFill.Foreground = ToBrush(GetStaminaBrush(_selectedStarter));
+        SelectedPlayerConditionTextBlock.Text = conditionText;
 
         SelectedPlayerAttackTextBlock.Text = _selectedStarter.Attack.ToString();
         SelectedPlayerDefenseTextBlock.Text = _selectedStarter.Defense.ToString();
@@ -889,6 +891,7 @@ public partial class PreMatchView : UserControl
         SelectedPlayerCard.ToolTip =
             $"{_selectedStarter.Name}{Environment.NewLine}" +
             $"{_selectedStarter.AssignedPosition} | OVR {ratingVisual.Rating} | {staminaText}{Environment.NewLine}" +
+            $"{conditionText}{Environment.NewLine}" +
             $"Attack {_selectedStarter.Attack}  Defense {_selectedStarter.Defense}{Environment.NewLine}" +
             $"Passing {_selectedStarter.Passing}  Finishing {_selectedStarter.Finishing}";
     }
@@ -1716,6 +1719,30 @@ public partial class PreMatchView : UserControl
     private FatigueBadgeResult CreateFatigueBadge(Player player)
     {
         return FatigueBadgeService.Evaluate(player, GetFixtureRestGapDays());
+    }
+
+    private string GetConditionText(Player player)
+    {
+        var badge = CreateFatigueBadge(player);
+        var status = string.IsNullOrWhiteSpace(badge.Text) ? "Fit" : badge.Text;
+        var parts = new List<string>
+        {
+            status,
+            $"Stamina {GetStaminaPercentage(player)}%",
+            $"Season fatigue {player.SeasonFatigue}"
+        };
+
+        if (player.MatchesPlayedRecently > 0)
+        {
+            parts.Add($"Recent load {player.MatchesPlayedRecently}");
+        }
+
+        if (player.ConsecutiveStarts > 0)
+        {
+            parts.Add($"{player.ConsecutiveStarts} starts");
+        }
+
+        return string.Join(" | ", parts);
     }
 
     private int? GetFixtureRestGapDays()

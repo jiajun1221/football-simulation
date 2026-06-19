@@ -672,6 +672,7 @@ public partial class HalfTimeView : UserControl
         var passAccuracy = GetEstimatedPassAccuracy(team, rating, _selectedStarter.Stamina);
         var formBadge = PlayerFormBadgeHelper.Create(_selectedStarter.FormStatus);
         var ratingVisual = GetRatingVisual(_selectedStarter, suitability);
+        var conditionText = GetConditionText(_selectedStarter);
 
         SelectedPlayerEmptyTextBlock.Visibility = Visibility.Collapsed;
         SelectedPlayerCard.Visibility = Visibility.Visible;
@@ -716,7 +717,7 @@ public partial class HalfTimeView : UserControl
                     new("Fouls", (performance?.Fouls ?? 0).ToString()),
                     new("Cards", GetCardsText(_selectedStarter, performance)),
                     new("Status", GetMatchStatusText(_selectedStarter)),
-                    new("Injury", _selectedStarter.IsInjured || performance?.Injuries > 0 ? "Injured" : "None")
+                    new("Condition", conditionText)
                 ]);
             return;
         }
@@ -736,7 +737,7 @@ public partial class HalfTimeView : UserControl
                 new("Duels Won", GetDuelsWon(performance).ToString()),
                 new("Fouls", (performance?.Fouls ?? 0).ToString()),
                 new("Cards", GetCardsText(_selectedStarter, performance)),
-                new("Status", GetMatchStatusText(_selectedStarter))
+                new("Condition", conditionText)
             ]);
     }
 
@@ -846,6 +847,30 @@ public partial class HalfTimeView : UserControl
     private FatigueBadgeResult CreateFatigueBadge(Player player)
     {
         return FatigueBadgeService.Evaluate(player, GetFixtureRestGapDays());
+    }
+
+    private string GetConditionText(Player player)
+    {
+        var badge = CreateFatigueBadge(player);
+        var status = string.IsNullOrWhiteSpace(badge.Text) ? "Fit" : badge.Text;
+        var parts = new List<string>
+        {
+            status,
+            $"Stamina {GetStaminaPercentage(player)}%",
+            $"Season fatigue {player.SeasonFatigue}"
+        };
+
+        if (player.MatchesPlayedRecently > 0)
+        {
+            parts.Add($"Recent load {player.MatchesPlayedRecently}");
+        }
+
+        if (player.ConsecutiveStarts > 0)
+        {
+            parts.Add($"{player.ConsecutiveStarts} starts");
+        }
+
+        return string.Join(" | ", parts);
     }
 
     private int? GetFixtureRestGapDays()
