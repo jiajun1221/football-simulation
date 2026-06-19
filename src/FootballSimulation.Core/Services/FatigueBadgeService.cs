@@ -42,14 +42,16 @@ public static class FatigueBadgeService
             return CreateRisk($"Stamina {stamina}%");
         }
 
-        if (player.SeasonFatigue >= 90)
-        {
-            return CreateRisk("Season fatigue 90+");
-        }
-
         if (stamina < 55 && (effectiveRecentLoad >= 6 || player.SeasonFatigue >= 70))
         {
             return CreateRisk($"Stamina {stamina}% with high workload");
+        }
+
+        if (player.SeasonFatigue >= 90)
+        {
+            return stamina < 75 || player.SeasonFatigue >= 96
+                ? CreateRisk("Season fatigue 90+")
+                : CreateTired($"Stamina {stamina}% with season fatigue {player.SeasonFatigue}");
         }
 
         if (player.ConsecutiveFullMatches >= 4 && isLessThanFourDaysRest)

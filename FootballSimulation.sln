@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FootballSimulation.Core", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FootballSimulation.Wpf", "src\FootballSimulation.Wpf\FootballSimulation.Wpf.csproj", "{014785BE-4B30-495A-B81F-6858A89B4AC2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FootballSimulation.Api", "src\FootballSimulation.Api\FootballSimulation.Api.csproj", "{EFFB1F04-7D3D-46ED-A64E-B5221E1BF6BA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -73,6 +75,18 @@ Global
 		{014785BE-4B30-495A-B81F-6858A89B4AC2}.Release|x64.Build.0 = Release|Any CPU
 		{014785BE-4B30-495A-B81F-6858A89B4AC2}.Release|x86.ActiveCfg = Release|Any CPU
 		{014785BE-4B30-495A-B81F-6858A89B4AC2}.Release|x86.Build.0 = Release|Any CPU
+		{EFFB1F04-7D3D-46ED-A64E-B5221E1BF6BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EFFB1F04-7D3D-46ED-A64E-B5221E1BF6BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EFFB1F04-7D3D-46ED-A64E-B5221E1BF6BA}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{EFFB1F04-7D3D-46ED-A64E-B5221E1BF6BA}.Debug|x64.Build.0 = Debug|Any CPU
+		{EFFB1F04-7D3D-46ED-A64E-B5221E1BF6BA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{EFFB1F04-7D3D-46ED-A64E-B5221E1BF6BA}.Debug|x86.Build.0 = Debug|Any CPU
+		{EFFB1F04-7D3D-46ED-A64E-B5221E1BF6BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EFFB1F04-7D3D-46ED-A64E-B5221E1BF6BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EFFB1F04-7D3D-46ED-A64E-B5221E1BF6BA}.Release|x64.ActiveCfg = Release|Any CPU
+		{EFFB1F04-7D3D-46ED-A64E-B5221E1BF6BA}.Release|x64.Build.0 = Release|Any CPU
+		{EFFB1F04-7D3D-46ED-A64E-B5221E1BF6BA}.Release|x86.ActiveCfg = Release|Any CPU
+		{EFFB1F04-7D3D-46ED-A64E-B5221E1BF6BA}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -82,5 +96,6 @@ Global
 		{1D9CC567-C08A-4AB6-9B87-40724BB7B956} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{FCEFA443-E850-490A-858D-B3EAEB991DB2} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{014785BE-4B30-495A-B81F-6858A89B4AC2} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{EFFB1F04-7D3D-46ED-A64E-B5221E1BF6BA} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 EndGlobal

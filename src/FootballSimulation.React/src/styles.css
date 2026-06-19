@@ -1,0 +1,400 @@
+:root {
+  color: #1a1c20;
+  background: #f4f0e8;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+}
+
+button {
+  font: inherit;
+}
+
+.app-shell {
+  display: grid;
+  grid-template-columns: minmax(260px, 320px) 1fr;
+  min-height: 100vh;
+}
+
+.team-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-height: 100vh;
+  padding: 24px 18px;
+  color: #faf7ef;
+  background: #173f35;
+}
+
+.brand-row {
+  display: grid;
+  grid-template-columns: 54px 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.brand-logo {
+  width: 54px;
+  height: 54px;
+  object-fit: contain;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  color: #b9954f;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 0;
+  font-size: 1.4rem;
+  line-height: 1.15;
+}
+
+.team-list {
+  display: grid;
+  gap: 8px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.team-button {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+  min-height: 42px;
+  border: 1px solid rgb(255 255 255 / 0.14);
+  border-radius: 6px;
+  padding: 10px 12px;
+  color: #faf7ef;
+  background: rgb(255 255 255 / 0.07);
+  cursor: pointer;
+  text-align: left;
+}
+
+.team-button:hover,
+.team-button.active {
+  color: #173f35;
+  background: #f2c35a;
+}
+
+.team-button span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.team-button strong {
+  font-size: 0.85rem;
+}
+
+.content-area {
+  min-width: 0;
+  padding: 28px;
+}
+
+.club-header {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.club-header h2 {
+  margin-bottom: 6px;
+  font-size: 2rem;
+  line-height: 1.05;
+}
+
+.subtle-text {
+  margin-bottom: 0;
+  color: #68625a;
+}
+
+.rating-badge {
+  display: grid;
+  gap: 4px;
+  min-width: 106px;
+  border: 1px solid #d7ccbd;
+  border-radius: 6px;
+  padding: 12px 14px;
+  background: #fffaf0;
+  text-align: center;
+}
+
+.rating-badge span,
+.metric span,
+.section-title span {
+  color: #68625a;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.rating-badge strong {
+  font-size: 1.7rem;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(130px, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.metric {
+  display: grid;
+  grid-template-columns: 38px 1fr;
+  gap: 4px 10px;
+  min-height: 88px;
+  border: 1px solid #ded4c3;
+  border-radius: 6px;
+  padding: 14px;
+  background: #fffaf0;
+}
+
+.metric-icon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 6px;
+  color: #f7efe0;
+  background: #9f3f32;
+  grid-row: span 2;
+}
+
+.metric strong {
+  font-size: 1.35rem;
+  line-height: 1.1;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.92fr) minmax(360px, 1.08fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.pitch-panel,
+.squad-panel,
+.error-panel,
+.loading-block {
+  border: 1px solid #ded4c3;
+  border-radius: 6px;
+  background: #fffaf0;
+}
+
+.pitch-panel,
+.squad-panel {
+  padding: 16px;
+}
+
+.section-title {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.section-title h3 {
+  margin-bottom: 0;
+  font-size: 1.1rem;
+}
+
+.pitch {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(84px, 1fr));
+  gap: 10px;
+  min-height: 620px;
+  border: 2px solid rgb(255 255 255 / 0.82);
+  border-radius: 6px;
+  padding: 14px;
+  background:
+    linear-gradient(90deg, transparent 49.7%, rgb(255 255 255 / 0.55) 49.7%, rgb(255 255 255 / 0.55) 50.3%, transparent 50.3%),
+    repeating-linear-gradient(0deg, #2f8b57 0 78px, #28794d 78px 156px);
+}
+
+.player-chip {
+  display: grid;
+  gap: 4px;
+  align-self: center;
+  min-height: 84px;
+  border-radius: 6px;
+  padding: 9px;
+  color: #141719;
+  background: rgb(255 250 240 / 0.9);
+  box-shadow: 0 8px 20px rgb(25 36 28 / 0.16);
+}
+
+.player-chip .number {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  color: #fffaf0;
+  background: #173f35;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.player-chip span:nth-child(2) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.player-chip strong {
+  color: #9f3f32;
+  font-size: 0.75rem;
+}
+
+.player-section + .player-section {
+  margin-top: 18px;
+}
+
+.player-section h4 {
+  margin-bottom: 8px;
+  color: #173f35;
+  font-size: 0.98rem;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  min-width: 520px;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border-bottom: 1px solid #ebe0ce;
+  padding: 9px 8px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+th {
+  color: #68625a;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+}
+
+td {
+  font-size: 0.9rem;
+}
+
+.status-line,
+.loading-block,
+.error-panel {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.status-line {
+  color: #faf7ef;
+}
+
+.loading-block,
+.error-panel {
+  padding: 18px;
+}
+
+.loading-block {
+  justify-content: center;
+  min-height: 180px;
+}
+
+.error-panel {
+  margin-bottom: 16px;
+  color: #7b241e;
+  background: #fff1ec;
+}
+
+.spin {
+  animation: spin 0.85s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 1080px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .team-nav {
+    min-height: auto;
+  }
+
+  .team-list {
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    max-height: none;
+  }
+
+  .dashboard-grid,
+  .metric-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .content-area,
+  .team-nav {
+    padding: 18px;
+  }
+
+  .club-header,
+  .section-title {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .club-header h2 {
+    font-size: 1.55rem;
+  }
+
+  .metric-grid,
+  .dashboard-grid,
+  .pitch {
+    grid-template-columns: 1fr;
+  }
+
+  .pitch {
+    min-height: auto;
+  }
+}

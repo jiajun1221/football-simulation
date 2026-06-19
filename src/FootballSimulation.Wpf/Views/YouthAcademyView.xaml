@@ -606,20 +606,20 @@
                               Style="{StaticResource ModernGridStyle}"
                               SelectionChanged="AcademyPlayersDataGrid_SelectionChanged">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="No." Binding="{Binding Number}" Width="54" ElementStyle="{StaticResource CenteredValueTextStyle}" />
-                            <DataGridTemplateColumn Header="Player" Width="1.35*" IsReadOnly="True" HeaderStyle="{StaticResource LeftAlignedColumnHeaderStyle}">
+                            <DataGridTextColumn Header="No." Binding="{Binding Number}" Width="54" CanUserSort="False" ElementStyle="{StaticResource CenteredValueTextStyle}" />
+                            <DataGridTemplateColumn Header="Player" Width="1.35*" IsReadOnly="True" HeaderStyle="{StaticResource LeftAlignedColumnHeaderStyle}" SortMemberPath="Name">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <StaticResource ResourceKey="YouthPlayerCellTemplate" />
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Nat" Width="42" IsReadOnly="True">
+                            <DataGridTemplateColumn Header="Nat" Width="42" IsReadOnly="True" SortMemberPath="NationalityName">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <StaticResource ResourceKey="NationalityCellTemplate" />
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                             <DataGridTextColumn Header="Pos" Binding="{Binding Position}" Width="48" ElementStyle="{StaticResource CenteredGridTextStyle}" />
                             <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="48" ElementStyle="{StaticResource CenteredGridTextStyle}" />
-                            <DataGridTemplateColumn Header="OVR" Width="60" IsReadOnly="True">
+                            <DataGridTemplateColumn Header="OVR" Width="60" IsReadOnly="True" SortMemberPath="Overall">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border Style="{StaticResource OvrBadgeBorderStyle}">
@@ -628,18 +628,18 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Potential" Width="92" IsReadOnly="True">
+                            <DataGridTemplateColumn Header="Potential" Width="92" IsReadOnly="True" SortMemberPath="PotentialMax">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <StaticResource ResourceKey="PotentialBadgeTemplate" />
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Dev." Width="86" IsReadOnly="True">
+                            <DataGridTemplateColumn Header="Dev." Width="86" IsReadOnly="True" SortMemberPath="DevelopmentSortOrder">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <StaticResource ResourceKey="DevelopmentBadgeTemplate" />
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                             <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="90" ElementStyle="{StaticResource CenteredValueTextStyle}" />
-                            <DataGridTemplateColumn Header="Status" Width="92" IsReadOnly="True">
+                            <DataGridTemplateColumn Header="Status" Width="92" IsReadOnly="True" SortMemberPath="Status">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <StaticResource ResourceKey="StatusCellTemplate" />
                                 </DataGridTemplateColumn.CellTemplate>

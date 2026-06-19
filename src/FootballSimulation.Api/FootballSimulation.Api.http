@@ -1,0 +1,16 @@
+@FootballSimulation.Api_HostAddress = http://localhost:5233
+
+GET {{FootballSimulation.Api_HostAddress}}/api/health
+Accept: application/json
+
+###
+
+GET {{FootballSimulation.Api_HostAddress}}/api/teams
+Accept: application/json
+
+###
+
+GET {{FootballSimulation.Api_HostAddress}}/api/teams/Chelsea
+Accept: application/json
+
+###

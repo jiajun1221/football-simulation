@@ -76,13 +76,14 @@ public class YouthAcademySystemTests
         service.ApplyDevelopment(slowProspect, academy, months: 6);
         service.ApplyDevelopment(explosiveProspect, academy, months: 6);
 
-        Assert.True(explosiveProspect.CurrentOVR > slowProspect.CurrentOVR);
-        Assert.True(explosiveProspect.DevelopmentProgress > slowProspect.DevelopmentProgress ||
-            explosiveProspect.CurrentOVR - slowProspect.CurrentOVR > 1);
+        var slowGrowthScore = slowProspect.CurrentOVR + slowProspect.DevelopmentProgress;
+        var explosiveGrowthScore = explosiveProspect.CurrentOVR + explosiveProspect.DevelopmentProgress;
+
+        Assert.True(explosiveGrowthScore > slowGrowthScore);
     }
 
     [Fact]
-    public void ApplyDevelopment_UnderTwentyProspectInSixtyToSeventyEightBandDevelopsVeryFast()
+    public void ApplyDevelopment_UnderTwentyProspectInSixtyToSeventyEightBandDevelopsFaster()
     {
         var academy = new YouthAcademy
         {
@@ -103,7 +104,55 @@ public class YouthAcademySystemTests
 
         Assert.True(
             eligibleProspect.CurrentOVR - 65 > normalProspect.CurrentOVR - 65 ||
-            eligibleProspect.DevelopmentProgress > normalProspect.DevelopmentProgress * 2);
+            eligibleProspect.DevelopmentProgress > normalProspect.DevelopmentProgress);
+    }
+
+    [Fact]
+    public void ApplyDevelopment_EliteExplosiveProspectDoesNotGrowUnrealisticallyInOneSeason()
+    {
+        var academy = new YouthAcademy
+        {
+            ClubName = "Chelsea",
+            AcademyLevel = AcademyLevel.Elite,
+            TrainingFocus = YouthTrainingFocus.Attacking
+        };
+        var prospect = CreateComparableProspect("Elite Prospect", YouthDevelopmentRate.Explosive);
+        prospect.Age = 16;
+        prospect.CurrentOVR = 65;
+        prospect.HiddenTruePotential = 96;
+        prospect.PotentialMin = 91;
+        prospect.PotentialMax = 97;
+        prospect.PotentialTier = YouthPotentialTier.GenerationalTalent;
+        prospect.Personality = YouthPersonality.Determined;
+        var service = new YouthDevelopmentService();
+
+        service.ApplyDevelopment(prospect, academy, months: 12);
+
+        Assert.InRange(prospect.CurrentOVR, 69, 72);
+    }
+
+    [Fact]
+    public void ApplyDevelopment_SlowsDownNearPotential()
+    {
+        var academy = new YouthAcademy
+        {
+            ClubName = "Chelsea",
+            AcademyLevel = AcademyLevel.Elite,
+            TrainingFocus = YouthTrainingFocus.Balanced
+        };
+        var prospect = CreateComparableProspect("Near Potential Prospect", YouthDevelopmentRate.Explosive);
+        prospect.Age = 17;
+        prospect.CurrentOVR = 86;
+        prospect.HiddenTruePotential = 88;
+        prospect.PotentialMin = 86;
+        prospect.PotentialMax = 90;
+        prospect.PotentialTier = YouthPotentialTier.EliteProspect;
+        prospect.Personality = YouthPersonality.Determined;
+        var service = new YouthDevelopmentService();
+
+        service.ApplyDevelopment(prospect, academy, months: 12);
+
+        Assert.True(prospect.CurrentOVR <= 87);
     }
 
     [Fact]

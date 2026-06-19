@@ -334,8 +334,17 @@ public partial class YouthAcademyView : UserControl
         public string Position => Player.PreferredPosition;
         public int Overall => Player.CurrentOVR;
         public string OverallText => Player.CurrentOVR.ToString(CultureInfo.InvariantCulture);
+        public int PotentialMax => Player.PotentialMax;
         public string Potential => $"{Player.PotentialMin}-{Player.PotentialMax}";
         public string Development => Player.DevelopmentRate.ToString();
+        public int DevelopmentSortOrder => Player.DevelopmentRate switch
+        {
+            YouthDevelopmentRate.Explosive => 4,
+            YouthDevelopmentRate.Fast => 3,
+            YouthDevelopmentRate.Normal => 2,
+            YouthDevelopmentRate.Slow => 1,
+            _ => 0
+        };
         public string Personality => Player.Personality.ToString();
         public string Traits => Player.Traits.Count == 0 ? "-" : string.Join(", ", Player.Traits.Take(2));
         public IReadOnlyList<PlayerTraitBadge> TraitBadges => PlayerTraitBadgeHelper.Create(Player.Traits, maxVisibleTraits: 6);

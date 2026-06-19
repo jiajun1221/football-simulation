@@ -631,14 +631,18 @@ public class YouthDevelopmentService
             return;
         }
 
-        var monthlyGrowth = 0.22 *
+        var monthlyGrowth = 0.11 *
             GetPotentialMultiplier(player) *
             GetAgeMultiplier(player.Age) *
             GetAcademyMultiplier(academy.AcademyLevel) *
             GetDevelopmentRateMultiplier(player.DevelopmentRate) *
             GetPersonalityMultiplier(player.Personality) *
             GetTrainingFocusMultiplier(player, academy.TrainingFocus) *
-            GetEmergingProspectAcademyMultiplier(player);
+            GetEmergingProspectAcademyMultiplier(player) *
+            GetCurrentOverallMultiplier(player.CurrentOVR) *
+            GetPotentialGapMultiplier(potentialGap);
+
+        monthlyGrowth = Math.Min(monthlyGrowth, 0.55);
 
         player.DevelopmentProgress += monthlyGrowth * Math.Max(1, months);
         while (player.DevelopmentProgress >= 1.0 && player.CurrentOVR < player.HiddenTruePotential)
@@ -675,8 +679,32 @@ public class YouthDevelopmentService
     private static double GetEmergingProspectAcademyMultiplier(YouthPlayer player)
     {
         return player.Age < 20 && player.CurrentOVR is >= 60 and <= 78
-            ? 2.35
+            ? 1.18
             : 1.0;
+    }
+
+    private static double GetCurrentOverallMultiplier(int currentOverall)
+    {
+        return currentOverall switch
+        {
+            >= 82 => 0.45,
+            >= 78 => 0.60,
+            >= 74 => 0.74,
+            >= 70 => 0.86,
+            _ => 1.0
+        };
+    }
+
+    private static double GetPotentialGapMultiplier(int potentialGap)
+    {
+        return potentialGap switch
+        {
+            >= 20 => 1.0,
+            >= 12 => 0.90,
+            >= 7 => 0.72,
+            >= 4 => 0.48,
+            _ => 0.28
+        };
     }
 
     private static double GetAcademyMultiplier(AcademyLevel level)
