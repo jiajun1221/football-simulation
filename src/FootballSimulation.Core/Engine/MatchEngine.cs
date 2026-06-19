@@ -1733,7 +1733,7 @@ public class MatchEngine
         openPlayTurnoverRisk += GetPreShotDisruptionRisk(match, attackingTeam, defendingTeam, chanceType, shooter);
         openPlayTurnoverRisk *= _tacticalImpactCalculator.GetTurnoverRiskModifier(attackingTeam, defendingTeam);
         openPlayTurnoverRisk *= HomeAwayAdvantageService.GetModifier(match, attackingTeam).TurnoverRiskModifier;
-        if (random.NextDouble() < Math.Clamp(openPlayTurnoverRisk, 0.035, 0.34))
+        if (random.NextDouble() < Math.Clamp(openPlayTurnoverRisk, 0.035, GetOpenPlayTurnoverRiskCap(attackingTeam, defendingTeam)))
         {
             HandlePossessionLoss(minute, match, attackingTeam, defendingTeam, playmaker, shooter, random, matchLog, eventFactory);
             MarkAttackResolved(simulationState, defendingTeam, BallState.Turnover, EventType.Turnover);
@@ -5202,6 +5202,23 @@ public class MatchEngine
             0.55);
 
         return random.NextDouble() < shotProbability;
+    }
+
+    private static double GetOpenPlayTurnoverRiskCap(Team attackingTeam, Team defendingTeam)
+    {
+        var playerDeficit = GetActivePitchPlayers(defendingTeam).Count() - GetActivePitchPlayers(attackingTeam).Count();
+        var riskCap = 0.34;
+        if (attackingTeam.Tactics.Mentality == Mentality.AllOutAttack)
+        {
+            riskCap += 0.08;
+        }
+
+        if (playerDeficit > 0)
+        {
+            riskCap += Math.Min(0.16, playerDeficit * 0.10);
+        }
+
+        return Math.Clamp(riskCap, 0.34, 0.56);
     }
 
     private Player ChoosePlaymaker(Team team, Random random)

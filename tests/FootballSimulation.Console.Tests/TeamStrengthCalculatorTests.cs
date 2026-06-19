@@ -38,6 +38,28 @@ public class TeamStrengthCalculatorTests
     }
 
     [Fact]
+    public void CalculateAttackStrength_DropsHeavilyAfterSendingOffAPlayer()
+    {
+        var seedDataService = new SeedDataService();
+        var calculator = new TeamStrengthCalculator();
+        var team = seedDataService.CreateHomeTeam();
+        team.Tactics = new TeamTactics
+        {
+            Mentality = Mentality.AllOutAttack,
+            Tempo = 90,
+            PressingIntensity = 90,
+            Width = 80,
+            DefensiveLine = 75
+        };
+
+        var fullStrengthAttack = calculator.CalculateAttackStrength(team);
+        team.Players.First(player => player.Position != Position.Goalkeeper).IsSentOff = true;
+        var reducedAttack = calculator.CalculateAttackStrength(team);
+
+        Assert.True(reducedAttack < fullStrengthAttack * 0.70);
+    }
+
+    [Fact]
     public void CalculateAttackStrength_IncreasesWithAttackingTactics()
     {
         var seedDataService = new SeedDataService();

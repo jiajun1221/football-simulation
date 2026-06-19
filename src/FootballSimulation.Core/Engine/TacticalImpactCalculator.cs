@@ -52,12 +52,14 @@ public class TacticalImpactCalculator
         var attackingTactics = Normalize(attackingTeam.Tactics);
         var defendingTactics = Normalize(defendingTeam.Tactics);
         var modifier =
+            GetMentalityTurnoverRiskModifier(attackingTactics.Mentality) *
             ScaleAroundBalanced(defendingTactics.PressingIntensity, 0.0100) *
             ScaleAroundBalanced(attackingTactics.Tempo, 0.0055) *
             ScaleInverseAroundBalanced(attackingTactics.Width, 0.0018) *
-            GetFormationRiskModifier(attackingTeam.Formation);
+            GetFormationRiskModifier(attackingTeam.Formation) *
+            GetManDisadvantageTurnoverModifier(attackingTeam, defendingTeam);
 
-        return Math.Clamp(modifier, 0.55, 2.10);
+        return Math.Clamp(modifier, 0.55, 2.60);
     }
 
     public double GetFoulModifier(Team defendingTeam)
@@ -120,6 +122,38 @@ public class TacticalImpactCalculator
             Mentality.AllOutAttack => 0.68,
             _ => 1.00
         };
+    }
+
+    private static double GetMentalityTurnoverRiskModifier(Mentality mentality)
+    {
+        return mentality switch
+        {
+            Mentality.UltraDefensive => 0.86,
+            Mentality.Defensive => 0.92,
+            Mentality.Attacking => 1.12,
+            Mentality.AllOutAttack => 1.30,
+            _ => 1.00
+        };
+    }
+
+    private static double GetManDisadvantageTurnoverModifier(Team attackingTeam, Team defendingTeam)
+    {
+        var attackingCount = GetActivePlayerCount(attackingTeam);
+        var defendingCount = GetActivePlayerCount(defendingTeam);
+        var deficit = Math.Max(0, defendingCount - attackingCount);
+
+        return deficit switch
+        {
+            0 => 1.0,
+            1 => 1.35,
+            2 => 1.75,
+            _ => 2.05
+        };
+    }
+
+    private static int GetActivePlayerCount(Team team)
+    {
+        return team.Players.Count(player => player.IsOnPitch && !player.IsSentOff && !player.IsInjured && !player.IsSuspended);
     }
 
     private static double ScaleAroundBalanced(int value, double weight)

@@ -32,7 +32,7 @@ public class TeamStrengthCalculator
         return baseAttackStrength
             * FormationModifiers.GetAttackModifier(team.Formation)
             * _tacticalImpactCalculator.GetAttackModifier(team, opponent)
-            * GetShortHandedModifier(availablePlayers.Count);
+            * GetShortHandedAttackModifier(availablePlayers.Count);
     }
 
     public double CalculateDefenseStrength(Team team, Team? opponent = null)
@@ -50,7 +50,7 @@ public class TeamStrengthCalculator
         return baseDefenseStrength
             * FormationModifiers.GetDefenseModifier(team.Formation)
             * _tacticalImpactCalculator.GetDefenseModifier(team, opponent)
-            * GetShortHandedModifier(availablePlayers.Count);
+            * GetShortHandedDefenseModifier(availablePlayers.Count);
     }
 
     public IEnumerable<Player> GetAvailablePlayers(Team team)
@@ -196,14 +196,25 @@ public class TeamStrengthCalculator
         return 1.0 + traitCount * 0.05 + moraleBonus;
     }
 
-    private static double GetShortHandedModifier(int availablePlayerCount)
+    private static double GetShortHandedAttackModifier(int availablePlayerCount)
     {
         return availablePlayerCount switch
         {
             >= 11 => 1.00,
-            10 => 0.78,
-            9 => 0.62,
-            _ => 0.50
+            10 => 0.55,
+            9 => 0.38,
+            _ => 0.28
+        };
+    }
+
+    private static double GetShortHandedDefenseModifier(int availablePlayerCount)
+    {
+        return availablePlayerCount switch
+        {
+            >= 11 => 1.00,
+            10 => 0.82,
+            9 => 0.68,
+            _ => 0.54
         };
     }
 }

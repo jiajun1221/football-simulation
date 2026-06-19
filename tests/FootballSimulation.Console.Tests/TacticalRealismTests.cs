@@ -131,6 +131,27 @@ public class TacticalRealismTests
     }
 
     [Fact]
+    public void TacticalImpact_TenManAllOutAttackHasHigherTurnoverRisk()
+    {
+        var calculator = new TacticalImpactCalculator();
+        var attackingTeam = CreateActiveTeam("Attack FC");
+        var defendingTeam = CreateActiveTeam("Defense FC");
+        attackingTeam.Tactics = new TeamTactics
+        {
+            Mentality = Mentality.AllOutAttack,
+            Tempo = 90,
+            PressingIntensity = 90,
+            Width = 80
+        };
+
+        var fullStrengthRisk = calculator.GetTurnoverRiskModifier(attackingTeam, defendingTeam);
+        attackingTeam.Players.First(player => player.Position != Position.Goalkeeper).IsSentOff = true;
+        var tenManRisk = calculator.GetTurnoverRiskModifier(attackingTeam, defendingTeam);
+
+        Assert.True(tenManRisk > fullStrengthRisk * 1.25);
+    }
+
+    [Fact]
     public void TacticalImpact_AllOutAttackBoostsAttackButWeakensDefense()
     {
         var calculator = new TacticalImpactCalculator();
@@ -194,5 +215,32 @@ public class TacticalRealismTests
         Assert.True(defensiveModifier.AttackModifier > aggressiveModifier.AttackModifier);
         Assert.True(defensiveModifier.TurnoverRiskModifier < aggressiveModifier.TurnoverRiskModifier);
         Assert.True(defensiveModifier.FatigueLossModifier < aggressiveModifier.FatigueLossModifier);
+    }
+
+    private static Team CreateActiveTeam(string name)
+    {
+        var players = Enumerable.Range(0, 11)
+            .Select(index => new Player
+            {
+                Name = $"{name} Player {index + 1}",
+                Position = index == 0 ? Position.Goalkeeper : index <= 4 ? Position.Defender : index <= 8 ? Position.Midfielder : Position.Forward,
+                IsOnPitch = true,
+                Stamina = 90,
+                CurrentStamina = 90,
+                Attack = 75,
+                Defense = 75,
+                Passing = 75,
+                Finishing = 75,
+                OverallRating = 75
+            })
+            .ToList();
+
+        return new Team
+        {
+            Name = name,
+            Formation = "4-3-3",
+            Players = players,
+            Tactics = new TeamTactics()
+        };
     }
 }

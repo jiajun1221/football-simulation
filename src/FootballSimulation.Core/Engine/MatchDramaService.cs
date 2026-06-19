@@ -254,13 +254,15 @@ public class MatchDramaService
         if (context.Minute >= 85 && roll < 0.38)
         {
             var team = ChooseLatePressureTeam(context);
+            var isHomeTeam = team == context.HomeTeam;
+            var attackModifier = GetLatePressureAttackModifier(context, team);
             return new MatchDramaResult
             {
                 EventType = EventType.LateDrama,
                 Team = team,
                 OpponentTeam = team == context.HomeTeam ? context.AwayTeam : context.HomeTeam,
-                HomeAttackModifier = team == context.HomeTeam ? 1.10 : 1.0,
-                AwayAttackModifier = team == context.AwayTeam ? 1.10 : 1.0
+                HomeAttackModifier = isHomeTeam ? attackModifier : 1.0,
+                AwayAttackModifier = isHomeTeam ? 1.0 : attackModifier
             };
         }
 
@@ -353,15 +355,54 @@ public class MatchDramaService
     {
         if (context.Match.HomeScore < context.Match.AwayScore)
         {
-            return context.HomeTeam;
+            return ChooseTrailingPressureTeam(context, context.HomeTeam, context.AwayTeam);
         }
 
         if (context.Match.AwayScore < context.Match.HomeScore)
         {
-            return context.AwayTeam;
+            return ChooseTrailingPressureTeam(context, context.AwayTeam, context.HomeTeam);
         }
 
         return ChooseStrongerAttack(context);
+    }
+
+    private static Team ChooseTrailingPressureTeam(MatchEventContext context, Team trailingTeam, Team leadingTeam)
+    {
+        var trailingCount = GetActivePlayers(trailingTeam).Count;
+        var leadingCount = GetActivePlayers(leadingTeam).Count;
+        if (trailingCount >= leadingCount)
+        {
+            return trailingTeam;
+        }
+
+        var trailingAttack = trailingTeam == context.HomeTeam
+            ? context.HomeAttackStrength
+            : context.AwayAttackStrength;
+        var leadingAttack = leadingTeam == context.HomeTeam
+            ? context.HomeAttackStrength
+            : context.AwayAttackStrength;
+        var attackShare = trailingAttack / Math.Max(1.0, trailingAttack + leadingAttack);
+        var scoreGap = Math.Abs(context.Match.HomeScore - context.Match.AwayScore);
+        var shortHandedPressureChance = Math.Clamp(
+            attackShare * (scoreGap > 1 ? 0.65 : 0.82),
+            0.08,
+            0.34);
+
+        return context.Random.NextDouble() < shortHandedPressureChance
+            ? trailingTeam
+            : leadingTeam;
+    }
+
+    private static double GetLatePressureAttackModifier(MatchEventContext context, Team team)
+    {
+        var opponent = team == context.HomeTeam ? context.AwayTeam : context.HomeTeam;
+        var playerDeficit = GetActivePlayers(opponent).Count - GetActivePlayers(team).Count;
+        return playerDeficit switch
+        {
+            <= 0 => 1.10,
+            1 => 1.02,
+            _ => 0.96
+        };
     }
 
     private static Team ChooseStrongerAttack(MatchEventContext context)
