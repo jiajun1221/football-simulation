@@ -69,4 +69,61 @@ public class SeasonAwardsServiceTests
         Assert.Equal("Cole Palmer", awards.PlayerOfTheSeason.PlayerName);
         Assert.Equal("Cole Palmer", awards.YoungPlayerOfTheSeason.PlayerName);
     }
+
+    [Fact]
+    public void CreateHighlights_UsesCupFinalFixtureWhenCompetitionStateHasNoWinner()
+    {
+        var chelsea = new Team { Name = "Chelsea" };
+        var arsenal = new Team { Name = "Arsenal" };
+        var liverpool = new Team { Name = "Liverpool" };
+        var league = new League
+        {
+            Teams = [chelsea, arsenal, liverpool],
+            Table =
+            [
+                new LeagueTableEntry { TeamName = "Chelsea", Played = 38, Wins = 22, Draws = 7, Losses = 9, Points = 73 },
+                new LeagueTableEntry { TeamName = "Arsenal", Played = 38, Wins = 20, Draws = 9, Losses = 9, Points = 69 },
+                new LeagueTableEntry { TeamName = "Liverpool", Played = 38, Wins = 19, Draws = 10, Losses = 9, Points = 67 }
+            ],
+            CompetitionStates =
+            [
+                new SeasonCompetitionState { Competition = CompetitionType.FACup, Name = "FA Cup" }
+            ],
+            Fixtures =
+            [
+                new Fixture
+                {
+                    Competition = CompetitionType.FACup,
+                    RoundName = "Third Round",
+                    CalendarRound = 42,
+                    IsKnockout = true,
+                    IsPlayed = true,
+                    HomeTeam = chelsea,
+                    AwayTeam = arsenal,
+                    WinningTeamName = "Arsenal",
+                    LosingTeamName = "Chelsea"
+                },
+                new Fixture
+                {
+                    Competition = CompetitionType.FACup,
+                    RoundName = "Final",
+                    KnockoutRoundKey = "Final",
+                    CalendarRound = 79,
+                    IsKnockout = true,
+                    IsPlayed = true,
+                    HomeTeam = arsenal,
+                    AwayTeam = liverpool,
+                    WinningTeamName = "Arsenal",
+                    LosingTeamName = "Liverpool"
+                }
+            ]
+        };
+
+        var highlights = new SeasonAwardsService().CreateHighlights(league, chelsea, league.Table, []);
+
+        var faCup = Assert.Single(highlights, highlight => highlight.Title == "FA Cup");
+        Assert.Equal("Arsenal won the competition.", faCup.PrimaryText);
+        Assert.Contains("Runner-up: Liverpool.", faCup.SecondaryText);
+        Assert.Contains("Eliminated in the Third Round.", faCup.SecondaryText);
+    }
 }

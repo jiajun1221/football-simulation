@@ -140,6 +140,33 @@ public class FatigueBadgeServiceTests
         Assert.Equal("Tired", badge.Text);
     }
 
+    [Fact]
+    public void CalculateWorkloadRiskPercentage_IncreasesWithLowStaminaAndRecentLoad()
+    {
+        var freshPlayer = CreatePlayer(stamina: 96, recentLoad: 1, seasonFatigue: 10);
+        var riskyPlayer = CreatePlayer(stamina: 52, recentLoad: 7, seasonFatigue: 45);
+        riskyPlayer.RecentMatchMinutes = [90, 90, 90, 80, 70];
+        riskyPlayer.ConsecutiveStarts = 8;
+        riskyPlayer.ConsecutiveFullMatches = 3;
+
+        var freshRisk = FatigueBadgeService.CalculateWorkloadRiskPercentage(freshPlayer, fixtureGapDays: 6);
+        var workloadRisk = FatigueBadgeService.CalculateWorkloadRiskPercentage(riskyPlayer, fixtureGapDays: 3);
+
+        Assert.InRange(freshRisk, 0, 20);
+        Assert.InRange(workloadRisk, 70, 100);
+        Assert.True(workloadRisk > freshRisk);
+    }
+
+    [Fact]
+    public void CalculateWorkloadRiskPercentage_IsNotJustSeasonFatigue()
+    {
+        var lowSeasonFatiguePlayer = CreatePlayer(stamina: 45, recentLoad: 6, seasonFatigue: 26);
+
+        var risk = FatigueBadgeService.CalculateWorkloadRiskPercentage(lowSeasonFatiguePlayer);
+
+        Assert.True(risk > lowSeasonFatiguePlayer.SeasonFatigue);
+    }
+
     private static Player CreatePlayer(int stamina, int recentLoad, int seasonFatigue)
     {
         return new Player

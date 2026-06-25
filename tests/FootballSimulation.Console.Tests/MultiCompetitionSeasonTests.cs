@@ -8,7 +8,7 @@ namespace FootballSimulation.Console.Tests;
 public class MultiCompetitionSeasonTests
 {
     [Fact]
-    public void SeasonCalendar_IncludesAllFourCompetitions()
+    public void SeasonCalendar_IncludesAllTrackedCompetitions()
     {
         var league = CreateLeague(teamCount: 20);
 
@@ -16,6 +16,12 @@ public class MultiCompetitionSeasonTests
         Assert.Contains(league.Fixtures, fixture => fixture.Competition == CompetitionType.FACup && fixture.IsKnockout);
         Assert.Contains(league.Fixtures, fixture => fixture.Competition == CompetitionType.LeagueCup && fixture.IsKnockout);
         Assert.Contains(league.Fixtures, fixture => fixture.Competition == CompetitionType.ChampionsLeague && !fixture.AffectsLeagueTable);
+        Assert.Contains(league.Fixtures, fixture => fixture.Competition == CompetitionType.CopaDelRey && fixture.IsKnockout);
+        Assert.Contains(league.Fixtures, fixture => fixture.Competition == CompetitionType.DfbPokal && fixture.IsKnockout);
+        Assert.Contains(league.Fixtures, fixture => fixture.Competition == CompetitionType.CoppaItalia && fixture.IsKnockout);
+        Assert.Contains(league.Fixtures, fixture => fixture.Competition == CompetitionType.CoupeDeFrance && fixture.IsKnockout);
+        Assert.Contains(league.Fixtures, fixture => fixture.Competition == CompetitionType.EuropaLeague && fixture.IsKnockout);
+        Assert.Contains(league.Fixtures, fixture => fixture.Competition == CompetitionType.ConferenceLeague && fixture.IsKnockout);
         Assert.All(league.Fixtures, fixture => Assert.True(fixture.CalendarRound > 0));
     }
 
@@ -202,6 +208,36 @@ public class MultiCompetitionSeasonTests
         Assert.Equal(36, state.Standings.Count);
         Assert.Equal("Round of 16", state.CurrentRoundName);
         Assert.NotEmpty(state.ProgressRecords);
+    }
+
+    [Fact]
+    public void ChampionsLeague_QuarterFinalIsKnockoutImportanceNotFinal()
+    {
+        var progression = new CompetitionProgressionService();
+        var league = CreateLeague(teamCount: 8);
+        var leaguePhaseFixtures = league.Fixtures
+            .Where(fixture => fixture.Competition == CompetitionType.ChampionsLeague && !fixture.IsKnockout)
+            .ToList();
+
+        foreach (var fixture in leaguePhaseFixtures)
+        {
+            CompleteFixture(progression, league, fixture, homeScore: 1, awayScore: 0);
+        }
+
+        var roundOf16Fixtures = league.Fixtures
+            .Where(fixture => fixture.Competition == CompetitionType.ChampionsLeague && fixture.RoundName == "Round of 16")
+            .ToList();
+        foreach (var fixture in roundOf16Fixtures)
+        {
+            CompleteFixture(progression, league, fixture, homeScore: 2, awayScore: 1);
+        }
+
+        var quarterFinalFixtures = league.Fixtures
+            .Where(fixture => fixture.Competition == CompetitionType.ChampionsLeague && fixture.RoundName == "Quarter Final")
+            .ToList();
+
+        Assert.NotEmpty(quarterFinalFixtures);
+        Assert.All(quarterFinalFixtures, fixture => Assert.Equal(FixtureImportance.Knockout, fixture.Importance));
     }
 
     [Fact]

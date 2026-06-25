@@ -7,5 +7,6 @@ public enum MatchSpeed
     OnePointFive,
     Medium,
     Slow,
-    VerySlow
+    VerySlow,
+    ThreeTimes
 }

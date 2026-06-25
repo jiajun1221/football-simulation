@@ -24,6 +24,10 @@ public class PitchPlayerCard
     public string MatchStatsText { get; init; } = string.Empty;
     public double Stamina { get; init; }
     public string StaminaBrush { get; init; } = "#2FA84F";
+    public string WorkloadRiskText { get; init; } = string.Empty;
+    public string WorkloadRiskBrush { get; init; } = "#16A34A";
+    public string WorkloadRiskForeground { get; init; } = "#FFFFFF";
+    public string WorkloadRiskTooltip { get; init; } = string.Empty;
     public string FormBadgeText { get; init; } = string.Empty;
     public string FormBadgeBackground { get; init; } = "#E1E5EA";
     public string FormBadgeForeground { get; init; } = "#465364";

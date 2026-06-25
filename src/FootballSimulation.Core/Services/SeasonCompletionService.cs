@@ -11,6 +11,14 @@ public class SeasonCompletionService
             league.Fixtures.All(fixture => fixture.IsPlayed);
     }
 
+    public bool IsSelectedTeamSeasonComplete(League? league, Team? selectedTeam)
+    {
+        return league is not null &&
+            selectedTeam is not null &&
+            league.Fixtures.Count > 0 &&
+            !league.Fixtures.Any(fixture => !fixture.IsPlayed && IsTeamInFixture(fixture, selectedTeam));
+    }
+
     public Fixture? GetNextFixtureForTeamOrNull(League? league, Team? selectedTeam)
     {
         if (league is null || selectedTeam is null)

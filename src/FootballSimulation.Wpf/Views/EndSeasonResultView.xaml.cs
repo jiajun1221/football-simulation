@@ -55,6 +55,8 @@ public partial class EndSeasonResultView : UserControl
             return;
         }
 
+        _rolloverService.CompleteRemainingAiFixturesIfSelectedTeamFinished(_state.League, _state.SelectedTeam);
+
         if (_state.League.PlayerStats.Count == 0)
         {
             new PlayerSeasonStatsService().RebuildLeagueSeasonStats(_state.League);
@@ -81,6 +83,7 @@ public partial class EndSeasonResultView : UserControl
             ? $"{_state.SelectedTeam.Name}: season finished"
             : $"{_state.SelectedTeam.Name}: {GetOrdinal(selectedRow.Position)} - {selectedRow.Points} pts, {selectedRow.Wins}W {selectedRow.Draws}D {selectedRow.Losses}L, GD {selectedRow.GoalDifference:+#;-#;0}";
 
+        CompetitionResultsItemsControl.ItemsSource = CreateCompetitionResultRows(_archive, _state.League, _state.SelectedTeam);
         LoadOutcome(_archive);
         LoadLeagueOutcomes(_archive);
         LoadBudget(_archive.BudgetSummary);
@@ -98,9 +101,6 @@ public partial class EndSeasonResultView : UserControl
 
     private void LoadOutcome(SeasonArchive archive)
     {
-        OutcomeTitleTextBlock.Text = archive.SelectedClubOutcome;
-        OutcomeSubtitleTextBlock.Text = CreateOutcomeSentence(archive);
-
         if (archive.SelectedClubPosition == 1)
         {
             HeroBorder.Background = ToBrush("#B7791F");
@@ -109,6 +109,95 @@ public partial class EndSeasonResultView : UserControl
         {
             HeroBorder.Background = ToBrush("#991B1B");
         }
+    }
+
+    private static List<CompetitionResultRow> CreateCompetitionResultRows(SeasonArchive archive, League league, Team selectedTeam)
+    {
+        var rows = new List<CompetitionResultRow>();
+        var selectedLeagueRow = archive.FinalTable.FirstOrDefault(row =>
+            row.TeamName.Equals(selectedTeam.Name, StringComparison.OrdinalIgnoreCase));
+
+        rows.Add(selectedLeagueRow is null
+            ? new CompetitionResultRow("Premier League", "n/a", "No final table row found.", "#94A3B8")
+            : new CompetitionResultRow(
+                "Premier League",
+                GetOrdinal(selectedLeagueRow.Position),
+                $"{selectedLeagueRow.Points} pts, GD {selectedLeagueRow.GoalDifference:+#;-#;0}",
+                selectedLeagueRow.Position == 1 ? "#FACC15" : selectedLeagueRow.Position <= 4 ? "#60A5FA" : "#CBD5E1"));
+
+        rows.Add(CreateCupCompetitionResultRow(archive, league, selectedTeam, CompetitionType.ChampionsLeague));
+        rows.Add(CreateCupCompetitionResultRow(archive, league, selectedTeam, CompetitionType.FACup));
+        rows.Add(CreateCupCompetitionResultRow(archive, league, selectedTeam, CompetitionType.LeagueCup));
+
+        return rows;
+    }
+
+    private static CompetitionResultRow CreateCupCompetitionResultRow(
+        SeasonArchive archive,
+        League league,
+        Team selectedTeam,
+        CompetitionType competition)
+    {
+        var competitionName = CompetitionNames.GetDisplayName(competition);
+        var archiveResult = archive.CompetitionResults.FirstOrDefault(result => result.Competition == competition);
+        var selectedTeamName = selectedTeam.Name;
+        var fixtures = league.Fixtures
+            .Where(fixture => fixture.Competition == competition && IsTeamInFixture(fixture, selectedTeamName))
+            .OrderByDescending(GetFixtureCalendarRound)
+            .ToList();
+
+        if (fixtures.Count == 0)
+        {
+            return new CompetitionResultRow(competitionName, "Did not enter", "No matches played.", "#94A3B8");
+        }
+
+        var finalFixture = fixtures
+            .Where(fixture => fixture.IsPlayed && IsFinalFixture(fixture))
+            .OrderByDescending(GetFixtureCalendarRound)
+            .FirstOrDefault();
+        if (finalFixture is not null &&
+            finalFixture.WinningTeamName.Equals(selectedTeamName, StringComparison.OrdinalIgnoreCase))
+        {
+            return new CompetitionResultRow(
+                competitionName,
+                competition == CompetitionType.ChampionsLeague ? "1st" : "Winner",
+                $"Won the Final vs {GetOpponentName(finalFixture, selectedTeamName)}",
+                "#FACC15");
+        }
+
+        if (finalFixture is not null &&
+            finalFixture.LosingTeamName.Equals(selectedTeamName, StringComparison.OrdinalIgnoreCase))
+        {
+            return new CompetitionResultRow(
+                competitionName,
+                "Runner-up",
+                $"Lost the Final to {GetOpponentName(finalFixture, selectedTeamName)}",
+                "#F59E0B");
+        }
+
+        var eliminatedFixture = fixtures
+            .Where(fixture => fixture.IsPlayed &&
+                fixture.IsKnockout &&
+                fixture.LosingTeamName.Equals(selectedTeamName, StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(GetFixtureCalendarRound)
+            .FirstOrDefault();
+        if (eliminatedFixture is not null)
+        {
+            var winnerName = string.IsNullOrWhiteSpace(eliminatedFixture.WinningTeamName)
+                ? GetOpponentName(eliminatedFixture, selectedTeamName)
+                : eliminatedFixture.WinningTeamName;
+            return new CompetitionResultRow(
+                competitionName,
+                $"Eliminated in {eliminatedFixture.RoundName}",
+                $"by {winnerName}{CreateScoreSuffix(eliminatedFixture)}",
+                "#F87171");
+        }
+
+        var fallbackResult = archiveResult?.SelectedClubResult.Trim().TrimEnd('.') ?? "Campaign complete";
+        var fallbackDetail = string.IsNullOrWhiteSpace(archiveResult?.WinnerTeamName)
+            ? "Competition finished."
+            : $"Winner: {archiveResult.WinnerTeamName}";
+        return new CompetitionResultRow(competitionName, fallbackResult, fallbackDetail, "#CBD5E1");
     }
 
     private void LoadLeagueOutcomes(SeasonArchive archive)
@@ -525,6 +614,37 @@ public partial class EndSeasonResultView : UserControl
         };
     }
 
+    private static bool IsTeamInFixture(Fixture fixture, string teamName)
+    {
+        return fixture.HomeTeam.Name.Equals(teamName, StringComparison.OrdinalIgnoreCase) ||
+            fixture.AwayTeam.Name.Equals(teamName, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static int GetFixtureCalendarRound(Fixture fixture)
+    {
+        return fixture.CalendarRound > 0 ? fixture.CalendarRound : fixture.RoundNumber;
+    }
+
+    private static bool IsFinalFixture(Fixture fixture)
+    {
+        return fixture.RoundName.Equals("Final", StringComparison.OrdinalIgnoreCase) ||
+            fixture.KnockoutRoundKey.Equals("Final", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string GetOpponentName(Fixture fixture, string teamName)
+    {
+        return fixture.HomeTeam.Name.Equals(teamName, StringComparison.OrdinalIgnoreCase)
+            ? fixture.AwayTeam.Name
+            : fixture.HomeTeam.Name;
+    }
+
+    private static string CreateScoreSuffix(Fixture fixture)
+    {
+        return fixture.Result is null
+            ? string.Empty
+            : $" ({fixture.Result.HomeScore}-{fixture.Result.AwayScore})";
+    }
+
     private static string FormatMoney(decimal value)
     {
         var sign = value < 0 ? "-" : string.Empty;
@@ -568,7 +688,7 @@ public partial class EndSeasonResultView : UserControl
                     highlight.SecondaryText.Contains(stat.PlayerName, StringComparison.OrdinalIgnoreCase));
                 var imagePath = playerStat is not null
                     ? GetPlayerIdentityImagePath(playerStat.PlayerName, GetClubLogoPath(playerStat.TeamName))
-                    : GetClubLogoPath(FindMentionedTeamName($"{highlight.PrimaryText} {highlight.SecondaryText}") ?? string.Empty);
+                    : GetClubLogoPath(FindHighlightTeamName(highlight) ?? string.Empty);
 
                 return new HighlightRow(
                     highlight.Title,
@@ -579,12 +699,48 @@ public partial class EndSeasonResultView : UserControl
             .ToList();
     }
 
+    private string? FindHighlightTeamName(SeasonHighlight highlight)
+    {
+        return FindWinningTeamName(highlight.PrimaryText) ??
+            FindWinningTeamName(highlight.SecondaryText) ??
+            FindMentionedTeamName(highlight.PrimaryText) ??
+            FindMentionedTeamName(highlight.SecondaryText);
+    }
+
+    private string? FindWinningTeamName(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return null;
+        }
+
+        return GetKnownTeamNames()
+            .OrderByDescending(name => name.Length)
+            .FirstOrDefault(teamName =>
+                text.Contains($"{teamName} won", StringComparison.OrdinalIgnoreCase) ||
+                text.Contains($"{teamName} are", StringComparison.OrdinalIgnoreCase));
+    }
+
     private string? FindMentionedTeamName(string text)
     {
-        return _state.League?.Teams
-            .Select(team => team.Name)
+        return GetKnownTeamNames()
             .OrderByDescending(name => name.Length)
             .FirstOrDefault(teamName => text.Contains(teamName, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private IEnumerable<string> GetKnownTeamNames()
+    {
+        var leagueTeams = _state.League?.Teams
+            .Select(team => team.Name)
+            ?? Enumerable.Empty<string>();
+        var fixtureTeams = _state.League?.Fixtures
+            .SelectMany(fixture => new[] { fixture.HomeTeam.Name, fixture.AwayTeam.Name })
+            ?? Enumerable.Empty<string>();
+
+        return leagueTeams
+            .Concat(fixtureTeams)
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .Distinct(StringComparer.OrdinalIgnoreCase);
     }
 
     private string GetClubLogoPath(string teamName)
@@ -687,6 +843,8 @@ public partial class EndSeasonResultView : UserControl
     }
 
     private sealed record OutcomeRow(int Position, string PrimaryText, string SecondaryText, string LogoPath, string ZoneBrush);
+
+    private sealed record CompetitionResultRow(string CompetitionName, string ResultText, string DetailText, string AccentBrush);
 
     private sealed record AwardCard(
         string Title,

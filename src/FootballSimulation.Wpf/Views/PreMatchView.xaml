@@ -169,6 +169,18 @@
                     <StackPanel Grid.Row="2"
                                 Orientation="Horizontal"
                                 Margin="0,3,0,0">
+                        <Border Background="{Binding WorkloadRiskBrush}"
+                                CornerRadius="7"
+                                Padding="3,1"
+                                HorizontalAlignment="Left"
+                                Margin="0,0,2,0"
+                                ToolTip="{Binding WorkloadRiskTooltip}">
+                            <TextBlock Text="{Binding WorkloadRiskText}"
+                                       FontFamily="Segoe UI Emoji"
+                                       Foreground="{Binding WorkloadRiskForeground}"
+                                       FontSize="7"
+                                       FontWeight="Black" />
+                        </Border>
                         <Border Background="{Binding FatigueWarningBadgeBackground}"
                                 CornerRadius="7"
                                 Padding="5,1"
@@ -334,6 +346,18 @@
                     <StackPanel Grid.Row="2"
                                 Orientation="Horizontal"
                                 Margin="0,3,0,0">
+                        <Border Background="{Binding WorkloadRiskBrush}"
+                                CornerRadius="7"
+                                Padding="3,1"
+                                HorizontalAlignment="Left"
+                                Margin="0,0,2,0"
+                                ToolTip="{Binding WorkloadRiskTooltip}">
+                            <TextBlock Text="{Binding WorkloadRiskText}"
+                                       FontFamily="Segoe UI Emoji"
+                                       Foreground="{Binding WorkloadRiskForeground}"
+                                       FontSize="7"
+                                       FontWeight="Black" />
+                        </Border>
                         <Border Background="{Binding StatusBadgeBackground}"
                                 CornerRadius="7"
                                 Padding="5,1"

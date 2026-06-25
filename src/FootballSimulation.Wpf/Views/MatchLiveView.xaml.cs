@@ -20,12 +20,13 @@ namespace FootballSimulation.Wpf.Views;
 public partial class MatchLiveView : UserControl
 {
     private const int FastBaseDelayMilliseconds = 3000;
+    private const int ThreeTimesBaseDelayMilliseconds = 1500;
     private const int OnePointFiveBaseDelayMilliseconds = 4000;
     private const int MediumBaseDelayMilliseconds = 6000;
     private const int VerySlowBaseDelayMilliseconds = 10000;
     private const int MinSpeedLevel = 0;
     private const int DefaultSpeedLevel = 1;
-    private const int MaxSpeedLevel = 4;
+    private const int MaxSpeedLevel = 5;
     private const int FirstHalfEndMinute = 45;
     private const int FullTimeMinute = 90;
     private const int ExtraTimeHalfEndMinute = 105;
@@ -1662,7 +1663,8 @@ public partial class MatchLiveView : UserControl
             1 => MatchSpeed.Medium,
             2 => MatchSpeed.OnePointFive,
             3 => MatchSpeed.Fast,
-            4 => MatchSpeed.VeryFast,
+            4 => MatchSpeed.ThreeTimes,
+            5 => MatchSpeed.VeryFast,
             _ => MatchSpeed.Medium
         };
     }
@@ -1675,7 +1677,8 @@ public partial class MatchLiveView : UserControl
             MatchSpeed.Medium => 1,
             MatchSpeed.OnePointFive => 2,
             MatchSpeed.Fast => 3,
-            MatchSpeed.VeryFast => 4,
+            MatchSpeed.ThreeTimes => 4,
+            MatchSpeed.VeryFast => 5,
             _ => DefaultSpeedLevel
         };
     }
@@ -1688,7 +1691,8 @@ public partial class MatchLiveView : UserControl
             1 => "1x",
             2 => "1.5x",
             3 => "2x",
-            4 => "4x",
+            4 => "3x",
+            5 => "4x",
             _ => "1x"
         };
     }
@@ -4656,7 +4660,8 @@ public partial class MatchLiveView : UserControl
             1 => MediumBaseDelayMilliseconds,
             2 => OnePointFiveBaseDelayMilliseconds,
             3 => FastBaseDelayMilliseconds,
-            4 => 700,
+            4 => ThreeTimesBaseDelayMilliseconds,
+            5 => 700,
             _ => MediumBaseDelayMilliseconds
         };
     }
@@ -4669,7 +4674,8 @@ public partial class MatchLiveView : UserControl
             1 => 0.75,
             2 => 0.60,
             3 => 0.45,
-            4 => 0.15,
+            4 => 0.30,
+            5 => 0.15,
             _ => 0.75
         };
     }

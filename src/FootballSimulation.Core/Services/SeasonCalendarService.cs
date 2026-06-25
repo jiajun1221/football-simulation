@@ -98,6 +98,46 @@ public class SeasonCalendarService
     private static readonly Dictionary<string, UclClubDefinition> ChampionsLeagueClubByName = ChampionsLeagueClubPool
         .ToDictionary(club => club.Name, StringComparer.OrdinalIgnoreCase);
 
+    private static readonly Dictionary<CompetitionType, NeutralCompetitionDefinition> NeutralCompetitions = new()
+    {
+        [CompetitionType.CopaDelRey] = new(
+            ["Real Madrid", "Barcelona", "Atletico Madrid", "Athletic Club", "Real Sociedad", "Villarreal", "Real Betis", "Sevilla"],
+            "Spain",
+            78,
+            "Round of 16",
+            [("Round of 16", 25), ("Quarter Final", 43), ("Semi Final", 59), ("Final", 75)]),
+        [CompetitionType.DfbPokal] = new(
+            ["Bayern Munich", "Borussia Dortmund", "RB Leipzig", "Bayer Leverkusen", "Eintracht Frankfurt", "Stuttgart", "Wolfsburg", "Freiburg"],
+            "Germany",
+            77,
+            "Round of 16",
+            [("Round of 16", 25), ("Quarter Final", 43), ("Semi Final", 59), ("Final", 75)]),
+        [CompetitionType.CoppaItalia] = new(
+            ["Inter Milan", "AC Milan", "Juventus", "Napoli", "Roma", "Lazio", "Atalanta", "Fiorentina"],
+            "Italy",
+            77,
+            "Round of 16",
+            [("Round of 16", 25), ("Quarter Final", 43), ("Semi Final", 59), ("Final", 75)]),
+        [CompetitionType.CoupeDeFrance] = new(
+            ["Paris Saint-Germain", "Marseille", "Lyon", "Monaco", "Lille", "Lens", "Rennes", "Nice"],
+            "France",
+            76,
+            "Round of 16",
+            [("Round of 16", 25), ("Quarter Final", 43), ("Semi Final", 59), ("Final", 75)]),
+        [CompetitionType.EuropaLeague] = new(
+            ["Tottenham Hotspur", "Aston Villa", "Roma", "Lazio", "Real Sociedad", "Real Betis", "Porto", "Ajax"],
+            "Europe",
+            76,
+            "Round of 16",
+            [("Round of 16", 57), ("Quarter Final", 69), ("Semi Final", 77), ("Final", 83)]),
+        [CompetitionType.ConferenceLeague] = new(
+            ["Brentford", "Fiorentina", "Freiburg", "Torino", "Valencia", "Mainz 05", "Auxerre", "Wolverhampton Wanderers"],
+            "Europe",
+            74,
+            "Round of 16",
+            [("Round of 16", 57), ("Quarter Final", 69), ("Semi Final", 77), ("Final", 83)])
+    };
+
     public List<Fixture> GenerateSeasonFixtures(
         IReadOnlyList<Team> premierLeagueTeams,
         string season,
@@ -122,6 +162,7 @@ public class SeasonCalendarService
             baseOverall: 64,
             season));
         fixtures.AddRange(CreateChampionsLeagueLeaguePhaseFixtures(premierLeagueTeams, season, championsLeagueQualifiedTeamNames));
+        fixtures.AddRange(CreateNeutralCompetitionFixtures(premierLeagueTeams, season));
 
         return fixtures
             .OrderBy(fixture => fixture.CalendarRound)
@@ -140,8 +181,8 @@ public class SeasonCalendarService
             .Select(entry => entry.Team.Name)
             .ToList();
 
-        return
-        [
+        var states = new List<SeasonCompetitionState>
+        {
             new()
             {
                 Competition = CompetitionType.PremierLeague,
@@ -167,7 +208,14 @@ public class SeasonCalendarService
                 CurrentRoundName = "Third Round"
             },
             CreateChampionsLeagueState(uclTeams)
-        ];
+        };
+
+        foreach (var state in CreateNeutralCompetitionStates(premierLeagueTeams))
+        {
+            states.Add(state);
+        }
+
+        return states;
     }
 
     public List<Fixture> GenerateNextCupRoundFixtures(
@@ -271,6 +319,61 @@ public class SeasonCalendarService
         };
 
         return state;
+    }
+
+    private static List<Fixture> CreateNeutralCompetitionFixtures(IReadOnlyList<Team> premierLeagueTeams, string season)
+    {
+        return NeutralCompetitions
+            .SelectMany(entry =>
+            {
+                var definition = entry.Value;
+                var entrants = CreateNeutralCompetitionEntrants(premierLeagueTeams, definition);
+                var openingRound = definition.Rounds.First(round => round.Name.Equals(definition.OpeningRoundName, StringComparison.OrdinalIgnoreCase));
+                return PairTeams(entrants)
+                    .Select(pair => CreateFixture(
+                        pair.Home,
+                        pair.Away,
+                        entry.Key,
+                        definition.OpeningRoundName,
+                        openingRound.CalendarRound,
+                        season,
+                        affectsLeagueTable: false,
+                        isKnockout: true));
+            })
+            .ToList();
+    }
+
+    private static List<SeasonCompetitionState> CreateNeutralCompetitionStates(IReadOnlyList<Team> premierLeagueTeams)
+    {
+        return NeutralCompetitions
+            .Select(entry =>
+            {
+                var entrants = CreateNeutralCompetitionEntrants(premierLeagueTeams, entry.Value);
+                return new SeasonCompetitionState
+                {
+                    Competition = entry.Key,
+                    Name = CompetitionNames.GetDisplayName(entry.Key),
+                    QualifiedTeamNames = entrants.Select(team => team.Name).ToList(),
+                    RoundOrder = entry.Value.Rounds.Select(round => round.Name).ToList(),
+                    CurrentRoundName = entry.Value.OpeningRoundName
+                };
+            })
+            .ToList();
+    }
+
+    private static List<Team> CreateNeutralCompetitionEntrants(
+        IReadOnlyList<Team> premierLeagueTeams,
+        NeutralCompetitionDefinition definition)
+    {
+        return definition.TeamNames
+            .Select((name, index) =>
+                PlaceholderTeamFactory.Create(
+                    name,
+                    definition.BaseOverall - Math.Min(index, 4),
+                    venueSuffix: "Stadium",
+                    country: definition.Country))
+            .DistinctBy(team => team.Name, StringComparer.OrdinalIgnoreCase)
+            .ToList();
     }
 
     private static IEnumerable<Team> SelectChampionsLeagueTeams(
@@ -743,10 +846,15 @@ public class SeasonCalendarService
             AffectsLeagueTable = affectsLeagueTable,
             IsKnockout = isKnockout,
             KnockoutRoundKey = roundName,
-            Importance = roundName.Contains("Final", StringComparison.OrdinalIgnoreCase)
+            Importance = IsFinalRound(roundName)
                 ? FixtureImportance.Final
                 : isKnockout ? FixtureImportance.Knockout : FixtureImportance.Normal
         };
+    }
+
+    private static bool IsFinalRound(string roundName)
+    {
+        return roundName.Equals("Final", StringComparison.OrdinalIgnoreCase);
     }
 
     private static DateTime? CreateSeasonDate(string season, int calendarRound)
@@ -776,4 +884,11 @@ public class SeasonCalendarService
     private sealed record UclPairing(UclTeamEntry First, UclTeamEntry Second);
 
     private sealed record ScheduledUclPairing(UclPairing Pairing, int Matchday);
+
+    private sealed record NeutralCompetitionDefinition(
+        IReadOnlyList<string> TeamNames,
+        string Country,
+        int BaseOverall,
+        string OpeningRoundName,
+        IReadOnlyList<(string Name, int CalendarRound)> Rounds);
 }

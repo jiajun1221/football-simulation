@@ -395,6 +395,40 @@ public class TransferMarketServiceTests
     }
 
     [Fact]
+    public void ApplyPassivePlayerGrowth_GrowsOtherLeagueYoungPlayers()
+    {
+        var league = CreateLeague("premier-league");
+        var activePlayer = CreateDevelopingTransferPlayer("Active Prospect", overall: 84);
+        var otherLeaguePlayer = CreateDevelopingTransferPlayer("Other League Prospect", overall: 84);
+        var state = CreatePassiveGrowthState(league, activePlayer, otherLeaguePlayer);
+        var service = new TransferMarketService(seed: 12);
+
+        service.ApplyPassivePlayerGrowth(state, league, currentRound: 2);
+
+        Assert.Equal(84, activePlayer.OverallRating);
+        Assert.Equal(85, otherLeaguePlayer.OverallRating);
+        Assert.Contains(PlayerTrait.TechnicalDribbler, otherLeaguePlayer.Traits);
+    }
+
+    [Fact]
+    public void ApplyPassivePlayerGrowth_DoesNotRepeatSameRound()
+    {
+        var league = CreateLeague("premier-league");
+        var activePlayer = CreateDevelopingTransferPlayer("Active Prospect", overall: 84);
+        var otherLeaguePlayer = CreateDevelopingTransferPlayer("Other League Prospect", overall: 84);
+        var state = CreatePassiveGrowthState(league, activePlayer, otherLeaguePlayer);
+        var service = new TransferMarketService(seed: 12);
+
+        service.ApplyPassivePlayerGrowth(state, league, currentRound: 2);
+        var afterFirstRun = otherLeaguePlayer.OverallRating;
+        var growthPointsAfterFirstRun = otherLeaguePlayer.GrowthPoints;
+        service.ApplyPassivePlayerGrowth(state, league, currentRound: 2);
+
+        Assert.Equal(afterFirstRun, otherLeaguePlayer.OverallRating);
+        Assert.Equal(growthPointsAfterFirstRun, otherLeaguePlayer.GrowthPoints);
+    }
+
+    [Fact]
     public void MakeUserOffer_BlocksPlayerWhoAlreadyMovedThisWindow()
     {
         var league = CreateLeague("premier-league");
@@ -656,6 +690,71 @@ public class TransferMarketServiceTests
             PreferredPosition = "CM",
             AssignedPosition = "CM",
             OverallRating = 75
+        };
+    }
+
+    private static TransferMarketState CreatePassiveGrowthState(
+        League activeLeague,
+        Player activePlayer,
+        Player otherLeaguePlayer)
+    {
+        var activeTeam = new Team
+        {
+            Name = "Active Growth FC",
+            Players = [activePlayer],
+            Substitutes = []
+        };
+        var otherTeam = new Team
+        {
+            Name = "Other Growth FC",
+            Players = [otherLeaguePlayer],
+            Substitutes = []
+        };
+
+        return new TransferMarketState
+        {
+            LastPassiveGrowthRound = 1,
+            Leagues =
+            [
+                new TransferLeagueState
+                {
+                    LeagueId = activeLeague.LeagueId,
+                    LeagueName = activeLeague.Name,
+                    Season = activeLeague.Season,
+                    Teams = [activeTeam]
+                },
+                new TransferLeagueState
+                {
+                    LeagueId = "la-liga",
+                    LeagueName = "La Liga",
+                    Season = activeLeague.Season,
+                    Teams = [otherTeam]
+                }
+            ]
+        };
+    }
+
+    private static Player CreateDevelopingTransferPlayer(string name, int overall)
+    {
+        return new Player
+        {
+            PlayerId = Guid.NewGuid().ToString("N"),
+            Name = name,
+            SquadNumber = 7,
+            Position = Position.Forward,
+            PreferredPosition = "RW",
+            AssignedPosition = "RW",
+            OverallRating = overall,
+            BaseOverallRating = overall,
+            PotentialOverall = 92,
+            GrowthPoints = 95,
+            Age = 18,
+            Role = PlayerRole.Prospect,
+            Attack = overall,
+            Defense = overall,
+            Passing = overall,
+            Finishing = overall,
+            Traits = [PlayerTrait.Rapid]
         };
     }
 }

@@ -32,6 +32,48 @@ public class CompetitionProgressionService
             ["Quarter Final"] = ("Semi Final", 77),
             ["Semi Final"] = ("Final", 85),
             ["Final"] = (null, 85)
+        },
+        [CompetitionType.CopaDelRey] = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Round of 16"] = ("Quarter Final", 43),
+            ["Quarter Final"] = ("Semi Final", 59),
+            ["Semi Final"] = ("Final", 75),
+            ["Final"] = (null, 75)
+        },
+        [CompetitionType.DfbPokal] = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Round of 16"] = ("Quarter Final", 43),
+            ["Quarter Final"] = ("Semi Final", 59),
+            ["Semi Final"] = ("Final", 75),
+            ["Final"] = (null, 75)
+        },
+        [CompetitionType.CoppaItalia] = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Round of 16"] = ("Quarter Final", 43),
+            ["Quarter Final"] = ("Semi Final", 59),
+            ["Semi Final"] = ("Final", 75),
+            ["Final"] = (null, 75)
+        },
+        [CompetitionType.CoupeDeFrance] = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Round of 16"] = ("Quarter Final", 43),
+            ["Quarter Final"] = ("Semi Final", 59),
+            ["Semi Final"] = ("Final", 75),
+            ["Final"] = (null, 75)
+        },
+        [CompetitionType.EuropaLeague] = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Round of 16"] = ("Quarter Final", 69),
+            ["Quarter Final"] = ("Semi Final", 77),
+            ["Semi Final"] = ("Final", 83),
+            ["Final"] = (null, 83)
+        },
+        [CompetitionType.ConferenceLeague] = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Round of 16"] = ("Quarter Final", 69),
+            ["Quarter Final"] = ("Semi Final", 77),
+            ["Semi Final"] = ("Final", 83),
+            ["Final"] = (null, 83)
         }
     };
 
@@ -62,6 +104,28 @@ public class CompetitionProgressionService
             UpdateChampionsLeagueLeaguePhaseTable(league, fixture);
             TryCreateChampionsLeagueKnockoutRound(league);
         }
+    }
+
+    public bool RecoverMissingKnockoutRound(League league)
+    {
+        ArgumentNullException.ThrowIfNull(league);
+
+        foreach (var competition in CupRoundMap.Keys)
+        {
+            var state = league.CompetitionStates.FirstOrDefault(state => state.Competition == competition);
+            if (!string.IsNullOrWhiteSpace(state?.WinnerTeamName) ||
+                league.Fixtures.Any(fixture => fixture.Competition == competition && !fixture.IsPlayed))
+            {
+                continue;
+            }
+
+            if (RecoverMissingKnockoutRound(league, competition))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public void EnsureFixtureMetadata(Fixture fixture)
@@ -213,6 +277,37 @@ public class CompetitionProgressionService
             .ThenBy(fixture => fixture.HomeTeam.Name)
             .ThenBy(fixture => fixture.AwayTeam.Name)
             .ToList();
+    }
+
+    private bool RecoverMissingKnockoutRound(League league, CompetitionType competition)
+    {
+        if (!CupRoundMap.TryGetValue(competition, out var roundMap))
+        {
+            return false;
+        }
+
+        foreach (var round in roundMap.Keys.Reverse())
+        {
+            var fixtures = league.Fixtures
+                .Where(fixture => fixture.Competition == competition &&
+                    fixture.RoundName.Equals(round, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            if (fixtures.Count == 0 ||
+                fixtures.Any(fixture => !fixture.IsPlayed) ||
+                fixtures.Any(fixture => string.IsNullOrWhiteSpace(fixture.WinningTeamName)))
+            {
+                continue;
+            }
+
+            AdvanceKnockoutCompetitionIfReady(league, competition, round);
+            var nextRound = roundMap[round].NextRound;
+            return nextRound is not null &&
+                league.Fixtures.Any(fixture => fixture.Competition == competition &&
+                    fixture.RoundName.Equals(nextRound, StringComparison.OrdinalIgnoreCase) &&
+                    !fixture.IsPlayed);
+        }
+
+        return false;
     }
 
     private static void UpdateChampionsLeagueLeaguePhaseTable(League league, Fixture fixture)

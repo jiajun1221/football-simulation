@@ -141,6 +141,7 @@ public class TransferMarketState
     public List<string> ShortlistedPlayerIds { get; set; } = [];
     public List<Player> FreeAgents { get; set; } = [];
     public int LastAiActivityRound { get; set; }
+    public int LastPassiveGrowthRound { get; set; }
 }
 
 public class TransferSearchCriteria

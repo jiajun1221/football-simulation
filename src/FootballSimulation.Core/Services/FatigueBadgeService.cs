@@ -100,6 +100,52 @@ public static class FatigueBadgeService
         return FatigueBadgeResult.None;
     }
 
+    public static int CalculateWorkloadRiskPercentage(Player player, int? fixtureGapDays = null)
+    {
+        ArgumentNullException.ThrowIfNull(player);
+
+        if (player.IsInjured)
+        {
+            return 100;
+        }
+
+        if (player.IsSuspended || player.IsSentOff)
+        {
+            return 0;
+        }
+
+        var stamina = Math.Clamp((int)Math.Round(player.Stamina), 0, 100);
+        var effectiveRecentLoad = GetEffectiveRecentLoad(player);
+        var risk = 0.0;
+
+        risk += Math.Max(0, 100 - stamina) * 0.9;
+        risk += Math.Clamp(player.SeasonFatigue, 0, 100) * 0.32;
+        risk += Math.Min(35, effectiveRecentLoad * 4.5);
+        risk += Math.Min(18, Math.Max(0, player.ConsecutiveStarts - 5) * 2.5);
+        risk += Math.Min(18, Math.Max(0, player.MinutesInLastFiveMatches - 300) * 0.12);
+
+        if (player.ConsecutiveFullMatches >= 3)
+        {
+            risk += Math.Min(18, (player.ConsecutiveFullMatches - 2) * 6);
+        }
+
+        if (fixtureGapDays is <= 3)
+        {
+            risk += 10;
+        }
+        else if (fixtureGapDays is >= 5)
+        {
+            risk -= 10;
+        }
+
+        if (stamina >= 95 && player.SeasonFatigue < 45 && effectiveRecentLoad < 6)
+        {
+            risk *= 0.45;
+        }
+
+        return Math.Clamp((int)Math.Round(risk), 0, 100);
+    }
+
     private static int GetEffectiveRecentLoad(Player player)
     {
         var recentLoad = Math.Max(0, player.MatchesPlayedRecently);

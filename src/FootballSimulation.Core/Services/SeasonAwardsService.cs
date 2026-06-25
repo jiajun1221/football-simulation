@@ -50,7 +50,7 @@ public class SeasonAwardsService
             CompetitionResults = CreateCompetitionResults(league, selectedTeam),
             PlayerStats = archivedStats,
             Awards = CreateAwards(league, archivedStats),
-            Highlights = CreateHighlights(league, sortedTable, archivedStats)
+            Highlights = CreateHighlights(league, selectedTeam, sortedTable, archivedStats)
         };
     }
 
@@ -96,13 +96,31 @@ public class SeasonAwardsService
         };
     }
 
+    private static string CreateCompetitionHighlightSecondaryText(ArchivedCompetitionResult result)
+    {
+        var selectedResult = result.SelectedClubResult.Trim();
+        var hasWinner = !string.IsNullOrWhiteSpace(result.WinnerTeamName);
+        var shouldShowSelectedResult = !hasWinner ||
+            !selectedResult.Equals("Did not participate.", StringComparison.OrdinalIgnoreCase);
+
+        if (string.IsNullOrWhiteSpace(result.RunnerUpTeamName))
+        {
+            return shouldShowSelectedResult ? selectedResult : "Competition complete.";
+        }
+
+        return shouldShowSelectedResult
+            ? $"Runner-up: {result.RunnerUpTeamName}. {selectedResult}"
+            : $"Runner-up: {result.RunnerUpTeamName}.";
+    }
+
     public List<SeasonHighlight> CreateHighlights(
         League league,
+        Team selectedTeam,
         IReadOnlyList<LeagueTableEntry> sortedTable,
         IReadOnlyList<ArchivedPlayerStatRow> stats)
     {
         var highlights = new List<SeasonHighlight>();
-        highlights.AddRange(CreateCompetitionResults(league, league.Teams.FirstOrDefault() ?? new Team())
+        highlights.AddRange(CreateCompetitionResults(league, selectedTeam)
             .Where(result => result.Competition != CompetitionType.PremierLeague)
             .Select(result => new SeasonHighlight
             {
@@ -111,9 +129,7 @@ public class SeasonAwardsService
                 PrimaryText = string.IsNullOrWhiteSpace(result.WinnerTeamName)
                     ? "No winner recorded."
                     : $"{result.WinnerTeamName} won the competition.",
-                SecondaryText = string.IsNullOrWhiteSpace(result.RunnerUpTeamName)
-                    ? result.SelectedClubResult
-                    : $"Runner-up: {result.RunnerUpTeamName}. {result.SelectedClubResult}"
+                SecondaryText = CreateCompetitionHighlightSecondaryText(result)
             }));
         var playedMatches = league.Fixtures
             .Where(fixture => fixture.IsPlayed && fixture.Result is not null)
@@ -276,6 +292,7 @@ public class SeasonAwardsService
             .Select(competition =>
             {
                 var state = league.CompetitionStates.FirstOrDefault(state => state.Competition == competition);
+                var finalFixture = GetCompletedFinalFixture(league, competition);
                 var selectedResult = competition == CompetitionType.PremierLeague
                     ? GetOutcomeLabel(GetPosition(new LeagueTableService().SortTable(league.Table), selectedTeam.Name), league.Table.Count)
                     : CreateSelectedCompetitionResult(league, competition, selectedTeam.Name);
@@ -286,10 +303,10 @@ public class SeasonAwardsService
                     CompetitionName = CompetitionNames.GetDisplayName(competition),
                     WinnerTeamName = competition == CompetitionType.PremierLeague
                         ? new LeagueTableService().SortTable(league.Table).FirstOrDefault()?.TeamName ?? string.Empty
-                        : state?.WinnerTeamName ?? string.Empty,
+                        : FirstNonBlank(state?.WinnerTeamName, finalFixture?.WinningTeamName),
                     RunnerUpTeamName = competition == CompetitionType.PremierLeague
                         ? new LeagueTableService().SortTable(league.Table).Skip(1).FirstOrDefault()?.TeamName ?? string.Empty
-                        : state?.RunnerUpTeamName ?? string.Empty,
+                        : FirstNonBlank(state?.RunnerUpTeamName, finalFixture?.LosingTeamName),
                     SelectedClubResult = selectedResult
                 };
             })
@@ -308,6 +325,22 @@ public class SeasonAwardsService
             return "Did not participate.";
         }
 
+        var finalFixture = fixtures
+            .Where(fixture => fixture.IsPlayed && IsFinalFixture(fixture))
+            .OrderByDescending(GetFixtureCalendarRound)
+            .FirstOrDefault();
+        if (finalFixture is not null &&
+            finalFixture.WinningTeamName.Equals(selectedTeamName, StringComparison.OrdinalIgnoreCase))
+        {
+            return "Champions.";
+        }
+
+        if (finalFixture is not null &&
+            finalFixture.LosingTeamName.Equals(selectedTeamName, StringComparison.OrdinalIgnoreCase))
+        {
+            return "Runner-up.";
+        }
+
         var eliminatedFixture = fixtures
             .Where(fixture => fixture.IsKnockout &&
                 fixture.LosingTeamName.Equals(selectedTeamName, StringComparison.OrdinalIgnoreCase))
@@ -318,14 +351,28 @@ public class SeasonAwardsService
             return $"Eliminated in the {eliminatedFixture.RoundName}.";
         }
 
-        var wonFinal = fixtures.Any(fixture => fixture.RoundName.Contains("Final", StringComparison.OrdinalIgnoreCase) &&
-            fixture.WinningTeamName.Equals(selectedTeamName, StringComparison.OrdinalIgnoreCase));
-        if (wonFinal)
-        {
-            return "Champions.";
-        }
-
         return "Campaign complete.";
+    }
+
+    private static Fixture? GetCompletedFinalFixture(League league, CompetitionType competition)
+    {
+        return league.Fixtures
+            .Where(fixture => fixture.Competition == competition &&
+                fixture.IsPlayed &&
+                IsFinalFixture(fixture))
+            .OrderByDescending(GetFixtureCalendarRound)
+            .FirstOrDefault();
+    }
+
+    private static bool IsFinalFixture(Fixture fixture)
+    {
+        return fixture.RoundName.Equals("Final", StringComparison.OrdinalIgnoreCase) ||
+            fixture.KnockoutRoundKey.Equals("Final", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string FirstNonBlank(params string?[] values)
+    {
+        return values.FirstOrDefault(value => !string.IsNullOrWhiteSpace(value)) ?? string.Empty;
     }
 
     private static int GetFixtureCalendarRound(Fixture fixture)

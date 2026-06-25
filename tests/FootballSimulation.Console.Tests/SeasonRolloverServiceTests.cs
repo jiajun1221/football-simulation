@@ -102,6 +102,7 @@ public class SeasonRolloverServiceTests
         var expectedUclLeagueTeams = result.Archive.FinalTable
             .OrderBy(row => row.Position)
             .Take(4)
+            .Where(row => result.League.Teams.Any(team => team.Name.Equals(row.TeamName, StringComparison.OrdinalIgnoreCase)))
             .Select(row => row.TeamName)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
         var actualUclLeagueTeams = result.League.CompetitionStates
@@ -175,6 +176,121 @@ public class SeasonRolloverServiceTests
     }
 
     [Fact]
+    public void CompleteRemainingAiFixturesIfSelectedTeamFinished_CompletesGeneratedNeutralCompetitionRounds()
+    {
+        var leagueEngine = new LeagueEngine();
+        var dataService = new LeagueDataService();
+        var definition = dataService.GetLeagueDefinition("premier-league");
+        var teams = dataService.LoadTeams(definition).Take(8).ToList();
+        var selectedTeam = teams[0];
+        var league = leagueEngine.CreateLeague("premier-league", GameSessionService.PremierLeagueName, "2025-26", teams);
+
+        var safety = 0;
+        while (league.Fixtures.Any(fixture => !fixture.IsPlayed &&
+            (fixture.HomeTeam.Name == selectedTeam.Name || fixture.AwayTeam.Name == selectedTeam.Name)) &&
+            safety++ < 100)
+        {
+            var fixture = league.Fixtures
+                .Where(fixture => !fixture.IsPlayed &&
+                    (fixture.HomeTeam.Name == selectedTeam.Name || fixture.AwayTeam.Name == selectedTeam.Name))
+                .OrderBy(fixture => fixture.CalendarRound > 0 ? fixture.CalendarRound : fixture.RoundNumber)
+                .ThenBy(fixture => fixture.Competition)
+                .First();
+            leagueEngine.SimulateFixture(league, fixture, options: new MatchSimulationOptions
+            {
+                EnableInjuries = false,
+                EnableDynamicFatigue = false
+            });
+        }
+
+        var service = new SeasonRolloverService();
+        service.CompleteRemainingAiFixturesIfSelectedTeamFinished(league, selectedTeam);
+        var archive = new SeasonAwardsService().CreateArchive(league, selectedTeam);
+
+        Assert.DoesNotContain(league.Fixtures, fixture => !fixture.IsPlayed);
+        Assert.True(league.IsCompleted);
+        Assert.All(Enum.GetValues<CompetitionType>(), competition =>
+        {
+            var result = archive.CompetitionResults.Single(item => item.Competition == competition);
+            Assert.False(string.IsNullOrWhiteSpace(result.WinnerTeamName), $"{competition} should have a winner.");
+        });
+        Assert.DoesNotContain(archive.Highlights, highlight =>
+            highlight.Title is "Copa del Rey" or "DFB-Pokal" or "Coppa Italia" or "Coupe de France" or "Europa League" or "Conference League" &&
+            highlight.PrimaryText.Equals("No winner recorded.", StringComparison.OrdinalIgnoreCase));
+        Assert.DoesNotContain(archive.Highlights, highlight =>
+            highlight.Title is "Copa del Rey" or "DFB-Pokal" or "Coppa Italia" or "Coupe de France" or "Europa League" or "Conference League" &&
+            highlight.SecondaryText.Contains("Did not participate", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void CompleteRemainingAiFixturesIfSelectedTeamFinished_RepairsOldNeutralCupWithMissingRounds()
+    {
+        var selectedTeam = new Team { Name = "Chelsea" };
+        var teams = new[]
+        {
+            PlaceholderTeamFactory.Create("Real Madrid", 82),
+            PlaceholderTeamFactory.Create("Barcelona", 82),
+            PlaceholderTeamFactory.Create("Atletico Madrid", 80),
+            PlaceholderTeamFactory.Create("Athletic Club", 79),
+            PlaceholderTeamFactory.Create("Real Sociedad", 78),
+            PlaceholderTeamFactory.Create("Villarreal", 78),
+            PlaceholderTeamFactory.Create("Real Betis", 77),
+            PlaceholderTeamFactory.Create("Sevilla", 77)
+        };
+        var fixtures = teams
+            .Chunk(2)
+            .Select(pair => new Fixture
+            {
+                Competition = CompetitionType.CopaDelRey,
+                RoundName = "Round of 16",
+                CalendarRound = 25,
+                RoundNumber = 25,
+                IsKnockout = true,
+                IsPlayed = true,
+                HomeTeam = pair[0],
+                AwayTeam = pair[1],
+                Result = new Match
+                {
+                    HomeTeam = pair[0],
+                    AwayTeam = pair[1],
+                    HomeScore = 2,
+                    AwayScore = 0,
+                    CurrentPhase = MatchPhase.Fulltime,
+                    CurrentMinute = 90
+                },
+                WinningTeamName = pair[0].Name,
+                LosingTeamName = pair[1].Name
+            })
+            .ToList();
+        var league = new League
+        {
+            Season = "2025-26",
+            Teams = [selectedTeam],
+            Table = [new LeagueTableEntry { TeamName = selectedTeam.Name, Played = 38, Wins = 38, Points = 114 }],
+            Fixtures = fixtures,
+            CompetitionStates =
+            [
+                new SeasonCompetitionState
+                {
+                    Competition = CompetitionType.CopaDelRey,
+                    Name = "Copa del Rey",
+                    CurrentRoundName = "Complete",
+                    IsActive = false
+                }
+            ]
+        };
+
+        new SeasonRolloverService().CompleteRemainingAiFixturesIfSelectedTeamFinished(league, selectedTeam);
+
+        var result = new SeasonAwardsService()
+            .CreateArchive(league, selectedTeam)
+            .CompetitionResults
+            .Single(result => result.Competition == CompetitionType.CopaDelRey);
+        Assert.False(string.IsNullOrWhiteSpace(result.WinnerTeamName));
+        Assert.DoesNotContain(league.Fixtures, fixture => fixture.Competition == CompetitionType.CopaDelRey && !fixture.IsPlayed);
+    }
+
+    [Fact]
     public void ApplySeasonRolloverBudget_UsesCarryoverAndBonuses()
     {
         var team = new Team
@@ -239,7 +355,11 @@ public class SeasonRolloverServiceTests
                 .OrderBy(fixture => fixture.CalendarRound > 0 ? fixture.CalendarRound : fixture.RoundNumber)
                 .ThenBy(fixture => fixture.Competition)
                 .First();
-            leagueEngine.SimulateFixture(league, fixture, seed: 12 + safety);
+            leagueEngine.SimulateFixture(league, fixture, seed: 12 + safety, options: new MatchSimulationOptions
+            {
+                EnableInjuries = false,
+                EnableDynamicFatigue = false
+            });
         }
 
         Assert.DoesNotContain(league.Fixtures, fixture => !fixture.IsPlayed);

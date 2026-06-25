@@ -81,7 +81,7 @@ public partial class RoundResultView : UserControl
 
     private void NextButton_Click(object sender, RoutedEventArgs e)
     {
-        var isSeasonComplete = _seasonCompletionService.IsLeagueComplete(_state.League);
+        var isSeasonComplete = _seasonCompletionService.IsSelectedTeamSeasonComplete(_state.League, _state.SelectedTeam);
         if (isSeasonComplete && _state.League is not null)
         {
             _state.League.IsCompleted = true;

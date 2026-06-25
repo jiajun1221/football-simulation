@@ -1,4 +1,5 @@
 using FootballSimulation.Models;
+using FootballSimulation.Engine;
 
 namespace FootballSimulation.Services;
 
@@ -11,6 +12,8 @@ public class SeasonRolloverService
     private readonly LeagueTableService _leagueTableService;
     private readonly LeagueScheduleService _leagueScheduleService;
     private readonly SeasonCalendarService _seasonCalendarService = new();
+    private readonly LeagueEngine _leagueEngine = new();
+    private readonly CompetitionProgressionService _competitionProgressionService = new();
     private readonly YouthAcademyService _youthAcademyService = new();
     private readonly YouthScoutService _youthScoutService = new();
 
@@ -45,6 +48,8 @@ public class SeasonRolloverService
     {
         ArgumentNullException.ThrowIfNull(league);
         ArgumentNullException.ThrowIfNull(selectedTeam);
+
+        CompleteRemainingAiFixturesIfSelectedTeamFinished(league, selectedTeam);
 
         if (!_completionService.IsLeagueComplete(league))
         {
@@ -96,6 +101,51 @@ public class SeasonRolloverService
             transferMarketState,
             promotedClubs,
             removedClubNames);
+    }
+
+    public void CompleteRemainingAiFixturesIfSelectedTeamFinished(League league, Team selectedTeam)
+    {
+        if (!_completionService.IsSelectedTeamSeasonComplete(league, selectedTeam))
+        {
+            return;
+        }
+
+        var safety = 0;
+        while (league.Fixtures.Any(fixture => !fixture.IsPlayed) ||
+            _competitionProgressionService.RecoverMissingKnockoutRound(league))
+        {
+            if (safety++ > 500)
+            {
+                throw new InvalidOperationException("Unable to complete remaining AI fixtures before season rollover.");
+            }
+
+            if (!league.Fixtures.Any(fixture => !fixture.IsPlayed))
+            {
+                continue;
+            }
+
+            var fixture = league.Fixtures
+                .Where(fixture => !fixture.IsPlayed)
+                .OrderBy(GetFixtureCalendarRound)
+                .ThenBy(fixture => fixture.Competition)
+                .ThenBy(fixture => fixture.RoundName)
+                .ThenBy(fixture => fixture.HomeTeam.Name)
+                .First();
+
+            _leagueEngine.SimulateFixture(league, fixture, options: CreateSeasonCloseSimulationOptions());
+        }
+
+        league.IsCompleted = _completionService.IsLeagueComplete(league);
+    }
+
+    private static MatchSimulationOptions CreateSeasonCloseSimulationOptions()
+    {
+        return new MatchSimulationOptions
+        {
+            EnableInjuries = false,
+            EnableDynamicFatigue = false,
+            PreserveMatchStartStamina = true
+        };
     }
 
     public static string AdvanceSeasonLabel(string season)
@@ -197,6 +247,11 @@ public class SeasonRolloverService
             .Select((entry, index) => new { entry.TeamName, Position = index + 1 })
             .FirstOrDefault(item => item.TeamName.Equals(teamName, StringComparison.OrdinalIgnoreCase))
             ?.Position ?? 0;
+    }
+
+    private static int GetFixtureCalendarRound(Fixture fixture)
+    {
+        return fixture.CalendarRound > 0 ? fixture.CalendarRound : fixture.RoundNumber;
     }
 
     private static List<string> GetChampionsLeagueQualifiedTeamNames(IReadOnlyList<LeagueTableEntry> sortedTable)

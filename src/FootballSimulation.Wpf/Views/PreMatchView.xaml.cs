@@ -545,6 +545,10 @@ public partial class PreMatchView : UserControl
             GrowthText = PlayerGrowthDisplayHelper.CreateGrowthText(player),
             Stamina = GetStaminaPercentage(player),
             StaminaBrush = GetStaminaBrush(player),
+            WorkloadRiskText = CreateWorkloadRiskText(player),
+            WorkloadRiskBrush = GetWorkloadRiskBrush(player),
+            WorkloadRiskForeground = GetWorkloadRiskForeground(player),
+            WorkloadRiskTooltip = CreateWorkloadRiskTooltip(player),
             FormBadgeText = form.Text,
             FormBadgeBackground = form.Background,
             FormBadgeForeground = form.Foreground,
@@ -807,6 +811,10 @@ public partial class PreMatchView : UserControl
             GrowthText = PlayerGrowthDisplayHelper.CreateGrowthText(player),
             Stamina = GetStaminaPercentage(player),
             StaminaBrush = GetStaminaBrush(player),
+            WorkloadRiskText = CreateWorkloadRiskText(player),
+            WorkloadRiskBrush = GetWorkloadRiskBrush(player),
+            WorkloadRiskForeground = GetWorkloadRiskForeground(player),
+            WorkloadRiskTooltip = CreateWorkloadRiskTooltip(player),
             BenchFormBadgeText = form.Text,
             BenchFormBadgeBackground = form.Background,
             BenchFormBadgeForeground = form.Foreground,
@@ -978,6 +986,40 @@ public partial class PreMatchView : UserControl
             >= 25 => "#E8872E",
             _ => "#D94343"
         };
+    }
+
+    private string CreateWorkloadRiskText(Player player)
+    {
+        return $"{DumbbellIcon()} {GetWorkloadRiskPercentage(player)}%";
+    }
+
+    private static string DumbbellIcon() => char.ConvertFromUtf32(0x1F3CB);
+
+    private string CreateWorkloadRiskTooltip(Player player)
+    {
+        return $"Injury/workload risk {GetWorkloadRiskPercentage(player)}%";
+    }
+
+    private string GetWorkloadRiskBrush(Player player)
+    {
+        return GetWorkloadRiskPercentage(player) switch
+        {
+            >= 70 => "#DC2626",
+            >= 40 => "#FACC15",
+            _ => "#16A34A"
+        };
+    }
+
+    private string GetWorkloadRiskForeground(Player player)
+    {
+        return GetWorkloadRiskPercentage(player) is >= 40 and < 70
+            ? "#102033"
+            : "#FFFFFF";
+    }
+
+    private int GetWorkloadRiskPercentage(Player player)
+    {
+        return FatigueBadgeService.CalculateWorkloadRiskPercentage(player, GetFixtureRestGapDays());
     }
 
     private static string GetPlayerImagePath(Player player)
@@ -1829,6 +1871,10 @@ public partial class PreMatchView : UserControl
         public string GrowthText { get; init; } = string.Empty;
         public double Stamina { get; init; }
         public string StaminaBrush { get; init; } = "#2FA84F";
+        public string WorkloadRiskText { get; init; } = string.Empty;
+        public string WorkloadRiskBrush { get; init; } = "#16A34A";
+        public string WorkloadRiskForeground { get; init; } = "#FFFFFF";
+        public string WorkloadRiskTooltip { get; init; } = string.Empty;
         public string BenchFormBadgeText { get; init; } = string.Empty;
         public string BenchFormBadgeBackground { get; init; } = "#E1E5EA";
         public string BenchFormBadgeForeground { get; init; } = "#465364";

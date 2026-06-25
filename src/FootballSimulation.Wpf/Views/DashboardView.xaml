@@ -232,6 +232,107 @@
             </Border>
         </DataTemplate>
 
+        <DataTemplate x:Key="DashboardBracketMatchTemplate">
+            <Border Margin="0,0,0,8"
+                    Padding="10"
+                    CornerRadius="10"
+                    Background="{Binding RowBackground}"
+                    BorderBrush="{Binding BorderBrush}"
+                    BorderThickness="{Binding BorderThickness}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="84" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Image Source="{Binding HomeLogoPath}"
+                               Width="24"
+                               Height="24"
+                               Stretch="Uniform"
+                               Margin="0,0,8,0" />
+                        <StackPanel>
+                            <TextBlock Text="{Binding HomeTeamName}"
+                                       Foreground="{DynamicResource AppTextBrush}"
+                                       FontSize="12"
+                                       FontWeight="{Binding HomeFontWeight}"
+                                       TextTrimming="CharacterEllipsis" />
+                            <TextBlock Text="{Binding HomeSeedText}"
+                                       Foreground="{DynamicResource AppMutedTextBrush}"
+                                       FontSize="9" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <Border Grid.Column="1"
+                            Background="#030712"
+                            CornerRadius="9"
+                            Padding="8,5"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center">
+                        <TextBlock Text="{Binding ScoreText}"
+                                   Foreground="#FFFFFF"
+                                   FontSize="12"
+                                   FontWeight="Black"
+                                   TextAlignment="Center" />
+                    </Border>
+
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <StackPanel HorizontalAlignment="Right">
+                            <TextBlock Text="{Binding AwayTeamName}"
+                                       Foreground="{DynamicResource AppTextBrush}"
+                                       FontSize="12"
+                                       FontWeight="{Binding AwayFontWeight}"
+                                       TextAlignment="Right"
+                                       TextTrimming="CharacterEllipsis" />
+                            <TextBlock Text="{Binding AwaySeedText}"
+                                       Foreground="{DynamicResource AppMutedTextBrush}"
+                                       FontSize="9"
+                                       TextAlignment="Right" />
+                        </StackPanel>
+                        <Image Source="{Binding AwayLogoPath}"
+                               Width="24"
+                               Height="24"
+                               Stretch="Uniform"
+                               Margin="8,0,0,0" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="DashboardBracketRoundTemplate">
+            <Border Margin="0,0,14,0"
+                    MinWidth="270"
+                    MaxWidth="340">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Border Background="{DynamicResource AppSecondaryCardBackground}"
+                            BorderBrush="{DynamicResource AppBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="12"
+                            Padding="10,6"
+                            Margin="0,0,0,10">
+                        <StackPanel>
+                            <TextBlock Text="{Binding RoundName}"
+                                       Foreground="{DynamicResource AppTextBrush}"
+                                       FontSize="14"
+                                       FontWeight="Black" />
+                            <TextBlock Text="{Binding SummaryText}"
+                                       Foreground="{DynamicResource AppMutedTextBrush}"
+                                       FontSize="10"
+                                       Margin="0,2,0,0" />
+                        </StackPanel>
+                    </Border>
+                    <ItemsControl Grid.Row="1"
+                                  ItemsSource="{Binding Matches}"
+                                  ItemTemplate="{StaticResource DashboardBracketMatchTemplate}" />
+                </Grid>
+            </Border>
+        </DataTemplate>
+
         <DataTemplate x:Key="FixtureCardTemplate">
             <Border Background="{DynamicResource AppSecondaryCardBackground}"
                     BorderBrush="{DynamicResource AppBorderBrush}"
@@ -693,72 +794,101 @@
                     </StackPanel>
                 </StackPanel>
 
-                <DataGrid x:Name="LeagueTableDataGrid"
-                          Grid.Row="2"
-                          Style="{StaticResource ModernDataGrid}"
-                          RowStyle="{StaticResource LeagueTableRowStyle}"
-                          AutoGenerateColumns="False"
-                          IsReadOnly="True"
-                          CanUserAddRows="False">
-                    <DataGrid.Columns>
-                        <DataGridTemplateColumn Width="9">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Border Background="{Binding ZoneBrush}"
-                                            Width="5"
-                                            HorizontalAlignment="Left"
-                                            Margin="0,5" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="#" Binding="{Binding Position}" Width="38" />
-                        <DataGridTemplateColumn Header="" Width="40">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Image Source="{Binding LogoPath}"
-                                           Width="26"
-                                           Height="26"
-                                           Stretch="Uniform"
-                                           HorizontalAlignment="Center"
-                                           VerticalAlignment="Center" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Header="Club" Width="*">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Club}"
-                                               FontWeight="Bold"
-                                               Foreground="{DynamicResource AppTextBrush}"
-                                               VerticalAlignment="Center"
-                                               TextTrimming="CharacterEllipsis" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="MP" Binding="{Binding Played}" Width="44" />
-                        <DataGridTextColumn Header="W" Binding="{Binding Wins}" Width="40" />
-                        <DataGridTextColumn Header="D" Binding="{Binding Draws}" Width="40" />
-                        <DataGridTextColumn Header="L" Binding="{Binding Losses}" Width="40" />
-                        <DataGridTextColumn Header="GF" Binding="{Binding GoalsFor}" Width="46" />
-                        <DataGridTextColumn Header="GA" Binding="{Binding GoalsAgainst}" Width="46" />
-                        <DataGridTextColumn Header="GD" Binding="{Binding GoalDifference}" Width="50" />
-                        <DataGridTextColumn Header="Pts" Binding="{Binding Points}" Width="52" />
-                        <DataGridTemplateColumn x:Name="LastFiveColumn" Header="Last 5" Width="122">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <ItemsControl ItemsSource="{Binding LastFive}"
-                                                  ItemTemplate="{StaticResource LastFiveBadgeTemplate}">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <StackPanel Orientation="Horizontal" />
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                    </ItemsControl>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
+                <StackPanel x:Name="ChampionsLeagueBracketLegendPanel"
+                            Grid.Row="1"
+                            Orientation="Horizontal"
+                            Margin="0,0,0,14"
+                            Visibility="Collapsed">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,18,0">
+                        <Border Width="10" Height="10" Background="#FACC15" Margin="0,0,6,0" VerticalAlignment="Center" />
+                        <TextBlock Text="Your club fixture" Foreground="{DynamicResource AppMutedTextBrush}" FontSize="12" />
+                    </StackPanel>
+                    <TextBlock Text="Champions League knockout bracket"
+                               Foreground="{DynamicResource AppMutedTextBrush}"
+                               FontSize="12" />
+                </StackPanel>
+
+                <Grid Grid.Row="2">
+                    <DataGrid x:Name="LeagueTableDataGrid"
+                              Style="{StaticResource ModernDataGrid}"
+                              RowStyle="{StaticResource LeagueTableRowStyle}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              CanUserAddRows="False">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Width="9">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{Binding ZoneBrush}"
+                                                Width="5"
+                                                HorizontalAlignment="Left"
+                                                Margin="0,5" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="#" Binding="{Binding Position}" Width="38" />
+                            <DataGridTemplateColumn Header="" Width="40">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Image Source="{Binding LogoPath}"
+                                               Width="26"
+                                               Height="26"
+                                               Stretch="Uniform"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Club" Width="*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Club}"
+                                                   FontWeight="Bold"
+                                                   Foreground="{DynamicResource AppTextBrush}"
+                                                   VerticalAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="MP" Binding="{Binding Played}" Width="44" />
+                            <DataGridTextColumn Header="W" Binding="{Binding Wins}" Width="40" />
+                            <DataGridTextColumn Header="D" Binding="{Binding Draws}" Width="40" />
+                            <DataGridTextColumn Header="L" Binding="{Binding Losses}" Width="40" />
+                            <DataGridTextColumn Header="GF" Binding="{Binding GoalsFor}" Width="46" />
+                            <DataGridTextColumn Header="GA" Binding="{Binding GoalsAgainst}" Width="46" />
+                            <DataGridTextColumn Header="GD" Binding="{Binding GoalDifference}" Width="50" />
+                            <DataGridTextColumn Header="Pts" Binding="{Binding Points}" Width="52" />
+                            <DataGridTemplateColumn x:Name="LastFiveColumn" Header="Last 5" Width="122">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <ItemsControl ItemsSource="{Binding LastFive}"
+                                                      ItemTemplate="{StaticResource LastFiveBadgeTemplate}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <StackPanel Orientation="Horizontal" />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                        </ItemsControl>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <ScrollViewer x:Name="ChampionsLeagueBracketScrollViewer"
+                                  HorizontalScrollBarVisibility="Auto"
+                                  VerticalScrollBarVisibility="Auto"
+                                  Visibility="Collapsed">
+                        <ItemsControl x:Name="ChampionsLeagueBracketItemsControl"
+                                      ItemTemplate="{StaticResource DashboardBracketRoundTemplate}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
             </Grid>
         </Border>
     </Grid>

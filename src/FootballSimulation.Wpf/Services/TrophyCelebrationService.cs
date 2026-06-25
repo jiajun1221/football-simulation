@@ -27,6 +27,8 @@ public static class TrophyCelebrationService
 
     public static void EnqueueSeasonResultCelebration(GameFlowState state)
     {
+        EnqueueCompletedCupFinalCelebrations(state, TrophyCelebrationNextRoute.SeasonOverview);
+
         if (state.League is null ||
             state.SelectedTeam is null ||
             state.League.HasShownLeagueTrophyCelebration ||
@@ -36,6 +38,29 @@ public static class TrophyCelebrationService
         }
 
         EnqueueLeagueTitleCelebration(state, TrophyCelebrationNextRoute.SeasonOverview);
+    }
+
+    private static void EnqueueCompletedCupFinalCelebrations(GameFlowState state, TrophyCelebrationNextRoute nextRoute)
+    {
+        if (state.League is null || state.SelectedTeam is null)
+        {
+            return;
+        }
+
+        var wonFinals = state.League.Fixtures
+            .Where(fixture =>
+                fixture.IsKnockout &&
+                fixture.IsPlayed &&
+                IsFinal(fixture) &&
+                fixture.WinningTeamName.Equals(state.SelectedTeam.Name, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(fixture => fixture.Competition)
+            .ThenBy(fixture => fixture.CalendarRound > 0 ? fixture.CalendarRound : fixture.RoundNumber)
+            .ToList();
+
+        foreach (var fixture in wonFinals)
+        {
+            EnqueueCupFinalCelebration(state, fixture, nextRoute);
+        }
     }
 
     public static bool IsTrophyImageAvailable(string trophyImagePath)
@@ -78,7 +103,7 @@ public static class TrophyCelebrationService
         }
 
         var definition = CreateCupDefinition(fixture.Competition, state.League.LeagueId);
-        var key = CreateCelebrationKey(state.League.Season, definition.CompetitionId);
+        var key = CreateCupFinalCelebrationKey(state.League.Season, definition.CompetitionId, fixture);
         EnqueueIfNew(
             state,
             key,
@@ -275,13 +300,20 @@ public static class TrophyCelebrationService
 
     private static bool IsFinal(Fixture fixture)
     {
-        return fixture.Importance == FixtureImportance.Final ||
-            fixture.RoundName.Contains("Final", StringComparison.OrdinalIgnoreCase) ||
-            fixture.KnockoutRoundKey.Contains("Final", StringComparison.OrdinalIgnoreCase);
+        return fixture.RoundName.Equals("Final", StringComparison.OrdinalIgnoreCase) ||
+            fixture.KnockoutRoundKey.Equals("Final", StringComparison.OrdinalIgnoreCase);
     }
 
     private static string CreateCelebrationKey(string season, string competitionId)
     {
         return $"{season}:{competitionId}".ToLowerInvariant();
+    }
+
+    private static string CreateCupFinalCelebrationKey(string season, string competitionId, Fixture fixture)
+    {
+        var fixtureKey = string.IsNullOrWhiteSpace(fixture.FixtureId)
+            ? $"{fixture.Competition}:{fixture.RoundName}:{fixture.HomeTeam.Name}:{fixture.AwayTeam.Name}"
+            : fixture.FixtureId;
+        return $"{season}:{competitionId}:final:{fixtureKey}".ToLowerInvariant();
     }
 }

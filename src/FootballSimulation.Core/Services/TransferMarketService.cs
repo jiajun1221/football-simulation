@@ -374,6 +374,7 @@ public class TransferMarketService
     {
         var windowPhase = _windowService.GetWindowPhase(activeLeague, currentRound);
         RefreshTransferWindowStatuses(state, activeLeague, currentRound);
+        ApplyPassivePlayerGrowth(state, activeLeague, currentRound);
         if (windowPhase != TransferWindowPhase.Closed)
         {
             ProcessAgreedTransfers(state, activeLeague, currentRound);
@@ -395,6 +396,132 @@ public class TransferMarketService
         }
 
         RunAiClubTransferActivity(state, activeLeague, selectedTeam, currentRound, windowPhase);
+    }
+
+    public void ApplyPassivePlayerGrowth(TransferMarketState state, League activeLeague, int currentRound)
+    {
+        ArgumentNullException.ThrowIfNull(state);
+        ArgumentNullException.ThrowIfNull(activeLeague);
+        if (currentRound <= 0)
+        {
+            return;
+        }
+
+        if (state.LastPassiveGrowthRound <= 0)
+        {
+            state.LastPassiveGrowthRound = currentRound;
+            return;
+        }
+
+        if (currentRound <= state.LastPassiveGrowthRound)
+        {
+            return;
+        }
+
+        var activeLeagueId = string.IsNullOrWhiteSpace(activeLeague.LeagueId)
+            ? LeagueDataService.DefaultLeagueId
+            : activeLeague.LeagueId;
+        var growthRounds = Math.Min(8, currentRound - state.LastPassiveGrowthRound);
+        foreach (var league in state.Leagues.Where(league =>
+            !league.LeagueId.Equals(activeLeagueId, StringComparison.OrdinalIgnoreCase)))
+        {
+            foreach (var player in league.Teams.SelectMany(team => team.Players.Concat(team.Substitutes)))
+            {
+                ApplyPassiveGrowth(player, growthRounds);
+            }
+        }
+
+        state.LastPassiveGrowthRound = currentRound;
+    }
+
+    private static void ApplyPassiveGrowth(Player player, int growthRounds)
+    {
+        if (growthRounds <= 0 || player.IsInjured || !CanPassivelyGrow(player))
+        {
+            return;
+        }
+
+        EnsureGrowthAttributes(player);
+        var previousOverall = player.OverallRating;
+        player.GrowthPoints += CalculatePassiveGrowthPoints(player) * growthRounds;
+        if (player.GrowthPoints < 100)
+        {
+            return;
+        }
+
+        var increases = Math.Min(player.GrowthPoints / 100, Math.Max(0, GetPotentialCap(player) - player.OverallRating));
+        increases = Math.Min(increases, growthRounds);
+        for (var index = 0; index < increases && player.OverallRating < GetPotentialCap(player); index++)
+        {
+            PlayerOverallCalculator.GrowAttributesTowardNextOverall(player, Math.Min(99, player.OverallRating + 1));
+            player.GrowthPoints -= 100;
+        }
+
+        PlayerTraitAssignmentService.UnlockOverallMilestoneTraits(player, previousOverall);
+    }
+
+    private static int CalculatePassiveGrowthPoints(Player player)
+    {
+        var potentialGap = Math.Max(0, GetPotentialCap(player) - player.OverallRating);
+        if (potentialGap == 0)
+        {
+            return 0;
+        }
+
+        var agePoints = player.Age switch
+        {
+            <= 18 => 14,
+            <= 21 => 11,
+            <= 24 => 7,
+            <= 27 => 4,
+            <= 30 => 2,
+            _ => 0
+        };
+        var potentialBonus = Math.Min(6, potentialGap);
+        var roleBonus = player.Role switch
+        {
+            PlayerRole.Prospect => 3,
+            PlayerRole.Starter or PlayerRole.KeyPlayer => 2,
+            PlayerRole.Rotation => 1,
+            _ => 0
+        };
+
+        return Math.Max(0, agePoints + potentialBonus + roleBonus);
+    }
+
+    private static bool CanPassivelyGrow(Player player)
+    {
+        return player.OverallRating is > 0 and < 99 &&
+            player.OverallRating < GetPotentialCap(player) &&
+            CalculatePassiveGrowthPoints(player) > 0;
+    }
+
+    private static int GetPotentialCap(Player player)
+    {
+        if (player.PotentialOverall.HasValue)
+        {
+            return Math.Clamp(player.PotentialOverall.Value, player.OverallRating, 99);
+        }
+
+        var baseOverall = player.BaseOverallRating > 0 ? player.BaseOverallRating : player.OverallRating;
+        return player.Age switch
+        {
+            <= 21 => Math.Min(99, baseOverall + 10),
+            <= 24 => Math.Min(99, baseOverall + 7),
+            <= 27 => Math.Min(99, baseOverall + 5),
+            <= 30 => Math.Min(99, baseOverall + 3),
+            _ => Math.Min(99, baseOverall + 1)
+        };
+    }
+
+    private static void EnsureGrowthAttributes(Player player)
+    {
+        if (player.Attack > 0 && player.Defense > 0 && player.Passing > 0 && player.Finishing > 0)
+        {
+            return;
+        }
+
+        YouthAcademyService.RepairSeniorOverallAttributes(player, player.OverallRating);
     }
 
     private void RunAiClubTransferActivity(
