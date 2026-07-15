@@ -59,6 +59,13 @@ public class LivePlayerIconViewModel
     public string DetailText { get; init; } = string.Empty;
     public string CardsText { get; init; } = "None";
     public string InjuryStatusText { get; init; } = string.Empty;
+    public string WorkloadRiskText { get; init; } = string.Empty;
+    public string WorkloadRiskBrush { get; init; } = "#16A34A";
+    public string WorkloadRiskForeground { get; init; } = "#FFFFFF";
+    public string WorkloadRiskTooltip { get; init; } = string.Empty;
+    public string FatigueWarningText { get; init; } = string.Empty;
+    public string FatigueWarningTooltip { get; init; } = string.Empty;
+    public string FatigueWarningBadgeBackground { get; init; } = "#F59E0B";
     public string FormText { get; init; } = string.Empty;
     public string StaminaText { get; init; } = "0/0";
     public string MatchStatusText { get; init; } = "Fresh";

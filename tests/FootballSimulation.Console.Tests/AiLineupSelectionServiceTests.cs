@@ -46,6 +46,39 @@ public class AiLineupSelectionServiceTests
         Assert.Contains(team.Substitutes, player => player.Name == tiredMidfielder.Name);
     }
 
+    [Fact]
+    public void BuildRealisticLineup_KeepsCurrentFormationWhenAssignmentCannotBeBuilt()
+    {
+        var team = new Team
+        {
+            Name = "Thin Squad FC",
+            Formation = "5-3-2",
+            Players =
+            [
+                CreatePlayer("Starter GK", "GK", Position.Goalkeeper, 78, isStarter: true),
+                CreatePlayer("Left Wing Back", "LWB", Position.Defender, 78, isStarter: true),
+                CreatePlayer("Center Back", "CB", Position.Defender, 78, isStarter: true),
+                CreatePlayer("Right Wing Back", "RWB", Position.Defender, 78, isStarter: true),
+                CreatePlayer("Central Midfielder", "CM", Position.Midfielder, 78, isStarter: true),
+                CreatePlayer("Right Winger 1", "RW", Position.Forward, 78, isStarter: true),
+                CreatePlayer("Right Winger 2", "RW", Position.Forward, 78, isStarter: true),
+                CreatePlayer("Right Winger 3", "RW", Position.Forward, 78, isStarter: true),
+                CreatePlayer("Right Winger 4", "RW", Position.Forward, 78, isStarter: true),
+                CreatePlayer("Right Winger 5", "RW", Position.Forward, 78, isStarter: true),
+                CreatePlayer("Backup GK", "GK", Position.Goalkeeper, 76, isStarter: true)
+            ],
+            Substitutes = [],
+            Tactics = new TeamTactics { Mentality = Mentality.Defensive }
+        };
+
+        team.Players[2].IsInjured = true;
+
+        AiLineupSelectionService.BuildRealisticLineup(team);
+
+        Assert.Equal("5-3-2", team.Formation);
+        Assert.Equal(11, team.Players.Count);
+    }
+
     private static Player CreatePlayer(string name, string preferredPosition, Position position, int overall, bool isStarter)
     {
         return new Player

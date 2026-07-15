@@ -57,7 +57,8 @@ public static class PositionCompatibilityService
         var naturalPositions = PositionSuitabilityService.GetNaturalExactPositions(player);
         return !string.IsNullOrWhiteSpace(slot) &&
             (naturalPositions.Contains(slot, StringComparer.OrdinalIgnoreCase) ||
-                IsFullyAdaptedCenterForwardRole(naturalPositions, slot));
+                IsFullyAdaptedCenterForwardRole(naturalPositions, slot) ||
+                IsSidedWideMidfieldRole(naturalPositions, slot));
     }
 
     public static bool CanOccupySlot(Player player, string exactPosition, bool allowOutOfPosition = true)
@@ -227,5 +228,11 @@ public static class PositionCompatibilityService
     {
         return slot is "ST" or "CAM" &&
             naturalPositions.Contains("CF", StringComparer.OrdinalIgnoreCase);
+    }
+
+    private static bool IsSidedWideMidfieldRole(IEnumerable<string> naturalPositions, string slot)
+    {
+        return (slot == "LM" && naturalPositions.Contains("LW", StringComparer.OrdinalIgnoreCase)) ||
+            (slot == "RM" && naturalPositions.Contains("RW", StringComparer.OrdinalIgnoreCase));
     }
 }

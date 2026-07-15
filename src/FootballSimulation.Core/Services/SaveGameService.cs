@@ -323,6 +323,11 @@ public class SaveGameService
             ApplyEstevaoRatingCorrection(player);
         }
 
+        if (IsKangInLee(player))
+        {
+            ApplyKangInLeeGrowthCorrection(player);
+        }
+
         ApplyKnownPositionCorrection(player, teamName);
         RepairMissingSeniorOverallAttributes(player);
         PlayerTraitAssignmentService.EnsureMinimumTraits(player);
@@ -351,6 +356,12 @@ public class SaveGameService
         player.Attack = Math.Max(player.Attack, 78);
         player.Defense = Math.Max(player.Defense, 35);
         player.Finishing = Math.Max(player.Finishing, 74);
+    }
+
+    private static void ApplyKangInLeeGrowthCorrection(Player player)
+    {
+        player.BaseOverallRating = Math.Max(player.BaseOverallRating, 82);
+        player.PotentialOverall = Math.Max(player.PotentialOverall ?? 0, 88);
     }
 
     private static void RepairMissingSeniorOverallAttributes(Player player)
@@ -413,6 +424,12 @@ public class SaveGameService
     {
         return player.PlayerId.Contains("estevao", StringComparison.OrdinalIgnoreCase) ||
             NormalizePlayerKey(player.Name).Equals("estevao", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsKangInLee(Player player)
+    {
+        return NormalizePlayerKey(player.PlayerId).Contains("kanginlee", StringComparison.OrdinalIgnoreCase) ||
+            NormalizePlayerKey(player.Name).Equals("kanginlee", StringComparison.OrdinalIgnoreCase);
     }
 
     private static string NormalizePlayerKey(string value)

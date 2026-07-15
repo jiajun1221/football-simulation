@@ -83,6 +83,18 @@ public class PositionCompatibilityServiceTests
         Assert.False(PositionSuitabilityService.IsOutOfPosition(player));
     }
 
+    [Theory]
+    [InlineData("Left Winger", "LW", "LM", 90)]
+    [InlineData("Right Winger", "RW", "RM", 90)]
+    public void WideForwards_CanPlayMatchingWideMidfieldRole(string playerName, string preferredPosition, string targetSlot, int expectedScore)
+    {
+        var player = CreatePlayer(playerName, Position.Forward, preferredPosition);
+
+        Assert.True(PositionCompatibilityService.CanPlayPosition(player, targetSlot));
+        Assert.True(PositionCompatibilityService.CanOccupySlot(player, targetSlot, allowOutOfPosition: false));
+        Assert.Equal(expectedScore, PositionCompatibilityService.GetCompatibilityScore(player, targetSlot));
+    }
+
     private static Player CreatePlayer(string name, Position position, string preferredPosition)
     {
         return new Player

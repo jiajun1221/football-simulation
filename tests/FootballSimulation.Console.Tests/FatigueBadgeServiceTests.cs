@@ -129,15 +129,95 @@ public class FatigueBadgeServiceTests
     }
 
     [Fact]
+    public void Evaluate_RestedGoalkeeperDoesNotShowRiskAfterTwoRestedMatches()
+    {
+        var goalkeeper = CreatePlayer(stamina: 100, recentLoad: 3, seasonFatigue: 10, Position.Goalkeeper);
+        goalkeeper.PreferredPosition = "GK";
+        goalkeeper.RecentMatchMinutes = [90, 90, 90, 0, 0];
+
+        var risk = FatigueBadgeService.CalculateWorkloadRiskPercentage(goalkeeper, fixtureGapDays: 3);
+        var badge = FatigueBadgeService.Evaluate(goalkeeper, fixtureGapDays: 3);
+
+        Assert.InRange(risk, 0, 5);
+        Assert.Equal(string.Empty, badge.Text);
+    }
+
+    [Fact]
+    public void CalculateWorkloadRiskPercentage_CapsFullyFitGoalkeeperRisk()
+    {
+        var goalkeeper = CreatePlayer(stamina: 100, recentLoad: 6, seasonFatigue: 22, Position.Goalkeeper);
+        goalkeeper.PreferredPosition = "GK";
+        goalkeeper.RecentMatchMinutes = [90, 90, 90, 90, 90];
+        goalkeeper.ConsecutiveStarts = 3;
+        goalkeeper.ConsecutiveFullMatches = 5;
+
+        var risk = FatigueBadgeService.CalculateWorkloadRiskPercentage(goalkeeper, fixtureGapDays: 3);
+        var badge = FatigueBadgeService.Evaluate(goalkeeper, fixtureGapDays: 3);
+
+        Assert.InRange(risk, 0, 25);
+        Assert.Equal(string.Empty, badge.Text);
+    }
+
+    [Fact]
+    public void CalculateWorkloadRiskPercentage_GoalkeeperWorkloadCountsLessThanOutfield()
+    {
+        var goalkeeper = CreatePlayer(stamina: 88, recentLoad: 7, seasonFatigue: 45, Position.Goalkeeper);
+        goalkeeper.PreferredPosition = "GK";
+        goalkeeper.RecentMatchMinutes = [90, 90, 90, 90, 90];
+        goalkeeper.ConsecutiveStarts = 8;
+        goalkeeper.ConsecutiveFullMatches = 4;
+
+        var midfielder = CreatePlayer(stamina: 88, recentLoad: 7, seasonFatigue: 45, Position.Midfielder);
+        midfielder.RecentMatchMinutes = [90, 90, 90, 90, 90];
+        midfielder.ConsecutiveStarts = 8;
+        midfielder.ConsecutiveFullMatches = 4;
+
+        var goalkeeperRisk = FatigueBadgeService.CalculateWorkloadRiskPercentage(goalkeeper, fixtureGapDays: 3);
+        var midfielderRisk = FatigueBadgeService.CalculateWorkloadRiskPercentage(midfielder, fixtureGapDays: 3);
+
+        Assert.True(goalkeeperRisk < midfielderRisk);
+        Assert.InRange(goalkeeperRisk, 0, 69);
+        Assert.InRange(midfielderRisk, 70, 100);
+    }
+
+    [Fact]
     public void Evaluate_ShortRestAfterThreeFullMatchesShowsTired()
     {
-        var player = CreatePlayer(stamina: 82, recentLoad: 4, seasonFatigue: 45);
+        var player = CreatePlayer(stamina: 75, recentLoad: 2, seasonFatigue: 30);
         player.RecentMatchMinutes = [90, 90, 90];
         player.ConsecutiveFullMatches = 3;
 
         var badge = FatigueBadgeService.Evaluate(player, fixtureGapDays: 3);
 
         Assert.Equal("Tired", badge.Text);
+    }
+
+    [Fact]
+    public void Evaluate_ShowsRiskForFourShortRestFullMatchesBecauseWorkloadRiskIsHigh()
+    {
+        var player = CreatePlayer(stamina: 90, recentLoad: 0, seasonFatigue: 0);
+        player.RecentMatchMinutes = [90, 90, 90, 90];
+        player.ConsecutiveFullMatches = 4;
+
+        var workloadRisk = FatigueBadgeService.CalculateWorkloadRiskPercentage(player, fixtureGapDays: 3);
+        var badge = FatigueBadgeService.Evaluate(player, fixtureGapDays: 3);
+
+        Assert.InRange(workloadRisk, 70, 100);
+        Assert.Equal("Risk", badge.Text);
+    }
+
+    [Fact]
+    public void Evaluate_ShowsRiskForShortRestFullMatchesOnlyWhenWorkloadRiskIsHigh()
+    {
+        var player = CreatePlayer(stamina: 70, recentLoad: 4, seasonFatigue: 45);
+        player.RecentMatchMinutes = [90, 90, 90, 90];
+        player.ConsecutiveFullMatches = 4;
+
+        var workloadRisk = FatigueBadgeService.CalculateWorkloadRiskPercentage(player, fixtureGapDays: 3);
+        var badge = FatigueBadgeService.Evaluate(player, fixtureGapDays: 3);
+
+        Assert.InRange(workloadRisk, 70, 100);
+        Assert.Equal("Risk", badge.Text);
     }
 
     [Fact]
@@ -167,12 +247,17 @@ public class FatigueBadgeServiceTests
         Assert.True(risk > lowSeasonFatiguePlayer.SeasonFatigue);
     }
 
-    private static Player CreatePlayer(int stamina, int recentLoad, int seasonFatigue)
+    private static Player CreatePlayer(
+        int stamina,
+        int recentLoad,
+        int seasonFatigue,
+        Position position = Position.Midfielder)
     {
         return new Player
         {
             Name = "Test Player",
-            Position = Position.Midfielder,
+            Position = position,
+            PreferredPosition = position == Position.Goalkeeper ? "GK" : "CM",
             Stamina = stamina,
             MatchesPlayedRecently = recentLoad,
             SeasonFatigue = seasonFatigue

@@ -104,7 +104,7 @@
                         Background="Transparent"
                         HorizontalAlignment="Center"
                         Margin="0,0,0,14">
-                    <Image Source="/Assets/App/football-logo.png"
+                    <Image Source="/Assets/App/FootballSimulator_AppIcon.ico"
                            Width="64"
                            Height="64"
                            Stretch="Uniform"

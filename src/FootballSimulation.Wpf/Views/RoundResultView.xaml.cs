@@ -73,10 +73,15 @@ public partial class RoundResultView : UserControl
             return;
         }
 
-        RightPanelTitleTextBlock.Text = "Updated League Table";
+        RightPanelTitleTextBlock.Text = _state.CurrentFixture.Competition == CompetitionType.PremierLeague
+            ? "Updated League Table"
+            : $"Updated {CompetitionDisplayService.GetName(_state.CurrentFixture.Competition)} Table";
         BracketScrollViewer.Visibility = Visibility.Collapsed;
         LeagueTableDataGrid.Visibility = Visibility.Visible;
-        LeagueTableDataGrid.ItemsSource = CreateLeagueTableRows(_state.League, _state.SelectedTeam);
+        LeagueTableDataGrid.ItemsSource = CreateUpdatedTableRows(
+            _state.League,
+            _state.CurrentFixture.Competition,
+            _state.SelectedTeam);
     }
 
     private void NextButton_Click(object sender, RoutedEventArgs e)
@@ -118,6 +123,43 @@ public partial class RoundResultView : UserControl
     private List<LeagueTableRow> CreateLeagueTableRows(League league, Team? selectedTeam)
     {
         return league.Table
+            .Select(entry => new LeagueTableRow
+            {
+                Club = entry.TeamName,
+                LogoPath = GetClubLogoPath(entry.TeamName),
+                Played = entry.Played,
+                Wins = entry.Wins,
+                Draws = entry.Draws,
+                Losses = entry.Losses,
+                GoalsFor = entry.GoalsFor,
+                GoalsAgainst = entry.GoalsAgainst,
+                GoalDifference = entry.GoalDifference,
+                Points = entry.Points,
+                IsSelectedTeam = selectedTeam is not null &&
+                    string.Equals(entry.TeamName, selectedTeam.Name, StringComparison.OrdinalIgnoreCase)
+            })
+            .ToList();
+    }
+
+    private List<LeagueTableRow> CreateUpdatedTableRows(League league, CompetitionType competition, Team? selectedTeam)
+    {
+        if (competition == CompetitionType.PremierLeague)
+        {
+            return CreateLeagueTableRows(league, selectedTeam);
+        }
+
+        var competitionState = league.CompetitionStates
+            .FirstOrDefault(state => state.Competition == competition);
+        if (competitionState is null || competitionState.Standings.Count == 0)
+        {
+            return CreateLeagueTableRows(league, selectedTeam);
+        }
+
+        return competitionState.Standings
+            .OrderByDescending(entry => entry.Points)
+            .ThenByDescending(entry => entry.GoalDifference)
+            .ThenByDescending(entry => entry.GoalsFor)
+            .ThenBy(entry => entry.TeamName)
             .Select(entry => new LeagueTableRow
             {
                 Club = entry.TeamName,

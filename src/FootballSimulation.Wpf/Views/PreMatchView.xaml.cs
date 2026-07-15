@@ -245,6 +245,7 @@ public partial class PreMatchView : UserControl
 
         var formation = GetSelectedFormation(_state.SelectedTeam);
         var positions = _formationLayoutService.GetPositions(formation);
+        AssignFormationPositions(positions);
         var assignments = CreatePitchSlotAssignments(_pitchSlots, positions);
 
         foreach (var assignment in assignments)
@@ -270,7 +271,7 @@ public partial class PreMatchView : UserControl
 
         for (var index = 0; index < _pitchSlots.Count && index < positions.Count; index++)
         {
-            if (CanPlayerOccupySlot(_pitchSlots[index], positions[index].ExactPosition))
+            if (CanAssignPlayerToSlot(_pitchSlots[index], positions[index].ExactPosition))
             {
                 PositionSuitabilityService.EnsurePositionMetadata(_pitchSlots[index], positions[index].ExactPosition);
             }
@@ -498,13 +499,9 @@ public partial class PreMatchView : UserControl
 
     private PitchPlayerCard CreatePitchPlayerCard(Player player, string displayedPosition)
     {
-        if (CanPlayerOccupySlot(player, displayedPosition))
+        PositionSuitabilityService.EnsurePositionMetadata(player);
+        if (!CanPlayerOccupySlot(player, displayedPosition))
         {
-            PositionSuitabilityService.EnsurePositionMetadata(player, displayedPosition);
-        }
-        else
-        {
-            PositionSuitabilityService.EnsurePositionMetadata(player);
             Debug.WriteLine(
                 $"[LINEUP WARNING] Reason=RenderPitch; Method={nameof(CreatePitchPlayerCard)}; Player={player.Name}; Invalid Slot={displayedPosition}");
         }
@@ -555,7 +552,7 @@ public partial class PreMatchView : UserControl
             FatigueWarningText = fatigueBadge.Text,
             FatigueWarningTooltip = fatigueBadge.Tooltip,
             FatigueWarningBadgeBackground = fatigueBadge.Background,
-            TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits),
+            TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits, int.MaxValue),
             CardBackground = cardBackground,
             CardBorderBrush = cardBorder,
             CardBorderThickness = player == _selectedStarter ? new Thickness(3) : new Thickness(1)
@@ -833,7 +830,7 @@ public partial class PreMatchView : UserControl
             FatigueWarningText = fatigueBadge.Text,
             FatigueWarningTooltip = fatigueBadge.Tooltip,
             FatigueWarningBadgeBackground = fatigueBadge.Background,
-            TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits)
+            TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits, int.MaxValue)
         };
     }
 
@@ -1576,6 +1573,8 @@ public partial class PreMatchView : UserControl
             team.Formation = formation;
         }
 
+        ApplyPitchSlotsToTeam();
+        AssignFormationPositions();
         TacticalSettingsPanel.ApplyTo(team.Tactics);
         PersistCurrentSaveSlot();
     }
@@ -1894,5 +1893,9 @@ public partial class PreMatchView : UserControl
         public string FatigueWarningTooltip { get; init; } = string.Empty;
         public string FatigueWarningBadgeBackground { get; init; } = "#F59E0B";
         public IReadOnlyList<PlayerTraitBadge> TraitBadges { get; init; } = [];
+        public int TraitCount => TraitBadges.Count;
+        public string TraitCountText => TraitCount.ToString();
+        public string TraitIconText => "★";
+        public string TraitSummaryText => TraitCount == 1 ? "1 player trait" : $"{TraitCount} player traits";
     }
 }

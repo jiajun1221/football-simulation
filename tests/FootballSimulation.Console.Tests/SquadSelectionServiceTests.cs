@@ -206,6 +206,21 @@ public class SquadSelectionServiceTests
     }
 
     [Fact]
+    public void RepairUnavailablePlayers_DoesNotDropBelowElevenWhenNoReplacementExists()
+    {
+        var team = CreateTeam(substituteCount: 0);
+        team.Substitutes = [];
+        var injuredStarter = team.Players[1];
+        injuredStarter.IsInjured = true;
+
+        var result = LineupValidationService.RepairUnavailablePlayers(team);
+
+        Assert.True(result.IsValid);
+        Assert.Equal(11, team.Players.Count);
+        Assert.Contains(injuredStarter, team.Players);
+    }
+
+    [Fact]
     public void AiLineupSelection_UsesNaturalCenterBacksOverHighRatedAttackers()
     {
         var team = new Team

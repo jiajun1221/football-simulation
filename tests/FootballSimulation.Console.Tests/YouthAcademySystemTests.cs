@@ -219,6 +219,45 @@ public class YouthAcademySystemTests
     }
 
     [Fact]
+    public void PromoteYouthPlayer_AllowsPromotionWhenExpandedSeniorSquadHasOneOpenSlot()
+    {
+        var league = CreateLeague();
+        var team = league.Teams[0];
+        var academy = new YouthAcademyService().GetAcademy(league, team.Name);
+        var prospect = academy.YouthPlayers[0];
+        prospect.Age = 16;
+        prospect.CurrentOVR = 58;
+        prospect.HiddenTruePotential = 86;
+        team.Players = CreateSeniorSquadPlayers(11);
+        team.Substitutes = CreateSeniorSquadPlayers(YouthAcademyService.MaximumSeniorSquadSize - team.Players.Count - 1);
+
+        var result = new YouthAcademyService().PromoteYouthPlayer(league, team, prospect.PlayerId);
+
+        Assert.True(result.Success, result.Message);
+        Assert.Equal(YouthAcademyService.MaximumSeniorSquadSize, team.Players.Count + team.Substitutes.Count);
+        Assert.Contains(team.Substitutes, player => player.PlayerId == prospect.PlayerId);
+    }
+
+    [Fact]
+    public void PromoteYouthPlayer_BlocksPromotionAtExpandedSeniorSquadLimit()
+    {
+        var league = CreateLeague();
+        var team = league.Teams[0];
+        var academy = new YouthAcademyService().GetAcademy(league, team.Name);
+        var prospect = academy.YouthPlayers[0];
+        prospect.Age = 16;
+        prospect.CurrentOVR = 58;
+        team.Players = CreateSeniorSquadPlayers(11);
+        team.Substitutes = CreateSeniorSquadPlayers(YouthAcademyService.MaximumSeniorSquadSize - team.Players.Count);
+
+        var result = new YouthAcademyService().PromoteYouthPlayer(league, team, prospect.PlayerId);
+
+        Assert.False(result.Success);
+        Assert.Equal("Senior squad is full.", result.Message);
+        Assert.DoesNotContain(team.Substitutes, player => player.PlayerId == prospect.PlayerId);
+    }
+
+    [Fact]
     public void PromoteYouthPlayer_KeepsSeniorDisplayedOverallAlignedWithYouthOverall()
     {
         var league = CreateLeague();
@@ -434,6 +473,21 @@ public class YouthAcademySystemTests
         var definition = dataService.GetLeagueDefinition("premier-league");
         var teams = dataService.LoadTeams(definition).Take(6).ToList();
         return new LeagueEngine().CreateLeague(definition.LeagueId, definition.Name, definition.Season, teams);
+    }
+
+    private static List<Player> CreateSeniorSquadPlayers(int count)
+    {
+        return Enumerable.Range(1, count)
+            .Select(index => new Player
+            {
+                PlayerId = $"senior-{index}",
+                Name = $"Senior Player {index}",
+                Position = Position.Midfielder,
+                PreferredPosition = "CM",
+                SquadNumber = index,
+                OverallRating = 70
+            })
+            .ToList();
     }
 
     private static void SimulateAllFixtures(LeagueEngine leagueEngine, League league)

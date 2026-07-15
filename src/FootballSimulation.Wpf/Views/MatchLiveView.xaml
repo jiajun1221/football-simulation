@@ -450,6 +450,39 @@
                                            FontSize="7"
                                            FontWeight="Bold" />
                             </Border>
+                            <Border Background="{Binding WorkloadRiskBrush}"
+                                    CornerRadius="7"
+                                    Padding="3,1"
+                                    HorizontalAlignment="Left"
+                                    Margin="0,0,2,0"
+                                    ToolTip="{Binding WorkloadRiskTooltip}">
+                                <TextBlock Text="{Binding WorkloadRiskText}"
+                                           FontFamily="Segoe UI Emoji"
+                                           Foreground="{Binding WorkloadRiskForeground}"
+                                           FontSize="7"
+                                           FontWeight="Black" />
+                            </Border>
+                            <Border Background="{Binding FatigueWarningBadgeBackground}"
+                                    CornerRadius="7"
+                                    Padding="5,1"
+                                    HorizontalAlignment="Left"
+                                    Margin="0,0,2,0"
+                                    ToolTip="{Binding FatigueWarningTooltip}">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding FatigueWarningText}" Value="">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Text="{Binding FatigueWarningText}"
+                                           Foreground="#FFFFFF"
+                                           FontSize="7"
+                                           FontWeight="Bold" />
+                            </Border>
                             <ItemsControl ItemsSource="{Binding TraitBadges}"
                                           ItemTemplate="{StaticResource TraitIconBadgeTemplate}">
                                 <ItemsControl.Style>

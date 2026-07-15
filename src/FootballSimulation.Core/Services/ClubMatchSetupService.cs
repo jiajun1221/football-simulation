@@ -7,15 +7,17 @@ public static class ClubMatchSetupService
     public static ClubMatchSetup Capture(Team team)
     {
         ArgumentNullException.ThrowIfNull(team);
+        var slots = FormationSlotService.GetSlots(team.Formation);
 
         return new ClubMatchSetup
         {
             ClubName = team.Name,
             Formation = team.Formation,
             StartingXI = team.Players
-                .Select(player => new LineupSlotAssignment
+                .Take(11)
+                .Select((player, index) => new LineupSlotAssignment
                 {
-                    Slot = PositionSuitabilityService.NormalizeExactPosition(player.AssignedPosition),
+                    Slot = index < slots.Count ? slots[index] : PositionSuitabilityService.NormalizeExactPosition(player.AssignedPosition),
                     PlayerId = player.PlayerId,
                     PlayerName = player.Name
                 })

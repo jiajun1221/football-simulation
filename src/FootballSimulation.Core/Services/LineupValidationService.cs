@@ -33,6 +33,11 @@ public static class LineupValidationService
 
             if (replacement is null)
             {
+                if (team.Players.Count <= 11 && !team.Substitutes.Any(IsAvailableForSelection))
+                {
+                    continue;
+                }
+
                 team.Players.Remove(unavailableStarter);
                 if (!team.Substitutes.Contains(unavailableStarter))
                 {
@@ -49,6 +54,24 @@ public static class LineupValidationService
             wasRepaired = true;
         }
 
+        wasRepaired |= FillOpenStarterSlots(team);
+
+        var goalkeeperResult = RepairGoalkeeperSlot(team);
+        if (!goalkeeperResult.IsValid)
+        {
+            return goalkeeperResult;
+        }
+
+        wasRepaired |= FillOpenStarterSlots(team);
+
+        return wasRepaired || goalkeeperResult.WasRepaired
+            ? LineupValidationResult.Repaired()
+            : LineupValidationResult.Valid();
+    }
+
+    private static bool FillOpenStarterSlots(Team team)
+    {
+        var wasRepaired = false;
         while (team.Players.Count < 11)
         {
             var replacement = team.Substitutes
@@ -69,15 +92,7 @@ public static class LineupValidationService
             wasRepaired = true;
         }
 
-        var goalkeeperResult = RepairGoalkeeperSlot(team);
-        if (!goalkeeperResult.IsValid)
-        {
-            return goalkeeperResult;
-        }
-
-        return wasRepaired || goalkeeperResult.WasRepaired
-            ? LineupValidationResult.Repaired()
-            : LineupValidationResult.Valid();
+        return wasRepaired;
     }
 
     public static LineupValidationResult RepairGoalkeeperSlot(Team team)

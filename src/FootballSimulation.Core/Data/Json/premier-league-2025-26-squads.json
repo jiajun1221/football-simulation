@@ -123,14 +123,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            98,
-            102
+            99,
+            109,
+            92,
+            0,
+            103
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 1,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -177,20 +180,24 @@
             "DivesIntoTackles"
           ],
           "morale": 50,
-          "isInjured": true,
-          "injuryType": "Knee Injury",
-          "injurySeverity": "Minor",
-          "injuryRecoveryMatches": 2,
+          "isInjured": false,
+          "injuryType": null,
+          "injurySeverity": null,
+          "injuryRecoveryMatches": null,
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            98
+            103,
+            99,
+            104,
+            0,
+            110
           ],
           "consecutiveFullMatches": 1,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "seasonFatigue": 6,
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -243,14 +250,15 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 1,
           "recentMatchMinutes": [
             98,
-            102
+            102,
+            0
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -303,14 +311,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 5,
           "recentMatchMinutes": [
-            98,
-            0
+            0,
+            0,
+            91,
+            95,
+            93
           ],
-          "consecutiveFullMatches": 0,
+          "consecutiveFullMatches": 3,
           "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveStarts": 3
         },
         {
           "playerId": null,
@@ -364,14 +375,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            98,
-            102
+            108,
+            104,
+            91,
+            95,
+            93
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 7,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 7
         },
         {
           "playerId": null,
@@ -426,6 +440,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            0,
+            0,
+            0,
             0,
             0
           ],
@@ -485,6 +502,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            0,
+            0,
+            0,
             0,
             0
           ],
@@ -606,12 +626,15 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 2,
           "recentMatchMinutes": [
-            98,
-            102
+            108,
+            0,
+            91,
+            0,
+            93
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 1,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -668,6 +691,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            108,
+            85,
+            0,
             0,
             0
           ],
@@ -723,6 +749,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            0,
+            0,
+            0,
             0,
             0
           ],
@@ -972,6 +1001,9 @@
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
             0,
+            0,
+            0,
+            0,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -1028,14 +1060,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
             0,
-            102
+            0,
+            91,
+            95,
+            93
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 5,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 3,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 3
         },
         {
           "playerId": null,
@@ -1089,7 +1124,10 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
-            24,
+            0,
+            0,
+            0,
+            0,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -1150,7 +1188,10 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
-            0,
+            97,
+            101,
+            97,
+            103,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -1210,6 +1251,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            108,
+            0,
+            0,
             0,
             0
           ],
@@ -1267,14 +1311,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            108,
+            104,
             0,
-            102
+            0,
+            0
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 5,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -1328,6 +1375,9 @@
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
             0,
+            104,
+            0,
+            95,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -1384,14 +1434,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 5,
           "recentMatchMinutes": [
-            98,
-            28
+            0,
+            20,
+            91,
+            95,
+            93
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 1,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 3,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 3
         }
       ]
     },
@@ -1510,7 +1563,7 @@
           "isInjured": true,
           "injuryType": "Fracture",
           "injurySeverity": "SeasonEnding",
-          "injuryRecoveryMatches": 91,
+          "injuryRecoveryMatches": 83,
           "isSeasonEndingInjury": true,
           "isSuspended": null,
           "suspendedMatches": null,
@@ -1567,7 +1620,7 @@
           "isInjured": true,
           "injuryType": "Fracture",
           "injurySeverity": "SeasonEnding",
-          "injuryRecoveryMatches": 91,
+          "injuryRecoveryMatches": 83,
           "isSeasonEndingInjury": true,
           "isSuspended": null,
           "suspendedMatches": null,
@@ -1626,14 +1679,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            104,
-            102
+            0,
+            95,
+            93,
+            95,
+            91
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 12,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 4,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 4
         },
         {
           "playerId": null,
@@ -1684,14 +1740,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            104,
-            102
+            101,
+            51,
+            93,
+            0,
+            91
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 1,
+          "seasonFatigue": 2,
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -1744,6 +1803,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            0,
+            0,
+            0,
             0,
             0
           ],
@@ -1801,13 +1863,16 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 3,
           "recentMatchMinutes": [
             0,
-            102
+            95,
+            0,
+            0,
+            91
           ],
           "consecutiveFullMatches": 1,
-          "seasonFatigue": 8,
+          "seasonFatigue": 4,
           "consecutiveStarts": 1
         },
         {
@@ -1860,14 +1925,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 5,
           "recentMatchMinutes": [
-            104,
-            80
+            101,
+            95,
+            0,
+            95,
+            0
           ],
           "consecutiveFullMatches": 0,
-          "seasonFatigue": 9,
-          "consecutiveStarts": 2
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -1919,14 +1987,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 5,
           "recentMatchMinutes": [
-            104,
-            102
+            101,
+            0,
+            0,
+            95,
+            47
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 12,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -1978,9 +2049,12 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 2,
           "recentMatchMinutes": [
-            104,
+            0,
+            95,
+            93,
+            95,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -2036,14 +2110,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 4,
           "recentMatchMinutes": [
-            104,
-            102
+            0,
+            95,
+            0,
+            0,
+            45
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 1
         }
       ],
       "substitutes": [
@@ -2091,14 +2168,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 1,
           "recentMatchMinutes": [
-            104,
-            0
+            101,
+            0,
+            93,
+            0,
+            91
           ],
           "consecutiveFullMatches": 0,
           "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -2143,18 +2223,24 @@
             "Interceptor"
           ],
           "morale": 50,
-          "isInjured": true,
-          "injuryType": "Calf Strain",
-          "injurySeverity": "Moderate",
-          "injuryRecoveryMatches": 4,
+          "isInjured": false,
+          "injuryType": null,
+          "injurySeverity": null,
+          "injuryRecoveryMatches": null,
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
-          "recentMatchMinutes": [],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "matchesPlayedRecently": 6,
+          "recentMatchMinutes": [
+            101,
+            95,
+            93,
+            95,
+            91
+          ],
+          "consecutiveFullMatches": 21,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 21
         },
         {
           "playerId": null,
@@ -2207,6 +2293,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            0,
+            0,
+            0,
             0,
             0
           ],
@@ -2263,14 +2352,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 3,
           "recentMatchMinutes": [
-            104,
-            102
+            101,
+            0,
+            93,
+            0,
+            91
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 12,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 1,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -2321,13 +2413,16 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 2,
           "recentMatchMinutes": [
-            104,
-            23
+            0,
+            95,
+            0,
+            95,
+            0
           ],
           "consecutiveFullMatches": 0,
-          "seasonFatigue": 7,
+          "seasonFatigue": 0,
           "consecutiveStarts": 0
         },
         {
@@ -2379,9 +2474,12 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 2,
           "recentMatchMinutes": [
             0,
+            95,
+            93,
+            95,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -2437,13 +2535,16 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 4,
           "recentMatchMinutes": [
+            101,
             0,
-            102
+            93,
+            0,
+            91
           ],
           "consecutiveFullMatches": 1,
-          "seasonFatigue": 8,
+          "seasonFatigue": 4,
           "consecutiveStarts": 1
         },
         {
@@ -2490,14 +2591,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
             0,
-            102
+            95,
+            0,
+            95,
+            0
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -2547,14 +2651,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            104,
-            102
+            101,
+            95,
+            93,
+            95,
+            91
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 12,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 12,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 16
         },
         {
           "playerId": null,
@@ -2604,14 +2711,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            104,
-            102
+            101,
+            45,
+            93,
+            95,
+            91
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 12,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 3,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 7
         },
         {
           "playerId": null,
@@ -2662,14 +2772,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 3,
           "recentMatchMinutes": [
+            101,
             0,
-            0
+            93,
+            0,
+            91
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 1,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -2720,9 +2833,12 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 1,
           "recentMatchMinutes": [
+            101,
             0,
+            0,
+            95,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -2848,14 +2964,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            103,
-            97
+            92,
+            93,
+            101,
+            95,
+            96
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 7,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 7
         },
         {
           "playerId": null,
@@ -2908,14 +3027,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 5,
           "recentMatchMinutes": [
-            103,
-            97
+            0,
+            104,
+            101,
+            94,
+            98
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 4,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 4
         },
         {
           "playerId": null,
@@ -2967,14 +3089,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
             103,
-            97
+            101,
+            106,
+            108,
+            100
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 17,
+          "seasonFatigue": 30,
+          "consecutiveStarts": 17
         },
         {
           "playerId": null,
@@ -3027,7 +3152,10 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
-            103,
+            0,
+            0,
+            0,
+            0,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -3084,14 +3212,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            0,
-            0
+            100,
+            104,
+            101,
+            94,
+            98
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 16,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 16
         },
         {
           "playerId": null,
@@ -3144,14 +3275,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            0,
-            0
+            100,
+            104,
+            101,
+            94,
+            98
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 13,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 13
         },
         {
           "playerId": null,
@@ -3204,14 +3338,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            0,
-            0
+            100,
+            104,
+            101,
+            94,
+            98
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 21,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 21
         },
         {
           "playerId": null,
@@ -3263,14 +3400,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 4,
           "recentMatchMinutes": [
-            103,
-            97
+            100,
+            104,
+            65,
+            0,
+            0
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 10,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -3322,14 +3462,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 2,
           "recentMatchMinutes": [
-            103,
-            0
+            0,
+            0,
+            32,
+            94,
+            98
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 2,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 2
         },
         {
           "playerId": null,
@@ -3383,7 +3526,10 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
-            103,
+            0,
+            0,
+            0,
+            0,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -3436,14 +3582,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 3,
           "recentMatchMinutes": [
-            103,
-            97
+            104,
+            94,
+            105,
+            95,
+            103
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 12,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 40
         },
         {
           "playerId": null,
@@ -3498,11 +3647,14 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 2,
           "recentMatchMinutes": [
-            103,
-            97
+            0,
+            0,
+            37,
+            94,
+            98
           ],
           "consecutiveFullMatches": 2,
-          "seasonFatigue": 10,
+          "seasonFatigue": 5,
           "consecutiveStarts": 2
         },
         {
@@ -3554,14 +3706,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 5,
           "recentMatchMinutes": [
+            104,
             0,
-            97
+            105,
+            95,
+            0
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 5,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -3612,14 +3767,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            0,
-            0
+            100,
+            104,
+            101,
+            94,
+            98
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 21,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 21
         },
         {
           "playerId": null,
@@ -3736,6 +3894,9 @@
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
             0,
+            0,
+            0,
+            0,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -3792,14 +3953,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            103,
-            97
+            100,
+            104,
+            101,
+            94,
+            98
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 8,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 8
         },
         {
           "playerId": null,
@@ -3852,6 +4016,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            0,
+            0,
+            0,
             0,
             0
           ],
@@ -3908,14 +4075,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 4,
           "recentMatchMinutes": [
+            100,
+            104,
+            70,
             0,
-            97
+            0
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 4,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -3967,14 +4137,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            103,
-            0
+            100,
+            104,
+            101,
+            94,
+            98
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 21,
+          "seasonFatigue": 5,
+          "consecutiveStarts": 21
         },
         {
           "playerId": null,
@@ -4024,14 +4197,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            0,
-            97
+            100,
+            104,
+            101,
+            94,
+            98
           ],
-          "consecutiveFullMatches": 1,
+          "consecutiveFullMatches": 21,
           "seasonFatigue": 4,
-          "consecutiveStarts": 1
+          "consecutiveStarts": 21
         },
         {
           "playerId": null,
@@ -4082,14 +4258,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            0,
-            97
+            100,
+            104,
+            101,
+            94,
+            98
           ],
-          "consecutiveFullMatches": 1,
+          "consecutiveFullMatches": 21,
           "seasonFatigue": 4,
-          "consecutiveStarts": 1
+          "consecutiveStarts": 21
         }
       ]
     },
@@ -4151,11 +4330,14 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 2,
           "recentMatchMinutes": [
+            104,
+            99,
+            0,
             95,
-            98
+            91
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 2,
           "consecutiveStarts": 2
         },
         {
@@ -4209,14 +4391,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
+            104,
+            99,
+            96,
             95,
-            98
+            91
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 23,
+          "seasonFatigue": 16,
+          "consecutiveStarts": 23
         },
         {
           "playerId": null,
@@ -4268,14 +4453,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
+            104,
+            99,
+            96,
             95,
-            98
+            91
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 23,
+          "seasonFatigue": 16,
+          "consecutiveStarts": 23
         },
         {
           "playerId": null,
@@ -4328,14 +4516,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
+            104,
+            99,
+            96,
             95,
-            98
+            91
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 20,
+          "seasonFatigue": 16,
+          "consecutiveStarts": 23
         },
         {
           "playerId": null,
@@ -4449,14 +4640,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            95,
-            98
+            104,
+            99,
+            96,
+            0,
+            91
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 10,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 1,
+          "seasonFatigue": 5,
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -4510,6 +4704,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            0,
+            0,
+            0,
             0,
             0
           ],
@@ -4568,14 +4765,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 2,
           "recentMatchMinutes": [
-            95,
-            0
+            0,
+            0,
+            96,
+            0,
+            91
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 1,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -4627,14 +4827,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
+            104,
+            99,
+            96,
             95,
-            98
+            91
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 23,
+          "seasonFatigue": 16,
+          "consecutiveStarts": 23
         },
         {
           "playerId": null,
@@ -4686,14 +4889,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 1,
           "recentMatchMinutes": [
+            0,
+            99,
+            0,
             95,
-            98
+            0
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -4745,6 +4951,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            0,
+            0,
+            0,
             0,
             0
           ],
@@ -4800,6 +5009,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            0,
+            0,
+            96,
             0,
             0
           ],
@@ -4858,14 +5070,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
+            104,
+            99,
+            96,
             95,
-            0
+            91
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 23,
+          "seasonFatigue": 16,
+          "consecutiveStarts": 23
         },
         {
           "playerId": null,
@@ -4916,14 +5131,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 3,
           "recentMatchMinutes": [
-            95,
-            0
+            104,
+            0,
+            96,
+            0,
+            91
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 1,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -4973,13 +5191,16 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
+            97,
+            93,
+            91,
             0,
-            98
+            96
           ],
           "consecutiveFullMatches": 1,
-          "seasonFatigue": 5,
+          "seasonFatigue": 0,
           "consecutiveStarts": 1
         },
         {
@@ -5031,14 +5252,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 2,
           "recentMatchMinutes": [
             0,
-            98
+            99,
+            0,
+            95,
+            0
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 4,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -5090,6 +5314,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            0,
+            0,
+            0,
             0,
             0
           ],
@@ -5146,14 +5373,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
+            104,
+            99,
+            96,
             95,
-            98
+            91
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 6,
+          "seasonFatigue": 16,
+          "consecutiveStarts": 6
         },
         {
           "playerId": null,
@@ -5205,14 +5435,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 2,
           "recentMatchMinutes": [
+            104,
             0,
-            98
+            0,
+            95,
+            91
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 4,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 2,
+          "seasonFatigue": 10,
+          "consecutiveStarts": 2
         },
         {
           "playerId": null,
@@ -5260,6 +5493,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            0,
+            0,
+            0,
             0,
             0
           ],
@@ -5313,6 +5549,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            0,
+            0,
+            0,
             0,
             0
           ],
@@ -5371,6 +5610,9 @@
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
             0,
+            0,
+            0,
+            0,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -5426,9 +5668,12 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 5,
           "recentMatchMinutes": [
-            0,
+            104,
+            99,
+            96,
+            95,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -5557,13 +5802,16 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            101,
-            104
+            108,
+            97,
+            0,
+            94,
+            98
           ],
           "consecutiveFullMatches": 2,
-          "seasonFatigue": 10,
+          "seasonFatigue": 0,
           "consecutiveStarts": 2
         },
         {
@@ -5616,9 +5864,12 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 4,
           "recentMatchMinutes": [
-            101,
+            97,
+            97,
+            0,
+            95,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -5675,14 +5926,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            101,
-            104
+            96,
+            80,
+            93,
+            94,
+            97
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 10,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 3,
+          "seasonFatigue": 12,
+          "consecutiveStarts": 6
         },
         {
           "playerId": null,
@@ -5733,13 +5987,16 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 4,
           "recentMatchMinutes": [
+            97,
             0,
-            104
+            97,
+            0,
+            98
           ],
           "consecutiveFullMatches": 1,
-          "seasonFatigue": 5,
+          "seasonFatigue": 4,
           "consecutiveStarts": 1
         },
         {
@@ -5979,14 +6236,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            101,
-            104
+            97,
+            97,
+            97,
+            95,
+            98
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 10,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 13,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 13
         },
         {
           "playerId": null,
@@ -6038,14 +6298,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 4,
           "recentMatchMinutes": [
             0,
-            0
+            0,
+            97,
+            0,
+            98
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 1,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -6094,14 +6357,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 4,
           "recentMatchMinutes": [
-            101,
-            104
+            100,
+            97,
+            105,
+            94,
+            0
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 14,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         }
       ],
       "substitutes": [
@@ -6149,14 +6415,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
-            101,
-            104
+            95,
+            0,
+            105,
+            94,
+            0
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 14,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -6209,14 +6478,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            101,
-            104
+            97,
+            97,
+            97,
+            95,
+            98
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 10,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 8,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 8
         },
         {
           "playerId": null,
@@ -6262,18 +6534,24 @@
             "AerialThreat"
           ],
           "morale": 50,
-          "isInjured": true,
-          "injuryType": "Back Injury",
-          "injurySeverity": "Serious",
-          "injuryRecoveryMatches": 7,
+          "isInjured": false,
+          "injuryType": null,
+          "injurySeverity": null,
+          "injuryRecoveryMatches": null,
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
-          "recentMatchMinutes": [],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "matchesPlayedRecently": 6,
+          "recentMatchMinutes": [
+            97,
+            97,
+            97,
+            95,
+            98
+          ],
+          "consecutiveFullMatches": 5,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 5
         },
         {
           "playerId": null,
@@ -6325,14 +6603,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            0,
-            104
+            97,
+            97,
+            97,
+            95,
+            98
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 6,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 9,
+          "seasonFatigue": 5,
+          "consecutiveStarts": 9
         },
         {
           "playerId": null,
@@ -6384,14 +6665,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            101,
-            104
+            0,
+            97,
+            97,
+            95,
+            98
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 10,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 4,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 4
         },
         {
           "playerId": null,
@@ -6440,14 +6724,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 2,
           "recentMatchMinutes": [
+            98,
+            103,
             101,
-            0
+            94,
+            95
           ],
-          "consecutiveFullMatches": 0,
+          "consecutiveFullMatches": 5,
           "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveStarts": 2
         },
         {
           "playerId": null,
@@ -6489,21 +6776,24 @@
           "isStarter": false,
           "traits": [],
           "morale": 50,
-          "isInjured": false,
-          "injuryType": null,
-          "injurySeverity": null,
-          "injuryRecoveryMatches": null,
-          "isSeasonEndingInjury": null,
+          "isInjured": true,
+          "injuryType": "Fracture",
+          "injurySeverity": "SeasonEnding",
+          "injuryRecoveryMatches": 99,
+          "isSeasonEndingInjury": true,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            104,
+            92,
             0,
-            104
+            120,
+            95
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 7,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 2,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -6552,9 +6842,12 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 2,
           "recentMatchMinutes": [
             0,
+            97,
+            0,
+            95,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -6605,14 +6898,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 3,
           "recentMatchMinutes": [
-            0,
-            0
+            97,
+            97,
+            97,
+            95,
+            98
           ],
           "consecutiveFullMatches": 0,
           "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveStarts": 20
         },
         {
           "playerId": null,
@@ -6662,14 +6958,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 1,
           "recentMatchMinutes": [
+            97,
             0,
-            0
+            0,
+            0,
+            98
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 1,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -6719,14 +7018,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            101,
-            0
+            0,
+            97,
+            97,
+            95,
+            98
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 4,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 4
         },
         {
           "playerId": null,
@@ -6777,14 +7079,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            101,
-            104
+            97,
+            97,
+            97,
+            95,
+            98
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 10,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 5,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 5
         }
       ]
     },
@@ -8314,14 +8619,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 3,
           "recentMatchMinutes": [
-            98,
-            101
+            93,
+            0,
+            0,
+            0,
+            97
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 13,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 1,
+          "seasonFatigue": 5,
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -8374,14 +8682,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 5,
           "recentMatchMinutes": [
-            98,
-            45
+            93,
+            0,
+            52,
+            99,
+            0
           ],
           "consecutiveFullMatches": 0,
           "seasonFatigue": 0,
-          "consecutiveStarts": 2
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -8428,18 +8739,24 @@
             "PowerHeader"
           ],
           "morale": 50,
-          "isInjured": true,
-          "injuryType": "Head Injury",
-          "injurySeverity": "Serious",
-          "injuryRecoveryMatches": 3,
+          "isInjured": false,
+          "injuryType": null,
+          "injurySeverity": null,
+          "injuryRecoveryMatches": null,
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
-          "recentMatchMinutes": [],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "matchesPlayedRecently": 4,
+          "recentMatchMinutes": [
+            93,
+            103,
+            96,
+            0,
+            97
+          ],
+          "consecutiveFullMatches": 1,
+          "seasonFatigue": 5,
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -8492,14 +8809,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 3,
           "recentMatchMinutes": [
             0,
-            0
+            0,
+            60,
+            105,
+            107
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 2,
+          "seasonFatigue": 20,
+          "consecutiveStarts": 2
         },
         {
           "playerId": null,
@@ -8552,14 +8872,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            65,
-            101
+            0,
+            103,
+            96,
+            0,
+            97
           ],
           "consecutiveFullMatches": 1,
-          "seasonFatigue": 7,
-          "consecutiveStarts": 2
+          "seasonFatigue": 5,
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -8613,14 +8936,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 5,
           "recentMatchMinutes": [
-            98,
-            101
+            93,
+            0,
+            96,
+            99,
+            0
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 13,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -8666,18 +8992,19 @@
             "PressResistant"
           ],
           "morale": 50,
-          "isInjured": true,
-          "injuryType": "Head Injury",
-          "injurySeverity": "Minor",
-          "injuryRecoveryMatches": 3,
+          "isInjured": false,
+          "injuryType": null,
+          "injurySeverity": null,
+          "injuryRecoveryMatches": null,
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
-            98
+            0,
+            0
           ],
-          "consecutiveFullMatches": 1,
+          "consecutiveFullMatches": 0,
           "seasonFatigue": 0,
           "consecutiveStarts": 0
         },
@@ -8734,6 +9061,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            0,
+            0,
+            0,
             0,
             0
           ],
@@ -8793,14 +9123,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 5,
           "recentMatchMinutes": [
-            65,
-            101
+            0,
+            59,
+            96,
+            0,
+            53
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 7,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -8912,7 +9245,10 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
-            98,
+            0,
+            0,
+            0,
+            0,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -8969,14 +9305,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            98,
-            57
+            93,
+            103,
+            45,
+            99,
+            97
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 2,
+          "seasonFatigue": 11,
+          "consecutiveStarts": 5
         },
         {
           "playerId": null,
@@ -9028,14 +9367,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 5,
           "recentMatchMinutes": [
-            98,
-            0
+            93,
+            45,
+            0,
+            99,
+            97
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 2,
+          "seasonFatigue": 7,
+          "consecutiveStarts": 2
         },
         {
           "playerId": null,
@@ -9088,13 +9430,16 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 4,
           "recentMatchMinutes": [
-            98,
-            101
+            103,
+            96,
+            0,
+            97,
+            45
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 13,
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
           "consecutiveStarts": 2
         },
         {
@@ -9148,14 +9493,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            98,
-            34
+            28,
+            103,
+            0,
+            99,
+            97
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 2,
+          "seasonFatigue": 7,
+          "consecutiveStarts": 2
         },
         {
           "playerId": null,
@@ -9207,13 +9555,16 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 2,
           "recentMatchMinutes": [
-            98,
-            34
+            0,
+            45,
+            0,
+            0,
+            0
           ],
           "consecutiveFullMatches": 0,
-          "seasonFatigue": 4,
+          "seasonFatigue": 0,
           "consecutiveStarts": 0
         },
         {
@@ -9383,14 +9734,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 1,
           "recentMatchMinutes": [
             0,
-            0
+            0,
+            0,
+            0,
+            107
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 1,
+          "seasonFatigue": 10,
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -9557,14 +9911,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 4,
           "recentMatchMinutes": [
-            34,
-            101
+            93,
+            45,
+            0,
+            99,
+            45
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 5,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 2
         }
       ]
     },
@@ -9687,14 +10044,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
+            101,
             96,
-            96
+            97,
+            94,
+            105
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 10,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 18,
+          "seasonFatigue": 98,
+          "consecutiveStarts": 18
         },
         {
           "playerId": null,
@@ -9746,14 +10106,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            96,
-            96
+            97,
+            95,
+            97,
+            94,
+            100
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 12,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 9,
+          "seasonFatigue": 5,
+          "consecutiveStarts": 9
         },
         {
           "playerId": null,
@@ -9806,14 +10169,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            96,
-            96
+            97,
+            95,
+            97,
+            94,
+            100
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 10,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 18,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 18
         },
         {
           "playerId": null,
@@ -9865,14 +10231,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 4,
           "recentMatchMinutes": [
-            96,
-            96
+            97,
+            95,
+            97,
+            94,
+            0
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 10,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -9917,18 +10286,24 @@
             "PressResistant"
           ],
           "morale": 50,
-          "isInjured": true,
-          "injuryType": "Hamstring Injury",
-          "injurySeverity": "Serious",
-          "injuryRecoveryMatches": 14,
+          "isInjured": false,
+          "injuryType": null,
+          "injurySeverity": null,
+          "injuryRecoveryMatches": null,
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
-          "recentMatchMinutes": [],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "matchesPlayedRecently": 4,
+          "recentMatchMinutes": [
+            0,
+            95,
+            0,
+            0,
+            100
+          ],
+          "consecutiveFullMatches": 1,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -9978,14 +10353,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 3,
           "recentMatchMinutes": [
             0,
-            96
+            0,
+            97,
+            94,
+            0
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 7,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -10038,14 +10416,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 1,
           "recentMatchMinutes": [
-            96,
-            0
+            0,
+            0,
+            0,
+            0,
+            100
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 1,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -10097,14 +10478,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 3,
           "recentMatchMinutes": [
-            96,
-            0
+            97,
+            95,
+            97,
+            0,
+            100
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 1,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -10156,14 +10540,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 1,
           "recentMatchMinutes": [
-            96,
-            96
+            97,
+            95,
+            97,
+            0,
+            0
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 10,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -10214,14 +10601,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 3,
           "recentMatchMinutes": [
+            97,
+            95,
+            97,
             0,
-            0
+            100
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 1,
+          "seasonFatigue": 5,
+          "consecutiveStarts": 1
         }
       ],
       "substitutes": [
@@ -10262,15 +10652,21 @@
           "isStarter": false,
           "traits": [],
           "morale": 50,
-          "isInjured": true,
-          "injuryType": "Head Injury",
-          "injurySeverity": "Moderate",
-          "injuryRecoveryMatches": 3,
+          "isInjured": false,
+          "injuryType": null,
+          "injurySeverity": null,
+          "injuryRecoveryMatches": null,
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
-          "recentMatchMinutes": [],
+          "matchesPlayedRecently": 1,
+          "recentMatchMinutes": [
+            94,
+            0,
+            98,
+            99,
+            0
+          ],
           "consecutiveFullMatches": 0,
           "seasonFatigue": 0,
           "consecutiveStarts": 0
@@ -10325,14 +10721,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            96,
-            96
+            97,
+            95,
+            97,
+            94,
+            100
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 10,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 8,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 20
         },
         {
           "playerId": null,
@@ -10381,14 +10780,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 4,
           "recentMatchMinutes": [
             0,
-            0
+            0,
+            97,
+            0,
+            100
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 1,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -10438,9 +10840,12 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 1,
           "recentMatchMinutes": [
+            97,
+            95,
             0,
+            94,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -10496,14 +10901,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            96,
-            96
+            97,
+            95,
+            97,
+            94,
+            100
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 12,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 20,
+          "seasonFatigue": 5,
+          "consecutiveStarts": 20
         },
         {
           "playerId": null,
@@ -10558,6 +10966,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            0,
+            0,
+            0,
             0,
             0
           ],
@@ -10615,14 +11026,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
             0,
-            96
+            0,
+            0,
+            0,
+            0
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 6,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -10677,10 +11091,13 @@
           "matchesPlayedRecently": 1,
           "recentMatchMinutes": [
             0,
-            96
+            0,
+            0,
+            0,
+            100
           ],
           "consecutiveFullMatches": 1,
-          "seasonFatigue": 6,
+          "seasonFatigue": 4,
           "consecutiveStarts": 1
         },
         {
@@ -10735,6 +11152,9 @@
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
             0,
+            0,
+            0,
+            94,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -10785,14 +11205,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 3,
           "recentMatchMinutes": [
-            32,
-            96
+            97,
+            95,
+            97,
+            94,
+            100
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 6,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 5
         },
         {
           "playerId": null,
@@ -10842,9 +11265,12 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 2,
           "recentMatchMinutes": [
+            97,
             0,
+            0,
+            94,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -10902,6 +11328,9 @@
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
             0,
+            0,
+            0,
+            94,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -11029,13 +11458,13 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 3,
           "recentMatchMinutes": [
-            106,
-            104
+            114,
+            94
           ],
           "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
+          "seasonFatigue": 6,
           "consecutiveStarts": 2
         },
         {
@@ -11088,14 +11517,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            106,
-            104
+            101,
+            103,
+            99,
+            91,
+            95
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 20,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 20
         },
         {
           "playerId": null,
@@ -11146,14 +11578,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            106,
-            45
+            104,
+            96,
+            101,
+            103,
+            99
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 3,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 9,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 9
         },
         {
           "playerId": null,
@@ -11204,14 +11639,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
+            101,
+            103,
             0,
-            104
+            91,
+            95
           ],
-          "consecutiveFullMatches": 1,
+          "consecutiveFullMatches": 2,
           "seasonFatigue": 4,
-          "consecutiveStarts": 1
+          "consecutiveStarts": 2
         },
         {
           "playerId": null,
@@ -11263,9 +11701,12 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 4,
           "recentMatchMinutes": [
-            106,
+            101,
+            19,
+            99,
+            47,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -11322,14 +11763,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            0,
-            0
+            101,
+            85,
+            99,
+            91,
+            95
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 3,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 5
         },
         {
           "playerId": null,
@@ -11382,6 +11826,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            0,
+            0,
+            0,
             0,
             0
           ],
@@ -11440,14 +11887,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            106,
-            104
+            101,
+            0,
+            99,
+            91,
+            95
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 3,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 3
         },
         {
           "playerId": null,
@@ -11561,9 +12011,12 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 5,
           "recentMatchMinutes": [
-            106,
+            101,
+            0,
+            99,
+            91,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -11616,14 +12069,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
-            106,
-            104
+            101,
+            0,
+            99,
+            91,
+            0
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -11668,21 +12124,24 @@
             "Interceptor"
           ],
           "morale": 50,
-          "isInjured": false,
-          "injuryType": null,
-          "injurySeverity": null,
-          "injuryRecoveryMatches": null,
+          "isInjured": true,
+          "injuryType": "Calf Strain",
+          "injurySeverity": "Serious",
+          "injuryRecoveryMatches": 3,
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
-            106,
-            104
+            98,
+            97,
+            96,
+            95,
+            99
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 10,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 19,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -11732,14 +12191,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            106,
-            60
+            97,
+            95,
+            96,
+            96,
+            100
           ],
-          "consecutiveFullMatches": 0,
+          "consecutiveFullMatches": 19,
           "seasonFatigue": 0,
-          "consecutiveStarts": 2
+          "consecutiveStarts": 40
         },
         {
           "playerId": null,
@@ -11791,14 +12253,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 5,
           "recentMatchMinutes": [
-            106,
-            0
+            0,
+            103,
+            99,
+            0,
+            95
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 1,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -11849,14 +12314,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 5,
           "recentMatchMinutes": [
+            101,
+            103,
             0,
-            104
+            91,
+            95
           ],
-          "consecutiveFullMatches": 1,
+          "consecutiveFullMatches": 2,
           "seasonFatigue": 4,
-          "consecutiveStarts": 1
+          "consecutiveStarts": 2
         },
         {
           "playerId": null,
@@ -11905,9 +12373,12 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 1,
           "recentMatchMinutes": [
+            97,
             0,
+            96,
+            96,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -11964,10 +12435,13 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
             0,
-            104
+            103,
+            99,
+            0,
+            95
           ],
           "consecutiveFullMatches": 1,
           "seasonFatigue": 4,
@@ -12022,14 +12496,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            106,
-            0
+            101,
+            0,
+            99,
+            91,
+            95
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 3,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 3
         },
         {
           "playerId": null,
@@ -12078,14 +12555,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 5,
           "recentMatchMinutes": [
             0,
-            104
+            103,
+            0,
+            91,
+            0
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 4,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -12131,14 +12611,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 1,
           "recentMatchMinutes": [
             0,
-            0
+            103,
+            0,
+            0,
+            95
           ],
           "consecutiveFullMatches": 0,
           "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -12188,14 +12671,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            0,
-            0
+            101,
+            103,
+            99,
+            91,
+            95
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 10,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 10
         },
         {
           "playerId": null,
@@ -12246,14 +12732,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 4,
           "recentMatchMinutes": [
             0,
-            104
+            103,
+            0,
+            45,
+            95
           ],
           "consecutiveFullMatches": 1,
           "seasonFatigue": 4,
-          "consecutiveStarts": 1
+          "consecutiveStarts": 2
         }
       ]
     },
@@ -12311,14 +12800,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
-            105,
-            100
+            104,
+            0,
+            95,
+            96,
+            0
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 18,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -12370,14 +12862,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            105,
-            100
+            97,
+            92,
+            101,
+            94,
+            98
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 16,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 22,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 22
         },
         {
           "playerId": null,
@@ -12423,21 +12918,22 @@
             "AerialThreat"
           ],
           "morale": 50,
-          "isInjured": false,
-          "injuryType": null,
-          "injurySeverity": null,
-          "injuryRecoveryMatches": null,
+          "isInjured": true,
+          "injuryType": "Ankle Injury",
+          "injurySeverity": "Serious",
+          "injuryRecoveryMatches": 8,
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
-            105,
-            100
+            94,
+            96,
+            97
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 16,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 3,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -12490,14 +12986,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            105,
-            0
+            94,
+            91,
+            97,
+            100,
+            108
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 11,
+          "seasonFatigue": 8,
+          "consecutiveStarts": 11
         },
         {
           "playerId": null,
@@ -12550,6 +13049,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            0,
+            0,
+            0,
             0,
             0
           ],
@@ -12610,6 +13112,9 @@
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
             0,
+            0,
+            0,
+            0,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -12667,6 +13172,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            0,
+            0,
+            0,
             0,
             0
           ],
@@ -12786,14 +13294,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            105,
-            100
+            97,
+            92,
+            101,
+            94,
+            98
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 18,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 22,
+          "seasonFatigue": 5,
+          "consecutiveStarts": 22
         },
         {
           "playerId": null,
@@ -12845,14 +13356,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            105,
-            100
+            97,
+            92,
+            101,
+            94,
+            98
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 16,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 22,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 22
         },
         {
           "playerId": null,
@@ -12903,14 +13417,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            105,
-            100
+            97,
+            92,
+            101,
+            94,
+            98
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 18,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 10,
+          "seasonFatigue": 5,
+          "consecutiveStarts": 10
         }
       ],
       "substitutes": [
@@ -12958,14 +13475,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 1,
           "recentMatchMinutes": [
             0,
-            0
+            94,
+            0,
+            0,
+            107
           ],
           "consecutiveFullMatches": 0,
           "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -13016,14 +13536,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            0,
-            100
+            97,
+            92,
+            101,
+            94,
+            98
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 9,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 22,
+          "seasonFatigue": 5,
+          "consecutiveStarts": 22
         },
         {
           "playerId": null,
@@ -13076,6 +13599,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            0,
+            0,
+            0,
             0,
             0
           ],
@@ -13133,14 +13659,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            105,
-            100
+            97,
+            92,
+            101,
+            94,
+            98
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 16,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 19,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 19
         },
         {
           "playerId": null,
@@ -13191,6 +13720,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            0,
+            0,
+            0,
             0,
             0
           ],
@@ -13245,14 +13777,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 5,
           "recentMatchMinutes": [
+            104,
+            94,
             0,
-            100
+            96,
+            0
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 10,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -13304,14 +13839,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            0,
-            0
+            97,
+            92,
+            101,
+            94,
+            98
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 22,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 22
         },
         {
           "playerId": null,
@@ -13363,14 +13901,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            105,
-            0
+            97,
+            92,
+            101,
+            94,
+            98
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 7,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 7
         },
         {
           "playerId": null,
@@ -13421,14 +13962,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            105,
-            0
+            97,
+            92,
+            101,
+            94,
+            98
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 22,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 22
         },
         {
           "playerId": null,
@@ -13477,14 +14021,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 2,
           "recentMatchMinutes": [
+            98,
             0,
-            100
+            96,
+            103,
+            104
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 10,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 3,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -13534,14 +14081,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            0,
-            100
+            97,
+            92,
+            101,
+            94,
+            98
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 22,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 22
         },
         {
           "playerId": null,
@@ -13592,14 +14142,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            105,
-            0
+            97,
+            92,
+            101,
+            94,
+            98
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 22,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 22
         }
       ]
     },
@@ -13659,14 +14212,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
             0,
-            100
+            96,
+            0,
+            99,
+            0
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 4,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -13712,18 +14268,24 @@
             "AerialThreat"
           ],
           "morale": 50,
-          "isInjured": true,
-          "injuryType": "Back Injury",
-          "injurySeverity": "Serious",
-          "injuryRecoveryMatches": 13,
+          "isInjured": false,
+          "injuryType": null,
+          "injurySeverity": null,
+          "injuryRecoveryMatches": null,
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
-          "recentMatchMinutes": [],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "matchesPlayedRecently": 6,
+          "recentMatchMinutes": [
+            95,
+            23,
+            96,
+            97,
+            95
+          ],
+          "consecutiveFullMatches": 3,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 3
         },
         {
           "playerId": null,
@@ -13769,18 +14331,24 @@
             "AerialThreat"
           ],
           "morale": 50,
-          "isInjured": true,
-          "injuryType": "Back Injury",
-          "injurySeverity": "Serious",
-          "injuryRecoveryMatches": 3,
+          "isInjured": false,
+          "injuryType": null,
+          "injurySeverity": null,
+          "injuryRecoveryMatches": null,
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
-          "recentMatchMinutes": [],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "matchesPlayedRecently": 6,
+          "recentMatchMinutes": [
+            0,
+            75,
+            96,
+            97,
+            95
+          ],
+          "consecutiveFullMatches": 3,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 4
         },
         {
           "playerId": null,
@@ -13831,14 +14399,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            100,
-            100
+            95,
+            97,
+            96,
+            97,
+            95
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 11,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 7
         },
         {
           "playerId": null,
@@ -13889,14 +14460,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 2,
           "recentMatchMinutes": [
-            100,
-            0
+            95,
+            0,
+            96,
+            0,
+            95
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 1,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -13948,14 +14522,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 1,
           "recentMatchMinutes": [
-            100,
-            0
+            0,
+            97,
+            0,
+            0,
+            95
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 1,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -14007,14 +14584,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            100,
-            100
+            95,
+            97,
+            96,
+            97,
+            95
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 20,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 20
         },
         {
           "playerId": null,
@@ -14068,7 +14648,10 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
-            100,
+            95,
+            0,
+            0,
+            97,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -14186,14 +14769,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 4,
           "recentMatchMinutes": [
             0,
-            100
+            97,
+            0,
+            97,
+            0
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 4,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -14244,14 +14830,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
             0,
-            100
+            0,
+            96,
+            0,
+            0
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 4,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         }
       ],
       "substitutes": [
@@ -14299,14 +14888,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 3,
           "recentMatchMinutes": [
-            100,
-            0
+            97,
+            94,
+            96,
+            96,
+            95
           ],
           "consecutiveFullMatches": 0,
           "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveStarts": 7
         },
         {
           "playerId": null,
@@ -14358,14 +14950,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            100,
-            100
+            95,
+            97,
+            96,
+            0,
+            95
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 1,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -14417,14 +15012,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 5,
           "recentMatchMinutes": [
-            100,
-            100
+            95,
+            97,
+            0,
+            97,
+            0
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -14475,12 +15073,15 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 1,
           "recentMatchMinutes": [
+            95,
+            97,
             0,
-            100
+            97,
+            0
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 4,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -14532,6 +15133,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            0,
+            0,
+            0,
             0,
             0
           ],
@@ -14591,6 +15195,9 @@
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
             0,
+            0,
+            0,
+            0,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -14644,14 +15251,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            100,
-            100
+            95,
+            97,
+            96,
+            97,
+            95
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 20,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 20
         },
         {
           "playerId": null,
@@ -14702,14 +15312,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
             0,
-            100
+            0,
+            0,
+            97,
+            0
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 4,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -14760,14 +15373,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            100,
-            100
+            0,
+            97,
+            96,
+            0,
+            95
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 1,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -14818,14 +15434,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 5,
           "recentMatchMinutes": [
-            100,
-            0
+            95,
+            0,
+            96,
+            0,
+            95
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 1,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -14873,6 +15492,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            0,
+            0,
+            0,
             0,
             0
           ],
@@ -14924,14 +15546,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 3,
           "recentMatchMinutes": [
             0,
-            0
+            97,
+            96,
+            97,
+            95
           ],
           "consecutiveFullMatches": 0,
           "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveStarts": 4
         }
       ]
     },
@@ -14991,17 +15616,14 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
-            0,
             99,
-            0,
-            0,
-            106
+            0
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 9,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -15054,14 +15676,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 2,
           "recentMatchMinutes": [
-            100,
-            0
+            108,
+            0,
+            0,
+            91,
+            94
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 2,
+          "seasonFatigue": 10,
+          "consecutiveStarts": 2
         },
         {
           "playerId": null,
@@ -15113,17 +15738,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 6,
+          "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
-            95,
             0,
-            95,
+            110,
             0,
-            96
+            0,
+            0
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 6,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -15175,9 +15800,12 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 1,
           "recentMatchMinutes": [
-            100,
+            0,
+            99,
+            0,
+            107,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -15234,14 +15862,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            108,
             0,
-            104
+            0,
+            91,
+            0
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 7,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -15294,14 +15925,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 2,
           "recentMatchMinutes": [
             0,
-            0
+            0,
+            14,
+            91,
+            94
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 2,
+          "seasonFatigue": 10,
+          "consecutiveStarts": 2
         },
         {
           "playerId": null,
@@ -15354,14 +15988,15 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 1,
           "recentMatchMinutes": [
             0,
-            0
+            0,
+            97
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 1,
+          "seasonFatigue": 6,
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -15413,14 +16048,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 1,
           "recentMatchMinutes": [
             0,
-            0
+            0,
+            0,
+            47,
+            94
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 1,
+          "seasonFatigue": 5,
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -15474,14 +16112,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            100,
-            104
+            0,
+            0,
+            98,
+            91,
+            94
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 10,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 3,
+          "seasonFatigue": 16,
+          "consecutiveStarts": 3
         },
         {
           "playerId": null,
@@ -15534,14 +16175,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 4,
           "recentMatchMinutes": [
-            100,
-            104
+            97,
+            101,
+            95,
+            0,
+            0
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 10,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -15597,6 +16241,8 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            0,
+            0,
             0,
             0
           ],
@@ -15839,12 +16485,15 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 1,
           "recentMatchMinutes": [
+            108,
             0,
-            104
+            98,
+            91,
+            0
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 6,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -15897,14 +16546,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 4,
           "recentMatchMinutes": [
             100,
-            104
+            99,
+            108,
+            110,
+            98
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 10,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 19,
+          "seasonFatigue": 5,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -15957,14 +16609,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
             100,
-            104
+            94,
+            94,
+            99,
+            100
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 10,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 10,
+          "seasonFatigue": 56,
+          "consecutiveStarts": 10
         },
         {
           "playerId": null,
@@ -16071,19 +16726,22 @@
             "Flair"
           ],
           "morale": 50,
-          "isInjured": false,
-          "injuryType": null,
-          "injurySeverity": null,
-          "injuryRecoveryMatches": null,
+          "isInjured": true,
+          "injuryType": "Muscle Fatigue",
+          "injurySeverity": "Serious",
+          "injuryRecoveryMatches": 14,
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
             0,
-            0
+            93,
+            103,
+            97,
+            97
           ],
-          "consecutiveFullMatches": 0,
+          "consecutiveFullMatches": 4,
           "seasonFatigue": 0,
           "consecutiveStarts": 0
         },
@@ -16139,6 +16797,9 @@
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
             0,
+            0,
+            0,
+            0,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -16191,6 +16852,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            0,
+            0,
+            0,
             0,
             0
           ],
@@ -16249,6 +16913,9 @@
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
             0,
+            110,
+            0,
+            0,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -16305,6 +16972,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            0,
+            0,
+            0,
             0,
             0
           ],
@@ -16500,14 +17170,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            105,
-            0
+            96,
+            0,
+            94,
+            0,
+            114
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 1,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -16561,14 +17234,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 4,
           "recentMatchMinutes": [
-            105,
-            0
+            95,
+            0,
+            101,
+            0,
+            99
           ],
-          "consecutiveFullMatches": 0,
+          "consecutiveFullMatches": 1,
           "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -16620,13 +17296,16 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 3,
           "recentMatchMinutes": [
+            95,
             0,
-            96
+            94,
+            0,
+            65
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 6,
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
           "consecutiveStarts": 1
         },
         {
@@ -16682,6 +17361,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            0,
+            0,
+            0,
             0,
             0
           ],
@@ -16741,9 +17423,9 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
-            101,
+            0,
             0,
             0,
             0,
@@ -16804,14 +17486,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 4,
           "recentMatchMinutes": [
-            105,
+            100,
+            97,
+            0,
+            0,
             96
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 10,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 1,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -16866,14 +17551,13 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 1,
           "recentMatchMinutes": [
-            105,
-            96
+            99
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 10,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 1,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -16926,9 +17610,12 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 2,
           "recentMatchMinutes": [
-            105,
+            0,
+            100,
+            92,
+            101,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -16990,6 +17677,9 @@
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
             0,
+            0,
+            0,
+            98,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -17168,13 +17858,16 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 4,
           "recentMatchMinutes": [
+            100,
+            0,
+            98,
             0,
             96
           ],
           "consecutiveFullMatches": 1,
-          "seasonFatigue": 6,
+          "seasonFatigue": 4,
           "consecutiveStarts": 1
         },
         {
@@ -17292,6 +17985,9 @@
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
             0,
+            0,
+            0,
+            0,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -17352,6 +18048,9 @@
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
             0,
+            0,
+            0,
+            0,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -17410,6 +18109,9 @@
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
             0,
+            0,
+            0,
+            0,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -17466,9 +18168,12 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 2,
           "recentMatchMinutes": [
-            105,
+            0,
+            0,
+            98,
+            0,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -17527,14 +18232,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
             0,
-            96
+            96,
+            0,
+            0,
+            0
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 6,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -17587,13 +18295,16 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 4,
           "recentMatchMinutes": [
+            0,
+            97,
+            0,
             0,
             96
           ],
           "consecutiveFullMatches": 1,
-          "seasonFatigue": 7,
+          "seasonFatigue": 5,
           "consecutiveStarts": 1
         },
         {
@@ -17640,14 +18351,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
             0,
-            96
+            0,
+            0,
+            0,
+            0
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 6,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -17697,14 +18411,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 3,
           "recentMatchMinutes": [
+            100,
             0,
-            96
+            0,
+            98,
+            0
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 6,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         }
       ]
     },
@@ -17764,14 +18481,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 1,
           "recentMatchMinutes": [
             0,
-            0
+            0,
+            0,
+            0,
+            93
           ],
           "consecutiveFullMatches": 0,
           "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -17953,14 +18673,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            0,
-            101
+            97,
+            70,
+            99,
+            92,
+            108
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 7,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 3,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 8
         },
         {
           "playerId": null,
@@ -18077,6 +18800,9 @@
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
             0,
+            95,
+            0,
+            0,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -18136,11 +18862,11 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 2,
           "recentMatchMinutes": [
-            106,
-            101
+            100,
+            98
           ],
           "consecutiveFullMatches": 2,
-          "seasonFatigue": 10,
+          "seasonFatigue": 4,
           "consecutiveStarts": 2
         },
         {
@@ -18194,6 +18920,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            0,
+            0,
+            0,
             0,
             0
           ],
@@ -18255,11 +18984,14 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 2,
           "recentMatchMinutes": [
-            106,
-            101
+            0,
+            108,
+            0,
+            92,
+            108
           ],
           "consecutiveFullMatches": 2,
-          "seasonFatigue": 14,
+          "seasonFatigue": 4,
           "consecutiveStarts": 2
         },
         {
@@ -18313,14 +19045,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            106,
-            101
+            98,
+            98,
+            103,
+            100,
+            100
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 14,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 6,
+          "seasonFatigue": 32,
+          "consecutiveStarts": 6
         },
         {
           "playerId": null,
@@ -18376,12 +19111,15 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 2,
           "recentMatchMinutes": [
-            106,
-            101
+            97,
+            108,
+            99,
+            0,
+            0
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 14,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         }
       ],
       "substitutes": [
@@ -18431,6 +19169,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            0,
+            0,
+            0,
             0,
             0
           ],
@@ -18488,14 +19229,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 5,
           "recentMatchMinutes": [
-            106,
-            101
+            0,
+            93,
+            0,
+            108,
+            0
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 14,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -18546,14 +19290,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 4,
           "recentMatchMinutes": [
             0,
-            101
+            108,
+            0,
+            92,
+            0
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 7,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -18606,14 +19353,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 2,
           "recentMatchMinutes": [
-            0,
-            0
+            100,
+            106,
+            100,
+            106,
+            96
           ],
-          "consecutiveFullMatches": 0,
+          "consecutiveFullMatches": 11,
           "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveStarts": 2
         },
         {
           "playerId": null,
@@ -18665,8 +19415,11 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 3,
           "recentMatchMinutes": [
+            97,
+            0,
+            99,
             0,
             0
           ],
@@ -18723,8 +19476,11 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 2,
           "recentMatchMinutes": [
+            0,
+            111,
+            105,
             0,
             0
           ],
@@ -18838,18 +19594,24 @@
             "TriesToBeatOffsideTrap"
           ],
           "morale": 50,
-          "isInjured": true,
-          "injuryType": "Calf Strain",
-          "injurySeverity": "Minor",
-          "injuryRecoveryMatches": 2,
+          "isInjured": false,
+          "injuryType": null,
+          "injurySeverity": null,
+          "injuryRecoveryMatches": null,
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
-          "recentMatchMinutes": [],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "matchesPlayedRecently": 5,
+          "recentMatchMinutes": [
+            93,
+            94,
+            108,
+            92,
+            108
+          ],
+          "consecutiveFullMatches": 12,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 2
         },
         {
           "playerId": null,
@@ -18900,9 +19662,12 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 4,
           "recentMatchMinutes": [
-            106,
+            97,
+            108,
+            0,
+            92,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -18958,14 +19723,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 4,
           "recentMatchMinutes": [
             0,
-            101
+            100,
+            0,
+            94,
+            0
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 7,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -19013,6 +19781,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            0,
+            0,
+            0,
             0,
             0
           ],
@@ -19069,14 +19840,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            106,
-            101
+            97,
+            108,
+            99,
+            92,
+            108
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 14,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 21,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 21
         }
       ]
     },
@@ -19139,10 +19913,13 @@
           "matchesPlayedRecently": 1,
           "recentMatchMinutes": [
             0,
-            104
+            99,
+            0,
+            0,
+            108
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 4,
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 1,
           "consecutiveStarts": 1
         },
         {
@@ -19195,14 +19972,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            96,
-            0
+            104,
+            99,
+            99,
+            98,
+            108
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 13,
+          "seasonFatigue": 26,
+          "consecutiveStarts": 4
         },
         {
           "playerId": null,
@@ -19255,14 +20035,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
+            93,
+            97,
             96,
-            104
+            104,
+            96
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 9,
+          "seasonFatigue": 48,
+          "consecutiveStarts": 9
         },
         {
           "playerId": null,
@@ -19315,14 +20098,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            96,
-            104
+            104,
+            99,
+            99,
+            98,
+            85
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 53,
+          "consecutiveStarts": 10
         },
         {
           "playerId": null,
@@ -19375,14 +20161,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            0,
-            0
+            104,
+            99,
+            99,
+            98,
+            108
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 7,
+          "seasonFatigue": 44,
+          "consecutiveStarts": 7
         },
         {
           "playerId": null,
@@ -19436,13 +20225,16 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            96,
-            104
+            104,
+            99,
+            0,
+            98,
+            108
           ],
           "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
+          "seasonFatigue": 14,
           "consecutiveStarts": 2
         },
         {
@@ -19496,13 +20288,16 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 5,
           "recentMatchMinutes": [
-            96,
-            0
+            104,
+            99,
+            99,
+            98,
+            24
           ],
           "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
+          "seasonFatigue": 31,
           "consecutiveStarts": 0
         },
         {
@@ -19620,14 +20415,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 2,
           "recentMatchMinutes": [
             0,
-            0
+            0,
+            99,
+            0,
+            108
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 1,
+          "seasonFatigue": 8,
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -19681,14 +20479,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 4,
           "recentMatchMinutes": [
+            104,
             0,
-            0
+            0,
+            98,
+            108
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 2,
+          "seasonFatigue": 14,
+          "consecutiveStarts": 2
         },
         {
           "playerId": null,
@@ -19740,14 +20541,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            96,
-            0
+            102,
+            97,
+            0,
+            98,
+            107
           ],
-          "consecutiveFullMatches": 0,
+          "consecutiveFullMatches": 2,
           "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveStarts": 2
         }
       ],
       "substitutes": [
@@ -19797,7 +20601,10 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
-            96,
+            0,
+            97,
+            0,
+            98,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -19854,14 +20661,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 5,
           "recentMatchMinutes": [
-            0,
-            104
+            110,
+            102,
+            97,
+            98,
+            0
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 5,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -19910,14 +20720,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
             0,
-            104
+            96,
+            0,
+            98,
+            0
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 6,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -19969,14 +20782,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            96,
-            104
+            104,
+            0,
+            99,
+            0,
+            108
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 10,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 1,
+          "seasonFatigue": 9,
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -20028,14 +20844,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 4,
           "recentMatchMinutes": [
             0,
-            104
+            99,
+            99,
+            0,
+            0
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 4,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -20087,9 +20906,12 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 1,
           "recentMatchMinutes": [
+            104,
             0,
+            0,
+            98,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -20139,21 +20961,24 @@
             "TriesToBeatOffsideTrap"
           ],
           "morale": 50,
-          "isInjured": false,
-          "injuryType": null,
-          "injurySeverity": null,
-          "injuryRecoveryMatches": null,
+          "isInjured": true,
+          "injuryType": "Knee Injury",
+          "injurySeverity": "Minor",
+          "injuryRecoveryMatches": 3,
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 4,
           "recentMatchMinutes": [
-            96,
-            104
+            106,
+            104,
+            99,
+            99,
+            0
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 10,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -20205,9 +21030,12 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 1,
           "recentMatchMinutes": [
             0,
+            99,
+            0,
+            98,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -20261,14 +21089,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 4,
           "recentMatchMinutes": [
-            96,
-            104
+            75,
+            99,
+            99,
+            98,
+            49
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 24,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -20310,19 +21141,22 @@
           "isStarter": false,
           "traits": [],
           "morale": 50,
-          "isInjured": false,
-          "injuryType": null,
-          "injurySeverity": null,
-          "injuryRecoveryMatches": null,
+          "isInjured": true,
+          "injuryType": "Knee Injury",
+          "injurySeverity": "Serious",
+          "injuryRecoveryMatches": 10,
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            94,
+            97,
             0,
-            0
+            108,
+            104
           ],
-          "consecutiveFullMatches": 0,
+          "consecutiveFullMatches": 2,
           "seasonFatigue": 0,
           "consecutiveStarts": 0
         },
@@ -20372,6 +21206,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            0,
+            0,
+            0,
             0,
             0
           ],
@@ -20425,6 +21262,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            0,
+            0,
+            0,
             0,
             0
           ],
@@ -21903,14 +22743,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 3,
           "recentMatchMinutes": [
             98,
-            98
+            92,
+            96,
+            99,
+            96
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 16,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 24
         },
         {
           "playerId": null,
@@ -21962,9 +22805,12 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 3,
           "recentMatchMinutes": [
-            98,
+            39,
+            0,
+            0,
+            99,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -22016,7 +22862,7 @@
           "isInjured": true,
           "injuryType": "Fracture",
           "injurySeverity": "SeasonEnding",
-          "injuryRecoveryMatches": 91,
+          "injuryRecoveryMatches": 83,
           "isSeasonEndingInjury": true,
           "isSuspended": null,
           "suspendedMatches": null,
@@ -22076,14 +22922,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
             98,
-            98
+            92,
+            96,
+            99,
+            96
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 18,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 16,
+          "seasonFatigue": 5,
+          "consecutiveStarts": 12
         },
         {
           "playerId": null,
@@ -22134,14 +22983,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 4,
           "recentMatchMinutes": [
             98,
-            0
+            0,
+            96,
+            0,
+            96
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 1,
+          "seasonFatigue": 5,
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -22193,14 +23045,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
+            93,
+            0,
+            93,
             98,
-            98
+            92
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 12,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 3,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 3
         },
         {
           "playerId": null,
@@ -22252,14 +23107,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            98,
-            98
+            0,
+            92,
+            96,
+            99,
+            96
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 16,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 4,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 4
         },
         {
           "playerId": null,
@@ -22434,14 +23292,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
             98,
-            98
+            92,
+            96,
+            99,
+            96
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 16,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 7,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 7
         },
         {
           "playerId": null,
@@ -22492,14 +23353,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
             98,
-            98
+            75,
+            96,
+            99,
+            96
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 16,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 3,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 8
         }
       ],
       "substitutes": [
@@ -22549,6 +23413,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            0,
+            0,
+            97,
             0,
             0
           ],
@@ -22603,14 +23470,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 3,
           "recentMatchMinutes": [
             0,
-            98
+            92,
+            0,
+            99,
+            0
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -22653,19 +23523,22 @@
           "isStarter": false,
           "traits": [],
           "morale": 50,
-          "isInjured": false,
-          "injuryType": null,
-          "injurySeverity": null,
-          "injuryRecoveryMatches": null,
+          "isInjured": true,
+          "injuryType": "Hamstring Injury",
+          "injurySeverity": "Serious",
+          "injuryRecoveryMatches": 5,
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
-            98,
-            0
+            94,
+            96,
+            97,
+            97,
+            101
           ],
-          "consecutiveFullMatches": 0,
+          "consecutiveFullMatches": 6,
           "seasonFatigue": 0,
           "consecutiveStarts": 0
         },
@@ -22717,14 +23590,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            0,
-            98
+            98,
+            92,
+            96,
+            99,
+            96
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 5,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 5
         },
         {
           "playerId": null,
@@ -22774,6 +23650,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            98,
+            0,
+            96,
             0,
             0
           ],
@@ -22832,7 +23711,10 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
-            98,
+            0,
+            18,
+            0,
+            0,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -22890,7 +23772,10 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
-            98,
+            0,
+            0,
+            0,
+            0,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -22944,14 +23829,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
             0,
-            98
+            0,
+            0,
+            0,
+            0
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -23001,14 +23889,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
             0,
-            98
+            0,
+            0,
+            0,
+            0
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -23059,14 +23950,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
+            98,
             0,
-            0
+            96,
+            99,
+            96
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 3,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 3
         },
         {
           "playerId": null,
@@ -23117,14 +24011,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            0,
-            0
+            98,
+            92,
+            96,
+            99,
+            96
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 5,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 5
         },
         {
           "playerId": null,
@@ -23176,10 +24073,13 @@
           "matchesPlayedRecently": 1,
           "recentMatchMinutes": [
             0,
-            98
+            92,
+            0,
+            0,
+            96
           ],
           "consecutiveFullMatches": 1,
-          "seasonFatigue": 8,
+          "seasonFatigue": 4,
           "consecutiveStarts": 1
         }
       ]
@@ -23304,14 +24204,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            101,
-            97
+            0,
+            94,
+            98,
+            93,
+            93
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 4,
+          "seasonFatigue": 12,
+          "consecutiveStarts": 4
         },
         {
           "playerId": null,
@@ -23365,14 +24268,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            101,
-            97
+            100,
+            0,
+            100,
+            94,
+            98
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 3,
+          "seasonFatigue": 18,
+          "consecutiveStarts": 3
         },
         {
           "playerId": null,
@@ -23424,14 +24330,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            101,
-            97
+            96,
+            98,
+            93,
+            95,
+            99
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 6,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 6
         },
         {
           "playerId": null,
@@ -23483,14 +24392,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            101,
-            0
+            95,
+            0,
+            92,
+            92,
+            94
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 3,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 3
         },
         {
           "playerId": null,
@@ -23668,6 +24580,9 @@
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
             0,
+            99,
+            0,
+            92,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -23724,14 +24639,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 1,
           "recentMatchMinutes": [
-            101,
-            0
+            0,
+            99,
+            0,
+            0,
+            94
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 1,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -23784,14 +24702,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 4,
           "recentMatchMinutes": [
-            101,
-            97
+            95,
+            0,
+            92,
+            0,
+            94
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 1,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -23843,14 +24764,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
-            101,
-            97
+            95,
+            0,
+            0,
+            92,
+            0
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         }
       ],
       "substitutes": [
@@ -23963,14 +24887,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            0,
-            0
+            95,
+            99,
+            92,
+            92,
+            94
           ],
-          "consecutiveFullMatches": 0,
-          "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveFullMatches": 15,
+          "seasonFatigue": 4,
+          "consecutiveStarts": 6
         },
         {
           "playerId": null,
@@ -24023,14 +24950,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            0,
-            97
+            95,
+            99,
+            92,
+            92,
+            94
           ],
-          "consecutiveFullMatches": 1,
+          "consecutiveFullMatches": 5,
           "seasonFatigue": 4,
-          "consecutiveStarts": 1
+          "consecutiveStarts": 5
         },
         {
           "playerId": null,
@@ -24082,9 +25012,12 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 2,
           "recentMatchMinutes": [
+            96,
             0,
+            65,
+            96,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -24142,14 +25075,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 3,
           "recentMatchMinutes": [
-            101,
-            97
+            95,
+            0,
+            0,
+            92,
+            0
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -24202,6 +25138,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            0,
+            0,
+            0,
             0,
             0
           ],
@@ -24262,6 +25201,9 @@
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
             0,
+            0,
+            0,
+            0,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -24318,14 +25260,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            95,
             0,
-            97
+            0,
+            92,
+            0
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 4,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -24380,6 +25325,9 @@
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
             0,
+            0,
+            0,
+            0,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -24432,6 +25380,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            0,
+            0,
+            0,
             0,
             0
           ],
@@ -24490,6 +25441,9 @@
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
             0,
+            0,
+            92,
+            0,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -24546,6 +25500,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            0,
+            0,
+            0,
             0,
             0
           ],
@@ -24613,7 +25570,10 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
-            95,
+            0,
+            96,
+            0,
+            104,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -24671,14 +25631,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            0,
-            102
+            102,
+            99,
+            109,
+            96,
+            94
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 4,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 7,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 7
         },
         {
           "playerId": null,
@@ -24731,11 +25694,14 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 2,
           "recentMatchMinutes": [
-            95,
-            102
+            0,
+            99,
+            0,
+            45,
+            94
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 12,
+          "consecutiveFullMatches": 1,
+          "seasonFatigue": 0,
           "consecutiveStarts": 2
         },
         {
@@ -24789,9 +25755,12 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 5,
           "recentMatchMinutes": [
-            95,
+            102,
+            99,
+            109,
+            96,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -24849,14 +25818,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 2,
           "recentMatchMinutes": [
-            95,
-            0
+            96,
+            107,
+            0,
+            96,
+            94
           ],
-          "consecutiveFullMatches": 0,
+          "consecutiveFullMatches": 2,
           "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveStarts": 2
         },
         {
           "playerId": null,
@@ -24908,14 +25880,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 4,
           "recentMatchMinutes": [
-            95,
-            102
+            96,
+            99,
+            102,
+            99,
+            109
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 9,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -25028,13 +26003,16 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            95,
-            102
+            102,
+            99,
+            0,
+            96,
+            94
           ],
           "consecutiveFullMatches": 2,
-          "seasonFatigue": 14,
+          "seasonFatigue": 0,
           "consecutiveStarts": 2
         },
         {
@@ -25088,14 +26066,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
-            95,
-            102
+            0,
+            0,
+            25,
+            96,
+            0
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 14,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         },
         {
           "playerId": null,
@@ -25147,13 +26128,16 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 4,
           "recentMatchMinutes": [
-            95,
-            102
+            103,
+            0,
+            96,
+            96,
+            94
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 12,
+          "consecutiveFullMatches": 3,
+          "seasonFatigue": 0,
           "consecutiveStarts": 2
         },
         {
@@ -25206,14 +26190,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
-            95,
-            102
+            0,
+            0,
+            0,
+            80,
+            0
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 12,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 0
         }
       ],
       "substitutes": [
@@ -25261,14 +26248,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 2,
           "recentMatchMinutes": [
+            102,
+            99,
             0,
-            102
+            96,
+            94
           ],
-          "consecutiveFullMatches": 1,
-          "seasonFatigue": 5,
-          "consecutiveStarts": 1
+          "consecutiveFullMatches": 0,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 2
         },
         {
           "playerId": null,
@@ -25321,13 +26311,16 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
+            102,
             0,
-            102
+            109,
+            0,
+            94
           ],
           "consecutiveFullMatches": 1,
-          "seasonFatigue": 4,
+          "seasonFatigue": 0,
           "consecutiveStarts": 1
         },
         {
@@ -25381,7 +26374,10 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            102,
             0,
+            85,
+            52,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -25437,14 +26433,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 2,
+          "matchesPlayedRecently": 5,
           "recentMatchMinutes": [
-            95,
-            102
+            102,
+            99,
+            0,
+            0,
+            94
           ],
-          "consecutiveFullMatches": 2,
-          "seasonFatigue": 8,
-          "consecutiveStarts": 2
+          "consecutiveFullMatches": 1,
+          "seasonFatigue": 0,
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -25493,14 +26492,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
             0,
-            0
+            99,
+            109,
+            0,
+            94
           ],
-          "consecutiveFullMatches": 0,
+          "consecutiveFullMatches": 1,
           "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -25549,14 +26551,17 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 5,
           "recentMatchMinutes": [
+            102,
             0,
-            0
+            109,
+            0,
+            94
           ],
-          "consecutiveFullMatches": 0,
+          "consecutiveFullMatches": 1,
           "seasonFatigue": 0,
-          "consecutiveStarts": 0
+          "consecutiveStarts": 1
         },
         {
           "playerId": null,
@@ -25610,7 +26615,10 @@
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
             0,
-            23
+            0,
+            0,
+            96,
+            0
           ],
           "consecutiveFullMatches": 0,
           "seasonFatigue": 0,
@@ -25665,9 +26673,12 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 4,
           "recentMatchMinutes": [
-            95,
+            102,
+            99,
+            109,
+            0,
             0
           ],
           "consecutiveFullMatches": 0,
@@ -25723,12 +26734,15 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 1,
+          "matchesPlayedRecently": 6,
           "recentMatchMinutes": [
-            0,
-            80
+            102,
+            99,
+            109,
+            17,
+            94
           ],
-          "consecutiveFullMatches": 0,
+          "consecutiveFullMatches": 1,
           "seasonFatigue": 0,
           "consecutiveStarts": 1
         },
@@ -25781,6 +26795,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            0,
+            0,
+            0,
             0,
             0
           ],
@@ -25836,8 +26853,11 @@
           "isSeasonEndingInjury": null,
           "isSuspended": null,
           "suspendedMatches": null,
-          "matchesPlayedRecently": 0,
+          "matchesPlayedRecently": 4,
           "recentMatchMinutes": [
+            0,
+            99,
+            109,
             0,
             0
           ],
@@ -25891,6 +26911,9 @@
           "suspendedMatches": null,
           "matchesPlayedRecently": 0,
           "recentMatchMinutes": [
+            0,
+            0,
+            109,
             0,
             0
           ],

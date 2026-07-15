@@ -78,6 +78,41 @@
             </Border>
         </DataTemplate>
 
+        <DataTemplate x:Key="TraitTooltipRowTemplate">
+            <Grid Margin="0,0,0,7">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Border Width="18"
+                        Height="18"
+                        Background="{Binding Background}"
+                        CornerRadius="9"
+                        Margin="0,1,7,0">
+                    <TextBlock Text="{Binding Icon}"
+                               Foreground="{Binding Foreground}"
+                               FontFamily="{Binding FontFamily}"
+                               FontSize="10"
+                               FontWeight="Black"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               TextAlignment="Center" />
+                </Border>
+
+                <StackPanel Grid.Column="1">
+                    <TextBlock Text="{Binding Label}"
+                               Foreground="{DynamicResource AppTextBrush}"
+                               FontSize="11"
+                               FontWeight="Bold" />
+                    <TextBlock Text="{Binding Description}"
+                               Foreground="{DynamicResource AppMutedTextBrush}"
+                               FontSize="10"
+                               TextWrapping="Wrap" />
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
+
         <DataTemplate x:Key="PitchPlayerCardTemplate">
             <Border Width="128"
                     MinHeight="70"
@@ -212,24 +247,48 @@
                                        FontSize="7"
                                        FontWeight="Bold" />
                         </Border>
-                        <ItemsControl ItemsSource="{Binding TraitBadges}"
-                                      ItemTemplate="{StaticResource TraitIconBadgeTemplate}">
-                            <ItemsControl.Style>
-                                <Style TargetType="ItemsControl">
+                        <Border Background="#EAF1FF"
+                                CornerRadius="7"
+                                Padding="5,1"
+                                HorizontalAlignment="Left"
+                                Margin="0,0,2,0"
+                                ToolTipService.ShowDuration="20000">
+                            <Border.ToolTip>
+                                <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                                    <StackPanel MaxWidth="260">
+                                        <TextBlock Text="{Binding TraitSummaryText}"
+                                                   Foreground="{DynamicResource AppTextBrush}"
+                                                   FontSize="12"
+                                                   FontWeight="Bold"
+                                                   Margin="0,0,0,7" />
+                                        <ItemsControl ItemsSource="{Binding TraitBadges}"
+                                                      ItemTemplate="{StaticResource TraitTooltipRowTemplate}" />
+                                    </StackPanel>
+                                </ToolTip>
+                            </Border.ToolTip>
+                            <Border.Style>
+                                <Style TargetType="Border">
                                     <Setter Property="Visibility" Value="Visible" />
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding TraitBadges.Count}" Value="0">
+                                        <DataTrigger Binding="{Binding TraitCount}" Value="0">
                                             <Setter Property="Visibility" Value="Collapsed" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
-                            </ItemsControl.Style>
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel Orientation="Horizontal" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                        </ItemsControl>
+                            </Border.Style>
+                            <StackPanel Orientation="Horizontal"
+                                        VerticalAlignment="Center">
+                                <TextBlock Text="{Binding TraitIconText}"
+                                           Foreground="#1E528F"
+                                           FontSize="7.5"
+                                           FontWeight="Black"
+                                           Margin="0,0,2,0" />
+                                <TextBlock Text="{Binding TraitCountText}"
+                                           Foreground="#1E528F"
+                                           FontSize="7"
+                                           FontWeight="Black" />
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
 
                     <ProgressBar Grid.Row="3"
@@ -409,24 +468,48 @@
                                        FontSize="7"
                                        FontWeight="Bold" />
                         </Border>
-                        <ItemsControl ItemsSource="{Binding TraitBadges}"
-                                      ItemTemplate="{StaticResource TraitIconBadgeTemplate}">
-                            <ItemsControl.Style>
-                                <Style TargetType="ItemsControl">
+                        <Border Background="#EAF1FF"
+                                CornerRadius="7"
+                                Padding="5,1"
+                                HorizontalAlignment="Left"
+                                Margin="0,0,2,0"
+                                ToolTipService.ShowDuration="20000">
+                            <Border.ToolTip>
+                                <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                                    <StackPanel MaxWidth="260">
+                                        <TextBlock Text="{Binding TraitSummaryText}"
+                                                   Foreground="{DynamicResource AppTextBrush}"
+                                                   FontSize="12"
+                                                   FontWeight="Bold"
+                                                   Margin="0,0,0,7" />
+                                        <ItemsControl ItemsSource="{Binding TraitBadges}"
+                                                      ItemTemplate="{StaticResource TraitTooltipRowTemplate}" />
+                                    </StackPanel>
+                                </ToolTip>
+                            </Border.ToolTip>
+                            <Border.Style>
+                                <Style TargetType="Border">
                                     <Setter Property="Visibility" Value="Visible" />
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding TraitBadges.Count}" Value="0">
+                                        <DataTrigger Binding="{Binding TraitCount}" Value="0">
                                             <Setter Property="Visibility" Value="Collapsed" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
-                            </ItemsControl.Style>
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel Orientation="Horizontal" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                        </ItemsControl>
+                            </Border.Style>
+                            <StackPanel Orientation="Horizontal"
+                                        VerticalAlignment="Center">
+                                <TextBlock Text="{Binding TraitIconText}"
+                                           Foreground="#1E528F"
+                                           FontSize="7.5"
+                                           FontWeight="Black"
+                                           Margin="0,0,2,0" />
+                                <TextBlock Text="{Binding TraitCountText}"
+                                           Foreground="#1E528F"
+                                           FontSize="7"
+                                           FontWeight="Black" />
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
 
                     <ProgressBar Grid.Row="3"

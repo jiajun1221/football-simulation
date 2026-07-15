@@ -136,7 +136,11 @@ public sealed class InjuryRiskService
             >= 55 => 1.5,
             _ => 0.0
         };
-        var loadRisk = Math.Min(MaximumRecentLoad, player.MatchesPlayedRecently) * 3.5;
+        var isGoalkeeper = PositionSuitabilityService.IsGoalkeeperCapable(player);
+        var staminaRiskMultiplier = isGoalkeeper ? 0.65 : 1.0;
+        var workloadRiskMultiplier = isGoalkeeper ? 0.40 : 1.0;
+        var duelRiskMultiplier = isGoalkeeper ? 0.60 : 1.0;
+        var loadRisk = Math.Min(MaximumRecentLoad, player.MatchesPlayedRecently) * 3.5 * workloadRiskMultiplier;
         var traitRisk = player.Traits.Contains(PlayerTrait.InjuryProne) ? 20.0 : 0.0;
         var duelRisk =
             (player.Traits.Contains(PlayerTrait.DivesIntoTackles) ? 5.0 : 0.0) +
@@ -149,7 +153,15 @@ public sealed class InjuryRiskService
             (player.Traits.Contains(PlayerTrait.Engine) ? 9.0 : 0.0) +
             Math.Max(0, player.Stamina - 76) * 0.12;
 
-        var baseWeight = 8.0 + staminaRisk + minutesRisk + loadRisk + traitRisk + duelRisk + opponentAggressionRisk + physicalEventRisk - fitnessProtection;
+        var baseWeight = 8.0 +
+            staminaRisk * staminaRiskMultiplier +
+            minutesRisk * workloadRiskMultiplier +
+            loadRisk +
+            traitRisk +
+            duelRisk * duelRiskMultiplier +
+            opponentAggressionRisk +
+            physicalEventRisk -
+            fitnessProtection;
         return Math.Max(1.0, baseWeight * GetFatigueInjuryRiskMultiplier(player));
     }
 
@@ -217,6 +229,7 @@ public sealed class InjuryRiskService
                 continue;
             }
 
+            var isGoalkeeper = PositionSuitabilityService.IsGoalkeeperCapable(player);
             player.SeasonFatigue = Math.Clamp(
                 player.SeasonFatigue + CalculateSeasonFatigueIncrease(player, team, performance, minutesPlayed),
                 0,
@@ -225,18 +238,35 @@ public sealed class InjuryRiskService
             player.ConsecutiveStarts = performance is { WasSubstitute: false } && minutesPlayed > 0
                 ? player.ConsecutiveStarts + 1
                 : 0;
-            player.ConsecutiveFullMatches = minutesPlayed >= 90
+            player.ConsecutiveFullMatches = !isGoalkeeper && minutesPlayed >= 90
                 ? player.ConsecutiveFullMatches + 1
                 : 0;
-            player.MatchesPlayedRecently = minutesPlayed switch
-            {
-                >= 110 => Math.Min(MaximumRecentLoad, player.MatchesPlayedRecently + 2),
-                >= 80 => Math.Min(MaximumRecentLoad, player.MatchesPlayedRecently + 1),
-                >= 55 => Math.Min(MaximumRecentLoad, player.MatchesPlayedRecently + 1),
-                >= 25 => player.MatchesPlayedRecently,
-                _ => Math.Max(0, player.MatchesPlayedRecently - 1)
-            };
+            player.MatchesPlayedRecently = isGoalkeeper
+                ? CalculateGoalkeeperRecentLoad(player.MatchesPlayedRecently, minutesPlayed)
+                : CalculateOutfieldRecentLoad(player.MatchesPlayedRecently, minutesPlayed);
         }
+    }
+
+    private static int CalculateOutfieldRecentLoad(int currentLoad, int minutesPlayed)
+    {
+        return minutesPlayed switch
+        {
+            >= 110 => Math.Min(MaximumRecentLoad, currentLoad + 2),
+            >= 80 => Math.Min(MaximumRecentLoad, currentLoad + 1),
+            >= 55 => Math.Min(MaximumRecentLoad, currentLoad + 1),
+            >= 25 => currentLoad,
+            _ => Math.Max(0, currentLoad - 1)
+        };
+    }
+
+    private static int CalculateGoalkeeperRecentLoad(int currentLoad, int minutesPlayed)
+    {
+        return minutesPlayed switch
+        {
+            >= 80 => Math.Min(3, currentLoad + 1),
+            >= 25 => Math.Min(3, currentLoad),
+            _ => Math.Max(0, currentLoad - 2)
+        };
     }
 
     private static void UpdateRecentMinuteHistory(Player player, int minutesPlayed)
@@ -289,7 +319,10 @@ public sealed class InjuryRiskService
             _ => 2
         };
 
-        return Math.Max(0, minuteFatigue + pressingFatigue + mentalityFatigue + ageModifier);
+        var fatigue = Math.Max(0, minuteFatigue + pressingFatigue + mentalityFatigue + ageModifier);
+        return PositionSuitabilityService.IsGoalkeeperCapable(player)
+            ? (int)Math.Round(fatigue * 0.45)
+            : fatigue;
     }
 
     public static double GetFatigueInjuryRiskMultiplier(Player player)
@@ -400,9 +433,14 @@ public sealed class InjuryRiskService
 
     private static double CalculatePlayerConditionRisk(Player player, int minute)
     {
-        return Math.Max(0, 62 - player.Stamina) * 0.85 +
-            Math.Min(MaximumRecentLoad, player.MatchesPlayedRecently) * 4.5 +
-            player.SeasonFatigue * 0.12 +
+        var isGoalkeeper = PositionSuitabilityService.IsGoalkeeperCapable(player);
+        var staminaRiskMultiplier = isGoalkeeper ? 0.65 : 1.0;
+        var workloadRiskMultiplier = isGoalkeeper ? 0.40 : 1.0;
+        var seasonFatigueRiskMultiplier = isGoalkeeper ? 0.70 : 1.0;
+
+        return Math.Max(0, 62 - player.Stamina) * 0.85 * staminaRiskMultiplier +
+            Math.Min(MaximumRecentLoad, player.MatchesPlayedRecently) * 4.5 * workloadRiskMultiplier +
+            player.SeasonFatigue * 0.12 * seasonFatigueRiskMultiplier +
             GetAgeConditionRisk(player) +
             (player.Traits.Contains(PlayerTrait.InjuryProne) ? 18 : 0) +
             (minute >= 75 ? 6 : 0);
@@ -418,9 +456,12 @@ public sealed class InjuryRiskService
     private static double CalculatePreparationInjuryWeight(Player player)
     {
         var attributes = PlayerAttributeService.GetAttributes(player);
+        var isGoalkeeper = PositionSuitabilityService.IsGoalkeeperCapable(player);
+        var workloadRiskMultiplier = isGoalkeeper ? 0.40 : 1.0;
+        var seasonFatigueRiskMultiplier = isGoalkeeper ? 0.70 : 1.0;
         var roleRisk = player.Role is PlayerRole.KeyPlayer or PlayerRole.Starter ? 3.0 : 0.0;
-        var loadRisk = Math.Min(MaximumRecentLoad, player.MatchesPlayedRecently) * 4.5;
-        var seasonFatigueRisk = player.SeasonFatigue * 0.30;
+        var loadRisk = Math.Min(MaximumRecentLoad, player.MatchesPlayedRecently) * 4.5 * workloadRiskMultiplier;
+        var seasonFatigueRisk = player.SeasonFatigue * 0.30 * seasonFatigueRiskMultiplier;
         var traitRisk = player.Traits.Contains(PlayerTrait.InjuryProne) ? 22.0 : 0.0;
         var ageRisk = GetAgePreparationRisk(player);
         var protection = Math.Max(0, attributes.Physical - 70) * 0.35 + (player.Traits.Contains(PlayerTrait.Engine) ? 8.0 : 0.0);

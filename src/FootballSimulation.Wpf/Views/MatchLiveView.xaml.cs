@@ -1600,7 +1600,7 @@ public partial class MatchLiveView : UserControl
         var isOverlayActive = _isPausedForSubstitution || _isPausedForTacticalAdjustment;
         var isMandatoryInjurySubPending = HasMandatoryInjurySubstitution() && !HasQueuedMandatoryInjurySubstitution();
         var isMatchActive = _state.CurrentMatch is not null &&
-            _state.CurrentMatch.CurrentMinute < GetPhaseEndMinute() &&
+            HasPlayablePhaseWork() &&
             !_hasNavigated;
 
         PauseResumeButton.Content = _isPlaybackPaused ? "\u25B6" : "\u23F8";
@@ -1629,6 +1629,18 @@ public partial class MatchLiveView : UserControl
         PausedSubstitutionPanelBorder.Background = ToBrush(isMandatoryInjurySubPending
             ? ThemeManager.GetBrushHex("FeedAttackBackground", "#3B1115")
             : GetLiveMatchCardBackground());
+    }
+
+    private bool HasPlayablePhaseWork()
+    {
+        if (_state.CurrentMatch is null)
+        {
+            return false;
+        }
+
+        return _state.CurrentMatch.CurrentMinute < GetPhaseEndMinute() ||
+            _pendingPlaybackEvents.Count > 0 ||
+            ContinueButton.Visibility != Visibility.Visible;
     }
 
     private static string GetLiveMatchCardBackground()
@@ -1689,10 +1701,10 @@ public partial class MatchLiveView : UserControl
         {
             0 => "0.5x",
             1 => "1x",
-            2 => "1.5x",
-            3 => "2x",
-            4 => "3x",
-            5 => "4x",
+            2 => "2x",
+            3 => "3x",
+            4 => "4x",
+            5 => "5x",
             _ => "1x"
         };
     }
@@ -2187,6 +2199,12 @@ public partial class MatchLiveView : UserControl
         var activeBallIndicator = string.Equals(_activeBallIndicator?.PlayerKey, playerKey, StringComparison.OrdinalIgnoreCase)
             ? _activeBallIndicator
             : null;
+        var fatigueBadge = CreateFatigueBadge(player, team);
+        var workloadRiskText = CreateWorkloadRiskText(player, team);
+        var workloadRiskTooltip = CreateWorkloadRiskTooltip(player, team);
+        var conditionTooltip = string.IsNullOrWhiteSpace(fatigueBadge.Text)
+            ? string.Empty
+            : $"{Environment.NewLine}Condition: {fatigueBadge.Text} - {fatigueBadge.Tooltip.Replace(Environment.NewLine, " | ")}";
 
         return new LivePlayerIconViewModel
         {
@@ -2237,9 +2255,17 @@ public partial class MatchLiveView : UserControl
             BallIndicatorForeground = activeBallIndicator?.Brush ?? "#FFFFFF",
             BallIndicatorEffect = CreateBallIndicatorEffect(activeBallIndicator?.Brush),
             BallIndicatorTooltip = activeBallIndicator?.Tooltip ?? string.Empty,
-            DetailText = BuildPlayerDetailText(player, performance, liveStats.CurrentRating, stamina, displayedStats.DefensiveContributions),
+            DetailText = BuildPlayerDetailText(player, performance, liveStats.CurrentRating, stamina, displayedStats.DefensiveContributions) +
+                $"{Environment.NewLine}{workloadRiskTooltip}{conditionTooltip}",
             CardsText = yellowCards == 0 && redCards == 0 ? "None" : $"Y{yellowCards} R{redCards}",
             InjuryStatusText = displayedStats.Injuries > 0 ? "Injured" : "Fit",
+            WorkloadRiskText = workloadRiskText,
+            WorkloadRiskBrush = GetWorkloadRiskBrush(player, team),
+            WorkloadRiskForeground = GetWorkloadRiskForeground(player, team),
+            WorkloadRiskTooltip = workloadRiskTooltip,
+            FatigueWarningText = fatigueBadge.Text,
+            FatigueWarningTooltip = fatigueBadge.Tooltip,
+            FatigueWarningBadgeBackground = fatigueBadge.Background,
             FormText = PlayerFormStatusService.ToDisplayText(player.FormStatus),
             StaminaText = $"{stamina:0}%",
             MatchStatusText = status.Text,
@@ -2371,10 +2397,10 @@ public partial class MatchLiveView : UserControl
                 ],
                 [
                     new("Stamina", $"{selectedPlayer.Stamina:0}%"),
+                    new("Risk", selectedPlayer.WorkloadRiskText),
                     new("Goals Conceded", GetGoalsConceded(team).ToString()),
-                    new("Fouls", (performance?.Fouls ?? 0).ToString()),
                     new("Cards", selectedPlayer.CardsText),
-                    new("Status", selectedPlayer.MatchStatusText),
+                    new("Condition", GetConditionDisplayText(selectedPlayer)),
                     new("Injury", selectedPlayer.InjuryStatusText)
                 ]);
         }
@@ -2391,10 +2417,10 @@ public partial class MatchLiveView : UserControl
                 ],
                 [
                     new("Stamina", $"{selectedPlayer.Stamina:0}%"),
-                    new("Shots", (performance?.Shots ?? 0).ToString()),
+                    new("Risk", selectedPlayer.WorkloadRiskText),
                     new("Pass Accuracy", $"{passAccuracy:0}%"),
                     new("Duels Won", GetDuelsWon(performance).ToString()),
-                    new("Fouls", (performance?.Fouls ?? 0).ToString()),
+                    new("Condition", GetConditionDisplayText(selectedPlayer)),
                     new("Cards", selectedPlayer.CardsText)
                 ]);
         }
@@ -2454,6 +2480,13 @@ public partial class MatchLiveView : UserControl
     {
         label.Text = row.Label;
         value.Text = row.Value;
+    }
+
+    private static string GetConditionDisplayText(LivePlayerIconViewModel selectedPlayer)
+    {
+        return string.IsNullOrWhiteSpace(selectedPlayer.FatigueWarningText)
+            ? selectedPlayer.MatchStatusText
+            : selectedPlayer.FatigueWarningText;
     }
 
     private double GetEstimatedPassAccuracy(Team? team, double rating, double stamina)
@@ -2737,6 +2770,8 @@ public partial class MatchLiveView : UserControl
     private static string MegaphoneIcon() => char.ConvertFromUtf32(0x1F4E3);
 
     private static string BatteryIcon() => char.ConvertFromUtf32(0x1F50B);
+
+    private static string DumbbellIcon() => char.ConvertFromUtf32(0x1F3CB);
 
     private static string RotateIcon() => char.ConvertFromUtf32(0x1F504);
 
@@ -4710,6 +4745,68 @@ public partial class MatchLiveView : UserControl
         };
     }
 
+    private string CreateWorkloadRiskText(Player player, Team? team)
+    {
+        return $"{DumbbellIcon()} {GetWorkloadRiskPercentage(player, team)}%";
+    }
+
+    private string CreateWorkloadRiskTooltip(Player player, Team? team)
+    {
+        return $"Injury/workload risk {GetWorkloadRiskPercentage(player, team)}%";
+    }
+
+    private string GetWorkloadRiskBrush(Player player, Team? team)
+    {
+        return GetWorkloadRiskPercentage(player, team) switch
+        {
+            >= 70 => "#DC2626",
+            >= 40 => "#FACC15",
+            _ => "#16A34A"
+        };
+    }
+
+    private string GetWorkloadRiskForeground(Player player, Team? team)
+    {
+        return GetWorkloadRiskPercentage(player, team) is >= 40 and < 70
+            ? "#102033"
+            : "#FFFFFF";
+    }
+
+    private int GetWorkloadRiskPercentage(Player player, Team? team)
+    {
+        return FatigueBadgeService.CalculateWorkloadRiskPercentage(player, GetFixtureRestGapDays(team));
+    }
+
+    private FatigueBadgeResult CreateFatigueBadge(Player player, Team? team)
+    {
+        return FatigueBadgeService.Evaluate(player, GetFixtureRestGapDays(team));
+    }
+
+    private int? GetFixtureRestGapDays(Team? team)
+    {
+        if (_state.League is null || team is null || _state.CurrentFixture is null)
+        {
+            return null;
+        }
+
+        var currentRound = GetFixtureCalendarRound(_state.CurrentFixture);
+        var previousFixture = _state.League.Fixtures
+            .Where(fixture => fixture.IsPlayed && IsTeamInFixture(fixture, team))
+            .Where(fixture => GetFixtureCalendarRound(fixture) < currentRound)
+            .OrderByDescending(GetFixtureCalendarRound)
+            .FirstOrDefault();
+
+        return previousFixture is null
+            ? null
+            : Math.Max(1, currentRound - GetFixtureCalendarRound(previousFixture));
+    }
+
+    private static bool IsTeamInFixture(Fixture fixture, Team team)
+    {
+        return fixture.HomeTeam.Name.Equals(team.Name, StringComparison.OrdinalIgnoreCase) ||
+            fixture.AwayTeam.Name.Equals(team.Name, StringComparison.OrdinalIgnoreCase);
+    }
+
     private List<SubstitutionPlayerCard> CreateSubstitutionPlayerCards(IEnumerable<Player> players, bool showPendingState, Team? team)
     {
         return players
@@ -4737,6 +4834,7 @@ public partial class MatchLiveView : UserControl
             ? PlayerCardStatusBadgeHelper.Create(player)
             : PlayerCardStatusBadgeHelper.Create(displayedStats.YellowCards, displayedStats.RedCards);
         var nationality = PlayerNationalityDisplayService.Resolve(player);
+        var fatigueBadge = CreateFatigueBadge(player, team);
 
         if (string.IsNullOrWhiteSpace(exactPosition))
         {
@@ -4764,6 +4862,13 @@ public partial class MatchLiveView : UserControl
             FormBadgeText = form.Text,
             FormBadgeBackground = form.Background,
             FormBadgeForeground = form.Foreground,
+            WorkloadRiskText = CreateWorkloadRiskText(player, team),
+            WorkloadRiskBrush = GetWorkloadRiskBrush(player, team),
+            WorkloadRiskForeground = GetWorkloadRiskForeground(player, team),
+            WorkloadRiskTooltip = CreateWorkloadRiskTooltip(player, team),
+            FatigueWarningText = fatigueBadge.Text,
+            FatigueWarningTooltip = fatigueBadge.Tooltip,
+            FatigueWarningBadgeBackground = fatigueBadge.Background,
             CardBackground = isPendingSubIn ? GetThemedStatusBackground("positive") : teamColors.PrimaryColor,
             CardBorderBrush = isPendingSubIn ? "#34A853" : teamColors.BorderColor,
             NameForeground = isPendingSubIn ? GetThemedStatusForeground("positive") : teamColors.TextColor,
@@ -4948,6 +5053,13 @@ public partial class MatchLiveView : UserControl
         public string FormBadgeText { get; init; } = string.Empty;
         public string FormBadgeBackground { get; init; } = "#E1E5EA";
         public string FormBadgeForeground { get; init; } = "#465364";
+        public string WorkloadRiskText { get; init; } = string.Empty;
+        public string WorkloadRiskBrush { get; init; } = "#16A34A";
+        public string WorkloadRiskForeground { get; init; } = "#FFFFFF";
+        public string WorkloadRiskTooltip { get; init; } = string.Empty;
+        public string FatigueWarningText { get; init; } = string.Empty;
+        public string FatigueWarningTooltip { get; init; } = string.Empty;
+        public string FatigueWarningBadgeBackground { get; init; } = "#F59E0B";
         public string CardBackground { get; init; } = "White";
         public string CardBorderBrush { get; init; } = "#D6DFEA";
         public string NameForeground { get; init; } = "#102033";

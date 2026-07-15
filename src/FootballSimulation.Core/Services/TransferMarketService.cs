@@ -132,8 +132,13 @@ public class TransferMarketService
         Team team,
         IEnumerable<PlayerSeasonStats>? stats = null)
     {
+        var clubId = GetClubId(leagueId, team.Name);
         return GetAllListings(state, stats)
-            .Where(listing => listing.LeagueId.Equals(leagueId, StringComparison.OrdinalIgnoreCase) && listing.Team == team)
+            .Where(listing =>
+                listing.LeagueId.Equals(leagueId, StringComparison.OrdinalIgnoreCase) &&
+                (ReferenceEquals(listing.Team, team) ||
+                    GetClubId(listing.LeagueId, listing.Team.Name).Equals(clubId, StringComparison.OrdinalIgnoreCase) ||
+                    listing.Team.Name.Equals(team.Name, StringComparison.OrdinalIgnoreCase)))
             .OrderByDescending(listing => listing.Player.OverallRating)
             .ThenBy(listing => listing.Player.Name)
             .ToList();
@@ -1513,7 +1518,8 @@ public class TransferMarketService
     {
         foreach (var transfer in state.TransferHistory
             .Where(transfer => !string.IsNullOrWhiteSpace(transfer.PlayerId))
-            .OrderBy(transfer => transfer.RoundNumber)
+            .GroupBy(transfer => transfer.PlayerId, StringComparer.OrdinalIgnoreCase)
+            .Select(group => group.Last())
             .ToList())
         {
             var player = FindPlayerOrDefault(state, transfer.PlayerId);
@@ -1835,9 +1841,15 @@ public class TransferMarketService
             (!criteria.FormStatus.HasValue || listing.Player.FormStatus == criteria.FormStatus.Value);
     }
 
-    private static bool MatchesText(string value, string filter)
+    private static bool MatchesText(string? value, string? filter)
     {
-        return string.IsNullOrWhiteSpace(filter) || value.Contains(filter.Trim(), StringComparison.OrdinalIgnoreCase);
+        if (string.IsNullOrWhiteSpace(filter))
+        {
+            return true;
+        }
+
+        return NormalizeSearchText(value)
+            .Contains(NormalizeSearchText(filter), StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool MatchesNationality(Player player, string filter)
@@ -1862,7 +1874,28 @@ public class TransferMarketService
         }
 
         var normalized = PositionSuitabilityService.NormalizeExactPosition(position);
-        return player.PreferredPosition.Equals(normalized, StringComparison.OrdinalIgnoreCase);
+        return PositionSuitabilityService.GetNaturalExactPositions(player)
+            .Contains(normalized, StringComparer.OrdinalIgnoreCase);
+    }
+
+    private static string NormalizeSearchText(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return string.Empty;
+        }
+
+        var normalized = value.Trim().Normalize(NormalizationForm.FormD);
+        var builder = new StringBuilder(normalized.Length);
+        foreach (var character in normalized)
+        {
+            if (CharUnicodeInfo.GetUnicodeCategory(character) != UnicodeCategory.NonSpacingMark)
+            {
+                builder.Append(character);
+            }
+        }
+
+        return builder.ToString().Normalize(NormalizationForm.FormC);
     }
 
     private static Dictionary<Position, double> GetWeakPositions(Team selectedTeam)

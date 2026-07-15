@@ -159,17 +159,22 @@ public class MatchDramaService
     private static double GetPlayerInjuryRisk(Player player)
     {
         var attributes = PlayerAttributeService.GetAttributes(player);
-        var lowStaminaRisk = Math.Max(0.0, 55.0 - player.Stamina) * 0.9;
+        var isGoalkeeper = PositionSuitabilityService.IsGoalkeeperCapable(player);
+        var staminaRiskMultiplier = isGoalkeeper ? 0.65 : 1.0;
+        var workloadRiskMultiplier = isGoalkeeper ? 0.35 : 1.0;
+        var seasonFatigueRiskMultiplier = isGoalkeeper ? 0.70 : 1.0;
+        var duelRiskMultiplier = isGoalkeeper ? 0.60 : 1.0;
+        var lowStaminaRisk = Math.Max(0.0, 55.0 - player.Stamina) * 0.9 * staminaRiskMultiplier;
         var traitRisk = player.Traits.Contains(PlayerTrait.InjuryProne) ? 26.0 : 0.0;
-        var workloadRisk = Math.Max(0, player.MatchesPlayedRecently - 2) * 8.0;
-        var seasonFatigueRisk = player.SeasonFatigue * 0.35;
+        var workloadRisk = Math.Max(0, player.MatchesPlayedRecently - 2) * 8.0 * workloadRiskMultiplier;
+        var seasonFatigueRisk = player.SeasonFatigue * 0.35 * seasonFatigueRiskMultiplier;
         var physicalProtection = Math.Max(0, attributes.Physical - 70) * 0.18;
         var duelRisk =
             (player.Traits.Contains(PlayerTrait.DivesIntoTackles) ? 5.0 : 0.0) +
             (player.Traits.Contains(PlayerTrait.Rapid) || player.Traits.Contains(PlayerTrait.SpeedDribbler) ? 4.0 : 0.0) +
             (player.Traits.Contains(PlayerTrait.PowerHeader) || player.Traits.Contains(PlayerTrait.AerialThreat) ? 3.0 : 0.0);
 
-        return Math.Max(0.0, lowStaminaRisk + traitRisk + workloadRisk + seasonFatigueRisk + duelRisk - physicalProtection);
+        return Math.Max(0.0, lowStaminaRisk + traitRisk + workloadRisk + seasonFatigueRisk + duelRisk * duelRiskMultiplier - physicalProtection);
     }
 
     private static string ChooseInjuryCause(MatchEventContext context, Player player)

@@ -469,7 +469,7 @@ public class SaveGameServiceTests
         var originalPlayers = selectedTeam.Players.Concat(selectedTeam.Substitutes).ToList();
         var goalkeeper = originalPlayers.First(PositionSuitabilityService.IsGoalkeeperCapable);
         var outfield = originalPlayers.Where(player => !PositionSuitabilityService.IsGoalkeeperCapable(player)).Take(10).ToList();
-        var slots = new[] { "GK", "RB", "CB", "CB", "LB", "CDM", "CDM", "LW", "CAM", "RW", "ST" };
+        var slots = FormationSlotService.GetSlots("4-2-3-1");
         var starters = new[] { goalkeeper, outfield[3], outfield[2], outfield[1], outfield[0], outfield[4], outfield[5], outfield[6], outfield[7], outfield[8], outfield[9] };
         var bench = originalPlayers.Except(starters).Take(3).ToArray();
 
@@ -501,13 +501,53 @@ public class SaveGameServiceTests
     }
 
     [Fact]
+    public void SaveGame_AndLoadGame_UsesFormationSlotsWhenAssignedPositionsAreStale()
+    {
+        var saveDirectory = CreateTempSaveDirectory();
+        var saveGameService = new SaveGameService(saveDirectory);
+        var leagueEngine = new LeagueEngine();
+        var teams = new LeagueSeedDataService().CreateLeagueTeams();
+        var selectedTeam = teams[0];
+        var league = leagueEngine.CreateLeague(GameSessionService.PremierLeagueName, teams);
+        var originalPlayers = selectedTeam.Players.Concat(selectedTeam.Substitutes).ToList();
+        var goalkeeper = originalPlayers.First(PositionSuitabilityService.IsGoalkeeperCapable);
+        var outfield = originalPlayers.Where(player => !PositionSuitabilityService.IsGoalkeeperCapable(player)).Take(10).ToList();
+        var starters = new[] { goalkeeper }.Concat(outfield).ToList();
+        var slots = FormationSlotService.GetSlots("4-3-3 Attack");
+
+        selectedTeam.Formation = "4-3-3 Attack";
+        selectedTeam.Players = starters;
+        selectedTeam.Substitutes = originalPlayers.Except(starters).ToList();
+        foreach (var player in selectedTeam.Players)
+        {
+            PositionSuitabilityService.EnsurePositionMetadata(player, "CAM");
+        }
+
+        try
+        {
+            saveGameService.SaveGame(1, SaveGameService.CreateSaveData(league, selectedTeam));
+
+            var loadedData = saveGameService.LoadGame(1);
+            var loadedLeague = SaveGameService.CreateLeague(loadedData!);
+            var loadedSelectedTeam = loadedLeague.Teams.Single(team => team.Name == selectedTeam.Name);
+
+            Assert.Equal(starters.Select(player => player.Name), loadedSelectedTeam.Players.Select(player => player.Name));
+            Assert.Equal(slots, loadedSelectedTeam.Players.Select(player => player.AssignedPosition));
+        }
+        finally
+        {
+            DeleteDirectory(saveDirectory);
+        }
+    }
+
+    [Fact]
     public void ClubMatchSetupService_ReplacesOnlyUnavailableStarterSlot()
     {
         var team = new LeagueSeedDataService().CreateLeagueTeams()[0];
         var allPlayers = team.Players.Concat(team.Substitutes).ToList();
         var goalkeeper = allPlayers.First(PositionSuitabilityService.IsGoalkeeperCapable);
         var outfield = allPlayers.Where(player => !PositionSuitabilityService.IsGoalkeeperCapable(player)).Take(13).ToList();
-        var slots = new[] { "GK", "RB", "CB", "CB", "LB", "CDM", "CDM", "LW", "CAM", "RW", "ST" };
+        var slots = FormationSlotService.GetSlots("4-2-3-1");
         var starters = new[] { goalkeeper, outfield[0], outfield[1], outfield[2], outfield[3], outfield[4], outfield[5], outfield[6], outfield[7], outfield[8], outfield[9] };
         var expectedCbName = starters[2].Name;
         var suspendedRightBack = starters[1];
@@ -526,7 +566,7 @@ public class SaveGameServiceTests
         ClubMatchSetupService.Apply(team, setup);
 
         Assert.NotEqual(suspendedRightBack.Name, team.Players[1].Name);
-        Assert.Equal("RB", team.Players[1].AssignedPosition);
+        Assert.Equal(slots[1], team.Players[1].AssignedPosition);
         Assert.Equal(expectedCbName, team.Players[2].Name);
         Assert.Equal("CB", team.Players[2].AssignedPosition);
         Assert.Contains(suspendedRightBack, team.Substitutes);
@@ -655,6 +695,52 @@ public class SaveGameServiceTests
             Assert.Equal("CF", loadedPlayer.AssignedPosition);
             Assert.Contains("ST", loadedPlayer.SecondaryPositions);
             Assert.Contains("CAM", loadedPlayer.SecondaryPositions);
+        }
+        finally
+        {
+            DeleteDirectory(saveDirectory);
+        }
+    }
+
+    [Fact]
+    public void LoadGame_CorrectsKangInLeePotentialCap()
+    {
+        var saveDirectory = CreateTempSaveDirectory();
+        var saveGameService = new SaveGameService(saveDirectory);
+        var team = CreateTeamWithPlayer(
+            "Chelsea",
+            "ligue-1:paris-saint-germain:kang-in-lee:10",
+            "Kang-in Lee",
+            Position.Midfielder,
+            "CAM",
+            ["CM"]);
+        var player = team.Players.Single();
+        player.OverallRating = 84;
+        player.BaseOverallRating = 82;
+        player.PotentialOverall = 84;
+        var saveData = new SaveGameData
+        {
+            LeagueId = "premier-league",
+            SelectedClubName = team.Name,
+            LeagueState = new LeagueState
+            {
+                LeagueId = "premier-league",
+                Name = "Premier League",
+                Season = "2025-26",
+                Table = []
+            },
+            Teams = [team]
+        };
+
+        try
+        {
+            saveGameService.SaveGame(1, saveData);
+
+            var loadedPlayer = saveGameService.LoadGame(1)!.Teams.Single().Players.Single();
+
+            Assert.Equal(84, loadedPlayer.OverallRating);
+            Assert.True(loadedPlayer.BaseOverallRating >= 82);
+            Assert.Equal(88, loadedPlayer.PotentialOverall);
         }
         finally
         {

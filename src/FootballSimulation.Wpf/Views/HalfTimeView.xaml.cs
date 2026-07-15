@@ -28,6 +28,7 @@ public partial class HalfTimeView : UserControl
     private const double PitchCardHeight = 70;
 
     private Player? _selectedStarter;
+    private string? _selectedPositionFilter;
     private List<Player> _pitchSlots = [];
     private readonly List<PendingHalftimeSubstitution> _pendingHalftimeSubstitutions = [];
     private Point _dragStartPoint;
@@ -396,8 +397,9 @@ public partial class HalfTimeView : UserControl
             FatigueWarningText = fatigueBadge.Text,
             FatigueWarningTooltip = fatigueBadge.Tooltip,
             FatigueWarningBadgeBackground = fatigueBadge.Background,
-            TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits),
-            CardStatusBadges = CreateCardStatusBadges(player, pendingIn: false),
+            TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits, int.MaxValue),
+            SubstitutionStatusBadge = CreateSubstitutionStatusBadge(player, pendingIn: false),
+            CardStatusBadges = CreateCardStatusBadges(player),
             CardBackground = teamColors.PrimaryColor,
             CardBorderBrush = player == _selectedStarter
                 ? teamColors.SelectedGlowColor
@@ -413,9 +415,32 @@ public partial class HalfTimeView : UserControl
         if (sender is Button { Tag: Player player })
         {
             _selectedStarter = player;
+            _selectedPositionFilter = (sender as FrameworkElement)?.DataContext is PitchPlayerCard card
+                ? PositionSuitabilityService.NormalizeExactPosition(card.PositionText)
+                : null;
             UpdateSelectedPlayerDetails();
+            RefreshSubstitutes();
             RenderPitch();
         }
+    }
+
+    private void ClearSubstituteFilterButton_Click(object sender, RoutedEventArgs e)
+    {
+        ClearPitchSelection();
+    }
+
+    private void ClearPitchSelection()
+    {
+        if (_selectedStarter is null && string.IsNullOrWhiteSpace(_selectedPositionFilter))
+        {
+            return;
+        }
+
+        _selectedStarter = null;
+        _selectedPositionFilter = null;
+        UpdateSelectedPlayerDetails();
+        RefreshSubstitutes();
+        RenderPitch();
     }
 
     private void FormationComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -508,18 +533,34 @@ public partial class HalfTimeView : UserControl
             return;
         }
 
+        var normalizedFilter = PositionSuitabilityService.NormalizeExactPosition(_selectedPositionFilter);
         var activePlayerKeys = GetActivePitchPlayers(_state.SelectedTeam)
             .Select(PlayerRosterKeyService.CreateKey)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var benchCards = _state.SelectedTeam.Substitutes
+        var substitutes = _state.SelectedTeam.Substitutes
             .Where(player => !activePlayerKeys.Contains(PlayerRosterKeyService.CreateKey(player)))
             .Where(IsAvailableSubstitute)
+            .ToList();
+
+        if (!string.IsNullOrWhiteSpace(normalizedFilter))
+        {
+            substitutes = substitutes
+                .OrderByDescending(player => PositionCompatibilityService.IsReasonableFit(player, normalizedFilter))
+                .ThenByDescending(player => PositionCompatibilityService.GetCompatibilityScore(player, normalizedFilter))
+                .ThenByDescending(GetOverallRating)
+                .ThenBy(player => player.SquadNumber <= 0 ? int.MaxValue : player.SquadNumber)
+                .ThenBy(player => player.Name)
+                .ToList();
+        }
+
+        var benchCards = substitutes
             .Select(CreateBenchPlayerCard)
             .ToList();
 
         SubstituteListBox.ItemsSource = null;
         SubstituteListBox.ItemsSource = benchCards;
         SubstituteListBox.IsEnabled = benchCards.Count > 0;
+        UpdateSubstituteFilterLabel(normalizedFilter);
         SubstitutionStatusTextBlock.Text = _pendingHalftimeSubstitutions.Count == 0
             ? $"{GetUsedSubstitutions()}/{GetMaxSubstitutions()} used"
             : $"{GetUsedSubstitutions()}/{GetMaxSubstitutions()} used · {_pendingHalftimeSubstitutions.Count} queued";
@@ -534,6 +575,19 @@ public partial class HalfTimeView : UserControl
 
         return _state.CurrentMatch is null ||
             !_squadSelectionService.WasPlayerSubstitutedOff(_state.CurrentMatch, _state.SelectedTeam?.Name ?? string.Empty, player.Name);
+    }
+
+    private void UpdateSubstituteFilterLabel(string normalizedFilter)
+    {
+        if (string.IsNullOrWhiteSpace(normalizedFilter))
+        {
+            SubstituteFilterTextBlock.Text = "All players";
+            ClearSubstituteFilterButton.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        SubstituteFilterTextBlock.Text = $"Filter: {normalizedFilter}";
+        ClearSubstituteFilterButton.Visibility = Visibility.Visible;
     }
 
     private void RefreshPendingSubstitutions()
@@ -580,8 +634,9 @@ public partial class HalfTimeView : UserControl
             TextForeground = teamColors.TextColor,
             PositionBackground = teamColors.SecondaryColor,
             PositionForeground = TeamColorService.GetReadableTextColor(teamColors.SecondaryColor),
-            TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits),
-            CardStatusBadges = CreateCardStatusBadges(player, pendingIn: true)
+            TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits, int.MaxValue),
+            SubstitutionStatusBadge = CreateSubstitutionStatusBadge(player, pendingIn: true),
+            CardStatusBadges = CreateCardStatusBadges(player)
         };
     }
 
@@ -618,34 +673,38 @@ public partial class HalfTimeView : UserControl
         return true;
     }
 
-    private IReadOnlyList<PlayerCardStatusBadge> CreateCardStatusBadges(Player player, bool pendingIn)
+    private IReadOnlyList<PlayerCardStatusBadge> CreateCardStatusBadges(Player player)
     {
-        var badges = PlayerCardStatusBadgeHelper.Create(player, FindSelectedPlayerPerformance(player, _state.SelectedTeam)).ToList();
+        return PlayerCardStatusBadgeHelper.Create(player, FindSelectedPlayerPerformance(player, _state.SelectedTeam));
+    }
+
+    private PlayerCardStatusBadge? CreateSubstitutionStatusBadge(Player player, bool pendingIn)
+    {
         if (_pendingHalftimeSubstitutions.Any(substitution => substitution.Starter == player))
         {
-            badges.Add(new PlayerCardStatusBadge
+            return new PlayerCardStatusBadge
             {
                 Text = "↓",
                 TooltipText = "Pending halftime substitution off.",
                 Background = "#DC2626",
                 Foreground = "#FFFFFF",
                 BorderBrush = "#FCA5A5"
-            });
+            };
         }
 
         if (pendingIn && _pendingHalftimeSubstitutions.Any(substitution => substitution.Substitute == player))
         {
-            badges.Add(new PlayerCardStatusBadge
+            return new PlayerCardStatusBadge
             {
                 Text = "↑",
                 TooltipText = "Pending halftime substitution on.",
                 Background = "#16A34A",
                 Foreground = "#FFFFFF",
                 BorderBrush = "#86EFAC"
-            });
+            };
         }
 
-        return badges;
+        return null;
     }
 
     private int GetUsedSubstitutions()
@@ -1733,6 +1792,11 @@ public partial class HalfTimeView : UserControl
         public string PositionBackground { get; init; } = "#E7EEF8";
         public string PositionForeground { get; init; } = "#102033";
         public IReadOnlyList<PlayerTraitBadge> TraitBadges { get; init; } = [];
+        public int TraitCount => TraitBadges.Count;
+        public string TraitCountText => TraitCount.ToString();
+        public string TraitIconText => "★";
+        public string TraitSummaryText => TraitCount == 1 ? "1 player trait" : $"{TraitCount} player traits";
+        public PlayerCardStatusBadge? SubstitutionStatusBadge { get; init; }
         public IReadOnlyList<PlayerCardStatusBadge> CardStatusBadges { get; init; } = [];
     }
 }

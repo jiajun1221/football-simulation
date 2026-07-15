@@ -30,6 +30,28 @@ public class InjuryRiskServiceTests
     }
 
     [Fact]
+    public void MatchInjuryWeight_GoalkeeperWorkloadCountsLessThanOutfield()
+    {
+        var service = new InjuryRiskService();
+        var goalkeeper = CreatePlayer("Keeper", Position.Goalkeeper, 82);
+        var midfielder = CreatePlayer("Midfielder", Position.Midfielder, 82);
+        foreach (var player in new[] { goalkeeper, midfielder })
+        {
+            player.Stamina = 76;
+            player.MatchesPlayedRecently = 6;
+            player.SeasonFatigue = 55;
+        }
+
+        var opponent = CreateTeam("Opponent", CreatePlayer("Opponent Defender", Position.Defender, 82));
+        var team = CreateTeam("Team", goalkeeper, midfielder);
+
+        var goalkeeperWeight = service.CalculatePlayerMatchInjuryWeight(goalkeeper, team, opponent, minute: 82, EventType.Foul);
+        var midfielderWeight = service.CalculatePlayerMatchInjuryWeight(midfielder, team, opponent, minute: 82, EventType.Foul);
+
+        Assert.True(goalkeeperWeight < midfielderWeight);
+    }
+
+    [Fact]
     public void MatchMinuteInjuryChance_IncreasesAfterPhysicalEventsLateInMatch()
     {
         var service = new InjuryRiskService();
@@ -132,6 +154,75 @@ public class InjuryRiskServiceTests
 
         Assert.Equal(8, starter.SeasonFatigue);
         Assert.Equal(1, starter.ConsecutiveStarts);
+    }
+
+    [Fact]
+    public void ApplyPostMatchLoad_GoalkeeperFullMatchLoadStaysCapped()
+    {
+        var service = new InjuryRiskService();
+        var goalkeeper = CreatePlayer("Keeper", Position.Goalkeeper, 82);
+        goalkeeper.Age = 27;
+        goalkeeper.MatchesPlayedRecently = 3;
+        goalkeeper.ConsecutiveFullMatches = 4;
+        var homeTeam = new Team
+        {
+            Name = "Home",
+            Players = [goalkeeper],
+            Tactics = new TeamTactics
+            {
+                PressingIntensity = 85,
+                Mentality = Mentality.Attacking
+            }
+        };
+        var awayTeam = CreateTeam("Away", CreatePlayer("Away Player", Position.Defender, 80));
+        var match = new Match
+        {
+            HomeTeam = homeTeam,
+            AwayTeam = awayTeam,
+            CurrentMinute = 90,
+            PlayerPerformances =
+            [
+                new PlayerMatchPerformance
+                {
+                    TeamName = homeTeam.Name,
+                    PlayerName = goalkeeper.Name,
+                    WasSubstitute = false
+                }
+            ]
+        };
+
+        service.ApplyPostMatchLoad(match);
+
+        Assert.Equal(3, goalkeeper.MatchesPlayedRecently);
+        Assert.Equal(0, goalkeeper.ConsecutiveFullMatches);
+        Assert.InRange(goalkeeper.SeasonFatigue, 0, 4);
+        Assert.Equal(1, goalkeeper.ConsecutiveStarts);
+    }
+
+    [Fact]
+    public void ApplyPostMatchLoad_GoalkeeperRestDecaysRecentLoadFaster()
+    {
+        var service = new InjuryRiskService();
+        var goalkeeper = CreatePlayer("Keeper", Position.Goalkeeper, 82);
+        goalkeeper.MatchesPlayedRecently = 3;
+        var homeTeam = new Team
+        {
+            Name = "Home",
+            Players = [goalkeeper],
+            Tactics = new TeamTactics()
+        };
+        var awayTeam = CreateTeam("Away", CreatePlayer("Away Player", Position.Defender, 80));
+        var match = new Match
+        {
+            HomeTeam = homeTeam,
+            AwayTeam = awayTeam,
+            CurrentMinute = 90,
+            PlayerPerformances = []
+        };
+
+        service.ApplyPostMatchLoad(match);
+
+        Assert.Equal(1, goalkeeper.MatchesPlayedRecently);
     }
 
     [Fact]

@@ -987,7 +987,7 @@ public partial class TransferMarketView : UserControl
         SearchLeagueComboBox.SelectedIndex = 0;
 
         SearchPositionComboBox.Items.Clear();
-        foreach (var item in new[] { ("Any", ""), ("GK", "GK"), ("CB", "CB"), ("LB", "LB"), ("RB", "RB"), ("CDM", "CDM"), ("CM", "CM"), ("CAM", "CAM"), ("LW", "LW"), ("RW", "RW"), ("ST", "ST") })
+        foreach (var item in new[] { ("Any", ""), ("GK", "GK"), ("CB", "CB"), ("LB", "LB"), ("RB", "RB"), ("CDM", "CDM"), ("CM", "CM"), ("CAM", "CAM"), ("LW", "LW"), ("RW", "RW"), ("CF", "CF"), ("ST", "ST") })
         {
             SearchPositionComboBox.Items.Add(CreateComboItem(item.Item1, item.Item2));
         }

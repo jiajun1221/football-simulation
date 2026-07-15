@@ -401,7 +401,7 @@ public partial class FormationSetupPanel : UserControl
 
     private PitchPlayerCard CreatePitchPlayerCard(Player player, string slot)
     {
-        PositionSuitabilityService.EnsurePositionMetadata(player, slot);
+        PositionSuitabilityService.EnsurePositionMetadata(player);
         var form = PlayerFormBadgeHelper.Create(player.FormStatus);
         var suitability = PositionSuitabilityService.GetEffectivenessMultiplier(player);
         var isOutOfPosition = PositionSuitabilityService.IsOutOfPosition(player);

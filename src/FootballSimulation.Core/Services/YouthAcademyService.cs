@@ -6,7 +6,7 @@ public class YouthAcademyService
 {
     public const int MinimumPromotionAge = 16;
     public const int MinimumPromotionOverall = 55;
-    public const int MaximumSeniorSquadSize = 30;
+    public const int MaximumSeniorSquadSize = 40;
 
     private readonly YouthPlayerGeneratorService _generator;
     private readonly YouthDevelopmentService _developmentService;

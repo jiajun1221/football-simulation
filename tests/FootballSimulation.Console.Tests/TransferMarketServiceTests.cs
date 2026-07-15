@@ -193,6 +193,86 @@ public class TransferMarketServiceTests
     }
 
     [Fact]
+    public void GetClubListings_IncludesTransferredPlayerWhenSelectedTeamReferenceDiffers()
+    {
+        var league = CreateLeague("la-liga");
+        var selectedTeam = league.Teams.Single(team => team.Name == "Real Madrid");
+        var service = new TransferMarketService();
+        var state = service.CreateInitialState(league);
+        var target = service.GetAllPlayerListings(state, league.PlayerStats)
+            .Where(listing => listing.Team != selectedTeam)
+            .Where(listing => listing.AskingPrice < service.GetFinance(state, league.LeagueId, selectedTeam).AvailableTransferBudget)
+            .OrderByDescending(listing => listing.Player.OverallRating)
+            .First();
+
+        var offer = service.MakeUserOffer(state, league, selectedTeam, target.Player.PlayerId, target.AskingPrice, currentRound: 1);
+        var equivalentSelectedTeam = new Team { Name = selectedTeam.Name };
+
+        var squadListings = service.GetClubListings(state, league.LeagueId, equivalentSelectedTeam, league.PlayerStats);
+
+        Assert.Equal(OfferStatus.Completed, offer.Status);
+        Assert.Contains(squadListings, listing => listing.Player.PlayerId == target.Player.PlayerId);
+    }
+
+    [Fact]
+    public void SyncSquadsFromTransferHistory_PreservesSavedTransferOrderWhenRoundsDifferAcrossLeagues()
+    {
+        var player = CreateTransferTestPlayer("la-liga:barcelona:paucubarsi:6", "Pau Cubarsí");
+        player.Position = Position.Defender;
+        player.PreferredPosition = "CB";
+        var barcelona = new Team { Name = "Barcelona", Substitutes = [player] };
+        var acMilan = new Team { Name = "AC Milan" };
+        var chelsea = new Team { Name = "Chelsea", Players = [player] };
+        player.IsStarter = true;
+        player.IsOnPitch = true;
+        PositionSuitabilityService.EnsurePositionMetadata(player, "CB");
+        var state = new TransferMarketState
+        {
+            Leagues =
+            [
+                new TransferLeagueState { LeagueId = "la-liga", LeagueName = "La Liga", Teams = [barcelona] },
+                new TransferLeagueState { LeagueId = "serie-a", LeagueName = "Serie A", Teams = [acMilan] },
+                new TransferLeagueState { LeagueId = "premier-league", LeagueName = "Premier League", Teams = [chelsea] }
+            ],
+            TransferHistory =
+            [
+                new TransferHistoryItem
+                {
+                    RoundNumber = 4,
+                    PlayerId = player.PlayerId,
+                    PlayerName = player.Name,
+                    FromLeagueId = "la-liga",
+                    FromClubName = "Barcelona",
+                    ToLeagueId = "serie-a",
+                    ToClubName = "AC Milan",
+                    WindowId = "summer"
+                },
+                new TransferHistoryItem
+                {
+                    RoundNumber = 2,
+                    PlayerId = player.PlayerId,
+                    PlayerName = player.Name,
+                    FromLeagueId = "serie-a",
+                    FromClubName = "AC Milan",
+                    ToLeagueId = "premier-league",
+                    ToClubName = "Chelsea",
+                    WindowId = "summer"
+                }
+            ]
+        };
+
+        new TransferMarketService().SyncSquadsFromTransferHistory(state);
+
+        Assert.Contains(chelsea.Players, squadPlayer => squadPlayer.PlayerId == player.PlayerId);
+        Assert.DoesNotContain(chelsea.Substitutes, squadPlayer => squadPlayer.PlayerId == player.PlayerId);
+        Assert.True(player.IsStarter);
+        Assert.True(player.IsOnPitch);
+        Assert.Equal("CB", player.AssignedPosition);
+        Assert.DoesNotContain(acMilan.Players.Concat(acMilan.Substitutes), squadPlayer => squadPlayer.PlayerId == player.PlayerId);
+        Assert.DoesNotContain(barcelona.Players.Concat(barcelona.Substitutes), squadPlayer => squadPlayer.PlayerId == player.PlayerId);
+    }
+
+    [Fact]
     public void MakeUserOffer_BlocksOutsideTransferWindow()
     {
         var league = CreateLeague("premier-league");
@@ -295,16 +375,30 @@ public class TransferMarketServiceTests
     }
 
     [Fact]
-    public void SearchPlayers_PositionFilterMatchesDisplayedPreferredPositionOnly()
+    public void SearchPlayers_PositionFilterMatchesNaturalAndSecondaryPositions()
     {
-        var league = CreateLeague("premier-league");
+        var league = CreateLeague("la-liga");
         var service = new TransferMarketService();
         var state = service.CreateInitialState(league);
 
-        var results = service.SearchPlayers(state, new TransferSearchCriteria { Position = "LW" }, league.PlayerStats);
+        var results = service.SearchPlayers(state, new TransferSearchCriteria { Position = "ST" }, league.PlayerStats);
 
-        Assert.NotEmpty(results);
-        Assert.All(results, listing => Assert.Equal("LW", listing.Player.PreferredPosition));
+        Assert.Contains(results, listing =>
+            listing.Player.Name.Equals("Julián Alvarez", StringComparison.OrdinalIgnoreCase) &&
+            listing.Player.PreferredPosition.Equals("CF", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void SearchPlayers_TextSearchIgnoresAccents()
+    {
+        var league = CreateLeague("la-liga");
+        var service = new TransferMarketService();
+        var state = service.CreateInitialState(league);
+
+        var results = service.SearchPlayers(state, new TransferSearchCriteria { PlayerName = "Julian Alvarez" }, league.PlayerStats);
+
+        Assert.Contains(results, listing =>
+            listing.Player.Name.Equals("Julián Alvarez", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]

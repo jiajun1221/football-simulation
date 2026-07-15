@@ -5,6 +5,11 @@ namespace FootballSimulation.Services;
 public static class FatigueBadgeService
 {
     private const double FullStaminaThreshold = 99.5;
+    private const int TiredWorkloadRiskThreshold = 55;
+    private const int RiskWorkloadRiskThreshold = 70;
+    private const double GoalkeeperStaminaRiskMultiplier = 0.65;
+    private const double GoalkeeperWorkloadRiskMultiplier = 0.40;
+    private const double GoalkeeperSeasonFatigueRiskMultiplier = 0.70;
 
     public static FatigueBadgeResult Evaluate(Player player, int? fixtureGapDays = null)
     {
@@ -21,6 +26,7 @@ public static class FatigueBadgeService
         var isShortRest = fixtureGapDays is <= 3;
         var isLessThanFourDaysRest = fixtureGapDays is < 4;
         var isLongRest = fixtureGapDays is >= 5;
+        var workloadRisk = CalculateWorkloadRiskPercentage(player, fixtureGapDays);
 
         if (hasFullStamina)
         {
@@ -56,7 +62,9 @@ public static class FatigueBadgeService
 
         if (player.ConsecutiveFullMatches >= 4 && isLessThanFourDaysRest)
         {
-            return CreateRisk("Played 90 minutes in 4 straight matches with short rest");
+            return CreateShortRestFullMatchBadge(
+                "Played 90 minutes in 4 straight matches with short rest",
+                workloadRisk);
         }
 
         var loadReason = GetLoadReason(player, effectiveRecentLoad);
@@ -94,7 +102,9 @@ public static class FatigueBadgeService
 
         if (player.ConsecutiveFullMatches >= 3 && isShortRest)
         {
-            return CreateTired("Played 90 minutes in last 3 matches with short rest");
+            return CreateShortRestFullMatchBadge(
+                "Played 90 minutes in last 3 matches with short rest",
+                workloadRisk);
         }
 
         return FatigueBadgeResult.None;
@@ -118,20 +128,30 @@ public static class FatigueBadgeService
         var effectiveRecentLoad = GetEffectiveRecentLoad(player);
         var risk = 0.0;
 
-        risk += Math.Max(0, 100 - stamina) * 0.9;
-        risk += Math.Clamp(player.SeasonFatigue, 0, 100) * 0.32;
-        risk += Math.Min(35, effectiveRecentLoad * 4.5);
-        risk += Math.Min(18, Math.Max(0, player.ConsecutiveStarts - 5) * 2.5);
-        risk += Math.Min(18, Math.Max(0, player.MinutesInLastFiveMatches - 300) * 0.12);
+        var isGoalkeeper = PositionSuitabilityService.IsGoalkeeperCapable(player);
+        var staminaRiskMultiplier = isGoalkeeper ? GoalkeeperStaminaRiskMultiplier : 1.0;
+        var workloadRiskMultiplier = isGoalkeeper ? GoalkeeperWorkloadRiskMultiplier : 1.0;
+        var seasonFatigueRiskMultiplier = isGoalkeeper ? GoalkeeperSeasonFatigueRiskMultiplier : 1.0;
+
+        risk += Math.Max(0, 100 - stamina) * 0.9 * staminaRiskMultiplier;
+        risk += Math.Clamp(player.SeasonFatigue, 0, 100) * 0.32 * seasonFatigueRiskMultiplier;
+        risk += Math.Min(35, effectiveRecentLoad * 4.5) * workloadRiskMultiplier;
+        risk += Math.Min(18, Math.Max(0, player.ConsecutiveStarts - 5) * 2.5) * workloadRiskMultiplier;
+        risk += Math.Min(18, Math.Max(0, player.MinutesInLastFiveMatches - 300) * 0.12) * workloadRiskMultiplier;
 
         if (player.ConsecutiveFullMatches >= 3)
         {
-            risk += Math.Min(18, (player.ConsecutiveFullMatches - 2) * 6);
+            risk += Math.Min(30, (player.ConsecutiveFullMatches - 2) * 10) * workloadRiskMultiplier;
+        }
+
+        if (player.ConsecutiveFullMatches >= 4 && fixtureGapDays is < 4)
+        {
+            risk += 25 * workloadRiskMultiplier;
         }
 
         if (fixtureGapDays is <= 3)
         {
-            risk += 10;
+            risk += isGoalkeeper ? 5 : 10;
         }
         else if (fixtureGapDays is >= 5)
         {
@@ -140,10 +160,13 @@ public static class FatigueBadgeService
 
         if (stamina >= 95 && player.SeasonFatigue < 45 && effectiveRecentLoad < 6)
         {
-            risk *= 0.45;
+            risk *= isGoalkeeper ? 0.30 : 0.45;
         }
 
-        return Math.Clamp((int)Math.Round(risk), 0, 100);
+        return Math.Clamp(
+            ApplyGoalkeeperRiskCap(player, risk, stamina),
+            0,
+            100);
     }
 
     private static int GetEffectiveRecentLoad(Player player)
@@ -154,27 +177,76 @@ public static class FatigueBadgeService
             return recentLoad;
         }
 
-        return player.LastMatchMinutes switch
+        var reducedLoad = recentLoad;
+        foreach (var minutes in player.RecentMatchMinutes.AsEnumerable().Reverse())
         {
-            0 => Math.Max(0, recentLoad - 2),
-            < 30 => Math.Max(0, recentLoad - 1),
-            _ => recentLoad
-        };
+            if (minutes == 0)
+            {
+                reducedLoad -= 2;
+                continue;
+            }
+
+            if (minutes < 30)
+            {
+                reducedLoad -= 1;
+            }
+
+            break;
+        }
+
+        return Math.Max(0, reducedLoad);
+    }
+
+    private static int ApplyGoalkeeperRiskCap(Player player, double risk, int stamina)
+    {
+        var roundedRisk = (int)Math.Round(risk);
+        if (!PositionSuitabilityService.IsGoalkeeperCapable(player) ||
+            player.Traits.Contains(PlayerTrait.InjuryProne))
+        {
+            return roundedRisk;
+        }
+
+        if (stamina >= 95 && player.SeasonFatigue <= 35)
+        {
+            return Math.Min(roundedRisk, 25);
+        }
+
+        if (stamina >= 90 && player.SeasonFatigue <= 50)
+        {
+            return Math.Min(roundedRisk, 35);
+        }
+
+        if (stamina >= 85 && player.SeasonFatigue <= 65)
+        {
+            return Math.Min(roundedRisk, 45);
+        }
+
+        if (stamina >= 80 && player.SeasonFatigue <= 75)
+        {
+            return Math.Min(roundedRisk, 55);
+        }
+
+        return roundedRisk;
     }
 
     private static string GetLoadReason(Player player, int effectiveRecentLoad)
     {
-        if (player.ConsecutiveStarts >= 10)
+        var isGoalkeeper = PositionSuitabilityService.IsGoalkeeperCapable(player);
+        var consecutiveStartsThreshold = isGoalkeeper ? 14 : 10;
+        var recentLoadThreshold = isGoalkeeper ? 9 : 7;
+        var recentMinutesThreshold = isGoalkeeper ? 470 : 430;
+
+        if (player.ConsecutiveStarts >= consecutiveStartsThreshold)
         {
             return $"Started {player.ConsecutiveStarts} consecutive matches";
         }
 
-        if (effectiveRecentLoad >= 7)
+        if (effectiveRecentLoad >= recentLoadThreshold)
         {
             return $"Recent match load {effectiveRecentLoad}";
         }
 
-        if (player.MinutesInLastFiveMatches >= 430)
+        if (player.MinutesInLastFiveMatches >= recentMinutesThreshold)
         {
             return $"{player.MinutesInLastFiveMatches} minutes in last 5 matches";
         }
@@ -204,6 +276,16 @@ public static class FatigueBadgeService
             "Tired",
             string.Join(Environment.NewLine, reason, "High recent workload"),
             "#F59E0B");
+    }
+
+    private static FatigueBadgeResult CreateShortRestFullMatchBadge(string reason, int workloadRisk)
+    {
+        return workloadRisk switch
+        {
+            >= RiskWorkloadRiskThreshold => CreateRisk(reason),
+            >= TiredWorkloadRiskThreshold => CreateTired(reason),
+            _ => FatigueBadgeResult.None
+        };
     }
 }
 

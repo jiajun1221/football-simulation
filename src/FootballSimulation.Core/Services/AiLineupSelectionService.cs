@@ -9,8 +9,8 @@ public static class AiLineupSelectionService
     {
         ArgumentNullException.ThrowIfNull(team);
 
-        team.Formation = SelectPreferredFormation(team);
-        var slots = FormationSlotService.GetSlots(team.Formation);
+        var selectedFormation = SelectPreferredFormation(team);
+        var slots = FormationSlotService.GetSlots(selectedFormation);
         var allPlayers = team.Players
             .Concat(team.Substitutes)
             .GroupBy(player => player.Name, StringComparer.OrdinalIgnoreCase)
@@ -28,6 +28,7 @@ public static class AiLineupSelectionService
             return;
         }
 
+        team.Formation = selectedFormation;
         var selectedPlayers = assignment.Assignments
             .Select(item =>
             {

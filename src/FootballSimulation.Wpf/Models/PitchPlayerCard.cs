@@ -35,6 +35,11 @@ public class PitchPlayerCard
     public string FatigueWarningTooltip { get; init; } = string.Empty;
     public string FatigueWarningBadgeBackground { get; init; } = "#F59E0B";
     public IReadOnlyList<PlayerTraitBadge> TraitBadges { get; init; } = [];
+    public int TraitCount => TraitBadges.Count;
+    public string TraitCountText => TraitCount.ToString();
+    public string TraitIconText => "★";
+    public string TraitSummaryText => TraitCount == 1 ? "1 player trait" : $"{TraitCount} player traits";
+    public PlayerCardStatusBadge? SubstitutionStatusBadge { get; init; }
     public IReadOnlyList<PlayerCardStatusBadge> CardStatusBadges { get; init; } = [];
     public string CardBackground { get; init; } = "#FFFFFF";
     public string CardBorderBrush { get; init; } = "#102033";

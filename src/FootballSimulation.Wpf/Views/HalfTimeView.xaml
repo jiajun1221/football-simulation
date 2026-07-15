@@ -39,6 +39,41 @@
             </Border>
         </DataTemplate>
 
+        <DataTemplate x:Key="TraitTooltipRowTemplate">
+            <Grid Margin="0,0,0,7">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Border Width="18"
+                        Height="18"
+                        Background="{Binding Background}"
+                        CornerRadius="9"
+                        Margin="0,1,7,0">
+                    <TextBlock Text="{Binding Icon}"
+                               Foreground="{Binding Foreground}"
+                               FontFamily="{Binding FontFamily}"
+                               FontSize="10"
+                               FontWeight="Black"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               TextAlignment="Center" />
+                </Border>
+
+                <StackPanel Grid.Column="1">
+                    <TextBlock Text="{Binding Label}"
+                               Foreground="{DynamicResource AppTextBrush}"
+                               FontSize="11"
+                               FontWeight="Bold" />
+                    <TextBlock Text="{Binding Description}"
+                               Foreground="{DynamicResource AppMutedTextBrush}"
+                               FontSize="10"
+                               TextWrapping="Wrap" />
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
+
         <DataTemplate x:Key="CardStatusBadgeTemplate">
             <Border MinWidth="14"
                     Height="14"
@@ -73,6 +108,24 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
+
+                    <ContentControl Content="{Binding SubstitutionStatusBadge}"
+                                    ContentTemplate="{StaticResource CardStatusBadgeTemplate}"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Top"
+                                    Margin="-10,-10,0,0"
+                                    Panel.ZIndex="10">
+                        <ContentControl.Style>
+                            <Style TargetType="ContentControl">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SubstitutionStatusBadge}" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ContentControl.Style>
+                    </ContentControl>
 
                     <Grid Grid.Row="0">
                         <Grid.ColumnDefinitions>
@@ -191,24 +244,48 @@
                                        FontSize="7"
                                        FontWeight="Bold" />
                         </Border>
-                        <ItemsControl ItemsSource="{Binding TraitBadges}"
-                                      ItemTemplate="{StaticResource TraitIconBadgeTemplate}">
-                            <ItemsControl.Style>
-                                <Style TargetType="ItemsControl">
+                        <Border Background="#EAF1FF"
+                                CornerRadius="7"
+                                Padding="5,1"
+                                HorizontalAlignment="Left"
+                                Margin="0,0,2,0"
+                                ToolTipService.ShowDuration="20000">
+                            <Border.ToolTip>
+                                <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                                    <StackPanel MaxWidth="260">
+                                        <TextBlock Text="{Binding TraitSummaryText}"
+                                                   Foreground="{DynamicResource AppTextBrush}"
+                                                   FontSize="12"
+                                                   FontWeight="Bold"
+                                                   Margin="0,0,0,7" />
+                                        <ItemsControl ItemsSource="{Binding TraitBadges}"
+                                                      ItemTemplate="{StaticResource TraitTooltipRowTemplate}" />
+                                    </StackPanel>
+                                </ToolTip>
+                            </Border.ToolTip>
+                            <Border.Style>
+                                <Style TargetType="Border">
                                     <Setter Property="Visibility" Value="Visible" />
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding TraitBadges.Count}" Value="0">
+                                        <DataTrigger Binding="{Binding TraitCount}" Value="0">
                                             <Setter Property="Visibility" Value="Collapsed" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
-                            </ItemsControl.Style>
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel Orientation="Horizontal" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                        </ItemsControl>
+                            </Border.Style>
+                            <StackPanel Orientation="Horizontal"
+                                        VerticalAlignment="Center">
+                                <TextBlock Text="{Binding TraitIconText}"
+                                           Foreground="#1E528F"
+                                           FontSize="7.5"
+                                           FontWeight="Black"
+                                           Margin="0,0,2,0" />
+                                <TextBlock Text="{Binding TraitCountText}"
+                                           Foreground="#1E528F"
+                                           FontSize="7"
+                                           FontWeight="Black" />
+                            </StackPanel>
+                        </Border>
                         <ItemsControl ItemsSource="{Binding CardStatusBadges}"
                                       ItemTemplate="{StaticResource CardStatusBadgeTemplate}">
                             <ItemsControl.Style>
@@ -265,6 +342,24 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
+
+                    <ContentControl Content="{Binding SubstitutionStatusBadge}"
+                                    ContentTemplate="{StaticResource CardStatusBadgeTemplate}"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Top"
+                                    Margin="-11,-11,0,0"
+                                    Panel.ZIndex="10">
+                        <ContentControl.Style>
+                            <Style TargetType="ContentControl">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SubstitutionStatusBadge}" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ContentControl.Style>
+                    </ContentControl>
 
                     <Grid Grid.Row="0">
                         <Grid.ColumnDefinitions>
@@ -383,24 +478,48 @@
                                        FontSize="7"
                                        FontWeight="Bold" />
                         </Border>
-                        <ItemsControl ItemsSource="{Binding TraitBadges}"
-                                      ItemTemplate="{StaticResource TraitIconBadgeTemplate}">
-                            <ItemsControl.Style>
-                                <Style TargetType="ItemsControl">
+                        <Border Background="#EAF1FF"
+                                CornerRadius="7"
+                                Padding="5,1"
+                                HorizontalAlignment="Left"
+                                Margin="0,0,2,0"
+                                ToolTipService.ShowDuration="20000">
+                            <Border.ToolTip>
+                                <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                                    <StackPanel MaxWidth="260">
+                                        <TextBlock Text="{Binding TraitSummaryText}"
+                                                   Foreground="{DynamicResource AppTextBrush}"
+                                                   FontSize="12"
+                                                   FontWeight="Bold"
+                                                   Margin="0,0,0,7" />
+                                        <ItemsControl ItemsSource="{Binding TraitBadges}"
+                                                      ItemTemplate="{StaticResource TraitTooltipRowTemplate}" />
+                                    </StackPanel>
+                                </ToolTip>
+                            </Border.ToolTip>
+                            <Border.Style>
+                                <Style TargetType="Border">
                                     <Setter Property="Visibility" Value="Visible" />
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding TraitBadges.Count}" Value="0">
+                                        <DataTrigger Binding="{Binding TraitCount}" Value="0">
                                             <Setter Property="Visibility" Value="Collapsed" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
-                            </ItemsControl.Style>
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel Orientation="Horizontal" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                        </ItemsControl>
+                            </Border.Style>
+                            <StackPanel Orientation="Horizontal"
+                                        VerticalAlignment="Center">
+                                <TextBlock Text="{Binding TraitIconText}"
+                                           Foreground="#1E528F"
+                                           FontSize="7.5"
+                                           FontWeight="Black"
+                                           Margin="0,0,2,0" />
+                                <TextBlock Text="{Binding TraitCountText}"
+                                           Foreground="#1E528F"
+                                           FontSize="7"
+                                           FontWeight="Black" />
+                            </StackPanel>
+                        </Border>
                         <ItemsControl ItemsSource="{Binding CardStatusBadges}"
                                       ItemTemplate="{StaticResource CardStatusBadgeTemplate}">
                             <ItemsControl.Style>
@@ -738,16 +857,39 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="Substitutes"
                                            Foreground="White"
                                            FontSize="17"
                                            FontWeight="Bold" />
-                                <TextBlock x:Name="SubstitutionStatusTextBlock"
+                                <TextBlock x:Name="SubstituteFilterTextBlock"
                                            Grid.Column="1"
+                                           Text="All players"
+                                           Foreground="#DDF7E8"
+                                           FontSize="10"
+                                           FontWeight="SemiBold"
+                                           Margin="8,0,0,0"
+                                           VerticalAlignment="Center" />
+                                <Button x:Name="ClearSubstituteFilterButton"
+                                        Grid.Column="2"
+                                        Content="x"
+                                        Width="22"
+                                        Height="22"
+                                        Margin="6,0,0,0"
+                                        Padding="0"
+                                        FontSize="11"
+                                        FontWeight="Black"
+                                        ToolTip="Show all substitutes"
+                                        Visibility="Collapsed"
+                                        Click="ClearSubstituteFilterButton_Click" />
+                                <TextBlock x:Name="SubstitutionStatusTextBlock"
+                                           Grid.Column="3"
                                            Foreground="#DDF7E8"
                                            FontSize="11"
                                            FontWeight="Bold"
+                                           Margin="8,0,0,0"
                                            VerticalAlignment="Center" />
                             </Grid>
 

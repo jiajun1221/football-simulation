@@ -456,8 +456,8 @@ public partial class SquadOverviewView : UserControl
         {
             "CF" => ["ST", "CAM"],
             "ST" => ["CF", "LW", "RW"],
-            "LW" => ["RW", "ST"],
-            "RW" => ["LW", "ST"],
+            "LW" => ["RW", "LM", "ST"],
+            "RW" => ["LW", "RM", "ST"],
             "CM" => ["CAM", "CDM"],
             "CAM" => ["CM", "CF"],
             "CDM" => ["CM", "CB"],

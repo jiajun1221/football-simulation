@@ -39,15 +39,29 @@ public static class PlayerTraitBadgeHelper
 
     private static PlayerTraitBadge CreateTraitBadge(PlayerTrait trait)
     {
+        var icon = PlayerTraitDisplayService.GetIcon(trait);
+        var label = PlayerTraitDisplayService.GetLabel(trait);
+        var description = PlayerTraitDisplayService.GetEffectDescription(trait);
+
         return new PlayerTraitBadge
         {
-            Icon = PlayerTraitDisplayService.GetIcon(trait),
-            TooltipText = CreateTooltipText(trait)
+            Icon = icon,
+            Label = label,
+            Description = description,
+            TooltipText = CreateTooltipText(icon, label, description)
         };
     }
 
     private static string CreateTooltipText(PlayerTrait trait)
     {
-        return $"{PlayerTraitDisplayService.GetIcon(trait)} {PlayerTraitDisplayService.GetLabel(trait)}{Environment.NewLine}{PlayerTraitDisplayService.GetEffectDescription(trait)}";
+        return CreateTooltipText(
+            PlayerTraitDisplayService.GetIcon(trait),
+            PlayerTraitDisplayService.GetLabel(trait),
+            PlayerTraitDisplayService.GetEffectDescription(trait));
+    }
+
+    private static string CreateTooltipText(string icon, string label, string description)
+    {
+        return $"{icon} {label}{Environment.NewLine}{description}";
     }
 }

@@ -203,8 +203,8 @@ public class PromotedClubGeneratorService
             "CDM" => ["CM", "CB"],
             "CM" => ["CDM", "CAM"],
             "CAM" => ["CM", "LW", "RW"],
-            "RW" => ["LW", "ST"],
-            "LW" => ["RW", "ST"],
+            "RW" => ["LW", "RM", "ST"],
+            "LW" => ["RW", "LM", "ST"],
             "ST" => ["RW", "LW"],
             _ => []
         };
