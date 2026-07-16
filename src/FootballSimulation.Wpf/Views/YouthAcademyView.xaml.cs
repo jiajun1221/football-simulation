@@ -47,7 +47,7 @@ public partial class YouthAcademyView : UserControl
 
         EnsureState();
         var academy = _academyService.GetAcademy(_state.League, _state.SelectedTeam.Name);
-        AcademySummaryTextBlock.Text = $"{academy.ClubName} | {academy.AcademyLevel} Academy | Reputation {academy.Reputation} | {academy.YouthPlayers.Count} youth players";
+        AcademySummaryTextBlock.Text = $"{academy.ClubName} | {academy.AcademyLevel} Academy | Reputation {academy.Reputation} | {academy.YouthPlayers.Count}/{YouthAcademyService.MaximumYouthAcademySize} youth players";
         LoadAcademySquad();
         LoadYouthScout();
         LoadAcademyHistory();

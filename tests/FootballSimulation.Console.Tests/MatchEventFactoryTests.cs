@@ -33,4 +33,47 @@ public class MatchEventFactoryTests
         Assert.Equal(EventType.Miss, matchEvent.EventType);
         Assert.Equal(ShotClassification.Header, matchEvent.ShotClassification);
     }
+
+    [Fact]
+    public void CreateLateDrama_PreservesCatalystAndTriggeredTrait()
+    {
+        var team = new Team { Name = "Chelsea" };
+        var opponent = new Team { Name = "Arsenal" };
+        var catalyst = new Player { Name = "Cole Palmer", Position = Position.Midfielder, PreferredPosition = "CAM" };
+        var match = new Match { HomeTeam = team, AwayTeam = opponent, HomeScore = 1, AwayScore = 2 };
+
+        var matchEvent = new MatchEventFactory().CreateLateDrama(88, team, opponent, match, catalyst, PlayerTrait.BigMatchPlayer);
+
+        Assert.Equal(EventType.LateDrama, matchEvent.EventType);
+        Assert.Equal(catalyst.Name, matchEvent.PrimaryPlayerName);
+        Assert.Equal(PlayerTrait.BigMatchPlayer, matchEvent.TriggeredTrait);
+    }
+
+    [Fact]
+    public void CreateTimeWasting_PreservesPlayerAndLeadershipTrait()
+    {
+        var team = new Team { Name = "Chelsea" };
+        var leader = new Player { Name = "Reece James", Position = Position.Defender, PreferredPosition = "RB" };
+
+        var matchEvent = new MatchEventFactory().CreateTimeWasting(84, team, new Random(1), leader, PlayerTrait.Leadership);
+
+        Assert.Equal(EventType.TimeWasting, matchEvent.EventType);
+        Assert.Equal(leader.Name, matchEvent.PrimaryPlayerName);
+        Assert.Equal(PlayerTrait.Leadership, matchEvent.TriggeredTrait);
+    }
+
+    [Fact]
+    public void CreateGoalkeeperMistake_UsesSlipperyConditionContext()
+    {
+        var team = new Team { Name = "Chelsea" };
+        var goalkeeper = new Player { Name = "Robert Sanchez", Position = Position.Goalkeeper, PreferredPosition = "GK" };
+        var attacker = new Player { Name = "Bukayo Saka", Position = Position.Forward, PreferredPosition = "RW" };
+
+        var matchEvent = new MatchEventFactory().CreateGoalkeeperMistake(63, team, goalkeeper, attacker, new Random(3), "slippery conditions");
+
+        Assert.Equal(EventType.GoalkeeperMistake, matchEvent.EventType);
+        Assert.Equal(goalkeeper.Name, matchEvent.PrimaryPlayerName);
+        Assert.Equal(attacker.Name, matchEvent.SecondaryPlayerName);
+        Assert.Contains("ball", matchEvent.Description, StringComparison.OrdinalIgnoreCase);
+    }
 }

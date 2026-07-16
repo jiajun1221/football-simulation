@@ -9,6 +9,9 @@ public class MatchEngine
     private const int CrowdMomentumCooldownMinutes = 12;
     private const int MaxCrowdMomentumEventsPerTeam = 2;
     private const int MaxCrowdMomentumEventsPerMatch = 3;
+    private const int DramaCooldownMinutes = 4;
+    private const int SameDramaTypeCooldownMinutes = 9;
+    private const int MaxDramaEventsPerMatch = 7;
     private const int RedCardCooldownMinutes = 20;
     private const int EarlyRedCardProtectionMinute = 15;
     private const int FirstHalfMaximumAddedMinutes = 6;
@@ -553,7 +556,9 @@ public class MatchEngine
     {
         var match = simulationState.Match;
         var regulationMinute = GetRegulationMinute(match, minute);
-        if (regulationMinute < 75 || minute - simulationState.LastTimeWastingMinute < 8)
+        if (regulationMinute < 75 ||
+            minute - simulationState.LastTimeWastingMinute < 8 ||
+            !CanAddDramaEvent(simulationState, minute, EventType.TimeWasting))
         {
             return;
         }
@@ -585,6 +590,7 @@ public class MatchEngine
 
         simulationState.MatchLog.AddEvent(simulationState.EventFactory.CreateTimeWasting(minute, leadingTeam, random));
         simulationState.LastTimeWastingMinute = minute;
+        RegisterDramaEvent(simulationState, minute, EventType.TimeWasting);
         SetPossession(simulationState, leadingTeam, BallState.SetPiece, EventType.TimeWasting);
     }
 
@@ -618,11 +624,17 @@ public class MatchEngine
 
         simulationState.MatchLog.AddEvent(createEvent());
         RegisterCrowdMomentum(simulationState, minute, team);
+        RegisterDramaEvent(simulationState, minute, EventType.CrowdMomentum);
         return true;
     }
 
     private static bool CanAddCrowdMomentum(MatchSimulationState simulationState, int minute, Team team)
     {
+        if (!CanAddDramaEvent(simulationState, minute, EventType.CrowdMomentum))
+        {
+            return false;
+        }
+
         var previousEventType = simulationState.MatchLog.GetEvents().LastOrDefault()?.EventType ?? simulationState.LastFeedEventType;
         if (previousEventType == EventType.CrowdMomentum)
         {
@@ -648,6 +660,73 @@ public class MatchEngine
         simulationState.LastCrowdMomentumMinute = minute;
         simulationState.TotalCrowdMomentumCount++;
         IncrementCount(simulationState.CrowdMomentumCountByTeam, team.Name);
+    }
+
+    private static bool CanAddDramaEvent(MatchSimulationState simulationState, int minute, EventType eventType)
+    {
+        if (eventType == EventType.Injury)
+        {
+            return true;
+        }
+
+        if (eventType == EventType.TimeWasting && minute - simulationState.LastTimeWastingMinute < 8)
+        {
+            return false;
+        }
+
+        if (simulationState.DramaEventCount >= MaxDramaEventsPerMatch)
+        {
+            return false;
+        }
+
+        var recentTrackedEvent = simulationState.MatchLog.GetEvents()
+            .LastOrDefault(matchEvent => IsTrackedDramaEvent(matchEvent.EventType));
+        if (recentTrackedEvent is not null && minute - recentTrackedEvent.Minute < DramaCooldownMinutes)
+        {
+            return false;
+        }
+
+        if (minute - simulationState.LastDramaEventMinute < DramaCooldownMinutes)
+        {
+            return false;
+        }
+
+        var recentSameTypeEvent = simulationState.MatchLog.GetEvents()
+            .LastOrDefault(matchEvent => matchEvent.EventType == eventType);
+        if (recentSameTypeEvent is not null && minute - recentSameTypeEvent.Minute < SameDramaTypeCooldownMinutes)
+        {
+            return false;
+        }
+
+        return !simulationState.LastDramaMinuteByType.TryGetValue(eventType, out var lastMinute) ||
+            minute - lastMinute >= SameDramaTypeCooldownMinutes;
+    }
+
+    private static void RegisterDramaEvent(MatchSimulationState simulationState, int minute, EventType eventType)
+    {
+        if (!IsTrackedDramaEvent(eventType))
+        {
+            return;
+        }
+
+        simulationState.LastDramaEventMinute = minute;
+        simulationState.LastDramaMinuteByType[eventType] = minute;
+        simulationState.DramaEventCount++;
+    }
+
+    private static bool IsTrackedDramaEvent(EventType eventType)
+    {
+        return eventType is EventType.CrowdMomentum
+            or EventType.LateDrama
+            or EventType.RefereeControversy
+            or EventType.Confrontation
+            or EventType.Exhaustion
+            or EventType.TimeWasting
+            or EventType.DefensiveError
+            or EventType.GoalkeeperHeroics
+            or EventType.GoalkeeperMistake
+            or EventType.Woodwork
+            or EventType.SetPieceDanger;
     }
 
     private static void AddPendingHalftimeSubstitutionEvents(MatchSimulationState simulationState, int minute)
@@ -1400,6 +1479,11 @@ public class MatchEngine
             return strengthSnapshot;
         }
 
+        if (!CanAddDramaEvent(simulationState, minute, dramaResult.EventType))
+        {
+            return strengthSnapshot;
+        }
+
         if (dramaResult.EventType is EventType.Confrontation or EventType.RefereeControversy &&
             !CanCreateContextualConfrontation(simulationState, minute, simulationState.LastFeedEventType))
         {
@@ -1441,6 +1525,13 @@ public class MatchEngine
 
         TrackDramaPerformance(match, dramaResult);
         simulationState.MatchLog.AddEvent(CreateDramaMatchEvent(minute, match, dramaResult, simulationState.EventFactory));
+        RegisterDramaEvent(simulationState, minute, dramaResult.EventType);
+        if (dramaResult.EventType == EventType.TimeWasting)
+        {
+            simulationState.LastTimeWastingMinute = minute;
+            SetPossession(simulationState, dramaResult.Team, BallState.SetPiece, EventType.TimeWasting);
+        }
+
         if (dramaResult.EventType == EventType.Confrontation && dramaResult.Player is not null)
         {
             RegisterConfrontation(simulationState, minute);
@@ -1526,13 +1617,22 @@ public class MatchEngine
                 dramaResult.Player!,
                 match,
                 scorerMatchGoals: GetMatchGoalCount(match, dramaResult.Team, dramaResult.Player!)),
-            EventType.GoalkeeperHeroics => eventFactory.CreateGoalkeeperHeroics(minute, dramaResult.Team, dramaResult.Player!),
-            EventType.SetPieceDanger => eventFactory.CreateSetPieceDanger(minute, dramaResult.Team, dramaResult.Player!),
-            EventType.RefereeControversy => eventFactory.CreateRefereeControversy(minute, dramaResult.Team, dramaResult.Player, new Random(minute + dramaResult.Team.Name.Length)),
-            EventType.LateDrama => eventFactory.CreateLateDrama(minute, dramaResult.Team, dramaResult.OpponentTeam ?? GetOpposingTeam(match, dramaResult.Team), match),
-            EventType.Confrontation => eventFactory.CreateConfrontation(minute, dramaResult.Team, dramaResult.Player!),
+            EventType.GoalkeeperHeroics => eventFactory.CreateGoalkeeperHeroics(minute, dramaResult.Team, dramaResult.Player!, dramaResult.TriggeredTrait, dramaResult.DramaFlavor),
+            EventType.SetPieceDanger => eventFactory.CreateSetPieceDanger(minute, dramaResult.Team, dramaResult.Player!, dramaResult.TriggeredTrait),
+            EventType.RefereeControversy => eventFactory.CreateRefereeControversy(minute, dramaResult.Team, dramaResult.Player, new Random(minute + dramaResult.Team.Name.Length), dramaResult.DramaFlavor, dramaResult.TriggeredTrait),
+            EventType.LateDrama => eventFactory.CreateLateDrama(minute, dramaResult.Team, dramaResult.OpponentTeam ?? GetOpposingTeam(match, dramaResult.Team), match, dramaResult.Player, dramaResult.TriggeredTrait),
+            EventType.Confrontation => eventFactory.CreateConfrontation(minute, dramaResult.Team, dramaResult.Player!, reason: dramaResult.DramaFlavor),
             EventType.CrowdMomentum => eventFactory.CreateCrowdMomentum(minute, dramaResult.Team),
             EventType.Exhaustion => eventFactory.CreateExhaustion(minute, dramaResult.Team, dramaResult.Player!),
+            EventType.TimeWasting => eventFactory.CreateTimeWasting(minute, dramaResult.Team, new Random(minute + dramaResult.Team.Name.Length), dramaResult.Player, dramaResult.TriggeredTrait),
+            EventType.Woodwork => eventFactory.CreateWoodwork(minute, dramaResult.Team, dramaResult.Player!, string.IsNullOrWhiteSpace(dramaResult.DramaFlavor) ? "The rebound causes chaos in the box." : dramaResult.DramaFlavor, new Random(minute + dramaResult.Team.Name.Length), dramaResult.TriggeredTrait),
+            EventType.GoalkeeperMistake => eventFactory.CreateGoalkeeperMistake(
+                minute,
+                dramaResult.Team,
+                dramaResult.Player!,
+                dramaResult.SecondaryPlayer ?? GetFirstAvailableOpponent(match, dramaResult.Team),
+                new Random(minute + dramaResult.Team.Name.Length),
+                dramaResult.DramaFlavor),
             _ => eventFactory.CreateSetPieceDanger(minute, dramaResult.Team, dramaResult.Player ?? dramaResult.Team.Players[0])
         };
     }
@@ -4396,6 +4496,26 @@ public class MatchEngine
 
                 break;
 
+            case EventType.Woodwork:
+                stats.TotalShots++;
+                stats.ExpectedGoals += 0.10;
+                if (player is not null)
+                {
+                    var performance = GetOrCreatePerformance(match, dramaResult.Team, player);
+                    performance.Shots++;
+                    performance.Rating += 0.10;
+                }
+
+                break;
+
+            case EventType.GoalkeeperMistake:
+                if (player is not null)
+                {
+                    GetOrCreatePerformance(match, dramaResult.Team, player).Rating -= 0.30;
+                }
+
+                break;
+
             case EventType.SetPieceDanger:
                 stats.Corners++;
                 if (player is not null)
@@ -4445,6 +4565,14 @@ public class MatchEngine
                 foreach (var activePlayer in GetActivePitchPlayers(dramaResult.Team))
                 {
                     activePlayer.Morale = Math.Clamp(activePlayer.Morale - 1, 0, 100);
+                }
+
+                break;
+
+            case EventType.TimeWasting:
+                foreach (var activePlayer in GetActivePitchPlayers(dramaResult.Team))
+                {
+                    activePlayer.Morale = Math.Clamp(activePlayer.Morale + 1, 0, 100);
                 }
 
                 break;
@@ -4642,6 +4770,14 @@ public class MatchEngine
     private static Team GetOpposingTeam(Match match, Team team)
     {
         return team == match.HomeTeam ? match.AwayTeam : match.HomeTeam;
+    }
+
+    private static Player GetFirstAvailableOpponent(Match match, Team team)
+    {
+        var opponentTeam = GetOpposingTeam(match, team);
+        return GetActivePitchPlayers(opponentTeam).FirstOrDefault(player => !PositionSuitabilityService.IsGoalkeeperCapable(player)) ??
+            GetActivePitchPlayers(opponentTeam).FirstOrDefault() ??
+            opponentTeam.Players.First();
     }
 
     private static Player? GetGoalkeeper(Team team)
@@ -5812,6 +5948,16 @@ public class MatchEngine
         public int TensionUntilMinute { get; set; }
         public int LastConfrontationMinute { get; set; } = -100;
         public int ConfrontationCount { get; set; }
+        public int LastDramaEventMinute { get; set; } = match.Events
+            .Where(matchEvent => IsTrackedDramaEvent(matchEvent.EventType))
+            .Select(matchEvent => matchEvent.Minute)
+            .DefaultIfEmpty(-100)
+            .Max();
+        public int DramaEventCount { get; set; } = match.Events.Count(matchEvent => IsTrackedDramaEvent(matchEvent.EventType));
+        public Dictionary<EventType, int> LastDramaMinuteByType { get; } = match.Events
+            .Where(matchEvent => IsTrackedDramaEvent(matchEvent.EventType))
+            .GroupBy(matchEvent => matchEvent.EventType)
+            .ToDictionary(group => group.Key, group => group.Max(matchEvent => matchEvent.Minute));
         public int LastRedCardMinute { get; set; } = match.Events
             .Where(matchEvent => matchEvent.EventType == EventType.RedCard)
             .Select(matchEvent => matchEvent.Minute)

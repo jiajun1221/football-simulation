@@ -5,7 +5,7 @@ namespace FootballSimulation.Services;
 public class YouthScoutService
 {
     public const int ScoutSlotCount = 3;
-    public const int RequiredMatchesPerReport = 3;
+    public const int RequiredMatchesPerReport = 4;
 
     private static readonly YouthScoutCountry[] Countries =
     [
@@ -272,6 +272,11 @@ public class YouthScoutService
         if (prospect.IsSigned)
         {
             return new YouthOperationResult(false, $"{prospect.Name} has already signed.");
+        }
+
+        if (YouthAcademyService.IsAcademyFull(academy))
+        {
+            return new YouthOperationResult(false, "Youth academy is full. Release or promote a player before signing another prospect.");
         }
 
         prospect.WeeklyWage = prospect.WeeklyWage > 0 ? prospect.WeeklyWage : CalculateWeeklyWage(prospect);
@@ -784,7 +789,16 @@ public class YouthScoutService
     {
         assignment.ScoutId = string.IsNullOrWhiteSpace(assignment.ScoutId) ? $"scout-{index + 1}" : assignment.ScoutId;
         assignment.ScoutName = string.IsNullOrWhiteSpace(assignment.ScoutName) ? $"Scout #{index + 1}" : assignment.ScoutName;
-        assignment.RequiredMatches = assignment.RequiredMatches <= 0 ? RequiredMatchesPerReport : assignment.RequiredMatches;
+        var wasCompleted = assignment.ProgressMatches >= assignment.RequiredMatches &&
+            !string.IsNullOrWhiteSpace(assignment.ActiveReportId);
+        assignment.RequiredMatches = assignment.RequiredMatches <= 0
+            ? RequiredMatchesPerReport
+            : Math.Max(RequiredMatchesPerReport, assignment.RequiredMatches);
+        if (wasCompleted)
+        {
+            assignment.ProgressMatches = assignment.RequiredMatches;
+        }
+
         assignment.ProgressMatches = Math.Clamp(assignment.ProgressMatches, 0, assignment.RequiredMatches);
         if (!Enum.IsDefined(assignment.PrimaryFocus) || !PositionFocuses.Contains(assignment.PrimaryFocus))
         {

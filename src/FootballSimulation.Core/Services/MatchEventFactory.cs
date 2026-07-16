@@ -730,9 +730,16 @@ public class MatchEventFactory
             triggeredTrait: triggeredTrait);
     }
 
-    public MatchEvent CreateGoalkeeperHeroics(int minute, Team team, Player goalkeeper)
+    public MatchEvent CreateGoalkeeperHeroics(int minute, Team team, Player goalkeeper, PlayerTrait? triggeredTrait = null, string dramaFlavor = "")
     {
-        return CreateEvent(minute, EventType.GoalkeeperHeroics, $"{goalkeeper.Name} keeps {team.Name} alive with a huge save.", goalkeeper.Name);
+        var description = dramaFlavor switch
+        {
+            "one-on-one" => $"{goalkeeper.Name} keeps {team.Name} alive with a huge one-on-one save.",
+            "scramble" => $"{goalkeeper.Name} reacts through bodies and keeps {team.Name} alive.",
+            _ => $"{goalkeeper.Name} keeps {team.Name} alive with a huge save."
+        };
+
+        return CreateEvent(minute, EventType.GoalkeeperHeroics, description, goalkeeper.Name, triggeredTrait: triggeredTrait);
     }
 
     public MatchEvent CreateSetPieceDanger(int minute, Team team, Player player, PlayerTrait? triggeredTrait = null)
@@ -889,17 +896,22 @@ public class MatchEventFactory
         return CreateEvent(minute, EventType.AddedTime, description);
     }
 
-    public MatchEvent CreateTimeWasting(int minute, Team team, Random random)
+    public MatchEvent CreateTimeWasting(int minute, Team team, Random random, Player? player = null, PlayerTrait? triggeredTrait = null)
     {
+        var playerText = player is null ? team.Name : player.Name;
         return CreateEvent(
             minute,
             EventType.TimeWasting,
             Pick(
                 random,
-                $"The keeper takes his time with the restart for {team.Name}.",
+                player is null
+                    ? $"The keeper takes his time with the restart for {team.Name}."
+                    : $"{playerText} takes extra care over the restart for {team.Name}.",
                 $"{team.Name} are trying to slow the game down.",
                 $"{team.Name} take their time over the restart as the clock ticks.",
-                $"A few extra seconds disappear as {team.Name} manage the tempo."));
+                $"A few extra seconds disappear as {team.Name} manage the tempo."),
+            player?.Name,
+            triggeredTrait: triggeredTrait);
     }
 
     public MatchEvent CreateWeatherAnnouncement(int minute, WeatherCondition weatherCondition)
@@ -978,50 +990,95 @@ public class MatchEventFactory
         return CreateEvent(minute, EventType.VarDecision, description, primaryPlayer?.Name, secondaryPlayer?.Name, match);
     }
 
-    public MatchEvent CreateRefereeControversy(int minute, Team team, Player? player, Random random)
+    public MatchEvent CreateRefereeControversy(
+        int minute,
+        Team team,
+        Player? player,
+        Random random,
+        string reason = "",
+        PlayerTrait? triggeredTrait = null)
     {
-        var description = Pick(random,
-            $"Players furious with the referee's decision. {team.Name} feel that looked harsh.",
-            $"Replay suggests there was very little contact. {team.Name} cannot believe the whistle.",
-            $"{team.Name} surround the referee as frustration spills over.");
+        var description = reason switch
+        {
+            "penalty incident" => Pick(random,
+                $"{team.Name} are furious with the penalty incident. The referee waves away the protests.",
+                $"{team.Name} surround the referee after that penalty-area call."),
+            "rivalry tension" => Pick(random,
+                $"The rivalry tension is boiling now. {team.Name} cannot believe the referee's call.",
+                $"{team.Name} are furious as the derby edge spills into the referee's decision."),
+            "aggressive player" when player is not null => Pick(random,
+                $"{player.Name} is right on the edge for {team.Name}. The referee gives a final warning.",
+                $"The referee pulls {player.Name} aside after another aggressive challenge."),
+            _ => Pick(random,
+                $"Players furious with the referee's decision. {team.Name} feel that looked harsh.",
+                $"Replay suggests there was very little contact. {team.Name} cannot believe the whistle.",
+                $"{team.Name} surround the referee as frustration spills over.")
+        };
 
-        return CreateEvent(minute, EventType.RefereeControversy, description, player?.Name);
+        return CreateEvent(minute, EventType.RefereeControversy, description, player?.Name, triggeredTrait: triggeredTrait);
     }
 
-    public MatchEvent CreateWoodwork(int minute, Team attackingTeam, Player attacker, string reboundOutcome, Random random)
+    public MatchEvent CreateWoodwork(
+        int minute,
+        Team attackingTeam,
+        Player attacker,
+        string reboundOutcome,
+        Random random,
+        PlayerTrait? triggeredTrait = null)
     {
         var description = Pick(random,
             $"{attacker.Name} rattles the crossbar for {attackingTeam.Name}! {reboundOutcome}",
             $"Shot crashes off the post from {attacker.Name}! {reboundOutcome}",
             $"Woodwork denies {attacker.Name} for {attackingTeam.Name}. {reboundOutcome}");
 
-        return CreateEvent(minute, EventType.Woodwork, description, attacker.Name);
+        return CreateEvent(minute, EventType.Woodwork, description, attacker.Name, triggeredTrait: triggeredTrait);
     }
 
-    public MatchEvent CreateGoalkeeperMistake(int minute, Team defendingTeam, Player goalkeeper, Player attacker, Random random)
+    public MatchEvent CreateGoalkeeperMistake(
+        int minute,
+        Team defendingTeam,
+        Player goalkeeper,
+        Player attacker,
+        Random random,
+        string dramaFlavor = "")
     {
-        var description = Pick(random,
-            $"{goalkeeper.Name} spills the ball under pressure for {defendingTeam.Name}. {attacker.Name} reacts first.",
-            $"Terrible moment at the back as {goalkeeper.Name} cannot hold {attacker.Name}'s effort.",
-            $"{goalkeeper.Name} misjudges it and the ball breaks dangerously inside the box.");
+        var description = dramaFlavor == "slippery conditions"
+            ? Pick(random,
+                $"{goalkeeper.Name} spills the slick ball for {defendingTeam.Name}. {attacker.Name} reacts first.",
+                $"The wet surface causes trouble as {goalkeeper.Name} cannot hold {attacker.Name}'s effort.",
+                $"{goalkeeper.Name} misjudges the skidding ball and it breaks dangerously inside the box.")
+            : Pick(random,
+                $"{goalkeeper.Name} spills the ball under pressure for {defendingTeam.Name}. {attacker.Name} reacts first.",
+                $"Terrible moment at the back as {goalkeeper.Name} cannot hold {attacker.Name}'s effort.",
+                $"{goalkeeper.Name} misjudges it and the ball breaks dangerously inside the box.");
 
         return CreateEvent(minute, EventType.GoalkeeperMistake, description, goalkeeper.Name, attacker.Name);
     }
 
-    public MatchEvent CreateLateDrama(int minute, Team team, Team opponentTeam, Match match)
+    public MatchEvent CreateLateDrama(
+        int minute,
+        Team team,
+        Team opponentTeam,
+        Match match,
+        Player? catalyst = null,
+        PlayerTrait? triggeredTrait = null)
     {
         var isLosing = team == match.HomeTeam ? match.HomeScore < match.AwayScore : match.AwayScore < match.HomeScore;
         var description = isLosing
             ? Pick(new Random(minute + team.Name.Length),
-                $"{team.Name} are throwing everyone forward. Late drama is unfolding.",
+                catalyst is null
+                    ? $"{team.Name} are throwing everyone forward. Late drama is unfolding."
+                    : $"{catalyst.Name} drives {team.Name} forward. Late drama is unfolding.",
                 $"{team.Name} pile bodies into attack while {opponentTeam.Name} try to hang on.",
                 $"Urgency everywhere now. {team.Name} chase the match with the crowd roaring.")
             : Pick(new Random(minute + team.Name.Length + opponentTeam.Name.Length),
-                $"{team.Name} sense a late chance to decide this.",
+                catalyst is null
+                    ? $"{team.Name} sense a late chance to decide this."
+                    : $"{catalyst.Name} senses a late chance to decide this for {team.Name}.",
                 $"The final minutes are opening up. {team.Name} push for one more moment.",
                 $"Tension rises as {team.Name} look for a late breakthrough.");
 
-        return CreateEvent(minute, EventType.LateDrama, description);
+        return CreateEvent(minute, EventType.LateDrama, description, catalyst?.Name, triggeredTrait: triggeredTrait);
     }
 
     public MatchEvent CreateHalftime(int minute, Match match)

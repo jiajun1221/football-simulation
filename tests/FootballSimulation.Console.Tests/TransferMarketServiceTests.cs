@@ -402,6 +402,35 @@ public class TransferMarketServiceTests
     }
 
     [Fact]
+    public void SearchPlayers_FindsAiPromotedAcademyPlayerAfterActiveLeagueBind()
+    {
+        var league = CreateLeague("premier-league");
+        var selectedTeam = league.Teams[0];
+        var aiTeam = league.Teams[1];
+        var academyService = new YouthAcademyService();
+        DisableAcademyAutoPromotionCandidates(league);
+        var academy = academyService.GetAcademy(league, aiTeam.Name);
+        var prospect = CreateAiPromotionProspect("Market Academy Star");
+        academy.YouthPlayers.Add(prospect);
+
+        var promotionResults = academyService.PromoteAiYouthPlayers(league, selectedTeam, currentRound: 8);
+        var promotionResult = Assert.Single(promotionResults);
+        Assert.NotNull(promotionResult.PromotedPlayer);
+        var promotedPlayer = promotionResult.PromotedPlayer;
+        var service = new TransferMarketService();
+        var state = service.CreateInitialState(league);
+        service.BindActiveLeague(state, league);
+
+        var listings = service.SearchPlayers(state, new TransferSearchCriteria { PlayerName = prospect.Name }, league.PlayerStats);
+
+        var listing = Assert.Single(listings);
+        Assert.Same(promotedPlayer, listing.Player);
+        Assert.Equal(aiTeam.Name, listing.Team.Name);
+        Assert.Equal(PlayerRole.Prospect, listing.Player.Role);
+        Assert.Equal(PlayerTransferStatus.None, listing.Player.TransferStatus);
+    }
+
+    [Fact]
     public void RunAiTransferActivity_OpenWindowCreatesVisibleAiTransfers()
     {
         var league = CreateLeague("premier-league");
@@ -784,6 +813,36 @@ public class TransferMarketServiceTests
             PreferredPosition = "CM",
             AssignedPosition = "CM",
             OverallRating = 75
+        };
+    }
+
+    private static void DisableAcademyAutoPromotionCandidates(League league)
+    {
+        foreach (var player in league.YouthAcademies.SelectMany(academy => academy.YouthPlayers))
+        {
+            player.CurrentOVR = YouthAcademyService.MinimumPromotionOverall - 1;
+            player.HiddenTruePotential = Math.Min(player.HiddenTruePotential, 70);
+            player.PotentialTier = YouthPotentialTier.CommonProspect;
+        }
+    }
+
+    private static YouthPlayer CreateAiPromotionProspect(string name)
+    {
+        return new YouthPlayer
+        {
+            PlayerId = Guid.NewGuid().ToString("N"),
+            Name = name,
+            Age = 17,
+            Position = Position.Goalkeeper,
+            PreferredPosition = "GK",
+            CurrentOVR = 80,
+            PotentialMin = 90,
+            PotentialMax = 96,
+            HiddenTruePotential = 96,
+            PotentialTier = YouthPotentialTier.EliteProspect,
+            DevelopmentRate = YouthDevelopmentRate.Explosive,
+            MarketValue = 35_000_000m,
+            ScoutReport = "Has potential to be a special player."
         };
     }
 

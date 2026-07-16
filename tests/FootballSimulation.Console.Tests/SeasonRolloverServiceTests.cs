@@ -176,6 +176,95 @@ public class SeasonRolloverServiceTests
     }
 
     [Fact]
+    public void StartNextSeason_AgesCarryoverPlayersTransferSnapshotsAndFreeAgentsOnce()
+    {
+        var leagueEngine = new LeagueEngine();
+        var dataService = new LeagueDataService();
+        var definition = dataService.GetLeagueDefinition("premier-league");
+        var teams = dataService.LoadTeams(definition).Take(6).ToList();
+        var selectedTeam = teams[0];
+        var league = leagueEngine.CreateLeague("premier-league", GameSessionService.PremierLeagueName, "2025-26", teams);
+        var selectedStarter = selectedTeam.Players[0];
+        var selectedSubstitute = selectedTeam.Substitutes[0];
+        selectedStarter.PlayerId = "selected-starter-age-test";
+        selectedSubstitute.PlayerId = "selected-substitute-age-test";
+        selectedStarter.Age = 24;
+        selectedSubstitute.Age = 20;
+        league.Table = teams
+            .Select((team, index) => new LeagueTableEntry
+            {
+                TeamName = team.Name,
+                Played = 10,
+                Wins = Math.Max(0, 5 - index),
+                Draws = 0,
+                Losses = index,
+                GoalsFor = 30 - index,
+                GoalsAgainst = 10 + index,
+                Points = (6 - index) * 3
+            })
+            .ToList();
+        foreach (var fixture in league.Fixtures)
+        {
+            fixture.IsPlayed = true;
+        }
+
+        var transferMarket = new TransferMarketService().CreateInitialState(league);
+        var foreignStarter = new Player
+        {
+            PlayerId = "foreign-starter-age-test",
+            Name = "Foreign Starter",
+            Age = 27,
+            Position = Position.Midfielder,
+            PreferredPosition = "CM",
+            OverallRating = 75
+        };
+        var foreignSubstitute = new Player
+        {
+            PlayerId = "foreign-substitute-age-test",
+            Name = "Foreign Substitute",
+            Age = 21,
+            Position = Position.Forward,
+            PreferredPosition = "ST",
+            OverallRating = 70
+        };
+        var freeAgent = new Player
+        {
+            PlayerId = "free-agent-age-test",
+            Name = "Free Agent",
+            Age = 30,
+            Position = Position.Defender,
+            PreferredPosition = "CB",
+            OverallRating = 72
+        };
+        transferMarket.Leagues.Add(new TransferLeagueState
+        {
+            LeagueId = "test-foreign",
+            LeagueName = "Test Foreign League",
+            Season = league.Season,
+            Teams =
+            [
+                new Team
+                {
+                    Name = "Foreign FC",
+                    Players = [foreignStarter],
+                    Substitutes = [foreignSubstitute]
+                }
+            ]
+        });
+        transferMarket.FreeAgents.Add(freeAgent);
+
+        var result = new SeasonRolloverService().StartNextSeason(league, selectedTeam, transferMarket);
+
+        var agedSelectedTeam = result.League.Teams.Single(team =>
+            team.Name.Equals(selectedTeam.Name, StringComparison.OrdinalIgnoreCase));
+        Assert.Equal(25, agedSelectedTeam.Players.Single(player => player.PlayerId == selectedStarter.PlayerId).Age);
+        Assert.Equal(21, agedSelectedTeam.Substitutes.Single(player => player.PlayerId == selectedSubstitute.PlayerId).Age);
+        Assert.Equal(28, foreignStarter.Age);
+        Assert.Equal(22, foreignSubstitute.Age);
+        Assert.Equal(31, freeAgent.Age);
+    }
+
+    [Fact]
     public void CompleteRemainingAiFixturesIfSelectedTeamFinished_CompletesGeneratedNeutralCompetitionRounds()
     {
         var leagueEngine = new LeagueEngine();

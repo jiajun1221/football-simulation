@@ -923,7 +923,7 @@ public partial class PenaltyShootoutView : UserControl
 
         if (!_isPracticeMode)
         {
-            _gameSessionService.CompleteSelectedTeamLiveMatch(_state.League, fixture, match);
+            _gameSessionService.CompleteSelectedTeamLiveMatch(_state.League, fixture, match, _state.SelectedTeam);
             RunPostMatchTransferActivity();
         }
 

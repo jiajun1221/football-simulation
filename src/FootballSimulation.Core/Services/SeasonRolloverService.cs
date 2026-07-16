@@ -72,6 +72,8 @@ public class SeasonRolloverService
             league.Teams.Select(team => team.Name),
             nextSeason);
 
+        AgePlayersForSeasonRollover(league, transferMarketState);
+
         league.Teams = league.Teams
             .Where(team => !removedClubNames.Contains(team.Name, StringComparer.OrdinalIgnoreCase))
             .Concat(promotedClubs)
@@ -90,7 +92,7 @@ public class SeasonRolloverService
         league.ShownTrophyCelebrationKeys = [];
 
         ApplyOffseasonPlayerReset(league.Teams);
-        _youthAcademyService.ApplySeasonRollover(league);
+        _youthAcademyService.ApplySeasonRollover(league, selectedTeam);
         _youthScoutService.EnsureScoutNetwork(league);
         UpdateTransferMarket(league, transferMarketState, promotedClubs);
 
@@ -292,6 +294,46 @@ public class SeasonRolloverService
                     player.IsSeasonEndingInjury = false;
                 }
             }
+        }
+    }
+
+    private static void AgePlayersForSeasonRollover(League league, TransferMarketState transferMarketState)
+    {
+        var agedPlayerReferences = new HashSet<Player>();
+        var agedPlayerIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var player in league.Teams.SelectMany(team => team.Players.Concat(team.Substitutes)))
+        {
+            AgePlayerForSeasonRollover(player, agedPlayerReferences, agedPlayerIds);
+        }
+
+        foreach (var player in transferMarketState.Leagues
+            .SelectMany(leagueState => leagueState.Teams)
+            .SelectMany(team => team.Players.Concat(team.Substitutes))
+            .Concat(transferMarketState.FreeAgents))
+        {
+            AgePlayerForSeasonRollover(player, agedPlayerReferences, agedPlayerIds);
+        }
+    }
+
+    private static void AgePlayerForSeasonRollover(
+        Player player,
+        HashSet<Player> agedPlayerReferences,
+        HashSet<string> agedPlayerIds)
+    {
+        if (!agedPlayerReferences.Add(player))
+        {
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(player.PlayerId) && !agedPlayerIds.Add(player.PlayerId))
+        {
+            return;
+        }
+
+        if (player.Age.HasValue)
+        {
+            player.Age++;
         }
     }
 

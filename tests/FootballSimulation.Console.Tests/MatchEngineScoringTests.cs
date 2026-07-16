@@ -361,6 +361,91 @@ public class MatchEngineScoringTests
     }
 
     [Fact]
+    public void MatchDramaService_CreatesLatePressureForTrailingOneGoalTeam()
+    {
+        var seedDataService = new SeedDataService();
+        var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+        ResetDramaRisk(homeTeam, awayTeam);
+        homeTeam.Players.First(player => player.Position != Position.Goalkeeper).Traits.Add(PlayerTrait.BigMatchPlayer);
+        var match = new Match { HomeTeam = homeTeam, AwayTeam = awayTeam, HomeScore = 1, AwayScore = 2 };
+        var service = new MatchDramaService();
+
+        var result = service.TryCreateDramaEvent(CreateDramaContext(
+            match,
+            new SequenceRandom(0.0, 0.99, 0.10, 0.10),
+            minute: 78));
+
+        Assert.NotNull(result);
+        Assert.Equal(EventType.LateDrama, result.EventType);
+        Assert.Equal(homeTeam, result.Team);
+        Assert.Equal(PlayerTrait.BigMatchPlayer, result.TriggeredTrait);
+    }
+
+    [Fact]
+    public void MatchDramaService_CreatesGameManagementForLateLeadingTeam()
+    {
+        var seedDataService = new SeedDataService();
+        var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+        ResetDramaRisk(homeTeam, awayTeam);
+        homeTeam.Tactics.Mentality = Mentality.Defensive;
+        var match = new Match { HomeTeam = homeTeam, AwayTeam = awayTeam, HomeScore = 2, AwayScore = 0 };
+        var service = new MatchDramaService();
+
+        var result = service.TryCreateDramaEvent(CreateDramaContext(
+            match,
+            new SequenceRandom(0.0, 0.99, 0.50, 0.80),
+            minute: 82));
+
+        Assert.NotNull(result);
+        Assert.Equal(EventType.TimeWasting, result.EventType);
+        Assert.Equal(homeTeam, result.Team);
+    }
+
+    [Fact]
+    public void MatchDramaService_CreatesRefereeTensionAfterAggressiveFoul()
+    {
+        var seedDataService = new SeedDataService();
+        var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+        ResetDramaRisk(homeTeam, awayTeam);
+        homeTeam.Tactics.PressingIntensity = 90;
+        awayTeam.Tactics.PressingIntensity = 82;
+        var tackler = homeTeam.Players.First(player => player.Position != Position.Goalkeeper);
+        tackler.Traits.Add(PlayerTrait.DivesIntoTackles);
+        var service = new MatchDramaService();
+
+        var result = service.TryCreateDramaEvent(CreateDramaContext(
+            new Match { HomeTeam = homeTeam, AwayTeam = awayTeam },
+            new SequenceRandom(0.0, 0.99, 0.15, 0.20),
+            minute: 61,
+            previousEventType: EventType.Foul));
+
+        Assert.NotNull(result);
+        Assert.Equal(EventType.RefereeControversy, result.EventType);
+        Assert.Equal(PlayerTrait.DivesIntoTackles, result.TriggeredTrait);
+    }
+
+    [Fact]
+    public void MatchDramaService_HeavyRainCanCreateGoalMouthChaos()
+    {
+        var seedDataService = new SeedDataService();
+        var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+        ResetDramaRisk(homeTeam, awayTeam);
+        var service = new MatchDramaService();
+
+        var result = service.TryCreateDramaEvent(CreateDramaContext(
+            new Match { HomeTeam = homeTeam, AwayTeam = awayTeam, WeatherCondition = WeatherCondition.HeavyRain },
+            new SequenceRandom(0.0, 0.99, 0.40),
+            minute: 62,
+            previousEventType: EventType.Shot,
+            weatherCondition: WeatherCondition.HeavyRain));
+
+        Assert.NotNull(result);
+        Assert.Equal(EventType.GoalkeeperMistake, result.EventType);
+        Assert.NotNull(result.Player);
+        Assert.NotNull(result.SecondaryPlayer);
+    }
+
+    [Fact]
     public void SimulateMatch_LimitsCrowdMomentumSpam()
     {
         var seedDataService = new SeedDataService();
@@ -401,6 +486,26 @@ public class MatchEngineScoringTests
             {
                 Assert.True(teamCrowdEvents.Count() <= 2, $"Seed {seed}: {teamCrowdEvents.Key} had too many crowd momentum events.");
             }
+        }
+    }
+
+    [Fact]
+    public void SimulateMatch_LimitsAtmosphereDramaSpam()
+    {
+        var seedDataService = new SeedDataService();
+        var engine = new MatchEngine();
+
+        for (var seed = 1; seed <= 90; seed++)
+        {
+            var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+            homeTeam.Tactics.PressingIntensity = 86;
+            awayTeam.Tactics.PressingIntensity = 84;
+            var result = engine.SimulateMatch(homeTeam, awayTeam, seed: seed);
+            var dramaEvents = result.Events
+                .Where(matchEvent => IsAtmosphereDramaEvent(matchEvent.EventType))
+                .ToList();
+
+            Assert.True(dramaEvents.Count <= 12, $"Seed {seed}: expected atmosphere drama to stay capped.");
         }
     }
 
@@ -1105,6 +1210,53 @@ public class MatchEngineScoringTests
             or EventType.Interception
             or EventType.Pressure
             or EventType.BlockedPass;
+    }
+
+    private static bool IsAtmosphereDramaEvent(EventType eventType)
+    {
+        return eventType is EventType.CrowdMomentum
+            or EventType.LateDrama
+            or EventType.RefereeControversy
+            or EventType.Confrontation
+            or EventType.Exhaustion
+            or EventType.TimeWasting;
+    }
+
+    private static MatchEventContext CreateDramaContext(
+        Match match,
+        Random random,
+        int minute,
+        EventType? previousEventType = null,
+        WeatherCondition weatherCondition = WeatherCondition.Clear)
+    {
+        return new MatchEventContext
+        {
+            Match = match,
+            HomeTeam = match.HomeTeam,
+            AwayTeam = match.AwayTeam,
+            Random = random,
+            Minute = minute,
+            WeatherCondition = weatherCondition,
+            IsRivalryMatch = match.IsRivalryMatch,
+            EnableInjuries = false,
+            PreviousEventType = previousEventType,
+            HomeAttackStrength = 82,
+            AwayAttackStrength = 80,
+            HomeDefenseStrength = 80,
+            AwayDefenseStrength = 80
+        };
+    }
+
+    private static void ResetDramaRisk(params Team[] teams)
+    {
+        foreach (var player in teams.SelectMany(team => team.Players))
+        {
+            player.Stamina = 100;
+            player.CurrentStamina = 100;
+            player.MatchesPlayedRecently = 0;
+            player.SeasonFatigue = 0;
+            player.Traits.Clear();
+        }
     }
 
     private static string? FindEventTeamName(MatchEvent matchEvent, Match match)

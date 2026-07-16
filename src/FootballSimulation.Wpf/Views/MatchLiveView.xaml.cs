@@ -514,7 +514,7 @@ public partial class MatchLiveView : UserControl
 
         if (ShouldCompleteFixtureAtSegmentEnd() && !_fixtureCompleted)
         {
-            _gameSessionService.CompleteSelectedTeamLiveMatch(_state.League, _state.CurrentFixture, _state.CurrentMatch);
+            _gameSessionService.CompleteSelectedTeamLiveMatch(_state.League, _state.CurrentFixture, _state.CurrentMatch, _state.SelectedTeam);
             if (_state.SelectedTeam is not null)
             {
                 _state.TransferMarket ??= _transferMarketService.CreateInitialState(_state.League);

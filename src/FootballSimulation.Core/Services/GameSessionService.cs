@@ -63,7 +63,7 @@ public class GameSessionService
         var result = _leagueEngine.SimulateFixture(league, fixture, options: CreateUserMatchOptions(selectedTeam));
         var remainingResults = _leagueEngine.SimulateRemainingFixturesForCompetitionRound(league, fixture);
         ApplyGrowthForCompletedMatches([result, .. remainingResults]);
-        AdvanceRecoveryAfterCalendarSlot(league, fixture, [result, .. remainingResults]);
+        AdvanceRecoveryAfterCalendarSlot(league, fixture, [result, .. remainingResults], selectedTeam);
         _playerFormPersistenceService.SaveActiveSquadFormStatuses(league.Teams, league.LeagueId);
 
         return result;
@@ -108,18 +108,18 @@ public class GameSessionService
         var result = _leagueEngine.SimulateFixtureSecondHalf(league, fixture, match, options: CreateUserMatchOptions(humanTeam));
         var remainingResults = _leagueEngine.SimulateRemainingFixturesForCompetitionRound(league, fixture);
         ApplyGrowthForCompletedMatches([result, .. remainingResults]);
-        AdvanceRecoveryAfterCalendarSlot(league, fixture, [result, .. remainingResults]);
+        AdvanceRecoveryAfterCalendarSlot(league, fixture, [result, .. remainingResults], selectedTeam);
         _playerFormPersistenceService.SaveActiveSquadFormStatuses(league.Teams, league.LeagueId);
 
         return result;
     }
 
-    public void CompleteSelectedTeamLiveMatch(League league, Fixture fixture, Match match)
+    public void CompleteSelectedTeamLiveMatch(League league, Fixture fixture, Match match, Team? selectedTeam = null)
     {
         _leagueEngine.CompleteLiveFixture(league, fixture, match);
         var remainingResults = _leagueEngine.SimulateRemainingFixturesForCompetitionRound(league, fixture);
         ApplyGrowthForCompletedMatches([match, .. remainingResults]);
-        AdvanceRecoveryAfterCalendarSlot(league, fixture, [match, .. remainingResults]);
+        AdvanceRecoveryAfterCalendarSlot(league, fixture, [match, .. remainingResults], selectedTeam);
         _playerFormPersistenceService.SaveActiveSquadFormStatuses(league.Teams, league.LeagueId);
     }
 
@@ -132,12 +132,20 @@ public class GameSessionService
         return results;
     }
 
-    private void AdvanceRecoveryAfterCalendarSlot(League league, Fixture completedFixture, IReadOnlyCollection<Match> completedMatches)
+    private void AdvanceRecoveryAfterCalendarSlot(
+        League league,
+        Fixture completedFixture,
+        IReadOnlyCollection<Match> completedMatches,
+        Team? selectedTeam = null)
     {
-        AdvanceRecoveryAfterCalendarSlot(league, GetFixtureCalendarRound(completedFixture), completedMatches);
+        AdvanceRecoveryAfterCalendarSlot(league, GetFixtureCalendarRound(completedFixture), completedMatches, selectedTeam);
     }
 
-    private void AdvanceRecoveryAfterCalendarSlot(League league, int completedCalendarRound, IReadOnlyCollection<Match> completedMatches)
+    private void AdvanceRecoveryAfterCalendarSlot(
+        League league,
+        int completedCalendarRound,
+        IReadOnlyCollection<Match> completedMatches,
+        Team? selectedTeam = null)
     {
         _injuryRecoveryService.AdvanceRecoveryAfterCompletedRound(league.Teams);
 
@@ -160,6 +168,7 @@ public class GameSessionService
         if (completedCalendarRound % 4 == 0)
         {
             _youthAcademyService.ApplyDevelopment(league);
+            _youthAcademyService.PromoteAiYouthPlayers(league, selectedTeam, completedCalendarRound);
         }
 
         _youthScoutService.AdvanceScoutingAfterCompletedCalendarSlot(league, completedCalendarRound);

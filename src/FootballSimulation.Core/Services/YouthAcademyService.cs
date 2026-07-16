@@ -7,6 +7,7 @@ public class YouthAcademyService
     public const int MinimumPromotionAge = 16;
     public const int MinimumPromotionOverall = 55;
     public const int MaximumSeniorSquadSize = 40;
+    public const int MaximumYouthAcademySize = 30;
 
     private readonly YouthPlayerGeneratorService _generator;
     private readonly YouthDevelopmentService _developmentService;
@@ -88,7 +89,21 @@ public class YouthAcademyService
                 continue;
             }
 
-            var count = CalculateIntakeCount(academy);
+            var availableSlots = GetAvailableAcademySlots(academy);
+            if (availableSlots <= 0)
+            {
+                academy.IntakeHistory.Add(new YouthIntakeRecord
+                {
+                    Season = season,
+                    CalendarRound = 1,
+                    PlayerCount = 0,
+                    PlayerIds = [],
+                    Summary = $"Academy intake skipped because the academy is full ({MaximumYouthAcademySize}/{MaximumYouthAcademySize})."
+                });
+                continue;
+            }
+
+            var count = Math.Min(CalculateIntakeCount(academy), availableSlots);
             var players = _generator.GenerateSeasonalIntake(academy, team, season, count);
             foreach (var player in players)
             {
@@ -126,6 +141,11 @@ public class YouthAcademyService
         }
 
         var academy = GetAcademy(league, team.Name);
+        if (IsAcademyFull(academy))
+        {
+            return null;
+        }
+
         var existingDiscovery = academy.IntakeHistory.Any(record =>
             record.Season.Equals(league.Season, StringComparison.OrdinalIgnoreCase) &&
             record.CalendarRound == currentRound);
@@ -155,6 +175,18 @@ public class YouthAcademyService
         return player;
     }
 
+    public static bool IsAcademyFull(YouthAcademy academy)
+    {
+        return GetAvailableAcademySlots(academy) <= 0;
+    }
+
+    public static int GetAvailableAcademySlots(YouthAcademy academy)
+    {
+        ArgumentNullException.ThrowIfNull(academy);
+        academy.YouthPlayers ??= [];
+        return Math.Max(0, MaximumYouthAcademySize - academy.YouthPlayers.Count(player => !player.IsPromoted));
+    }
+
     public void ApplyDevelopment(League league, int months = 1)
     {
         EnsureAcademies(league);
@@ -169,7 +201,7 @@ public class YouthAcademyService
         }
     }
 
-    public void ApplySeasonRollover(League league)
+    public void ApplySeasonRollover(League league, Team? selectedTeam = null)
     {
         EnsureAcademies(league);
         foreach (var academy in league.YouthAcademies)
@@ -182,7 +214,48 @@ public class YouthAcademyService
 
         ApplyDevelopment(league, months: 3);
         GenerateSeasonalIntake(league, league.Season);
-        ApplyAiAcademyLogic(league);
+        PromoteAiYouthPlayers(league, selectedTeam);
+    }
+
+    public IReadOnlyList<YouthOperationResult> PromoteAiYouthPlayers(League league, Team? selectedTeam = null, int currentRound = 0)
+    {
+        EnsureAcademies(league);
+        var promotedPlayers = new List<YouthOperationResult>();
+
+        foreach (var team in league.Teams)
+        {
+            if (selectedTeam is not null &&
+                team.Name.Equals(selectedTeam.Name, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            var academy = GetAcademy(league, team.Name);
+            var strongestProspect = academy.YouthPlayers
+                .Where(player => !player.IsPromoted)
+                .Where(player => player.Age >= MinimumPromotionAge)
+                .Where(player => player.CurrentOVR >= MinimumPromotionOverall)
+                .OrderByDescending(player => GetAiPromotionScore(team, player))
+                .FirstOrDefault();
+            if (strongestProspect is null)
+            {
+                continue;
+            }
+
+            var score = GetAiPromotionScore(team, strongestProspect);
+            if (score < 112)
+            {
+                continue;
+            }
+
+            var result = PromoteYouthPlayer(league, team, strongestProspect.PlayerId, currentRound);
+            if (result.Success)
+            {
+                promotedPlayers.Add(result);
+            }
+        }
+
+        return promotedPlayers;
     }
 
     public YouthOperationResult PromoteYouthPlayer(League league, Team team, string youthPlayerId, int currentRound = 0)
@@ -401,30 +474,6 @@ public class YouthAcademyService
             (!string.IsNullOrWhiteSpace(playerId) &&
                 record.PlayerId.Equals(playerId, StringComparison.OrdinalIgnoreCase) ||
                 record.PlayerName.Equals(playerName, StringComparison.OrdinalIgnoreCase)));
-    }
-
-    private void ApplyAiAcademyLogic(League league)
-    {
-        foreach (var team in league.Teams)
-        {
-            var academy = GetAcademy(league, team.Name);
-            var strongestProspect = academy.YouthPlayers
-                .Where(player => !player.IsPromoted)
-                .Where(player => player.Age >= MinimumPromotionAge)
-                .Where(player => player.CurrentOVR >= MinimumPromotionOverall)
-                .OrderByDescending(player => GetAiPromotionScore(team, player))
-                .FirstOrDefault();
-            if (strongestProspect is null)
-            {
-                continue;
-            }
-
-            var score = GetAiPromotionScore(team, strongestProspect);
-            if (score >= 112)
-            {
-                _ = PromoteYouthPlayer(league, team, strongestProspect.PlayerId);
-            }
-        }
     }
 
     private static double GetAiPromotionScore(Team team, YouthPlayer player)

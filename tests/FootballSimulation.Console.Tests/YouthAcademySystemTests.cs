@@ -281,7 +281,49 @@ public class YouthAcademySystemTests
     }
 
     [Fact]
-    public void YouthScout_GeneratesCountryReportAfterThreeClubMatches()
+    public void PromoteAiYouthPlayers_PromotesEligibleNonUserClubProspectAndRecordsHistory()
+    {
+        var league = CreateLeague();
+        var selectedTeam = league.Teams[0];
+        var aiTeam = league.Teams[1];
+        var service = new YouthAcademyService();
+        DisableAiProspects(league);
+        var academy = service.GetAcademy(league, aiTeam.Name);
+        var prospect = CreateAiPromotionProspect("AI Academy Star");
+        academy.YouthPlayers.Add(prospect);
+
+        var results = service.PromoteAiYouthPlayers(league, selectedTeam, currentRound: 8);
+
+        var result = Assert.Single(results);
+        Assert.True(result.Success, result.Message);
+        Assert.Contains(aiTeam.Substitutes, player => player.PlayerId == prospect.PlayerId);
+        Assert.DoesNotContain(academy.YouthPlayers, player => player.PlayerId == prospect.PlayerId);
+        Assert.Contains(academy.AcademyHistory, record =>
+            record.EventType == AcademyHistoryEventType.Promoted &&
+            record.PlayerId == prospect.PlayerId &&
+            record.CalendarRound == 8);
+    }
+
+    [Fact]
+    public void PromoteAiYouthPlayers_DoesNotAutoPromoteSelectedClubProspect()
+    {
+        var league = CreateLeague();
+        var selectedTeam = league.Teams[0];
+        var service = new YouthAcademyService();
+        DisableAiProspects(league);
+        var selectedAcademy = service.GetAcademy(league, selectedTeam.Name);
+        var prospect = CreateAiPromotionProspect("Selected Club Star");
+        selectedAcademy.YouthPlayers.Add(prospect);
+
+        var results = service.PromoteAiYouthPlayers(league, selectedTeam, currentRound: 8);
+
+        Assert.Empty(results);
+        Assert.Contains(selectedAcademy.YouthPlayers, player => player.PlayerId == prospect.PlayerId);
+        Assert.DoesNotContain(selectedTeam.Substitutes, player => player.PlayerId == prospect.PlayerId);
+    }
+
+    [Fact]
+    public void YouthScout_GeneratesCountryReportAfterFourClubMatches()
     {
         var league = CreateLeague();
         var selectedTeam = league.Teams[0];
@@ -298,11 +340,13 @@ public class YouthAcademySystemTests
 
         service.AdvanceScoutingAfterClubMatch(league, selectedTeam, currentRound: 1);
         service.AdvanceScoutingAfterClubMatch(league, selectedTeam, currentRound: 2);
-        var reports = service.AdvanceScoutingAfterClubMatch(league, selectedTeam, currentRound: 3);
+        var incompleteReports = service.AdvanceScoutingAfterClubMatch(league, selectedTeam, currentRound: 3);
+        var reports = service.AdvanceScoutingAfterClubMatch(league, selectedTeam, currentRound: 4);
         var focusedReport = reports.Single(report => report.ScoutId == assignment.ScoutId);
         var focusedCount = focusedReport.Prospects.Count(prospect => prospect.PreferredPosition == "CB");
 
         Assert.Equal(3, academy.ScoutAssignments.Count);
+        Assert.Empty(incompleteReports);
         Assert.NotEmpty(reports);
         Assert.True(focusedCount >= (int)Math.Ceiling(focusedReport.Prospects.Count * 0.70), "Focused reports should mostly match the selected position.");
         Assert.All(reports, report =>
@@ -333,7 +377,8 @@ public class YouthAcademySystemTests
             YouthScoutPositionFocus.CB);
         service.AdvanceScoutingAfterClubMatch(academy, league.Season, currentRound: 1);
         service.AdvanceScoutingAfterClubMatch(academy, league.Season, currentRound: 2);
-        var reports = service.AdvanceScoutingAfterClubMatch(academy, league.Season, currentRound: 3);
+        service.AdvanceScoutingAfterClubMatch(academy, league.Season, currentRound: 3);
+        var reports = service.AdvanceScoutingAfterClubMatch(academy, league.Season, currentRound: 4);
         var report = reports.Single(item => item.ScoutId == eliteScout.ScoutId);
         var focusedCount = report.Prospects.Count(prospect => prospect.PreferredPosition == "CB");
 
@@ -355,6 +400,7 @@ public class YouthAcademySystemTests
         service.AdvanceScoutingAfterClubMatch(academy, league.Season, currentRound: 1);
         service.AdvanceScoutingAfterClubMatch(academy, league.Season, currentRound: 2);
         service.AdvanceScoutingAfterClubMatch(academy, league.Season, currentRound: 3);
+        service.AdvanceScoutingAfterClubMatch(academy, league.Season, currentRound: 4);
         var otherScoutReportCount = academy.ScoutReports.Count(report =>
             !report.ScoutId.Equals(scout.ScoutId, StringComparison.OrdinalIgnoreCase));
 
@@ -382,6 +428,7 @@ public class YouthAcademySystemTests
         service.AdvanceScoutingAfterClubMatch(league, selectedTeam, currentRound: 1);
         service.AdvanceScoutingAfterClubMatch(league, selectedTeam, currentRound: 2);
         service.AdvanceScoutingAfterClubMatch(league, selectedTeam, currentRound: 3);
+        service.AdvanceScoutingAfterClubMatch(league, selectedTeam, currentRound: 4);
         var report = academy.ScoutReports.First();
         var prospect = report.Prospects.First();
         var startingCount = academy.YouthPlayers.Count;
@@ -398,7 +445,7 @@ public class YouthAcademySystemTests
             selectedTeam,
             report.ReportId,
             prospect.ProspectId,
-            currentRound: 3);
+            currentRound: 4);
 
         Assert.True(result.Success, result.Message);
         Assert.True(prospect.IsSigned);
@@ -407,6 +454,53 @@ public class YouthAcademySystemTests
         Assert.Equal(prospect.WeeklyWage, signedPlayer.WeeklyWage);
         Assert.Equal(startingTransferSpent, finance.TransferSpent);
         Assert.Equal(startingYouthWageSpent + prospect.WeeklyWage, finance.YouthWageSpent);
+    }
+
+    [Fact]
+    public void GenerateSeasonalIntake_OnlyFillsAvailableAcademySlots()
+    {
+        var league = CreateLeague();
+        var academyService = new YouthAcademyService();
+        var academy = academyService.GetAcademy(league, league.Teams[0].Name);
+        academy.YouthPlayers = CreateYouthAcademyPlayers(YouthAcademyService.MaximumYouthAcademySize - 1);
+        academy.IntakeHistory.Clear();
+
+        var createdPlayers = academyService.GenerateSeasonalIntake(league, league.Season)
+            .Where(player => player.ClubName.Equals(academy.ClubName, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        Assert.Single(createdPlayers);
+        Assert.Equal(YouthAcademyService.MaximumYouthAcademySize, academy.YouthPlayers.Count(player => !player.IsPromoted));
+    }
+
+    [Fact]
+    public void YouthScout_SignProspectBlocksWhenAcademyIsFull()
+    {
+        var league = CreateLeague();
+        var selectedTeam = league.Teams[0];
+        var transferState = new TransferMarketService().CreateInitialState(league);
+        var service = new YouthScoutService();
+        var academy = new YouthAcademyService().GetAcademy(league, selectedTeam.Name);
+        service.AdvanceScoutingAfterClubMatch(league, selectedTeam, currentRound: 1);
+        service.AdvanceScoutingAfterClubMatch(league, selectedTeam, currentRound: 2);
+        service.AdvanceScoutingAfterClubMatch(league, selectedTeam, currentRound: 3);
+        service.AdvanceScoutingAfterClubMatch(league, selectedTeam, currentRound: 4);
+        var report = academy.ScoutReports.First();
+        var prospect = report.Prospects.First();
+        academy.YouthPlayers = CreateYouthAcademyPlayers(YouthAcademyService.MaximumYouthAcademySize);
+
+        var result = service.SignProspect(
+            league,
+            transferState,
+            selectedTeam,
+            report.ReportId,
+            prospect.ProspectId,
+            currentRound: 4);
+
+        Assert.False(result.Success);
+        Assert.Equal("Youth academy is full. Release or promote a player before signing another prospect.", result.Message);
+        Assert.False(prospect.IsSigned);
+        Assert.Equal(YouthAcademyService.MaximumYouthAcademySize, academy.YouthPlayers.Count);
     }
 
     [Fact]
@@ -488,6 +582,56 @@ public class YouthAcademySystemTests
                 OverallRating = 70
             })
             .ToList();
+    }
+
+    private static List<YouthPlayer> CreateYouthAcademyPlayers(int count)
+    {
+        return Enumerable.Range(1, count)
+            .Select(index => new YouthPlayer
+            {
+                PlayerId = $"youth-capacity-{index}",
+                Name = $"Youth Player {index}",
+                Age = 17,
+                Position = Position.Midfielder,
+                PreferredPosition = "CM",
+                CurrentOVR = 55,
+                PotentialMin = 70,
+                PotentialMax = 82,
+                HiddenTruePotential = 78,
+                PotentialTier = YouthPotentialTier.GoodProspect,
+                DevelopmentRate = YouthDevelopmentRate.Normal
+            })
+            .ToList();
+    }
+
+    private static void DisableAiProspects(League league)
+    {
+        foreach (var player in league.YouthAcademies.SelectMany(academy => academy.YouthPlayers))
+        {
+            player.CurrentOVR = YouthAcademyService.MinimumPromotionOverall - 1;
+            player.HiddenTruePotential = Math.Min(player.HiddenTruePotential, 70);
+            player.PotentialTier = YouthPotentialTier.CommonProspect;
+        }
+    }
+
+    private static YouthPlayer CreateAiPromotionProspect(string name)
+    {
+        return new YouthPlayer
+        {
+            PlayerId = Guid.NewGuid().ToString("N"),
+            Name = name,
+            Age = 17,
+            Position = Position.Goalkeeper,
+            PreferredPosition = "GK",
+            CurrentOVR = 80,
+            PotentialMin = 90,
+            PotentialMax = 96,
+            HiddenTruePotential = 96,
+            PotentialTier = YouthPotentialTier.EliteProspect,
+            DevelopmentRate = YouthDevelopmentRate.Explosive,
+            MarketValue = 35_000_000m,
+            ScoutReport = "Has potential to be a special player."
+        };
     }
 
     private static void SimulateAllFixtures(LeagueEngine leagueEngine, League league)

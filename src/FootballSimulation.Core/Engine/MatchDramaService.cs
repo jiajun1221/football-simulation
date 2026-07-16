@@ -74,11 +74,12 @@ public class MatchDramaService
             : activePlayers.Average(player => 100 - player.Stamina);
         var averagePressing = (context.HomeTeam.Tactics.PressingIntensity + context.AwayTeam.Tactics.PressingIntensity) / 2.0;
         var lateGameBonus = context.Minute >= 70 ? 0.03 : 0.0;
+        var oneGoalLateBonus = context.Minute >= 75 && IsOneGoalMatch(context.Match) ? 0.018 : 0.0;
         var rivalryBonus = context.IsRivalryMatch ? 0.018 : 0.0;
         var weatherBonus = context.WeatherCondition switch
         {
-            WeatherCondition.Storm => 0.022,
-            WeatherCondition.HeavyRain or WeatherCondition.Snow => 0.018,
+            WeatherCondition.Storm => 0.028,
+            WeatherCondition.HeavyRain or WeatherCondition.Snow => 0.022,
             WeatherCondition.Rainy or WeatherCondition.Foggy => 0.010,
             WeatherCondition.Windy => 0.006,
             WeatherCondition.Hot => 0.012,
@@ -87,9 +88,9 @@ public class MatchDramaService
         };
 
         return Math.Clamp(
-            0.035 + averageFatigue / 900.0 + Math.Max(0, averagePressing - 60) / 700.0 + lateGameBonus + rivalryBonus + weatherBonus,
+            0.035 + averageFatigue / 900.0 + Math.Max(0, averagePressing - 60) / 700.0 + lateGameBonus + oneGoalLateBonus + rivalryBonus + weatherBonus,
             0.02,
-            0.22);
+            0.24);
     }
 
     private static Player? FindTiredPlayer(MatchEventContext context)
@@ -256,37 +257,196 @@ public class MatchDramaService
     private static MatchDramaResult CreateAtmosphereEvent(MatchEventContext context)
     {
         var roll = context.Random.NextDouble();
-        if (context.Minute >= 85 && roll < 0.38)
+        if (ShouldCreateLatePressure(context, roll))
         {
             var team = ChooseLatePressureTeam(context);
             var isHomeTeam = team == context.HomeTeam;
             var attackModifier = GetLatePressureAttackModifier(context, team);
+            var catalyst = ChooseBigMomentPlayer(team, context.Random);
             return new MatchDramaResult
             {
                 EventType = EventType.LateDrama,
                 Team = team,
+                Player = catalyst,
                 OpponentTeam = team == context.HomeTeam ? context.AwayTeam : context.HomeTeam,
+                TriggeredTrait = ChooseBigMomentTrait(catalyst),
                 HomeAttackModifier = isHomeTeam ? attackModifier : 1.0,
                 AwayAttackModifier = isHomeTeam ? 1.0 : attackModifier
             };
         }
 
-        if (CanCreateAtmosphereConfrontation(context) && roll < 0.18)
+        if (ShouldCreateTimeWasting(context, roll))
         {
-            var team = ChooseConfrontationTeam(context);
+            var team = GetLeadingTeam(context.Match)!;
+            var isHomeTeam = team == context.HomeTeam;
+            var catalyst = ChooseGameManagementPlayer(team, context.Random);
             return new MatchDramaResult
             {
-                EventType = context.IsRivalryMatch && context.Random.NextDouble() < 0.40
+                EventType = EventType.TimeWasting,
+                Team = team,
+                Player = catalyst,
+                TriggeredTrait = catalyst?.Traits.Contains(PlayerTrait.Leadership) == true ? PlayerTrait.Leadership : null,
+                DramaFlavor = "game management",
+                HomeAttackModifier = isHomeTeam ? 0.97 : 1.0,
+                AwayAttackModifier = isHomeTeam ? 1.0 : 0.97
+            };
+        }
+
+        if (ShouldCreateGoalMouthChaos(context, roll))
+        {
+            return CreateGoalMouthChaosEvent(context, roll);
+        }
+
+        if (ShouldCreateRefereeTension(context, roll))
+        {
+            var team = ChooseConfrontationTeam(context);
+            var player = ChooseConfrontationPlayer(team, context.Random);
+            var isRefereeControversy = context.IsRivalryMatch ||
+                context.PreviousEventType is EventType.PenaltyDecision or EventType.VarCheck or EventType.VarDecision ||
+                context.Random.NextDouble() < 0.42;
+            return new MatchDramaResult
+            {
+                EventType = isRefereeControversy
                     ? EventType.RefereeControversy
                     : EventType.Confrontation,
                 Team = team,
-                Player = ChooseConfrontationPlayer(team, context.Random),
+                Player = player,
+                TriggeredTrait = player.Traits.Contains(PlayerTrait.DivesIntoTackles) ? PlayerTrait.DivesIntoTackles : null,
+                DramaFlavor = ChooseConfrontationReason(context, player),
                 HomeDefenseModifier = team == context.HomeTeam ? 0.96 : 1.0,
                 AwayDefenseModifier = team == context.AwayTeam ? 0.96 : 1.0
             };
         }
 
-        return new MatchDramaResult { EventType = EventType.CrowdMomentum, Team = context.HomeTeam, HomeAttackModifier = 1.08 };
+        var momentumTeam = ChooseMomentumTeam(context);
+        return new MatchDramaResult
+        {
+            EventType = EventType.CrowdMomentum,
+            Team = momentumTeam,
+            HomeAttackModifier = momentumTeam == context.HomeTeam ? 1.08 : 1.0,
+            AwayAttackModifier = momentumTeam == context.AwayTeam ? 1.08 : 1.0
+        };
+    }
+
+    private static bool ShouldCreateLatePressure(MatchEventContext context, double roll)
+    {
+        if (context.Minute < 75)
+        {
+            return false;
+        }
+
+        var threshold = IsOneGoalMatch(context.Match) ? 0.44 : 0.30;
+        if (context.Minute >= 85)
+        {
+            threshold += 0.10;
+        }
+
+        return roll < threshold;
+    }
+
+    private static bool ShouldCreateTimeWasting(MatchEventContext context, double roll)
+    {
+        var leadingTeam = GetLeadingTeam(context.Match);
+        if (context.Minute < 78 || leadingTeam is null)
+        {
+            return false;
+        }
+
+        var scoreGap = Math.Abs(context.Match.HomeScore - context.Match.AwayScore);
+        var defensiveShapeBonus = leadingTeam.Tactics.Mentality is Mentality.Defensive or Mentality.UltraDefensive ? 0.06 : 0.0;
+        var threshold = (scoreGap <= 1 ? 0.62 : 0.52) + defensiveShapeBonus;
+        return roll < Math.Min(0.72, threshold);
+    }
+
+    private static bool ShouldCreateGoalMouthChaos(MatchEventContext context, double roll)
+    {
+        if (context.Minute < 35)
+        {
+            return false;
+        }
+
+        var hasTriggeringEvent = context.PreviousEventType is EventType.Shot
+            or EventType.Save
+            or EventType.CornerKick
+            or EventType.SetPieceDanger
+            or EventType.DefensiveStop
+            or EventType.PenaltyDecision;
+        var badWeather = context.WeatherCondition is WeatherCondition.Storm
+            or WeatherCondition.HeavyRain
+            or WeatherCondition.Snow
+            or WeatherCondition.Foggy;
+        var lateCloseGame = context.Minute >= 70 && IsOneGoalMatch(context.Match);
+
+        return (hasTriggeringEvent || badWeather || lateCloseGame) && roll < 0.76;
+    }
+
+    private static MatchDramaResult CreateGoalMouthChaosEvent(MatchEventContext context, double roll)
+    {
+        var attackingTeam = ChooseStrongerAttack(context);
+        var defendingTeam = attackingTeam == context.HomeTeam ? context.AwayTeam : context.HomeTeam;
+        var attacker = ChooseBigMomentPlayer(attackingTeam, context.Random) ?? ChooseAttackingPlayer(attackingTeam, context.Random);
+        var goalkeeper = ChooseGoalkeeper(defendingTeam);
+
+        if (context.WeatherCondition is WeatherCondition.Storm or WeatherCondition.HeavyRain or WeatherCondition.Snow && roll < 0.45)
+        {
+            return new MatchDramaResult
+            {
+                EventType = EventType.GoalkeeperMistake,
+                Team = defendingTeam,
+                Player = goalkeeper,
+                SecondaryPlayer = attacker,
+                DramaFlavor = "slippery conditions",
+                HomeDefenseModifier = defendingTeam == context.HomeTeam ? 0.96 : 1.0,
+                AwayDefenseModifier = defendingTeam == context.AwayTeam ? 0.96 : 1.0
+            };
+        }
+
+        if (goalkeeper.Traits.Contains(PlayerTrait.OneOnOnes) && roll < 0.58)
+        {
+            return new MatchDramaResult
+            {
+                EventType = EventType.GoalkeeperHeroics,
+                Team = defendingTeam,
+                Player = goalkeeper,
+                TriggeredTrait = PlayerTrait.OneOnOnes,
+                DramaFlavor = "one-on-one",
+                HomeDefenseModifier = defendingTeam == context.HomeTeam ? 1.04 : 1.0,
+                AwayDefenseModifier = defendingTeam == context.AwayTeam ? 1.04 : 1.0
+            };
+        }
+
+        if (roll < 0.68)
+        {
+            return new MatchDramaResult
+            {
+                EventType = EventType.Woodwork,
+                Team = attackingTeam,
+                Player = attacker,
+                DramaFlavor = "The rebound causes panic before the defense hack it clear.",
+                TriggeredTrait = ChooseBigMomentTrait(attacker),
+                HomeAttackModifier = attackingTeam == context.HomeTeam ? 1.03 : 1.0,
+                AwayAttackModifier = attackingTeam == context.AwayTeam ? 1.03 : 1.0
+            };
+        }
+
+        var setPieceTaker = ChooseSetPiecePlayer(attackingTeam, context.Random);
+        return new MatchDramaResult
+        {
+            EventType = EventType.SetPieceDanger,
+            Team = attackingTeam,
+            Player = setPieceTaker,
+            TriggeredTrait = setPieceTaker.Traits.Contains(PlayerTrait.DeadBallSpecialist) ? PlayerTrait.DeadBallSpecialist : null,
+            DramaFlavor = "scramble",
+            HomeAttackModifier = attackingTeam == context.HomeTeam ? 1.04 : 1.0,
+            AwayAttackModifier = attackingTeam == context.AwayTeam ? 1.04 : 1.0
+        };
+    }
+
+    private static bool ShouldCreateRefereeTension(MatchEventContext context, double roll)
+    {
+        var highPressing = Math.Max(context.HomeTeam.Tactics.PressingIntensity, context.AwayTeam.Tactics.PressingIntensity) >= 78;
+        var threshold = context.IsRivalryMatch ? 0.34 : highPressing ? 0.26 : 0.20;
+        return (CanCreateAtmosphereConfrontation(context) || highPressing) && roll < threshold;
     }
 
     private static bool CanCreateAtmosphereConfrontation(MatchEventContext context)
@@ -306,6 +466,124 @@ public class MatchDramaService
             or EventType.Offside
             or EventType.CornerKick
             or EventType.SetPieceDanger;
+    }
+
+    private static bool IsOneGoalMatch(Match match)
+    {
+        return Math.Abs(match.HomeScore - match.AwayScore) <= 1;
+    }
+
+    private static Team? GetLeadingTeam(Match match)
+    {
+        if (match.HomeScore > match.AwayScore)
+        {
+            return match.HomeTeam;
+        }
+
+        if (match.AwayScore > match.HomeScore)
+        {
+            return match.AwayTeam;
+        }
+
+        return null;
+    }
+
+    private static Player? ChooseBigMomentPlayer(Team team, Random random)
+    {
+        return GetActivePlayers(team)
+            .Where(IsOutfieldPlayer)
+            .OrderByDescending(player =>
+                (player.Traits.Contains(PlayerTrait.BigMatchPlayer) ? 80 : 0) +
+                (player.Traits.Contains(PlayerTrait.Leadership) ? 34 : 0) +
+                (player.Traits.Contains(PlayerTrait.ClinicalFinisher) ? 28 : 0) +
+                (player.Traits.Contains(PlayerTrait.Playmaker) ? 20 : 0) +
+                (player.Traits.Contains(PlayerTrait.Engine) ? 12 : 0) +
+                player.CurrentForm * 0.30 +
+                player.Morale * 0.20 +
+                random.NextDouble())
+            .FirstOrDefault();
+    }
+
+    private static Player? ChooseGameManagementPlayer(Team team, Random random)
+    {
+        var goalkeeper = GetActivePlayers(team)
+            .FirstOrDefault(PositionSuitabilityService.IsGoalkeeperCapable);
+        if (goalkeeper is not null && random.NextDouble() < 0.46)
+        {
+            return goalkeeper;
+        }
+
+        return GetActivePlayers(team)
+            .OrderByDescending(player =>
+                (player.Traits.Contains(PlayerTrait.Leadership) ? 45 : 0) +
+                (player.Traits.Contains(PlayerTrait.TeamPlayer) ? 20 : 0) +
+                player.Morale * 0.15 +
+                random.NextDouble())
+            .FirstOrDefault();
+    }
+
+    private static PlayerTrait? ChooseBigMomentTrait(Player? player)
+    {
+        if (player is null)
+        {
+            return null;
+        }
+
+        if (player.Traits.Contains(PlayerTrait.BigMatchPlayer))
+        {
+            return PlayerTrait.BigMatchPlayer;
+        }
+
+        if (player.Traits.Contains(PlayerTrait.Leadership))
+        {
+            return PlayerTrait.Leadership;
+        }
+
+        if (player.Traits.Contains(PlayerTrait.ClinicalFinisher))
+        {
+            return PlayerTrait.ClinicalFinisher;
+        }
+
+        if (player.Traits.Contains(PlayerTrait.Engine))
+        {
+            return PlayerTrait.Engine;
+        }
+
+        return null;
+    }
+
+    private static string ChooseConfrontationReason(MatchEventContext context, Player player)
+    {
+        if (context.PreviousEventType == EventType.PenaltyDecision)
+        {
+            return "penalty incident";
+        }
+
+        if (context.IsRivalryMatch)
+        {
+            return "rivalry tension";
+        }
+
+        if (player.Traits.Contains(PlayerTrait.DivesIntoTackles))
+        {
+            return "aggressive player";
+        }
+
+        return context.PreviousEventType is EventType.YellowCard or EventType.RedCard
+            ? "dangerous foul"
+            : "frustration";
+    }
+
+    private static Team ChooseMomentumTeam(MatchEventContext context)
+    {
+        if (context.Minute >= 70 && context.Match.HomeScore != context.Match.AwayScore)
+        {
+            return context.Match.HomeScore < context.Match.AwayScore
+                ? context.HomeTeam
+                : context.AwayTeam;
+        }
+
+        return context.HomeTeam;
     }
 
     private static Team ChooseConfrontationTeam(MatchEventContext context)
