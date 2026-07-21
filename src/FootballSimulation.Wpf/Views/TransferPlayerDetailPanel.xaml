@@ -498,6 +498,16 @@
                     </StackPanel>
 
                     <StackPanel x:Name="SquadActionPanel" Visibility="Collapsed">
+                        <StackPanel x:Name="MainPositionEditorPanel" Visibility="Collapsed" Margin="0,0,0,10">
+                            <TextBlock Text="Main Position" Style="{StaticResource DetailLabelStyle}" />
+                            <ComboBox x:Name="MainPositionComboBox"
+                                      Height="30"
+                                      Padding="7,2"
+                                      Background="{DynamicResource AppInputBackground}"
+                                      Foreground="{DynamicResource AppTextBrush}"
+                                      SelectionChanged="MainPositionComboBox_SelectionChanged"
+                                      ToolTip="Choose one of this player's natural positions." />
+                        </StackPanel>
                         <TextBlock Text="Contract Extension" Style="{StaticResource DetailLabelStyle}" />
                         <UniformGrid Columns="3" Margin="0,0,0,8">
                             <TextBox x:Name="RenewalWageTextBox"

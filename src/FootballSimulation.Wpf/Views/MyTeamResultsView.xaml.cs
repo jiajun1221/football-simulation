@@ -13,11 +13,17 @@ public partial class MyTeamResultsView : UserControl
     private readonly Action<UserControl> _navigate;
     private readonly PostMatchAnalysisService _postMatchAnalysisService = new();
 
-    public MyTeamResultsView(GameFlowState state, Action<UserControl> navigate)
+    public MyTeamResultsView(GameFlowState state, Action<UserControl> navigate, bool showHeader = true)
     {
         InitializeComponent();
         _state = state;
         _navigate = navigate;
+        if (!showHeader)
+        {
+            RootGrid.Margin = new Thickness(0);
+            HeaderGrid.Visibility = Visibility.Collapsed;
+        }
+
         LoadResults();
     }
 

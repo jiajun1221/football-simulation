@@ -302,8 +302,7 @@
         </DataTemplate>
 
         <DataTemplate x:Key="SubstitutionPlayerTemplate">
-            <StackPanel Width="142"
-                        Margin="0,0,0,7">
+            <StackPanel Margin="0,0,0,7">
                 <Grid Margin="0,0,0,3">
                     <Grid.Style>
                         <Style TargetType="Grid">
@@ -1065,8 +1064,11 @@
                     <ColumnDefinition Width="1.1*" />
                 </Grid.ColumnDefinitions>
 
-                <Border Grid.Column="0"
+                <Border x:Name="SelectedPlayerDetailCardBorder"
+                        Grid.Column="0"
                         Background="{DynamicResource AppCardBackground}"
+                        BorderBrush="Transparent"
+                        BorderThickness="2"
                         CornerRadius="12"
                         Padding="10"
                         Margin="0,0,8,0">
@@ -1092,6 +1094,7 @@
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
                                     <controls:FlagBadge FlagSource="{Binding FlagImagePath}"
                                                         ToolTip="{Binding NationalityName}"
@@ -1102,10 +1105,26 @@
                                     <TextBlock x:Name="SelectedPlayerNameTextBlock"
                                                Grid.Column="1"
                                                Foreground="{DynamicResource AppTextBrush}"
-                                               FontSize="15"
+                                               FontSize="13"
                                                FontWeight="Bold"
-                                               TextWrapping="Wrap"
+                                               TextWrapping="NoWrap"
+                                               TextTrimming="CharacterEllipsis"
                                                VerticalAlignment="Center" />
+                                    <Border x:Name="SelectedPlayerBallStatusBorder"
+                                            Grid.Column="2"
+                                            Width="16"
+                                            Height="16"
+                                            CornerRadius="8"
+                                            BorderThickness="1"
+                                            Margin="4,0,0,0"
+                                            Visibility="Collapsed"
+                                            VerticalAlignment="Center">
+                                        <TextBlock x:Name="SelectedPlayerBallStatusTextBlock"
+                                                   FontSize="8"
+                                                   FontWeight="Bold"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center" />
+                                    </Border>
                                 </Grid>
 
                                 <StackPanel Grid.Column="1"
@@ -1276,43 +1295,73 @@
                         <Grid x:Name="PausedActionPanel"
                               Margin="0">
                             <StackPanel>
-                                <Grid Margin="0,0,0,6">
+                                <Grid Margin="0,0,0,2">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="82" />
                                         <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="Formation"
+
+                                    <TextBlock Text="Tactics"
                                                Foreground="{DynamicResource AppTextBrush}"
                                                FontSize="10"
-                                               FontWeight="SemiBold"
+                                               FontWeight="Bold"
                                                VerticalAlignment="Center"
                                                Margin="0,0,8,0" />
-                                    <ComboBox x:Name="ActionFormationComboBox"
-                                              Grid.Column="1"
-                                              MinHeight="24"
-                                              DisplayMemberPath="Name"
-                                              SelectedValuePath="Name"
-                                              TextSearch.TextPath="Name"
-                                              SelectionChanged="FormationComboBox_SelectionChanged">
-                                        <ComboBox.GroupStyle>
-                                            <GroupStyle>
-                                                <GroupStyle.HeaderTemplate>
-                                                    <DataTemplate>
-                                                        <TextBlock Text="{Binding Name}"
-                                                                   Foreground="{DynamicResource AppMutedTextBrush}"
-                                                                   FontSize="10"
-                                                                   FontWeight="Bold"
-                                                                   Margin="6,4,0,2" />
-                                                    </DataTemplate>
-                                                </GroupStyle.HeaderTemplate>
-                                            </GroupStyle>
-                                        </ComboBox.GroupStyle>
-                                    </ComboBox>
+
+                                    <Button x:Name="ActionFormationButton"
+                                            Grid.Column="1"
+                                            Content="Formation"
+                                            Style="{StaticResource PrimaryTextButton}"
+                                            Height="17"
+                                            MinWidth="74"
+                                            MaxWidth="96"
+                                            Padding="3,0"
+                                            FontSize="7.5"
+                                            FontWeight="SemiBold"
+                                            Click="ActionFormationButton_Click" />
                                 </Grid>
+
+                                <Popup x:Name="ActionFormationPopup"
+                                       PlacementTarget="{Binding ElementName=ActionFormationButton}"
+                                       Placement="Bottom"
+                                       StaysOpen="True"
+                                       AllowsTransparency="True"
+                                       PopupAnimation="Fade">
+                                    <Border Width="156"
+                                            Background="{DynamicResource AppCardBackground}"
+                                            BorderBrush="{DynamicResource AppCardBorderBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="8"
+                                            Padding="8"
+                                            Margin="0,4,0,0">
+                                        <ComboBox x:Name="ActionFormationComboBox"
+                                                  MinHeight="26"
+                                                  DisplayMemberPath="Name"
+                                                  SelectedValuePath="Name"
+                                                  TextSearch.TextPath="Name"
+                                                  SelectionChanged="FormationComboBox_SelectionChanged"
+                                                  DropDownClosed="ActionFormationComboBox_DropDownClosed">
+                                            <ComboBox.GroupStyle>
+                                                <GroupStyle>
+                                                    <GroupStyle.HeaderTemplate>
+                                                        <DataTemplate>
+                                                            <TextBlock Text="{Binding Name}"
+                                                                       Foreground="{DynamicResource AppMutedTextBrush}"
+                                                                       FontSize="10"
+                                                                       FontWeight="Bold"
+                                                                       Margin="6,4,0,2" />
+                                                        </DataTemplate>
+                                                    </GroupStyle.HeaderTemplate>
+                                                </GroupStyle>
+                                            </ComboBox.GroupStyle>
+                                        </ComboBox>
+                                    </Border>
+                                </Popup>
 
                                 <controls:TacticalSettingsPanel x:Name="ActionTacticalSettingsPanel"
                                                                 IsCompact="True"
-                                                                PanelMaxHeight="220" />
+                                                                ShowCompactTitle="False"
+                                                                PanelMaxHeight="170" />
 
                                 <TextBlock x:Name="PausedActionStatusTextBlock"
                                            Foreground="{DynamicResource AppMutedTextBrush}"
@@ -1338,7 +1387,7 @@
                         </Grid.RowDefinitions>
 
                         <TextBlock Foreground="{DynamicResource AppTextBrush}"
-                                   FontSize="13"
+                                   FontSize="10"
                                    FontWeight="Bold"
                                    Margin="0,0,0,4">
                             <TextBlock.Inlines>
@@ -1346,7 +1395,7 @@
                                 <Run Text="   " />
                                 <Run x:Name="SubsLeftTextBlock"
                                      Foreground="{DynamicResource AppMutedTextBrush}"
-                                     FontSize="11"
+                                     FontSize="7"
                                      FontWeight="SemiBold" />
                             </TextBlock.Inlines>
                         </TextBlock>
@@ -1356,18 +1405,19 @@
                                  ItemTemplate="{StaticResource SubstitutionPlayerTemplate}"
                                  Background="Transparent"
                                  BorderThickness="0"
-                                 ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                                 ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                 ScrollViewer.CanContentScroll="False">
                             <ListBox.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <StackPanel Orientation="Horizontal" />
+                                    <UniformGrid Columns="2" />
                                 </ItemsPanelTemplate>
                             </ListBox.ItemsPanel>
                             <ListBox.ItemContainerStyle>
                                 <Style TargetType="ListBoxItem">
                                     <Setter Property="Padding" Value="0" />
-                                    <Setter Property="Margin" Value="0,0,8,0" />
-                                    <Setter Property="HorizontalContentAlignment" Value="Left" />
+                                    <Setter Property="Margin" Value="0,0,8,7" />
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                                     <Setter Property="Background" Value="Transparent" />
                                     <Setter Property="BorderThickness" Value="0" />
                                 </Style>

@@ -23,6 +23,12 @@ public partial class TacticalSettingsPanel : UserControl
         typeof(TacticalSettingsPanel),
         new PropertyMetadata(false, OnCompactChanged));
 
+    public static readonly DependencyProperty ShowCompactTitleProperty = DependencyProperty.Register(
+        nameof(ShowCompactTitle),
+        typeof(bool),
+        typeof(TacticalSettingsPanel),
+        new PropertyMetadata(true, OnCompactChanged));
+
     private readonly TacticalDimension[] _dimensions =
     [
         TacticalDimension.Mentality,
@@ -52,6 +58,12 @@ public partial class TacticalSettingsPanel : UserControl
     {
         get => (bool)GetValue(IsCompactProperty);
         set => SetValue(IsCompactProperty, value);
+    }
+
+    public bool ShowCompactTitle
+    {
+        get => (bool)GetValue(ShowCompactTitleProperty);
+        set => SetValue(ShowCompactTitleProperty, value);
     }
 
     public void LoadTactics(TeamTactics tactics)
@@ -235,7 +247,7 @@ public partial class TacticalSettingsPanel : UserControl
         icon.Margin = new Thickness(0, 0, 5, 0);
         grid.Children.Add(icon);
 
-        var title = CreateText(GetDimensionTitle(dimension), 9.5, FontWeights.Bold, "AppTextBrush");
+        var title = CreateText(GetDimensionTitle(dimension), 8, FontWeights.Bold, "AppTextBrush");
         title.TextTrimming = TextTrimming.CharacterEllipsis;
         Grid.SetColumn(title, 1);
         grid.Children.Add(title);
@@ -447,7 +459,7 @@ public partial class TacticalSettingsPanel : UserControl
 
     private void ApplySummaryVisual()
     {
-        CompactTitleTextBlock.Visibility = IsCompact ? Visibility.Visible : Visibility.Collapsed;
+        CompactTitleTextBlock.Visibility = IsCompact && ShowCompactTitle ? Visibility.Visible : Visibility.Collapsed;
         SummaryTextBlock.Visibility = IsCompact ? Visibility.Collapsed : Visibility.Visible;
         PresetPanel.Visibility = IsCompact ? Visibility.Collapsed : Visibility.Visible;
         SummaryTextBlock.FontSize = 10;

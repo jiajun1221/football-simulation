@@ -20,8 +20,10 @@ public partial class TransferPlayerDetailPanel : UserControl
     public event EventHandler? ContractRenewalRequested;
     public event EventHandler? CaptainAssignmentRequested;
     public event EventHandler? TransferLockToggled;
+    public event EventHandler? MainPositionChanged;
 
     private bool _usesTransferListToggle;
+    private bool _isUpdatingMainPosition;
 
     public TransferPlayerDetailPanel()
     {
@@ -40,6 +42,10 @@ public partial class TransferPlayerDetailPanel : UserControl
 
     public PlayerRole RenewalRole => RenewalRoleComboBox.SelectedItem is ComboBoxItem { Tag: PlayerRole role } ? role : PlayerRole.Rotation;
 
+    public string SelectedMainPosition => MainPositionComboBox.SelectedItem is ComboBoxItem { Tag: string position }
+        ? position
+        : string.Empty;
+
     public void ShowEmpty()
     {
         EmptyStatePanel.Visibility = Visibility.Visible;
@@ -47,6 +53,7 @@ public partial class TransferPlayerDetailPanel : UserControl
         CornerActionButton.Visibility = Visibility.Collapsed;
         CaptainActionButton.Visibility = Visibility.Collapsed;
         LockActionButton.Visibility = Visibility.Collapsed;
+        MainPositionEditorPanel.Visibility = Visibility.Collapsed;
     }
 
     public void ShowPlayer(TransferPlayerDetailContext context)
@@ -105,6 +112,7 @@ public partial class TransferPlayerDetailPanel : UserControl
             : "-";
         TraitsItemsControl.ItemsSource = CreateTraitBadges(player);
         AttributeItemsControl.ItemsSource = CreateAttributeRows(player);
+        UpdateMainPositionEditor(context, player);
         OfferFeeTextBox.Text = (listing.AskingPrice / 1_000_000m).ToString("0.#", CultureInfo.InvariantCulture);
         RenewalWageTextBox.Text = ((listing.WeeklyWage * 1.10m) / 1_000m).ToString("0", CultureInfo.InvariantCulture);
         SelectRenewalYears(PlayerContractService.GetYearsRemaining(player) <= 1 ? 4 : 3);
@@ -122,6 +130,50 @@ public partial class TransferPlayerDetailPanel : UserControl
 
         UpdateOfferInfo(context);
         UpdateActionPanels(context);
+    }
+
+    private void UpdateMainPositionEditor(TransferPlayerDetailContext context, Player player)
+    {
+        var showEditor = context.Mode is TransferDetailMode.Squad && context.IsOwnPlayer;
+        MainPositionEditorPanel.Visibility = showEditor ? Visibility.Visible : Visibility.Collapsed;
+        if (!showEditor)
+        {
+            return;
+        }
+
+        _isUpdatingMainPosition = true;
+        try
+        {
+            MainPositionComboBox.Items.Clear();
+            var positions = PositionSuitabilityService.GetNaturalExactPositions(player);
+            foreach (var position in positions)
+            {
+                MainPositionComboBox.Items.Add(new ComboBoxItem
+                {
+                    Content = position,
+                    Tag = position
+                });
+            }
+
+            foreach (ComboBoxItem item in MainPositionComboBox.Items)
+            {
+                if (item.Tag is string position &&
+                    position.Equals(player.PreferredPosition, StringComparison.OrdinalIgnoreCase))
+                {
+                    MainPositionComboBox.SelectedItem = item;
+                    break;
+                }
+            }
+
+            MainPositionComboBox.IsEnabled = positions.Count > 1;
+            MainPositionComboBox.ToolTip = positions.Count > 1
+                ? "Choose one of this player's natural positions."
+                : "No secondary natural positions available.";
+        }
+        finally
+        {
+            _isUpdatingMainPosition = false;
+        }
     }
 
     private void UpdateOfferInfo(TransferPlayerDetailContext context)
@@ -323,6 +375,16 @@ public partial class TransferPlayerDetailPanel : UserControl
     private void RenewContractButton_Click(object sender, RoutedEventArgs e)
     {
         ContractRenewalRequested?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void MainPositionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_isUpdatingMainPosition)
+        {
+            return;
+        }
+
+        MainPositionChanged?.Invoke(this, EventArgs.Empty);
     }
 
     private void InitializeContractControls()

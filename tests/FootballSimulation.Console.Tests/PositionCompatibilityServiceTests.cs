@@ -95,6 +95,37 @@ public class PositionCompatibilityServiceTests
         Assert.Equal(expectedScore, PositionCompatibilityService.GetCompatibilityScore(player, targetSlot));
     }
 
+    [Fact]
+    public void TrySetPreferredPosition_AllowsNaturalSecondaryPositionAsNewMainPosition()
+    {
+        var player = CreatePlayer("Kylian Mbappe", Position.Forward, "ST");
+        player.AssignedPosition = "ST";
+        player.SecondaryPositions = ["LW", "RW"];
+
+        var changed = PositionSuitabilityService.TrySetPreferredPosition(player, "LW");
+
+        Assert.True(changed);
+        Assert.Equal("LW", player.PreferredPosition);
+        Assert.Equal(Position.Forward, player.Position);
+        Assert.Equal("LW", player.AssignedPosition);
+        Assert.Contains("ST", player.SecondaryPositions);
+        Assert.Contains("RW", player.SecondaryPositions);
+        Assert.DoesNotContain("LW", player.SecondaryPositions);
+    }
+
+    [Fact]
+    public void TrySetPreferredPosition_BlocksUnnaturalPosition()
+    {
+        var player = CreatePlayer("Kylian Mbappe", Position.Forward, "ST");
+        player.SecondaryPositions = ["LW", "RW"];
+
+        var changed = PositionSuitabilityService.TrySetPreferredPosition(player, "CB");
+
+        Assert.False(changed);
+        Assert.Equal("ST", player.PreferredPosition);
+        Assert.DoesNotContain("CB", player.SecondaryPositions);
+    }
+
     private static Player CreatePlayer(string name, Position position, string preferredPosition)
     {
         return new Player

@@ -366,7 +366,6 @@ public class MatchDramaService
         }
 
         var hasTriggeringEvent = context.PreviousEventType is EventType.Shot
-            or EventType.Save
             or EventType.CornerKick
             or EventType.SetPieceDanger
             or EventType.DefensiveStop

@@ -113,9 +113,18 @@ public class CompetitionProgressionService
         foreach (var competition in CupRoundMap.Keys)
         {
             var state = league.CompetitionStates.FirstOrDefault(state => state.Competition == competition);
-            if (!string.IsNullOrWhiteSpace(state?.WinnerTeamName) ||
-                league.Fixtures.Any(fixture => fixture.Competition == competition && !fixture.IsPlayed))
+            if (league.Fixtures.Any(fixture => fixture.Competition == competition && !fixture.IsPlayed))
             {
+                continue;
+            }
+
+            if (!string.IsNullOrWhiteSpace(state?.WinnerTeamName))
+            {
+                if (RecoverMissingFinalFromCompletedSingleSemifinal(league, competition, state))
+                {
+                    return true;
+                }
+
                 continue;
             }
 
@@ -240,6 +249,14 @@ public class CompetitionProgressionService
             .Cast<Team>()
             .ToList();
 
+        if (nextRoundInfo.NextRound is not null &&
+            winners.Count == 1 &&
+            IsSemiFinalToFinal(roundName, nextRoundInfo.NextRound) &&
+            TryFindUneliminatedRecoveryOpponent(league, competition, winners[0].Name) is { } recoveryOpponent)
+        {
+            winners.Add(recoveryOpponent);
+        }
+
         state.ProgressRecords.Add(new CompetitionProgressRecord
         {
             Competition = competition,
@@ -279,6 +296,39 @@ public class CompetitionProgressionService
             .ToList();
     }
 
+    private static bool IsSemiFinalToFinal(string roundName, string nextRoundName)
+    {
+        return roundName.Equals("Semi Final", StringComparison.OrdinalIgnoreCase) &&
+            nextRoundName.Equals("Final", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static Team? TryFindUneliminatedRecoveryOpponent(League league, CompetitionType competition, string winnerTeamName)
+    {
+        var competitionFixtures = league.Fixtures
+            .Where(fixture => fixture.Competition == competition)
+            .ToList();
+        if (competitionFixtures.Count == 0)
+        {
+            return null;
+        }
+
+        var eliminatedTeamNames = competitionFixtures
+            .Select(fixture => fixture.LosingTeamName)
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        return competitionFixtures
+            .SelectMany(fixture => new[] { fixture.HomeTeam, fixture.AwayTeam })
+            .Concat(league.Teams)
+            .Where(team =>
+                !team.Name.Equals(winnerTeamName, StringComparison.OrdinalIgnoreCase) &&
+                !eliminatedTeamNames.Contains(team.Name))
+            .DistinctBy(team => team.Name, StringComparer.OrdinalIgnoreCase)
+            .OrderByDescending(GetTeamStrength)
+            .ThenBy(team => team.Name)
+            .FirstOrDefault();
+    }
+
     private bool RecoverMissingKnockoutRound(League league, CompetitionType competition)
     {
         if (!CupRoundMap.TryGetValue(competition, out var roundMap))
@@ -308,6 +358,58 @@ public class CompetitionProgressionService
         }
 
         return false;
+    }
+
+    private bool RecoverMissingFinalFromCompletedSingleSemifinal(
+        League league,
+        CompetitionType competition,
+        SeasonCompetitionState state)
+    {
+        if (!CupRoundMap.TryGetValue(competition, out var roundMap) ||
+            !roundMap.TryGetValue("Semi Final", out var semiFinalInfo) ||
+            !string.Equals(semiFinalInfo.NextRound, "Final", StringComparison.OrdinalIgnoreCase) ||
+            league.Fixtures.Any(fixture => fixture.Competition == competition &&
+                fixture.RoundName.Equals("Final", StringComparison.OrdinalIgnoreCase)))
+        {
+            return false;
+        }
+
+        var completedSemifinals = league.Fixtures
+            .Where(fixture => fixture.Competition == competition &&
+                fixture.RoundName.Equals("Semi Final", StringComparison.OrdinalIgnoreCase) &&
+                fixture.IsPlayed &&
+                !string.IsNullOrWhiteSpace(fixture.WinningTeamName))
+            .ToList();
+        if (completedSemifinals.Count != 1)
+        {
+            return false;
+        }
+
+        var winner = ResolveTeam(league, completedSemifinals[0].WinningTeamName);
+        if (winner is null ||
+            TryFindUneliminatedRecoveryOpponent(league, competition, winner.Name) is not { } recoveryOpponent)
+        {
+            return false;
+        }
+
+        state.WinnerTeamName = string.Empty;
+        state.RunnerUpTeamName = string.Empty;
+        state.QualifiedTeamNames = [winner.Name, recoveryOpponent.Name];
+        state.CurrentRoundName = "Final";
+        state.IsActive = true;
+        league.Fixtures.AddRange(_calendarService.GenerateNextCupRoundFixtures(
+            competition,
+            "Final",
+            [winner, recoveryOpponent],
+            semiFinalInfo.CalendarRound,
+            league.Season));
+        league.Fixtures = league.Fixtures
+            .OrderBy(fixture => fixture.CalendarRound)
+            .ThenBy(fixture => fixture.Competition)
+            .ThenBy(fixture => fixture.HomeTeam.Name)
+            .ThenBy(fixture => fixture.AwayTeam.Name)
+            .ToList();
+        return true;
     }
 
     private static void UpdateChampionsLeagueLeaguePhaseTable(League league, Fixture fixture)

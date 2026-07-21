@@ -4,6 +4,9 @@ namespace FootballSimulation.Services;
 
 public class SeasonCalendarService
 {
+    private const int LeagueCupEntrantCount = 32;
+    private const int FaCupEntrantCount = 64;
+
     private static readonly string[] LowerLeagueClubNames =
     [
         "Coventry City",
@@ -153,6 +156,7 @@ public class SeasonCalendarService
             "Third Round",
             calendarRound: 9,
             baseOverall: 66,
+            entrantCount: LeagueCupEntrantCount,
             season));
         fixtures.AddRange(CreateDomesticCupOpeningRound(
             premierLeagueTeams,
@@ -160,6 +164,7 @@ public class SeasonCalendarService
             "Third Round",
             calendarRound: 21,
             baseOverall: 64,
+            entrantCount: FaCupEntrantCount,
             season));
         fixtures.AddRange(CreateChampionsLeagueLeaguePhaseFixtures(premierLeagueTeams, season, championsLeagueQualifiedTeamNames));
         fixtures.AddRange(CreateNeutralCompetitionFixtures(premierLeagueTeams, season));
@@ -195,7 +200,7 @@ public class SeasonCalendarService
             {
                 Competition = CompetitionType.LeagueCup,
                 Name = CompetitionNames.GetDisplayName(CompetitionType.LeagueCup),
-                QualifiedTeamNames = leagueTeams.Concat(LowerLeagueClubNames.Take(premierLeagueTeams.Count)).Distinct(StringComparer.OrdinalIgnoreCase).ToList(),
+                QualifiedTeamNames = CreateDomesticCupEntrantNames(premierLeagueTeams, LeagueCupEntrantCount),
                 RoundOrder = ["Third Round", "Fourth Round", "Quarter Final", "Semi Final", "Final"],
                 CurrentRoundName = "Third Round"
             },
@@ -203,7 +208,7 @@ public class SeasonCalendarService
             {
                 Competition = CompetitionType.FACup,
                 Name = CompetitionNames.GetDisplayName(CompetitionType.FACup),
-                QualifiedTeamNames = leagueTeams.Concat(LowerLeagueClubNames.Take(premierLeagueTeams.Count)).Distinct(StringComparer.OrdinalIgnoreCase).ToList(),
+                QualifiedTeamNames = CreateDomesticCupEntrantNames(premierLeagueTeams, FaCupEntrantCount),
                 RoundOrder = ["Third Round", "Fourth Round", "Fifth Round", "Quarter Final", "Semi Final", "Final"],
                 CurrentRoundName = "Third Round"
             },
@@ -261,10 +266,11 @@ public class SeasonCalendarService
         string roundName,
         int calendarRound,
         int baseOverall,
+        int entrantCount,
         string season)
     {
-        var placeholders = LowerLeagueClubNames
-            .Take(premierLeagueTeams.Count)
+        var placeholderCount = Math.Max(0, entrantCount - premierLeagueTeams.Count);
+        var placeholders = CreateDomesticCupPlaceholderNames(placeholderCount)
             .Select(name => PlaceholderTeamFactory.Create(name, baseOverall))
             .ToList();
         var entrants = premierLeagueTeams.Concat(placeholders).ToList();
@@ -280,6 +286,29 @@ public class SeasonCalendarService
                 affectsLeagueTable: false,
                 isKnockout: true))
             .ToList();
+    }
+
+    private static List<string> CreateDomesticCupEntrantNames(IReadOnlyList<Team> premierLeagueTeams, int entrantCount)
+    {
+        var placeholderCount = Math.Max(0, entrantCount - premierLeagueTeams.Count);
+        return premierLeagueTeams
+            .Select(team => team.Name)
+            .Concat(CreateDomesticCupPlaceholderNames(placeholderCount))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    private static IEnumerable<string> CreateDomesticCupPlaceholderNames(int count)
+    {
+        foreach (var name in LowerLeagueClubNames.Take(count))
+        {
+            yield return name;
+        }
+
+        for (var index = LowerLeagueClubNames.Length + 1; index <= count; index++)
+        {
+            yield return $"National League Club {index - LowerLeagueClubNames.Length:00}";
+        }
     }
 
     private static List<Fixture> CreateChampionsLeagueLeaguePhaseFixtures(

@@ -361,6 +361,43 @@ public class MatchEngineScoringTests
     }
 
     [Fact]
+    public void MatchDramaService_DoesNotCreateOpponentKeeperHeroicsImmediatelyAfterSave()
+    {
+        var seedDataService = new SeedDataService();
+        var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+        foreach (var player in homeTeam.Players.Concat(awayTeam.Players))
+        {
+            player.Stamina = 100;
+            player.CurrentStamina = 100;
+            player.MatchesPlayedRecently = 0;
+            player.Traits.Clear();
+        }
+
+        homeTeam.Players.First(player => player.Position == Position.Goalkeeper).Traits.Add(PlayerTrait.OneOnOnes);
+        awayTeam.Players.First(player => player.Position == Position.Goalkeeper).Traits.Add(PlayerTrait.OneOnOnes);
+
+        var service = new MatchDramaService();
+        var result = service.TryCreateDramaEvent(new MatchEventContext
+        {
+            Match = new Match { HomeTeam = homeTeam, AwayTeam = awayTeam },
+            HomeTeam = homeTeam,
+            AwayTeam = awayTeam,
+            Random = new SequenceRandom(0.0, 0.99, 0.10),
+            Minute = 48,
+            PreviousEventType = EventType.Save,
+            WeatherCondition = WeatherCondition.Clear,
+            IsRivalryMatch = false,
+            HomeAttackStrength = 80,
+            AwayAttackStrength = 80,
+            HomeDefenseStrength = 80,
+            AwayDefenseStrength = 80
+        });
+
+        Assert.NotNull(result);
+        Assert.NotEqual(EventType.GoalkeeperHeroics, result.EventType);
+    }
+
+    [Fact]
     public void MatchDramaService_CreatesLatePressureForTrailingOneGoalTeam()
     {
         var seedDataService = new SeedDataService();

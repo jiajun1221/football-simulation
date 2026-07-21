@@ -37,6 +37,7 @@ public partial class LeaguePlayerStatsView : UserControl
         }
 
         LeagueSubtitleTextBlock.Text = $"League: {_state.League.Name}";
+        MatchHistoryContentControl.Content = new MyTeamResultsView(_state, _navigate, showHeader: false);
         SelectCategory(StatsCategory.Goals);
     }
 

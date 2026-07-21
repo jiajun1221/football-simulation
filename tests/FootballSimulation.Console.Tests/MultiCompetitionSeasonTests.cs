@@ -80,6 +80,84 @@ public class MultiCompetitionSeasonTests
     }
 
     [Fact]
+    public void FaCupProgression_GeneratesPlayableFinalAfterSemifinals()
+    {
+        var progression = new CompetitionProgressionService();
+        var league = CreateLeague(teamCount: 20);
+        var roundNames = new[] { "Third Round", "Fourth Round", "Fifth Round", "Quarter Final", "Semi Final" };
+
+        foreach (var roundName in roundNames)
+        {
+            var fixtures = league.Fixtures
+                .Where(fixture => fixture.Competition == CompetitionType.FACup &&
+                    fixture.RoundName == roundName)
+                .ToList();
+
+            Assert.NotEmpty(fixtures);
+            if (roundName == "Semi Final")
+            {
+                Assert.Equal(2, fixtures.Count);
+            }
+
+            foreach (var fixture in fixtures)
+            {
+                CompleteFixture(progression, league, fixture, homeScore: 2, awayScore: 1);
+            }
+        }
+
+        var finalFixture = Assert.Single(league.Fixtures, fixture =>
+            fixture.Competition == CompetitionType.FACup &&
+            fixture.RoundName == "Final");
+        Assert.False(finalFixture.IsPlayed);
+        Assert.Equal(FixtureImportance.Final, finalFixture.Importance);
+    }
+
+    [Fact]
+    public void Recovery_RestoresMissingFaCupFinalFromCompletedSingleSemifinal()
+    {
+        var progression = new CompetitionProgressionService();
+        var semiWinner = CreateTeam("Chelsea");
+        var semiLoser = CreateTeam("Leicester City");
+        var droppedOpponent = CreateTeam("Arsenal");
+        var eliminatedOpponent = CreateTeam("Everton");
+        var league = new League
+        {
+            Name = GameSessionService.PremierLeagueName,
+            Season = "2025-26",
+            Teams = [semiWinner, semiLoser, droppedOpponent, eliminatedOpponent],
+            Fixtures =
+            [
+                CreateCompletedKnockoutFixture(CompetitionType.FACup, "Quarter Final", droppedOpponent, eliminatedOpponent, droppedOpponent),
+                CreateCompletedKnockoutFixture(CompetitionType.FACup, "Semi Final", semiWinner, semiLoser, semiWinner)
+            ],
+            CompetitionStates =
+            [
+                new SeasonCompetitionState
+                {
+                    Competition = CompetitionType.FACup,
+                    Name = CompetitionNames.GetDisplayName(CompetitionType.FACup),
+                    WinnerTeamName = semiWinner.Name,
+                    CurrentRoundName = "Complete",
+                    IsActive = false
+                }
+            ]
+        };
+
+        var recovered = progression.RecoverMissingKnockoutRound(league);
+
+        Assert.True(recovered);
+        var finalFixture = Assert.Single(league.Fixtures, fixture =>
+            fixture.Competition == CompetitionType.FACup &&
+            fixture.RoundName == "Final");
+        Assert.False(finalFixture.IsPlayed);
+        var finalTeamNames = new[] { finalFixture.HomeTeam.Name, finalFixture.AwayTeam.Name };
+        Assert.Contains(semiWinner.Name, finalTeamNames);
+        Assert.Contains(droppedOpponent.Name, finalTeamNames);
+        Assert.Equal(string.Empty, league.CompetitionStates.Single().WinnerTeamName);
+        Assert.True(league.CompetitionStates.Single().IsActive);
+    }
+
+    [Fact]
     public void ChampionsLeague_LeaguePhaseUsesSwissStyleEuropeanOpponents()
     {
         var league = CreateLeague(teamCount: 20);
@@ -298,6 +376,46 @@ public class MultiCompetitionSeasonTests
         };
         fixture.IsPlayed = true;
         progression.ProcessCompletedFixture(league, fixture, seed: 7);
+    }
+
+    private static Fixture CreateCompletedKnockoutFixture(
+        CompetitionType competition,
+        string roundName,
+        Team homeTeam,
+        Team awayTeam,
+        Team winningTeam)
+    {
+        var losingTeam = winningTeam.Name.Equals(homeTeam.Name, StringComparison.OrdinalIgnoreCase)
+            ? awayTeam
+            : homeTeam;
+        return new Fixture
+        {
+            Competition = competition,
+            RoundName = roundName,
+            KnockoutRoundKey = roundName,
+            CalendarRound = 67,
+            RoundNumber = 67,
+            HomeTeam = homeTeam,
+            AwayTeam = awayTeam,
+            IsKnockout = true,
+            IsPlayed = true,
+            WinningTeamName = winningTeam.Name,
+            LosingTeamName = losingTeam.Name,
+            Result = new Match
+            {
+                HomeTeam = homeTeam,
+                AwayTeam = awayTeam,
+                HomeScore = winningTeam.Name.Equals(homeTeam.Name, StringComparison.OrdinalIgnoreCase) ? 2 : 1,
+                AwayScore = winningTeam.Name.Equals(awayTeam.Name, StringComparison.OrdinalIgnoreCase) ? 2 : 1,
+                CurrentPhase = MatchPhase.Fulltime,
+                CurrentMinute = 90
+            }
+        };
+    }
+
+    private static Team CreateTeam(string name)
+    {
+        return new Team { Name = name };
     }
 
     private static bool IsTeamInFixture(Fixture fixture, Team team)

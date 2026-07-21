@@ -130,7 +130,7 @@
 
         <Grid Margin="0,0,0,18">
             <StackPanel>
-                <TextBlock Text="Current Season Player Stats"
+                <TextBlock Text="Statistics"
                            Foreground="{DynamicResource AppTextBrush}"
                            FontSize="28"
                            FontWeight="Black" />
@@ -178,109 +178,126 @@
             </Button>
         </Grid>
 
-        <Border Grid.Row="1"
-                Style="{StaticResource StatsCard}"
-                Margin="0,0,0,16">
-            <WrapPanel>
-                <Button x:Name="GoalsButton" Content="Goals" Tag="Goals" Style="{StaticResource CategoryButtonStyle}" Click="CategoryButton_Click" />
-                <Button x:Name="AssistsButton" Content="Assists" Tag="Assists" Style="{StaticResource CategoryButtonStyle}" Click="CategoryButton_Click" />
-                <Button x:Name="SavesButton" Content="Saves" Tag="Saves" Style="{StaticResource CategoryButtonStyle}" Click="CategoryButton_Click" />
-                <Button x:Name="CleanSheetsButton" Content="Clean Sheets" Tag="CleanSheets" Style="{StaticResource CategoryButtonStyle}" Click="CategoryButton_Click" />
-                <Button x:Name="YellowCardsButton" Content="Yellow Cards" Tag="YellowCards" Style="{StaticResource CategoryButtonStyle}" Click="CategoryButton_Click" />
-                <Button x:Name="RedCardsButton" Content="Red Cards" Tag="RedCards" Style="{StaticResource CategoryButtonStyle}" Click="CategoryButton_Click" />
-                <Button x:Name="RatingsButton" Content="Player Ratings" Tag="Ratings" Style="{StaticResource CategoryButtonStyle}" Click="CategoryButton_Click" />
-                <Button x:Name="AppearancesButton" Content="Appearances" Tag="Appearances" Style="{StaticResource CategoryButtonStyle}" Click="CategoryButton_Click" />
-            </WrapPanel>
-        </Border>
+        <TabControl Grid.Row="1"
+                    Grid.RowSpan="2">
+            <TabItem Header="Player Stats">
+                <Grid Margin="0,12,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
 
-        <Border Grid.Row="2"
-                Style="{StaticResource StatsCard}">
-            <DataGrid x:Name="StatsDataGrid"
-                      Style="{StaticResource StatsGridStyle}"
-                      RowStyle="{StaticResource StatsGridRowStyle}"
-                      ItemsSource="{Binding}">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Rank" Binding="{Binding Rank}" Width="62" ElementStyle="{StaticResource StatsCenterTextStyle}" />
-                    <DataGridTextColumn x:Name="PlayerColumn" Header="Player" Binding="{Binding PlayerName}" Width="2*" ElementStyle="{StaticResource StatsBoldLeftTextStyle}" />
-                    <DataGridTemplateColumn Header="" Width="52">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Grid Height="54"
-                                      VerticalAlignment="Center"
-                                      HorizontalAlignment="Center">
-                                    <Image Source="{Binding ClubLogoPath}"
-                                           Width="28"
-                                           Height="28"
-                                           Stretch="Uniform"
-                                           HorizontalAlignment="Center"
-                                           VerticalAlignment="Center" />
-                                </Grid>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <DataGridTextColumn Header="Club" Binding="{Binding TeamName}" Width="1.5*" ElementStyle="{StaticResource StatsBoldLeftTextStyle}" />
-                    <DataGridTextColumn x:Name="PositionColumn" Header="Position" Binding="{Binding PositionText}" Width="90" ElementStyle="{StaticResource StatsCenterTextStyle}" />
-                    <DataGridTextColumn x:Name="GoalsColumn" Header="Goals" Binding="{Binding Goals}" Width="90" ElementStyle="{StaticResource StatsCenterTextStyle}" />
-                    <DataGridTextColumn x:Name="AssistsColumn" Header="Assists" Binding="{Binding Assists}" Width="90" ElementStyle="{StaticResource StatsCenterTextStyle}" />
-                    <DataGridTextColumn x:Name="SavesColumn" Header="Saves" Binding="{Binding Saves}" Width="90" ElementStyle="{StaticResource StatsCenterTextStyle}" />
-                    <DataGridTextColumn x:Name="GoalsConcededColumn" Header="Goals Conceded" Binding="{Binding GoalsConceded}" Width="130" ElementStyle="{StaticResource StatsCenterTextStyle}" />
-                    <DataGridTextColumn x:Name="CleanSheetsColumn" Header="Clean Sheets" Binding="{Binding CleanSheets}" Width="120" ElementStyle="{StaticResource StatsCenterTextStyle}" />
-                    <DataGridTextColumn x:Name="YellowCardsColumn" Header="Yellow" Binding="{Binding YellowCards}" Width="90" ElementStyle="{StaticResource StatsCenterTextStyle}" />
-                    <DataGridTextColumn x:Name="RedCardsColumn" Header="Red" Binding="{Binding RedCards}" Width="90" ElementStyle="{StaticResource StatsCenterTextStyle}" />
-                    <DataGridTextColumn x:Name="MatchesColumn" Header="Matches" Binding="{Binding Matches}" Width="90" ElementStyle="{StaticResource StatsCenterTextStyle}" />
-                    <DataGridTextColumn x:Name="StartsColumn" Header="Starts" Binding="{Binding Starts}" Width="80" ElementStyle="{StaticResource StatsCenterTextStyle}" />
-                    <DataGridTextColumn x:Name="MinutesColumn" Header="Minutes" Binding="{Binding MinutesPlayed}" Width="90" ElementStyle="{StaticResource StatsCenterTextStyle}" />
-                    <DataGridTemplateColumn x:Name="RatingColumn" Header="Average Rating" Width="130">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Grid Height="54"
-                                      VerticalAlignment="Center"
-                                      HorizontalAlignment="Center">
-                                    <Border MinWidth="46"
-                                            Height="34"
-                                            Background="{Binding RatingBackground}"
-                                            CornerRadius="10"
-                                            Padding="8,0"
-                                            HorizontalAlignment="Center"
-                                            VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding AverageRatingText}"
-                                                   Foreground="White"
-                                                   FontWeight="Bold"
-                                                   HorizontalAlignment="Center"
-                                                   VerticalAlignment="Center"
-                                                   TextAlignment="Center" />
-                                    </Border>
-                                </Grid>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <DataGridTemplateColumn Header="Form" Width="120">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Grid Height="54"
-                                      VerticalAlignment="Center"
-                                      HorizontalAlignment="Center">
-                                    <Border MinWidth="74"
-                                            Height="34"
-                                            Background="{Binding FormBadgeBackground}"
-                                            CornerRadius="10"
-                                            Padding="8,0"
-                                            HorizontalAlignment="Center"
-                                            VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding FormBadgeText}"
-                                                   Foreground="{Binding FormBadgeForeground}"
-                                                   FontSize="11"
-                                                   FontWeight="Bold"
-                                                   HorizontalAlignment="Center"
-                                                   VerticalAlignment="Center"
-                                                   TextAlignment="Center" />
-                                    </Border>
-                                </Grid>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                </DataGrid.Columns>
-            </DataGrid>
-        </Border>
+                    <Border Grid.Row="0"
+                            Style="{StaticResource StatsCard}"
+                            Margin="0,0,0,16">
+                        <WrapPanel>
+                            <Button x:Name="GoalsButton" Content="Goals" Tag="Goals" Style="{StaticResource CategoryButtonStyle}" Click="CategoryButton_Click" />
+                            <Button x:Name="AssistsButton" Content="Assists" Tag="Assists" Style="{StaticResource CategoryButtonStyle}" Click="CategoryButton_Click" />
+                            <Button x:Name="SavesButton" Content="Saves" Tag="Saves" Style="{StaticResource CategoryButtonStyle}" Click="CategoryButton_Click" />
+                            <Button x:Name="CleanSheetsButton" Content="Clean Sheets" Tag="CleanSheets" Style="{StaticResource CategoryButtonStyle}" Click="CategoryButton_Click" />
+                            <Button x:Name="YellowCardsButton" Content="Yellow Cards" Tag="YellowCards" Style="{StaticResource CategoryButtonStyle}" Click="CategoryButton_Click" />
+                            <Button x:Name="RedCardsButton" Content="Red Cards" Tag="RedCards" Style="{StaticResource CategoryButtonStyle}" Click="CategoryButton_Click" />
+                            <Button x:Name="RatingsButton" Content="Player Ratings" Tag="Ratings" Style="{StaticResource CategoryButtonStyle}" Click="CategoryButton_Click" />
+                            <Button x:Name="AppearancesButton" Content="Appearances" Tag="Appearances" Style="{StaticResource CategoryButtonStyle}" Click="CategoryButton_Click" />
+                        </WrapPanel>
+                    </Border>
+
+                    <Border Grid.Row="1"
+                            Style="{StaticResource StatsCard}">
+                        <DataGrid x:Name="StatsDataGrid"
+                                  Style="{StaticResource StatsGridStyle}"
+                                  RowStyle="{StaticResource StatsGridRowStyle}"
+                                  ItemsSource="{Binding}">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Rank" Binding="{Binding Rank}" Width="62" ElementStyle="{StaticResource StatsCenterTextStyle}" />
+                                <DataGridTextColumn x:Name="PlayerColumn" Header="Player" Binding="{Binding PlayerName}" Width="2*" ElementStyle="{StaticResource StatsBoldLeftTextStyle}" />
+                                <DataGridTemplateColumn Header="" Width="52">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Grid Height="54"
+                                                  VerticalAlignment="Center"
+                                                  HorizontalAlignment="Center">
+                                                <Image Source="{Binding ClubLogoPath}"
+                                                       Width="28"
+                                                       Height="28"
+                                                       Stretch="Uniform"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Club" Binding="{Binding TeamName}" Width="1.5*" ElementStyle="{StaticResource StatsBoldLeftTextStyle}" />
+                                <DataGridTextColumn x:Name="PositionColumn" Header="Position" Binding="{Binding PositionText}" Width="90" ElementStyle="{StaticResource StatsCenterTextStyle}" />
+                                <DataGridTextColumn x:Name="GoalsColumn" Header="Goals" Binding="{Binding Goals}" Width="90" ElementStyle="{StaticResource StatsCenterTextStyle}" />
+                                <DataGridTextColumn x:Name="AssistsColumn" Header="Assists" Binding="{Binding Assists}" Width="90" ElementStyle="{StaticResource StatsCenterTextStyle}" />
+                                <DataGridTextColumn x:Name="SavesColumn" Header="Saves" Binding="{Binding Saves}" Width="90" ElementStyle="{StaticResource StatsCenterTextStyle}" />
+                                <DataGridTextColumn x:Name="GoalsConcededColumn" Header="Goals Conceded" Binding="{Binding GoalsConceded}" Width="130" ElementStyle="{StaticResource StatsCenterTextStyle}" />
+                                <DataGridTextColumn x:Name="CleanSheetsColumn" Header="Clean Sheets" Binding="{Binding CleanSheets}" Width="120" ElementStyle="{StaticResource StatsCenterTextStyle}" />
+                                <DataGridTextColumn x:Name="YellowCardsColumn" Header="Yellow" Binding="{Binding YellowCards}" Width="90" ElementStyle="{StaticResource StatsCenterTextStyle}" />
+                                <DataGridTextColumn x:Name="RedCardsColumn" Header="Red" Binding="{Binding RedCards}" Width="90" ElementStyle="{StaticResource StatsCenterTextStyle}" />
+                                <DataGridTextColumn x:Name="MatchesColumn" Header="Matches" Binding="{Binding Matches}" Width="90" ElementStyle="{StaticResource StatsCenterTextStyle}" />
+                                <DataGridTextColumn x:Name="StartsColumn" Header="Starts" Binding="{Binding Starts}" Width="80" ElementStyle="{StaticResource StatsCenterTextStyle}" />
+                                <DataGridTextColumn x:Name="MinutesColumn" Header="Minutes" Binding="{Binding MinutesPlayed}" Width="90" ElementStyle="{StaticResource StatsCenterTextStyle}" />
+                                <DataGridTemplateColumn x:Name="RatingColumn" Header="Average Rating" Width="130">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Grid Height="54"
+                                                  VerticalAlignment="Center"
+                                                  HorizontalAlignment="Center">
+                                                <Border MinWidth="46"
+                                                        Height="34"
+                                                        Background="{Binding RatingBackground}"
+                                                        CornerRadius="10"
+                                                        Padding="8,0"
+                                                        HorizontalAlignment="Center"
+                                                        VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding AverageRatingText}"
+                                                               Foreground="White"
+                                                               FontWeight="Bold"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Center"
+                                                               TextAlignment="Center" />
+                                                </Border>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Form" Width="120">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Grid Height="54"
+                                                  VerticalAlignment="Center"
+                                                  HorizontalAlignment="Center">
+                                                <Border MinWidth="74"
+                                                        Height="34"
+                                                        Background="{Binding FormBadgeBackground}"
+                                                        CornerRadius="10"
+                                                        Padding="8,0"
+                                                        HorizontalAlignment="Center"
+                                                        VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding FormBadgeText}"
+                                                               Foreground="{Binding FormBadgeForeground}"
+                                                               FontSize="11"
+                                                               FontWeight="Bold"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Center"
+                                                               TextAlignment="Center" />
+                                                </Border>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Match History">
+                <ContentControl x:Name="MatchHistoryContentControl"
+                                Margin="0,12,0,0" />
+            </TabItem>
+        </TabControl>
     </Grid>
 </UserControl>

@@ -32,6 +32,7 @@ public partial class SquadOverviewView : UserControl
         SquadDetailPanel.ContractRenewalRequested += SquadDetailPanel_ContractRenewalRequested;
         SquadDetailPanel.CaptainAssignmentRequested += SquadDetailPanel_CaptainAssignmentRequested;
         SquadDetailPanel.TransferLockToggled += SquadDetailPanel_TransferLockToggled;
+        SquadDetailPanel.MainPositionChanged += SquadDetailPanel_MainPositionChanged;
         _toastTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2.4) };
         _toastTimer.Tick += (_, _) =>
         {
@@ -829,6 +830,37 @@ public partial class SquadOverviewView : UserControl
         ShowCaptainToast(player.RejectTransferOffers
             ? $"{player.Name} is now marked untouchable."
             : $"{player.Name} can now receive transfer offers.");
+    }
+
+    private void SquadDetailPanel_MainPositionChanged(object? sender, EventArgs e)
+    {
+        if (_selectedRow is null)
+        {
+            return;
+        }
+
+        var player = _selectedRow.Listing.Player;
+        var selectedPosition = SquadDetailPanel.SelectedMainPosition;
+        if (!PositionSuitabilityService.CanSetPreferredPosition(player, selectedPosition))
+        {
+            MessageBox.Show(
+                $"{player.Name} cannot be set as {selectedPosition}.",
+                "Main Position",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+            LoadSquad();
+            return;
+        }
+
+        if (!PositionSuitabilityService.TrySetPreferredPosition(player, selectedPosition))
+        {
+            return;
+        }
+
+        PersistCurrentSaveSlot();
+        LoadSquad();
+        LoadFormationEditor();
+        ShowCaptainToast($"{player.Name}'s main position is now {player.PreferredPosition}.");
     }
 
     private void SquadDetailPanel_TransferListToggled(object? sender, EventArgs e)

@@ -250,6 +250,9 @@ public class LeagueEngine
             _ = _injuryRiskService.TryCreatePreparationInjury(fixture.AwayTeam, GetFixtureCalendarRound(fixture), random);
         }
 
+        EnsureTeamCanFieldEleven(fixture.HomeTeam);
+        EnsureTeamCanFieldEleven(fixture.AwayTeam);
+
         if (!IsHumanControlled(fixture.HomeTeam, options))
         {
             AiLineupSelectionService.BuildRealisticLineup(fixture.HomeTeam);
@@ -262,6 +265,41 @@ public class LeagueEngine
 
         _ = LineupValidationService.RepairUnavailablePlayers(fixture.HomeTeam);
         _ = LineupValidationService.RepairUnavailablePlayers(fixture.AwayTeam);
+    }
+
+    private static void EnsureTeamCanFieldEleven(Team team)
+    {
+        var availablePlayerCount = team.Players
+            .Concat(team.Substitutes)
+            .Count(player => !player.IsInjured && !player.IsSuspended && !player.IsSentOff);
+        if (availablePlayerCount >= 11)
+        {
+            return;
+        }
+
+        var baseOverall = team.Players
+            .Concat(team.Substitutes)
+            .Select(player => player.OverallRating)
+            .DefaultIfEmpty(65)
+            .Average();
+        var emergencySquad = PlaceholderTeamFactory.Create(
+            $"{team.Name} Emergency Squad",
+            Math.Clamp((int)Math.Round(baseOverall) - 8, 55, 75));
+
+        foreach (var player in emergencySquad.Players.Concat(emergencySquad.Substitutes))
+        {
+            if (availablePlayerCount >= 11)
+            {
+                break;
+            }
+
+            player.PlayerId = $"emergency-{Guid.NewGuid():N}";
+            player.Name = $"{team.Name} Emergency Player {availablePlayerCount + 1}";
+            player.IsStarter = false;
+            player.IsOnPitch = false;
+            team.Substitutes.Add(player);
+            availablePlayerCount++;
+        }
     }
 
     private static bool IsHumanControlled(Team team, MatchSimulationOptions options)

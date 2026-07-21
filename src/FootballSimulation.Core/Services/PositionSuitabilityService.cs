@@ -82,6 +82,62 @@ public static class PositionSuitabilityService
             .ToList();
     }
 
+    public static bool CanSetPreferredPosition(Player player, string? exactPosition)
+    {
+        var normalized = NormalizeExactPosition(exactPosition);
+        return normalized.Length > 0 &&
+            GetNaturalExactPositions(player).Contains(normalized, StringComparer.OrdinalIgnoreCase);
+    }
+
+    public static bool TrySetPreferredPosition(Player player, string? exactPosition)
+    {
+        EnsurePositionMetadata(player);
+        var normalized = NormalizeExactPosition(exactPosition);
+        if (normalized.Length == 0)
+        {
+            return false;
+        }
+
+        var naturalPositions = GetNaturalExactPositions(player);
+        if (!naturalPositions.Contains(normalized, StringComparer.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        var oldPreferred = player.PreferredPosition;
+        if (oldPreferred.Equals(normalized, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        player.PreferredPosition = normalized;
+        player.Position = GetPositionGroup(normalized);
+        player.SecondaryPositions = naturalPositions
+            .Where(position => !position.Equals(normalized, StringComparison.OrdinalIgnoreCase))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (string.IsNullOrWhiteSpace(player.AssignedPosition) ||
+            player.AssignedPosition.Equals(oldPreferred, StringComparison.OrdinalIgnoreCase))
+        {
+            player.AssignedPosition = normalized;
+        }
+
+        return true;
+    }
+
+    public static Position GetPositionGroup(string? exactPosition)
+    {
+        return NormalizeExactPosition(exactPosition) switch
+        {
+            "GK" => Position.Goalkeeper,
+            "CB" or "LB" or "RB" or "LWB" or "RWB" => Position.Defender,
+            "CM" or "CAM" or "CDM" or "LM" or "RM" => Position.Midfielder,
+            "LW" or "ST" or "RW" or "CF" => Position.Forward,
+            _ => Position.Midfielder
+        };
+    }
+
     public static string GetDefaultExactPosition(Position position)
     {
         return position switch

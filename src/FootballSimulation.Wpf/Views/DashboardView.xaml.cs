@@ -21,6 +21,7 @@ public partial class DashboardView : UserControl
     private readonly YouthAcademyService _youthAcademyService = new();
     private readonly YouthScoutService _youthScoutService = new();
     private readonly SeasonCompletionService _seasonCompletionService = new();
+    private readonly CompetitionProgressionService _competitionProgressionService = new();
     private CompetitionType? _fixtureFilter;
     private DashboardTableView _activeTableView = DashboardTableView.League;
     private const string ClubsAssetPath = "Assets/Clubs";
@@ -81,6 +82,7 @@ public partial class DashboardView : UserControl
 
         SelectedTeamTextBlock.Text = _state.SelectedTeam.Name;
         SeasonTextBlock.Text = $"Season {FormatSeasonLabel(_state.League.Season)}";
+        _competitionProgressionService.RecoverMissingKnockoutRound(_state.League);
         EnsureFixtureFilterOptions();
         SelectedClubLogoImage.Source = CreateImageSource(GetClubLogoPath(_state.SelectedTeam.Name));
         RefreshSelectedTableView();
@@ -371,16 +373,6 @@ public partial class DashboardView : UserControl
         }
 
         _navigate(new LeaguePlayerStatsView(_state, _navigate));
-    }
-
-    private void MatchResultsButton_Click(object sender, RoutedEventArgs e)
-    {
-        if (_state.League is null || _state.SelectedTeam is null)
-        {
-            return;
-        }
-
-        _navigate(new MyTeamResultsView(_state, _navigate));
     }
 
     private void MySquadButton_Click(object sender, RoutedEventArgs e)

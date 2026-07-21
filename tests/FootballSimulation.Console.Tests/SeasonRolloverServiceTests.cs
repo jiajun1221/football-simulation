@@ -262,6 +262,54 @@ public class SeasonRolloverServiceTests
         Assert.Equal(28, foreignStarter.Age);
         Assert.Equal(22, foreignSubstitute.Age);
         Assert.Equal(31, freeAgent.Age);
+        Assert.Contains(result.TransferMarketState.FreeAgents, player => player.PlayerId == freeAgent.PlayerId);
+    }
+
+    [Fact]
+    public void StartNextSeason_RetiresOldFreeAgentAndAddsRegenToTransferMarket()
+    {
+        var (league, selectedTeam) = CreateCompletedRolloverContext();
+        var oldFreeAgent = new Player
+        {
+            PlayerId = "rollover-old-free-agent-test",
+            Name = "Rollover Old Agent",
+            Age = 39,
+            Position = Position.Midfielder,
+            PreferredPosition = "CM",
+            AssignedPosition = "CM",
+            SecondaryPositions = ["CAM", "CDM"],
+            Nationality = "Spain",
+            NationalityName = "Spain",
+            NationalityCode = "ES",
+            FlagImagePath = "Assets/Flags/spain.png",
+            OverallRating = 84,
+            BaseOverallRating = 84,
+            PotentialOverall = 88,
+            ContractEndYear = 2025,
+            ContractStatus = PlayerContractStatus.FreeAgent
+        };
+        var transferMarket = new TransferMarketState
+        {
+            ActiveSeason = league.Season,
+            FreeAgents = [oldFreeAgent]
+        };
+
+        var result = new SeasonRolloverService().StartNextSeason(league, selectedTeam, transferMarket);
+
+        Assert.DoesNotContain(result.TransferMarketState.FreeAgents, player => player.PlayerId == oldFreeAgent.PlayerId);
+        var regen = Assert.Single(result.TransferMarketState.FreeAgents, player =>
+            player.PlayerId.StartsWith("regen-free-agent-2026-27-rollover-old-free-agent-test", StringComparison.OrdinalIgnoreCase));
+        Assert.InRange(regen.Age.GetValueOrDefault(), 16, 19);
+        Assert.Equal(Position.Midfielder, regen.Position);
+        Assert.Equal("CM", regen.PreferredPosition);
+        Assert.Contains("CAM", regen.SecondaryPositions);
+        Assert.Equal("Spain", regen.NationalityName);
+        Assert.Equal("ES", regen.NationalityCode);
+        Assert.Equal(PlayerContractStatus.FreeAgent, regen.ContractStatus);
+        Assert.InRange(regen.PotentialOverall.GetValueOrDefault(), 80, 96);
+        Assert.Contains(result.TransferMarketState.Inbox, notification =>
+            notification.Message.Contains("free agent", StringComparison.OrdinalIgnoreCase) &&
+            notification.Message.Contains("regen", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]
@@ -452,5 +500,34 @@ public class SeasonRolloverServiceTests
         }
 
         Assert.DoesNotContain(league.Fixtures, fixture => !fixture.IsPlayed);
+    }
+
+    private static (League League, Team SelectedTeam) CreateCompletedRolloverContext()
+    {
+        var leagueEngine = new LeagueEngine();
+        var dataService = new LeagueDataService();
+        var definition = dataService.GetLeagueDefinition("premier-league");
+        var teams = dataService.LoadTeams(definition).Take(6).ToList();
+        var selectedTeam = teams[0];
+        var league = leagueEngine.CreateLeague("premier-league", GameSessionService.PremierLeagueName, "2025-26", teams);
+        league.Table = teams
+            .Select((team, index) => new LeagueTableEntry
+            {
+                TeamName = team.Name,
+                Played = 10,
+                Wins = Math.Max(0, 5 - index),
+                Draws = 0,
+                Losses = index,
+                GoalsFor = 30 - index,
+                GoalsAgainst = 10 + index,
+                Points = (6 - index) * 3
+            })
+            .ToList();
+        foreach (var fixture in league.Fixtures)
+        {
+            fixture.IsPlayed = true;
+        }
+
+        return (league, selectedTeam);
     }
 }
