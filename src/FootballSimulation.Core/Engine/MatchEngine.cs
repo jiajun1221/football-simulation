@@ -1192,20 +1192,29 @@ public class MatchEngine
             entry => entry.Key,
             entry => entry.Value);
         simulationState.Match.Events = simulationState.MatchLog.GetEvents()
-            .Select(matchEvent => ApplyDisplayMinute(simulationState.Match, matchEvent))
+            .Select((matchEvent, index) => ApplyDisplayMinute(
+                simulationState.Match,
+                matchEvent,
+                simulationState.Match.ExtraTimeEventStartIndex is int extraTimeStartIndex &&
+                    index >= extraTimeStartIndex))
             .ToList();
         UpdateFinalPlayerFatigue(simulationState.Match);
         NormalizePlayerRatings(simulationState.Match);
     }
 
-    private static MatchEvent ApplyDisplayMinute(Match match, MatchEvent matchEvent)
+    private static MatchEvent ApplyDisplayMinute(Match match, MatchEvent matchEvent, bool isExtraTimeEvent)
     {
-        matchEvent.DisplayMinuteText = FormatDisplayMinute(match, matchEvent.Minute);
+        matchEvent.DisplayMinuteText = FormatDisplayMinute(match, matchEvent.Minute, isExtraTimeEvent);
         return matchEvent;
     }
 
-    public static string FormatDisplayMinute(Match match, int minute)
+    public static string FormatDisplayMinute(Match match, int minute, bool isExtraTimeEvent = false)
     {
+        if (isExtraTimeEvent)
+        {
+            return $"{minute}'";
+        }
+
         if (minute <= MatchConstants.HalftimeMinute)
         {
             return $"{minute}'";

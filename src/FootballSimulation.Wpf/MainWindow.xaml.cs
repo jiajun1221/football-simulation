@@ -20,8 +20,11 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         SourceInitialized += MainWindow_SourceInitialized;
+        StateChanged += MainWindow_StateChanged;
         ThemeManager.ThemeChanged += ThemeManager_ThemeChanged;
         UpdateThemeToggleButton();
+        UpdatePinToTopButton();
+        UpdateMaximizeButton();
         ShowMainMenu();
     }
 
@@ -33,12 +36,65 @@ public partial class MainWindow : Window
     private void ThemeManager_ThemeChanged(object? sender, EventArgs e)
     {
         UpdateThemeToggleButton();
+        UpdatePinToTopButton();
         ApplyWindowChromeTheme();
     }
 
     private void ThemeToggleButton_Click(object sender, RoutedEventArgs e)
     {
         ThemeManager.ToggleTheme();
+    }
+
+    private void PinToTopButton_Click(object sender, RoutedEventArgs e)
+    {
+        Topmost = !Topmost;
+        UpdatePinToTopButton();
+    }
+
+    private void MinimizeWindowButton_Click(object sender, RoutedEventArgs e)
+    {
+        WindowState = WindowState.Minimized;
+    }
+
+    private void MaximizeWindowButton_Click(object sender, RoutedEventArgs e)
+    {
+        WindowState = WindowState == WindowState.Maximized
+            ? WindowState.Normal
+            : WindowState.Maximized;
+    }
+
+    private void CloseWindowButton_Click(object sender, RoutedEventArgs e)
+    {
+        Close();
+    }
+
+    private void MainWindow_StateChanged(object? sender, EventArgs e)
+    {
+        UpdateMaximizeButton();
+    }
+
+    private void UpdatePinToTopButton()
+    {
+        PinToTopButton.ToolTip = Topmost
+            ? "Unpin window from top"
+            : "Pin window on top";
+        PinToTopButton.Opacity = Topmost ? 1.0 : 0.65;
+        PinToTopButton.Background = Topmost
+            ? new SolidColorBrush(Color.FromRgb(37, 99, 235))
+            : Brushes.Transparent;
+        PinToTopButton.Foreground = Topmost
+            ? Brushes.White
+            : Brushes.White;
+    }
+
+    private void UpdateMaximizeButton()
+    {
+        MaximizeWindowButton.Content = WindowState == WindowState.Maximized
+            ? "\uE923"
+            : "\uE922";
+        MaximizeWindowButton.ToolTip = WindowState == WindowState.Maximized
+            ? "Restore"
+            : "Maximize";
     }
 
     private void ShellSaveButton_Click(object sender, RoutedEventArgs e)

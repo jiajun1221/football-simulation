@@ -283,6 +283,11 @@ public partial class MatchLiveView : UserControl
             return;
         }
 
+        if (_segment == LiveMatchSegment.ExtraTimeFirstHalf)
+        {
+            _state.CurrentMatch.ExtraTimeEventStartIndex ??= _state.CurrentMatch.Events.Count;
+        }
+
         var segmentStartMinute = _segment switch
         {
             LiveMatchSegment.ExtraTimeFirstHalf => FullTimeMinute,

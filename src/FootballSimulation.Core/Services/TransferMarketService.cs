@@ -97,6 +97,7 @@ public class TransferMarketService
         EnsureTeamPlayers(activeLeague.Teams, activeLeague.LeagueId);
         EnrichMissingPlayerData(activeLeague.Teams, activeLeague.LeagueId);
         SyncSquadsFromTransferHistory(state);
+        SyncScheduledFixtureTeams(state, activeLeague);
 
         foreach (var team in activeLeague.Teams)
         {
@@ -574,7 +575,8 @@ public class TransferMarketService
                 candidate.Fee,
                 currentRound,
                 _windowService.GetWindowId(activeLeague, currentRound),
-                candidate.Reason))
+                candidate.Reason,
+                activeLeague: activeLeague))
             {
                 movedPlayerIds.Add(candidate.Listing.Player.PlayerId);
                 completedTransfers++;
@@ -1379,7 +1381,7 @@ public class TransferMarketService
             return;
         }
 
-        if (!CompleteTransfer(state, listing, activeLeague.LeagueId, selectedTeam, offerFee, currentRound, _windowService.GetWindowId(activeLeague, currentRound), "Permanent"))
+        if (!CompleteTransfer(state, listing, activeLeague.LeagueId, selectedTeam, offerFee, currentRound, _windowService.GetWindowId(activeLeague, currentRound), "Permanent", activeLeague: activeLeague))
         {
             offer.Status = OfferStatus.Withdrawn;
             offer.Message = $"{selectedTeam.Name} could not complete the transfer for {listing.Player.Name}.";
@@ -1419,7 +1421,8 @@ public class TransferMarketService
             currentRound,
             _windowService.GetWindowId(activeLeague, currentRound),
             type,
-            enforceBuyerBudget: offer.IsUserOffer))
+            enforceBuyerBudget: offer.IsUserOffer,
+            activeLeague: activeLeague))
         {
             offer.Status = OfferStatus.Withdrawn;
             offer.Message = $"{offer.ToClubName} could not complete the transfer for {offer.PlayerName}.";
@@ -1443,7 +1446,8 @@ public class TransferMarketService
         int currentRound,
         string windowId,
         string type,
-        bool enforceBuyerBudget = true)
+        bool enforceBuyerBudget = true,
+        League? activeLeague = null)
     {
         var sellingTeam = listing.Team;
         var player = listing.Player;
@@ -1504,6 +1508,11 @@ public class TransferMarketService
             return false;
         }
 
+        if (activeLeague is not null)
+        {
+            SyncScheduledFixtureTeams(state, activeLeague);
+        }
+
         WithdrawActiveTransferDealsForPlayer(state, player.PlayerId);
         buyerFinance.TransferSpent += fee;
         sellerFinance.TransferIncome += fee;
@@ -1512,6 +1521,27 @@ public class TransferMarketService
 
         AddNotification(state, TransferNotificationType.TransferCompleted, $"Transfer completed: {player.Name} joined {buyingTeam.Name} for {FormatMoney(fee)}.", currentRound);
         return true;
+    }
+
+    private static void SyncScheduledFixtureTeams(TransferMarketState state, League activeLeague)
+    {
+        var teamsByName = state.Leagues
+            .SelectMany(league => league.Teams)
+            .GroupBy(team => team.Name, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
+
+        foreach (var fixture in activeLeague.Fixtures.Where(fixture => !fixture.IsPlayed))
+        {
+            if (teamsByName.TryGetValue(fixture.HomeTeam.Name, out var homeTeam))
+            {
+                fixture.HomeTeam = homeTeam;
+            }
+
+            if (teamsByName.TryGetValue(fixture.AwayTeam.Name, out var awayTeam))
+            {
+                fixture.AwayTeam = awayTeam;
+            }
+        }
     }
 
     public void SyncSquadsFromTransferHistory(TransferMarketState state)

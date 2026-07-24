@@ -7,8 +7,119 @@
         MinHeight="700"
         MinWidth="1040"
         Icon="Assets/App/FootballSimulator_AppIcon.ico"
+        WindowStyle="None"
         Background="{DynamicResource AppPageBackground}">
+    <Window.Resources>
+        <Style x:Key="TitleBarButtonStyle" TargetType="Button">
+            <Setter Property="Foreground" Value="#FFFFFF" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBackground"
+                                Background="{TemplateBinding Background}">
+                            <TextBlock Text="{TemplateBinding Content}"
+                                       Foreground="#FFFFFF"
+                                       FontFamily="{TemplateBinding FontFamily}"
+                                       FontSize="{TemplateBinding FontSize}"
+                                       FontWeight="{TemplateBinding FontWeight}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBackground" Property="Background" Value="#1E3A5F" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonBackground" Property="Background" Value="#2563EB" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="30"
+                      ResizeBorderThickness="6"
+                      CornerRadius="8"
+                      GlassFrameThickness="0"
+                      UseAeroCaptionButtons="False" />
+    </WindowChrome.WindowChrome>
     <Grid Background="{DynamicResource AppPageBackground}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Background="#071226">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="36" />
+                <ColumnDefinition Width="40" />
+                <ColumnDefinition Width="40" />
+                <ColumnDefinition Width="40" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="9,0,0,0">
+                <Image Source="Assets/App/FootballSimulator_AppIcon.ico" Width="16" Height="16" Margin="0,0,7,0" />
+                <TextBlock Text="Football Simulator - By ScorpJJ"
+                           Foreground="#FFFFFF"
+                           VerticalAlignment="Center"
+                           FontSize="12" />
+            </StackPanel>
+
+            <Button x:Name="PinToTopButton"
+                    Grid.Column="1"
+                    Style="{StaticResource TitleBarButtonStyle}"
+                    WindowChrome.IsHitTestVisibleInChrome="True"
+                    Click="PinToTopButton_Click"
+                    ToolTip="Pin window on top"
+                    Content="&#xE718;"
+                    FontFamily="Segoe MDL2 Assets"
+                    FontSize="14"
+                    Cursor="Hand"
+                    BorderThickness="0"
+                    Background="Transparent"
+                    Foreground="#FFFFFF" />
+            <Button Grid.Column="2"
+                    Style="{StaticResource TitleBarButtonStyle}"
+                    WindowChrome.IsHitTestVisibleInChrome="True"
+                    Click="MinimizeWindowButton_Click"
+                    ToolTip="Minimize"
+                    Content="&#xE921;"
+                    FontFamily="Segoe MDL2 Assets"
+                    FontSize="11"
+                    BorderThickness="0"
+                    Background="Transparent"
+                    Foreground="#FFFFFF" />
+            <Button x:Name="MaximizeWindowButton"
+                    Grid.Column="3"
+                    Style="{StaticResource TitleBarButtonStyle}"
+                    WindowChrome.IsHitTestVisibleInChrome="True"
+                    Click="MaximizeWindowButton_Click"
+                    ToolTip="Maximize"
+                    Content="&#xE922;"
+                    FontFamily="Segoe MDL2 Assets"
+                    FontSize="11"
+                    BorderThickness="0"
+                    Background="Transparent"
+                    Foreground="#FFFFFF" />
+            <Button Grid.Column="4"
+                    Style="{StaticResource TitleBarButtonStyle}"
+                    WindowChrome.IsHitTestVisibleInChrome="True"
+                    Click="CloseWindowButton_Click"
+                    ToolTip="Close"
+                    Content="&#xE8BB;"
+                    FontFamily="Segoe MDL2 Assets"
+                    FontSize="11"
+                    BorderThickness="0"
+                    Background="Transparent"
+                    Foreground="#FFFFFF" />
+        </Grid>
+
+        <Grid Grid.Row="1">
         <ContentControl x:Name="MainContent" />
         <StackPanel x:Name="ShellActionsPanel"
                     HorizontalAlignment="Right"
@@ -171,5 +282,6 @@
                 </Button.Template>
             </Button>
         </StackPanel>
+        </Grid>
     </Grid>
 </Window>

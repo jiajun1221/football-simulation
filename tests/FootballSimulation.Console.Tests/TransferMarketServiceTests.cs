@@ -193,6 +193,47 @@ public class TransferMarketServiceTests
     }
 
     [Fact]
+    public void MakeUserOffer_RefreshesEuropeanFixtureTeamAfterTransfer()
+    {
+        var league = CreateLeague("premier-league");
+        var selectedTeam = league.Teams.Single(team => team.Name == "Chelsea");
+        var service = new TransferMarketService();
+        var state = service.CreateInitialState(league);
+        var target = service.GetAllPlayerListings(state, league.PlayerStats)
+            .Where(listing => listing.Team != selectedTeam)
+            .Where(listing => !league.Teams.Contains(listing.Team))
+            .Where(listing => listing.AskingPrice < service.GetFinance(state, league.LeagueId, selectedTeam).AvailableTransferBudget)
+            .OrderByDescending(listing => listing.Player.OverallRating)
+            .First();
+        var staleOpponent = new Team
+        {
+            Name = target.Team.Name,
+            Players = [target.Player]
+        };
+        var fixture = new Fixture
+        {
+            Competition = CompetitionType.ChampionsLeague,
+            HomeTeam = selectedTeam,
+            AwayTeam = staleOpponent
+        };
+        league.Fixtures.Add(fixture);
+
+        var offer = service.MakeUserOffer(
+            state,
+            league,
+            selectedTeam,
+            target.Player.PlayerId,
+            target.AskingPrice,
+            currentRound: 1);
+
+        Assert.Equal(OfferStatus.Completed, offer.Status);
+        Assert.Same(target.Team, fixture.AwayTeam);
+        Assert.DoesNotContain(
+            fixture.AwayTeam.Players.Concat(fixture.AwayTeam.Substitutes),
+            player => player.PlayerId == target.Player.PlayerId);
+    }
+
+    [Fact]
     public void GetClubListings_IncludesTransferredPlayerWhenSelectedTeamReferenceDiffers()
     {
         var league = CreateLeague("la-liga");

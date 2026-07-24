@@ -15,6 +15,7 @@ public class Match
     public int SecondHalfStoppageSeconds { get; set; }
     public bool FirstHalfAddedTimeAnnounced { get; set; }
     public bool SecondHalfAddedTimeAnnounced { get; set; }
+    public int? ExtraTimeEventStartIndex { get; set; }
     public int HomePossessionMoments { get; set; }
     public int AwayPossessionMoments { get; set; }
     public MatchPhase CurrentPhase { get; set; }

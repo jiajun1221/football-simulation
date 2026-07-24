@@ -642,6 +642,20 @@ public class MatchEngineScoringTests
     }
 
     [Fact]
+    public void FormatDisplayMinute_DoesNotSubtractAddedTimeFromExtraTime()
+    {
+        var match = new Match
+        {
+            FirstHalfAddedMinutes = 4,
+            SecondHalfAddedMinutes = 3,
+            CurrentPhase = MatchPhase.ExtraTimeFirstHalf
+        };
+
+        Assert.Equal("91'", MatchEngine.FormatDisplayMinute(match, 91, isExtraTimeEvent: true));
+        Assert.Equal("105'", MatchEngine.FormatDisplayMinute(match, 105, isExtraTimeEvent: true));
+    }
+
+    [Fact]
     public void SimulateMatch_ConfrontationsOnlyFollowStoppedPlayTriggers()
     {
         var seedDataService = new SeedDataService();

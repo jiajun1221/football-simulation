@@ -138,8 +138,12 @@ public class LeagueEngine
         int? matchSeed = seed.HasValue
             ? seed.Value + fixture.RoundNumber * 100 + fixtureIndex
             : null;
+        var simulationOptions = CreateOptions(options);
 
-        return _matchEngine.AdvanceMatch(match, startMinute, endMinute, includeFulltime, matchSeed, CreateOptions(options));
+        RepairMalformedLiveTeamRoster(match.HomeTeam, simulationOptions);
+        RepairMalformedLiveTeamRoster(match.AwayTeam, simulationOptions);
+
+        return _matchEngine.AdvanceMatch(match, startMinute, endMinute, includeFulltime, matchSeed, simulationOptions);
     }
 
     public Match SimulateFixtureSecondHalf(League league, Fixture fixture, Match match, int? seed = null, MatchSimulationOptions? options = null)
@@ -299,6 +303,52 @@ public class LeagueEngine
             player.IsOnPitch = false;
             team.Substitutes.Add(player);
             availablePlayerCount++;
+        }
+    }
+
+    private static void RepairMalformedLiveTeamRoster(Team team, MatchSimulationOptions options)
+    {
+        if (team.Players.Count == 11)
+        {
+            return;
+        }
+
+        EnsureTeamCanFieldEleven(team);
+
+        if (!IsHumanControlled(team, options))
+        {
+            AiLineupSelectionService.BuildRealisticLineup(team);
+        }
+
+        while (team.Players.Count > 11)
+        {
+            var extraPlayer = team.Players
+                .LastOrDefault(player => !player.IsOnPitch) ??
+                team.Players[^1];
+            team.Players.Remove(extraPlayer);
+            extraPlayer.IsStarter = false;
+            extraPlayer.IsOnPitch = false;
+            if (!team.Substitutes.Contains(extraPlayer))
+            {
+                team.Substitutes.Add(extraPlayer);
+            }
+        }
+
+        while (team.Players.Count < 11)
+        {
+            var replacement = team.Substitutes
+                .Where(player => !player.IsInjured && !player.IsSuspended && !player.IsSentOff)
+                .OrderByDescending(player => player.OverallRating)
+                .FirstOrDefault();
+            if (replacement is null)
+            {
+                break;
+            }
+
+            team.Substitutes.Remove(replacement);
+            replacement.IsStarter = true;
+            replacement.IsOnPitch = true;
+            team.Players.Add(replacement);
         }
     }
 
