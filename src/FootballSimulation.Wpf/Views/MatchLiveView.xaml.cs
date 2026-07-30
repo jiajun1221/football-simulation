@@ -4179,6 +4179,7 @@ public partial class MatchLiveView : UserControl
             EventType.Save => CreateSaveHeadline(matchEvent),
             EventType.Goal => CreateGoalHeadline(matchEvent, teamName),
             EventType.Foul => CreateFoulHeadline(matchEvent),
+            EventType.Dive => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "booked for diving", "Simulation spotted"),
             EventType.YellowCard => matchEvent.Description.Contains("Both players", StringComparison.OrdinalIgnoreCase)
                 ? "Both players booked"
                 : CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "booked", "Yellow card shown"),
@@ -4249,6 +4250,7 @@ public partial class MatchLiveView : UserControl
             EventType.Foul => matchEvent.IsPenaltyFoul || matchEvent.FoulLocation == FoulLocation.PenaltyBox
                 ? string.Empty
                 : "Play is stopped.",
+            EventType.Dive => "No penalty is awarded.",
             EventType.YellowCard => "He is on a booking.",
             EventType.RedCard => "They are down to ten.",
             EventType.Injury => "Medical staff are watching.",
@@ -4678,6 +4680,7 @@ public partial class MatchLiveView : UserControl
             EventType.Shot => ShotStyle(matchEvent),
             EventType.Save => SaveStyle(GloveIcon(), "SAVE"),
             EventType.Foul => FoulStyle(StopIcon(), "FOUL"),
+            EventType.Dive => YellowCardStyle(WarningIcon(), "DIVING"),
             EventType.Miss => MissStyle(WarningIcon(), "MISS"),
             EventType.Woodwork => MissStyle(WarningIcon(), "WOODWORK"),
             EventType.Goal => GoalStyle(SoccerBallIcon(), "GOAL"),
@@ -4914,6 +4917,7 @@ public partial class MatchLiveView : UserControl
             or EventType.RedCard
             or EventType.Miss
             or EventType.Injury
+            or EventType.Dive
             or EventType.PenaltyDecision
             or EventType.PenaltyTaker
             or EventType.Penalty
@@ -4948,6 +4952,7 @@ public partial class MatchLiveView : UserControl
             or EventType.Save
             or EventType.Miss
             or EventType.Foul
+            or EventType.Dive
             or EventType.YellowCard
             or EventType.RedCard
             or EventType.Injury

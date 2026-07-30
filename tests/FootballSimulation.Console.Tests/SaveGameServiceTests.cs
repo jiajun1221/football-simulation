@@ -136,6 +136,64 @@ public class SaveGameServiceTests
     }
 
     [Fact]
+    public void CreateLeague_PreservesRenewedContractInsteadOfRestoringSourceContract()
+    {
+        var dataService = new LeagueDataService();
+        var definition = dataService.GetLeagueDefinition("premier-league");
+        var teams = dataService.LoadTeams(definition);
+        var league = new GameSessionService().CreateLeague(definition, teams);
+        var selectedTeam = league.Teams.Single(team => team.Name == "Chelsea");
+        var player = selectedTeam.Players
+            .Concat(selectedTeam.Substitutes)
+            .First();
+
+        player.ContractEndYear = 2033;
+        player.WeeklyWage = 624_000m;
+        player.ContractStatus = PlayerContractStatus.Active;
+
+        var saveData = SaveGameService.CreateSaveData(league, selectedTeam);
+        var restoredLeague = SaveGameService.CreateLeague(saveData);
+        var restoredPlayer = restoredLeague.Teams
+            .Single(team => team.Name == selectedTeam.Name)
+            .Players
+            .Concat(restoredLeague.Teams
+                .Single(team => team.Name == selectedTeam.Name)
+                .Substitutes)
+            .Single(candidate => candidate.PlayerId == player.PlayerId);
+
+        Assert.Equal(2033, restoredPlayer.ContractEndYear);
+        Assert.Equal(624_000m, restoredPlayer.WeeklyWage);
+        Assert.Equal(PlayerContractStatus.Active, restoredPlayer.ContractStatus);
+    }
+
+    [Fact]
+    public void CreateLeague_PreservesMainPositionSelectedByUser()
+    {
+        var dataService = new LeagueDataService();
+        var definition = dataService.GetLeagueDefinition("premier-league");
+        var teams = dataService.LoadTeams(definition);
+        var league = new GameSessionService().CreateLeague(definition, teams);
+        var selectedTeam = league.Teams.Single(team => team.Name == "Chelsea");
+        var player = selectedTeam.Players
+            .Concat(selectedTeam.Substitutes)
+            .First(candidate => candidate.SecondaryPositions.Count > 0);
+        var selectedPosition = player.SecondaryPositions[0];
+
+        Assert.True(PositionSuitabilityService.TrySetPreferredPosition(player, selectedPosition));
+
+        var saveData = SaveGameService.CreateSaveData(league, selectedTeam);
+        var restoredLeague = SaveGameService.CreateLeague(saveData);
+        var restoredTeam = restoredLeague.Teams.Single(team => team.Name == selectedTeam.Name);
+        var restoredPlayer = restoredTeam.Players
+            .Concat(restoredTeam.Substitutes)
+            .Single(candidate => candidate.PlayerId == player.PlayerId);
+
+        Assert.Equal(selectedPosition, restoredPlayer.PreferredPosition);
+        Assert.Equal(PositionSuitabilityService.GetPositionGroup(selectedPosition), restoredPlayer.Position);
+        Assert.True(restoredPlayer.HasCustomPreferredPosition);
+    }
+
+    [Fact]
     public void LoadGame_CorrectsLegacyEstevaoAge()
     {
         var saveDirectory = CreateTempSaveDirectory();

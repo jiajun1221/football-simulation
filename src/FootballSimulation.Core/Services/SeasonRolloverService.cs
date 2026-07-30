@@ -67,6 +67,7 @@ public class SeasonRolloverService
         league.SeasonHistory.Add(archive);
 
         var nextSeason = AdvanceSeasonLabel(league.Season);
+        RenewValuableExpiringPlayers(league, transferMarketState, GetSeasonEndYear(nextSeason));
         var removedClubNames = GetClubsToReplace(archive.FinalTable, selectedTeam.Name);
         var promotedClubs = _promotedClubGeneratorService.GeneratePromotedClubs(
             removedClubNames.Count,
@@ -95,7 +96,7 @@ public class SeasonRolloverService
         ApplyOffseasonPlayerReset(league.Teams);
         _youthAcademyService.ApplySeasonRollover(league, selectedTeam);
         _youthScoutService.EnsureScoutNetwork(league);
-        UpdateTransferMarket(league, transferMarketState, promotedClubs);
+        UpdateTransferMarket(league, selectedTeam, transferMarketState, promotedClubs);
 
         return new SeasonRolloverResult(
             archive,
@@ -298,6 +299,97 @@ public class SeasonRolloverService
         }
     }
 
+    private static void RenewValuableExpiringPlayers(
+        League league,
+        TransferMarketState transferMarketState,
+        int nextSeasonEndYear)
+    {
+        var teams = league.Teams
+            .Concat(transferMarketState.Leagues.SelectMany(leagueState => leagueState.Teams))
+            .Distinct()
+            .ToList();
+
+        foreach (var team in teams)
+        {
+            var roster = team.Players
+                .Concat(team.Substitutes)
+                .Distinct()
+                .ToList();
+            if (roster.Count == 0)
+            {
+                continue;
+            }
+
+            var coreSquad = roster
+                .OrderByDescending(player => player.OverallRating)
+                .ThenByDescending(player => player.PotentialOverall ?? player.OverallRating)
+                .Take(Math.Min(18, roster.Count))
+                .ToHashSet();
+            var averageOverall = roster.Average(player => player.OverallRating);
+
+            foreach (var player in roster.Where(player =>
+                player.ContractEndYear.HasValue &&
+                player.ContractEndYear.Value < nextSeasonEndYear))
+            {
+                var isValuableProspect = player.Age is <= 24 &&
+                    (player.PotentialOverall ?? player.OverallRating) >= averageOverall + 3;
+                var isImportantPlayer = player.IsStarter ||
+                    player.Role is PlayerRole.KeyPlayer or PlayerRole.Starter ||
+                    player.OverallRating >= averageOverall - 1;
+
+                if (!coreSquad.Contains(player) && !isImportantPlayer && !isValuableProspect)
+                {
+                    continue;
+                }
+
+                var extensionYears = player.Age switch
+                {
+                    >= 34 => 1,
+                    >= 31 => 2,
+                    <= 23 => 4,
+                    _ => 3
+                };
+                var leagueId = FindLeagueIdForTeam(league, transferMarketState, team);
+                var expectedWage = PlayerContractService.EstimateWeeklyWage(player, leagueId);
+
+                player.ContractEndYear = nextSeasonEndYear + extensionYears;
+                player.WeeklyWage = Math.Max(player.WeeklyWage ?? 0, Math.Round(expectedWage * 1.08m, 0));
+                player.ContractStatus = PlayerContractStatus.Active;
+            }
+        }
+    }
+
+    private static string FindLeagueIdForTeam(
+        League league,
+        TransferMarketState transferMarketState,
+        Team team)
+    {
+        if (league.Teams.Contains(team))
+        {
+            return league.LeagueId;
+        }
+
+        return transferMarketState.Leagues
+            .FirstOrDefault(leagueState => leagueState.Teams.Contains(team))
+            ?.LeagueId ?? league.LeagueId;
+    }
+
+    private static int GetSeasonEndYear(string season)
+    {
+        var normalizedSeason = season.Trim().Replace('/', '-');
+        var parts = normalizedSeason.Split('-', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (parts.Length == 2 &&
+            int.TryParse(parts[0], out var startYear) &&
+            int.TryParse(parts[1], out var endYear))
+        {
+            return endYear < 100 ? (startYear / 100 * 100) + endYear : endYear;
+        }
+
+        return int.TryParse(normalizedSeason, out var year)
+            ? year + 1
+            : PlayerContractService.DefaultSeasonEndYear;
+    }
+
     private static void AgePlayersForSeasonRollover(League league, TransferMarketState transferMarketState)
     {
         var agedPlayerReferences = new HashSet<Player>();
@@ -340,6 +432,7 @@ public class SeasonRolloverService
 
     private void UpdateTransferMarket(
         League league,
+        Team selectedTeam,
         TransferMarketState transferMarketState,
         IReadOnlyList<Team> promotedClubs)
     {
@@ -373,6 +466,109 @@ public class SeasonRolloverService
         activeLeague.Teams = league.Teams;
 
         new TransferMarketService().BindActiveLeague(transferMarketState, league);
+        ReplenishAiClubRosters(
+            transferMarketState,
+            selectedTeam,
+            GetSeasonEndYear(league.Season));
+    }
+
+    public static void ReplenishAiClubRosters(
+        TransferMarketState transferMarketState,
+        Team selectedTeam,
+        int seasonEndYear,
+        int minimumRosterSize = 18)
+    {
+        ArgumentNullException.ThrowIfNull(transferMarketState);
+        ArgumentNullException.ThrowIfNull(selectedTeam);
+
+        foreach (var leagueState in transferMarketState.Leagues)
+        {
+            foreach (var team in leagueState.Teams.Where(team =>
+                !ReferenceEquals(team, selectedTeam) &&
+                !team.Name.Equals(selectedTeam.Name, StringComparison.OrdinalIgnoreCase)))
+            {
+                var roster = team.Players.Concat(team.Substitutes).ToList();
+                var playersNeededToFieldEleven = Math.Max(0, 11 - roster.Count);
+                if (playersNeededToFieldEleven == 0 ||
+                    transferMarketState.FreeAgents.Count < playersNeededToFieldEleven)
+                {
+                    continue;
+                }
+
+                while (roster.Count < minimumRosterSize)
+                {
+                    var freeAgent = SelectFreeAgentForRoster(transferMarketState.FreeAgents, roster);
+                    if (freeAgent is null)
+                    {
+                        break;
+                    }
+
+                    transferMarketState.FreeAgents.Remove(freeAgent);
+                    freeAgent.ClubId = $"{leagueState.LeagueId}:{NormalizeClubKey(team.Name)}";
+                    freeAgent.PreviousClubId = string.Empty;
+                    freeAgent.TransferStatus = PlayerTransferStatus.RecentlyTransferred;
+                    freeAgent.ContractEndYear = seasonEndYear + GetAiContractYears(freeAgent);
+                    freeAgent.ContractStatus = PlayerContractStatus.Active;
+                    freeAgent.WeeklyWage = Math.Max(
+                        freeAgent.WeeklyWage ?? 0,
+                        PlayerContractService.EstimateWeeklyWage(freeAgent, leagueState.LeagueId));
+                    freeAgent.IsStarter = false;
+                    freeAgent.IsOnPitch = false;
+                    team.Substitutes.Add(freeAgent);
+                    roster.Add(freeAgent);
+                }
+
+                _ = LineupValidationService.RepairGoalkeeperSlot(team);
+            }
+        }
+    }
+
+    private static Player? SelectFreeAgentForRoster(
+        IEnumerable<Player> freeAgents,
+        IReadOnlyCollection<Player> roster)
+    {
+        var positionNeeds = new Dictionary<Position, int>
+        {
+            [Position.Goalkeeper] = Math.Max(0, 2 - roster.Count(player => player.Position == Position.Goalkeeper)),
+            [Position.Defender] = Math.Max(0, 6 - roster.Count(player => player.Position == Position.Defender)),
+            [Position.Midfielder] = Math.Max(0, 6 - roster.Count(player => player.Position == Position.Midfielder)),
+            [Position.Forward] = Math.Max(0, 4 - roster.Count(player => player.Position == Position.Forward))
+        };
+        var neededPosition = positionNeeds
+            .Where(item => item.Value > 0)
+            .OrderByDescending(item => item.Value)
+            .Select(item => (Position?)item.Key)
+            .FirstOrDefault();
+
+        return freeAgents
+            .Where(player => player.ContractStatus is PlayerContractStatus.FreeAgent or PlayerContractStatus.Expired)
+            .Where(player => neededPosition is null || player.Position == neededPosition)
+            .OrderByDescending(player => player.OverallRating)
+            .ThenByDescending(player => player.PotentialOverall ?? player.OverallRating)
+            .FirstOrDefault()
+            ?? freeAgents
+                .OrderByDescending(player => player.OverallRating)
+                .ThenByDescending(player => player.PotentialOverall ?? player.OverallRating)
+                .FirstOrDefault();
+    }
+
+    private static int GetAiContractYears(Player player)
+    {
+        return player.Age switch
+        {
+            >= 34 => 1,
+            >= 30 => 2,
+            <= 23 => 4,
+            _ => 3
+        };
+    }
+
+    private static string NormalizeClubKey(string clubName)
+    {
+        return new string(clubName
+            .Where(char.IsLetterOrDigit)
+            .Select(char.ToLowerInvariant)
+            .ToArray());
     }
 }
 

@@ -111,6 +111,7 @@ public static class PositionSuitabilityService
         }
 
         player.PreferredPosition = normalized;
+        player.HasCustomPreferredPosition = true;
         player.Position = GetPositionGroup(normalized);
         player.SecondaryPositions = naturalPositions
             .Where(position => !position.Equals(normalized, StringComparison.OrdinalIgnoreCase))

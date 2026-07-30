@@ -436,6 +436,15 @@ public class MatchEventFactory
         return CreateEvent(minute, EventType.YellowCard, description, player.Name);
     }
 
+    public MatchEvent CreateDive(int minute, Team attackingTeam, Player player)
+    {
+        return CreateEvent(
+            minute,
+            EventType.Dive,
+            $"{player.Name} goes down looking for a penalty, but the referee spots the simulation. No penalty for {attackingTeam.Name}.",
+            player.Name);
+    }
+
     public MatchEvent CreateRedCard(int minute, Player player)
     {
         return CreateEvent(
@@ -843,6 +852,19 @@ public class MatchEventFactory
             $"The referee warns {playerText} after the confrontation. No cards this time.",
             firstPlayer.Name,
             secondPlayer?.Name);
+    }
+
+    public MatchEvent CreatePersistentFoulWarning(int minute, Team team, Player player, bool isTeamWarning)
+    {
+        var description = isTeamWarning
+            ? $"The referee calls over {team.Name}'s captain and warns the team about their persistent fouling."
+            : $"The referee gives {player.Name} a final warning after a series of fouls.";
+
+        return CreateEvent(
+            minute,
+            EventType.RefereeControversy,
+            description,
+            player.Name);
     }
 
     public MatchEvent CreateCrowdMomentum(int minute, Team team)

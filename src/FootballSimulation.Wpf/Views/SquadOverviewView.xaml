@@ -267,10 +267,36 @@
         </Grid.RowDefinitions>
 
         <DockPanel Grid.Row="0" Margin="0,0,0,12">
-            <Button Content="Back to Dashboard"
-                    Style="{StaticResource BackButtonStyle}"
-                    Click="BackToDashboardButton_Click"
-                    DockPanel.Dock="Right" />
+            <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+                <Border Background="{DynamicResource AppCardBackground}"
+                        BorderBrush="{DynamicResource AppBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="10"
+                        Padding="12,5"
+                        Margin="0,0,10,0">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <StackPanel Margin="0,0,16,0">
+                            <TextBlock Text="Transfer Budget"
+                                       Foreground="{DynamicResource AppMutedTextBrush}"
+                                       FontSize="10" />
+                            <TextBlock x:Name="TransferBudgetBalanceTextBlock"
+                                       Foreground="{DynamicResource AppTextBrush}"
+                                       FontWeight="Bold" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Text="Wage Budget"
+                                       Foreground="{DynamicResource AppMutedTextBrush}"
+                                       FontSize="10" />
+                            <TextBlock x:Name="WageBudgetBalanceTextBlock"
+                                       Foreground="{DynamicResource AppTextBrush}"
+                                       FontWeight="Bold" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+                <Button Content="Back to Dashboard"
+                        Style="{StaticResource BackButtonStyle}"
+                        Click="BackToDashboardButton_Click" />
+            </StackPanel>
             <StackPanel>
                 <TextBlock Text="My Squad"
                            FontSize="28"
@@ -358,7 +384,26 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="Exp." Binding="{Binding ContractText}" Width="76" ElementStyle="{StaticResource CenteredGridTextStyle}" IsReadOnly="True" />
+                            <DataGridTemplateColumn Header="Exp." Width="76" IsReadOnly="True">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal"
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding ContractText}"
+                                                       VerticalAlignment="Center" />
+                                            <TextBlock Text="⚠"
+                                                       Margin="5,0,0,0"
+                                                       Foreground="#DC2626"
+                                                       FontWeight="Bold"
+                                                       FontSize="13"
+                                                       VerticalAlignment="Center"
+                                                       Visibility="{Binding ContractWarningVisibility}"
+                                                       ToolTip="{Binding ContractWarningTooltip}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
                             <DataGridTextColumn Header="Wage" Binding="{Binding WageText}" Width="78" ElementStyle="{StaticResource CenteredValueTextStyle}" IsReadOnly="True" />
                             <DataGridTemplateColumn Header="Status" Width="100" IsReadOnly="True">
                                 <DataGridTemplateColumn.CellTemplate>

@@ -5,6 +5,24 @@ namespace FootballSimulation.Console.Tests;
 
 public class LeagueDataServiceTests
 {
+    [Fact]
+    public void LoadTeams_IncludesJamieGittensInInitialChelseaSquad()
+    {
+        var dataService = new LeagueDataService();
+        var definition = dataService.GetLeagueDefinition("premier-league");
+
+        var teams = dataService.LoadTeams(definition);
+        var chelsea = teams.Single(team => team.Name == "Chelsea");
+        var squad = chelsea.Players.Concat(chelsea.Substitutes).ToList();
+        var gittens = squad.Single(player => player.Name == "Jamie Gittens");
+
+        Assert.Equal(11, gittens.SquadNumber);
+        Assert.Equal("LW", gittens.PreferredPosition);
+        Assert.Equal(80, gittens.OverallRating);
+        Assert.Equal(2032, gittens.ContractEndYear);
+        Assert.Equal(49, squad.Single(player => player.Name == "Alejandro Garnacho").SquadNumber);
+    }
+
     private static readonly string[] EnabledLeagueIds =
     [
         "premier-league",

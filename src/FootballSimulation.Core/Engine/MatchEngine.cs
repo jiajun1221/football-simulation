@@ -2065,6 +2065,25 @@ public class MatchEngine
     {
         var match = simulationState.Match;
         var defender = ChooseDefendingPlayer(defendingTeam, random);
+
+        if (foulContext.IsPenalty && ShouldAttemptDive(fouledPlayer, random))
+        {
+            matchLog.AddEvent(eventFactory.CreateDive(minute, attackingTeam, fouledPlayer));
+            ApplyYellowCard(
+                minute,
+                simulationState,
+                attackingTeam,
+                defendingTeam,
+                fouledPlayer,
+                GetOrCreatePerformance(match, attackingTeam, fouledPlayer),
+                GetTeamStats(match, attackingTeam),
+                matchLog,
+                eventFactory,
+                random,
+                reason: "for simulation");
+            return defendingTeam;
+        }
+
         matchLog.AddEvent(eventFactory.CreateFoul(
             minute,
             defendingTeam,
@@ -2079,6 +2098,18 @@ public class MatchEngine
         defenderPerformance.Fouls++;
         defenderPerformance.Rating -= 0.15;
         GetOrCreatePerformance(match, GetOpposingTeam(match, defendingTeam), fouledPlayer).Rating += 0.05;
+
+        var tackleCausedInjury = TryApplyTackleInjury(
+            minute,
+            simulationState,
+            attackingTeam,
+            defendingTeam,
+            defender,
+            fouledPlayer,
+            foulContext,
+            random,
+            matchLog,
+            eventFactory);
 
         var redCardReason = GetStraightRedReason(foulContext, defender, simulationState, defendingTeam, minute, random);
         if (redCardReason is not null)
@@ -2106,10 +2137,29 @@ public class MatchEngine
                 eventFactory,
                 random);
         }
-        else
-        {
-            TryAddRefereeControversy(minute, simulationState, defendingTeam, attackingTeam, defender, fouledPlayer, foulContext, random, matchLog, eventFactory);
-        }
+
+        TrackPersistentFoulingAndWarn(
+            minute,
+            simulationState,
+            defendingTeam,
+            defender,
+            defendingStats,
+            defenderPerformance,
+            matchLog,
+            eventFactory);
+
+        TryAddRefereeControversy(
+            minute,
+            simulationState,
+            defendingTeam,
+            attackingTeam,
+            defender,
+            fouledPlayer,
+            foulContext,
+            tackleCausedInjury,
+            random,
+            matchLog,
+            eventFactory);
 
         if (foulContext.IsPenalty)
         {
@@ -3113,6 +3163,112 @@ public class MatchEngine
         return true;
     }
 
+    private static bool ShouldAttemptDive(Player attacker, Random random)
+    {
+        if (attacker.IsSentOff || attacker.IsInjured)
+        {
+            return false;
+        }
+
+        var chance = 0.006 +
+            (attacker.Traits.Contains(PlayerTrait.Flair) ? 0.008 : 0.0) +
+            (attacker.Traits.Contains(PlayerTrait.TechnicalDribbler) ? 0.006 : 0.0) +
+            (attacker.Traits.Contains(PlayerTrait.SpeedDribbler) ? 0.004 : 0.0);
+        chance *= attacker.YellowCards > 0 ? 0.18 : 1.0;
+        return random.NextDouble() < Math.Clamp(chance, 0.002, 0.022);
+    }
+
+    private static bool TryApplyTackleInjury(
+        int minute,
+        MatchSimulationState simulationState,
+        Team attackingTeam,
+        Team defendingTeam,
+        Player defender,
+        Player fouledPlayer,
+        FoulContext foulContext,
+        Random random,
+        MatchLogService matchLog,
+        MatchEventFactory eventFactory)
+    {
+        if (!simulationState.Options.EnableInjuries ||
+            fouledPlayer.IsInjured ||
+            foulContext.Severity is not (FoulSeverity.Reckless or FoulSeverity.Dangerous or FoulSeverity.Violent))
+        {
+            return false;
+        }
+
+        var baseChance = foulContext.Severity switch
+        {
+            FoulSeverity.Reckless => 0.012,
+            FoulSeverity.Dangerous => 0.075,
+            FoulSeverity.Violent => 0.16,
+            _ => 0.0
+        };
+        var attributes = PlayerAttributeService.GetAttributes(fouledPlayer);
+        var fatigueMultiplier = 1.0 + Math.Max(0, 55 - fouledPlayer.Stamina) / 75.0;
+        var physicalMultiplier = Math.Clamp(1.18 - Math.Max(0, attributes.Physical - 55) / 180.0, 0.78, 1.18);
+        var chance = baseChance *
+            fatigueMultiplier *
+            physicalMultiplier *
+            (fouledPlayer.Traits.Contains(PlayerTrait.InjuryProne) ? 1.55 : 1.0) *
+            (defender.Traits.Contains(PlayerTrait.DivesIntoTackles) ? 1.25 : 1.0);
+
+        if (random.NextDouble() >= Math.Clamp(chance, 0.004, 0.28))
+        {
+            return false;
+        }
+
+        var injuryCause = foulContext.Severity == FoulSeverity.Reckless
+            ? "heavy collision"
+            : "dangerous tackle";
+        InjuryRiskService.ApplyInjury(fouledPlayer, injuryCause, random);
+        matchLog.AddEvent(eventFactory.CreateInjury(minute, attackingTeam, fouledPlayer, injuryCause));
+        simulationState.LatestSeriousIncidentMinute = minute;
+        IncreaseMatchTension(simulationState, minute, random);
+        return true;
+    }
+
+    private static void TrackPersistentFoulingAndWarn(
+        int minute,
+        MatchSimulationState simulationState,
+        Team defendingTeam,
+        Player defender,
+        MatchTeamStats teamStats,
+        PlayerMatchPerformance playerPerformance,
+        MatchLogService matchLog,
+        MatchEventFactory eventFactory)
+    {
+        var playerKey = GetPlayerIncidentKey(defendingTeam, defender);
+        var teamWarningThreshold = simulationState.Match.IsRivalryMatch ? 3 : 5;
+        var playerWarningThreshold = simulationState.Match.IsRivalryMatch ? 2 : 3;
+
+        if (playerPerformance.Fouls >= playerWarningThreshold &&
+            simulationState.WarnedPersistentFoulPlayers.Add(playerKey))
+        {
+            matchLog.AddEvent(eventFactory.CreatePersistentFoulWarning(minute, defendingTeam, defender, isTeamWarning: false));
+            return;
+        }
+
+        if (teamStats.Fouls >= teamWarningThreshold &&
+            simulationState.WarnedPersistentFoulTeams.Add(defendingTeam.Name))
+        {
+            matchLog.AddEvent(eventFactory.CreatePersistentFoulWarning(minute, defendingTeam, defender, isTeamWarning: true));
+        }
+    }
+
+    private static bool IsPersistentFouling(MatchSimulationState simulationState, Team team, Player player)
+    {
+        var teamThreshold = simulationState.Match.IsRivalryMatch ? 4 : 6;
+        var playerThreshold = simulationState.Match.IsRivalryMatch ? 3 : 4;
+        return GetOrCreatePerformance(simulationState.Match, team, player).Fouls >= playerThreshold ||
+            GetTeamStats(simulationState.Match, team).Fouls >= teamThreshold;
+    }
+
+    private static string GetPlayerIncidentKey(Team team, Player player)
+    {
+        return $"{team.Name}|{player.Name}";
+    }
+
     private void TryAddRefereeControversy(
         int minute,
         MatchSimulationState simulationState,
@@ -3121,14 +3277,26 @@ public class MatchEngine
         Player defender,
         Player fouledPlayer,
         FoulContext foulContext,
+        bool tackleCausedInjury,
         Random random,
         MatchLogService matchLog,
         MatchEventFactory eventFactory)
     {
-        var controversyChance = foulContext.IsPenalty || foulContext.DeniesClearChance ? 0.12 : 0.045;
+        var controversyChance = foulContext.IsPenalty || foulContext.DeniesClearChance ? 0.12 : 0.025;
         var shouldAddControversy = random.NextDouble() <= controversyChance;
-        var shouldAddConfrontation = CanCreateContextualConfrontation(simulationState, minute, EventType.Foul) &&
-            random.NextDouble() < GetFoulConfrontationChance(simulationState.Match, defender, foulContext);
+        var persistentFouling = IsPersistentFouling(simulationState, defendingTeam, defender);
+        var seriousIncident = foulContext.Severity is FoulSeverity.Dangerous or FoulSeverity.Violent ||
+            tackleCausedInjury ||
+            foulContext.DeniesClearChance ||
+            persistentFouling;
+        var shouldAddConfrontation = seriousIncident &&
+            CanCreateContextualConfrontation(simulationState, minute, EventType.Foul) &&
+            random.NextDouble() < GetFoulConfrontationChance(
+                simulationState.Match,
+                defender,
+                foulContext,
+                tackleCausedInjury,
+                persistentFouling);
         if (!shouldAddControversy && !shouldAddConfrontation)
         {
             return;
@@ -3231,18 +3399,25 @@ public class MatchEngine
         matchLog.AddEvent(eventFactory.CreateRefereeWarning(minute, firstPlayer, secondPlayer));
     }
 
-    private static double GetFoulConfrontationChance(Match match, Player defender, FoulContext foulContext)
+    private static double GetFoulConfrontationChance(
+        Match match,
+        Player defender,
+        FoulContext foulContext,
+        bool tackleCausedInjury,
+        bool persistentFouling)
     {
-        var chance = 0.065;
+        var chance = 0.08;
         if (foulContext.ViolentFoul || foulContext.DeniesClearChance)
         {
-            chance = 0.18;
+            chance = 0.22;
         }
-        else if (foulContext.IsPenalty)
+        else if (foulContext.Severity == FoulSeverity.Dangerous)
         {
-            chance = 0.13;
+            chance = 0.16;
         }
 
+        chance += tackleCausedInjury ? 0.12 : 0.0;
+        chance += persistentFouling ? 0.08 : 0.0;
         if (defender.Traits.Contains(PlayerTrait.DivesIntoTackles))
         {
             chance += 0.025;
@@ -3253,7 +3428,7 @@ public class MatchEngine
             chance += 0.035;
         }
 
-        return Math.Clamp(chance, 0.03, 0.25);
+        return Math.Clamp(chance, 0.05, 0.36);
     }
 
     private static bool CanCreateContextualConfrontation(
@@ -3296,10 +3471,7 @@ public class MatchEngine
             or EventType.RedCard
             or EventType.VarCheck
             or EventType.VarDecision
-            or EventType.RefereeControversy
-            or EventType.Offside
-            or EventType.CornerKick
-            or EventType.SetPieceDanger;
+            or EventType.RefereeControversy;
     }
 
     private static bool IsSubstitutionStoppageEvent(EventType? eventType)
@@ -4885,10 +5057,15 @@ public class MatchEngine
             ? 0.0
             : IsMatchTense(simulationState, minute) ? 0.05 : 0.0;
         var defendingTeam = ResolvePlayerTeam(simulationState.Match, defender);
+        var persistentFoulingBonus = defender.YellowCards == 0 &&
+            defendingTeam is not null &&
+            IsPersistentFouling(simulationState, defendingTeam, defender)
+                ? 0.18
+                : 0.0;
         var venueModifier = defendingTeam is null
             ? 1.0
             : HomeAwayAdvantageService.GetModifier(simulationState.Match, defendingTeam).YellowRiskModifier;
-        return random.NextDouble() < Math.Clamp((baseChance + traitBonus + tensionBonus) * venueModifier, 0.0, 0.88);
+        return random.NextDouble() < Math.Clamp((baseChance + traitBonus + tensionBonus + persistentFoulingBonus) * venueModifier, 0.0, 0.88);
     }
 
     private static FoulContext CreateFoulContext(
@@ -5957,6 +6134,9 @@ public class MatchEngine
         public int TensionUntilMinute { get; set; }
         public int LastConfrontationMinute { get; set; } = -100;
         public int ConfrontationCount { get; set; }
+        public int LatestSeriousIncidentMinute { get; set; } = -100;
+        public HashSet<string> WarnedPersistentFoulTeams { get; } = new(StringComparer.OrdinalIgnoreCase);
+        public HashSet<string> WarnedPersistentFoulPlayers { get; } = new(StringComparer.OrdinalIgnoreCase);
         public int LastDramaEventMinute { get; set; } = match.Events
             .Where(matchEvent => IsTrackedDramaEvent(matchEvent.EventType))
             .Select(matchEvent => matchEvent.Minute)

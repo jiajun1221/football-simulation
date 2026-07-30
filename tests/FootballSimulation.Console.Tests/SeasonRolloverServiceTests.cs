@@ -266,6 +266,74 @@ public class SeasonRolloverServiceTests
     }
 
     [Fact]
+    public void StartNextSeason_RenewsValuablePlayersAndReleasesFringePlayers()
+    {
+        var (league, selectedTeam) = CreateCompletedRolloverContext();
+        var aiTeam = league.Teams[1];
+        var selectedValuablePlayer = selectedTeam.Players
+            .OrderByDescending(player => player.OverallRating)
+            .First();
+        selectedValuablePlayer.PlayerId = "selected-valuable-renewal-test";
+        selectedValuablePlayer.ContractEndYear = 2026;
+        selectedValuablePlayer.Role = PlayerRole.KeyPlayer;
+        var valuablePlayer = aiTeam.Players
+            .OrderByDescending(player => player.OverallRating)
+            .First();
+        valuablePlayer.PlayerId = "valuable-renewal-test";
+        valuablePlayer.ContractEndYear = 2026;
+        valuablePlayer.Role = PlayerRole.Starter;
+        valuablePlayer.IsStarter = true;
+
+        var fringePlayer = new Player
+        {
+            PlayerId = "fringe-expiry-test",
+            Name = "Fringe Expiry Test",
+            ContractEndYear = 2026,
+            OverallRating = 40,
+            PotentialOverall = 45,
+            Age = 28,
+            Position = Position.Midfielder,
+            PreferredPosition = "CM",
+            Role = PlayerRole.Backup,
+            IsStarter = false,
+            IsOnPitch = false
+        };
+        aiTeam.Substitutes.Add(fringePlayer);
+
+        var transferMarket = new TransferMarketState
+        {
+            ActiveSeason = league.Season,
+            Leagues =
+            [
+                new TransferLeagueState
+                {
+                    LeagueId = league.LeagueId,
+                    LeagueName = league.Name,
+                    Season = league.Season,
+                    Teams = league.Teams
+                }
+            ]
+        };
+
+        var result = new SeasonRolloverService().StartNextSeason(league, selectedTeam, transferMarket);
+        var rolledOverAiTeam = result.League.Teams.Single(team => team.Name == aiTeam.Name);
+
+        Assert.Contains(
+            result.SelectedTeam.Players.Concat(result.SelectedTeam.Substitutes),
+            player => player.PlayerId == selectedValuablePlayer.PlayerId);
+        Assert.True(selectedValuablePlayer.ContractEndYear > 2027);
+        Assert.Contains(
+            rolledOverAiTeam.Players.Concat(rolledOverAiTeam.Substitutes),
+            player => player.PlayerId == valuablePlayer.PlayerId);
+        Assert.True(valuablePlayer.ContractEndYear > 2027);
+        Assert.Equal(2026, fringePlayer.ContractEndYear);
+        Assert.DoesNotContain(
+            rolledOverAiTeam.Players.Concat(rolledOverAiTeam.Substitutes),
+            player => player.PlayerId == fringePlayer.PlayerId);
+        Assert.Contains(result.TransferMarketState.FreeAgents, player => player.PlayerId == fringePlayer.PlayerId);
+    }
+
+    [Fact]
     public void StartNextSeason_RetiresOldFreeAgentAndAddsRegenToTransferMarket()
     {
         var (league, selectedTeam) = CreateCompletedRolloverContext();
@@ -467,6 +535,77 @@ public class SeasonRolloverServiceTests
         Assert.Equal(0, state.ClubFinances[0].TransferSpent);
         Assert.Equal(0, state.ClubFinances[0].TransferIncome);
         Assert.Equal(90_000m, state.ClubFinances[0].WageSpent);
+    }
+
+    [Fact]
+    public void ReplenishAiClubRosters_FillsDepletedClubWithNamedFreeAgents()
+    {
+        var selectedTeam = new Team
+        {
+            Name = "Chelsea",
+            Players = [new Player { PlayerId = "chelsea-player", Name = "Chelsea Player" }]
+        };
+        var juventus = new Team
+        {
+            Name = "Juventus",
+            Players =
+            [
+                new Player { PlayerId = "juve-gk", Name = "Juventus Goalkeeper", Position = Position.Goalkeeper },
+                new Player { PlayerId = "juve-df", Name = "Juventus Defender", Position = Position.Defender },
+                new Player { PlayerId = "juve-mf", Name = "Juventus Midfielder", Position = Position.Midfielder },
+                new Player { PlayerId = "juve-fw", Name = "Juventus Forward", Position = Position.Forward },
+                new Player { PlayerId = "juve-fw2", Name = "Juventus Forward 2", Position = Position.Forward }
+            ]
+        };
+        var freeAgents = Enumerable.Range(1, 20)
+            .Select(index => new Player
+            {
+                PlayerId = $"free-agent-{index}",
+                Name = $"Named Free Agent {index}",
+                Position = (index % 4) switch
+                {
+                    0 => Position.Goalkeeper,
+                    1 => Position.Defender,
+                    2 => Position.Midfielder,
+                    _ => Position.Forward
+                },
+                OverallRating = 70 + index,
+                ContractStatus = PlayerContractStatus.FreeAgent
+            })
+            .ToList();
+        var state = new TransferMarketState
+        {
+            Leagues =
+            [
+                new TransferLeagueState
+                {
+                    LeagueId = "serie-a",
+                    LeagueName = "Serie A",
+                    Teams = [juventus]
+                },
+                new TransferLeagueState
+                {
+                    LeagueId = "premier-league",
+                    LeagueName = "Premier League",
+                    Teams = [selectedTeam]
+                }
+            ],
+            FreeAgents = freeAgents
+        };
+
+        SeasonRolloverService.ReplenishAiClubRosters(state, selectedTeam, 2031);
+
+        var restoredRoster = juventus.Players.Concat(juventus.Substitutes).ToList();
+        Assert.Equal(18, restoredRoster.Count);
+        Assert.DoesNotContain(restoredRoster, player => player.Name.Contains("Emergency Player"));
+        Assert.All(restoredRoster.Skip(5), player =>
+        {
+            Assert.True(player.ContractEndYear > 2031);
+            Assert.Equal(PlayerContractStatus.Active, player.ContractStatus);
+            Assert.StartsWith("serie-a:", player.ClubId);
+        });
+        Assert.Single(selectedTeam.Players);
+        Assert.Equal(7, state.FreeAgents.Count);
     }
 
     private static string CreateTempSaveDirectory()

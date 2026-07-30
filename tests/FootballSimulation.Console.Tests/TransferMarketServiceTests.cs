@@ -167,6 +167,94 @@ public class TransferMarketServiceTests
     }
 
     [Fact]
+    public void OfferContractExtension_AcceptsHighValuePlayerRaiseNearCurrentWage()
+    {
+        var player = new Player
+        {
+            PlayerId = "elite-renewal-test",
+            Name = "Erling Haaland",
+            OverallRating = 94,
+            Age = 30,
+            Position = Position.Forward,
+            PreferredPosition = "LW",
+            Role = PlayerRole.KeyPlayer,
+            Morale = 50,
+            MatchesPlayedRecently = 5,
+            WeeklyWage = 545_000m,
+            ContractEndYear = 2030
+        };
+        var rosterPlayer = new Player
+        {
+            PlayerId = "restored-roster-copy-with-different-id",
+            Name = player.Name,
+            OverallRating = player.OverallRating,
+            Age = player.Age,
+            Position = player.Position,
+            PreferredPosition = player.PreferredPosition,
+            Role = player.Role,
+            Morale = player.Morale,
+            MatchesPlayedRecently = player.MatchesPlayedRecently,
+            WeeklyWage = player.WeeklyWage,
+            ContractEndYear = player.ContractEndYear
+        };
+        var team = new Team
+        {
+            Name = "Chelsea",
+            Players = [rosterPlayer]
+        };
+        var state = new TransferMarketState
+        {
+            ActiveSeason = "2025-26",
+            Leagues =
+            [
+                new TransferLeagueState
+                {
+                    LeagueId = "premier-league",
+                    LeagueName = "Premier League",
+                    Season = "2029-30",
+                    Teams = [team]
+                }
+            ],
+            ClubFinances =
+            [
+                new ClubFinance
+                {
+                    LeagueId = "premier-league",
+                    ClubName = team.Name,
+                    ClubWageBudget = 10_000_000m
+                }
+            ]
+        };
+        var finance = state.ClubFinances.Single();
+        var availableWageBudgetBefore = finance.AvailableWageBudget - player.WeeklyWage.Value;
+
+        var result = new TransferMarketService().OfferContractExtension(
+            state,
+            "premier-league",
+            team,
+            player,
+            weeklyWage: 600_000m,
+            years: 3,
+            squadRole: PlayerRole.KeyPlayer,
+            currentRound: 10);
+        var activeLeague = new League
+        {
+            LeagueId = "premier-league",
+            Name = "Premier League",
+            Season = "2029-30",
+            Teams = [team]
+        };
+        new TransferMarketService().BindActiveLeague(state, activeLeague);
+
+        Assert.True(result.Accepted);
+        Assert.Equal(600_000m, player.WeeklyWage);
+        Assert.Equal(2033, player.ContractEndYear);
+        Assert.Equal(600_000m, rosterPlayer.WeeklyWage);
+        Assert.Equal(2033, rosterPlayer.ContractEndYear);
+        Assert.Equal(availableWageBudgetBefore - 55_000m, finance.AvailableWageBudget);
+    }
+
+    [Fact]
     public void MakeUserOffer_CompletesTransferAndUpdatesBudgets()
     {
         var league = CreateLeague("la-liga");
@@ -190,6 +278,78 @@ public class TransferMarketServiceTests
         Assert.True(service.GetFinance(state, league.LeagueId, selectedTeam).AvailableTransferBudget < buyerBudgetBefore);
         Assert.True(service.GetFinance(state, target.LeagueId, sellingTeam).TransferIncome > sellerIncomeBefore);
         Assert.Contains(state.TransferHistory, item => item.PlayerId == target.Player.PlayerId);
+    }
+
+    [Fact]
+    public void MakeUserOffer_AppliesNegotiatedSigningContract()
+    {
+        var league = CreateLeague("la-liga");
+        var selectedTeam = league.Teams.Single(team => team.Name == "Real Madrid");
+        var service = new TransferMarketService(seed: 17);
+        var state = service.CreateInitialState(league);
+        var target = service.GetAllPlayerListings(state, league.PlayerStats)
+            .Where(listing => listing.Team != selectedTeam)
+            .Where(listing => listing.AskingPrice * 2 < service.GetFinance(state, league.LeagueId, selectedTeam).AvailableTransferBudget)
+            .OrderBy(listing => listing.AskingPrice)
+            .First();
+        var negotiatedWage = Math.Max(
+            1_000_000m,
+            TransferMarketService.CalculateMinimumSigningWage(
+                target.Player,
+                league.LeagueId,
+                PlayerRole.KeyPlayer,
+                4));
+
+        var offer = service.MakeUserOffer(
+            state,
+            league,
+            selectedTeam,
+            target.Player.PlayerId,
+            target.AskingPrice * 2,
+            currentRound: 1,
+            weeklyWage: negotiatedWage,
+            contractYears: 4,
+            squadRole: PlayerRole.KeyPlayer);
+
+        Assert.Equal(OfferStatus.Completed, offer.Status);
+        Assert.Equal(negotiatedWage, target.Player.WeeklyWage);
+        Assert.Equal(2030, target.Player.ContractEndYear);
+        Assert.Equal(PlayerRole.KeyPlayer, target.Player.Role);
+        var history = state.TransferHistory.Single(item => item.PlayerId == target.Player.PlayerId);
+        Assert.Equal(negotiatedWage, history.WeeklyWage);
+        Assert.Equal(2030, history.ContractEndYear);
+        Assert.Equal(PlayerRole.KeyPlayer, history.SquadRole);
+    }
+
+    [Fact]
+    public void MakeUserOffer_AssignsAvailableNumberWhenIncomingNumberIsAlreadyUsed()
+    {
+        var league = CreateLeague("la-liga");
+        var selectedTeam = league.Teams.Single(team => team.Name == "Real Madrid");
+        var service = new TransferMarketService(seed: 31);
+        var state = service.CreateInitialState(league);
+        var existingPlayer = selectedTeam.Players.First();
+        var target = service.GetAllPlayerListings(state, league.PlayerStats)
+            .Where(listing => listing.Team != selectedTeam)
+            .Where(listing => listing.AskingPrice * 2 <
+                service.GetFinance(state, league.LeagueId, selectedTeam).AvailableTransferBudget)
+            .OrderBy(listing => listing.AskingPrice)
+            .First();
+        target.Player.SquadNumber = existingPlayer.SquadNumber;
+
+        var offer = service.MakeUserOffer(
+            state,
+            league,
+            selectedTeam,
+            target.Player.PlayerId,
+            target.AskingPrice * 2,
+            currentRound: 1);
+
+        Assert.Equal(OfferStatus.Completed, offer.Status);
+        var roster = selectedTeam.Players.Concat(selectedTeam.Substitutes).ToList();
+        Assert.Equal(roster.Count, roster.Select(player => player.SquadNumber).Distinct().Count());
+        Assert.NotEqual(existingPlayer.SquadNumber, target.Player.SquadNumber);
+        Assert.InRange(target.Player.SquadNumber, 1, 99);
     }
 
     [Fact]
@@ -314,6 +474,139 @@ public class TransferMarketServiceTests
     }
 
     [Fact]
+    public void SyncSquadsFromTransferHistory_RestoresMissingPlayerWithSavedDevelopment()
+    {
+        var developedPlayer = CreateTransferTestPlayer(
+            "premier-league:newcastleunited:nickwoltemade:9",
+            "Nick Woltemade");
+        developedPlayer.OverallRating = 86;
+        developedPlayer.BaseOverallRating = 79;
+        developedPlayer.PotentialOverall = 90;
+        developedPlayer.GrowthPoints = 73;
+        developedPlayer.Pace = 82;
+        developedPlayer.Shooting = 87;
+
+        var newcastle = new Team { Name = "Newcastle United" };
+        var chelsea = new Team { Name = "Chelsea" };
+        var transfer = new TransferHistoryItem
+        {
+            PlayerId = developedPlayer.PlayerId,
+            PlayerName = developedPlayer.Name,
+            FromLeagueId = "premier-league",
+            FromClubName = newcastle.Name,
+            ToLeagueId = "premier-league",
+            ToClubName = chelsea.Name,
+            WindowId = "summer",
+            RoundNumber = 1,
+            PlayerSnapshot = developedPlayer
+        };
+        var state = new TransferMarketState
+        {
+            Leagues =
+            [
+                new TransferLeagueState
+                {
+                    LeagueId = "premier-league",
+                    LeagueName = "Premier League",
+                    Teams = [newcastle, chelsea]
+                }
+            ],
+            TransferHistory = [transfer]
+        };
+
+        new TransferMarketService().SyncSquadsFromTransferHistory(state);
+
+        var restoredPlayer = chelsea.Players.Concat(chelsea.Substitutes)
+            .Single(player => player.PlayerId == developedPlayer.PlayerId);
+        Assert.Equal(86, restoredPlayer.OverallRating);
+        Assert.Equal(79, restoredPlayer.BaseOverallRating);
+        Assert.Equal(90, restoredPlayer.PotentialOverall);
+        Assert.Equal(73, restoredPlayer.GrowthPoints);
+        Assert.Equal(82, restoredPlayer.Pace);
+        Assert.Equal(87, restoredPlayer.Shooting);
+        Assert.Same(restoredPlayer, transfer.PlayerSnapshot);
+    }
+
+    [Fact]
+    public void SyncSquadsFromTransferHistory_PreservesTransferListedStatus()
+    {
+        var player = CreateTransferTestPlayer(
+            "bundesliga:rb-leipzig:xavisimons:10",
+            "Xavi Simons");
+        player.TransferStatus = PlayerTransferStatus.Listed;
+        var sourceTeam = new Team { Name = "RB Leipzig" };
+        var targetTeam = new Team { Name = "Chelsea", Substitutes = [player] };
+        var state = new TransferMarketState
+        {
+            Leagues =
+            [
+                new TransferLeagueState
+                {
+                    LeagueId = "test-league",
+                    LeagueName = "Test League",
+                    Teams = [sourceTeam, targetTeam]
+                }
+            ],
+            TransferHistory =
+            [
+                new TransferHistoryItem
+                {
+                    PlayerId = player.PlayerId,
+                    PlayerName = player.Name,
+                    FromLeagueId = "test-league",
+                    FromClubName = sourceTeam.Name,
+                    ToLeagueId = "test-league",
+                    ToClubName = targetTeam.Name,
+                    WindowId = "summer",
+                    RoundNumber = 1,
+                    PlayerSnapshot = player
+                }
+            ]
+        };
+
+        new TransferMarketService().SyncSquadsFromTransferHistory(state);
+
+        Assert.Equal(PlayerTransferStatus.Listed, player.TransferStatus);
+        Assert.True(player.IsListedForSale);
+    }
+
+    [Theory]
+    [InlineData("2029-30", true)]
+    [InlineData("2030-31", true)]
+    [InlineData("2031-32", false)]
+    public void IsInAiTransferCooldown_RequiresOneStableSeasonAfterMove(
+        string currentSeason,
+        bool expectedCooldown)
+    {
+        var player = CreateTransferTestPlayer(
+            "serie-a:juventus:exampleplayer:8",
+            "Example Player");
+        var state = new TransferMarketState
+        {
+            TransferHistory =
+            [
+                new TransferHistoryItem
+                {
+                    PlayerId = player.PlayerId,
+                    PlayerName = player.Name,
+                    FromLeagueId = "serie-a",
+                    FromClubName = "Juventus",
+                    ToLeagueId = "la-liga",
+                    ToClubName = "Barcelona",
+                    WindowId = "serie-a:2029-30:summer"
+                }
+            ]
+        };
+
+        var isInCooldown = TransferMarketService.IsInAiTransferCooldown(
+            state,
+            player,
+            currentSeason);
+
+        Assert.Equal(expectedCooldown, isInCooldown);
+    }
+
+    [Fact]
     public void MakeUserOffer_BlocksOutsideTransferWindow()
     {
         var league = CreateLeague("premier-league");
@@ -416,7 +709,7 @@ public class TransferMarketServiceTests
     }
 
     [Fact]
-    public void SearchPlayers_PositionFilterMatchesNaturalAndSecondaryPositions()
+    public void SearchPlayers_PositionFilterMatchesOnlyMainPosition()
     {
         var league = CreateLeague("la-liga");
         var service = new TransferMarketService();
@@ -424,7 +717,10 @@ public class TransferMarketServiceTests
 
         var results = service.SearchPlayers(state, new TransferSearchCriteria { Position = "ST" }, league.PlayerStats);
 
-        Assert.Contains(results, listing =>
+        Assert.NotEmpty(results);
+        Assert.All(results, listing =>
+            Assert.Equal("ST", listing.Player.PreferredPosition, ignoreCase: true));
+        Assert.DoesNotContain(results, listing =>
             listing.Player.Name.Equals("Julián Alvarez", StringComparison.OrdinalIgnoreCase) &&
             listing.Player.PreferredPosition.Equals("CF", StringComparison.OrdinalIgnoreCase));
     }

@@ -190,15 +190,6 @@ public class MatchDramaService
             return context.Random.NextDouble() < 0.55 ? "over exhaustion" : "sprint muscle pull";
         }
 
-        var opposingTeam = GetOpposingTeam(context, player);
-        var dangerousTackleRisk = opposingTeam.Players
-            .Count(candidate => IsActivePlayer(candidate) && candidate.Traits.Contains(PlayerTrait.DivesIntoTackles));
-
-        if (dangerousTackleRisk > 0 && context.Random.NextDouble() < 0.28)
-        {
-            return "dangerous tackle";
-        }
-
         if (player.Traits.Contains(PlayerTrait.PowerHeader) || player.Traits.Contains(PlayerTrait.AerialThreat))
         {
             return "aerial duel impact";
@@ -211,11 +202,6 @@ public class MatchDramaService
             < 0.76 => "sprint muscle pull",
             _ => "aerial duel impact"
         };
-    }
-
-    private static Team GetOpposingTeam(MatchEventContext context, Player player)
-    {
-        return player.TeamIs(context.HomeTeam) ? context.AwayTeam : context.HomeTeam;
     }
 
     private static double GetStaminaRatio(Player player)
@@ -301,14 +287,9 @@ public class MatchDramaService
         {
             var team = ChooseConfrontationTeam(context);
             var player = ChooseConfrontationPlayer(team, context.Random);
-            var isRefereeControversy = context.IsRivalryMatch ||
-                context.PreviousEventType is EventType.PenaltyDecision or EventType.VarCheck or EventType.VarDecision ||
-                context.Random.NextDouble() < 0.42;
             return new MatchDramaResult
             {
-                EventType = isRefereeControversy
-                    ? EventType.RefereeControversy
-                    : EventType.Confrontation,
+                EventType = EventType.RefereeControversy,
                 Team = team,
                 Player = player,
                 TriggeredTrait = player.Traits.Contains(PlayerTrait.DivesIntoTackles) ? PlayerTrait.DivesIntoTackles : null,
@@ -455,16 +436,11 @@ public class MatchDramaService
             return true;
         }
 
-        return context.PreviousEventType is EventType.Foul
-            or EventType.PenaltyDecision
-            or EventType.YellowCard
+        return context.PreviousEventType is EventType.PenaltyDecision
             or EventType.RedCard
             or EventType.VarCheck
             or EventType.VarDecision
-            or EventType.RefereeControversy
-            or EventType.Offside
-            or EventType.CornerKick
-            or EventType.SetPieceDanger;
+            or EventType.RefereeControversy;
     }
 
     private static bool IsOneGoalMatch(Match match)

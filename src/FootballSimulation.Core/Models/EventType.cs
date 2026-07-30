@@ -6,6 +6,7 @@ public enum EventType
     Attack,
     ChanceCreated,
     Foul,
+    Dive,
     Shot,
     Goal,
     Miss,

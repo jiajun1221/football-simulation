@@ -1226,9 +1226,7 @@ public class MatchEngineScoringTests
             or EventType.VarCheck
             or EventType.VarDecision
             or EventType.RefereeControversy
-            or EventType.Offside
-            or EventType.CornerKick
-            or EventType.SetPieceDanger
+            or EventType.Injury
             or EventType.RivalryAtmosphere;
     }
 

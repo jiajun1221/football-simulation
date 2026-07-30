@@ -6,6 +6,8 @@ namespace FootballSimulation.Services;
 
 public class TransferMarketService
 {
+    public const int AiTransferCooldownSeasons = 1;
+
     private readonly LeagueDataService _leagueDataService;
     private readonly ClubFinanceService _financeService;
     private readonly PlayerMarketValueCalculator _valueCalculator;
@@ -97,6 +99,10 @@ public class TransferMarketService
         EnsureTeamPlayers(activeLeague.Teams, activeLeague.LeagueId);
         EnrichMissingPlayerData(activeLeague.Teams, activeLeague.LeagueId);
         SyncSquadsFromTransferHistory(state);
+        foreach (var team in activeLeague.Teams)
+        {
+            EnsureUniqueSquadNumbers(team);
+        }
         SyncScheduledFixtureTeams(state, activeLeague);
 
         foreach (var team in activeLeague.Teams)
@@ -180,7 +186,10 @@ public class TransferMarketService
         Team selectedTeam,
         string playerId,
         decimal fee,
-        int currentRound)
+        int currentRound,
+        decimal? weeklyWage = null,
+        int? contractYears = null,
+        PlayerRole? squadRole = null)
     {
         if (!_windowService.IsWindowOpen(activeLeague, currentRound))
         {
@@ -205,7 +214,16 @@ public class TransferMarketService
         }
 
         var buyerFinance = _financeService.GetOrCreateFinance(state, activeLeague.LeagueId, selectedTeam);
-        var proposedWage = Math.Max(listing.Player.WeeklyWage ?? 0, PlayerContractService.EstimateWeeklyWage(listing.Player, activeLeague.LeagueId));
+        var proposedRole = squadRole ?? listing.Player.Role;
+        var proposedYears = Math.Clamp(contractYears ?? GetNewSigningContractYears(listing.Player), 1, 5);
+        var proposedWage = weeklyWage ?? Math.Max(
+            listing.Player.WeeklyWage ?? 0,
+            PlayerContractService.EstimateWeeklyWage(listing.Player, activeLeague.LeagueId));
+        var minimumWage = CalculateMinimumSigningWage(
+            listing.Player,
+            activeLeague.LeagueId,
+            proposedRole,
+            proposedYears);
         if (buyerFinance.AvailableTransferBudget < fee)
         {
             return CreateBlockedOffer(state, playerId, selectedTeam, fee, currentRound, TransferNotificationType.InsufficientBudget, "Insufficient transfer budget.");
@@ -214,6 +232,18 @@ public class TransferMarketService
         if (buyerFinance.AvailableWageBudget < proposedWage)
         {
             return CreateBlockedOffer(state, playerId, selectedTeam, fee, currentRound, TransferNotificationType.InsufficientBudget, "Insufficient wage budget.");
+        }
+
+        if (proposedWage < minimumWage)
+        {
+            return CreateBlockedOffer(
+                state,
+                playerId,
+                selectedTeam,
+                fee,
+                currentRound,
+                TransferNotificationType.Info,
+                $"{listing.Player.Name} rejected the contract. Minimum expected wage: {PlayerContractService.FormatWage(minimumWage)}.");
         }
 
         var offer = new TransferOffer
@@ -228,8 +258,8 @@ public class TransferMarketService
             ToClubName = selectedTeam.Name,
             Fee = fee,
             WeeklyWage = proposedWage,
-            ContractYears = GetNewSigningContractYears(listing.Player),
-            SquadRole = listing.Player.Role,
+            ContractYears = proposedYears,
+            SquadRole = proposedRole,
             CreatedRound = currentRound,
             IsUserOffer = true
         };
@@ -543,6 +573,7 @@ public class TransferMarketService
             .Where(listing => listing.Player.TransferStatus != PlayerTransferStatus.Unavailable)
             .Where(listing => listing.Player.TransferStatus != PlayerTransferStatus.RecentlyTransferred)
             .Where(listing => !HasTransferredThisWindow(state, activeLeague, listing.Player, currentRound))
+            .Where(listing => !IsInAiTransferCooldown(state, listing.Player, activeLeague.Season))
             .Where(listing => !HasActiveOfferForPlayer(state, listing.Player.PlayerId))
             .Where(listing => !listing.Player.IsInjured)
             .ToList();
@@ -790,7 +821,15 @@ public class TransferMarketService
         }
 
         var player = listing.Player;
-        var remainingPositionPlayers = listing.Team.Players.Concat(listing.Team.Substitutes)
+        var remainingRoster = listing.Team.Players.Concat(listing.Team.Substitutes)
+            .Where(candidate => candidate.PlayerId != player.PlayerId)
+            .ToList();
+        if (remainingRoster.Count < 18)
+        {
+            return false;
+        }
+
+        var remainingPositionPlayers = remainingRoster
             .Where(candidate => candidate.PlayerId != player.PlayerId && candidate.Position == player.Position)
             .ToList();
         var minimumDepth = player.Position switch
@@ -1240,14 +1279,23 @@ public class TransferMarketService
         var extraWage = Math.Max(0, weeklyWage - currentWage);
         if (finance.AvailableWageBudget < extraWage)
         {
-            return new ContractRenewalResult(false, "The board blocked the renewal because the wage budget is too tight.", weeklyWage, player.ContractEndYear ?? PlayerContractService.DefaultSeasonEndYear, player.Role);
+            return new ContractRenewalResult(
+                false,
+                $"The board blocked the renewal. The offer adds {PlayerContractService.FormatWage(extraWage)}, but only {PlayerContractService.FormatWage(finance.AvailableWageBudget)} remains in the wage budget.",
+                weeklyWage,
+                player.ContractEndYear ?? PlayerContractService.DefaultSeasonEndYear,
+                player.Role);
         }
 
-        var expectedWage = PlayerContractService.EstimateWeeklyWage(player, leagueId);
-        var requiredWage = expectedWage * GetRenewalWageExpectation(player, squadRole, years);
+        var requiredWage = CalculateMinimumRenewalWage(player, leagueId, squadRole, years);
         if (weeklyWage < requiredWage)
         {
-            return new ContractRenewalResult(false, $"{player.Name} rejected the offer because the wage package is below expectations.", weeklyWage, player.ContractEndYear ?? PlayerContractService.DefaultSeasonEndYear, player.Role);
+            return new ContractRenewalResult(
+                false,
+                $"{player.Name} rejected the offer. The minimum expected package is {PlayerContractService.FormatWage(requiredWage)}.",
+                weeklyWage,
+                player.ContractEndYear ?? PlayerContractService.DefaultSeasonEndYear,
+                player.Role);
         }
 
         if (GetRoleRank(squadRole) < GetRoleRank(player.Role) && player.Role is PlayerRole.KeyPlayer or PlayerRole.Starter)
@@ -1255,15 +1303,82 @@ public class TransferMarketService
             return new ContractRenewalResult(false, $"{player.Name} rejected the offer because the proposed squad role is too low.", weeklyWage, player.ContractEndYear ?? PlayerContractService.DefaultSeasonEndYear, player.Role);
         }
 
-        var seasonEndYear = GetSeasonEndYear(state.ActiveSeason);
-        player.WeeklyWage = weeklyWage;
-        player.ContractEndYear = seasonEndYear + years;
-        player.Role = squadRole;
-        player.ContractStatus = PlayerContractStatus.Active;
+        var leagueSeason = state.Leagues
+            .FirstOrDefault(league => league.LeagueId.Equals(leagueId, StringComparison.OrdinalIgnoreCase))
+            ?.Season;
+        var seasonEndYear = GetSeasonEndYear(
+            string.IsNullOrWhiteSpace(leagueSeason) ? state.ActiveSeason : leagueSeason);
+        var contractEndYear = seasonEndYear + years;
+        foreach (var playerCopy in FindClubPlayerCopies(state, team, player))
+        {
+            playerCopy.WeeklyWage = weeklyWage;
+            playerCopy.ContractEndYear = contractEndYear;
+            playerCopy.Role = squadRole;
+            playerCopy.ContractStatus = PlayerContractStatus.Active;
+        }
+
         finance.WageSpent = ClubFinanceService.CalculateWageSpent(team);
-        var message = $"{player.Name} signed a contract extension until {player.ContractEndYear} on {PlayerContractService.FormatWage(weeklyWage)}.";
+        var message = $"{player.Name} signed a contract extension until {contractEndYear} on {PlayerContractService.FormatWage(weeklyWage)}.";
         AddNotification(state, TransferNotificationType.Info, message, currentRound);
-        return new ContractRenewalResult(true, message, weeklyWage, player.ContractEndYear.Value, squadRole);
+        return new ContractRenewalResult(true, message, weeklyWage, contractEndYear, squadRole);
+    }
+
+    private static IReadOnlyList<Player> FindClubPlayerCopies(
+        TransferMarketState state,
+        Team team,
+        Player player)
+    {
+        var candidates = team.Players
+            .Concat(team.Substitutes)
+            .Concat(state.Leagues
+                .SelectMany(league => league.Teams)
+                .Where(candidateTeam => candidateTeam.Name.Equals(team.Name, StringComparison.OrdinalIgnoreCase))
+                .SelectMany(candidateTeam => candidateTeam.Players.Concat(candidateTeam.Substitutes)))
+            .Append(player)
+            .Distinct()
+            .ToList();
+
+        return candidates
+            .Where(candidate =>
+                ReferenceEquals(candidate, player) ||
+                (!string.IsNullOrWhiteSpace(player.PlayerId) &&
+                    candidate.PlayerId.Equals(player.PlayerId, StringComparison.OrdinalIgnoreCase)) ||
+                candidate.Name.Equals(player.Name, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+    }
+
+    public static decimal CalculateMinimumRenewalWage(
+        Player player,
+        string leagueId,
+        PlayerRole squadRole,
+        int years)
+    {
+        years = Math.Clamp(years, 1, 5);
+        var expectation = GetRenewalWageExpectation(player, squadRole, years);
+        var marketWageFloor = PlayerContractService.EstimateWeeklyWage(player, leagueId) * expectation * 0.75m;
+        var currentWage = player.WeeklyWage ?? marketWageFloor;
+        var raiseRate = player.Age switch
+        {
+            >= 32 => 1.00m,
+            >= 29 => 1.02m,
+            _ => 1.05m
+        };
+        if (GetRoleRank(squadRole) > GetRoleRank(player.Role))
+        {
+            raiseRate += 0.03m;
+        }
+
+        var currentWageFloor = currentWage * raiseRate;
+        return Math.Round(Math.Max(marketWageFloor, currentWageFloor) / 1_000m, 0) * 1_000m;
+    }
+
+    public static decimal CalculateMinimumSigningWage(
+        Player player,
+        string leagueId,
+        PlayerRole squadRole,
+        int years)
+    {
+        return CalculateMinimumRenewalWage(player, leagueId, squadRole, years);
     }
 
     public ContractRenewalResult OfferPreContract(
@@ -1381,7 +1496,19 @@ public class TransferMarketService
             return;
         }
 
-        if (!CompleteTransfer(state, listing, activeLeague.LeagueId, selectedTeam, offerFee, currentRound, _windowService.GetWindowId(activeLeague, currentRound), "Permanent", activeLeague: activeLeague))
+        if (!CompleteTransfer(
+            state,
+            listing,
+            activeLeague.LeagueId,
+            selectedTeam,
+            offerFee,
+            currentRound,
+            _windowService.GetWindowId(activeLeague, currentRound),
+            "Permanent",
+            activeLeague: activeLeague,
+            negotiatedWeeklyWage: offer.WeeklyWage,
+            contractYears: offer.ContractYears,
+            squadRole: offer.SquadRole))
         {
             offer.Status = OfferStatus.Withdrawn;
             offer.Message = $"{selectedTeam.Name} could not complete the transfer for {listing.Player.Name}.";
@@ -1422,7 +1549,10 @@ public class TransferMarketService
             _windowService.GetWindowId(activeLeague, currentRound),
             type,
             enforceBuyerBudget: offer.IsUserOffer,
-            activeLeague: activeLeague))
+            activeLeague: activeLeague,
+            negotiatedWeeklyWage: offer.WeeklyWage,
+            contractYears: offer.ContractYears,
+            squadRole: offer.SquadRole))
         {
             offer.Status = OfferStatus.Withdrawn;
             offer.Message = $"{offer.ToClubName} could not complete the transfer for {offer.PlayerName}.";
@@ -1447,13 +1577,18 @@ public class TransferMarketService
         string windowId,
         string type,
         bool enforceBuyerBudget = true,
-        League? activeLeague = null)
+        League? activeLeague = null,
+        decimal? negotiatedWeeklyWage = null,
+        int? contractYears = null,
+        PlayerRole? squadRole = null)
     {
         var sellingTeam = listing.Team;
         var player = listing.Player;
         var buyerFinance = _financeService.GetOrCreateFinance(state, toLeagueId, buyingTeam);
         var sellerFinance = _financeService.GetOrCreateFinance(state, listing.LeagueId, sellingTeam);
-        var proposedWage = PlayerContractService.EstimateWeeklyWage(player, toLeagueId);
+        var proposedWage = negotiatedWeeklyWage ?? PlayerContractService.EstimateWeeklyWage(player, toLeagueId);
+        var proposedContractYears = Math.Clamp(contractYears ?? GetNewSigningContractYears(player), 1, 5);
+        var proposedRole = squadRole ?? player.Role;
 
         if (enforceBuyerBudget && buyerFinance.AvailableTransferBudget < fee)
         {
@@ -1479,8 +1614,10 @@ public class TransferMarketService
             type = "Free Agent";
         }
 
-        player.ContractEndYear = PlayerContractService.DefaultSeasonEndYear + GetNewSigningContractYears(player);
+        var currentSeason = activeLeague?.Season ?? state.ActiveSeason;
+        player.ContractEndYear = GetSeasonEndYear(currentSeason) + proposedContractYears;
         player.WeeklyWage = proposedWage;
+        player.Role = proposedRole;
         player.ReleaseClause = PlayerContractService.EstimateReleaseClause(player, fee, toLeagueId);
         player.ContractStatus = PlayerContractStatus.Active;
 
@@ -1500,6 +1637,7 @@ public class TransferMarketService
             WeeklyWage = player.WeeklyWage,
             ContractEndYear = player.ContractEndYear,
             SquadRole = player.Role,
+            PlayerSnapshot = player,
             Type = type
         };
 
@@ -1552,7 +1690,7 @@ public class TransferMarketService
             .Select(group => group.Last())
             .ToList())
         {
-            var player = FindPlayerOrDefault(state, transfer.PlayerId);
+            var player = FindPlayerOrDefault(state, transfer.PlayerId) ?? transfer.PlayerSnapshot;
             if (player is null)
             {
                 continue;
@@ -1566,6 +1704,47 @@ public class TransferMarketService
     {
         var windowId = _windowService.GetWindowId(activeLeague, currentRound);
         return HasTransferredThisWindow(state, player, windowId);
+    }
+
+    public static bool IsInAiTransferCooldown(
+        TransferMarketState state,
+        Player player,
+        string currentSeason)
+    {
+        var currentSeasonStartYear = TryGetSeasonStartYear(currentSeason);
+        if (!currentSeasonStartYear.HasValue)
+        {
+            return false;
+        }
+
+        var lastTransferSeasonStartYear = state.TransferHistory
+            .Where(history => history.PlayerId.Equals(player.PlayerId, StringComparison.OrdinalIgnoreCase))
+            .Select(history => TryGetSeasonStartYearFromWindowId(history.WindowId))
+            .Where(year => year.HasValue)
+            .Select(year => year!.Value)
+            .DefaultIfEmpty(int.MinValue)
+            .Max();
+
+        return lastTransferSeasonStartYear != int.MinValue &&
+            currentSeasonStartYear.Value - lastTransferSeasonStartYear <= AiTransferCooldownSeasons;
+    }
+
+    private static int? TryGetSeasonStartYearFromWindowId(string windowId)
+    {
+        var parts = windowId.Split(':', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        return parts.Length >= 2
+            ? TryGetSeasonStartYear(parts[^2])
+            : null;
+    }
+
+    private static int? TryGetSeasonStartYear(string season)
+    {
+        var normalized = season.Trim().Replace('/', '-');
+        var parts = normalized.Split('-', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        return parts.Length > 0 &&
+            int.TryParse(parts[0], NumberStyles.Integer, CultureInfo.InvariantCulture, out var startYear)
+                ? startYear
+                : null;
     }
 
     public void RefreshTransferWindowStatuses(TransferMarketState state, League activeLeague, int currentRound)
@@ -1620,6 +1799,7 @@ public class TransferMarketService
         var targetTeamPlayer = FindPlayerInTeam(toTeam, player.PlayerId);
         if (!saveHistory && targetTeamPlayer is not null)
         {
+            transfer.PlayerSnapshot = targetTeamPlayer;
             var targetSyncAffectedTeams = new HashSet<Team>();
             foreach (var team in GetAllTeams(state).Select(item => item.Team))
             {
@@ -1657,6 +1837,7 @@ public class TransferMarketService
         state.FreeAgents.RemoveAll(candidate => candidate.PlayerId.Equals(player.PlayerId, StringComparison.OrdinalIgnoreCase));
 
         ApplyTransferMetadata(player, transfer, fromTeam, toTeam, windowId);
+        transfer.PlayerSnapshot = player;
         player.IsStarter = false;
         player.IsOnPitch = false;
 
@@ -1664,6 +1845,7 @@ public class TransferMarketService
         {
             toTeam.Substitutes.Add(player);
         }
+        EnsureUniqueSquadNumbers(toTeam);
 
         affectedTeams.Add(toTeam);
         foreach (var team in affectedTeams)
@@ -1677,6 +1859,30 @@ public class TransferMarketService
         }
 
         return true;
+    }
+
+    public static void EnsureUniqueSquadNumbers(Team team)
+    {
+        ArgumentNullException.ThrowIfNull(team);
+
+        var usedNumbers = new HashSet<int>();
+        foreach (var player in team.Players.Concat(team.Substitutes))
+        {
+            if (player.SquadNumber is >= 1 and <= 99 && usedNumbers.Add(player.SquadNumber))
+            {
+                continue;
+            }
+
+            var availableNumber = Enumerable.Range(1, 99)
+                .FirstOrDefault(number => !usedNumbers.Contains(number));
+            if (availableNumber == 0)
+            {
+                continue;
+            }
+
+            player.SquadNumber = availableNumber;
+            usedNumbers.Add(availableNumber);
+        }
     }
 
     private static Player? FindPlayerInTeam(Team team, string playerId)
@@ -1712,7 +1918,11 @@ public class TransferMarketService
             : transfer.ToClubId;
         player.LastTransferRound = transfer.RoundNumber;
         player.LastTransferWindowId = windowId;
-        player.TransferStatus = PlayerTransferStatus.RecentlyTransferred;
+        if (player.TransferStatus is not PlayerTransferStatus.Listed and
+            not PlayerTransferStatus.Unavailable)
+        {
+            player.TransferStatus = PlayerTransferStatus.RecentlyTransferred;
+        }
     }
 
     private static void RemovePlayerFromTeam(Team team, Player player)
@@ -1904,8 +2114,8 @@ public class TransferMarketService
         }
 
         var normalized = PositionSuitabilityService.NormalizeExactPosition(position);
-        return PositionSuitabilityService.GetNaturalExactPositions(player)
-            .Contains(normalized, StringComparer.OrdinalIgnoreCase);
+        var preferredPosition = PositionSuitabilityService.NormalizeExactPosition(player.PreferredPosition);
+        return preferredPosition.Equals(normalized, StringComparison.OrdinalIgnoreCase);
     }
 
     private static string NormalizeSearchText(string? value)
@@ -2278,10 +2488,10 @@ public class TransferMarketService
                 PlayerContractService.ApplyContractData(
                     player,
                     leagueId,
-                    sourcePlayer.ContractEndYear,
-                    sourcePlayer.WeeklyWage,
-                    sourcePlayer.ReleaseClause,
-                    sourcePlayer.ContractStatus);
+                    player.ContractEndYear ?? sourcePlayer.ContractEndYear,
+                    player.WeeklyWage is > 0 ? player.WeeklyWage : sourcePlayer.WeeklyWage,
+                    player.ReleaseClause is > 0 ? player.ReleaseClause : sourcePlayer.ReleaseClause,
+                    player.ContractEndYear.HasValue ? null : sourcePlayer.ContractStatus);
                 if (PlayerNationalityDataService.IsMissingOrDefault(player) &&
                     string.IsNullOrWhiteSpace(sourcePlayer.FlagImagePath))
                 {

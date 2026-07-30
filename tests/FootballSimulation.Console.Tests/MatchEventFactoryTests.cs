@@ -76,4 +76,31 @@ public class MatchEventFactoryTests
         Assert.Equal(attacker.Name, matchEvent.SecondaryPlayerName);
         Assert.Contains("ball", matchEvent.Description, StringComparison.OrdinalIgnoreCase);
     }
+
+    [Fact]
+    public void CreateDive_RecordsSimulationAndAttacker()
+    {
+        var team = new Team { Name = "Chelsea" };
+        var attacker = new Player { Name = "Cole Palmer", Position = Position.Midfielder, PreferredPosition = "CAM" };
+
+        var matchEvent = new MatchEventFactory().CreateDive(72, team, attacker);
+
+        Assert.Equal(EventType.Dive, matchEvent.EventType);
+        Assert.Equal(attacker.Name, matchEvent.PrimaryPlayerName);
+        Assert.Contains("simulation", matchEvent.Description, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("No penalty", matchEvent.Description, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void CreatePersistentFoulWarning_ExplainsTeamEscalation()
+    {
+        var team = new Team { Name = "Chelsea" };
+        var defender = new Player { Name = "Reece James", Position = Position.Defender, PreferredPosition = "RB" };
+
+        var matchEvent = new MatchEventFactory().CreatePersistentFoulWarning(54, team, defender, isTeamWarning: true);
+
+        Assert.Equal(EventType.RefereeControversy, matchEvent.EventType);
+        Assert.Contains("persistent fouling", matchEvent.Description, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal(defender.Name, matchEvent.PrimaryPlayerName);
+    }
 }

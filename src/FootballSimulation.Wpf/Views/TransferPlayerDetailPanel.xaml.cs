@@ -34,6 +34,12 @@ public partial class TransferPlayerDetailPanel : UserControl
 
     public string OfferFeeText => OfferFeeTextBox.Text;
 
+    public string SigningWageText => SigningWageTextBox.Text;
+
+    public int SigningYears => SigningYearsComboBox.SelectedItem is ComboBoxItem { Tag: int years } ? years : 3;
+
+    public PlayerRole SigningRole => SigningRoleComboBox.SelectedItem is ComboBoxItem { Tag: PlayerRole role } ? role : PlayerRole.Rotation;
+
     public string CounterFeeText => CounterFeeTextBox.Text;
 
     public string RenewalWageText => RenewalWageTextBox.Text;
@@ -114,9 +120,28 @@ public partial class TransferPlayerDetailPanel : UserControl
         AttributeItemsControl.ItemsSource = CreateAttributeRows(player);
         UpdateMainPositionEditor(context, player);
         OfferFeeTextBox.Text = (listing.AskingPrice / 1_000_000m).ToString("0.#", CultureInfo.InvariantCulture);
+        var signingYears = player.Age is >= 31 ? 2 : player.Age is <= 23 ? 5 : 4;
+        var signingRole = player.OverallRating >= 88 ? PlayerRole.KeyPlayer : player.Role;
+        var minimumSigningWage = TransferMarketService.CalculateMinimumSigningWage(
+            player,
+            listing.LeagueId,
+            signingRole,
+            signingYears);
+        SigningWageTextBox.Text = (minimumSigningWage / 1_000m).ToString("0", CultureInfo.InvariantCulture);
+        SelectComboBoxValue(SigningYearsComboBox, signingYears);
+        SelectComboBoxValue(SigningRoleComboBox, signingRole);
+        SigningGuidanceTextBlock.Text =
+            $"Weekly wage (â‚¬k). Expected minimum: {(minimumSigningWage / 1_000m):0}k/week.";
         RenewalWageTextBox.Text = ((listing.WeeklyWage * 1.10m) / 1_000m).ToString("0", CultureInfo.InvariantCulture);
         SelectRenewalYears(PlayerContractService.GetYearsRemaining(player) <= 1 ? 4 : 3);
         SelectRenewalRole(player.Role);
+        var minimumRenewalWage = TransferMarketService.CalculateMinimumRenewalWage(
+            player,
+            listing.LeagueId,
+            player.Role,
+            PlayerContractService.GetYearsRemaining(player) <= 1 ? 4 : 3);
+        RenewalGuidanceTextBlock.Text =
+            $"Weekly wage (€k). Expected minimum: {(minimumRenewalWage / 1_000m):0}k/week.";
         CounterFeeTextBox.Text = context.Offer is null
             ? string.Empty
             : ((context.Offer.CounterFee ?? context.Offer.Fee) / 1_000_000m).ToString("0.#", CultureInfo.InvariantCulture);
@@ -234,6 +259,9 @@ public partial class TransferPlayerDetailPanel : UserControl
 
         MakeOfferButton.IsEnabled = context.IsTransferWindowOpen && !context.IsOwnPlayer && !context.HasTransferredThisWindow;
         OfferFeeTextBox.IsEnabled = MakeOfferButton.IsEnabled;
+        SigningWageTextBox.IsEnabled = MakeOfferButton.IsEnabled;
+        SigningYearsComboBox.IsEnabled = MakeOfferButton.IsEnabled;
+        SigningRoleComboBox.IsEnabled = MakeOfferButton.IsEnabled;
         AcceptOfferButton.Content = isPreWindowAiOffer ? "Accept Agreement" : "Accept";
         AcceptOfferButton.Width = isPreWindowAiOffer ? 142 : 90;
         AcceptOfferButton.IsEnabled = canRespondToOffer && (context.IsTransferWindowOpen || !context.Offer!.IsUserOffer);
@@ -389,20 +417,38 @@ public partial class TransferPlayerDetailPanel : UserControl
 
     private void InitializeContractControls()
     {
+        SigningYearsComboBox.Items.Clear();
         RenewalYearsComboBox.Items.Clear();
         foreach (var years in Enumerable.Range(1, 5))
         {
+            SigningYearsComboBox.Items.Add(new ComboBoxItem { Content = $"{years} Years", Tag = years });
             RenewalYearsComboBox.Items.Add(new ComboBoxItem { Content = $"{years} Years", Tag = years });
         }
 
+        SigningRoleComboBox.Items.Clear();
         RenewalRoleComboBox.Items.Clear();
         foreach (var role in Enum.GetValues<PlayerRole>())
         {
+            SigningRoleComboBox.Items.Add(new ComboBoxItem { Content = PlayerContractService.FormatRole(role), Tag = role });
             RenewalRoleComboBox.Items.Add(new ComboBoxItem { Content = PlayerContractService.FormatRole(role), Tag = role });
         }
 
+        SigningYearsComboBox.SelectedIndex = 2;
+        SigningRoleComboBox.SelectedIndex = 2;
         RenewalYearsComboBox.SelectedIndex = 2;
         RenewalRoleComboBox.SelectedIndex = 2;
+    }
+
+    private static void SelectComboBoxValue<T>(ComboBox comboBox, T value)
+    {
+        foreach (ComboBoxItem item in comboBox.Items)
+        {
+            if (item.Tag is T itemValue && EqualityComparer<T>.Default.Equals(itemValue, value))
+            {
+                comboBox.SelectedItem = item;
+                return;
+            }
+        }
     }
 
     private void SelectRenewalYears(int years)

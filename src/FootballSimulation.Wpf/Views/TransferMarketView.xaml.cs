@@ -173,7 +173,8 @@ public partial class TransferMarketView : UserControl
             return;
         }
 
-        var offerFeeText = (sender as TransferPlayerDetailPanel)?.OfferFeeText ?? _activeDetailPanel?.OfferFeeText ?? string.Empty;
+        var panel = sender as TransferPlayerDetailPanel ?? _activeDetailPanel;
+        var offerFeeText = panel?.OfferFeeText ?? string.Empty;
         if (!TryParseMillionAmount(offerFeeText, out var fee))
         {
             ShowSimpleTransferModal(
@@ -187,6 +188,19 @@ public partial class TransferMarketView : UserControl
             return;
         }
 
+        if (panel is null || !TryParseThousandAmount(panel.SigningWageText, out var weeklyWage))
+        {
+            ShowSimpleTransferModal(
+                "Invalid Contract Offer",
+                "Player Contract",
+                _selectedListing.Player.Name,
+                CreatePlayerMeta(_selectedListing),
+                "Enter a valid weekly wage in thousands.",
+                "The transfer cannot be completed until personal terms are agreed.",
+                "Continue");
+            return;
+        }
+
         var listing = _selectedListing;
         var offer = _transferMarketService.MakeUserOffer(
             _state.TransferMarket,
@@ -194,7 +208,10 @@ public partial class TransferMarketView : UserControl
             _state.SelectedTeam,
             _selectedListing.Player.PlayerId,
             fee,
-            GetCurrentRound());
+            GetCurrentRound(),
+            weeklyWage,
+            panel.SigningYears,
+            panel.SigningRole);
 
         RefreshAll();
         ShowOfferOutcomeModal(offer, listing, submittedFee: fee);

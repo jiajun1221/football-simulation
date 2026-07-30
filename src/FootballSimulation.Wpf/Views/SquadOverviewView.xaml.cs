@@ -52,6 +52,7 @@ public partial class SquadOverviewView : UserControl
         }
 
         EnsureTransferState();
+        UpdateBudgetBalance();
         var restoredPlayers = RestoreMissingSelectedTeamSourcePlayers() |
             RestoreMissingCompletedIncomingTransfers() |
             RestoreMissingSelectedTeamStatPlayers();
@@ -77,6 +78,21 @@ public partial class SquadOverviewView : UserControl
         _selectedRow = rows.FirstOrDefault(row => row.Listing.Player.PlayerId == selectedPlayerId) ?? rows.FirstOrDefault();
         SquadDataGrid.SelectedItem = _selectedRow;
         ShowSelectedPlayer();
+    }
+
+    private void UpdateBudgetBalance()
+    {
+        if (_state.TransferMarket is null || _state.League is null || _state.SelectedTeam is null)
+        {
+            return;
+        }
+
+        var finance = _transferMarketService.GetFinance(
+            _state.TransferMarket,
+            _state.League.LeagueId,
+            _state.SelectedTeam);
+        TransferBudgetBalanceTextBlock.Text = TransferMarketService.FormatMoney(finance.AvailableTransferBudget);
+        WageBudgetBalanceTextBlock.Text = $"{PlayerContractService.FormatWage(finance.AvailableWageBudget)} available";
     }
 
     private bool RestoreMissingSelectedTeamSourcePlayers()
@@ -304,6 +320,11 @@ public partial class SquadOverviewView : UserControl
 
     private Player? LoadSourceTransferPlayer(TransferHistoryItem transfer)
     {
+        if (transfer.PlayerSnapshot is not null)
+        {
+            return transfer.PlayerSnapshot;
+        }
+
         if (string.IsNullOrWhiteSpace(transfer.FromLeagueId) ||
             string.IsNullOrWhiteSpace(transfer.FromClubName))
         {
@@ -919,8 +940,22 @@ public partial class SquadOverviewView : UserControl
             GetCurrentRound());
 
         LoadSquad();
+        if (result.Accepted)
+        {
+            PersistCurrentSaveSlot();
+        }
+        var resultMessage = result.Message;
+        if (result.Accepted)
+        {
+            var finance = _transferMarketService.GetFinance(
+                _state.TransferMarket,
+                _state.League.LeagueId,
+                _state.SelectedTeam);
+            resultMessage += $"{Environment.NewLine}{Environment.NewLine}" +
+                $"Wage budget remaining: {PlayerContractService.FormatWage(finance.AvailableWageBudget)}.";
+        }
         MessageBox.Show(
-            result.Message,
+            resultMessage,
             result.Accepted ? "Contract Extended" : "Contract Rejected",
             MessageBoxButton.OK,
             result.Accepted ? MessageBoxImage.Information : MessageBoxImage.Warning);
@@ -990,6 +1025,9 @@ public partial class SquadOverviewView : UserControl
         var formBadge = PlayerFormBadgeHelper.Create(player.FormStatus);
         var status = CreateStatusDisplay(player);
         var nationality = PlayerNationalityDisplayService.Resolve(player);
+        var seasonEndYear = GetSeasonEndYear(_state.League?.Season ?? string.Empty);
+        var contractYearsRemaining = PlayerContractService.GetYearsRemaining(player, seasonEndYear);
+        var showContractWarning = player.ContractEndYear.HasValue && contractYearsRemaining <= 1;
 
         return new SquadPlayerRow
         {
@@ -1006,6 +1044,10 @@ public partial class SquadOverviewView : UserControl
             Form = formBadge.Text,
             MarketValueText = TransferMarketService.FormatMoney(listing.MarketValue),
             ContractText = player.ContractEndYear?.ToString(CultureInfo.InvariantCulture) ?? "-",
+            ContractWarningVisibility = showContractWarning ? Visibility.Visible : Visibility.Collapsed,
+            ContractWarningTooltip = contractYearsRemaining == 0
+                ? "Danger: contract expires at the end of this season."
+                : "Warning: only one season remains on this contract.",
             WageText = PlayerContractService.FormatWage(listing.WeeklyWage),
             Status = status.Text,
             StatusTooltip = status.Tooltip,
@@ -1132,6 +1174,8 @@ public partial class SquadOverviewView : UserControl
         public string Form { get; init; } = string.Empty;
         public string MarketValueText { get; init; } = string.Empty;
         public string ContractText { get; init; } = string.Empty;
+        public Visibility ContractWarningVisibility { get; init; }
+        public string ContractWarningTooltip { get; init; } = string.Empty;
         public string WageText { get; init; } = string.Empty;
         public string Status { get; init; } = string.Empty;
         public string StatusTooltip { get; init; } = string.Empty;

@@ -386,6 +386,11 @@ public class SaveGameService
 
     private static void ApplyKnownPositionCorrection(Player player, string teamName)
     {
+        if (player.HasCustomPreferredPosition)
+        {
+            return;
+        }
+
         var correction = KnownPositionCorrections.FirstOrDefault(item => IsPositionCorrectionMatch(player, teamName, item));
         if (correction is null)
         {
@@ -602,8 +607,28 @@ public class SaveGameService
         }
 
         RehydrateTransferMarketReferences(data);
+        ReplenishDepletedAiRosters(data);
         RepairPlaceholderTeams(data);
         data.MatchHistory = CreateMatchHistory(data.Fixtures);
+    }
+
+    private static void ReplenishDepletedAiRosters(SaveGameData data)
+    {
+        var selectedTeam = data.Teams.FirstOrDefault(team =>
+            team.Name.Equals(data.SelectedClubName, StringComparison.OrdinalIgnoreCase));
+        if (selectedTeam is null)
+        {
+            return;
+        }
+
+        var seasonStartYear = TryGetSeasonStartYear(data.LeagueState.Season);
+        var seasonEndYear = seasonStartYear.HasValue
+            ? seasonStartYear.Value + 1
+            : PlayerContractService.DefaultSeasonEndYear;
+        SeasonRolloverService.ReplenishAiClubRosters(
+            data.TransferMarketState,
+            selectedTeam,
+            seasonEndYear);
     }
 
     private static void EnsureFixtureMetadata(Fixture fixture)
@@ -784,14 +809,17 @@ public class SaveGameService
                     continue;
                 }
 
-                ApplyPositionDataFromSource(player, sourcePlayer);
+                if (!player.HasCustomPreferredPosition)
+                {
+                    ApplyPositionDataFromSource(player, sourcePlayer);
+                }
                 PlayerContractService.ApplyContractData(
                     player,
                     leagueId,
-                    sourcePlayer.ContractEndYear,
-                    sourcePlayer.WeeklyWage,
-                    sourcePlayer.ReleaseClause,
-                    sourcePlayer.ContractStatus);
+                    player.ContractEndYear ?? sourcePlayer.ContractEndYear,
+                    player.WeeklyWage is > 0 ? player.WeeklyWage : sourcePlayer.WeeklyWage,
+                    player.ReleaseClause is > 0 ? player.ReleaseClause : sourcePlayer.ReleaseClause,
+                    player.ContractEndYear.HasValue ? null : sourcePlayer.ContractStatus);
 
                 if (PlayerNationalityDataService.IsMissingOrDefault(player))
                 {

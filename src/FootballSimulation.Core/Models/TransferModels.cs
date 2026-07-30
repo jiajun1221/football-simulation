@@ -109,6 +109,7 @@ public class TransferHistoryItem
     public decimal? WeeklyWage { get; set; }
     public int? ContractEndYear { get; set; }
     public PlayerRole? SquadRole { get; set; }
+    public Player? PlayerSnapshot { get; set; }
     public string Type { get; set; } = "Permanent";
 }
 
