@@ -4,6 +4,7 @@ public enum EventType
 {
     Kickoff,
     Attack,
+    AttackProgression,
     ChanceCreated,
     Foul,
     Dive,
@@ -47,5 +48,7 @@ public enum EventType
     TimeWasting,
     TacticalChange,
     Halftime,
-    Fulltime
+    Fulltime,
+    Clearance,
+    ThrowIn
 }

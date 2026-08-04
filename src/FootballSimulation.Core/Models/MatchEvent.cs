@@ -18,8 +18,26 @@ public class MatchEvent
     public string FoulingPlayer { get; set; } = string.Empty;
     public string FoulingTeam { get; set; } = string.Empty;
     public string AttackingTeam { get; set; } = string.Empty;
+    public string AttackNarrativeId { get; set; } = string.Empty;
+    public string AttackRoute { get; set; } = string.Empty;
+    public string AttackOrigin { get; set; } = string.Empty;
+    public string AttackAction { get; set; } = string.Empty;
+    public int AttackSequenceStep { get; set; }
+    public int AttackFeedTarget { get; set; }
     public string Description { get; set; } = string.Empty;
 }
+
+public sealed record AttackNarrativeContext(
+    string Id,
+    string TeamName,
+    string Origin,
+    string Route,
+    string Character,
+    string PlaymakerName,
+    string TargetName,
+    string DefensivePressure,
+    bool IsLateUrgency,
+    string OriginPlayerName = "");
 
 public enum FoulLocation
 {

@@ -512,8 +512,8 @@ public partial class MatchLiveView : UserControl
             return;
         }
 
-                    var feedItem = CreateFeedItem(matchEvent, _state.CurrentMatch);
-                    InsertFeedItemAtTop(feedItem);
+        var feedItem = CreateFeedItem(matchEvent, _state.CurrentMatch);
+        InsertFeedItemAtTop(feedItem);
         await Dispatcher.InvokeAsync(() => { }, System.Windows.Threading.DispatcherPriority.Render);
         RecordDisplayedPitchStats(matchEvent);
         RecordDisplayedPitchRating(matchEvent);
@@ -3032,6 +3032,20 @@ public partial class MatchLiveView : UserControl
 
     private static string RotateIcon() => char.ConvertFromUtf32(0x1F504);
 
+    private static string LinkIcon() => char.ConvertFromUtf32(0x1F517);
+
+    private static string RunnerIcon() => char.ConvertFromUtf32(0x1F3C3);
+
+    private static string FastForwardIcon() => char.ConvertFromUtf32(0x23E9);
+
+    private static string ReturnPassIcon() => char.ConvertFromUtf32(0x21A9);
+
+    private static string StrengthIcon() => char.ConvertFromUtf32(0x1F4AA);
+
+    private static string ForwardPassIcon() => char.ConvertFromUtf32(0x2197);
+
+    private static string ThrowInIcon() => char.ConvertFromUtf32(0x1F91A);
+
     private static string ClipboardIcon() => char.ConvertFromUtf32(0x1F4CB);
 
     private static string ClockIcon() => char.ConvertFromUtf32(0x23F1);
@@ -3465,6 +3479,7 @@ public partial class MatchLiveView : UserControl
                 or EventType.Penalty
                 or EventType.PenaltyTaker
                 or EventType.Attack
+                or EventType.AttackProgression
                 or EventType.ChanceCreated
                 or EventType.CornerKick
                 or EventType.SetPieceDanger
@@ -3565,6 +3580,7 @@ public partial class MatchLiveView : UserControl
                 break;
 
             case EventType.Attack:
+            case EventType.AttackProgression:
             case EventType.ChanceCreated:
             case EventType.Shot:
             case EventType.Woodwork:
@@ -4056,6 +4072,7 @@ public partial class MatchLiveView : UserControl
         {
             case EventType.Turnover:
             case EventType.Attack:
+            case EventType.AttackProgression:
             case EventType.ChanceCreated:
             case EventType.Shot:
             case EventType.Miss:
@@ -4174,6 +4191,9 @@ public partial class MatchLiveView : UserControl
                 ? "Second half underway"
                 : "Kickoff underway",
             EventType.Attack => CreateAttackHeadline(matchEvent, teamName),
+            EventType.AttackProgression => CreateAttackProgressionHeadline(matchEvent, teamName),
+            EventType.Clearance => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "clears into touch", $"{teamName} clear into touch"),
+            EventType.ThrowIn => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "takes the throw-in", $"{teamName} throw-in"),
             EventType.ChanceCreated => CreatePlayerHeadline(matchEvent.PrimaryPlayerName, "creates chance", $"{teamName} create chance"),
             EventType.Shot => CreateShotHeadline(matchEvent, teamName),
             EventType.Save => CreateSaveHeadline(matchEvent),
@@ -4351,6 +4371,97 @@ public partial class MatchLiveView : UserControl
         }
 
         return $"{teamName} on the attack";
+    }
+
+    private static string CreateAttackProgressionHeadline(MatchEvent matchEvent, string teamName)
+    {
+        var passer = GetHeadlinePlayerName(matchEvent.PrimaryPlayerName);
+        if (string.IsNullOrWhiteSpace(passer))
+        {
+            passer = teamName;
+        }
+
+        var receiver = GetHeadlinePlayerName(matchEvent.SecondaryPlayerName);
+        if (string.IsNullOrWhiteSpace(receiver))
+        {
+            receiver = "a teammate";
+        }
+
+        if (!string.IsNullOrWhiteSpace(matchEvent.AttackAction))
+        {
+            return matchEvent.AttackAction switch
+            {
+                "LongPass" => $"{passer} sends a long pass to {receiver}",
+                "Switch" => $"{passer} switches play to {receiver}",
+                "Control" => $"{passer} controls and finds {receiver}",
+                "Dribble" => $"{passer} dribbles forward",
+                "Carry" => $"{passer} carries the ball forward",
+                "Overlap" => $"{passer} releases {receiver} on the overlap",
+                "Cutback" => $"{passer} cuts back to {receiver}",
+                "HoldUp" => $"{passer} holds up for {receiver}",
+                "Counter" => $"{passer} drives the counterattack",
+                "Combination" => $"{passer} combines with {receiver}",
+                "Cross" => $"{passer} crosses toward {receiver}",
+                "ThroughBall" => $"{passer} sends {receiver} through",
+                "OneOnOne" => $"{receiver} breaks through one-on-one",
+                "FinalPass" => $"{passer} finds {receiver} with the final pass",
+                _ => $"{passer} passes to {receiver}"
+            };
+        }
+
+        var description = matchEvent.Description;
+        if (description.Contains("one-two", StringComparison.OrdinalIgnoreCase) ||
+            description.Contains("exchanges a quick pass", StringComparison.OrdinalIgnoreCase) ||
+            description.Contains("combining with", StringComparison.OrdinalIgnoreCase) ||
+            description.Contains("combines with", StringComparison.OrdinalIgnoreCase))
+        {
+            return $"{passer} combines with {receiver}";
+        }
+
+        if (description.Contains("dribbles", StringComparison.OrdinalIgnoreCase) ||
+            description.Contains("beats a marker", StringComparison.OrdinalIgnoreCase) ||
+            description.Contains("beats the nearest", StringComparison.OrdinalIgnoreCase))
+        {
+            return $"{passer} dribbles forward";
+        }
+
+        if (description.Contains("lays it off", StringComparison.OrdinalIgnoreCase) ||
+            description.Contains("lays it back", StringComparison.OrdinalIgnoreCase))
+        {
+            return $"{passer} lays off to {receiver}";
+        }
+
+        if (description.Contains("cuts the ball back", StringComparison.OrdinalIgnoreCase))
+        {
+            return $"{passer} cuts back to {receiver}";
+        }
+
+        if (description.Contains("holds off", StringComparison.OrdinalIgnoreCase))
+        {
+            return $"{passer} holds up for {receiver}";
+        }
+
+        if (description.Contains("turns", StringComparison.OrdinalIgnoreCase) ||
+            description.Contains("half-turn", StringComparison.OrdinalIgnoreCase))
+        {
+            return $"{passer} turns and finds {receiver}";
+        }
+
+        if (description.Contains("carries", StringComparison.OrdinalIgnoreCase) ||
+            description.Contains("drives through", StringComparison.OrdinalIgnoreCase))
+        {
+            return $"{passer} carries the ball forward";
+        }
+
+        return matchEvent.AttackRoute switch
+        {
+            "switch of play" => $"{passer} switches play to {receiver}",
+            "direct ball" => $"{passer} sends a long pass",
+            "overlap" => $"{passer} releases {receiver}",
+            "counterattack" => $"{receiver} drives the counterattack",
+            "left flank" or "right flank" => $"{receiver} gets the ball",
+            _ => $"{passer} finds {receiver} between the lines"
+        };
     }
 
     private static string CreateShotHeadline(MatchEvent matchEvent, string teamName)
@@ -4676,6 +4787,9 @@ public partial class MatchLiveView : UserControl
         {
             EventType.Kickoff => MatchBoundaryStyle(FlagIcon(), "KICKOFF"),
             EventType.Attack => AttackStyle(SwordsIcon(), "ATTACK"),
+            EventType.AttackProgression => AttackProgressionStyle(matchEvent),
+            EventType.Clearance => DefensiveStyle(ForwardPassIcon(), "CLEARANCE"),
+            EventType.ThrowIn => NeutralStyle(ThrowInIcon(), "THROW-IN"),
             EventType.ChanceCreated => ChanceStyle(StarIcon(), "CHANCE CREATED"),
             EventType.Shot => ShotStyle(matchEvent),
             EventType.Save => SaveStyle(GloveIcon(), "SAVE"),
@@ -4727,6 +4841,92 @@ public partial class MatchLiveView : UserControl
     private static FeedEventStyle AttackStyle(string icon, string label)
     {
         return CreateThemedFeedStyle(icon, label, "FeedAttack", "#FEF2F2", "#EF4444", "#FEE2E2", "#B91C1C");
+    }
+
+    private static FeedEventStyle AttackProgressionStyle(MatchEvent matchEvent)
+    {
+        if (!string.IsNullOrWhiteSpace(matchEvent.AttackAction))
+        {
+            return matchEvent.AttackAction switch
+            {
+                "LongPass" => AttackStyle(TargetIcon(), "LONG PASS"),
+                "Switch" => AttackStyle(TargetIcon(), "SWITCH"),
+                "Control" => AttackStyle(SoccerBallIcon(), "CONTROL"),
+                "Dribble" => AttackStyle(RunnerIcon(), "DRIBBLE"),
+                "Carry" => AttackStyle(SoccerBallIcon(), "CARRY"),
+                "Overlap" => AttackStyle(FastForwardIcon(), "OVERLAP"),
+                "Cutback" => AttackStyle(ReturnPassIcon(), "CUTBACK"),
+                "HoldUp" => AttackStyle(StrengthIcon(), "HOLD-UP"),
+                "Counter" => AttackStyle(FastForwardIcon(), "COUNTER"),
+                "Combination" => AttackStyle(LinkIcon(), "COMBINATION"),
+                "Cross" => AttackStyle(ForwardPassIcon(), "CROSS"),
+                "ThroughBall" => AttackStyle(TargetIcon(), "THROUGH BALL"),
+                "OneOnOne" => AttackStyle(RunnerIcon(), "ONE-ON-ONE"),
+                "FinalPass" => AttackStyle(TargetIcon(), "FINAL PASS"),
+                _ => AttackStyle(ForwardPassIcon(), "PASS")
+            };
+        }
+
+        var description = matchEvent.Description;
+        if (description.Contains("one-two", StringComparison.OrdinalIgnoreCase) ||
+            description.Contains("exchanges a quick pass", StringComparison.OrdinalIgnoreCase) ||
+            description.Contains("combines with", StringComparison.OrdinalIgnoreCase) ||
+            description.Contains("combining with", StringComparison.OrdinalIgnoreCase))
+        {
+            return AttackStyle(LinkIcon(), "COMBINATION");
+        }
+
+        if (description.Contains("dribbles", StringComparison.OrdinalIgnoreCase) ||
+            description.Contains("beats a marker", StringComparison.OrdinalIgnoreCase) ||
+            description.Contains("beats the nearest", StringComparison.OrdinalIgnoreCase))
+        {
+            return AttackStyle(RunnerIcon(), "DRIBBLE");
+        }
+
+        if (description.Contains("long pass", StringComparison.OrdinalIgnoreCase) ||
+            description.Contains("long diagonal", StringComparison.OrdinalIgnoreCase) ||
+            description.Contains("cross-field", StringComparison.OrdinalIgnoreCase) ||
+            description.Contains("switches play", StringComparison.OrdinalIgnoreCase))
+        {
+            return AttackStyle(TargetIcon(), "LONG PASS");
+        }
+
+        if (description.Contains("overlap", StringComparison.OrdinalIgnoreCase) ||
+            description.Contains("races beyond", StringComparison.OrdinalIgnoreCase))
+        {
+            return AttackStyle(FastForwardIcon(), "OVERLAP");
+        }
+
+        if (description.Contains("cuts the ball back", StringComparison.OrdinalIgnoreCase))
+        {
+            return AttackStyle(ReturnPassIcon(), "CUTBACK");
+        }
+
+        if (description.Contains("lays it off", StringComparison.OrdinalIgnoreCase) ||
+            description.Contains("lays it back", StringComparison.OrdinalIgnoreCase))
+        {
+            return AttackStyle(ReturnPassIcon(), "LAYOFF");
+        }
+
+        if (description.Contains("holds off", StringComparison.OrdinalIgnoreCase))
+        {
+            return AttackStyle(StrengthIcon(), "HOLD-UP");
+        }
+
+        if (description.Contains("carries", StringComparison.OrdinalIgnoreCase) ||
+            description.Contains("drives through", StringComparison.OrdinalIgnoreCase) ||
+            description.Contains("advances with the ball", StringComparison.OrdinalIgnoreCase))
+        {
+            return AttackStyle(SoccerBallIcon(), "CARRY");
+        }
+
+        if (description.Contains("turns", StringComparison.OrdinalIgnoreCase) ||
+            description.Contains("half-turn", StringComparison.OrdinalIgnoreCase))
+        {
+            return AttackStyle(RotateIcon(), "TURN");
+        }
+
+        return AttackStyle(ForwardPassIcon(), "PASS");
     }
 
     private static FeedEventStyle DefensiveStyle(string icon, string label)
@@ -4929,6 +5129,7 @@ public partial class MatchLiveView : UserControl
             or EventType.BlockedPass
             or EventType.Turnover
             or EventType.ChanceCreated
+            or EventType.AttackProgression
             or EventType.DefensiveStop
             or EventType.DefensiveError
             or EventType.WonderGoal
@@ -4965,6 +5166,7 @@ public partial class MatchLiveView : UserControl
             or EventType.BlockedPass
             or EventType.Turnover
             or EventType.ChanceCreated
+            or EventType.AttackProgression
             or EventType.DefensiveStop
             or EventType.DefensiveError
             or EventType.GoalkeeperHeroics

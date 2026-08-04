@@ -121,6 +121,182 @@ public class MatchEngineScoringTests
     }
 
     [Fact]
+    public void SimulateMatch_AttackProgressionUsesAConnectedPlayerChain()
+    {
+        var seedDataService = new SeedDataService();
+        var engine = new MatchEngine();
+
+        for (var seed = 1; seed <= 30; seed++)
+        {
+            var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+            var result = engine.SimulateMatch(homeTeam, awayTeam, seed: seed);
+            var events = result.Events;
+
+            for (var index = 1; index < events.Count; index++)
+            {
+                var previous = events[index - 1];
+                var current = events[index];
+                if (previous.EventType != EventType.AttackProgression ||
+                    current.EventType != EventType.AttackProgression ||
+                    previous.AttackNarrativeId != current.AttackNarrativeId)
+                {
+                    continue;
+                }
+
+                Assert.Equal(previous.SecondaryPlayerName, current.PrimaryPlayerName);
+                Assert.NotEqual(previous.PrimaryPlayerName, current.PrimaryPlayerName);
+                Assert.NotEqual(current.PrimaryPlayerName, current.SecondaryPlayerName);
+                Assert.NotEqual(previous.AttackAction, current.AttackAction);
+            }
+        }
+    }
+
+    [Fact]
+    public void SimulateMatch_OpenPlayChanceRequiresThreeConnectedAttackFeeds()
+    {
+        var seedDataService = new SeedDataService();
+        var engine = new MatchEngine();
+        var checkedChances = 0;
+        var longerAttackCount = 0;
+
+        for (var seed = 1; seed <= 30; seed++)
+        {
+            var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+            var events = engine.SimulateMatch(homeTeam, awayTeam, seed: seed).Events;
+
+            for (var index = 0; index < events.Count; index++)
+            {
+                var chance = events[index];
+                if (chance.EventType != EventType.ChanceCreated || string.IsNullOrWhiteSpace(chance.AttackNarrativeId))
+                {
+                    continue;
+                }
+
+                var chain = events
+                    .Take(index)
+                    .Where(matchEvent => matchEvent.AttackNarrativeId == chance.AttackNarrativeId)
+                    .ToList();
+
+                Assert.True(
+                    chain.Count is >= 3 and <= 8,
+                    $"Expected at least three connected feed cards before chance {chance.AttackNarrativeId}, but found {chain.Count}. " +
+                    string.Join(" | ", events.Skip(Math.Max(0, index - 4)).Take(4).Select(matchEvent =>
+                        $"{matchEvent.EventType}:{matchEvent.AttackNarrativeId}:{matchEvent.Description}")));
+                Assert.Equal(EventType.Attack, chain[0].EventType);
+                Assert.All(chain.Skip(1), matchEvent => Assert.Equal(EventType.AttackProgression, matchEvent.EventType));
+                Assert.Contains(chain[^1].AttackAction, new[] { "Cross", "ThroughBall", "OneOnOne", "Dribble", "Combination", "FinalPass" });
+                var involvedPlayers = chain
+                    .SelectMany(matchEvent => new[] { matchEvent.PrimaryPlayerName, matchEvent.SecondaryPlayerName })
+                    .Where(playerName => !string.IsNullOrWhiteSpace(playerName))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .Count();
+                Assert.True(involvedPlayers >= Math.Min(chain.Count - 1, 6));
+                for (var chainIndex = 2; chainIndex < chain.Count; chainIndex++)
+                {
+                    Assert.NotEqual(chain[chainIndex - 1].AttackAction, chain[chainIndex].AttackAction);
+                }
+                if (chance.Minute >= 3)
+                {
+                    Assert.True(
+                        chain.Select(matchEvent => matchEvent.DisplayMinuteText).Distinct().Count() >= 2,
+                        string.Join(" | ", chain.Select(matchEvent =>
+                            $"{matchEvent.EventType}:{matchEvent.Minute}:{matchEvent.DisplayMinuteText}:{matchEvent.Description}")));
+                }
+                if (chain.Count > 3)
+                {
+                    longerAttackCount++;
+                }
+                checkedChances++;
+            }
+        }
+
+        Assert.True(checkedChances > 0);
+        Assert.True(longerAttackCount > 0);
+    }
+
+    [Fact]
+    public void SimulateMatch_ClearanceToTouchIsFollowedByThrowIn()
+    {
+        var seedDataService = new SeedDataService();
+        var engine = new MatchEngine();
+        var connectedRestarts = 0;
+
+        for (var seed = 1; seed <= 60; seed++)
+        {
+            var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+            var events = engine.SimulateMatch(homeTeam, awayTeam, seed: seed).Events;
+            for (var index = 0; index < events.Count - 1; index++)
+            {
+                if (events[index].EventType != EventType.Clearance)
+                {
+                    continue;
+                }
+
+                Assert.Equal(EventType.ThrowIn, events[index + 1].EventType);
+                Assert.Equal(events[index].Minute, events[index + 1].Minute);
+                connectedRestarts++;
+            }
+        }
+
+        Assert.True(connectedRestarts > 0);
+    }
+
+    [Fact]
+    public void SimulateMatch_MiscontrolBelongsToTheLastAttackReceiver()
+    {
+        var seedDataService = new SeedDataService();
+        var engine = new MatchEngine();
+        var checkedMiscontrols = 0;
+
+        for (var seed = 1; seed <= 50; seed++)
+        {
+            var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+            var events = engine.SimulateMatch(homeTeam, awayTeam, seed: seed).Events;
+
+            for (var index = 1; index < events.Count; index++)
+            {
+                if (events[index].EventType != EventType.Miscontrol ||
+                    events[index - 1].EventType != EventType.AttackProgression)
+                {
+                    continue;
+                }
+
+                Assert.Equal(events[index - 1].SecondaryPlayerName, events[index].PrimaryPlayerName);
+                checkedMiscontrols++;
+            }
+        }
+
+        Assert.True(checkedMiscontrols > 0);
+    }
+
+    [Fact]
+    public void AdvanceMatch_PreservesAttackNarrativeAcrossMinuteByMinuteUpdates()
+    {
+        var seedDataService = new SeedDataService();
+        var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+        var engine = new MatchEngine();
+        var match = engine.CreateLiveMatch(homeTeam, awayTeam);
+
+        for (var minute = 1; minute <= 35; minute++)
+        {
+            match = engine.AdvanceMatch(match, minute, minute, includeFulltime: false, seed: 500 + minute);
+        }
+
+        var completedNarrative = match.Events
+            .Where(matchEvent => !string.IsNullOrWhiteSpace(matchEvent.AttackNarrativeId))
+            .GroupBy(matchEvent => matchEvent.AttackNarrativeId)
+            .Select(group => group
+                .Where(matchEvent => matchEvent.EventType is EventType.Attack or EventType.AttackProgression)
+                .ToList())
+            .FirstOrDefault(events => events.Count is >= 3 and <= 8);
+
+        Assert.NotNull(completedNarrative);
+        Assert.Equal(completedNarrative.Count, completedNarrative.Select(matchEvent => matchEvent.Minute).Distinct().Count());
+        Assert.Equal(EventType.Attack, completedNarrative[0].EventType);
+        Assert.All(completedNarrative.Skip(1), matchEvent => Assert.Equal(EventType.AttackProgression, matchEvent.EventType));
+    }
+
+    [Fact]
     public void SimulateMatch_FirstOpenPlayEventBelongsToKickoffTeam()
     {
         var seedDataService = new SeedDataService();

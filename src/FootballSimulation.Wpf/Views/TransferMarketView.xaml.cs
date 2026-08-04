@@ -16,6 +16,7 @@ public partial class TransferMarketView : UserControl
     private readonly GameFlowState _state;
     private readonly Action<UserControl> _navigate;
     private readonly TransferMarketService _transferMarketService = new();
+    private readonly SaveGameService _saveGameService = new();
     private TransferPlayerListing? _selectedListing;
     private TransferOffer? _selectedOffer;
     private TransferHistoryItem? _selectedHistoryItem;
@@ -32,6 +33,7 @@ public partial class TransferMarketView : UserControl
         EnsureTransferState();
         InitializeFilterControls();
         TransferModal.ActionRequested += TransferModal_ActionRequested;
+        SquadDetailPanel.TransferLockToggled += DetailPanel_TransferLockToggled;
         LoadMarket();
         TransferTabControl.SelectedIndex = 0;
         SyncTransferTabButtons();
@@ -263,6 +265,38 @@ public partial class TransferMarketView : UserControl
         _selectedListing.Player.IsListedForSale = !_selectedListing.Player.IsListedForSale;
         RefreshAll();
         UpdateActionAvailability();
+    }
+
+    private void DetailPanel_TransferLockToggled(object? sender, EventArgs e)
+    {
+        if (_selectedListing is null || _state.SelectedTeam is null ||
+            !_selectedListing.Team.Name.Equals(_state.SelectedTeam.Name, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        var player = _selectedListing.Player;
+        if (HasAgreedTransfer(player))
+        {
+            ShowSimpleTransferModal(
+                "Transfer Agreed",
+                "Transfer Market",
+                player.Name,
+                CreatePlayerMeta(_selectedListing),
+                "This player already has a transfer agreed for the next window.",
+                "The untouchable status cannot be changed unless the agreement is cancelled.",
+                "Continue");
+            return;
+        }
+
+        player.RejectTransferOffers = !player.RejectTransferOffers;
+        if (player.RejectTransferOffers && player.TransferStatus == PlayerTransferStatus.Listed)
+        {
+            player.TransferStatus = PlayerTransferStatus.None;
+        }
+
+        PersistCurrentSaveSlot();
+        RefreshAll();
     }
 
     private void DetailPanel_ContractRenewalRequested(object? sender, EventArgs e)
@@ -952,7 +986,9 @@ public partial class TransferMarketView : UserControl
             recommendationReason,
             offer,
             historyItem,
-            HasTransferredThisWindow: hasTransferredThisWindow));
+            HasTransferredThisWindow: hasTransferredThisWindow,
+            CanToggleTransferLock: mode == TransferDetailMode.Squad && isOwnPlayer && !HasAgreedTransfer(player),
+            IsTransferLocked: player.RejectTransferOffers));
     }
 
     private void UpdateActionAvailability()
@@ -972,6 +1008,29 @@ public partial class TransferMarketView : UserControl
                         ? TransferDetailMode.History
                         : TransferDetailMode.Market;
         ShowPlayerDetails(_selectedListing, mode, string.Empty, _selectedOffer, _selectedHistoryItem, _activeDetailPanel);
+    }
+
+    private void PersistCurrentSaveSlot()
+    {
+        if (_state.CurrentSaveSlotNumber is not int slotNumber ||
+            _state.League is null ||
+            _state.SelectedTeam is null)
+        {
+            return;
+        }
+
+        try
+        {
+            var saveData = SaveGameService.CreateSaveData(_state.League, _state.SelectedTeam, _state.TransferMarket);
+            _saveGameService.SaveGame(slotNumber, saveData);
+        }
+        catch (Exception ex) when (ex is System.IO.IOException or
+            UnauthorizedAccessException or
+            InvalidOperationException or
+            System.Text.Json.JsonException)
+        {
+            System.Diagnostics.Debug.WriteLine($"[TransferLockSave] Could not persist player transfer lock: {ex.Message}");
+        }
     }
 
     private void EnsureTransferState()

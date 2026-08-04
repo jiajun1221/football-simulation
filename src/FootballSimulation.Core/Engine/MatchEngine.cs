@@ -873,9 +873,10 @@ public class MatchEngine
         }
 
         simulationState.LastFeedEventType = lastEvent.EventType;
-        simulationState.LastAttackingTeamName = lastEvent.EventType == EventType.Attack
+        simulationState.LastAttackingTeamName = lastEvent.EventType is EventType.Attack or EventType.AttackProgression
             ? FindEventTeamName(lastEvent, simulationState.Match)
             : null;
+        RestoreActiveAttackNarrative(simulationState, lastEvent);
         var latestConfrontation = simulationState.Match.Events.LastOrDefault(matchEvent => matchEvent.EventType == EventType.Confrontation);
         if (latestConfrontation is not null && latestConfrontation.Minute + 8 >= simulationState.Match.CurrentMinute)
         {
@@ -887,6 +888,68 @@ public class MatchEngine
         RestoreErrorStateFromExistingEvents(simulationState);
         var possessionTeam = InferPossessionAfterEvent(lastEvent, simulationState.Match);
         SetPossession(simulationState, possessionTeam, GetBallStateAfterEvent(lastEvent.EventType), lastEvent.EventType);
+    }
+
+    private static void RestoreActiveAttackNarrative(MatchSimulationState simulationState, MatchEvent lastEvent)
+    {
+        if (simulationState.Match.Events.LastOrDefault()?.EventType is EventType.Halftime or EventType.Fulltime)
+        {
+            return;
+        }
+
+        if (lastEvent.EventType is not (EventType.Attack or EventType.AttackProgression) ||
+            string.IsNullOrWhiteSpace(lastEvent.AttackNarrativeId))
+        {
+            return;
+        }
+
+        var narrativeEvents = simulationState.Match.Events
+            .Where(matchEvent => string.Equals(
+                matchEvent.AttackNarrativeId,
+                lastEvent.AttackNarrativeId,
+                StringComparison.Ordinal))
+            .ToList();
+        var openingEvent = narrativeEvents.FirstOrDefault(matchEvent => matchEvent.EventType == EventType.Attack);
+        if (openingEvent is null)
+        {
+            return;
+        }
+
+        var attackingTeamName = FindEventTeamName(openingEvent, simulationState.Match);
+        if (string.IsNullOrWhiteSpace(attackingTeamName))
+        {
+            return;
+        }
+
+        var firstProgression = narrativeEvents.FirstOrDefault(matchEvent => matchEvent.EventType == EventType.AttackProgression);
+        var playmakerName = openingEvent.PrimaryPlayerName ?? firstProgression?.PrimaryPlayerName ?? string.Empty;
+        var targetName = firstProgression?.SecondaryPlayerName ?? openingEvent.SecondaryPlayerName ?? playmakerName;
+        var stage = lastEvent.AttackSequenceStep switch
+        {
+            1 => 1,
+            2 => 2,
+            3 => 3,
+            _ when lastEvent.EventType == EventType.Attack => 1,
+            _ when lastEvent.AttackSequenceStep > 0 => Math.Clamp(lastEvent.AttackSequenceStep, 2, 7),
+            _ => Math.Clamp(narrativeEvents.Count(matchEvent => matchEvent.EventType == EventType.AttackProgression) + 1, 2, 7)
+        };
+
+        simulationState.ActiveAttackNarrative = new AttackNarrativeContext(
+            lastEvent.AttackNarrativeId,
+            attackingTeamName,
+            openingEvent.AttackOrigin,
+            openingEvent.AttackRoute,
+            "balanced",
+            playmakerName,
+            targetName,
+            "balanced shape",
+            IsLateUrgency: false,
+            openingEvent.PrimaryPlayerName ?? string.Empty);
+        simulationState.AttackNarrativeStage = stage;
+        simulationState.AttackLastAction = lastEvent.AttackAction;
+        simulationState.AttackBallCarrierName = stage == 1
+            ? playmakerName
+            : lastEvent.SecondaryPlayerName ?? targetName;
     }
 
     private static void RestoreErrorStateFromExistingEvents(MatchSimulationState simulationState)
@@ -925,6 +988,7 @@ public class MatchEngine
     {
         return matchEvent.EventType is EventType.Kickoff
             or EventType.Attack
+            or EventType.AttackProgression
             or EventType.ChanceCreated
             or EventType.Foul
             or EventType.Shot
@@ -944,6 +1008,8 @@ public class MatchEngine
             or EventType.Pressure
             or EventType.BlockedPass
             or EventType.Turnover
+            or EventType.Clearance
+            or EventType.ThrowIn
             or EventType.DefensiveStop
             or EventType.WonderGoal
             or EventType.GoalkeeperHeroics
@@ -966,8 +1032,123 @@ public class MatchEngine
 
     private static bool HasUnresolvedAttack(MatchSimulationState simulationState, Team attackingTeam)
     {
-        return simulationState.LastFeedEventType == EventType.Attack &&
-            string.Equals(simulationState.LastAttackingTeamName, attackingTeam.Name, StringComparison.OrdinalIgnoreCase);
+        return simulationState.ActiveAttackNarrative is not null &&
+            simulationState.AttackNarrativeStage > 0 &&
+            string.Equals(simulationState.ActiveAttackNarrative.TeamName, attackingTeam.Name, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static AttackNarrativeContext GetOrCreateAttackNarrative(
+        MatchSimulationState simulationState,
+        Team attackingTeam,
+        Team defendingTeam,
+        Player playmaker,
+        Player target,
+        int minute,
+        bool followsTurnover,
+        bool followsRestart,
+        Random random)
+    {
+        if (simulationState.ActiveAttackNarrative is not null &&
+            string.Equals(simulationState.ActiveAttackNarrative.TeamName, attackingTeam.Name, StringComparison.OrdinalIgnoreCase))
+        {
+            return simulationState.ActiveAttackNarrative;
+        }
+
+        var deepBuildRoll = random.NextDouble();
+        var origin = followsTurnover
+            ? "turnover"
+            : followsRestart
+                ? "restart"
+                : playmaker.Position == Position.Goalkeeper || deepBuildRoll < 0.12
+                    ? "goalkeeper distribution"
+                    : playmaker.Position == Position.Defender || deepBuildRoll < 0.30
+                        ? "defensive recovery"
+                        : "midfield possession";
+        var originPlayer = origin switch
+        {
+            "goalkeeper distribution" => GetActivePitchPlayers(attackingTeam)
+                .FirstOrDefault(PositionSuitabilityService.IsGoalkeeperCapable) ?? playmaker,
+            "defensive recovery" => GetActivePitchPlayers(attackingTeam)
+                .Where(player => player.Position == Position.Defender)
+                .OrderBy(_ => random.Next())
+                .FirstOrDefault() ?? playmaker,
+            _ => playmaker
+        };
+        var route = ChooseAttackNarrativeRoute(attackingTeam, playmaker, target, followsTurnover, random);
+        if (simulationState.LastAttackRouteByTeam.TryGetValue(attackingTeam.Name, out var previousRoute) &&
+            string.Equals(previousRoute, route, StringComparison.OrdinalIgnoreCase) &&
+            route is not "counterattack")
+        {
+            route = route is "central play" or "direct ball"
+                ? "switch of play"
+                : "central play";
+        }
+        simulationState.LastAttackRouteByTeam[attackingTeam.Name] = route;
+        var character = attackingTeam.Tactics.Tempo >= 72
+            ? "quick"
+            : attackingTeam.Tactics.Tempo <= 38
+                ? "patient"
+                : "balanced";
+        var defensivePressure = defendingTeam.Tactics.PressingIntensity >= 72
+            ? "high press"
+            : defendingTeam.Tactics.DefensiveLine <= 35
+                ? "low block"
+                : "balanced shape";
+        var narrative = new AttackNarrativeContext(
+            $"{minute}:{attackingTeam.Name}:{simulationState.AttackNarrativeSequence++}",
+            attackingTeam.Name,
+            origin,
+            route,
+            character,
+            playmaker.Name,
+            target.Name,
+            defensivePressure,
+            minute >= 78 && Math.Abs(simulationState.Match.HomeScore - simulationState.Match.AwayScore) <= 1,
+            originPlayer.Name);
+        simulationState.ActiveAttackNarrative = narrative;
+        return narrative;
+    }
+
+    private static string ChooseAttackNarrativeRoute(
+        Team team,
+        Player playmaker,
+        Player target,
+        bool followsTurnover,
+        Random random)
+    {
+        if (followsTurnover)
+        {
+            return "counterattack";
+        }
+
+        var targetPosition = target.PreferredPosition?.ToUpperInvariant() ?? string.Empty;
+        if (targetPosition is "LW" or "LWB" or "LB")
+        {
+            return random.NextDouble() < 0.30 ? "overlap" : "left flank";
+        }
+
+        if (targetPosition is "RW" or "RWB" or "RB")
+        {
+            return random.NextDouble() < 0.30 ? "overlap" : "right flank";
+        }
+
+        if (playmaker.Traits.Contains(PlayerTrait.LongPasser) || team.Tactics.Width >= 72)
+        {
+            return random.NextDouble() < 0.55 ? "switch of play" : "direct ball";
+        }
+
+        if (team.Tactics.Tempo >= 76)
+        {
+            return "direct ball";
+        }
+
+        return "central play";
+    }
+
+    private static Player? FindActivePlayerByName(Team team, string playerName)
+    {
+        return GetActivePitchPlayers(team)
+            .FirstOrDefault(player => string.Equals(player.Name, playerName, StringComparison.OrdinalIgnoreCase));
     }
 
     private static void MarkAttackStarted(MatchSimulationState simulationState, Team attackingTeam)
@@ -979,11 +1160,22 @@ public class MatchEngine
     private static void MarkAttackResolved(MatchSimulationState simulationState, Team possessionTeam, BallState ballState, EventType outcomeType)
     {
         simulationState.LastAttackingTeamName = null;
+        simulationState.ActiveAttackNarrative = null;
+        simulationState.AttackNarrativeStage = 0;
+        simulationState.AttackLastAction = string.Empty;
+        simulationState.AttackBallCarrierName = string.Empty;
         SetPossession(simulationState, possessionTeam, ballState, outcomeType);
     }
 
     private static void SetPossession(MatchSimulationState simulationState, Team team, BallState ballState, EventType? eventType)
     {
+        if (simulationState.ActiveAttackNarrative is not null &&
+            !string.Equals(simulationState.ActiveAttackNarrative.TeamName, team.Name, StringComparison.OrdinalIgnoreCase))
+        {
+            simulationState.ActiveAttackNarrative = null;
+            simulationState.LastAttackingTeamName = null;
+        }
+
         simulationState.PossessionTeamName = team.Name;
         simulationState.BallState = ballState;
         simulationState.LastActingTeamName = team.Name;
@@ -999,10 +1191,12 @@ public class MatchEngine
         return matchEvent.EventType switch
         {
             EventType.Attack => actingTeamModel,
+            EventType.AttackProgression => actingTeamModel,
             EventType.ChanceCreated => actingTeamModel,
             EventType.Foul => opposingTeam,
             EventType.PenaltyDecision => opposingTeam,
             EventType.Turnover => actingTeamModel,
+            EventType.Clearance or EventType.ThrowIn => actingTeamModel,
             EventType.BadPass or EventType.Miscontrol => actingTeamModel,
             EventType.Tackle or EventType.Interception or EventType.Pressure or EventType.BlockedPass => opposingTeam,
             EventType.DefensiveStop => actingTeamModel,
@@ -1030,6 +1224,7 @@ public class MatchEngine
         {
             EventType.Kickoff => BallState.Kickoff,
             EventType.Attack => BallState.AttackPending,
+            EventType.AttackProgression => BallState.AttackPending,
             EventType.ChanceCreated => BallState.Chance,
             EventType.Shot or EventType.Save or EventType.Goal or EventType.Miss or EventType.WonderGoal or EventType.Woodwork or EventType.GoalkeeperHeroics => BallState.Chance,
             EventType.GoalkeeperMistake => BallState.Turnover,
@@ -1039,6 +1234,8 @@ public class MatchEngine
             EventType.Foul or EventType.Offside or EventType.PenaltyDecision or EventType.PenaltyTaker or EventType.Penalty => BallState.SetPiece,
             EventType.TimeWasting => BallState.SetPiece,
             EventType.Turnover => BallState.Turnover,
+            EventType.Clearance => BallState.SetPiece,
+            EventType.ThrowIn => BallState.BuildUp,
             EventType.BadPass or EventType.Miscontrol or EventType.Tackle or EventType.Interception or EventType.Pressure or EventType.BlockedPass => BallState.Turnover,
             EventType.DefensiveStop => BallState.Defending,
             _ => BallState.BuildUp
@@ -1053,7 +1250,10 @@ public class MatchEngine
         switch (matchEvent.EventType)
         {
             case EventType.Turnover:
+            case EventType.Clearance:
+            case EventType.ThrowIn:
             case EventType.Attack:
+            case EventType.AttackProgression:
             case EventType.ChanceCreated:
             case EventType.Shot:
             case EventType.Miss:
@@ -1191,21 +1391,34 @@ public class MatchEngine
         simulationState.Match.SuperSubBoosts = simulationState.SuperSubBoosts.ToDictionary(
             entry => entry.Key,
             entry => entry.Value);
-        simulationState.Match.Events = simulationState.MatchLog.GetEvents()
-            .Select((matchEvent, index) => ApplyDisplayMinute(
+        var finalizedEvents = simulationState.MatchLog.GetEvents().ToList();
+        var previousDisplayMinute = 0;
+        for (var index = 0; index < finalizedEvents.Count; index++)
+        {
+            var matchEvent = finalizedEvents[index];
+            var isExtraTimeEvent = simulationState.Match.ExtraTimeEventStartIndex is int extraTimeStartIndex &&
+                index >= extraTimeStartIndex;
+            previousDisplayMinute = ApplyDisplayMinute(
                 simulationState.Match,
                 matchEvent,
-                simulationState.Match.ExtraTimeEventStartIndex is int extraTimeStartIndex &&
-                    index >= extraTimeStartIndex))
-            .ToList();
+                isExtraTimeEvent,
+                previousDisplayMinute);
+        }
+        simulationState.Match.Events = finalizedEvents;
         UpdateFinalPlayerFatigue(simulationState.Match);
         NormalizePlayerRatings(simulationState.Match);
     }
 
-    private static MatchEvent ApplyDisplayMinute(Match match, MatchEvent matchEvent, bool isExtraTimeEvent)
+    private static int ApplyDisplayMinute(
+        Match match,
+        MatchEvent matchEvent,
+        bool isExtraTimeEvent,
+        int previousDisplayMinute)
     {
-        matchEvent.DisplayMinuteText = FormatDisplayMinute(match, matchEvent.Minute, isExtraTimeEvent);
-        return matchEvent;
+        var proposedDisplayMinute = matchEvent.Minute;
+        var displayMinute = Math.Max(previousDisplayMinute, proposedDisplayMinute);
+        matchEvent.DisplayMinuteText = FormatDisplayMinute(match, displayMinute, isExtraTimeEvent);
+        return displayMinute;
     }
 
     public static string FormatDisplayMinute(Match match, int minute, bool isExtraTimeEvent = false)
@@ -1670,12 +1883,157 @@ public class MatchEngine
         var defendingStats = GetTeamStats(match, defendingTeam);
         var attackOutcome = DetermineAttackOutcome(attackingTeam, defendingTeam, attackingTeamStrength, defendingTeamStrength, random);
         var isResolvingPreviousAttack = HasUnresolvedAttack(simulationState, attackingTeam);
+        var attackChainAdded = false;
+        var currentBallCarrier = shooter;
+        string? forcedChanceType = null;
+        Player? decisiveCreator = null;
+        Player? decisiveReceiver = null;
         var isResolvingTurnover = simulationState.LastFeedEventType == EventType.Turnover;
         var isRestartingAfterOffside = simulationState.LastFeedEventType == EventType.Offside;
-
+        var narrative = GetOrCreateAttackNarrative(
+            simulationState,
+            attackingTeam,
+            defendingTeam,
+            playmaker,
+            shooter,
+            minute,
+            isResolvingTurnover,
+            isRestartingAfterOffside,
+            random);
         if (isResolvingTurnover || isRestartingAfterOffside)
         {
             attackOutcome = AttackFlowOutcome.BuildUp;
+        }
+        if (isResolvingPreviousAttack)
+        {
+            playmaker = FindActivePlayerByName(attackingTeam, narrative.PlaymakerName) ?? playmaker;
+            shooter = FindActivePlayerByName(attackingTeam, narrative.TargetName) ?? shooter;
+            currentBallCarrier = FindActivePlayerByName(attackingTeam, simulationState.AttackBallCarrierName) ?? playmaker;
+        }
+
+        if (isResolvingPreviousAttack && simulationState.AttackNarrativeStage == 1)
+        {
+            var firstReceiver = ResolveDistinctAttackTeammate(attackingTeam, playmaker, shooter, random);
+            var progressionEvent = eventFactory.CreateAttackProgression(
+                minute,
+                attackingTeam,
+                playmaker,
+                firstReceiver,
+                narrative,
+                random);
+            progressionEvent.AttackSequenceStep = 2;
+            matchLog.AddEvent(progressionEvent);
+            simulationState.AttackBallCarrierName = firstReceiver.Name;
+            simulationState.AttackNarrativeStage = 2;
+            simulationState.AttackLastAction = progressionEvent.AttackAction;
+            if (IsAttackChainInterrupted(defendingTeam, random, afterSecondAction: false))
+            {
+                return HandleAttackChainInterruption(
+                    minute,
+                    simulationState,
+                    attackingTeam,
+                    defendingTeam,
+                    firstReceiver,
+                    random);
+            }
+
+            MarkAttackStarted(simulationState, attackingTeam);
+            return attackingTeam;
+        }
+
+        if (isResolvingPreviousAttack &&
+            simulationState.AttackNarrativeStage >= 2 &&
+            !ShouldResolveAttackNarrative(simulationState, attackingTeam, defendingTeam, random))
+        {
+            var carrier = FindActivePlayerByName(attackingTeam, simulationState.AttackBallCarrierName) ?? shooter;
+            var usedPlayers = GetAttackNarrativePlayerNames(simulationState);
+            var supportPlayer = ChooseAttackSupportPlayer(attackingTeam, carrier, playmaker, usedPlayers, random);
+            if (supportPlayer is null)
+            {
+                HandlePossessionLoss(minute, match, attackingTeam, defendingTeam, carrier, carrier, random, matchLog, eventFactory);
+                MarkAttackResolved(simulationState, defendingTeam, BallState.Turnover, EventType.Turnover);
+                return defendingTeam;
+            }
+
+            var continuationEvent = eventFactory.CreateAttackContinuation(
+                minute,
+                attackingTeam,
+                carrier,
+                supportPlayer,
+                narrative,
+                random,
+                simulationState.AttackLastAction);
+            continuationEvent.AttackSequenceStep = simulationState.AttackNarrativeStage + 1;
+            matchLog.AddEvent(continuationEvent);
+            simulationState.AttackBallCarrierName = supportPlayer.Name;
+            simulationState.AttackNarrativeStage++;
+            simulationState.AttackLastAction = continuationEvent.AttackAction;
+            if (IsAttackChainInterrupted(defendingTeam, random, afterSecondAction: true))
+            {
+                return HandleAttackChainInterruption(
+                    minute,
+                    simulationState,
+                    attackingTeam,
+                    defendingTeam,
+                    supportPlayer,
+                    random);
+            }
+
+            MarkAttackStarted(simulationState, attackingTeam);
+            return attackingTeam;
+        }
+
+        if (isResolvingPreviousAttack && simulationState.AttackNarrativeStage >= 3)
+        {
+            decisiveCreator = FindActivePlayerByName(attackingTeam, simulationState.AttackBallCarrierName) ?? shooter;
+            (forcedChanceType, decisiveReceiver) = ChooseDecisiveChance(attackingTeam, decisiveCreator, random);
+            var decisiveEvent = eventFactory.CreateDecisiveAttackAction(
+                minute,
+                attackingTeam,
+                decisiveCreator,
+                decisiveReceiver,
+                forcedChanceType,
+                narrative,
+                random);
+            if (string.Equals(decisiveEvent.AttackAction, simulationState.AttackLastAction, StringComparison.OrdinalIgnoreCase))
+            {
+                decisiveEvent.AttackAction = "FinalPass";
+            }
+            decisiveEvent.AttackSequenceStep = simulationState.AttackNarrativeStage + 1;
+            matchLog.AddEvent(decisiveEvent);
+            simulationState.AttackNarrativeStage++;
+            simulationState.AttackBallCarrierName = decisiveReceiver.Name;
+            simulationState.AttackLastAction = decisiveEvent.AttackAction;
+            currentBallCarrier = decisiveReceiver;
+        }
+
+        if (isResolvingPreviousAttack)
+        {
+            currentBallCarrier = FindActivePlayerByName(attackingTeam, simulationState.AttackBallCarrierName) ?? shooter;
+            attackOutcome = forcedChanceType is not null || random.NextDouble() < 0.48
+                ? AttackFlowOutcome.CreateChance
+                : AttackFlowOutcome.LosePossession;
+        }
+        else if (attackOutcome != AttackFlowOutcome.ForcedReset)
+        {
+            var buildUpEvent = isRestartingAfterOffside
+                ? eventFactory.CreateOffsideRestart(minute, attackingTeam, random, narrative)
+                : eventFactory.CreateAttackBuildUp(
+                    minute,
+                    attackingTeam,
+                    playmaker,
+                    shooter,
+                    random,
+                    GetTriggeredBuildUpTrait(match, attackingTeam, playmaker, minute, random),
+                    narrative);
+            buildUpEvent.AttackSequenceStep = 1;
+            matchLog.AddEvent(buildUpEvent);
+            simulationState.AttackNarrativeStage = 1;
+            simulationState.AttackBallCarrierName = playmaker.Name;
+            simulationState.AttackLastAction = string.Empty;
+            MarkAttackStarted(simulationState, attackingTeam);
+            GetOrCreatePerformance(match, attackingTeam, playmaker).Rating += 0.04;
+            return attackingTeam;
         }
 
         if (attackOutcome == AttackFlowOutcome.BuildUp)
@@ -1689,24 +2047,34 @@ public class MatchEngine
             else
             {
                 var buildUpEvent = isRestartingAfterOffside
-                    ? eventFactory.CreateOffsideRestart(minute, attackingTeam, random)
+                    ? eventFactory.CreateOffsideRestart(minute, attackingTeam, random, narrative)
                     : eventFactory.CreateAttackBuildUp(
                         minute,
                         attackingTeam,
                         playmaker,
                         shooter,
                         random,
-                        GetTriggeredBuildUpTrait(match, attackingTeam, playmaker, minute, random));
+                        GetTriggeredBuildUpTrait(match, attackingTeam, playmaker, minute, random),
+                        narrative);
                 matchLog.AddEvent(buildUpEvent);
+                if (!AddAttackProgressionEvents(minute, attackingTeam, defendingTeam, playmaker, shooter, narrative, random, matchLog, eventFactory, out currentBallCarrier))
+                {
+                    HandlePossessionLoss(minute, match, attackingTeam, defendingTeam, currentBallCarrier, currentBallCarrier, random, matchLog, eventFactory);
+                    MarkAttackResolved(simulationState, defendingTeam, BallState.Turnover, EventType.Turnover);
+                    return defendingTeam;
+                }
                 MarkAttackStarted(simulationState, attackingTeam);
+                attackChainAdded = true;
                 GetOrCreatePerformance(match, attackingTeam, playmaker).Rating += 0.04;
-                return attackingTeam;
+                attackOutcome = random.NextDouble() < 0.48
+                    ? AttackFlowOutcome.CreateChance
+                    : AttackFlowOutcome.LosePossession;
             }
         }
 
         if (attackOutcome == AttackFlowOutcome.LosePossession)
         {
-            if (!isResolvingPreviousAttack)
+            if (!isResolvingPreviousAttack && !attackChainAdded)
             {
                 matchLog.AddEvent(eventFactory.CreateAttackBuildUp(
                     minute,
@@ -1714,12 +2082,14 @@ public class MatchEngine
                     playmaker,
                     shooter,
                     random,
-                    GetTriggeredBuildUpTrait(match, attackingTeam, playmaker, minute, random)));
+                    GetTriggeredBuildUpTrait(match, attackingTeam, playmaker, minute, random),
+                    narrative));
+                AddAttackProgressionEvents(minute, attackingTeam, defendingTeam, playmaker, shooter, narrative, random, matchLog, eventFactory, out currentBallCarrier, allowInterruption: false);
                 MarkAttackStarted(simulationState, attackingTeam);
                 GetOrCreatePerformance(match, attackingTeam, playmaker).Rating += 0.04;
             }
 
-            HandlePossessionLoss(minute, match, attackingTeam, defendingTeam, playmaker, shooter, random, matchLog, eventFactory);
+            HandlePossessionLoss(minute, match, attackingTeam, defendingTeam, currentBallCarrier, currentBallCarrier, random, matchLog, eventFactory);
             MarkAttackResolved(simulationState, defendingTeam, BallState.Turnover, EventType.Turnover);
             return defendingTeam;
         }
@@ -1732,12 +2102,25 @@ public class MatchEngine
             return attackingTeam;
         }
 
-        var chanceType = ChooseChanceType(attackingTeam, defendingTeam, match.WeatherCondition, playmaker, shooter, random);
+        var chanceType = forcedChanceType ?? ChooseChanceType(attackingTeam, defendingTeam, match.WeatherCondition, playmaker, shooter, random);
         var attackSequence = CreateOpenPlayAttackSequence(attackingTeam, playmaker, shooter, chanceType, random);
         playmaker = attackSequence.CreatorPlayer;
         shooter = attackSequence.ShooterPlayer;
+        if (forcedChanceType is not null && decisiveCreator is not null && decisiveReceiver is not null)
+        {
+            playmaker = decisiveCreator;
+            shooter = decisiveReceiver;
+        }
+        else if (attackChainAdded || isResolvingPreviousAttack)
+        {
+            playmaker = currentBallCarrier;
+            if (chanceType is "dribble run" or "long-range attempt")
+            {
+                shooter = currentBallCarrier;
+            }
+        }
         var shooterHasSuperSubBoost = IsSuperSubBoostActive(simulationState, shooter, minute);
-        if (!isResolvingPreviousAttack)
+        if (!isResolvingPreviousAttack && !attackChainAdded)
         {
             matchLog.AddEvent(eventFactory.CreateAttackBuildUp(
                 minute,
@@ -1745,7 +2128,14 @@ public class MatchEngine
                 playmaker,
                 shooter,
                 random,
-                GetTriggeredBuildUpTrait(match, attackingTeam, playmaker, minute, random)));
+                GetTriggeredBuildUpTrait(match, attackingTeam, playmaker, minute, random),
+                narrative));
+            if (!AddAttackProgressionEvents(minute, attackingTeam, defendingTeam, playmaker, shooter, narrative, random, matchLog, eventFactory, out currentBallCarrier))
+            {
+                HandlePossessionLoss(minute, match, attackingTeam, defendingTeam, currentBallCarrier, currentBallCarrier, random, matchLog, eventFactory);
+                MarkAttackResolved(simulationState, defendingTeam, BallState.Turnover, EventType.Turnover);
+                return defendingTeam;
+            }
             MarkAttackStarted(simulationState, attackingTeam);
         }
 
@@ -1844,7 +2234,7 @@ public class MatchEngine
         openPlayTurnoverRisk *= HomeAwayAdvantageService.GetModifier(match, attackingTeam).TurnoverRiskModifier;
         if (random.NextDouble() < Math.Clamp(openPlayTurnoverRisk, 0.035, GetOpenPlayTurnoverRiskCap(attackingTeam, defendingTeam)))
         {
-            HandlePossessionLoss(minute, match, attackingTeam, defendingTeam, playmaker, shooter, random, matchLog, eventFactory);
+            HandlePossessionLoss(minute, match, attackingTeam, defendingTeam, currentBallCarrier, currentBallCarrier, random, matchLog, eventFactory);
             MarkAttackResolved(simulationState, defendingTeam, BallState.Turnover, EventType.Turnover);
             return defendingTeam;
         }
@@ -1859,14 +2249,17 @@ public class MatchEngine
             shooter,
             chanceType,
             random,
-            triggeredChanceTrait));
+            triggeredChanceTrait,
+            narrative));
         matchLog.AddEvent(eventFactory.CreateShot(
             minute,
             attackingTeam,
             shooter,
             chanceCreator,
             chanceType,
-            random));
+            random,
+            GetTriggeredShotActionTrait(shooter, chanceType),
+            narrative: narrative));
         var shotPossessionTeam = HandleShotOutcome(
             minute,
             simulationState,
@@ -1887,6 +2280,279 @@ public class MatchEngine
         var shotFinalEventType = GetLastEventType(matchLog, EventType.Shot);
         MarkAttackResolved(simulationState, shotPossessionTeam, GetBallStateAfterEvent(shotFinalEventType), shotFinalEventType);
         return shotPossessionTeam;
+    }
+
+    private static bool AddAttackProgressionEvents(
+        int minute,
+        Team attackingTeam,
+        Team defendingTeam,
+        Player playmaker,
+        Player target,
+        AttackNarrativeContext narrative,
+        Random random,
+        MatchLogService matchLog,
+        MatchEventFactory eventFactory,
+        out Player finalBallCarrier,
+        bool allowInterruption = true)
+    {
+        finalBallCarrier = playmaker;
+        var originalTargetMatchesPlaymaker = string.Equals(
+            playmaker.Name,
+            target.Name,
+            StringComparison.OrdinalIgnoreCase);
+        var effectiveTarget = target;
+        if (originalTargetMatchesPlaymaker)
+        {
+            effectiveTarget = GetActivePitchPlayers(attackingTeam)
+                .Where(player =>
+                    player.Position != Position.Goalkeeper &&
+                    !string.Equals(player.Name, playmaker.Name, StringComparison.OrdinalIgnoreCase))
+                .OrderByDescending(player =>
+                    (player.Position == Position.Midfielder ? 20 : 0) +
+                    player.Passing * 0.20 +
+                    random.NextDouble())
+                .FirstOrDefault() ?? target;
+        }
+
+        matchLog.AddEvent(eventFactory.CreateAttackProgression(
+            minute,
+            attackingTeam,
+            playmaker,
+            effectiveTarget,
+            narrative,
+            random));
+        finalBallCarrier = effectiveTarget;
+
+        if (allowInterruption && IsAttackChainInterrupted(defendingTeam, random, afterSecondAction: false))
+        {
+            return false;
+        }
+
+        var supportPlayer = originalTargetMatchesPlaymaker
+            ? playmaker
+            : GetActivePitchPlayers(attackingTeam)
+                .Where(player =>
+                    player.Position != Position.Goalkeeper &&
+                    !string.Equals(player.Name, playmaker.Name, StringComparison.OrdinalIgnoreCase) &&
+                    !string.Equals(player.Name, effectiveTarget.Name, StringComparison.OrdinalIgnoreCase))
+                .OrderByDescending(player =>
+                    (player.Traits.Contains(PlayerTrait.TeamPlayer) ? 35 : 0) +
+                    (player.Traits.Contains(PlayerTrait.Playmaker) ? 28 : 0) +
+                    (player.Position == Position.Midfielder ? 20 : 0) +
+                    player.Passing * 0.20 +
+                    random.NextDouble())
+                .FirstOrDefault();
+        if (supportPlayer is null)
+        {
+            return false;
+        }
+
+        matchLog.AddEvent(eventFactory.CreateAttackContinuation(
+            minute,
+            attackingTeam,
+            effectiveTarget,
+            supportPlayer,
+            narrative,
+            random));
+        finalBallCarrier = supportPlayer;
+
+        return !allowInterruption || !IsAttackChainInterrupted(defendingTeam, random, afterSecondAction: true);
+    }
+
+    private static Player ResolveDistinctAttackTeammate(
+        Team attackingTeam,
+        Player playmaker,
+        Player preferredTarget,
+        Random random)
+    {
+        if (!string.Equals(playmaker.Name, preferredTarget.Name, StringComparison.OrdinalIgnoreCase))
+        {
+            return preferredTarget;
+        }
+
+        return GetActivePitchPlayers(attackingTeam)
+            .Where(player =>
+                player.Position != Position.Goalkeeper &&
+                !string.Equals(player.Name, playmaker.Name, StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(player =>
+                (player.Position == Position.Midfielder ? 20 : 0) +
+                player.Passing * 0.20 +
+                random.NextDouble())
+            .FirstOrDefault() ?? preferredTarget;
+    }
+
+    private static Player? ChooseAttackSupportPlayer(
+        Team attackingTeam,
+        Player ballCarrier,
+        Player openingPlaymaker,
+        IReadOnlySet<string> usedPlayers,
+        Random random)
+    {
+        var unusedTeammate = GetActivePitchPlayers(attackingTeam)
+            .Where(player =>
+                player.Position != Position.Goalkeeper &&
+                !string.Equals(player.Name, ballCarrier.Name, StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(player.Name, openingPlaymaker.Name, StringComparison.OrdinalIgnoreCase) &&
+                !usedPlayers.Contains(player.Name))
+            .OrderByDescending(player =>
+                (player.Traits.Contains(PlayerTrait.TeamPlayer) ? 35 : 0) +
+                (player.Traits.Contains(PlayerTrait.Playmaker) ? 28 : 0) +
+                (player.Position == Position.Midfielder ? 20 : 0) +
+                player.Passing * 0.20 +
+                random.NextDouble())
+            .FirstOrDefault();
+        if (unusedTeammate is not null)
+        {
+            return unusedTeammate;
+        }
+
+        return GetActivePitchPlayers(attackingTeam)
+            .Where(player =>
+                player.Position != Position.Goalkeeper &&
+                !string.Equals(player.Name, ballCarrier.Name, StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(player.Name, openingPlaymaker.Name, StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(player => player.Passing + random.NextDouble() * 10)
+            .FirstOrDefault();
+    }
+
+    private static HashSet<string> GetAttackNarrativePlayerNames(MatchSimulationState simulationState)
+    {
+        var narrativeId = simulationState.ActiveAttackNarrative?.Id;
+        if (string.IsNullOrWhiteSpace(narrativeId))
+        {
+            return new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        }
+
+        return simulationState.MatchLog.GetEvents()
+            .Where(matchEvent => string.Equals(matchEvent.AttackNarrativeId, narrativeId, StringComparison.Ordinal))
+            .SelectMany(matchEvent => new[] { matchEvent.PrimaryPlayerName, matchEvent.SecondaryPlayerName })
+            .Where(playerName => !string.IsNullOrWhiteSpace(playerName))
+            .Select(playerName => playerName!)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+    }
+
+    private static bool IsAttackChainInterrupted(Team defendingTeam, Random random, bool afterSecondAction)
+    {
+        var pressingBonus = Math.Max(0, defendingTeam.Tactics.PressingIntensity - 50) * 0.0015;
+        var interruptionChance = (afterSecondAction ? 0.055 : 0.08) + pressingBonus;
+        return random.NextDouble() < Math.Clamp(interruptionChance, 0.04, afterSecondAction ? 0.14 : 0.18);
+    }
+
+    private static bool ShouldResolveAttackNarrative(
+        MatchSimulationState simulationState,
+        Team attackingTeam,
+        Team defendingTeam,
+        Random random)
+    {
+        var feedCount = simulationState.AttackNarrativeStage;
+        if (feedCount < 3)
+        {
+            return false;
+        }
+
+        if (feedCount >= 7)
+        {
+            return true;
+        }
+
+        var mentalityControl = attackingTeam.Tactics.Mentality switch
+        {
+            Mentality.AllOutAttack => 75,
+            Mentality.Attacking => 65,
+            Mentality.Defensive => 40,
+            Mentality.UltraDefensive => 30,
+            _ => 50
+        };
+        var attackingControl = (attackingTeam.Tactics.Tempo + mentalityControl) / 2.0;
+        var defensivePressure = defendingTeam.Tactics.PressingIntensity;
+        var resolutionChance = 0.25 +
+            (feedCount - 3) * 0.14 +
+            (attackingControl - 50) * 0.002 +
+            (defensivePressure - 50) * 0.001;
+        return random.NextDouble() < Math.Clamp(resolutionChance, 0.18, 0.88);
+    }
+
+    private static (string ChanceType, Player Receiver) ChooseDecisiveChance(
+        Team attackingTeam,
+        Player creator,
+        Random random)
+    {
+        var activeOutfieldPlayers = GetActivePitchPlayers(attackingTeam)
+            .Where(player => player.Position != Position.Goalkeeper)
+            .ToList();
+        var preferredPosition = creator.PreferredPosition?.ToUpperInvariant() ?? string.Empty;
+        var isWideCreator = preferredPosition is "LW" or "RW" or "LM" or "RM" or "LWB" or "RWB" or "LB" or "RB";
+        var forwardRunner = activeOutfieldPlayers
+            .Where(player => !string.Equals(player.Name, creator.Name, StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(player =>
+                (player.Position == Position.Forward ? 35 : 0) +
+                (player.Traits.Contains(PlayerTrait.TriesToBeatOffsideTrap) ? 25 : 0) +
+                (player.Traits.Contains(PlayerTrait.Rapid) ? 20 : 0) +
+                player.Pace * 0.25 +
+                player.Shooting * 0.20 +
+                random.NextDouble())
+            .FirstOrDefault() ?? creator;
+
+        if (isWideCreator || creator.Traits.Contains(PlayerTrait.EarlyCrosser))
+        {
+            return ("cross into box", forwardRunner);
+        }
+
+        if (creator.Traits.Contains(PlayerTrait.Playmaker) || creator.Traits.Contains(PlayerTrait.LongPasser))
+        {
+            return ("through ball attempt", forwardRunner);
+        }
+
+        if (forwardRunner.Traits.Contains(PlayerTrait.TriesToBeatOffsideTrap) ||
+            forwardRunner.Traits.Contains(PlayerTrait.Rapid) && random.NextDouble() < 0.55)
+        {
+            return ("one-on-one", forwardRunner);
+        }
+
+        if (creator.Traits.Any(trait => trait is PlayerTrait.TechnicalDribbler or PlayerTrait.SpeedDribbler or PlayerTrait.Flair))
+        {
+            return ("dribble run", creator);
+        }
+
+        return ("quick combination", forwardRunner);
+    }
+
+    private Team HandleAttackChainInterruption(
+        int minute,
+        MatchSimulationState simulationState,
+        Team attackingTeam,
+        Team defendingTeam,
+        Player attacker,
+        Random random)
+    {
+        var match = simulationState.Match;
+        var matchLog = simulationState.MatchLog;
+        var eventFactory = simulationState.EventFactory;
+        if (random.NextDouble() < 0.28)
+        {
+            var defender = ChooseDefendingPlayer(defendingTeam, random);
+            GetOrCreatePerformance(match, defendingTeam, defender).Clearances++;
+            matchLog.AddEvent(eventFactory.CreateClearanceToTouch(minute, defendingTeam, defender, attacker, random));
+
+            var thrower = GetActivePitchPlayers(attackingTeam)
+                .Where(player => player.Position != Position.Goalkeeper)
+                .OrderByDescending(player =>
+                    (player.Traits.Contains(PlayerTrait.LongThrower) ? 50 : 0) +
+                    (player.PreferredPosition is "LB" or "RB" or "LWB" or "RWB" ? 25 : 0) +
+                    random.NextDouble())
+                .FirstOrDefault() ?? attacker;
+            var receiver = GetActivePitchPlayers(attackingTeam)
+                .Where(player => !string.Equals(player.Name, thrower.Name, StringComparison.OrdinalIgnoreCase))
+                .OrderByDescending(player => player.Dribbling + player.Passing * 0.25 + random.NextDouble())
+                .FirstOrDefault() ?? attacker;
+            matchLog.AddEvent(eventFactory.CreateThrowIn(minute, attackingTeam, thrower, receiver, random));
+            MarkAttackResolved(simulationState, attackingTeam, BallState.BuildUp, EventType.ThrowIn);
+            return attackingTeam;
+        }
+
+        HandlePossessionLoss(minute, match, attackingTeam, defendingTeam, attacker, attacker, random, matchLog, eventFactory);
+        MarkAttackResolved(simulationState, defendingTeam, BallState.Turnover, EventType.Turnover);
+        return defendingTeam;
     }
 
     private void HandlePossessionLoss(
@@ -3892,6 +4558,26 @@ public class MatchEngine
         }
 
         return null;
+    }
+
+    private static PlayerTrait? GetTriggeredShotActionTrait(Player shooter, string chanceType)
+    {
+        if (chanceType == "long-range attempt")
+        {
+            if (shooter.Traits.Contains(PlayerTrait.LongShotTaker)) return PlayerTrait.LongShotTaker;
+            if (shooter.Traits.Contains(PlayerTrait.FinesseShot)) return PlayerTrait.FinesseShot;
+            if (shooter.Traits.Contains(PlayerTrait.OutsideFootShot)) return PlayerTrait.OutsideFootShot;
+        }
+
+        if (chanceType == "cross into box")
+        {
+            if (shooter.Traits.Contains(PlayerTrait.PowerHeader)) return PlayerTrait.PowerHeader;
+            if (shooter.Traits.Contains(PlayerTrait.AerialThreat)) return PlayerTrait.AerialThreat;
+        }
+
+        return shooter.Traits.Contains(PlayerTrait.ClinicalFinisher)
+            ? PlayerTrait.ClinicalFinisher
+            : null;
     }
 
     private static Player ResolveChanceCreator(Player playmaker, Player shooter, string chanceType)
@@ -6131,6 +6817,12 @@ public class MatchEngine
         public EventType? LastFeedEventType { get; set; }
         public string? LastAttackingTeamName { get; set; }
         public string? LastActingTeamName { get; set; }
+        public AttackNarrativeContext? ActiveAttackNarrative { get; set; }
+        public int AttackNarrativeStage { get; set; }
+        public string AttackLastAction { get; set; } = string.Empty;
+        public string AttackBallCarrierName { get; set; } = string.Empty;
+        public int AttackNarrativeSequence { get; set; }
+        public Dictionary<string, string> LastAttackRouteByTeam { get; } = new(StringComparer.OrdinalIgnoreCase);
         public int TensionUntilMinute { get; set; }
         public int LastConfrontationMinute { get; set; } = -100;
         public int ConfrontationCount { get; set; }

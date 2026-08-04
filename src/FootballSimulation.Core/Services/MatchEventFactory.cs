@@ -33,14 +33,17 @@ public class MatchEventFactory
         Player playmaker,
         Player target,
         Random random,
-        PlayerTrait? triggeredTrait = null)
+        PlayerTrait? triggeredTrait = null,
+        AttackNarrativeContext? narrative = null)
     {
         var safeTarget = ResolveDistinctTeammate(attackingTeam, playmaker, target, random);
         var playmakerName = GetDisplayName(playmaker.Name);
         var tacticalDescription = triggeredTrait is null
             ? CreateTacticalBuildUpDescription(attackingTeam, playmaker, safeTarget, random)
             : null;
-        var description = triggeredTrait is not null
+        var description = narrative is not null
+            ? CreateNarrativeBuildUpDescription(attackingTeam, playmaker, safeTarget, narrative, random)
+            : triggeredTrait is not null
             ? CreateTraitBuildUpDescription(attackingTeam, playmaker, safeTarget, triggeredTrait.Value, random)
             : tacticalDescription ?? (safeTarget is null
             ? Pick(random,
@@ -52,7 +55,10 @@ public class MatchEventFactory
                 $"{attackingTeam.Name} keep it moving and {playmakerName} links with {GetDisplayName(safeTarget.Name)}.",
                 $"{attackingTeam.Name} combine neatly, with {playmakerName} releasing {GetDisplayName(safeTarget.Name)}."));
 
-        return CreateEvent(minute, EventType.Attack, description, playmaker.Name, safeTarget?.Name, triggeredTrait: triggeredTrait);
+        var matchEvent = CreateEvent(minute, EventType.Attack, description, playmaker.Name, safeTarget?.Name, triggeredTrait: triggeredTrait);
+        ApplyAttackNarrative(matchEvent, narrative);
+        matchEvent.AttackSequenceStep = narrative is null ? 0 : 1;
+        return matchEvent;
     }
 
     public MatchEvent CreateAttackReset(int minute, Team attackingTeam, Team defendingTeam, Player defender, Random random)
@@ -66,6 +72,163 @@ public class MatchEventFactory
         return CreateEvent(minute, EventType.DefensiveStop, description, defender.Name);
     }
 
+    public MatchEvent CreateAttackProgression(
+        int minute,
+        Team attackingTeam,
+        Player playmaker,
+        Player target,
+        AttackNarrativeContext narrative,
+        Random random)
+    {
+        var safeTarget = ResolveDistinctTeammate(attackingTeam, playmaker, target, random);
+        var description = CreateNarrativeProgressionDescription(attackingTeam, playmaker, safeTarget, narrative);
+        var matchEvent = CreateEvent(
+            minute,
+            EventType.AttackProgression,
+            description,
+            playmaker.Name,
+            safeTarget?.Name);
+        matchEvent.AttackAction = GetOpeningAttackAction(playmaker, safeTarget, narrative);
+        matchEvent.AttackSequenceStep = 2;
+        matchEvent.TriggeredTrait = GetAttackActionTrait(playmaker, matchEvent.AttackAction);
+        ApplyAttackNarrative(matchEvent, narrative);
+        return matchEvent;
+    }
+
+    public MatchEvent CreateAttackContinuation(
+        int minute,
+        Team attackingTeam,
+        Player ballCarrier,
+        Player supportPlayer,
+        AttackNarrativeContext narrative,
+        Random random,
+        string previousAction = "")
+    {
+        var carrierName = GetDisplayName(ballCarrier.Name);
+        var supportName = GetDisplayName(supportPlayer.Name);
+        var carrierIsDribbler = ballCarrier.Traits.Any(trait =>
+            trait is PlayerTrait.TechnicalDribbler or PlayerTrait.SpeedDribbler or PlayerTrait.Rapid or PlayerTrait.Flair);
+        var (description, action) = narrative.Route switch
+        {
+            "left flank" or "right flank" when carrierIsDribbler => (Pick(random,
+                $"{carrierName} dribbles past the first challenge, cuts inside, and exchanges a quick pass with {supportName}.",
+                $"{carrierName} keeps the ball close, beats a marker, then lays it off to {supportName} before continuing the run."), "Combination"),
+            "left flank" or "right flank" => (Pick(random,
+                $"{carrierName} controls on the flank, carries forward, and plays a short pass into {supportName}.",
+                $"{carrierName} advances down the line before finding {supportName} inside with a firm pass."), "Carry"),
+            "overlap" => (Pick(random,
+                $"{carrierName} reaches the overlap and cuts the ball back toward {supportName}.",
+                $"{carrierName} races beyond the fullback, receives the return pass, and looks up for {supportName}."), "Cutback"),
+            "switch of play" => (Pick(random,
+                $"{carrierName} cushions the dropping ball, draws a defender, and rolls it inside to {supportName}.",
+                $"{carrierName} brings the ball under control before combining with {supportName} near the box."), "Control"),
+            "counterattack" => (Pick(random,
+                $"{carrierName} carries the ball at speed, pulls a defender across, and slips it to {supportName}.",
+                $"{carrierName} drives through midfield and completes a fast one-two with {supportName}."), "Carry"),
+            "direct ball" => (Pick(random,
+                $"{carrierName} shields the dropping ball under pressure and lays it back to the advancing {supportName}.",
+                $"{carrierName} holds off a defender, brings the ball down, and finds {supportName} in support."), "HoldUp"),
+            _ when carrierIsDribbler => (Pick(random,
+                $"{carrierName} turns between the lines, dribbles beyond a midfielder, and combines with {supportName}.",
+                $"{carrierName} receives on the half-turn, beats the nearest player, and gives it to {supportName}."), "Dribble"),
+            _ => (Pick(random,
+                $"{carrierName} receives between the lines and completes a quick one-two with {supportName}.",
+                $"{carrierName} turns with the ball, draws pressure, and passes into {supportName}'s path."), "Combination")
+        };
+
+        if (string.Equals(action, previousAction, StringComparison.OrdinalIgnoreCase))
+        {
+            action = action is "Combination" or "ForwardPass" ? "Carry" : "Combination";
+        }
+
+        var matchEvent = CreateEvent(
+            minute,
+            EventType.AttackProgression,
+            description,
+            ballCarrier.Name,
+            supportPlayer.Name);
+        matchEvent.AttackAction = action;
+        matchEvent.AttackSequenceStep = 3;
+        matchEvent.TriggeredTrait = GetAttackActionTrait(ballCarrier, action);
+        matchEvent.Description = CreateTraitContinuationDescription(
+            ballCarrier,
+            supportPlayer,
+            action,
+            matchEvent.TriggeredTrait) ?? description;
+        ApplyAttackNarrative(matchEvent, narrative);
+        return matchEvent;
+    }
+
+    private static string GetOpeningAttackAction(Player playmaker, Player? target, AttackNarrativeContext narrative)
+    {
+        return narrative.Route switch
+        {
+            "switch of play" => "Switch",
+            "direct ball" => playmaker.Traits.Contains(PlayerTrait.LongPasser) ? "LongPass" : "ForwardPass",
+            "overlap" => "Overlap",
+            "counterattack" => "Counter",
+            "left flank" or "right flank" => "ForwardPass",
+            _ => "ForwardPass"
+        };
+    }
+
+    private static PlayerTrait? GetAttackActionTrait(Player player, string action)
+    {
+        if (action is "LongPass" or "Switch" && player.Traits.Contains(PlayerTrait.LongPasser))
+        {
+            return PlayerTrait.LongPasser;
+        }
+
+        if (action is "Dribble" or "Carry" or "Counter")
+        {
+            if (player.Traits.Contains(PlayerTrait.TechnicalDribbler)) return PlayerTrait.TechnicalDribbler;
+            if (player.Traits.Contains(PlayerTrait.SpeedDribbler)) return PlayerTrait.SpeedDribbler;
+            if (player.Traits.Contains(PlayerTrait.Rapid)) return PlayerTrait.Rapid;
+            if (player.Traits.Contains(PlayerTrait.Flair)) return PlayerTrait.Flair;
+            if (player.Traits.Contains(PlayerTrait.BoxToBox)) return PlayerTrait.BoxToBox;
+        }
+
+        if (action == "HoldUp" && player.Traits.Contains(PlayerTrait.AerialThreat))
+        {
+            return PlayerTrait.AerialThreat;
+        }
+
+        if (action is "Combination" or "Cutback" or "ForwardPass" or "Overlap")
+        {
+            if (player.Traits.Contains(PlayerTrait.Playmaker)) return PlayerTrait.Playmaker;
+            if (player.Traits.Contains(PlayerTrait.TeamPlayer)) return PlayerTrait.TeamPlayer;
+            if (player.Traits.Contains(PlayerTrait.EarlyCrosser) && action is "Cutback" or "Overlap") return PlayerTrait.EarlyCrosser;
+            if (player.Traits.Contains(PlayerTrait.PressResistant)) return PlayerTrait.PressResistant;
+        }
+
+        return null;
+    }
+
+    private static string? CreateTraitContinuationDescription(
+        Player ballCarrier,
+        Player supportPlayer,
+        string action,
+        PlayerTrait? trait)
+    {
+        var carrierName = GetDisplayName(ballCarrier.Name);
+        var supportName = GetDisplayName(supportPlayer.Name);
+        return trait switch
+        {
+            PlayerTrait.TechnicalDribbler => $"{carrierName} uses tight control to glide past the nearest challenge before finding {supportName}.",
+            PlayerTrait.SpeedDribbler => $"{carrierName} accelerates with the ball, beats the defender at speed, and releases {supportName}.",
+            PlayerTrait.Rapid => $"{carrierName} bursts into open space before slipping the ball toward {supportName}.",
+            PlayerTrait.Flair => $"{carrierName} escapes pressure with a clever touch and combines inventively with {supportName}.",
+            PlayerTrait.BoxToBox => $"{carrierName} powers forward from midfield and feeds {supportName} ahead of the defense.",
+            PlayerTrait.Playmaker when action == "Combination" => $"{carrierName} draws the pressure, reads {supportName}'s movement, and completes a sharp one-two.",
+            PlayerTrait.Playmaker => $"{carrierName} spots the passing lane early and releases {supportName} between the lines.",
+            PlayerTrait.TeamPlayer => $"{carrierName} chooses the unselfish pass and keeps moving to support {supportName}.",
+            PlayerTrait.EarlyCrosser => $"{carrierName} delivers early toward {supportName} before the defense can reset.",
+            PlayerTrait.PressResistant => $"{carrierName} resists the press, protects the ball, and finds {supportName} in space.",
+            PlayerTrait.AerialThreat => $"{carrierName} uses strength to bring the direct ball under control and lays it off to {supportName}.",
+            _ => null
+        };
+    }
+
     public MatchEvent CreateDefensiveStop(int minute, Team defendingTeam, Player defender, Player attacker, Random random)
     {
         var description = Pick(random,
@@ -77,6 +240,70 @@ public class MatchEventFactory
             $"Interception cuts out the attack as {defender.Name} steps in for {defendingTeam.Name}.");
 
         return CreateEvent(minute, EventType.DefensiveStop, description, defender.Name, attacker.Name);
+    }
+
+    public MatchEvent CreateClearanceToTouch(int minute, Team defendingTeam, Player defender, Player attacker, Random random)
+    {
+        var defenderName = GetDisplayName(defender.Name);
+        var attackerName = GetDisplayName(attacker.Name);
+        var description = Pick(random,
+            $"{defenderName} gets across {attackerName} and clears firmly into touch for {defendingTeam.Name}.",
+            $"{defenderName} blocks the route forward and hooks the ball out over the sideline.",
+            $"Under pressure from {attackerName}, {defenderName} takes no risk and clears into touch.");
+        return CreateEvent(minute, EventType.Clearance, description, defender.Name, attacker.Name);
+    }
+
+    public MatchEvent CreateThrowIn(int minute, Team attackingTeam, Player thrower, Player receiver, Random random)
+    {
+        var throwerName = GetDisplayName(thrower.Name);
+        var receiverName = GetDisplayName(receiver.Name);
+        var isLongThrow = thrower.Traits.Contains(PlayerTrait.LongThrower);
+        var description = isLongThrow
+            ? Pick(random,
+                $"{throwerName} launches a long throw down the line toward {receiverName} for {attackingTeam.Name}.",
+                $"{throwerName} uses the long throw to send the ball deep into attacking territory for {receiverName}.")
+            : Pick(random,
+                $"{throwerName} takes the throw quickly and finds {receiverName} near the touchline.",
+                $"{throwerName} restarts from the sideline, throwing into {receiverName}'s feet.");
+        return CreateEvent(
+            minute,
+            EventType.ThrowIn,
+            description,
+            thrower.Name,
+            receiver.Name,
+            triggeredTrait: isLongThrow ? PlayerTrait.LongThrower : null);
+    }
+
+    public MatchEvent CreateDecisiveAttackAction(
+        int minute,
+        Team attackingTeam,
+        Player creator,
+        Player receiver,
+        string chanceType,
+        AttackNarrativeContext narrative,
+        Random random)
+    {
+        var creatorName = GetDisplayName(creator.Name);
+        var receiverName = GetDisplayName(receiver.Name);
+        var (action, trait, description) = chanceType switch
+        {
+            "cross into box" => ("Cross", creator.Traits.Contains(PlayerTrait.EarlyCrosser) ? PlayerTrait.EarlyCrosser : (PlayerTrait?)null,
+                creator.Traits.Contains(PlayerTrait.EarlyCrosser)
+                    ? $"{creatorName} crosses early from the wide area before the defense is set, and {receiverName} attacks the delivery."
+                    : $"{creatorName} reaches the wide channel and curls a cross toward {receiverName} in the box."),
+            "through ball attempt" => ("ThroughBall", creator.Traits.Contains(PlayerTrait.Playmaker) ? PlayerTrait.Playmaker : creator.Traits.Contains(PlayerTrait.LongPasser) ? PlayerTrait.LongPasser : (PlayerTrait?)null,
+                $"{creatorName} sees {receiverName}'s run and threads a through ball between the center-backs."),
+            "one-on-one" => ("OneOnOne", receiver.Traits.Contains(PlayerTrait.TriesToBeatOffsideTrap) ? PlayerTrait.TriesToBeatOffsideTrap : receiver.Traits.Contains(PlayerTrait.Rapid) ? PlayerTrait.Rapid : (PlayerTrait?)null,
+                $"{receiverName} bursts beyond the last defender and races through one-on-one with the goalkeeper."),
+            "dribble run" => ("Dribble", receiver.Traits.Contains(PlayerTrait.TechnicalDribbler) ? PlayerTrait.TechnicalDribbler : receiver.Traits.Contains(PlayerTrait.SpeedDribbler) ? PlayerTrait.SpeedDribbler : (PlayerTrait?)null,
+                $"{receiverName} beats the final defender on the dribble and drives directly toward goal."),
+            _ => ("Combination", creator.Traits.Contains(PlayerTrait.Playmaker) ? PlayerTrait.Playmaker : (PlayerTrait?)null,
+                $"{creatorName} exchanges a sharp final pass with {receiverName}, opening a shooting lane inside the box.")
+        };
+        var matchEvent = CreateEvent(minute, EventType.AttackProgression, description, creator.Name, receiver.Name, triggeredTrait: trait);
+        matchEvent.AttackAction = action;
+        ApplyAttackNarrative(matchEvent, narrative);
+        return matchEvent;
     }
 
     public MatchEvent CreateBlockedShot(int minute, Team defendingTeam, Player defender, Player attacker, Random random)
@@ -234,13 +461,16 @@ public class MatchEventFactory
         Player shooter,
         string chanceType,
         Random random,
-        PlayerTrait? triggeredTrait = null)
+        PlayerTrait? triggeredTrait = null,
+        AttackNarrativeContext? narrative = null)
     {
         var creatorName = GetDisplayName(chanceCreator.Name);
         var shooterName = GetDisplayName(shooter.Name);
         var hasSeparateShooter = !string.Equals(chanceCreator.Name, shooter.Name, StringComparison.OrdinalIgnoreCase);
 
-        string description = triggeredTrait is not null
+        string description = narrative is not null
+            ? CreateNarrativeChanceDescription(attackingTeam, chanceCreator, shooter, chanceType, narrative, random)
+            : triggeredTrait is not null
             ? CreateTraitChanceDescription(attackingTeam, chanceCreator, shooter, chanceType, triggeredTrait.Value, random)
             : chanceType switch
         {
@@ -274,7 +504,10 @@ public class MatchEventFactory
                 : $"{creatorName} creates a shooting chance for {attackingTeam.Name}."
         };
 
-        return CreateEvent(minute, EventType.ChanceCreated, description, chanceCreator.Name, hasSeparateShooter ? shooter.Name : null, triggeredTrait: triggeredTrait);
+        var matchEvent = CreateEvent(minute, EventType.ChanceCreated, description, chanceCreator.Name, hasSeparateShooter ? shooter.Name : null, triggeredTrait: triggeredTrait);
+        ApplyAttackNarrative(matchEvent, narrative);
+        matchEvent.AttackSequenceStep = narrative is null ? 0 : 4;
+        return matchEvent;
     }
 
     public MatchEvent CreateShot(
@@ -284,7 +517,8 @@ public class MatchEventFactory
         Player? playmaker,
         string chanceType,
         Random random,
-        PlayerTrait? triggeredTrait = null)
+        PlayerTrait? triggeredTrait = null,
+        AttackNarrativeContext? narrative = null)
     {
         var attackerName = GetDisplayName(attacker.Name);
         var playmakerName = playmaker is null || string.Equals(playmaker.Name, attacker.Name, StringComparison.OrdinalIgnoreCase)
@@ -314,11 +548,12 @@ public class MatchEventFactory
             "long-range attempt" => Pick(random,
                 $"{attackerName} shoots from distance for {attackingTeam.Name}.",
                 $"{attackerName} lets fly from range for {attackingTeam.Name}."),
-            "cross into box" => Pick(random,
-                string.IsNullOrWhiteSpace(playmakerName)
-                    ? $"{attackerName} meets the delivery and gets the shot away for {attackingTeam.Name}."
-                    : $"{attackerName} meets {playmakerName}'s delivery and gets the shot away for {attackingTeam.Name}.",
-                $"{attackerName} meets the delivery for {attackingTeam.Name} inside the area."),
+            "cross into box" => CreateCrossShotDescription(
+                attackingTeam,
+                attacker,
+                attackerName,
+                playmakerName,
+                random),
             "through ball attempt" => !string.IsNullOrWhiteSpace(playmakerName)
                 ? $"{attackerName} runs onto {playmakerName}'s pass and gets the shot away for {attackingTeam.Name}."
                 : $"{attackingTeam.Name} find a lane through the middle and {attackerName} pulls the trigger.",
@@ -330,9 +565,43 @@ public class MatchEventFactory
                 : $"{attackerName} takes a shot for {attackingTeam.Name}."
         };
 
+        description = triggeredTrait switch
+        {
+            PlayerTrait.LongShotTaker => $"{attackerName} sets himself outside the box and unleashes a powerful long-range strike for {attackingTeam.Name}.",
+            PlayerTrait.FinesseShot => $"{attackerName} opens his body and curls a controlled finesse shot toward goal for {attackingTeam.Name}.",
+            PlayerTrait.OutsideFootShot => $"{attackerName} shapes an outside-of-the-boot effort toward goal for {attackingTeam.Name}.",
+            PlayerTrait.PowerHeader => $"{attackerName} attacks the delivery aggressively and powers a header toward goal for {attackingTeam.Name}.",
+            PlayerTrait.AerialThreat => $"{attackerName} rises above the defender and directs the aerial effort toward goal.",
+            PlayerTrait.ClinicalFinisher => $"{attackerName} takes one composed touch and fires decisively at goal for {attackingTeam.Name}.",
+            _ => description
+        };
+
         var matchEvent = CreateEvent(minute, EventType.Shot, description, attacker.Name, GetAssistCandidateName(attacker, playmaker), triggeredTrait: triggeredTrait);
         matchEvent.ShotClassification = ClassifyShot(chanceType, description);
+        ApplyAttackNarrative(matchEvent, narrative);
+        matchEvent.AttackSequenceStep = narrative is null ? 0 : 5;
         return matchEvent;
+    }
+
+    private static string CreateCrossShotDescription(
+        Team attackingTeam,
+        Player attacker,
+        string attackerName,
+        string playmakerName,
+        Random random)
+    {
+        var headerFavored = attacker.Traits.Contains(PlayerTrait.PowerHeader) ||
+            attacker.Traits.Contains(PlayerTrait.AerialThreat);
+        if (headerFavored || random.NextDouble() < 0.62)
+        {
+            return string.IsNullOrWhiteSpace(playmakerName)
+                ? $"{attackerName} rises to the delivery and heads at goal for {attackingTeam.Name}."
+                : $"{attackerName} meets {playmakerName}'s cross and heads at goal for {attackingTeam.Name}.";
+        }
+
+        return string.IsNullOrWhiteSpace(playmakerName)
+            ? $"{attackerName} meets the dropping ball with a volley at goal for {attackingTeam.Name}."
+            : $"{attackerName} connects with {playmakerName}'s delivery and volleys at goal for {attackingTeam.Name}.";
     }
 
     public MatchEvent CreateGoal(int minute, Team attackingTeam, Player scorer, Match match, Player? assister = null, int scorerMatchGoals = 0)
@@ -664,7 +933,11 @@ public class MatchEventFactory
         return CreateEvent(minute, EventType.Offside, description, scorer.Name, assister?.Name, match);
     }
 
-    public MatchEvent CreateOffsideRestart(int minute, Team team, Random random)
+    public MatchEvent CreateOffsideRestart(
+        int minute,
+        Team team,
+        Random random,
+        AttackNarrativeContext? narrative = null)
     {
         var description = Pick(random,
             $"{team.Name} restart play.",
@@ -672,7 +945,10 @@ public class MatchEventFactory
             $"{team.Name} regain possession.",
             $"{team.Name} look to settle on the ball.");
 
-        return CreateEvent(minute, EventType.Attack, description);
+        var matchEvent = CreateEvent(minute, EventType.Attack, description);
+        ApplyAttackNarrative(matchEvent, narrative);
+        matchEvent.AttackSequenceStep = narrative is null ? 0 : 1;
+        return matchEvent;
     }
 
     public MatchEvent CreateDefensiveError(int minute, Team defendingTeam, Player player)
@@ -1450,6 +1726,131 @@ public class MatchEventFactory
         }
 
         return null;
+    }
+
+    private static string CreateNarrativeBuildUpDescription(
+        Team team,
+        Player playmaker,
+        Player? target,
+        AttackNarrativeContext narrative,
+        Random random)
+    {
+        var originPlayerName = string.IsNullOrWhiteSpace(narrative.OriginPlayerName)
+            ? GetDisplayName(playmaker.Name)
+            : GetDisplayName(narrative.OriginPlayerName);
+        var opening = narrative.Origin switch
+        {
+            "goalkeeper distribution" => Pick(random,
+                $"{team.Name} begin with {originPlayerName} rolling it short before working patiently into midfield.",
+                $"{team.Name} play out from the back through {originPlayerName}."),
+            "defensive recovery" => Pick(random,
+                $"{team.Name} recover the ball deep through {originPlayerName} and immediately look forward.",
+                $"{team.Name} turn {originPlayerName}'s defensive recovery into a new attack."),
+            "turnover" => Pick(random,
+                $"{team.Name} spring forward after winning possession.",
+                $"{team.Name} break before the defense can regain its shape."),
+            "restart" => $"{team.Name} restart quickly and begin building again.",
+            _ => Pick(random,
+                $"{team.Name} settle in possession and begin to build.",
+                $"{team.Name} move through midfield with controlled possession.")
+        };
+        return opening;
+    }
+
+    private static string CreateNarrativeProgressionDescription(
+        Team team,
+        Player playmaker,
+        Player? target,
+        AttackNarrativeContext narrative)
+    {
+        var playmakerName = GetDisplayName(playmaker.Name);
+        var targetName = target is null ? "the front line" : GetDisplayName(target.Name);
+        var targetIsDribbler = target?.Traits.Any(trait =>
+            trait is PlayerTrait.TechnicalDribbler or PlayerTrait.SpeedDribbler or PlayerTrait.Rapid) == true;
+        var playmakerIsLongPasser = playmaker.Traits.Contains(PlayerTrait.LongPasser);
+        var progression = narrative.Route switch
+        {
+            "left flank" when targetIsDribbler =>
+                $"{playmakerName} passes left to {targetName}, who takes a positive first touch and dribbles up the flank.",
+            "left flank" =>
+                $"{playmakerName} feeds {targetName} down the left. {targetName} controls the pass and carries the ball forward.",
+            "right flank" when targetIsDribbler =>
+                $"{playmakerName} finds {targetName} on the right. {targetName} turns and dribbles directly at the nearest defender.",
+            "right flank" =>
+                $"{playmakerName} plays into {targetName} in the right channel, and {targetName} advances with the ball.",
+            "overlap" =>
+                $"{playmakerName} holds the ball inside, waits for the run, then slips a pass to the overlapping {targetName}.",
+            "switch of play" when playmakerIsLongPasser =>
+                $"{playmakerName} looks up and strikes a long diagonal pass across the pitch to {targetName}.",
+            "switch of play" =>
+                $"{playmakerName} switches play with a measured cross-field pass toward {targetName}.",
+            "direct ball" when playmakerIsLongPasser =>
+                $"{playmakerName} launches a precise long pass beyond the defensive line for {targetName} to chase.",
+            "direct ball" =>
+                $"{playmakerName} sends an early forward pass into the space ahead of {targetName}.",
+            "counterattack" when targetIsDribbler =>
+                $"{playmakerName} releases {targetName} on the break. {targetName} collects the pass and dribbles forward at speed.",
+            "counterattack" =>
+                $"{playmakerName} moves the ball quickly to {targetName}, who carries the counterattack into the final third.",
+            _ when playmaker.Traits.Contains(PlayerTrait.Playmaker) =>
+                $"{playmakerName} receives between the lines, turns, and threads a pass into {targetName}'s feet.",
+            _ =>
+                $"{playmakerName} gets on the ball centrally and plays a forward pass to {targetName} between the lines."
+        };
+        var pressure = narrative.DefensivePressure switch
+        {
+            "high press" => "They must move it quickly under an aggressive press.",
+            "low block" => "The defense remain compact, leaving very little space between the lines.",
+            _ => string.Empty
+        };
+        var urgency = narrative.IsLateUrgency ? " There is urgency in every forward pass now." : string.Empty;
+        return $"{progression} {pressure}{urgency}".Trim();
+    }
+
+    private static string CreateNarrativeChanceDescription(
+        Team team,
+        Player creator,
+        Player shooter,
+        string chanceType,
+        AttackNarrativeContext narrative,
+        Random random)
+    {
+        var creatorName = GetDisplayName(creator.Name);
+        var shooterName = GetDisplayName(shooter.Name);
+        var separatePlayers = !string.Equals(creator.Name, shooter.Name, StringComparison.OrdinalIgnoreCase);
+        var routeLead = narrative.Route switch
+        {
+            "left flank" => "The move reaches the left side of the penalty area.",
+            "right flank" => "The attack develops down the right.",
+            "overlap" => "The overlapping run finally opens the defensive line.",
+            "switch of play" => "The switch creates space on the far side.",
+            "counterattack" => "The counter reaches the final third before the defense can settle.",
+            "direct ball" => "The early ball turns the back line around.",
+            _ => "The patient move reaches the edge of the final third."
+        };
+        var finalAction = chanceType switch
+        {
+            "cross into box" when separatePlayers => $"{creatorName} delivers into the area and {shooterName} attacks the cross.",
+            "through ball attempt" when separatePlayers => $"{creatorName} threads the pass through and releases {shooterName} behind the line.",
+            "quick combination" when separatePlayers => $"{creatorName} exchanges a sharp pass before setting {shooterName} for the finish.",
+            "dribble run" => $"{shooterName} beats the nearest marker and drives into shooting range.",
+            "long-range attempt" => $"{shooterName} sees the shooting lane open from distance.",
+            _ when separatePlayers => $"{creatorName} finds {shooterName} in space for {team.Name}.",
+            _ => $"{shooterName} creates the shooting angle alone."
+        };
+        return $"{routeLead} {finalAction}";
+    }
+
+    private static void ApplyAttackNarrative(MatchEvent matchEvent, AttackNarrativeContext? narrative)
+    {
+        if (narrative is null)
+        {
+            return;
+        }
+
+        matchEvent.AttackNarrativeId = narrative.Id;
+        matchEvent.AttackRoute = narrative.Route;
+        matchEvent.AttackOrigin = narrative.Origin;
     }
 
     private static string? CreateTacticalPossessionLossDescription(
