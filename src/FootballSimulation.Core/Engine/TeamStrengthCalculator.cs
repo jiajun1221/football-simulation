@@ -6,6 +6,7 @@ namespace FootballSimulation.Engine;
 public class TeamStrengthCalculator
 {
     private readonly TacticalImpactCalculator _tacticalImpactCalculator;
+    private readonly ContextualPlayerPerformanceCalculator _playerPerformanceCalculator = new();
 
     public TeamStrengthCalculator()
         : this(new TacticalImpactCalculator())
@@ -65,34 +66,24 @@ public class TeamStrengthCalculator
 
     public double GetEffectiveAttack(Player player)
     {
-        var traitModifier = GetTraitModifier(player, PlayerTrait.Rapid, PlayerTrait.SpeedDribbler, PlayerTrait.TechnicalDribbler, PlayerTrait.Flair, PlayerTrait.Leadership);
-        var attributes = PlayerAttributeService.GetAttributes(player);
-        var attack = player.Attack * 0.35 + attributes.Pace * 0.22 + attributes.Dribbling * 0.23 + attributes.Shooting * 0.20;
-        return attack * GetStaminaModifier(player) * GetStatusModifier(player) * traitModifier * PositionSuitabilityService.GetEffectivenessMultiplier(player);
+        return _playerPerformanceCalculator.Calculate(player, MatchActionType.Dribbling).Score;
     }
 
     public double GetEffectiveDefense(Player player)
     {
-        var traitModifier = GetTraitModifier(player, PlayerTrait.DivesIntoTackles, PlayerTrait.Interceptor, PlayerTrait.PowerHeader, PlayerTrait.AerialThreat, PlayerTrait.Engine, PlayerTrait.Leadership);
-        var attributes = PlayerAttributeService.GetAttributes(player);
-        var defense = player.Defense * 0.50 + attributes.Defending * 0.34 + attributes.Physical * 0.16;
-        return defense * GetStaminaModifier(player) * GetStatusModifier(player) * traitModifier * PositionSuitabilityService.GetEffectivenessMultiplier(player);
+        return _playerPerformanceCalculator.Calculate(player, player.Position == Position.Goalkeeper
+            ? MatchActionType.Goalkeeping
+            : MatchActionType.Tackling).Score;
     }
 
     public double GetEffectivePassing(Player player)
     {
-        var traitModifier = GetTraitModifier(player, PlayerTrait.Playmaker, PlayerTrait.LongPasser, PlayerTrait.PressResistant, PlayerTrait.DeadBallSpecialist, PlayerTrait.EarlyCrosser, PlayerTrait.TeamPlayer, PlayerTrait.Leadership);
-        var attributes = PlayerAttributeService.GetAttributes(player);
-        var passing = player.Passing * 0.62 + attributes.Passing * 0.28 + attributes.Dribbling * 0.10;
-        return passing * GetStaminaModifier(player) * GetStatusModifier(player) * traitModifier * PositionSuitabilityService.GetEffectivenessMultiplier(player);
+        return _playerPerformanceCalculator.Calculate(player, MatchActionType.Passing).Score;
     }
 
     public double GetEffectiveFinishing(Player player)
     {
-        var traitModifier = GetTraitModifier(player, PlayerTrait.ClinicalFinisher, PlayerTrait.FinesseShot, PlayerTrait.LongShotTaker, PlayerTrait.PowerHeader, PlayerTrait.AerialThreat, PlayerTrait.OutsideFootShot);
-        var attributes = PlayerAttributeService.GetAttributes(player);
-        var finishing = player.Finishing * 0.55 + attributes.Shooting * 0.35 + attributes.Physical * 0.10;
-        return finishing * GetStaminaModifier(player) * GetStatusModifier(player) * traitModifier * PositionSuitabilityService.GetEffectivenessMultiplier(player);
+        return _playerPerformanceCalculator.Calculate(player, MatchActionType.Finishing).Score;
     }
 
     public double GetPlaymakerWeight(Player player)
@@ -114,7 +105,12 @@ public class TeamStrengthCalculator
             (player.Traits.Contains(PlayerTrait.LongThrower) ? 1.04 : 1.0);
 
         var attributes = PlayerAttributeService.GetAttributes(player);
-        return (GetEffectivePassing(player) * 0.64 + attributes.Passing * 0.20 + attributes.Dribbling * 0.16) * positionModifier * decisionModifier;
+        var roleModifier = player.Traits.Contains(PlayerTrait.Poacher) ? 0.72 :
+            player.Traits.Contains(PlayerTrait.TargetForward) ? 0.82 : 1.0;
+        var controlModifier = player.Traits.Contains(PlayerTrait.FirstTouch) ? 1.08 :
+            player.Traits.Contains(PlayerTrait.CrossingSpecialist) ? 1.07 : 1.0;
+        return (GetEffectivePassing(player) * 0.64 + attributes.Passing * 0.20 + attributes.Dribbling * 0.16) *
+            positionModifier * decisionModifier * roleModifier * controlModifier;
     }
 
     public double GetShooterWeight(Player player)
@@ -136,6 +132,11 @@ public class TeamStrengthCalculator
             (player.Traits.Contains(PlayerTrait.PowerHeader) ? 1.04 : 1.0) *
             (player.Traits.Contains(PlayerTrait.TriesToBeatOffsideTrap) ? 1.04 : 1.0) *
             (player.Traits.Contains(PlayerTrait.TechnicalDribbler) ? 1.03 : 1.0);
+
+        decisionModifier *=
+            (player.Traits.Contains(PlayerTrait.Poacher) ? 1.16 : 1.0) *
+            (player.Traits.Contains(PlayerTrait.TargetForward) ? 1.08 : 1.0) *
+            (player.Traits.Contains(PlayerTrait.Composed) ? 1.06 : 1.0);
 
         var attributes = PlayerAttributeService.GetAttributes(player);
         return (GetEffectiveAttack(player) * 0.22 + GetEffectiveFinishing(player) * 0.58 + attributes.Pace * 0.08 + attributes.Shooting * 0.12) * positionModifier * decisionModifier;

@@ -5,6 +5,56 @@ namespace FootballSimulation.Engine;
 
 public class TacticalImpactCalculator
 {
+    public TacticalEventProfile GetEventProfile(Team team, Team? opponent = null)
+    {
+        var tactics = Normalize(team.Tactics);
+        var opponentTactics = Normalize(opponent?.Tactics);
+        var tempoDelta = (tactics.Tempo - 50) / 50.0;
+        var pressDelta = (tactics.PressingIntensity - 50) / 50.0;
+        var widthDelta = (tactics.Width - 50) / 50.0;
+        var lineDelta = (tactics.DefensiveLine - 50) / 50.0;
+        var opponentPress = (opponentTactics.PressingIntensity - 50) / 50.0;
+
+        var pressingRecovery = 1.0 + pressDelta * 0.42;
+        var pressExposure = 1.0 + Math.Max(0, pressDelta) * 0.24;
+        var attackFrequency = 1.0 + tempoDelta * 0.24 + GetMentalityFrequencyShift(tactics.Mentality);
+        var buildupLength = 1.0 - tempoDelta * 0.30;
+        var turnoverRisk = 1.0 + tempoDelta * 0.18 + opponentPress * 0.34;
+        var wideRoute = 1.0 + widthDelta * 0.55;
+        var centralRoute = 1.0 - widthDelta * 0.38;
+        var spaceBehindLine = 1.0 + Math.Max(0, lineDelta) * 0.48;
+        var offsidePressure = 1.0 + lineDelta * 0.38;
+        var fatigueLoad = GetFatigueLoadModifier(tactics.Tempo, tactics.PressingIntensity, tactics.Mentality);
+
+        return new TacticalEventProfile(
+            Math.Clamp(attackFrequency, 0.70, 1.35),
+            Math.Clamp(buildupLength, 0.70, 1.35),
+            Math.Clamp(pressingRecovery, 0.68, 1.48),
+            Math.Clamp(turnoverRisk, 0.65, 1.70),
+            Math.Clamp(wideRoute, 0.52, 1.55),
+            Math.Clamp(centralRoute, 0.62, 1.40),
+            Math.Clamp(pressExposure, 1.0, 1.25),
+            Math.Clamp(spaceBehindLine, 0.72, 1.48),
+            Math.Clamp(offsidePressure, 0.62, 1.38),
+            fatigueLoad);
+    }
+
+    public double GetPressingContestShift(Team pressingTeam, Team possessionTeam)
+    {
+        var pressing = Normalize(pressingTeam.Tactics).PressingIntensity;
+        var tempo = Normalize(possessionTeam.Tactics).Tempo;
+        return Math.Clamp((pressing - 50) * 0.0018 + (tempo - 50) * 0.0007, -0.10, 0.10);
+    }
+
+    public double GetHighLineExposureShift(Team defendingTeam, Player attacker)
+    {
+        var line = Normalize(defendingTeam.Tactics).DefensiveLine;
+        var attributes = PlayerAttributeService.GetAttributes(attacker);
+        var paceAdvantage = Math.Max(0, attributes.Pace - 72);
+        var runnerBonus = attacker.Traits.Contains(PlayerTrait.TriesToBeatOffsideTrap) ? 0.035 : 0.0;
+        return Math.Clamp(Math.Max(0, line - 55) * 0.0015 + paceAdvantage * 0.0015 + runnerBonus, 0, 0.10);
+    }
+
     public double GetAttackModifier(Team team, Team? opponent = null)
     {
         var tactics = Normalize(team.Tactics);
@@ -65,9 +115,14 @@ public class TacticalImpactCalculator
     public double GetFoulModifier(Team defendingTeam)
     {
         var tactics = Normalize(defendingTeam.Tactics);
+        var activePlayers = defendingTeam.Players.Where(player => player.IsOnPitch && !player.IsSentOff).ToList();
+        var traitRisk = 1.0 + Math.Min(0.18,
+            activePlayers.Count(player => player.Traits.Contains(PlayerTrait.RelentlessPresser)) * 0.035 +
+            activePlayers.Count(player => player.Traits.Contains(PlayerTrait.BallWinner)) * 0.018);
         var modifier =
             ScaleAroundBalanced(tactics.PressingIntensity, 0.0075) *
-            ScaleAroundBalanced(tactics.DefensiveLine, 0.0030);
+            ScaleAroundBalanced(tactics.DefensiveLine, 0.0030) *
+            traitRisk;
 
         return Math.Clamp(modifier, 0.65, 1.85);
     }
@@ -134,6 +189,36 @@ public class TacticalImpactCalculator
             Mentality.AllOutAttack => 1.30,
             _ => 1.00
         };
+    }
+
+    private static double GetMentalityFrequencyShift(Mentality mentality)
+    {
+        return mentality switch
+        {
+            Mentality.UltraDefensive => -0.20,
+            Mentality.Defensive => -0.10,
+            Mentality.Attacking => 0.12,
+            Mentality.AllOutAttack => 0.22,
+            _ => 0.0
+        };
+    }
+
+    private static double GetFatigueLoadModifier(int tempo, int pressing, Mentality mentality)
+    {
+        var tempoLoad = 0.82 + Math.Clamp(tempo, 1, 100) / 250.0;
+        var pressAboveBalanced = Math.Max(0, pressing - 50) / 50.0;
+        var pressLoad = pressing < 40
+            ? 0.84
+            : 1.0 + 0.45 * Math.Pow(pressAboveBalanced, 1.55);
+        var mentalityLoad = mentality switch
+        {
+            Mentality.AllOutAttack => 1.10,
+            Mentality.Attacking => 1.05,
+            Mentality.UltraDefensive => 0.94,
+            _ => 1.0
+        };
+
+        return Math.Clamp(tempoLoad * pressLoad * mentalityLoad, 0.68, 1.75);
     }
 
     private static double GetManDisadvantageTurnoverModifier(Team attackingTeam, Team defendingTeam)
@@ -295,3 +380,15 @@ public class TacticalImpactCalculator
         }
     }
 }
+
+public sealed record TacticalEventProfile(
+    double AttackFrequency,
+    double BuildupLength,
+    double PressingRecovery,
+    double TurnoverRisk,
+    double WideRoutePreference,
+    double CentralRoutePreference,
+    double ExposureAfterPress,
+    double SpaceBehindLine,
+    double OffsidePressure,
+    double FatigueLoad);

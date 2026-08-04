@@ -214,14 +214,14 @@ public class PromotedClubGeneratorService
     {
         var traits = exactPosition switch
         {
-            "GK" => new[] { PlayerTrait.OneOnOnes, PlayerTrait.RushesOutOfGoal },
-            "CB" => new[] { PlayerTrait.Interceptor, PlayerTrait.AerialThreat },
-            "LB" or "RB" => new[] { PlayerTrait.Engine, PlayerTrait.EarlyCrosser },
-            "CDM" => new[] { PlayerTrait.DivesIntoTackles, PlayerTrait.TeamPlayer },
-            "CM" => new[] { PlayerTrait.BoxToBox, PlayerTrait.Playmaker },
-            "CAM" => new[] { PlayerTrait.Playmaker, PlayerTrait.PressResistant },
-            "LW" or "RW" => new[] { PlayerTrait.Rapid, PlayerTrait.TechnicalDribbler },
-            "ST" => new[] { PlayerTrait.ClinicalFinisher, PlayerTrait.TriesToBeatOffsideTrap },
+            "GK" => new[] { PlayerTrait.OneOnOnes, PlayerTrait.ShotStopper, PlayerTrait.CrossClaimer },
+            "CB" => new[] { PlayerTrait.Interceptor, PlayerTrait.Strong, PlayerTrait.RecoveryPace },
+            "LB" or "RB" => new[] { PlayerTrait.Engine, PlayerTrait.CrossingSpecialist, PlayerTrait.RecoveryPace },
+            "CDM" => new[] { PlayerTrait.BallWinner, PlayerTrait.RelentlessPresser, PlayerTrait.TeamPlayer },
+            "CM" => new[] { PlayerTrait.BoxToBox, PlayerTrait.FirstTouch, PlayerTrait.Composed },
+            "CAM" => new[] { PlayerTrait.Playmaker, PlayerTrait.FirstTouch, PlayerTrait.Composed },
+            "LW" or "RW" => new[] { PlayerTrait.Rapid, PlayerTrait.CrossingSpecialist, PlayerTrait.Acrobatics },
+            "ST" => new[] { PlayerTrait.ClinicalFinisher, PlayerTrait.Poacher, PlayerTrait.TargetForward },
             _ => Array.Empty<PlayerTrait>()
         };
 

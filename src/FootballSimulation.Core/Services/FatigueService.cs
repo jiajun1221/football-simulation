@@ -14,6 +14,7 @@ public class FatigueService
     private const int ManagedSubstitutionRecoveryBonus = 8;
     private const int FullMatchRestSeasonFatigueRecovery = 55;
     private const int OffWeekSeasonFatigueRecovery = 36;
+    private readonly FootballSimulation.Engine.TacticalImpactCalculator _tacticalImpactCalculator = new();
 
     public void RecoverTeamForNewMatch(Team team, int? recoveryPoints = null)
     {
@@ -64,8 +65,7 @@ public class FatigueService
         foreach (var player in team.Players.Where(player => player.IsOnPitch && !player.IsSentOff && !player.IsSuspended && !player.IsInjured))
         {
             var staminaLoss = BaseStaminaLossPerMinute
-                * GetTempoMultiplier(team.Tactics.Tempo)
-                * GetPressingMultiplier(team.Tactics.PressingIntensity)
+                * _tacticalImpactCalculator.GetEventProfile(team).FatigueLoad
                 * GetPositionMultiplier(player.Position)
                 * GetStaminaResistanceMultiplier(player.Stamina)
                 * GetPositionSuitabilityFatigueMultiplier(player)
@@ -215,9 +215,20 @@ public class FatigueService
 
     private static double GetTraitFatigueMultiplier(Player player)
     {
-        return player.Traits.Contains(PlayerTrait.Engine) || player.Traits.Contains(PlayerTrait.BoxToBox)
+        var modifier = player.Traits.Contains(PlayerTrait.Engine) || player.Traits.Contains(PlayerTrait.BoxToBox)
             ? 0.88
             : 1.0;
+        if (player.Traits.Contains(PlayerTrait.RelentlessPresser))
+        {
+            modifier *= 1.15;
+        }
+
+        if (player.Traits.Contains(PlayerTrait.RecoveryPace))
+        {
+            modifier *= 1.06;
+        }
+
+        return modifier;
     }
 
     private static double GetSeasonFatigueMatchMultiplier(Player player)

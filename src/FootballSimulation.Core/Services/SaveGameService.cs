@@ -331,6 +331,7 @@ public class SaveGameService
         ApplyKnownPositionCorrection(player, teamName);
         RepairMissingSeniorOverallAttributes(player);
         PlayerTraitAssignmentService.EnsureMinimumTraits(player);
+        ExpandedPlayerTraitService.ApplyInferredTrait(player);
     }
 
     private static void ApplyEstevaoRatingCorrection(Player player)

@@ -13,7 +13,6 @@ public static class PlayerTraitDisplayService
         [PlayerTrait.Playmaker] = new("PM", "🪄", "Playmaker", "Receives more attacks and creates chances.", KeyPassBonus: 0.12, AssistEventBonus: 0.10),
         [PlayerTrait.LongPasser] = new("LPS", "📡", "Long Passer", "More likely to switch play or play through balls.", LongPassBonus: 0.12),
         [PlayerTrait.LongShotTaker] = new("LST", "🚀", "Long Shot Taker", "More likely to shoot from distance.", LongShotBonus: 0.14),
-        [PlayerTrait.EarlyCrosser] = new("CRS", "↗", "Early Crosser", "More likely to cross early.", CrossingBonus: 0.12),
         [PlayerTrait.OutsideFootShot] = new("OFS", "🌀", "Outside Foot Shot", "Can attempt outside-foot finishes.", ShotAccuracyBonus: 0.04),
         [PlayerTrait.Leadership] = new("LED", "👑", "Leadership", "Improves team composure.", MoraleBonus: 0.08),
         [PlayerTrait.TeamPlayer] = new("TM", "🤝", "Team Player", "Improves support play.", KeyPassBonus: 0.05),
@@ -34,7 +33,19 @@ public static class PlayerTraitDisplayService
         [PlayerTrait.Rapid] = new("RAP", "💨", "Rapid", "Makes more high-speed attacking runs.", DribbleEventBonus: 0.10),
         [PlayerTrait.TechnicalDribbler] = new("TEC", "🕺", "Technical Dribbler", "Better close-control dribbling.", DribbleEventBonus: 0.12),
         [PlayerTrait.PenaltySpecialist] = new("PEN", "🎯", "Penalty Specialist", "More reliable from the spot.", ShotAccuracyBonus: 0.10),
-        [PlayerTrait.BigMatchPlayer] = new("BIG", "⭐", "Big Match Player", "Can lift performance in high-pressure moments.", MoraleBonus: 0.04)
+        [PlayerTrait.BigMatchPlayer] = new("BIG", "⭐", "Big Match Player", "Can lift performance in high-pressure moments.", MoraleBonus: 0.04),
+        [PlayerTrait.Strong] = new("STR", "💪", "Strong", "Shields the ball and competes better in physical and aerial duels."),
+        [PlayerTrait.Acrobatics] = new("ACR", "🤸", "Acrobatics", "Attempts difficult volleys and acrobatic finishes more effectively."),
+        [PlayerTrait.FirstTouch] = new("1ST", "🦶", "First Touch", "Controls difficult passes and the ball under pressure more reliably."),
+        [PlayerTrait.Poacher] = new("PCH", "🥅", "Poacher", "Finds space for close-range chances and reacts quickly to rebounds."),
+        [PlayerTrait.TargetForward] = new("TGT", "🎯", "Target Forward", "Receives direct balls, holds up play, and attacks crosses."),
+        [PlayerTrait.RelentlessPresser] = new("PRE", "🔥", "Relentless Presser", "Forces more turnovers but uses extra stamina and risks late fouls."),
+        [PlayerTrait.BallWinner] = new("WIN", "⚔", "Ball Winner", "Wins tackles and recoveries more often with slightly greater foul risk."),
+        [PlayerTrait.RecoveryPace] = new("REC", "🏃", "Recovery Pace", "Recovers against counterattacks and protects space behind a high line."),
+        [PlayerTrait.Composed] = new("COM", "🧊", "Composed", "Makes better decisions and finishes more reliably under pressure."),
+        [PlayerTrait.CrossingSpecialist] = new("CRS+", "📐", "Crossing Specialist", "Delivers more accurate crosses and cutbacks from wide areas.", CrossingBonus: 0.14),
+        [PlayerTrait.ShotStopper] = new("STOP", "🧤", "Shot Stopper", "Reacts better to close-range and powerful shots.", SaveBonus: 0.10),
+        [PlayerTrait.CrossClaimer] = new("CLM", "🙌", "Cross Claimer", "Claims crosses safely and limits dangerous second balls.", CrossClaimBonus: 0.12)
     };
 
     public static PlayerTraitDefinition GetDefinition(PlayerTrait trait)

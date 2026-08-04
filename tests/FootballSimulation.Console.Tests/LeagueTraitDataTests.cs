@@ -44,7 +44,9 @@ public class LeagueTraitDataTests
             PlayerTrait.RushesOutOfGoal,
             PlayerTrait.Puncher,
             PlayerTrait.LongThrower,
-            PlayerTrait.Leadership
+            PlayerTrait.Leadership,
+            PlayerTrait.ShotStopper,
+            PlayerTrait.CrossClaimer
         };
 
         var goalkeepers = LoadAllEnabledLeaguePlayers()
@@ -74,7 +76,7 @@ public class LeagueTraitDataTests
         AssertTraits(realMadridPlayers["Rodrygo"], PlayerTrait.Flair, PlayerTrait.TechnicalDribbler, PlayerTrait.FinesseShot, PlayerTrait.OutsideFootShot);
         AssertTraits(realMadridPlayers["Federico Valverde"], PlayerTrait.Engine, PlayerTrait.BoxToBox, PlayerTrait.LongShotTaker, PlayerTrait.TeamPlayer);
         AssertTraits(realMadridPlayers["Eduardo Camavinga"], PlayerTrait.PressResistant, PlayerTrait.TechnicalDribbler, PlayerTrait.Engine);
-        AssertTraits(realMadridPlayers["Trent Alexander-Arnold"], PlayerTrait.LongPasser, PlayerTrait.EarlyCrosser, PlayerTrait.Playmaker, PlayerTrait.DeadBallSpecialist);
+        AssertTraits(realMadridPlayers["Trent Alexander-Arnold"], PlayerTrait.LongPasser, PlayerTrait.CrossingSpecialist, PlayerTrait.Playmaker, PlayerTrait.DeadBallSpecialist);
         AssertTraits(realMadridPlayers["Antonio Rüdiger"], PlayerTrait.DivesIntoTackles, PlayerTrait.AerialThreat, PlayerTrait.Leadership);
         AssertTraits(realMadridPlayers["Éder Militão"], PlayerTrait.AerialThreat, PlayerTrait.Rapid, PlayerTrait.Interceptor);
         AssertTraits(realMadridPlayers["Thibaut Courtois"], PlayerTrait.OneOnOnes, PlayerTrait.LongThrower, PlayerTrait.Leadership);
@@ -175,6 +177,8 @@ public class LeagueTraitDataTests
 
     private static void AssertTraits(Player player, params PlayerTrait[] expectedTraits)
     {
-        Assert.Equal(expectedTraits, player.Traits);
+        Assert.Equal(expectedTraits, player.Traits.Take(expectedTraits.Length));
+        Assert.InRange(player.Traits.Count, expectedTraits.Length,
+            Math.Max(expectedTraits.Length, ExpandedPlayerTraitService.GetMaximumTraitCount(player)));
     }
 }

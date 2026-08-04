@@ -173,6 +173,94 @@ public class TacticalRealismTests
     }
 
     [Fact]
+    public void ContextualPerformance_OverallRatingStronglyAffectsSameAction()
+    {
+        var calculator = new ContextualPlayerPerformanceCalculator();
+        var elite = CreateRatedPlayer("Elite", 90);
+        var average = CreateRatedPlayer("Average", 75);
+
+        var elitePassing = calculator.Calculate(elite, MatchActionType.Passing).Score;
+        var averagePassing = calculator.Calculate(average, MatchActionType.Passing).Score;
+
+        Assert.True(elitePassing >= averagePassing + 5);
+        Assert.True(calculator.GetContestProbability(elite, MatchActionType.Passing, average, MatchActionType.Interception) > 0.55);
+    }
+
+    [Fact]
+    public void ContextualPerformance_UsesNoMoreThanTwoRelevantTraits()
+    {
+        var calculator = new ContextualPlayerPerformanceCalculator();
+        var player = CreateRatedPlayer("Creator", 84);
+        player.Traits =
+        [
+            PlayerTrait.Playmaker,
+            PlayerTrait.LongPasser,
+            PlayerTrait.TeamPlayer,
+            PlayerTrait.PressResistant,
+            PlayerTrait.ClinicalFinisher
+        ];
+
+        var result = calculator.Calculate(player, MatchActionType.Passing);
+
+        Assert.Equal(2, result.AppliedTraits.Count);
+        Assert.DoesNotContain(PlayerTrait.ClinicalFinisher, result.AppliedTraits);
+    }
+
+    [Fact]
+    public void TacticalProfile_SlowTempoSlowsAttacksAndExtendsBuildup()
+    {
+        var calculator = new TacticalImpactCalculator();
+        var slow = CreateActiveTeam("Slow FC");
+        var fast = CreateActiveTeam("Fast FC");
+        slow.Tactics.Tempo = 20;
+        fast.Tactics.Tempo = 90;
+
+        var slowProfile = calculator.GetEventProfile(slow);
+        var fastProfile = calculator.GetEventProfile(fast);
+
+        Assert.True(slowProfile.AttackFrequency < fastProfile.AttackFrequency);
+        Assert.True(slowProfile.BuildupLength > fastProfile.BuildupLength);
+        Assert.True(slowProfile.FatigueLoad < fastProfile.FatigueLoad);
+    }
+
+    [Fact]
+    public void TacticalProfile_ConstantPressureHasRecoveryFatigueAndExposureTradeoffs()
+    {
+        var calculator = new TacticalImpactCalculator();
+        var balanced = CreateActiveTeam("Balanced FC");
+        var constantPressure = CreateActiveTeam("Press FC");
+        balanced.Tactics.PressingIntensity = 50;
+        constantPressure.Tactics.PressingIntensity = 95;
+
+        var balancedProfile = calculator.GetEventProfile(balanced);
+        var pressProfile = calculator.GetEventProfile(constantPressure);
+
+        Assert.True(pressProfile.PressingRecovery > balancedProfile.PressingRecovery);
+        Assert.True(pressProfile.ExposureAfterPress > balancedProfile.ExposureAfterPress);
+        Assert.True(pressProfile.FatigueLoad >= balancedProfile.FatigueLoad * 1.30);
+    }
+
+    [Fact]
+    public void TacticalProfile_WideAndHighLineSettingsHaveDistinctConsequences()
+    {
+        var calculator = new TacticalImpactCalculator();
+        var wide = CreateActiveTeam("Wide FC");
+        var narrow = CreateActiveTeam("Narrow FC");
+        wide.Tactics.Width = 90;
+        narrow.Tactics.Width = 20;
+        wide.Tactics.DefensiveLine = 90;
+        narrow.Tactics.DefensiveLine = 25;
+
+        var wideProfile = calculator.GetEventProfile(wide);
+        var narrowProfile = calculator.GetEventProfile(narrow);
+
+        Assert.True(wideProfile.WideRoutePreference > narrowProfile.WideRoutePreference);
+        Assert.True(narrowProfile.CentralRoutePreference > wideProfile.CentralRoutePreference);
+        Assert.True(wideProfile.SpaceBehindLine > narrowProfile.SpaceBehindLine);
+        Assert.True(wideProfile.OffsidePressure > narrowProfile.OffsidePressure);
+    }
+
+    [Fact]
     public void HomeAwayAdvantage_AppliesHomeBoostsAndAwayPressure()
     {
         var homeTeam = new Team { Name = "Home FC", Tactics = new TeamTactics() };
@@ -241,6 +329,30 @@ public class TacticalRealismTests
             Formation = "4-3-3",
             Players = players,
             Tactics = new TeamTactics()
+        };
+    }
+
+    private static Player CreateRatedPlayer(string name, int rating)
+    {
+        return new Player
+        {
+            Name = name,
+            Position = Position.Midfielder,
+            PreferredPosition = "CM",
+            AssignedPosition = "CM",
+            OverallRating = rating,
+            Attack = rating,
+            Defense = rating,
+            Passing = rating,
+            Finishing = rating,
+            Pace = rating,
+            Shooting = rating,
+            Dribbling = rating,
+            Defending = rating,
+            Physical = rating,
+            Stamina = 100,
+            CurrentForm = 50,
+            Morale = 50
         };
     }
 }

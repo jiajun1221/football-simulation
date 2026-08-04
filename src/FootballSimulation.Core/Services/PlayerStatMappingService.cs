@@ -80,6 +80,7 @@ public class PlayerStatMappingService
             ConsecutiveStarts = Math.Max(0, record.ConsecutiveStarts ?? 0),
             Finishing = CalculateFinishing(position, preferredPosition, overall)
         };
+        ExpandedPlayerTraitService.ApplyInferredTrait(player);
         PlayerContractService.ApplyContractData(
             player,
             string.Empty,
@@ -169,6 +170,7 @@ public class PlayerStatMappingService
             ConsecutiveStarts = Math.Max(0, record.ConsecutiveStarts ?? 0),
             Finishing = CalculateFinishing(position, preferredPosition, overall)
         };
+        ExpandedPlayerTraitService.ApplyInferredTrait(player);
         PlayerContractService.ApplyContractData(
             player,
             string.Empty,

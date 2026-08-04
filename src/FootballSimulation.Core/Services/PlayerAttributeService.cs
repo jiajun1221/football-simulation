@@ -102,7 +102,7 @@ public static class PlayerAttributeService
             Passing = attributes.Passing +
                 (traits.Contains(PlayerTrait.Playmaker) ? 4 : 0) +
                 (traits.Contains(PlayerTrait.LongPasser) ? 3 : 0) +
-                (traits.Contains(PlayerTrait.EarlyCrosser) ? 2 : 0) +
+                (traits.Contains(PlayerTrait.CrossingSpecialist) ? 2 : 0) +
                 (traits.Contains(PlayerTrait.DeadBallSpecialist) ? 2 : 0),
             Dribbling = attributes.Dribbling +
                 (traits.Contains(PlayerTrait.SpeedDribbler) ? 3 : 0) +

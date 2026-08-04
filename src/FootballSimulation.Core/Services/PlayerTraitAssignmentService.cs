@@ -161,7 +161,9 @@ public static class PlayerTraitAssignmentService
                 PlayerTrait.Puncher,
                 PlayerTrait.LongThrower,
                 PlayerTrait.BigMatchPlayer,
-                PlayerTrait.Leadership
+                PlayerTrait.Leadership,
+                PlayerTrait.ShotStopper,
+                PlayerTrait.CrossClaimer
             ],
             "CB" =>
             [
@@ -170,16 +172,20 @@ public static class PlayerTraitAssignmentService
                 PlayerTrait.AerialThreat,
                 PlayerTrait.DivesIntoTackles,
                 PlayerTrait.TeamPlayer,
-                PlayerTrait.BigMatchPlayer
+                PlayerTrait.BigMatchPlayer,
+                PlayerTrait.Strong,
+                PlayerTrait.RecoveryPace,
+                PlayerTrait.BallWinner
             ],
             "LB" or "RB" or "LWB" or "RWB" =>
             [
                 PlayerTrait.Engine,
-                PlayerTrait.EarlyCrosser,
+                PlayerTrait.CrossingSpecialist,
                 PlayerTrait.DivesIntoTackles,
                 PlayerTrait.Interceptor,
                 PlayerTrait.LongPasser,
-                PlayerTrait.TeamPlayer
+                PlayerTrait.TeamPlayer,
+                PlayerTrait.RecoveryPace
             ],
             "CDM" =>
             [
@@ -188,7 +194,9 @@ public static class PlayerTraitAssignmentService
                 PlayerTrait.PressResistant,
                 PlayerTrait.LongPasser,
                 PlayerTrait.BoxToBox,
-                PlayerTrait.Leadership
+                PlayerTrait.Leadership,
+                PlayerTrait.BallWinner,
+                PlayerTrait.RelentlessPresser
             ],
             "CM" =>
             [
@@ -197,7 +205,9 @@ public static class PlayerTraitAssignmentService
                 PlayerTrait.PressResistant,
                 PlayerTrait.LongPasser,
                 PlayerTrait.Engine,
-                PlayerTrait.TeamPlayer
+                PlayerTrait.TeamPlayer,
+                PlayerTrait.FirstTouch,
+                PlayerTrait.Composed
             ],
             "CAM" =>
             [
@@ -206,7 +216,9 @@ public static class PlayerTraitAssignmentService
                 PlayerTrait.TechnicalDribbler,
                 PlayerTrait.LongShotTaker,
                 PlayerTrait.PressResistant,
-                PlayerTrait.BigMatchPlayer
+                PlayerTrait.BigMatchPlayer,
+                PlayerTrait.FirstTouch,
+                PlayerTrait.Composed
             ],
             "LW" or "RW" =>
             [
@@ -214,8 +226,10 @@ public static class PlayerTraitAssignmentService
                 PlayerTrait.TechnicalDribbler,
                 PlayerTrait.SpeedDribbler,
                 PlayerTrait.Flair,
-                PlayerTrait.EarlyCrosser,
-                PlayerTrait.FinesseShot
+                PlayerTrait.CrossingSpecialist,
+                PlayerTrait.FinesseShot,
+                PlayerTrait.FirstTouch,
+                PlayerTrait.Acrobatics
             ],
             "ST" or "CF" =>
             [
@@ -224,7 +238,11 @@ public static class PlayerTraitAssignmentService
                 PlayerTrait.FinesseShot,
                 PlayerTrait.PowerHeader,
                 PlayerTrait.AerialThreat,
-                PlayerTrait.BigMatchPlayer
+                PlayerTrait.BigMatchPlayer,
+                PlayerTrait.Poacher,
+                PlayerTrait.TargetForward,
+                PlayerTrait.Strong,
+                PlayerTrait.Acrobatics
             ],
             _ => position switch
             {

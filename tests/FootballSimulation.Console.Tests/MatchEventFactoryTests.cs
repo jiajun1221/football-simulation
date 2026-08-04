@@ -277,7 +277,7 @@ public class MatchEventFactoryTests
             Name = "Reece James",
             Position = Position.Defender,
             PreferredPosition = "RB",
-            Traits = [PlayerTrait.EarlyCrosser]
+            Traits = [PlayerTrait.CrossingSpecialist]
         };
         var receiver = new Player { Name = "Liam Delap", Position = Position.Forward };
         var narrative = new AttackNarrativeContext(
@@ -302,7 +302,7 @@ public class MatchEventFactoryTests
 
         Assert.Equal(EventType.AttackProgression, matchEvent.EventType);
         Assert.Equal("Cross", matchEvent.AttackAction);
-        Assert.Equal(PlayerTrait.EarlyCrosser, matchEvent.TriggeredTrait);
+        Assert.Equal(PlayerTrait.CrossingSpecialist, matchEvent.TriggeredTrait);
         Assert.Contains("cross", matchEvent.Description, StringComparison.OrdinalIgnoreCase);
     }
 }

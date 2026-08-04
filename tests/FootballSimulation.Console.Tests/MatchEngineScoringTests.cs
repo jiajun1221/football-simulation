@@ -242,6 +242,33 @@ public class MatchEngineScoringTests
     }
 
     [Fact]
+    public void SimulateMatch_KeeperHeroicsAlwaysFollowsAShot()
+    {
+        var seedDataService = new SeedDataService();
+        var engine = new MatchEngine();
+        var heroicSaves = 0;
+
+        for (var seed = 1; seed <= 100; seed++)
+        {
+            var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+            var events = engine.SimulateMatch(homeTeam, awayTeam, seed: seed).Events;
+            for (var index = 0; index < events.Count; index++)
+            {
+                if (events[index].EventType != EventType.GoalkeeperHeroics)
+                {
+                    continue;
+                }
+
+                Assert.True(index > 0);
+                Assert.Contains(events[index - 1].EventType, new[] { EventType.Shot, EventType.PenaltyTaker });
+                heroicSaves++;
+            }
+        }
+
+        Assert.True(heroicSaves > 0);
+    }
+
+    [Fact]
     public void SimulateMatch_MiscontrolBelongsToTheLastAttackReceiver()
     {
         var seedDataService = new SeedDataService();
@@ -1343,7 +1370,7 @@ public class MatchEngineScoringTests
                 PlayerTrait.DeadBallSpecialist,
                 PlayerTrait.LongShotTaker,
                 PlayerTrait.Playmaker,
-                PlayerTrait.EarlyCrosser
+                PlayerTrait.CrossingSpecialist
             ];
         }
     }

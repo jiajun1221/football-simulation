@@ -9,7 +9,6 @@ public enum PlayerTrait
     Playmaker,
     LongPasser,
     LongShotTaker,
-    EarlyCrosser,
     OutsideFootShot,
     Leadership,
     TeamPlayer,
@@ -31,6 +30,18 @@ public enum PlayerTrait
     TechnicalDribbler,
     PenaltySpecialist,
     BigMatchPlayer,
+    Strong,
+    Acrobatics,
+    FirstTouch,
+    Poacher,
+    TargetForward,
+    RelentlessPresser,
+    BallWinner,
+    RecoveryPace,
+    Composed,
+    CrossingSpecialist,
+    ShotStopper,
+    CrossClaimer,
 
     PlayMaker = Playmaker,
     OneOnOnesGK = OneOnOnes,
@@ -41,5 +52,6 @@ public enum PlayerTrait
     PushesUpForCornersGK = RushesOutOfGoal,
     AggressiveTackler = DivesIntoTackles,
     PaceMerchant = Rapid,
-    SetPieceSpecialist = DeadBallSpecialist
+    SetPieceSpecialist = DeadBallSpecialist,
+    EarlyCrosser = CrossingSpecialist
 }

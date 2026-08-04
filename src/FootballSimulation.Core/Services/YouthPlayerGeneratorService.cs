@@ -239,14 +239,14 @@ public class YouthPlayerGeneratorService
     {
         var candidates = slot switch
         {
-            "GK" => new[] { PlayerTrait.OneOnOnes, PlayerTrait.RushesOutOfGoal, PlayerTrait.Puncher },
-            "CB" => new[] { PlayerTrait.Interceptor, PlayerTrait.AerialThreat, PlayerTrait.DivesIntoTackles },
-            "LB" or "RB" => new[] { PlayerTrait.Engine, PlayerTrait.EarlyCrosser, PlayerTrait.Rapid },
-            "CDM" => new[] { PlayerTrait.TeamPlayer, PlayerTrait.DivesIntoTackles, PlayerTrait.LongPasser },
-            "CM" => new[] { PlayerTrait.BoxToBox, PlayerTrait.Playmaker, PlayerTrait.PressResistant },
-            "CAM" => new[] { PlayerTrait.Playmaker, PlayerTrait.Flair, PlayerTrait.TechnicalDribbler },
-            "LW" or "RW" => new[] { PlayerTrait.Rapid, PlayerTrait.TechnicalDribbler, PlayerTrait.Flair },
-            "ST" => new[] { PlayerTrait.ClinicalFinisher, PlayerTrait.PowerHeader, PlayerTrait.TriesToBeatOffsideTrap },
+            "GK" => new[] { PlayerTrait.OneOnOnes, PlayerTrait.ShotStopper, PlayerTrait.CrossClaimer, PlayerTrait.RushesOutOfGoal },
+            "CB" => new[] { PlayerTrait.Interceptor, PlayerTrait.Strong, PlayerTrait.RecoveryPace, PlayerTrait.BallWinner },
+            "LB" or "RB" => new[] { PlayerTrait.Engine, PlayerTrait.CrossingSpecialist, PlayerTrait.RecoveryPace },
+            "CDM" => new[] { PlayerTrait.TeamPlayer, PlayerTrait.BallWinner, PlayerTrait.RelentlessPresser, PlayerTrait.LongPasser },
+            "CM" => new[] { PlayerTrait.BoxToBox, PlayerTrait.FirstTouch, PlayerTrait.Composed, PlayerTrait.Playmaker },
+            "CAM" => new[] { PlayerTrait.Playmaker, PlayerTrait.FirstTouch, PlayerTrait.Composed, PlayerTrait.TechnicalDribbler },
+            "LW" or "RW" => new[] { PlayerTrait.Rapid, PlayerTrait.CrossingSpecialist, PlayerTrait.Acrobatics, PlayerTrait.TechnicalDribbler },
+            "ST" => new[] { PlayerTrait.ClinicalFinisher, PlayerTrait.Poacher, PlayerTrait.TargetForward, PlayerTrait.Acrobatics },
             _ => Array.Empty<PlayerTrait>()
         };
         var traitChance = tier switch

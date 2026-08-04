@@ -125,6 +125,9 @@ public class MatchEventFactory
             "counterattack" => (Pick(random,
                 $"{carrierName} carries the ball at speed, pulls a defender across, and slips it to {supportName}.",
                 $"{carrierName} drives through midfield and completes a fast one-two with {supportName}."), "Carry"),
+            "direct ball" when ballCarrier.Traits.Contains(PlayerTrait.Strong) || ballCarrier.Traits.Contains(PlayerTrait.TargetForward) => (Pick(random,
+                $"{carrierName} uses strength to hold off the defender, controls the direct ball, and lays it into {supportName}'s path.",
+                $"{carrierName} anchors the move with powerful hold-up play before releasing {supportName}."), "HoldUp"),
             "direct ball" => (Pick(random,
                 $"{carrierName} shields the dropping ball under pressure and lays it back to the advancing {supportName}.",
                 $"{carrierName} holds off a defender, brings the ball down, and finds {supportName} in support."), "HoldUp"),
@@ -174,6 +177,11 @@ public class MatchEventFactory
 
     private static PlayerTrait? GetAttackActionTrait(Player player, string action)
     {
+        if (action == "Control" && player.Traits.Contains(PlayerTrait.FirstTouch))
+        {
+            return PlayerTrait.FirstTouch;
+        }
+
         if (action is "LongPass" or "Switch" && player.Traits.Contains(PlayerTrait.LongPasser))
         {
             return PlayerTrait.LongPasser;
@@ -193,11 +201,17 @@ public class MatchEventFactory
             return PlayerTrait.AerialThreat;
         }
 
+        if (action == "HoldUp")
+        {
+            if (player.Traits.Contains(PlayerTrait.Strong)) return PlayerTrait.Strong;
+            if (player.Traits.Contains(PlayerTrait.TargetForward)) return PlayerTrait.TargetForward;
+        }
+
         if (action is "Combination" or "Cutback" or "ForwardPass" or "Overlap")
         {
+            if (player.Traits.Contains(PlayerTrait.CrossingSpecialist) && action is "Cutback" or "Overlap") return PlayerTrait.CrossingSpecialist;
             if (player.Traits.Contains(PlayerTrait.Playmaker)) return PlayerTrait.Playmaker;
             if (player.Traits.Contains(PlayerTrait.TeamPlayer)) return PlayerTrait.TeamPlayer;
-            if (player.Traits.Contains(PlayerTrait.EarlyCrosser) && action is "Cutback" or "Overlap") return PlayerTrait.EarlyCrosser;
             if (player.Traits.Contains(PlayerTrait.PressResistant)) return PlayerTrait.PressResistant;
         }
 
@@ -222,9 +236,12 @@ public class MatchEventFactory
             PlayerTrait.Playmaker when action == "Combination" => $"{carrierName} draws the pressure, reads {supportName}'s movement, and completes a sharp one-two.",
             PlayerTrait.Playmaker => $"{carrierName} spots the passing lane early and releases {supportName} between the lines.",
             PlayerTrait.TeamPlayer => $"{carrierName} chooses the unselfish pass and keeps moving to support {supportName}.",
-            PlayerTrait.EarlyCrosser => $"{carrierName} delivers early toward {supportName} before the defense can reset.",
             PlayerTrait.PressResistant => $"{carrierName} resists the press, protects the ball, and finds {supportName} in space.",
             PlayerTrait.AerialThreat => $"{carrierName} uses strength to bring the direct ball under control and lays it off to {supportName}.",
+            PlayerTrait.Strong => $"{carrierName} uses strength to shield the ball from the defender and releases {supportName}.",
+            PlayerTrait.TargetForward => $"{carrierName} pins the center-back, brings the direct ball down, and lays it off to {supportName}.",
+            PlayerTrait.FirstTouch => $"{carrierName} cushions the difficult pass perfectly and immediately finds {supportName}.",
+            PlayerTrait.CrossingSpecialist => $"{carrierName} shapes an accurate delivery toward {supportName} from the wide channel.",
             _ => null
         };
     }
@@ -287,8 +304,8 @@ public class MatchEventFactory
         var receiverName = GetDisplayName(receiver.Name);
         var (action, trait, description) = chanceType switch
         {
-            "cross into box" => ("Cross", creator.Traits.Contains(PlayerTrait.EarlyCrosser) ? PlayerTrait.EarlyCrosser : (PlayerTrait?)null,
-                creator.Traits.Contains(PlayerTrait.EarlyCrosser)
+            "cross into box" => ("Cross", creator.Traits.Contains(PlayerTrait.CrossingSpecialist) ? PlayerTrait.CrossingSpecialist : (PlayerTrait?)null,
+                creator.Traits.Contains(PlayerTrait.CrossingSpecialist)
                     ? $"{creatorName} crosses early from the wide area before the defense is set, and {receiverName} attacks the delivery."
                     : $"{creatorName} reaches the wide channel and curls a cross toward {receiverName} in the box."),
             "through ball attempt" => ("ThroughBall", creator.Traits.Contains(PlayerTrait.Playmaker) ? PlayerTrait.Playmaker : creator.Traits.Contains(PlayerTrait.LongPasser) ? PlayerTrait.LongPasser : (PlayerTrait?)null,
@@ -478,7 +495,7 @@ public class MatchEventFactory
                 $"{creatorName} finds space outside the box for {attackingTeam.Name}.",
                 $"{creatorName} opens the angle from range for {attackingTeam.Name}."),
             "cross into box" => Pick(random,
-                chanceCreator.Traits.Contains(PlayerTrait.EarlyCrosser)
+                chanceCreator.Traits.Contains(PlayerTrait.CrossingSpecialist)
                     ? $"{creatorName} delivers early and catches the defense sleeping for {attackingTeam.Name}."
                     : $"{creatorName} whips a cross into the area for {attackingTeam.Name}.",
                 hasSeparateShooter
@@ -1066,7 +1083,7 @@ public class MatchEventFactory
         var description = triggeredTrait switch
         {
             PlayerTrait.DeadBallSpecialist => Pick(new Random(minute + taker.Name.Length), $"{taker.Name} swings in a dangerous corner for {team.Name}.", $"{taker.Name}'s corner delivery drops into a threatening area for {team.Name}."),
-            PlayerTrait.EarlyCrosser => $"{taker.Name} whips an early corner into the danger area for {team.Name}.",
+            PlayerTrait.CrossingSpecialist => $"{taker.Name} whips an accurate corner into the danger area for {team.Name}.",
             _ => $"{taker.Name} delivers the corner for {team.Name}."
         };
 
@@ -1513,7 +1530,7 @@ public class MatchEventFactory
             PlayerTrait.LongPasser => Pick(random,
                 $"{creatorName} picks a superb long diagonal and {shooterName} attacks the space.",
                 $"Pinpoint long ball from {creatorName} finds {shooterName} instantly."),
-            PlayerTrait.EarlyCrosser => Pick(random,
+            PlayerTrait.CrossingSpecialist => Pick(random,
                 $"{creatorName} delivers early and catches the defense sleeping for {team.Name}.",
                 $"Quick delivery from {creatorName} flashes into the danger area for {shooterName}."),
             PlayerTrait.TeamPlayer => Pick(random,
@@ -1559,7 +1576,7 @@ public class MatchEventFactory
             PlayerTrait.LongPasser => Pick(random,
                 $"GOAL! {assisterName}'s pinpoint long ball finds {scorerName}, who finishes for {team.Name}.",
                 $"GOAL! A superb long diagonal from {assisterName} opens the pitch for {scorerName}."),
-            PlayerTrait.EarlyCrosser => Pick(random,
+            PlayerTrait.CrossingSpecialist => Pick(random,
                 $"GOAL! An early cross from {assisterName} catches the defense sleeping and {scorerName} finishes.",
                 $"GOAL! Quick delivery into the danger area, and {scorerName} converts for {team.Name}."),
             PlayerTrait.OutsideFootShot => Pick(random,
