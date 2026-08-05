@@ -9,18 +9,11 @@ public class PlayerStatMappingService
     {
         var position = MapPosition(record.Position);
         var overall = ClampStat(record.OverallRating);
-        var fatigue = Math.Clamp(record.Fatigue ?? 0, 0, 100);
         var stamina = ClampStat(record.Stamina ?? CalculateStamina(position, overall));
         var loadedStatus = PlayerFormStatus.Average;
         var form = PlayerFormStatusService.ToDisplayText(loadedStatus);
         var currentForm = PlayerFormStatusService.ToCurrentForm(loadedStatus);
         var preferredPosition = GetPreferredPosition(record.Position, record.PreferredPosition);
-        var injuryState = CreateInjuryState(
-            record.IsInjured,
-            record.InjuryType,
-            record.InjurySeverity,
-            record.InjuryRecoveryMatches,
-            record.IsSeasonEndingInjury);
         var traits = PlayerTraitAssignmentService.EnsureMinimumTraits(
             MapTraits(record.Traits),
             position,
@@ -64,20 +57,20 @@ public class PlayerStatMappingService
             Attack = CalculateAttack(position, preferredPosition, overall),
             Defense = CalculateDefense(position, preferredPosition, overall),
             Passing = CalculatePassing(position, preferredPosition, overall),
-            Stamina = stamina,
-            CurrentStamina = CalculateCurrentStamina(stamina, fatigue),
-            Fatigue = fatigue,
-            IsInjured = injuryState.IsInjured,
-            InjuryType = injuryState.Type,
-            InjurySeverity = injuryState.Severity,
-            InjuryRecoveryMatches = injuryState.RecoveryMatches,
-            IsSeasonEndingInjury = injuryState.IsSeasonEnding,
-            SuspendedMatches = GetSuspendedMatches(record.SuspendedMatches, record.IsSuspended),
-            MatchesPlayedRecently = Math.Max(0, record.MatchesPlayedRecently ?? 0),
-            RecentMatchMinutes = NormalizeRecentMatchMinutes(record.RecentMatchMinutes),
-            ConsecutiveFullMatches = Math.Max(0, record.ConsecutiveFullMatches ?? 0),
-            SeasonFatigue = Math.Clamp(record.SeasonFatigue ?? 0, 0, 100),
-            ConsecutiveStarts = Math.Max(0, record.ConsecutiveStarts ?? 0),
+            Stamina = 100,
+            CurrentStamina = 100,
+            Fatigue = 0,
+            IsInjured = false,
+            InjuryType = string.Empty,
+            InjurySeverity = null,
+            InjuryRecoveryMatches = 0,
+            IsSeasonEndingInjury = false,
+            SuspendedMatches = 0,
+            MatchesPlayedRecently = 0,
+            RecentMatchMinutes = [],
+            ConsecutiveFullMatches = 0,
+            SeasonFatigue = 0,
+            ConsecutiveStarts = 0,
             Finishing = CalculateFinishing(position, preferredPosition, overall)
         };
         ExpandedPlayerTraitService.ApplyInferredTrait(player);
@@ -95,18 +88,11 @@ public class PlayerStatMappingService
     {
         var position = MapPosition(record.Position);
         var overall = ClampStat(record.OverallRating);
-        var fatigue = Math.Clamp(record.Fatigue, 0, 100);
         var stamina = ClampStat(record.Stamina ?? CalculateStamina(position, overall));
         var loadedStatus = PlayerFormStatus.Average;
         var form = PlayerFormStatusService.ToDisplayText(loadedStatus);
         var currentForm = PlayerFormStatusService.ToCurrentForm(loadedStatus);
         var preferredPosition = GetPreferredPosition(record.Position, record.PreferredPosition);
-        var injuryState = CreateInjuryState(
-            record.IsInjured,
-            record.InjuryType,
-            record.InjurySeverity,
-            record.InjuryRecoveryMatches,
-            record.IsSeasonEndingInjury);
         var traits = PlayerTraitAssignmentService.EnsureMinimumTraits(
             MapTraits(record.Traits),
             position,
@@ -154,20 +140,20 @@ public class PlayerStatMappingService
             Attack = CalculateAttack(position, preferredPosition, overall),
             Defense = CalculateDefense(position, preferredPosition, overall),
             Passing = CalculatePassing(position, preferredPosition, overall),
-            Stamina = stamina,
-            CurrentStamina = CalculateCurrentStamina(stamina, fatigue),
-            Fatigue = fatigue,
-            IsInjured = injuryState.IsInjured,
-            InjuryType = injuryState.Type,
-            InjurySeverity = injuryState.Severity,
-            InjuryRecoveryMatches = injuryState.RecoveryMatches,
-            IsSeasonEndingInjury = injuryState.IsSeasonEnding,
-            SuspendedMatches = GetSuspendedMatches(record.SuspendedMatches, record.IsSuspended),
-            MatchesPlayedRecently = Math.Max(0, record.MatchesPlayedRecently ?? 0),
-            RecentMatchMinutes = NormalizeRecentMatchMinutes(record.RecentMatchMinutes),
-            ConsecutiveFullMatches = Math.Max(0, record.ConsecutiveFullMatches ?? 0),
-            SeasonFatigue = Math.Clamp(record.SeasonFatigue ?? 0, 0, 100),
-            ConsecutiveStarts = Math.Max(0, record.ConsecutiveStarts ?? 0),
+            Stamina = 100,
+            CurrentStamina = 100,
+            Fatigue = 0,
+            IsInjured = false,
+            InjuryType = string.Empty,
+            InjurySeverity = null,
+            InjuryRecoveryMatches = 0,
+            IsSeasonEndingInjury = false,
+            SuspendedMatches = 0,
+            MatchesPlayedRecently = 0,
+            RecentMatchMinutes = [],
+            ConsecutiveFullMatches = 0,
+            SeasonFatigue = 0,
+            ConsecutiveStarts = 0,
             Finishing = CalculateFinishing(position, preferredPosition, overall)
         };
         ExpandedPlayerTraitService.ApplyInferredTrait(player);

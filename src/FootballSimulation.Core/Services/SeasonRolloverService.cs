@@ -93,10 +93,10 @@ public class SeasonRolloverService
         league.HasShownLeagueTrophyCelebration = false;
         league.ShownTrophyCelebrationKeys = [];
 
-        ApplyOffseasonPlayerReset(league.Teams);
         _youthAcademyService.ApplySeasonRollover(league, selectedTeam);
         _youthScoutService.EnsureScoutNetwork(league);
         UpdateTransferMarket(league, selectedTeam, transferMarketState, promotedClubs);
+        ApplyOffseasonPlayerReset(league.Teams, transferMarketState);
 
         return new SeasonRolloverResult(
             archive,
@@ -268,9 +268,17 @@ public class SeasonRolloverService
             .ToList();
     }
 
-    private static void ApplyOffseasonPlayerReset(IEnumerable<Team> teams)
+    private static void ApplyOffseasonPlayerReset(
+        IEnumerable<Team> activeLeagueTeams,
+        TransferMarketState transferMarketState)
     {
-        foreach (var player in teams.SelectMany(team => team.Players.Concat(team.Substitutes)))
+        var allPlayers = activeLeagueTeams
+            .Concat(transferMarketState.Leagues.SelectMany(leagueState => leagueState.Teams))
+            .SelectMany(team => team.Players.Concat(team.Substitutes))
+            .Concat(transferMarketState.FreeAgents)
+            .Distinct();
+
+        foreach (var player in allPlayers)
         {
             player.SuspendedMatches = 0;
             player.IsSentOff = false;
@@ -283,7 +291,7 @@ public class SeasonRolloverService
             player.SeasonFatigue = 0;
             player.ConsecutiveStarts = 0;
             player.LiveMatchModifier = 1.0;
-            player.Stamina = Math.Max(player.Stamina, 92);
+            player.Stamina = 100;
 
             if (player.IsInjured)
             {

@@ -8,6 +8,52 @@ namespace FootballSimulation.Console.Tests;
 public class SaveGameServiceTests
 {
     [Fact]
+    public void SaveSlots_KeepPlayerConditionIndependent()
+    {
+        var saveDirectory = CreateTempSaveDirectory();
+        var saveGameService = new SaveGameService(saveDirectory);
+        var teams = new LeagueSeedDataService().CreateLeagueTeams();
+        var selectedTeam = teams[0];
+        var league = new GameSessionService().CreatePremierLeague(teams);
+        var player = selectedTeam.Players[0];
+
+        try
+        {
+            player.Stamina = 38;
+            player.SeasonFatigue = 88;
+            player.MatchesPlayedRecently = 6;
+            player.RecentMatchMinutes = [90, 90, 90, 90, 90];
+            saveGameService.SaveGame(1, SaveGameService.CreateSaveData(league, selectedTeam));
+
+            player.Stamina = 100;
+            player.SeasonFatigue = 0;
+            player.MatchesPlayedRecently = 0;
+            player.RecentMatchMinutes = [];
+            saveGameService.SaveGame(2, SaveGameService.CreateSaveData(league, selectedTeam));
+
+            var slotOneTeam = SaveGameService.CreateLeague(saveGameService.LoadGame(1)!)
+                .Teams.Single(team => team.Name == selectedTeam.Name);
+            var slotTwoTeam = SaveGameService.CreateLeague(saveGameService.LoadGame(2)!)
+                .Teams.Single(team => team.Name == selectedTeam.Name);
+            var slotOnePlayer = slotOneTeam.Players.Concat(slotOneTeam.Substitutes)
+                .Single(candidate => candidate.Name == player.Name);
+            var slotTwoPlayer = slotTwoTeam.Players.Concat(slotTwoTeam.Substitutes)
+                .Single(candidate => candidate.Name == player.Name);
+
+            Assert.Equal(38, slotOnePlayer.Stamina);
+            Assert.Equal(88, slotOnePlayer.SeasonFatigue);
+            Assert.Equal(6, slotOnePlayer.MatchesPlayedRecently);
+            Assert.Equal(100, slotTwoPlayer.Stamina);
+            Assert.Equal(0, slotTwoPlayer.SeasonFatigue);
+            Assert.Equal(0, slotTwoPlayer.MatchesPlayedRecently);
+        }
+        finally
+        {
+            DeleteDirectory(saveDirectory);
+        }
+    }
+
+    [Fact]
     public void SaveGame_AndLoadGame_RestoresLeagueProgressAndReferences()
     {
         var saveDirectory = CreateTempSaveDirectory();

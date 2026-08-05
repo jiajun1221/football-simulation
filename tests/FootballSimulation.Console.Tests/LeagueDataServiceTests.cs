@@ -6,6 +6,37 @@ namespace FootballSimulation.Console.Tests;
 public class LeagueDataServiceTests
 {
     [Fact]
+    public void LoadTeams_CreatesIndependentPlayersWithFreshConditionForEveryNewGame()
+    {
+        var dataService = new LeagueDataService();
+        var definition = dataService.GetLeagueDefinition("premier-league");
+        var firstGameTeams = dataService.LoadTeams(definition);
+        var firstGamePlayer = firstGameTeams.SelectMany(team => team.Players.Concat(team.Substitutes)).First();
+
+        firstGamePlayer.Stamina = 32;
+        firstGamePlayer.SeasonFatigue = 91;
+        firstGamePlayer.MatchesPlayedRecently = 6;
+        firstGamePlayer.RecentMatchMinutes.AddRange([90, 90, 90]);
+        firstGamePlayer.IsInjured = true;
+        firstGamePlayer.InjuryRecoveryMatches = 8;
+
+        var secondGameTeams = dataService.LoadTeams(definition);
+        var secondGamePlayer = secondGameTeams
+            .SelectMany(team => team.Players.Concat(team.Substitutes))
+            .Single(player => player.PlayerId == firstGamePlayer.PlayerId);
+
+        Assert.NotSame(firstGamePlayer, secondGamePlayer);
+        Assert.Equal(100, secondGamePlayer.Stamina);
+        Assert.Equal(0, secondGamePlayer.Fatigue);
+        Assert.Equal(0, secondGamePlayer.SeasonFatigue);
+        Assert.Equal(0, secondGamePlayer.MatchesPlayedRecently);
+        Assert.Empty(secondGamePlayer.RecentMatchMinutes);
+        Assert.False(secondGamePlayer.IsInjured);
+        Assert.Equal(0, secondGamePlayer.InjuryRecoveryMatches);
+        Assert.Equal(0, secondGamePlayer.SuspendedMatches);
+    }
+
+    [Fact]
     public void LoadTeams_IncludesJamieGittensInInitialChelseaSquad()
     {
         var dataService = new LeagueDataService();

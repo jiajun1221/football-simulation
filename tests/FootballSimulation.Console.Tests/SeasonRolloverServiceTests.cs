@@ -266,6 +266,63 @@ public class SeasonRolloverServiceTests
     }
 
     [Fact]
+    public void StartNextSeason_FullyResetsFitnessAndRecentMatchLoadForEveryPlayer()
+    {
+        var (league, selectedTeam) = CreateCompletedRolloverContext();
+        var transferMarket = new TransferMarketService().CreateInitialState(league);
+        var activePlayer = selectedTeam.Players[0];
+        var foreignPlayer = new Player
+        {
+            PlayerId = "foreign-fitness-reset-test",
+            Name = "Foreign Player",
+            Position = Position.Midfielder,
+            PreferredPosition = "CM",
+            OverallRating = 75
+        };
+        var freeAgent = new Player
+        {
+            PlayerId = "free-agent-fitness-reset-test",
+            Name = "Free Agent",
+            Position = Position.Defender,
+            PreferredPosition = "CB",
+            OverallRating = 72
+        };
+
+        transferMarket.Leagues.Add(new TransferLeagueState
+        {
+            LeagueId = "fitness-reset-league",
+            LeagueName = "Fitness Reset League",
+            Season = league.Season,
+            Teams = [new Team { Name = "Fitness FC", Players = [foreignPlayer] }]
+        });
+        transferMarket.FreeAgents.Add(freeAgent);
+
+        foreach (var player in new[] { activePlayer, foreignPlayer, freeAgent })
+        {
+            player.Stamina = 41;
+            player.SeasonFatigue = 84;
+            player.MatchesPlayedRecently = 6;
+            player.RecentMatchMinutes.AddRange([90, 90, 75]);
+            player.ConsecutiveFullMatches = 3;
+            player.ConsecutiveStarts = 5;
+        }
+
+        var result = new SeasonRolloverService().StartNextSeason(league, selectedTeam, transferMarket);
+
+        Assert.All(new[] { activePlayer, foreignPlayer, freeAgent }, player =>
+        {
+            Assert.Equal(100, player.Stamina);
+            Assert.Equal(0, player.Fatigue);
+            Assert.Equal(0, player.SeasonFatigue);
+            Assert.Equal(0, player.MatchesPlayedRecently);
+            Assert.Empty(player.RecentMatchMinutes);
+            Assert.Equal(0, player.ConsecutiveFullMatches);
+            Assert.Equal(0, player.ConsecutiveStarts);
+        });
+        Assert.Same(transferMarket, result.TransferMarketState);
+    }
+
+    [Fact]
     public void StartNextSeason_RenewsValuablePlayersAndReleasesFringePlayers()
     {
         var (league, selectedTeam) = CreateCompletedRolloverContext();
