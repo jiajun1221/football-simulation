@@ -1322,7 +1322,11 @@
           "form": "Average",
           "isStarter": false,
           "traits": [
-            "Playmaker"
+            "Playmaker",
+            "LongPasser",
+            "PressResistant",
+            "FirstTouch",
+            "Composed"
           ],
           "morale": 50,
           "nationalityCode": "HR",

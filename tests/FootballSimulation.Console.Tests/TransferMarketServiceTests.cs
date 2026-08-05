@@ -5,6 +5,24 @@ namespace FootballSimulation.Console.Tests;
 
 public class TransferMarketServiceTests
 {
+    [Theory]
+    [InlineData("Real Madrid", 86, 250_000_000)]
+    [InlineData("Chelsea", 84, 180_000_000)]
+    [InlineData("Competitive FC", 82, 120_000_000)]
+    [InlineData("Midtable FC", 78, 80_000_000)]
+    [InlineData("Smaller FC", 74, 45_000_000)]
+    public void ClubFinanceService_IncreasesFirstSeasonBudgets(string clubName, double averageRating, decimal expectedBudget)
+    {
+        Assert.Equal(expectedBudget, ClubFinanceService.GetFirstSeasonBudget(clubName, averageRating));
+    }
+
+    [Fact]
+    public void ClubFinanceService_StillUsesPerformanceBasedBaseBudgetAfterFirstSeason()
+    {
+        Assert.Equal(120_000_000m, ClubFinanceService.GetBaseBudget("Chelsea", 84));
+        Assert.Equal(85_000_000m, ClubFinanceService.GetBaseBudget("Competitive FC", 82));
+    }
+
     [Fact]
     public void TransferWindowService_UsesRoundBasedWindows()
     {

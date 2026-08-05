@@ -41,7 +41,7 @@ public class ClubFinanceService
     public ClubFinance CreateFinance(string leagueId, Team team)
     {
         var averageRating = team.Players.Concat(team.Substitutes).DefaultIfEmpty().Average(player => player?.OverallRating ?? 72);
-        var budget = GetBaseBudget(team.Name, averageRating);
+        var budget = GetFirstSeasonBudget(team.Name, averageRating);
 
         return new ClubFinance
         {
@@ -126,6 +126,27 @@ public class ClubFinanceService
             >= 78 => 55_000_000m,
             >= 74 => 32_000_000m,
             _ => 18_000_000m
+        };
+    }
+
+    public static decimal GetFirstSeasonBudget(string clubName, double averageRating)
+    {
+        if (IsEliteClub(clubName))
+        {
+            return 250_000_000m;
+        }
+
+        if (IsBigClub(clubName))
+        {
+            return 200_000_000m;
+        }
+
+        return averageRating switch
+        {
+            >= 82 => 120_000_000m,
+            >= 78 => 80_000_000m,
+            >= 74 => 45_000_000m,
+            _ => 25_000_000m
         };
     }
 

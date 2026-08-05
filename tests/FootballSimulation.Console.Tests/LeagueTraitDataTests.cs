@@ -91,7 +91,9 @@ public class LeagueTraitDataTests
             Assert.InRange(player.Traits.Count, 1, 3));
         Assert.All(players.Where(player => player.OverallRating is >= 78 and < 82), player =>
             Assert.InRange(player.Traits.Count, 1, 4));
-        Assert.All(players.Where(player => player.OverallRating is >= 82 and < 86), player =>
+        Assert.All(players.Where(player =>
+                player.OverallRating is >= 82 and < 86 &&
+                !player.Name.Equals("Luka Modrić", StringComparison.OrdinalIgnoreCase)), player =>
             Assert.InRange(player.Traits.Count, 1, 4));
         Assert.All(players.Where(player => player.OverallRating is >= 86 and < 90), player =>
             Assert.InRange(player.Traits.Count, 1, 5));
@@ -105,6 +107,25 @@ public class LeagueTraitDataTests
         var players = LoadAllEnabledLeaguePlayers().ToList();
 
         Assert.All(players, player => Assert.NotEmpty(player.Traits));
+    }
+
+    [Fact]
+    public void SerieATraits_GiveModricCuratedSuperstarProfile()
+    {
+        var modric = new LeagueDataService()
+            .LoadTeams("serie-a")
+            .SelectMany(team => team.Players.Concat(team.Substitutes))
+            .Single(player => player.Name.Equals("Luka Modrić", StringComparison.OrdinalIgnoreCase));
+
+        Assert.Equal(
+            [
+                PlayerTrait.Playmaker,
+                PlayerTrait.LongPasser,
+                PlayerTrait.PressResistant,
+                PlayerTrait.FirstTouch,
+                PlayerTrait.Composed
+            ],
+            modric.Traits);
     }
 
     [Fact]

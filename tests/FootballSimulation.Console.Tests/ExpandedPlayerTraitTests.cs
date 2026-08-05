@@ -91,6 +91,22 @@ public class ExpandedPlayerTraitTests
     }
 
     [Fact]
+    public void ExistingSaveModric_ReceivesFullCuratedProfileIdempotently()
+    {
+        var modric = CreatePlayer("Luka Modrić", "CM", Position.Midfielder, 83);
+        modric.Traits = [PlayerTrait.Playmaker];
+
+        var changed = ExpandedPlayerTraitService.ApplyInferredTrait(modric);
+        var changedAgain = ExpandedPlayerTraitService.ApplyInferredTrait(modric);
+
+        Assert.True(changed);
+        Assert.False(changedAgain);
+        Assert.Equal(
+            [PlayerTrait.Playmaker, PlayerTrait.LongPasser, PlayerTrait.PressResistant, PlayerTrait.FirstTouch, PlayerTrait.Composed],
+            modric.Traits);
+    }
+
+    [Fact]
     public void Mapping_AppliesCuratedTraitWithoutEditingSeedJson()
     {
         var record = new PlayerDataRecord

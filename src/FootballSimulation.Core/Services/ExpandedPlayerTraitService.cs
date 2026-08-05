@@ -6,6 +6,19 @@ namespace FootballSimulation.Services;
 
 public static class ExpandedPlayerTraitService
 {
+    private static readonly IReadOnlyDictionary<string, IReadOnlyList<PlayerTrait>> CuratedProfiles =
+        new Dictionary<string, IReadOnlyList<PlayerTrait>>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["lukamodric"] =
+            [
+                PlayerTrait.Playmaker,
+                PlayerTrait.LongPasser,
+                PlayerTrait.PressResistant,
+                PlayerTrait.FirstTouch,
+                PlayerTrait.Composed
+            ]
+        };
+
     private static readonly IReadOnlyDictionary<string, PlayerTrait> CuratedTraits =
         new Dictionary<string, PlayerTrait>(StringComparer.OrdinalIgnoreCase)
         {
@@ -38,6 +51,11 @@ public static class ExpandedPlayerTraitService
     {
         ArgumentNullException.ThrowIfNull(player);
         player.Traits ??= [];
+        if (ApplyCuratedProfile(player))
+        {
+            return true;
+        }
+
         if (player.OverallRating < 78 || player.Traits.Any(ExpandedTraits.Contains) ||
             player.Traits.Count >= GetMaximumTraitCount(player))
         {
@@ -57,6 +75,28 @@ public static class ExpandedPlayerTraitService
     }
 
     public static bool IsExpandedTrait(PlayerTrait trait) => ExpandedTraits.Contains(trait);
+
+    private static bool ApplyCuratedProfile(Player player)
+    {
+        if (!CuratedProfiles.TryGetValue(NormalizeName(player.Name), out var profile))
+        {
+            return false;
+        }
+
+        var changed = false;
+        foreach (var trait in profile)
+        {
+            if (player.Traits.Contains(trait))
+            {
+                continue;
+            }
+
+            player.Traits.Add(trait);
+            changed = true;
+        }
+
+        return changed;
+    }
 
     public static int GetMaximumTraitCount(Player player)
     {
