@@ -63,12 +63,12 @@ public class PlayerGrowthService
 
     private static int CalculateGrowthPoints(Match match, Team team, Player player, PlayerMatchPerformance performance)
     {
-        var isAtOrAbovePotentialCap = IsAtOrAbovePotentialCap(player);
-        if (isAtOrAbovePotentialCap && !CanEarnOverCapGrowth(player, performance))
+        if (!CanGrow(player))
         {
             return 0;
         }
 
+        var isAtOrAbovePotentialCap = IsAtOrAbovePotentialCap(player);
         var basePoints = performance.Rating switch
         {
             >= 8.5 => 40,
@@ -108,6 +108,7 @@ public class PlayerGrowthService
         if (isAtOrAbovePotentialCap)
         {
             total *= GetOverCapGrowthMultiplier(player);
+            total = Math.Max(1, total);
         }
         else
         {
@@ -262,20 +263,17 @@ public class PlayerGrowthService
         return player.OverallRating >= GetPotentialCap(player);
     }
 
-    private static bool CanEarnOverCapGrowth(Player player, PlayerMatchPerformance performance)
-    {
-        return player.Age is < 30 && performance.Rating >= 8.5;
-    }
-
     private static double GetOverCapGrowthMultiplier(Player player)
     {
         return player.Age switch
         {
             <= 21 => 0.18,
-            <= 24 => 0.10,
-            <= 27 => 0.06,
-            < 30 => 0.03,
-            _ => 0.0
+            <= 24 => 0.12,
+            <= 27 => 0.08,
+            <= 30 => 0.05,
+            <= 33 => 0.03,
+            <= 36 => 0.02,
+            _ => 0.01
         };
     }
 

@@ -224,7 +224,7 @@ public class PlayerGrowthServiceTests
     }
 
     [Fact]
-    public void ApplyMatchGrowth_ThirtyYearOldDoesNotDevelopOverPotentialCap()
+    public void ApplyMatchGrowth_ThirtyYearOldDevelopsOverPotentialCapVerySlowly()
     {
         var service = new PlayerGrowthService();
         var player = CreatePlayer("Over Cap Veteran", overall: 94, age: 30);
@@ -236,9 +236,44 @@ public class PlayerGrowthServiceTests
 
         service.ApplyMatchGrowth(CreateMatch(team, opponentTeam, player, rating: 10.0, goals: 3, assists: 2));
 
-        Assert.Equal(94, player.OverallRating);
-        Assert.Equal(99, player.GrowthPoints);
-        Assert.Equal(0, player.LastMatchOverallIncrease);
+        Assert.Equal(95, player.OverallRating);
+        Assert.InRange(player.GrowthPoints, 0, 5);
+        Assert.Equal(1, player.LastMatchOverallIncrease);
+    }
+
+    [Fact]
+    public void ApplyMatchGrowth_CappedPrimePlayerEarnsSlowGrowthFromSolidPerformance()
+    {
+        var service = new PlayerGrowthService();
+        var player = CreatePlayer("Capped Prime Player", overall: 84, age: 26);
+        player.PotentialOverall = 84;
+        var opponent = CreatePlayer("Opponent", overall: 78, age: 25);
+        var team = CreateTeam("Chelsea", player);
+        var opponentTeam = CreateTeam("Liverpool", opponent);
+
+        service.ApplyMatchGrowth(CreateMatch(team, opponentTeam, player, rating: 6.5));
+
+        Assert.Equal(84, player.OverallRating);
+        Assert.Equal(1, player.GrowthPoints);
+        Assert.Equal(1, player.LastMatchGrowthPoints);
+    }
+
+    [Fact]
+    public void ApplyMatchGrowth_PlayerAtNinetyNineCannotGrowFurther()
+    {
+        var service = new PlayerGrowthService();
+        var player = CreatePlayer("Maximum Player", overall: 99, age: 24);
+        player.PotentialOverall = 99;
+        player.GrowthPoints = 50;
+        var opponent = CreatePlayer("Opponent", overall: 78, age: 25);
+        var team = CreateTeam("Chelsea", player);
+        var opponentTeam = CreateTeam("Liverpool", opponent);
+
+        service.ApplyMatchGrowth(CreateMatch(team, opponentTeam, player, rating: 10, goals: 3));
+
+        Assert.Equal(99, player.OverallRating);
+        Assert.Equal(50, player.GrowthPoints);
+        Assert.Equal(0, player.LastMatchGrowthPoints);
     }
 
     private static Match CreateMatch(Team team, Team opponentTeam, Player player, double rating, int goals = 0, int assists = 0)

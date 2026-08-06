@@ -6,6 +6,18 @@ namespace FootballSimulation.Console.Tests;
 public class LeagueDataServiceTests
 {
     [Fact]
+    public void LoadTeams_GivesMamardashviliGrowthPotential()
+    {
+        var mamardashvili = new LeagueDataService()
+            .LoadTeams("premier-league")
+            .SelectMany(team => team.Players.Concat(team.Substitutes))
+            .Single(player => player.Name == "Giorgi Mamardashvili");
+
+        Assert.Equal(84, mamardashvili.OverallRating);
+        Assert.Equal(88, mamardashvili.PotentialOverall);
+    }
+
+    [Fact]
     public void LoadTeams_CreatesIndependentPlayersWithFreshConditionForEveryNewGame()
     {
         var dataService = new LeagueDataService();
