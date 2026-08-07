@@ -6,6 +6,7 @@ namespace FootballSimulation.Engine;
 
 public class MatchEngine
 {
+    private const int MaximumAttackCompletionMinutes = 7;
     private const int CrowdMomentumCooldownMinutes = 12;
     private const int MaxCrowdMomentumEventsPerTeam = 2;
     private const int MaxCrowdMomentumEventsPerMatch = 3;
@@ -321,6 +322,19 @@ public class MatchEngine
                 random,
                 strengthSnapshot);
 
+            var additionalAttackSteps = 0;
+            while (ReferenceEquals(nextPossessionTeam, attackingTeam) &&
+                ShouldContinueAttackInSameMinute(simulationState, attackingTeam, additionalAttackSteps, random))
+            {
+                nextPossessionTeam = ProcessAttack(
+                    minute,
+                    simulationState,
+                    attackingTeam,
+                    random,
+                    strengthSnapshot);
+                additionalAttackSteps++;
+            }
+
             if (nextPossessionTeam is not null)
             {
                 SetPossession(simulationState, nextPossessionTeam, simulationState.BallState, simulationState.LastFeedEventType);
@@ -335,6 +349,8 @@ public class MatchEngine
             }
 
             AddStoppageForNewEvents(simulationState, eventsBeforeMinute, random, minute);
+
+            ExtendPhaseForUnresolvedAttack(simulationState, minute, includeFulltime, ref dynamicEndMinute);
 
             if (minute == GetFirstHalfEndMinute(match))
             {
@@ -497,6 +513,37 @@ public class MatchEngine
     private static int GetPhaseEndMinute(Match match, bool includeFulltime)
     {
         return includeFulltime ? GetSecondHalfEndMinute(match) : GetFirstHalfEndMinute(match);
+    }
+
+    private static void ExtendPhaseForUnresolvedAttack(
+        MatchSimulationState simulationState,
+        int minute,
+        bool includeFulltime,
+        ref int dynamicEndMinute)
+    {
+        if (simulationState.ActiveAttackNarrative is null)
+        {
+            return;
+        }
+
+        var match = simulationState.Match;
+        if (minute == GetFirstHalfEndMinute(match) &&
+            match.FirstHalfAttackExtensionMinutes < MaximumAttackCompletionMinutes)
+        {
+            match.FirstHalfAttackExtensionMinutes++;
+            match.FirstHalfAddedMinutes++;
+            dynamicEndMinute = Math.Max(dynamicEndMinute, GetFirstHalfEndMinute(match));
+            return;
+        }
+
+        if (includeFulltime &&
+            minute == GetSecondHalfEndMinute(match) &&
+            match.SecondHalfAttackExtensionMinutes < MaximumAttackCompletionMinutes)
+        {
+            match.SecondHalfAttackExtensionMinutes++;
+            match.SecondHalfAddedMinutes++;
+            dynamicEndMinute = Math.Max(dynamicEndMinute, GetSecondHalfEndMinute(match));
+        }
     }
 
     private static bool IsFirstHalfMinute(Match match, int minute)
@@ -1036,6 +1083,24 @@ public class MatchEngine
         return simulationState.ActiveAttackNarrative is not null &&
             simulationState.AttackNarrativeStage > 0 &&
             string.Equals(simulationState.ActiveAttackNarrative.TeamName, attackingTeam.Name, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool ShouldContinueAttackInSameMinute(
+        MatchSimulationState simulationState,
+        Team attackingTeam,
+        int additionalAttackSteps,
+        Random random)
+    {
+        if (additionalAttackSteps >= 2 || !HasUnresolvedAttack(simulationState, attackingTeam))
+        {
+            return false;
+        }
+
+        var tempoAdjustment = (attackingTeam.Tactics.Tempo - 50) * 0.004;
+        var counterattackBonus = simulationState.ActiveAttackNarrative?.Route == "counterattack" ? 0.12 : 0.0;
+        var baseChance = additionalAttackSteps == 0 ? 0.46 : 0.16;
+        var continuationChance = Math.Clamp(baseChance + tempoAdjustment + counterattackBonus, 0.18, 0.78);
+        return random.NextDouble() < continuationChance;
     }
 
     private static AttackNarrativeContext GetOrCreateAttackNarrative(
@@ -2488,6 +2553,15 @@ public class MatchEngine
         if (feedCount < 3)
         {
             return false;
+        }
+
+        var match = simulationState.Match;
+        var attackCompletionLimitReached = match.CurrentMinute <= GetFirstHalfEndMinute(match)
+            ? match.FirstHalfAttackExtensionMinutes >= MaximumAttackCompletionMinutes
+            : match.SecondHalfAttackExtensionMinutes >= MaximumAttackCompletionMinutes;
+        if (attackCompletionLimitReached)
+        {
+            return true;
         }
 
         if (feedCount >= 7)

@@ -318,9 +318,54 @@ public class MatchEngineScoringTests
             .FirstOrDefault(events => events.Count is >= 3 and <= 8);
 
         Assert.NotNull(completedNarrative);
-        Assert.Equal(completedNarrative.Count, completedNarrative.Select(matchEvent => matchEvent.Minute).Distinct().Count());
+        Assert.InRange(
+            completedNarrative.Select(matchEvent => matchEvent.Minute).Distinct().Count(),
+            1,
+            completedNarrative.Count);
         Assert.Equal(EventType.Attack, completedNarrative[0].EventType);
         Assert.All(completedNarrative.Skip(1), matchEvent => Assert.Equal(EventType.AttackProgression, matchEvent.EventType));
+    }
+
+    [Fact]
+    public void SimulateMatch_AttackActionsCanShareAMinute()
+    {
+        var seedDataService = new SeedDataService();
+        var engine = new MatchEngine();
+        var foundSharedMinute = false;
+
+        for (var seed = 1; seed <= 40 && !foundSharedMinute; seed++)
+        {
+            var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+            foundSharedMinute = engine.SimulateMatch(homeTeam, awayTeam, seed).Events
+                .Where(matchEvent => !string.IsNullOrWhiteSpace(matchEvent.AttackNarrativeId) &&
+                    matchEvent.EventType is EventType.Attack or EventType.AttackProgression)
+                .GroupBy(matchEvent => new { matchEvent.AttackNarrativeId, matchEvent.Minute })
+                .Any(group => group.Count() >= 2);
+        }
+
+        Assert.True(foundSharedMinute, "Expected at least one attack to contain multiple actions in the same minute.");
+    }
+
+    [Fact]
+    public void AdvanceMatch_MinuteByMinuteCompletesFinalAttackBeforeHalftime()
+    {
+        var seedDataService = new SeedDataService();
+        var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+        var engine = new MatchEngine();
+        var match = engine.CreateLiveMatch(homeTeam, awayTeam);
+
+        while (match.CurrentPhase != MatchPhase.Halftime && match.CurrentMinute < 60)
+        {
+            var nextMinute = match.CurrentMinute + 1;
+            match = engine.AdvanceMatch(match, nextMinute, nextMinute, includeFulltime: false, seed: 800 + nextMinute);
+        }
+
+        var halftimeIndex = match.Events.FindIndex(matchEvent => matchEvent.EventType == EventType.Halftime);
+        Assert.Equal(MatchPhase.Halftime, match.CurrentPhase);
+        Assert.True(halftimeIndex > 0);
+        Assert.DoesNotContain(
+            match.Events.Take(halftimeIndex).TakeLast(1),
+            matchEvent => matchEvent.EventType is EventType.Attack or EventType.AttackProgression);
     }
 
     [Fact]
@@ -797,6 +842,46 @@ public class MatchEngineScoringTests
             Assert.True(
                 eventsAfterHalftime.Count == 0,
                 $"Seed {seed}: halftime appeared before later first-half events.");
+        }
+    }
+
+    [Fact]
+    public void SimulateFirstHalf_CompletesFinalAttackBeforeHalftimeWhistle()
+    {
+        var seedDataService = new SeedDataService();
+        var engine = new MatchEngine();
+
+        for (var seed = 1; seed <= 80; seed++)
+        {
+            var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+            var result = engine.SimulateFirstHalf(homeTeam, awayTeam, seed);
+            var halftimeIndex = result.Events.FindIndex(matchEvent => matchEvent.EventType == EventType.Halftime);
+
+            Assert.True(halftimeIndex > 0, $"Seed {seed}: missing halftime sequence.");
+            Assert.DoesNotContain(
+                result.Events.Take(halftimeIndex).TakeLast(1),
+                matchEvent => matchEvent.EventType is EventType.Attack or EventType.AttackProgression);
+            Assert.InRange(result.FirstHalfAttackExtensionMinutes, 0, 7);
+        }
+    }
+
+    [Fact]
+    public void SimulateMatch_CompletesFinalAttackBeforeFulltimeWhistle()
+    {
+        var seedDataService = new SeedDataService();
+        var engine = new MatchEngine();
+
+        for (var seed = 1; seed <= 80; seed++)
+        {
+            var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+            var result = engine.SimulateMatch(homeTeam, awayTeam, seed);
+            var fulltimeIndex = result.Events.FindIndex(matchEvent => matchEvent.EventType == EventType.Fulltime);
+
+            Assert.True(fulltimeIndex > 0, $"Seed {seed}: missing fulltime sequence.");
+            Assert.DoesNotContain(
+                result.Events.Take(fulltimeIndex).TakeLast(1),
+                matchEvent => matchEvent.EventType is EventType.Attack or EventType.AttackProgression);
+            Assert.InRange(result.SecondHalfAttackExtensionMinutes, 0, 7);
         }
     }
 

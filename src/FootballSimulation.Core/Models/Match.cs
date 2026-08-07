@@ -11,6 +11,8 @@ public class Match
     public int CurrentMinute { get; set; }
     public int FirstHalfAddedMinutes { get; set; }
     public int SecondHalfAddedMinutes { get; set; }
+    public int FirstHalfAttackExtensionMinutes { get; set; }
+    public int SecondHalfAttackExtensionMinutes { get; set; }
     public int FirstHalfStoppageSeconds { get; set; }
     public int SecondHalfStoppageSeconds { get; set; }
     public bool FirstHalfAddedTimeAnnounced { get; set; }
