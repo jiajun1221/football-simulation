@@ -13,6 +13,11 @@ public class Fixture
     public bool AffectsLeagueTable { get; set; } = true;
     public bool IsKnockout { get; set; }
     public string KnockoutRoundKey { get; set; } = string.Empty;
+    public bool IsTwoLeggedTie { get; set; }
+    public string KnockoutTieId { get; set; } = string.Empty;
+    public int LegNumber { get; set; }
+    public int? AggregateHomeScore { get; set; }
+    public int? AggregateAwayScore { get; set; }
     public int? ExtraTimeHomeScore { get; set; }
     public int? ExtraTimeAwayScore { get; set; }
     public int? PenaltyHomeScore { get; set; }

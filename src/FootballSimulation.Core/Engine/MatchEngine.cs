@@ -2070,7 +2070,11 @@ public class MatchEngine
         if (isResolvingPreviousAttack && simulationState.AttackNarrativeStage >= 3)
         {
             decisiveCreator = FindActivePlayerByName(attackingTeam, simulationState.AttackBallCarrierName) ?? shooter;
-            (forcedChanceType, decisiveReceiver) = ChooseDecisiveChance(attackingTeam, decisiveCreator, random);
+            (forcedChanceType, decisiveReceiver) = ChooseDecisiveChance(
+                match,
+                attackingTeam,
+                decisiveCreator,
+                random);
             var decisiveEvent = eventFactory.CreateDecisiveAttackAction(
                 minute,
                 attackingTeam,
@@ -2587,6 +2591,7 @@ public class MatchEngine
     }
 
     private static (string ChanceType, Player Receiver) ChooseDecisiveChance(
+        Match match,
         Team attackingTeam,
         Player creator,
         Random random)
@@ -2596,16 +2601,13 @@ public class MatchEngine
             .ToList();
         var preferredPosition = creator.PreferredPosition?.ToUpperInvariant() ?? string.Empty;
         var isWideCreator = preferredPosition is "LW" or "RW" or "LM" or "RM" or "LWB" or "RWB" or "LB" or "RB";
-        var forwardRunner = activeOutfieldPlayers
+        var runnerCandidates = activeOutfieldPlayers
             .Where(player => !string.Equals(player.Name, creator.Name, StringComparison.OrdinalIgnoreCase))
-            .OrderByDescending(player =>
-                (player.Position == Position.Forward ? 35 : 0) +
-                (player.Traits.Contains(PlayerTrait.TriesToBeatOffsideTrap) ? 25 : 0) +
-                (player.Traits.Contains(PlayerTrait.Rapid) ? 20 : 0) +
-                player.Pace * 0.25 +
-                player.Shooting * 0.20 +
-                random.NextDouble())
-            .FirstOrDefault() ?? creator;
+            .ToList();
+        var forwardRunner = ChooseWeightedPlayer(
+            runnerCandidates,
+            player => GetDecisiveRunnerWeight(match, attackingTeam, player, isWideCreator),
+            random) ?? creator;
 
         if (isWideCreator || creator.Traits.Contains(PlayerTrait.CrossingSpecialist))
         {
@@ -2629,6 +2631,65 @@ public class MatchEngine
         }
 
         return ("quick combination", forwardRunner);
+    }
+
+    private static double GetDecisiveRunnerWeight(
+        Match match,
+        Team attackingTeam,
+        Player player,
+        bool isWideAttack)
+    {
+        var attributes = PlayerAttributeService.GetAttributes(player);
+        var performance = match.PlayerPerformances.FirstOrDefault(existing =>
+            existing.TeamName.Equals(attackingTeam.Name, StringComparison.OrdinalIgnoreCase) &&
+            existing.PlayerName.Equals(player.Name, StringComparison.OrdinalIgnoreCase));
+        var positionWeight = player.Position switch
+        {
+            Position.Forward => 1.45,
+            Position.Midfielder => 1.05,
+            Position.Defender when isWideAttack && player.PreferredPosition is "LB" or "RB" or "LWB" or "RWB" => 0.72,
+            Position.Defender => 0.28,
+            _ => 0.15
+        };
+        var suitability = 0.45 +
+            attributes.Shooting / 180.0 +
+            attributes.Pace / 300.0 +
+            attributes.Dribbling / 420.0;
+        var traitModifier = 1.0 +
+            (player.Traits.Contains(PlayerTrait.Poacher) ? 0.16 : 0.0) +
+            (player.Traits.Contains(PlayerTrait.TriesToBeatOffsideTrap) ? 0.13 : 0.0) +
+            (player.Traits.Contains(PlayerTrait.Rapid) ? 0.10 : 0.0) +
+            (isWideAttack && player.Traits.Contains(PlayerTrait.AerialThreat) ? 0.14 : 0.0) +
+            (isWideAttack && player.Traits.Contains(PlayerTrait.PowerHeader) ? 0.12 : 0.0);
+        var repeatedShotModifier = 1.0 / (1.0 + (performance?.Shots ?? 0) * 0.16);
+
+        return Math.Max(0.05, positionWeight * suitability * traitModifier * repeatedShotModifier);
+    }
+
+    private static Player? ChooseWeightedPlayer(
+        IReadOnlyList<Player> candidates,
+        Func<Player, double> getWeight,
+        Random random)
+    {
+        if (candidates.Count == 0)
+        {
+            return null;
+        }
+
+        var weightedCandidates = candidates
+            .Select(player => (Player: player, Weight: Math.Max(0.01, getWeight(player))))
+            .ToList();
+        var roll = random.NextDouble() * weightedCandidates.Sum(candidate => candidate.Weight);
+        foreach (var candidate in weightedCandidates)
+        {
+            roll -= candidate.Weight;
+            if (roll <= 0)
+            {
+                return candidate.Player;
+            }
+        }
+
+        return weightedCandidates[^1].Player;
     }
 
     private Team HandleAttackChainInterruption(
@@ -4175,15 +4236,54 @@ public class MatchEngine
 
         if (roll < 0.25)
         {
-            matchLog.AddEvent(eventFactory.CreateDoubleBooking(minute, firstPlayer, secondPlayer));
-            ApplyYellowCard(minute, simulationState, firstTeam, secondTeam, firstPlayer, GetOrCreatePerformance(simulationState.Match, firstTeam, firstPlayer), GetTeamStats(simulationState.Match, firstTeam), matchLog, eventFactory, random, addCardEvent: false);
-            ApplyYellowCard(minute, simulationState, secondTeam, firstTeam, secondPlayer, GetOrCreatePerformance(simulationState.Match, secondTeam, secondPlayer), GetTeamStats(simulationState.Match, secondTeam), matchLog, eventFactory, random, addCardEvent: false);
+            var firstEligible = !WasBookedEarlierInIncident(matchLog, minute, firstPlayer);
+            var secondEligible = !WasBookedEarlierInIncident(matchLog, minute, secondPlayer);
+            if (firstEligible && secondEligible)
+            {
+                matchLog.AddEvent(eventFactory.CreateDoubleBooking(minute, firstPlayer, secondPlayer));
+                ApplyYellowCard(minute, simulationState, firstTeam, secondTeam, firstPlayer, GetOrCreatePerformance(simulationState.Match, firstTeam, firstPlayer), GetTeamStats(simulationState.Match, firstTeam), matchLog, eventFactory, random, addCardEvent: false);
+                ApplyYellowCard(minute, simulationState, secondTeam, firstTeam, secondPlayer, GetOrCreatePerformance(simulationState.Match, secondTeam, secondPlayer), GetTeamStats(simulationState.Match, secondTeam), matchLog, eventFactory, random, addCardEvent: false);
+            }
+            else if (firstEligible || secondEligible)
+            {
+                var bookedPlayer = firstEligible ? firstPlayer : secondPlayer;
+                var bookedTeam = firstEligible ? firstTeam : secondTeam;
+                var opposingTeam = firstEligible ? secondTeam : firstTeam;
+                ApplyYellowCard(
+                    minute,
+                    simulationState,
+                    bookedTeam,
+                    opposingTeam,
+                    bookedPlayer,
+                    GetOrCreatePerformance(simulationState.Match, bookedTeam, bookedPlayer),
+                    GetTeamStats(simulationState.Match, bookedTeam),
+                    matchLog,
+                    eventFactory,
+                    random,
+                    reason: "after the confrontation");
+            }
+            else
+            {
+                matchLog.AddEvent(eventFactory.CreateRefereeWarning(minute, firstPlayer, secondPlayer));
+            }
+
             return;
         }
 
         if (roll < 0.90)
         {
-            var bookedPlayer = ChooseConfrontationOffender(firstPlayer, secondPlayer, random);
+            var eligiblePlayers = new[] { firstPlayer, secondPlayer }
+                .Where(player => !WasBookedEarlierInIncident(matchLog, minute, player))
+                .ToList();
+            if (eligiblePlayers.Count == 0)
+            {
+                matchLog.AddEvent(eventFactory.CreateRefereeWarning(minute, firstPlayer, secondPlayer));
+                return;
+            }
+
+            var bookedPlayer = eligiblePlayers.Count == 1
+                ? eligiblePlayers[0]
+                : ChooseConfrontationOffender(eligiblePlayers[0], eligiblePlayers[1], random);
             var bookedTeam = IsPlayerOnTeam(bookedPlayer, firstTeam) ? firstTeam : secondTeam;
             var opposingTeam = bookedTeam == firstTeam ? secondTeam : firstTeam;
             ApplyYellowCard(
@@ -4202,6 +4302,18 @@ public class MatchEngine
         }
 
         matchLog.AddEvent(eventFactory.CreateRefereeWarning(minute, firstPlayer, secondPlayer));
+    }
+
+    private static bool WasBookedEarlierInIncident(
+        MatchLogService matchLog,
+        int minute,
+        Player player)
+    {
+        return matchLog.GetEvents().Any(matchEvent =>
+            matchEvent.Minute == minute &&
+            matchEvent.EventType == EventType.YellowCard &&
+            (string.Equals(matchEvent.PrimaryPlayerName, player.Name, StringComparison.OrdinalIgnoreCase) ||
+             string.Equals(matchEvent.SecondaryPlayerName, player.Name, StringComparison.OrdinalIgnoreCase)));
     }
 
     private static double GetFoulConfrontationChance(
@@ -4782,10 +4894,10 @@ public class MatchEngine
             return shooter;
         }
 
-        return candidates
-            .OrderByDescending(candidate => _teamStrengthCalculator.GetShooterWeight(candidate))
-            .ThenBy(candidate => candidate.Name, StringComparer.OrdinalIgnoreCase)
-            .First();
+        return ChooseWeightedPlayer(
+            candidates,
+            _teamStrengthCalculator.GetShooterWeight,
+            random) ?? shooter;
     }
 
     private static PlayerTrait? GetTriggeredWonderGoalTrait(Player shooter, string chanceType)

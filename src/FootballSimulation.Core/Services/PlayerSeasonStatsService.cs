@@ -54,6 +54,15 @@ public class PlayerSeasonStatsService
                     Starts = stat.Starts,
                     Goals = stat.Goals,
                     Assists = stat.Assists,
+                    Shots = stat.Shots,
+                    ShotsOnTarget = stat.ShotsOnTarget,
+                    KeyPasses = stat.KeyPasses,
+                    Tackles = stat.Tackles,
+                    Interceptions = stat.Interceptions,
+                    Blocks = stat.Blocks,
+                    Clearances = stat.Clearances,
+                    AerialDuelsWon = stat.AerialDuelsWon,
+                    Recoveries = stat.Recoveries,
                     Saves = stat.Saves,
                     GoalsConceded = stat.GoalsConceded,
                     CleanSheets = stat.CleanSheets,
@@ -106,6 +115,15 @@ public class PlayerSeasonStatsService
 
             builder.Goals += performance.Goals;
             builder.Assists += performance.Assists;
+            builder.Shots += performance.Shots;
+            builder.ShotsOnTarget += performance.ShotsOnTarget;
+            builder.KeyPasses += performance.KeyPasses;
+            builder.Tackles += performance.Tackles;
+            builder.Interceptions += performance.Interceptions;
+            builder.Blocks += performance.Blocks;
+            builder.Clearances += performance.Clearances;
+            builder.AerialDuelsWon += performance.AerialDuelsWon;
+            builder.Recoveries += performance.Recoveries;
             builder.Saves += performance.Saves;
             builder.YellowCards += performance.YellowCards;
             builder.RedCards += performance.RedCards;
@@ -189,6 +207,15 @@ public class PlayerSeasonStatsService
         public int Starts { get; set; }
         public int Goals { get; set; }
         public int Assists { get; set; }
+        public int Shots { get; set; }
+        public int ShotsOnTarget { get; set; }
+        public int KeyPasses { get; set; }
+        public int Tackles { get; set; }
+        public int Interceptions { get; set; }
+        public int Blocks { get; set; }
+        public int Clearances { get; set; }
+        public int AerialDuelsWon { get; set; }
+        public int Recoveries { get; set; }
         public int Saves { get; set; }
         public int GoalsConceded { get; set; }
         public int CleanSheets { get; set; }
@@ -211,6 +238,15 @@ public class PlayerSeasonStatsService
                 Starts = Starts,
                 Goals = Goals,
                 Assists = Assists,
+                Shots = Shots,
+                ShotsOnTarget = ShotsOnTarget,
+                KeyPasses = KeyPasses,
+                Tackles = Tackles,
+                Interceptions = Interceptions,
+                Blocks = Blocks,
+                Clearances = Clearances,
+                AerialDuelsWon = AerialDuelsWon,
+                Recoveries = Recoveries,
                 Saves = Saves,
                 GoalsConceded = GoalsConceded,
                 CleanSheets = CleanSheets,

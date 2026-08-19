@@ -111,9 +111,10 @@ public partial class PreMatchView : UserControl
 
     private static string GetFixtureRoundText(Fixture fixture)
     {
-        return string.IsNullOrWhiteSpace(fixture.RoundName)
+        var roundText = string.IsNullOrWhiteSpace(fixture.RoundName)
             ? $"Round {fixture.RoundNumber}"
             : fixture.RoundName;
+        return fixture.IsTwoLeggedTie ? $"{roundText} - Leg {fixture.LegNumber}" : roundText;
     }
 
     private LineupValidationResult ReconcileUnavailablePlayers(Team team)

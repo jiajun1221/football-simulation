@@ -26,6 +26,25 @@ public class MultiCompetitionSeasonTests
     }
 
     [Fact]
+    public void ChampionsLeague_SquadsDoNotDuplicateArsenalGyokeresAtSporting()
+    {
+        var league = CreateLeague(teamCount: 20);
+        var uclTeams = league.Fixtures
+            .Where(fixture => fixture.Competition == CompetitionType.ChampionsLeague)
+            .SelectMany(fixture => new[] { fixture.HomeTeam, fixture.AwayTeam })
+            .DistinctBy(team => team.Name, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        var owners = uclTeams
+            .Where(team => team.Players
+                .Concat(team.Substitutes)
+                .Any(player => player.Name.StartsWith("Viktor Gy", StringComparison.OrdinalIgnoreCase)))
+            .Select(team => team.Name)
+            .ToList();
+
+        Assert.Equal(["Arsenal"], owners);
+    }
+
+    [Fact]
     public void NextFixture_UsesCalendarOrderAcrossCompetitions()
     {
         var league = CreateLeague(teamCount: 20);
@@ -286,6 +305,14 @@ public class MultiCompetitionSeasonTests
         Assert.Equal(36, state.Standings.Count);
         Assert.Equal("Round of 16", state.CurrentRoundName);
         Assert.NotEmpty(state.ProgressRecords);
+        Assert.Equal(
+            [51, 53],
+            league.Fixtures
+                .Where(fixture => fixture.Competition == CompetitionType.ChampionsLeague && fixture.RoundName == "Round of 16")
+                .Select(fixture => fixture.CalendarRound)
+                .Distinct()
+                .Order()
+                .ToArray());
     }
 
     [Fact]
@@ -316,6 +343,224 @@ public class MultiCompetitionSeasonTests
 
         Assert.NotEmpty(quarterFinalFixtures);
         Assert.All(quarterFinalFixtures, fixture => Assert.Equal(FixtureImportance.Knockout, fixture.Importance));
+    }
+
+    [Fact]
+    public void ChampionsLeague_KnockoutRoundsUseTwoLegAggregateTies()
+    {
+        var calendar = new SeasonCalendarService();
+        var progression = new CompetitionProgressionService();
+        var teams = Enumerable.Range(1, 4).Select(index => CreateTeam($"UCL Team {index}")).ToList();
+        var league = new League
+        {
+            Name = "Test League",
+            Season = "2025-26",
+            Teams = teams,
+            CompetitionStates =
+            [
+                new SeasonCompetitionState
+                {
+                    Competition = CompetitionType.ChampionsLeague,
+                    CurrentRoundName = "Round of 16",
+                    QualifiedTeamNames = teams.Select(team => team.Name).ToList()
+                }
+            ]
+        };
+        league.Fixtures = calendar.GenerateNextCupRoundFixtures(
+            CompetitionType.ChampionsLeague,
+            "Round of 16",
+            teams,
+            61,
+            league.Season);
+
+        Assert.Equal(4, league.Fixtures.Count);
+        Assert.Equal(2, league.Fixtures.Select(fixture => fixture.KnockoutTieId).Distinct().Count());
+        Assert.Equal([61, 63], league.Fixtures.Select(fixture => fixture.CalendarRound).Distinct().Order().ToArray());
+        Assert.All(league.Fixtures, fixture => Assert.True(fixture.IsTwoLeggedTie));
+
+        foreach (var tie in league.Fixtures.GroupBy(fixture => fixture.KnockoutTieId).ToList())
+        {
+            var firstLeg = tie.Single(fixture => fixture.LegNumber == 1);
+            var secondLeg = tie.Single(fixture => fixture.LegNumber == 2);
+            Assert.Same(firstLeg.HomeTeam, secondLeg.AwayTeam);
+            Assert.Same(firstLeg.AwayTeam, secondLeg.HomeTeam);
+
+            CompleteFixture(progression, league, firstLeg, homeScore: 2, awayScore: 0);
+            Assert.Equal(string.Empty, firstLeg.WinningTeamName);
+            CompleteFixture(progression, league, secondLeg, homeScore: 1, awayScore: 1);
+
+            Assert.Equal(firstLeg.HomeTeam.Name, firstLeg.WinningTeamName);
+            Assert.Equal(firstLeg.HomeTeam.Name, secondLeg.WinningTeamName);
+            Assert.Equal(3, firstLeg.AggregateHomeScore);
+            Assert.Equal(1, firstLeg.AggregateAwayScore);
+        }
+
+        var quarterFinals = league.Fixtures
+            .Where(fixture => fixture.RoundName == "Quarter Final")
+            .ToList();
+        Assert.Equal(2, quarterFinals.Count);
+        Assert.Equal([69, 71], quarterFinals.Select(fixture => fixture.CalendarRound).Distinct().Order().ToArray());
+    }
+
+    [Fact]
+    public void ChampionsLeague_FirstLegDefeatStillCarriesScoreIntoSecondLegAggregate()
+    {
+        var calendar = new SeasonCalendarService();
+        var progression = new CompetitionProgressionService();
+        var teams = Enumerable.Range(1, 2).Select(index => CreateTeam($"Aggregate Team {index}")).ToList();
+        var league = new League
+        {
+            Name = "Test League",
+            Season = "2025-26",
+            Teams = teams,
+            CompetitionStates =
+            [
+                new SeasonCompetitionState
+                {
+                    Competition = CompetitionType.ChampionsLeague,
+                    CurrentRoundName = "Round of 16",
+                    QualifiedTeamNames = teams.Select(team => team.Name).ToList()
+                }
+            ]
+        };
+        league.Fixtures = calendar.GenerateNextCupRoundFixtures(
+            CompetitionType.ChampionsLeague,
+            "Round of 16",
+            teams,
+            51,
+            league.Season);
+        var firstLeg = league.Fixtures.Single(fixture => fixture.LegNumber == 1);
+        var secondLeg = league.Fixtures.Single(fixture => fixture.LegNumber == 2);
+
+        CompleteFixture(progression, league, firstLeg, homeScore: 0, awayScore: 2);
+
+        var liveAggregate = KnockoutAggregateService.GetLiveAggregateScore(
+            league,
+            secondLeg,
+            currentHomeScore: 1,
+            currentAwayScore: 0);
+        Assert.Equal((3, 0), liveAggregate);
+
+        CompleteFixture(progression, league, secondLeg, homeScore: 1, awayScore: 0);
+
+        Assert.Equal(3, secondLeg.AggregateHomeScore);
+        Assert.Equal(0, secondLeg.AggregateAwayScore);
+        Assert.Equal(firstLeg.AwayTeam.Name, secondLeg.WinningTeamName);
+    }
+
+    [Fact]
+    public void ChampionsLeague_CompletingFirstLegRoundDoesNotSimulateSecondLegs()
+    {
+        var calendar = new SeasonCalendarService();
+        var engine = new LeagueEngine();
+        var teams = Enumerable.Range(1, 4).Select(index => CreateTeam($"Leg Team {index}")).ToList();
+        var league = new League
+        {
+            Name = "Test League",
+            Season = "2025-26",
+            Teams = teams,
+            CompetitionStates =
+            [
+                new SeasonCompetitionState
+                {
+                    Competition = CompetitionType.ChampionsLeague,
+                    CurrentRoundName = "Round of 16",
+                    QualifiedTeamNames = teams.Select(team => team.Name).ToList()
+                }
+            ]
+        };
+        league.Fixtures = calendar.GenerateNextCupRoundFixtures(
+            CompetitionType.ChampionsLeague,
+            "Round of 16",
+            teams,
+            51,
+            league.Season);
+        var selectedFirstLeg = league.Fixtures.First(fixture => fixture.LegNumber == 1);
+        var selectedSecondLeg = league.Fixtures.Single(fixture =>
+            fixture.LegNumber == 2 && fixture.KnockoutTieId == selectedFirstLeg.KnockoutTieId);
+
+        engine.SimulateFixture(league, selectedFirstLeg, seed: 901);
+        engine.SimulateRemainingFixturesForCompetitionRound(league, selectedFirstLeg, seed: 902);
+
+        Assert.All(league.Fixtures.Where(fixture => fixture.LegNumber == 1), fixture => Assert.True(fixture.IsPlayed));
+        Assert.All(league.Fixtures.Where(fixture => fixture.LegNumber == 2), fixture => Assert.False(fixture.IsPlayed));
+        Assert.False(selectedSecondLeg.IsPlayed);
+        Assert.Equal(string.Empty, selectedSecondLeg.WinningTeamName);
+    }
+
+    [Fact]
+    public void ChampionsLeague_KnockoutScheduleLeavesRecoveryGapsBetweenRounds()
+    {
+        var calendar = new SeasonCalendarService();
+        var teams = Enumerable.Range(1, 16).Select(index => CreateTeam($"Schedule Team {index}")).ToList();
+
+        var roundOf16 = calendar.GenerateNextCupRoundFixtures(
+            CompetitionType.ChampionsLeague, "Round of 16", teams, 51, "2025-26");
+        var quarterFinal = calendar.GenerateNextCupRoundFixtures(
+            CompetitionType.ChampionsLeague, "Quarter Final", teams.Take(8).ToList(), 59, "2025-26");
+        var semiFinal = calendar.GenerateNextCupRoundFixtures(
+            CompetitionType.ChampionsLeague, "Semi Final", teams.Take(4).ToList(), 67, "2025-26");
+        var final = calendar.GenerateNextCupRoundFixtures(
+            CompetitionType.ChampionsLeague, "Final", teams.Take(2).ToList(), 77, "2025-26");
+
+        Assert.True(quarterFinal.Min(fixture => fixture.CalendarRound) - roundOf16.Max(fixture => fixture.CalendarRound) >= 6);
+        Assert.True(semiFinal.Min(fixture => fixture.CalendarRound) - quarterFinal.Max(fixture => fixture.CalendarRound) >= 6);
+        Assert.True(final.Min(fixture => fixture.CalendarRound) - semiFinal.Max(fixture => fixture.CalendarRound) >= 8);
+        Assert.Single(final);
+        Assert.False(final[0].IsTwoLeggedTie);
+    }
+
+    [Fact]
+    public void ChampionsLeague_OverdueTwoLegTieIsMovedAfterCurrentRoundWithLeagueMatchBetweenLegs()
+    {
+        var calendar = new SeasonCalendarService();
+        var progression = new CompetitionProgressionService();
+        var teams = Enumerable.Range(1, 4).Select(index => CreateTeam($"UCL Team {index}")).ToList();
+        var league = new League
+        {
+            Name = "Test League",
+            Season = "2025-26",
+            Teams = teams
+        };
+        league.Fixtures = calendar.GenerateNextCupRoundFixtures(
+            CompetitionType.ChampionsLeague,
+            "Round of 16",
+            teams,
+            61,
+            league.Season);
+        league.Fixtures.Add(new Fixture
+        {
+            Competition = CompetitionType.PremierLeague,
+            RoundName = "Round 36",
+            CalendarRound = 72,
+            RoundNumber = 36,
+            HomeTeam = teams[0],
+            AwayTeam = teams[1],
+            IsPlayed = true
+        });
+        league.Fixtures.Add(new Fixture
+        {
+            Competition = CompetitionType.PremierLeague,
+            RoundName = "Round 37",
+            CalendarRound = 74,
+            RoundNumber = 37,
+            HomeTeam = teams[0],
+            AwayTeam = teams[2]
+        });
+
+        Assert.True(progression.RecoverMissingKnockoutRound(league));
+
+        var knockoutRounds = league.Fixtures
+            .Where(fixture => fixture.Competition == CompetitionType.ChampionsLeague)
+            .Select(fixture => fixture.CalendarRound)
+            .Distinct()
+            .Order()
+            .ToArray();
+        Assert.Equal([73, 75], knockoutRounds);
+        Assert.Contains(league.Fixtures, fixture =>
+            fixture.Competition == CompetitionType.PremierLeague &&
+            fixture.CalendarRound > knockoutRounds[0] &&
+            fixture.CalendarRound < knockoutRounds[1]);
     }
 
     [Fact]

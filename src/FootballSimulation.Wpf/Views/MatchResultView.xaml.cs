@@ -164,7 +164,7 @@ public partial class MatchResultView : UserControl
             fixture.PenaltyHomeScore is null &&
             fixture.PenaltyAwayScore is null &&
             _state.CurrentLiveMatchSegment == LiveMatchSegment.ExtraTimeSecondHalf &&
-            match.HomeScore == match.AwayScore;
+            KnockoutAggregateService.IsTieLevelAfterMatch(_state.League, fixture, match);
     }
 
     private static ScorerPanel CreateGoalSummaryPanel(Match match, Team team, int totalGoals, PlayerMatchPerformance? manOfTheMatch)

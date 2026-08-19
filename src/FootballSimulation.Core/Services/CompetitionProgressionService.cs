@@ -28,10 +28,10 @@ public class CompetitionProgressionService
         },
         [CompetitionType.ChampionsLeague] = new(StringComparer.OrdinalIgnoreCase)
         {
-            ["Round of 16"] = ("Quarter Final", 69),
-            ["Quarter Final"] = ("Semi Final", 77),
-            ["Semi Final"] = ("Final", 85),
-            ["Final"] = (null, 85)
+            ["Round of 16"] = ("Quarter Final", 59),
+            ["Quarter Final"] = ("Semi Final", 67),
+            ["Semi Final"] = ("Final", 77),
+            ["Final"] = (null, 77)
         },
         [CompetitionType.CopaDelRey] = new(StringComparer.OrdinalIgnoreCase)
         {
@@ -96,7 +96,7 @@ public class CompetitionProgressionService
 
         if (fixture.IsKnockout)
         {
-            ResolveKnockoutFixture(fixture, seed);
+            ResolveKnockoutFixture(league, fixture, seed);
             AdvanceKnockoutCompetitionIfReady(league, fixture.Competition, fixture.RoundName);
         }
         else if (fixture.Competition == CompetitionType.ChampionsLeague)
@@ -109,6 +109,11 @@ public class CompetitionProgressionService
     public bool RecoverMissingKnockoutRound(League league)
     {
         ArgumentNullException.ThrowIfNull(league);
+
+        if (RescheduleOverdueChampionsLeagueTies(league))
+        {
+            return true;
+        }
 
         foreach (var competition in CupRoundMap.Keys)
         {
@@ -159,8 +164,14 @@ public class CompetitionProgressionService
         fixture.AffectsLeagueTable = fixture.Competition == CompetitionType.PremierLeague;
     }
 
-    private static void ResolveKnockoutFixture(Fixture fixture, int? seed)
+    private static void ResolveKnockoutFixture(League league, Fixture fixture, int? seed)
     {
+        if (fixture.IsTwoLeggedTie)
+        {
+            ResolveTwoLeggedTie(league, fixture, seed);
+            return;
+        }
+
         if (!string.IsNullOrWhiteSpace(fixture.WinningTeamName) || fixture.Result is null)
         {
             return;
@@ -216,6 +227,94 @@ public class CompetitionProgressionService
             homeWins ? fixture.AwayTeam : fixture.HomeTeam);
     }
 
+    private static void ResolveTwoLeggedTie(League league, Fixture completedFixture, int? seed)
+    {
+        var tieFixtures = league.Fixtures
+            .Where(fixture => fixture.Competition == completedFixture.Competition &&
+                fixture.IsTwoLeggedTie &&
+                fixture.KnockoutTieId.Equals(completedFixture.KnockoutTieId, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(fixture => fixture.LegNumber)
+            .ToList();
+        if (tieFixtures.Count != 2)
+        {
+            return;
+        }
+
+        var aggregateScores = tieFixtures
+            .SelectMany(fixture => new[] { fixture.HomeTeam.Name, fixture.AwayTeam.Name })
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(teamName => teamName, _ => 0, StringComparer.OrdinalIgnoreCase);
+        foreach (var fixture in tieFixtures.Where(fixture => fixture.IsPlayed && fixture.Result is not null))
+        {
+            aggregateScores[fixture.HomeTeam.Name] += fixture.Result!.HomeScore;
+            aggregateScores[fixture.AwayTeam.Name] += fixture.Result.AwayScore;
+        }
+
+        foreach (var fixture in tieFixtures)
+        {
+            fixture.AggregateHomeScore = aggregateScores[fixture.HomeTeam.Name];
+            fixture.AggregateAwayScore = aggregateScores[fixture.AwayTeam.Name];
+        }
+
+        if (tieFixtures.Any(fixture => !fixture.IsPlayed || fixture.Result is null))
+        {
+            return;
+        }
+
+        var teams = tieFixtures
+            .SelectMany(fixture => new[] { fixture.HomeTeam, fixture.AwayTeam })
+            .DistinctBy(team => team.Name, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        if (teams.Count != 2)
+        {
+            return;
+        }
+
+        Team winner;
+        Team loser;
+        var firstScore = aggregateScores[teams[0].Name];
+        var secondScore = aggregateScores[teams[1].Name];
+        if (firstScore != secondScore)
+        {
+            winner = firstScore > secondScore ? teams[0] : teams[1];
+            loser = ReferenceEquals(winner, teams[0]) ? teams[1] : teams[0];
+        }
+        else
+        {
+            var decidingLeg = tieFixtures.Single(fixture => fixture.LegNumber == 2);
+            var random = seed.HasValue
+                ? new Random(unchecked(seed.Value * 397 ^ decidingLeg.FixtureId.GetHashCode()))
+                : Random.Shared;
+            var homeStrength = GetTeamStrength(decidingLeg.HomeTeam);
+            var awayStrength = GetTeamStrength(decidingLeg.AwayTeam);
+            var homeWins = random.NextDouble() < homeStrength / Math.Max(1.0, homeStrength + awayStrength);
+
+            decidingLeg.ExtraTimeHomeScore = decidingLeg.Result!.HomeScore;
+            decidingLeg.ExtraTimeAwayScore = decidingLeg.Result.AwayScore;
+            decidingLeg.PenaltyHomeScore = homeWins ? random.Next(4, 6) : random.Next(2, 5);
+            decidingLeg.PenaltyAwayScore = homeWins ? random.Next(2, 5) : random.Next(4, 6);
+            if (decidingLeg.PenaltyHomeScore == decidingLeg.PenaltyAwayScore)
+            {
+                if (homeWins)
+                {
+                    decidingLeg.PenaltyHomeScore++;
+                }
+                else
+                {
+                    decidingLeg.PenaltyAwayScore++;
+                }
+            }
+
+            winner = homeWins ? decidingLeg.HomeTeam : decidingLeg.AwayTeam;
+            loser = homeWins ? decidingLeg.AwayTeam : decidingLeg.HomeTeam;
+        }
+
+        foreach (var fixture in tieFixtures)
+        {
+            SetWinner(fixture, winner, loser);
+        }
+    }
+
     private void AdvanceKnockoutCompetitionIfReady(League league, CompetitionType competition, string roundName)
     {
         if (!CupRoundMap.TryGetValue(competition, out var roundMap) ||
@@ -247,6 +346,7 @@ public class CompetitionProgressionService
             .Select(fixture => ResolveTeam(league, fixture.WinningTeamName))
             .Where(team => team is not null)
             .Cast<Team>()
+            .DistinctBy(team => team.Name, StringComparer.OrdinalIgnoreCase)
             .ToList();
 
         if (nextRoundInfo.NextRound is not null &&
@@ -262,7 +362,11 @@ public class CompetitionProgressionService
             Competition = competition,
             RoundName = roundName,
             QualifiedTeamNames = winners.Select(team => team.Name).ToList(),
-            EliminatedTeamNames = roundFixtures.Select(fixture => fixture.LosingTeamName).Where(name => !string.IsNullOrWhiteSpace(name)).ToList()
+            EliminatedTeamNames = roundFixtures
+                .Select(fixture => fixture.LosingTeamName)
+                .Where(name => !string.IsNullOrWhiteSpace(name))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList()
         });
 
         if (nextRoundInfo.NextRound is null || winners.Count <= 1)
@@ -282,11 +386,15 @@ public class CompetitionProgressionService
 
         state.QualifiedTeamNames = winners.Select(team => team.Name).ToList();
         state.CurrentRoundName = nextRoundInfo.NextRound;
+        var calendarRound = GetNextAvailableCupCalendarRound(
+            league,
+            competition,
+            nextRoundInfo.CalendarRound);
         league.Fixtures.AddRange(_calendarService.GenerateNextCupRoundFixtures(
             competition,
             nextRoundInfo.NextRound,
             winners,
-            nextRoundInfo.CalendarRound,
+            calendarRound,
             league.Season));
         league.Fixtures = league.Fixtures
             .OrderBy(fixture => fixture.CalendarRound)
@@ -476,11 +584,15 @@ public class CompetitionProgressionService
             QualifiedTeamNames = playoffPlaces.Select(row => row.TeamName).ToList()
         });
         state.CurrentRoundName = "Round of 16";
+        var calendarRound = GetNextAvailableCupCalendarRound(
+            league,
+            CompetitionType.ChampionsLeague,
+            51);
         league.Fixtures.AddRange(_calendarService.GenerateNextCupRoundFixtures(
             CompetitionType.ChampionsLeague,
             "Round of 16",
             qualifiers,
-            61,
+            calendarRound,
             league.Season));
         league.Fixtures = league.Fixtures
             .OrderBy(fixture => fixture.CalendarRound)
@@ -488,6 +600,96 @@ public class CompetitionProgressionService
             .ThenBy(fixture => fixture.HomeTeam.Name)
             .ThenBy(fixture => fixture.AwayTeam.Name)
             .ToList();
+    }
+
+    private static int GetNextAvailableCupCalendarRound(
+        League league,
+        CompetitionType competition,
+        int plannedCalendarRound)
+    {
+        if (competition != CompetitionType.ChampionsLeague)
+        {
+            return plannedCalendarRound;
+        }
+
+        var latestCompletedRound = league.Fixtures
+            .Where(fixture => fixture.IsPlayed)
+            .Select(fixture => fixture.CalendarRound)
+            .DefaultIfEmpty(0)
+            .Max();
+        var latestCompletedKnockoutRound = league.Fixtures
+            .Where(fixture =>
+                fixture.Competition == CompetitionType.ChampionsLeague &&
+                fixture.IsKnockout &&
+                fixture.IsPlayed)
+            .Select(fixture => fixture.CalendarRound)
+            .DefaultIfEmpty(0)
+            .Max();
+        var calendarRound = Math.Max(
+            plannedCalendarRound,
+            Math.Max(latestCompletedRound + 1, latestCompletedKnockoutRound + 6));
+
+        // Premier League fixtures occupy even calendar rounds. Keeping UCL ties on
+        // odd rounds leaves an actual domestic match slot between the two legs.
+        return calendarRound % 2 == 0 ? calendarRound + 1 : calendarRound;
+    }
+
+    private static bool RescheduleOverdueChampionsLeagueTies(League league)
+    {
+        var latestCompletedRound = league.Fixtures
+            .Where(fixture => fixture.IsPlayed)
+            .Select(fixture => fixture.CalendarRound)
+            .DefaultIfEmpty(0)
+            .Max();
+        var overdueRounds = league.Fixtures
+            .Where(fixture =>
+                fixture.Competition == CompetitionType.ChampionsLeague &&
+                fixture.IsTwoLeggedTie &&
+                !fixture.IsPlayed)
+            .GroupBy(fixture => fixture.RoundName, StringComparer.OrdinalIgnoreCase)
+            .Where(group => group.Any(fixture => fixture.CalendarRound <= latestCompletedRound))
+            .OrderBy(group => group.Min(fixture => fixture.CalendarRound))
+            .ToList();
+        if (overdueRounds.Count == 0)
+        {
+            return false;
+        }
+
+        var nextRound = latestCompletedRound + 1;
+        if (nextRound % 2 == 0)
+        {
+            nextRound++;
+        }
+
+        foreach (var round in overdueRounds)
+        {
+            foreach (var fixture in round)
+            {
+                fixture.CalendarRound = nextRound + (fixture.LegNumber == 2 ? 2 : 0);
+                fixture.RoundNumber = fixture.CalendarRound;
+                fixture.ScheduledDate = CreateSeasonDate(league.Season, fixture.CalendarRound);
+            }
+
+            nextRound += 8;
+        }
+
+        league.Fixtures = league.Fixtures
+            .OrderBy(fixture => fixture.CalendarRound)
+            .ThenBy(fixture => fixture.Competition)
+            .ThenBy(fixture => fixture.HomeTeam.Name)
+            .ThenBy(fixture => fixture.AwayTeam.Name)
+            .ToList();
+        return true;
+    }
+
+    private static DateTime? CreateSeasonDate(string season, int calendarRound)
+    {
+        var startYearText = (season ?? string.Empty)
+            .Split('-', '/', StringSplitOptions.RemoveEmptyEntries)
+            .FirstOrDefault();
+        return int.TryParse(startYearText, out var startYear)
+            ? new DateTime(startYear, 8, 1).AddDays(calendarRound * 4)
+            : null;
     }
 
     private static CompetitionStandingRow GetOrCreateStandingRow(List<CompetitionStandingRow> table, string teamName)

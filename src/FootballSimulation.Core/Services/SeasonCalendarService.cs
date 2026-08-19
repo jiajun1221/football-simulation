@@ -230,6 +230,45 @@ public class SeasonCalendarService
         int calendarRound,
         string season)
     {
+        if (competition == CompetitionType.ChampionsLeague && !IsFinalRound(roundName))
+        {
+            var fixtures = new List<Fixture>();
+            foreach (var pair in PairTeams(qualifiedTeams))
+            {
+                var tieId = Guid.NewGuid().ToString("N");
+                var firstLeg = CreateFixture(
+                    pair.Home,
+                    pair.Away,
+                    competition,
+                    roundName,
+                    calendarRound,
+                    season,
+                    affectsLeagueTable: false,
+                    isKnockout: true);
+                firstLeg.IsTwoLeggedTie = true;
+                firstLeg.KnockoutTieId = tieId;
+                firstLeg.LegNumber = 1;
+
+                var secondLeg = CreateFixture(
+                    pair.Away,
+                    pair.Home,
+                    competition,
+                    roundName,
+                    calendarRound + 2,
+                    season,
+                    affectsLeagueTable: false,
+                    isKnockout: true);
+                secondLeg.IsTwoLeggedTie = true;
+                secondLeg.KnockoutTieId = tieId;
+                secondLeg.LegNumber = 2;
+
+                fixtures.Add(firstLeg);
+                fixtures.Add(secondLeg);
+            }
+
+            return fixtures;
+        }
+
         return PairTeams(qualifiedTeams)
             .Select(pair => CreateFixture(
                 pair.Home,
@@ -415,8 +454,7 @@ public class SeasonCalendarService
                 .Select(name => premierLeagueTeams.FirstOrDefault(team => team.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
                 .Where(team => team is not null)
                 .Cast<Team>()
-                .DistinctBy(team => team.Name, StringComparer.OrdinalIgnoreCase)
-                .Take(4);
+                .DistinctBy(team => team.Name, StringComparer.OrdinalIgnoreCase);
         }
 
         var preferred = new[] { "Chelsea", "Arsenal", "Manchester City", "Liverpool", "Manchester United", "Tottenham Hotspur" };
@@ -644,7 +682,7 @@ public class SeasonCalendarService
     {
         var homeCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         var awayCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-        var calendarRounds = new[] { 5, 13, 23, 33, 43, 53, 63, 73 };
+        var calendarRounds = new[] { 5, 11, 17, 23, 29, 35, 41, 47 };
         var fixtures = new List<Fixture>();
         var scheduledPairings = AssignMatchdays(pairings);
 

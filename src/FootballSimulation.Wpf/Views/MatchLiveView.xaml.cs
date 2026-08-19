@@ -3195,7 +3195,10 @@ public partial class MatchLiveView : UserControl
             _state.CurrentFixture is not null &&
             _state.CurrentMatch is not null &&
             IsKnockoutFixture(_state.CurrentFixture) &&
-            _state.CurrentMatch.HomeScore == _state.CurrentMatch.AwayScore;
+            KnockoutAggregateService.IsTieLevelAfterMatch(
+                _state.League,
+                _state.CurrentFixture,
+                _state.CurrentMatch);
     }
 
     private bool ShouldRouteToPenaltyResultPreview()
@@ -3204,7 +3207,10 @@ public partial class MatchLiveView : UserControl
             _state.CurrentFixture is not null &&
             _state.CurrentMatch is not null &&
             IsKnockoutFixture(_state.CurrentFixture) &&
-            _state.CurrentMatch.HomeScore == _state.CurrentMatch.AwayScore;
+            KnockoutAggregateService.IsTieLevelAfterMatch(
+                _state.League,
+                _state.CurrentFixture,
+                _state.CurrentMatch);
     }
 
     private void StoreExtraTimeResultIfNeeded()
@@ -3289,9 +3295,10 @@ public partial class MatchLiveView : UserControl
 
     private static string GetFixtureRoundText(Fixture fixture)
     {
-        return string.IsNullOrWhiteSpace(fixture.RoundName)
+        var roundText = string.IsNullOrWhiteSpace(fixture.RoundName)
             ? $"Round {fixture.RoundNumber}"
             : fixture.RoundName;
+        return fixture.IsTwoLeggedTie ? $"{roundText} - Leg {fixture.LegNumber}" : roundText;
     }
 
     private static int GetFixtureCalendarRound(Fixture fixture)
@@ -3348,6 +3355,25 @@ public partial class MatchLiveView : UserControl
     {
         HomeScoreTextBlock.Text = homeScore.ToString();
         AwayScoreTextBlock.Text = awayScore.ToString();
+        UpdateAggregateScore(homeScore, awayScore);
+    }
+
+    private void UpdateAggregateScore(int homeScore, int awayScore)
+    {
+        if (_state.CurrentFixture is null ||
+            KnockoutAggregateService.GetLiveAggregateScore(
+                _state.League,
+                _state.CurrentFixture,
+                homeScore,
+                awayScore) is not { } aggregateScore)
+        {
+            AggregateScorePanel.Visibility = Visibility.Collapsed;
+            AggregateScoreTextBlock.Text = string.Empty;
+            return;
+        }
+
+        AggregateScoreTextBlock.Text = $"Aggregate: {aggregateScore.HomeScore} - {aggregateScore.AwayScore}";
+        AggregateScorePanel.Visibility = Visibility.Visible;
     }
 
     private void ApplyScorePanelColors(Border panel, TextBlock teamNameTextBlock, TextBlock scoreTextBlock, Team team, bool isPossessionTeam)

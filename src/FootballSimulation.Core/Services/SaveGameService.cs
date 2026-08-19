@@ -8,7 +8,7 @@ namespace FootballSimulation.Services;
 
 public class SaveGameService
 {
-    public const int CurrentSaveVersion = 7;
+    public const int CurrentSaveVersion = 8;
     public const int MaxSaveSlots = 3;
 
     private const string SaveFolderName = "WPFFootballSimulator";
@@ -204,6 +204,11 @@ public class SaveGameService
         };
 
         ApplyKnownPlayerDataCorrections(league);
+        if (data.SaveVersion < 8)
+        {
+            new PlayerSeasonStatsService().RebuildLeagueSeasonStats(league);
+        }
+
         return league;
     }
 
@@ -290,6 +295,41 @@ public class SaveGameService
         }
 
         ApplyKnownPlayerDataCorrections(data.TransferMarketState.FreeAgents, seasonStartYear);
+        RepairDuplicateGyokeresOwnership(data);
+    }
+
+    private static void RepairDuplicateGyokeresOwnership(SaveGameData data)
+    {
+        var arsenal = data.Teams.FirstOrDefault(team =>
+            team.Name.Equals("Arsenal", StringComparison.OrdinalIgnoreCase));
+        var arsenalOwnsGyokeres = arsenal?.Players
+                .Concat(arsenal.Substitutes)
+                .Any(IsViktorGyokeres) == true;
+        if (!arsenalOwnsGyokeres)
+        {
+            return;
+        }
+
+        var fixtureTeams = data.Fixtures
+            .SelectMany(fixture => new[] { fixture.HomeTeam, fixture.AwayTeam });
+        var marketTeams = data.TransferMarketState.Leagues
+            .SelectMany(league => league.Teams);
+        foreach (var team in data.Teams
+            .Concat(fixtureTeams)
+            .Concat(marketTeams)
+            .Where(team => !team.Name.Equals("Arsenal", StringComparison.OrdinalIgnoreCase))
+            .Distinct())
+        {
+            team.Players.RemoveAll(IsViktorGyokeres);
+            team.Substitutes.RemoveAll(IsViktorGyokeres);
+        }
+
+        data.TransferMarketState.FreeAgents.RemoveAll(IsViktorGyokeres);
+    }
+
+    private static bool IsViktorGyokeres(Player player)
+    {
+        return NormalizePlayerKey(player.Name).Equals("viktorgyokeres", StringComparison.OrdinalIgnoreCase);
     }
 
     private static void ApplyKnownPlayerDataCorrections(IEnumerable<Team> teams, int? seasonStartYear)
@@ -600,6 +640,7 @@ public class SaveGameService
 
         EnsureCompleteDoubleRoundRobinFixtures(data, teamsByName);
         EnsureCompetitionStates(data);
+        RepairMissingDefendingChampionsLeagueWinner(data);
         EnsureYouthAcademies(data);
 
         foreach (var match in data.MatchHistory)
@@ -682,6 +723,63 @@ public class SaveGameService
         }
 
         data.CompetitionStates = new SeasonCalendarService().CreateInitialCompetitionStates(data.Teams);
+    }
+
+    private static void RepairMissingDefendingChampionsLeagueWinner(SaveGameData data)
+    {
+        var previousSeason = data.SeasonHistory
+            .OrderByDescending(archive => archive.CompletedAt)
+            .FirstOrDefault();
+        var defendingChampion = previousSeason?.CompetitionResults
+            .FirstOrDefault(result => result.Competition == CompetitionType.ChampionsLeague)
+            ?.WinnerTeamName;
+        if (string.IsNullOrWhiteSpace(defendingChampion) ||
+            !data.Teams.Any(team => team.Name.Equals(defendingChampion, StringComparison.OrdinalIgnoreCase)))
+        {
+            return;
+        }
+
+        var championsLeagueFixtures = data.Fixtures
+            .Where(fixture => fixture.Competition == CompetitionType.ChampionsLeague)
+            .ToList();
+        var championsLeagueState = data.CompetitionStates
+            .FirstOrDefault(state => state.Competition == CompetitionType.ChampionsLeague);
+        var championAlreadyIncluded = championsLeagueState?.QualifiedTeamNames
+                .Contains(defendingChampion, StringComparer.OrdinalIgnoreCase) == true ||
+            championsLeagueFixtures.Any(fixture =>
+                fixture.HomeTeam.Name.Equals(defendingChampion, StringComparison.OrdinalIgnoreCase) ||
+                fixture.AwayTeam.Name.Equals(defendingChampion, StringComparison.OrdinalIgnoreCase));
+        if (championAlreadyIncluded || championsLeagueFixtures.Any(fixture => fixture.IsPlayed))
+        {
+            return;
+        }
+
+        var qualifiedLeagueTeams = previousSeason!.FinalTable
+            .OrderBy(row => row.Position)
+            .Take(4)
+            .Select(row => row.TeamName)
+            .Where(teamName => data.Teams.Any(team => team.Name.Equals(teamName, StringComparison.OrdinalIgnoreCase)))
+            .Append(defendingChampion)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        var calendar = new SeasonCalendarService();
+        var repairedFixtures = calendar.GenerateSeasonFixtures(
+                data.Teams,
+                data.LeagueState.Season,
+                qualifiedLeagueTeams)
+            .Where(fixture => fixture.Competition == CompetitionType.ChampionsLeague)
+            .ToList();
+        var repairedState = calendar.CreateInitialCompetitionStates(data.Teams, qualifiedLeagueTeams)
+            .Single(state => state.Competition == CompetitionType.ChampionsLeague);
+
+        data.Fixtures.RemoveAll(fixture => fixture.Competition == CompetitionType.ChampionsLeague);
+        data.Fixtures.AddRange(repairedFixtures);
+        if (championsLeagueState is not null)
+        {
+            data.CompetitionStates.Remove(championsLeagueState);
+        }
+
+        data.CompetitionStates.Add(repairedState);
     }
 
     private static void EnsureYouthAcademies(SaveGameData data)

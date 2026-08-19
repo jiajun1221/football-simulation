@@ -176,6 +176,64 @@ public class SeasonRolloverServiceTests
     }
 
     [Fact]
+    public void StartNextSeason_ChampionsLeagueWinnerOutsideTopFourStillQualifies()
+    {
+        var leagueEngine = new LeagueEngine();
+        var dataService = new LeagueDataService();
+        var definition = dataService.GetLeagueDefinition("premier-league");
+        var teams = dataService.LoadTeams(definition).Take(8).ToList();
+        var selectedTeam = teams[4];
+        var league = leagueEngine.CreateLeague("premier-league", GameSessionService.PremierLeagueName, "2025-26", teams);
+        league.Table = teams
+            .Select((team, index) => new LeagueTableEntry
+            {
+                TeamName = team.Name,
+                Played = 14,
+                Wins = 8 - index,
+                Draws = 0,
+                Losses = index,
+                GoalsFor = 40 - index,
+                GoalsAgainst = 10 + index,
+                Points = (8 - index) * 3
+            })
+            .ToList();
+        foreach (var fixture in league.Fixtures)
+        {
+            fixture.IsPlayed = true;
+        }
+
+        var championsLeagueState = league.CompetitionStates
+            .Single(state => state.Competition == CompetitionType.ChampionsLeague);
+        championsLeagueState.WinnerTeamName = selectedTeam.Name;
+        var topFour = league.Table
+            .OrderByDescending(row => row.Points)
+            .ThenByDescending(row => row.GoalDifference)
+            .Take(4)
+            .Select(row => row.TeamName)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        Assert.DoesNotContain(selectedTeam.Name, topFour);
+
+        var result = new SeasonRolloverService().StartNextSeason(
+            league,
+            selectedTeam,
+            new TransferMarketService().CreateInitialState(league));
+
+        var nextChampionsLeagueState = result.League.CompetitionStates
+            .Single(state => state.Competition == CompetitionType.ChampionsLeague);
+        var qualifiedLeagueClubs = nextChampionsLeagueState.QualifiedTeamNames
+            .Where(teamName => result.League.Teams.Any(team =>
+                team.Name.Equals(teamName, StringComparison.OrdinalIgnoreCase)))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        Assert.Equal(5, qualifiedLeagueClubs.Count);
+        Assert.True(topFour.IsSubsetOf(qualifiedLeagueClubs));
+        Assert.Contains(selectedTeam.Name, qualifiedLeagueClubs);
+        Assert.Contains(result.League.Fixtures, fixture =>
+            fixture.Competition == CompetitionType.ChampionsLeague &&
+            (fixture.HomeTeam.Name == selectedTeam.Name || fixture.AwayTeam.Name == selectedTeam.Name));
+    }
+
+    [Fact]
     public void StartNextSeason_AgesCarryoverPlayersTransferSnapshotsAndFreeAgentsOnce()
     {
         var leagueEngine = new LeagueEngine();

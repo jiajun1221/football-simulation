@@ -176,12 +176,41 @@ public class TransferMarketServiceTests
         var state = service.CreateInitialState(league);
         var player = selectedTeam.Players.Concat(selectedTeam.Substitutes).First();
         var wage = PlayerContractService.EstimateWeeklyWage(player, league.LeagueId) * 1.2m;
+        var previousExpiry = player.ContractEndYear!.Value;
 
         var result = service.OfferContractExtension(state, league.LeagueId, selectedTeam, player, wage, 4, player.Role, currentRound: 3);
 
         Assert.True(result.Accepted);
-        Assert.Equal(PlayerContractService.DefaultSeasonEndYear + 4, player.ContractEndYear);
+        Assert.True(player.ContractEndYear >= previousExpiry + 4);
         Assert.Equal(wage, player.WeeklyWage);
+    }
+
+    [Fact]
+    public void OfferContractExtension_AddsYearsToExistingExpiryDate()
+    {
+        var league = CreateLeague("premier-league");
+        league.Season = "2026-27";
+        var selectedTeam = league.Teams.Single(team => team.Name == "Chelsea");
+        var service = new TransferMarketService();
+        var state = service.CreateInitialState(league);
+        var player = selectedTeam.Players.Concat(selectedTeam.Substitutes).First();
+        player.ContractEndYear = 2028;
+        var wage = PlayerContractService.EstimateWeeklyWage(player, league.LeagueId) * 1.2m;
+
+        var result = service.OfferContractExtension(
+            state,
+            league.LeagueId,
+            selectedTeam,
+            player,
+            wage,
+            years: 3,
+            player.Role,
+            currentRound: 2);
+
+        Assert.True(result.Accepted);
+        Assert.Equal(2031, result.ContractEndYear);
+        Assert.Equal(2031, player.ContractEndYear);
+        Assert.Contains("until 2031", result.Message);
     }
 
     [Fact]

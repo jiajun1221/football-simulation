@@ -26,7 +26,24 @@ public class PlayerSeasonStatsServiceTests
             [
                 new() { PlayerName = homeGoalkeeper.Name, TeamName = homeTeam.Name, Position = Position.Goalkeeper, Rating = 7.4 },
                 new() { PlayerName = homeScorer.Name, TeamName = homeTeam.Name, Position = Position.Forward, Goals = 2, Rating = 8.6 },
-                new() { PlayerName = homeCreator.Name, TeamName = homeTeam.Name, Position = Position.Midfielder, Assists = 1, YellowCards = 1, Rating = 7.7 },
+                new()
+                {
+                    PlayerName = homeCreator.Name,
+                    TeamName = homeTeam.Name,
+                    Position = Position.Midfielder,
+                    Assists = 1,
+                    Shots = 3,
+                    ShotsOnTarget = 2,
+                    KeyPasses = 4,
+                    Tackles = 3,
+                    Interceptions = 2,
+                    Blocks = 1,
+                    Clearances = 2,
+                    AerialDuelsWon = 3,
+                    Recoveries = 5,
+                    YellowCards = 1,
+                    Rating = 7.7
+                },
                 new() { PlayerName = awayGoalkeeper.Name, TeamName = awayTeam.Name, Position = Position.Goalkeeper, Saves = 5, Rating = 7.2 },
                 new() { PlayerName = awayDefender.Name, TeamName = awayTeam.Name, Position = Position.Defender, RedCards = 1, Rating = 5.4 }
             ]
@@ -40,6 +57,17 @@ public class PlayerSeasonStatsServiceTests
         Assert.Equal(2, scorerStats.Goals);
         Assert.Equal("ST", scorerStats.ExactPosition);
         Assert.Equal(8.6, scorerStats.AverageRating);
+
+        var creatorStats = stats.Single(stat => stat.PlayerName == homeCreator.Name);
+        Assert.Equal(3, creatorStats.Shots);
+        Assert.Equal(2, creatorStats.ShotsOnTarget);
+        Assert.Equal(4, creatorStats.KeyPasses);
+        Assert.Equal(3, creatorStats.Tackles);
+        Assert.Equal(2, creatorStats.Interceptions);
+        Assert.Equal(1, creatorStats.Blocks);
+        Assert.Equal(2, creatorStats.Clearances);
+        Assert.Equal(3, creatorStats.AerialDuelsWon);
+        Assert.Equal(5, creatorStats.Recoveries);
 
         var keeperStats = stats.Single(stat => stat.PlayerName == homeGoalkeeper.Name);
         Assert.Equal(1, keeperStats.CleanSheets);

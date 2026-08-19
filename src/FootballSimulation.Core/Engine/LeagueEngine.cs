@@ -397,6 +397,15 @@ public class LeagueEngine
             return fixture.RoundNumber == completedFixture.RoundNumber;
         }
 
+        if (fixture.IsTwoLeggedTie || completedFixture.IsTwoLeggedTie)
+        {
+            return fixture.IsTwoLeggedTie &&
+                completedFixture.IsTwoLeggedTie &&
+                fixture.LegNumber == completedFixture.LegNumber &&
+                !string.IsNullOrWhiteSpace(fixture.RoundName) &&
+                fixture.RoundName.Equals(completedFixture.RoundName, StringComparison.OrdinalIgnoreCase);
+        }
+
         return !string.IsNullOrWhiteSpace(fixture.RoundName) &&
             fixture.RoundName.Equals(completedFixture.RoundName, StringComparison.OrdinalIgnoreCase);
     }

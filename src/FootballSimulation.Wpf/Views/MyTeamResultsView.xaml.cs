@@ -167,9 +167,10 @@ public partial class MyTeamResultsView : UserControl
 
     private static string GetFixtureRoundText(Fixture fixture)
     {
-        return string.IsNullOrWhiteSpace(fixture.RoundName)
+        var roundText = string.IsNullOrWhiteSpace(fixture.RoundName)
             ? $"Round {fixture.RoundNumber}"
             : fixture.RoundName;
+        return fixture.IsTwoLeggedTie ? $"{roundText} - Leg {fixture.LegNumber}" : roundText;
     }
 
     private static string GetResultBrush(string resultText)

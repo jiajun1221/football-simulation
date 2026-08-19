@@ -59,8 +59,8 @@ public class SeasonRolloverService
 
         transferMarketState ??= new TransferMarketState();
         var sortedTable = _leagueTableService.SortTable(league.Table);
-        var championsLeagueQualifiedTeamNames = GetChampionsLeagueQualifiedTeamNames(sortedTable);
         var archive = _awardsService.CreateArchive(league, selectedTeam);
+        var championsLeagueQualifiedTeamNames = GetChampionsLeagueQualifiedTeamNames(sortedTable, archive);
         var selectedSummary = ApplyBudgetRolloverForCompletedLeague(league, selectedTeam, transferMarketState, sortedTable);
         archive.BudgetSummary = selectedSummary;
 
@@ -258,14 +258,27 @@ public class SeasonRolloverService
         return fixture.CalendarRound > 0 ? fixture.CalendarRound : fixture.RoundNumber;
     }
 
-    private static List<string> GetChampionsLeagueQualifiedTeamNames(IReadOnlyList<LeagueTableEntry> sortedTable)
+    private static List<string> GetChampionsLeagueQualifiedTeamNames(
+        IReadOnlyList<LeagueTableEntry> sortedTable,
+        SeasonArchive archive)
     {
-        return sortedTable
+        var qualifiedTeamNames = sortedTable
             .Take(4)
             .Select(entry => entry.TeamName)
             .Where(teamName => !string.IsNullOrWhiteSpace(teamName))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
+
+        var championsLeagueWinner = archive.CompetitionResults
+            .FirstOrDefault(result => result.Competition == CompetitionType.ChampionsLeague)
+            ?.WinnerTeamName;
+        if (!string.IsNullOrWhiteSpace(championsLeagueWinner) &&
+            !qualifiedTeamNames.Contains(championsLeagueWinner, StringComparer.OrdinalIgnoreCase))
+        {
+            qualifiedTeamNames.Add(championsLeagueWinner);
+        }
+
+        return qualifiedTeamNames;
     }
 
     private static void ApplyOffseasonPlayerReset(
@@ -435,6 +448,7 @@ public class SeasonRolloverService
         if (player.Age.HasValue)
         {
             player.Age++;
+            VeteranDeclineService.ApplySeasonDecline(player);
         }
     }
 

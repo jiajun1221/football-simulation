@@ -399,6 +399,42 @@
                                 <TextBlock x:Name="RatingTextBlock" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" />
                             </StackPanel>
                         </UniformGrid>
+                        <UniformGrid Columns="4" Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock Text="Tackles" Style="{StaticResource DetailMutedTextStyle}" />
+                                <TextBlock x:Name="TacklesTextBlock" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" />
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock Text="Interceptions" Style="{StaticResource DetailMutedTextStyle}" />
+                                <TextBlock x:Name="InterceptionsTextBlock" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" />
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock Text="Blocks" Style="{StaticResource DetailMutedTextStyle}" />
+                                <TextBlock x:Name="BlocksTextBlock" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" />
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock Text="Clearances" Style="{StaticResource DetailMutedTextStyle}" />
+                                <TextBlock x:Name="ClearancesTextBlock" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" />
+                            </StackPanel>
+                        </UniformGrid>
+                        <UniformGrid Columns="4" Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock x:Name="ExtraStatOneLabelTextBlock" Style="{StaticResource DetailMutedTextStyle}" />
+                                <TextBlock x:Name="ExtraStatOneValueTextBlock" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" />
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock x:Name="ExtraStatTwoLabelTextBlock" Style="{StaticResource DetailMutedTextStyle}" />
+                                <TextBlock x:Name="ExtraStatTwoValueTextBlock" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" />
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock x:Name="ExtraStatThreeLabelTextBlock" Style="{StaticResource DetailMutedTextStyle}" />
+                                <TextBlock x:Name="ExtraStatThreeValueTextBlock" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" />
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock x:Name="ExtraStatFourLabelTextBlock" Style="{StaticResource DetailMutedTextStyle}" />
+                                <TextBlock x:Name="ExtraStatFourValueTextBlock" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" />
+                            </StackPanel>
+                        </UniformGrid>
 
                         <Grid Style="{StaticResource DetailSectionHeaderStyle}">
                             <Grid.ColumnDefinitions>

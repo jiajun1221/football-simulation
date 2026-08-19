@@ -210,9 +210,10 @@ public partial class RoundResultView : UserControl
     private BracketMatchRow CreateBracketMatchRow(Fixture fixture, Team? selectedTeam)
     {
         var winner = fixture.WinningTeamName;
-        var homeWon = !string.IsNullOrWhiteSpace(winner) &&
+        var canShowWinner = !fixture.IsTwoLeggedTie || fixture.LegNumber == 2;
+        var homeWon = canShowWinner && !string.IsNullOrWhiteSpace(winner) &&
             winner.Equals(fixture.HomeTeam.Name, StringComparison.OrdinalIgnoreCase);
-        var awayWon = !string.IsNullOrWhiteSpace(winner) &&
+        var awayWon = canShowWinner && !string.IsNullOrWhiteSpace(winner) &&
             winner.Equals(fixture.AwayTeam.Name, StringComparison.OrdinalIgnoreCase);
         var isSelectedTeamMatch = selectedTeam is not null &&
             (fixture.HomeTeam.Name.Equals(selectedTeam.Name, StringComparison.OrdinalIgnoreCase) ||
@@ -255,6 +256,15 @@ public partial class RoundResultView : UserControl
         }
 
         var score = $"{fixture.Result.HomeScore}-{fixture.Result.AwayScore}";
+        if (fixture.IsTwoLeggedTie && fixture.LegNumber == 2 &&
+            fixture.AggregateHomeScore.HasValue && fixture.AggregateAwayScore.HasValue)
+        {
+            score = $"{score}\nAgg {fixture.AggregateHomeScore}-{fixture.AggregateAwayScore}";
+        }
+        else if (fixture.IsTwoLeggedTie)
+        {
+            score = $"{score}\nLeg {fixture.LegNumber}";
+        }
         if (fixture.PenaltyHomeScore.HasValue && fixture.PenaltyAwayScore.HasValue)
         {
             return $"{score}\n{fixture.PenaltyHomeScore}-{fixture.PenaltyAwayScore} pens";
@@ -341,9 +351,10 @@ public partial class RoundResultView : UserControl
 
     private static string GetFixtureRoundText(Fixture fixture)
     {
-        return string.IsNullOrWhiteSpace(fixture.RoundName)
+        var roundText = string.IsNullOrWhiteSpace(fixture.RoundName)
             ? $"Round {fixture.RoundNumber}"
             : fixture.RoundName;
+        return fixture.IsTwoLeggedTie ? $"{roundText} - Leg {fixture.LegNumber}" : roundText;
     }
 
     private static IEnumerable<string> GetLogoCandidatePaths(string clubName)

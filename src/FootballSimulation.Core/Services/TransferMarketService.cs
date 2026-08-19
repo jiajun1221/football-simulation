@@ -1308,7 +1308,10 @@ public class TransferMarketService
             ?.Season;
         var seasonEndYear = GetSeasonEndYear(
             string.IsNullOrWhiteSpace(leagueSeason) ? state.ActiveSeason : leagueSeason);
-        var contractEndYear = seasonEndYear + years;
+        var extensionBaseYear = Math.Max(
+            seasonEndYear,
+            player.ContractEndYear ?? seasonEndYear);
+        var contractEndYear = extensionBaseYear + years;
         foreach (var playerCopy in FindClubPlayerCopies(state, team, player))
         {
             playerCopy.WeeklyWage = weeklyWage;

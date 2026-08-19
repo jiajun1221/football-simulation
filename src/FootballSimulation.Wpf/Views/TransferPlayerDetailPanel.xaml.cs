@@ -116,6 +116,11 @@ public partial class TransferPlayerDetailPanel : UserControl
         RatingTextBlock.Text = stat is { Appearances: > 0 }
             ? stat.AverageRating.ToString("0.00", CultureInfo.InvariantCulture)
             : "-";
+        TacklesTextBlock.Text = (stat?.Tackles ?? 0).ToString(CultureInfo.InvariantCulture);
+        InterceptionsTextBlock.Text = (stat?.Interceptions ?? 0).ToString(CultureInfo.InvariantCulture);
+        BlocksTextBlock.Text = (stat?.Blocks ?? 0).ToString(CultureInfo.InvariantCulture);
+        ClearancesTextBlock.Text = (stat?.Clearances ?? 0).ToString(CultureInfo.InvariantCulture);
+        UpdateRoleSpecificSeasonStats(player, stat);
         TraitsItemsControl.ItemsSource = CreateTraitBadges(player);
         AttributeItemsControl.ItemsSource = CreateAttributeRows(player);
         UpdateMainPositionEditor(context, player);
@@ -155,6 +160,29 @@ public partial class TransferPlayerDetailPanel : UserControl
 
         UpdateOfferInfo(context);
         UpdateActionPanels(context);
+    }
+
+    private void UpdateRoleSpecificSeasonStats(Player player, PlayerSeasonStats? stat)
+    {
+        if (player.Position == Position.Goalkeeper)
+        {
+            SetExtraSeasonStat(ExtraStatOneLabelTextBlock, ExtraStatOneValueTextBlock, "Saves", stat?.Saves ?? 0);
+            SetExtraSeasonStat(ExtraStatTwoLabelTextBlock, ExtraStatTwoValueTextBlock, "Clean sheets", stat?.CleanSheets ?? 0);
+            SetExtraSeasonStat(ExtraStatThreeLabelTextBlock, ExtraStatThreeValueTextBlock, "Conceded", stat?.GoalsConceded ?? 0);
+            SetExtraSeasonStat(ExtraStatFourLabelTextBlock, ExtraStatFourValueTextBlock, "Minutes", stat?.MinutesPlayed ?? 0);
+            return;
+        }
+
+        SetExtraSeasonStat(ExtraStatOneLabelTextBlock, ExtraStatOneValueTextBlock, "Key passes", stat?.KeyPasses ?? 0);
+        SetExtraSeasonStat(ExtraStatTwoLabelTextBlock, ExtraStatTwoValueTextBlock, "Recoveries", stat?.Recoveries ?? 0);
+        SetExtraSeasonStat(ExtraStatThreeLabelTextBlock, ExtraStatThreeValueTextBlock, "Aerial wins", stat?.AerialDuelsWon ?? 0);
+        SetExtraSeasonStat(ExtraStatFourLabelTextBlock, ExtraStatFourValueTextBlock, "Shots on target", stat?.ShotsOnTarget ?? 0);
+    }
+
+    private static void SetExtraSeasonStat(TextBlock label, TextBlock value, string labelText, int statistic)
+    {
+        label.Text = labelText;
+        value.Text = statistic.ToString(CultureInfo.InvariantCulture);
     }
 
     private void UpdateMainPositionEditor(TransferPlayerDetailContext context, Player player)

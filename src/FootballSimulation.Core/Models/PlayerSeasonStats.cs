@@ -12,6 +12,15 @@ public class PlayerSeasonStats
     public int Starts { get; set; }
     public int Goals { get; set; }
     public int Assists { get; set; }
+    public int Shots { get; set; }
+    public int ShotsOnTarget { get; set; }
+    public int KeyPasses { get; set; }
+    public int Tackles { get; set; }
+    public int Interceptions { get; set; }
+    public int Blocks { get; set; }
+    public int Clearances { get; set; }
+    public int AerialDuelsWon { get; set; }
+    public int Recoveries { get; set; }
     public int Saves { get; set; }
     public int GoalsConceded { get; set; }
     public int CleanSheets { get; set; }

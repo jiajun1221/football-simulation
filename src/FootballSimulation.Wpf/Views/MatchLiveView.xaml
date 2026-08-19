@@ -659,6 +659,21 @@
                             </StackPanel>
                         </Border>
                     </Grid>
+                    <Border x:Name="AggregateScorePanel"
+                            HorizontalAlignment="Center"
+                            Margin="0,7,0,0"
+                            Padding="10,3"
+                            Background="#16243A"
+                            BorderBrush="#4B6383"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Visibility="Collapsed">
+                        <TextBlock x:Name="AggregateScoreTextBlock"
+                                   Foreground="#F8FAFC"
+                                   FontSize="11"
+                                   FontWeight="Bold"
+                                   TextAlignment="Center" />
+                    </Border>
                     <StackPanel x:Name="CompactScoreControlsPanel"
                                 Orientation="Horizontal"
                                 HorizontalAlignment="Center"

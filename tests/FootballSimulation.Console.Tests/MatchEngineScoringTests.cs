@@ -38,6 +38,28 @@ public class MatchEngineScoringTests
     }
 
     [Fact]
+    public void SimulateMatch_DecisiveFinisherVariesAcrossSeededMatches()
+    {
+        var scorers = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        for (var seed = 1; seed <= 30; seed++)
+        {
+            var (homeTeam, awayTeam) = new SeedDataService().CreateDemoTeams();
+            var result = new MatchEngine().SimulateMatch(homeTeam, awayTeam, seed);
+            foreach (var goal in result.Events.Where(IsScoringEvent).Where(goal => !IsGoalDisallowedEvent(goal)))
+            {
+                if (!string.IsNullOrWhiteSpace(goal.PrimaryPlayerName))
+                {
+                    scorers.Add(goal.PrimaryPlayerName);
+                }
+            }
+        }
+
+        Assert.True(
+            scorers.Count >= 4,
+            $"Expected goals to be shared among several finishers, but found: {string.Join(", ", scorers)}");
+    }
+
+    [Fact]
     public void SimulateMatch_StillReturnsFullNinetyMinuteMatch()
     {
         var seedDataService = new SeedDataService();
@@ -1016,6 +1038,27 @@ public class MatchEngineScoringTests
                     sameIncidentYellow,
                     $"Seed {seed}: {redCard.PrimaryPlayerName} received yellow and straight red in the same incident.");
             }
+        }
+    }
+
+    [Fact]
+    public void SimulateMatch_ConfrontationDoesNotBookSamePlayerTwiceInOneIncident()
+    {
+        var seedDataService = new SeedDataService();
+        var engine = new MatchEngine();
+
+        for (var seed = 1; seed <= 100; seed++)
+        {
+            var (homeTeam, awayTeam) = seedDataService.CreateDemoTeams();
+            var result = engine.SimulateMatch(homeTeam, awayTeam, seed);
+            var duplicateBooking = result.Events
+                .Where(matchEvent => matchEvent.EventType == EventType.YellowCard)
+                .GroupBy(matchEvent => new { matchEvent.Minute, matchEvent.PrimaryPlayerName })
+                .FirstOrDefault(group => group.Count() > 1);
+
+            Assert.True(
+                duplicateBooking is null,
+                $"Seed {seed}: {duplicateBooking?.Key.PrimaryPlayerName} was booked twice at {duplicateBooking?.Key.Minute}'.");
         }
     }
 

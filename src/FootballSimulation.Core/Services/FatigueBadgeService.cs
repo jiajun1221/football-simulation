@@ -151,7 +151,11 @@ public static class FatigueBadgeService
 
         if (fixtureGapDays is <= 3)
         {
-            risk += isGoalkeeper ? 5 : 10;
+            var lastMatchMinutes = player.RecentMatchMinutes.Count > 0
+                ? player.LastMatchMinutes
+                : player.MatchesPlayedRecently > 0 ? 90 : 0;
+            var shortRestExposure = Math.Clamp(lastMatchMinutes / 90.0, 0.0, 1.0);
+            risk += (isGoalkeeper ? 5 : 10) * shortRestExposure;
         }
         else if (fixtureGapDays is >= 5)
         {

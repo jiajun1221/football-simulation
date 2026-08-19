@@ -6,6 +6,7 @@ public static class PlayerAttributeService
 {
     public static PlayerAttributeRatings GetAttributes(Player player)
     {
+        PlayerAttributeRatings attributes;
         if (player.Pace > 0 &&
             player.Shooting > 0 &&
             player.Passing > 0 &&
@@ -13,7 +14,7 @@ public static class PlayerAttributeService
             player.Defending > 0 &&
             player.Physical > 0)
         {
-            return new PlayerAttributeRatings(
+            attributes = new PlayerAttributeRatings(
                 player.Pace,
                 player.Shooting,
                 player.Passing,
@@ -21,13 +22,17 @@ public static class PlayerAttributeService
                 player.Defending,
                 player.Physical);
         }
+        else
+        {
+            attributes = DeriveAttributes(
+                player.Position,
+                player.PreferredPosition,
+                player.OverallRating,
+                player.Traits,
+                (int)Math.Round(player.Stamina));
+        }
 
-        return DeriveAttributes(
-            player.Position,
-            player.PreferredPosition,
-            player.OverallRating,
-            player.Traits,
-            (int)Math.Round(player.Stamina));
+        return NormalizeRoleDefiningAttributes(player, attributes);
     }
 
     public static void ApplyMissingAttributes(Player player)
@@ -40,6 +45,39 @@ public static class PlayerAttributeService
         player.Dribbling = player.Dribbling <= 0 ? attributes.Dribbling : player.Dribbling;
         player.Defending = player.Defending <= 0 ? attributes.Defending : player.Defending;
         player.Physical = player.Physical <= 0 ? attributes.Physical : player.Physical;
+        if (IsPrimaryGoalkeeper(player))
+        {
+            player.Defending = attributes.Defending;
+            player.Physical = Math.Max(player.Physical, attributes.Physical);
+        }
+    }
+
+    private static PlayerAttributeRatings NormalizeRoleDefiningAttributes(
+        Player player,
+        PlayerAttributeRatings attributes)
+    {
+        if (!IsPrimaryGoalkeeper(player))
+        {
+            return attributes;
+        }
+
+        var goalkeeperBaseline = DeriveAttributes(
+            Position.Goalkeeper,
+            "GK",
+            player.OverallRating,
+            player.Traits,
+            (int)Math.Round(player.Stamina));
+        return attributes with
+        {
+            Defending = Math.Max(attributes.Defending, goalkeeperBaseline.Defending),
+            Physical = Math.Max(attributes.Physical, goalkeeperBaseline.Physical)
+        };
+    }
+
+    private static bool IsPrimaryGoalkeeper(Player player)
+    {
+        return player.Position == Position.Goalkeeper ||
+            PositionSuitabilityService.NormalizeExactPosition(player.PreferredPosition) == "GK";
     }
 
     public static PlayerAttributeRatings DeriveAttributes(

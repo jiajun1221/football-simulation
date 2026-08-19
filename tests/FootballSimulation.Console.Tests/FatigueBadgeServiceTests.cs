@@ -238,6 +238,31 @@ public class FatigueBadgeServiceTests
     }
 
     [Fact]
+    public void CalculateWorkloadRiskPercentage_DoesNotPenalizeUnusedPlayerForShortRest()
+    {
+        var unusedPlayer = CreatePlayer(stamina: 100, recentLoad: 0, seasonFatigue: 0);
+        unusedPlayer.RecentMatchMinutes = [0];
+
+        var risk = FatigueBadgeService.CalculateWorkloadRiskPercentage(unusedPlayer, fixtureGapDays: 3);
+
+        Assert.Equal(0, risk);
+    }
+
+    [Fact]
+    public void CalculateWorkloadRiskPercentage_ScalesShortRestByMinutesPlayed()
+    {
+        var substitute = CreatePlayer(stamina: 100, recentLoad: 0, seasonFatigue: 0);
+        substitute.RecentMatchMinutes = [20];
+        var starter = CreatePlayer(stamina: 100, recentLoad: 1, seasonFatigue: 4);
+        starter.RecentMatchMinutes = [90];
+
+        var substituteRisk = FatigueBadgeService.CalculateWorkloadRiskPercentage(substitute, fixtureGapDays: 3);
+        var starterRisk = FatigueBadgeService.CalculateWorkloadRiskPercentage(starter, fixtureGapDays: 3);
+
+        Assert.True(substituteRisk < starterRisk);
+    }
+
+    [Fact]
     public void CalculateWorkloadRiskPercentage_IsNotJustSeasonFatigue()
     {
         var lowSeasonFatiguePlayer = CreatePlayer(stamina: 45, recentLoad: 6, seasonFatigue: 26);
