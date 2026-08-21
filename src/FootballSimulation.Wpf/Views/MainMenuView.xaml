@@ -77,9 +77,11 @@
         <Image Source="/Assets/Backgrounds/main-menu-stadium.png"
                Stretch="UniformToFill"
                HorizontalAlignment="Stretch"
-               VerticalAlignment="Stretch" />
+               VerticalAlignment="Stretch"
+               Visibility="Collapsed" />
 
-        <Border Background="{DynamicResource MainMenuOverlayBrush}" />
+        <Border Background="{DynamicResource MainMenuOverlayBrush}"
+                Visibility="Collapsed" />
 
         <Border Width="480"
                 Padding="26"

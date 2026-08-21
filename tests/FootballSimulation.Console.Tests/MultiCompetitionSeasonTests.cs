@@ -449,6 +449,94 @@ public class MultiCompetitionSeasonTests
     }
 
     [Fact]
+    public void ChampionsLeague_RecordedPenaltyWinnerAdvancesFromLevelAggregateTie()
+    {
+        var calendar = new SeasonCalendarService();
+        var progression = new CompetitionProgressionService();
+        var chelsea = CreateTeam("Chelsea");
+        var leverkusen = CreateTeam("Bayer Leverkusen");
+        var teams = new List<Team>
+        {
+            chelsea,
+            leverkusen,
+            CreateTeam("Inter Milan"),
+            CreateTeam("Barcelona")
+        };
+        var league = new League
+        {
+            Name = "Test League",
+            Season = "2025-26",
+            Teams = teams,
+            CompetitionStates =
+            [
+                new SeasonCompetitionState
+                {
+                    Competition = CompetitionType.ChampionsLeague,
+                    CurrentRoundName = "Quarter Final",
+                    QualifiedTeamNames = teams.Select(team => team.Name).ToList()
+                }
+            ]
+        };
+        league.Fixtures = calendar.GenerateNextCupRoundFixtures(
+            CompetitionType.ChampionsLeague,
+            "Quarter Final",
+            teams,
+            59,
+            league.Season);
+        var firstLeg = league.Fixtures.Single(fixture =>
+            fixture.LegNumber == 1 &&
+            (fixture.HomeTeam.Name == chelsea.Name || fixture.AwayTeam.Name == chelsea.Name));
+        var secondLeg = league.Fixtures.Single(fixture =>
+            fixture.LegNumber == 2 && fixture.KnockoutTieId == firstLeg.KnockoutTieId);
+        var otherFirstLeg = league.Fixtures.Single(fixture =>
+            fixture.LegNumber == 1 && fixture.KnockoutTieId != firstLeg.KnockoutTieId);
+        var otherSecondLeg = league.Fixtures.Single(fixture =>
+            fixture.LegNumber == 2 && fixture.KnockoutTieId == otherFirstLeg.KnockoutTieId);
+
+        CompleteFixture(progression, league, firstLeg, homeScore: 2, awayScore: 3);
+        CompleteFixture(progression, league, otherFirstLeg, homeScore: 2, awayScore: 0);
+        secondLeg.PenaltyHomeScore = 4;
+        secondLeg.PenaltyAwayScore = 3;
+        secondLeg.WinningTeamName = chelsea.Name;
+        secondLeg.LosingTeamName = leverkusen.Name;
+        CompleteFixture(progression, league, secondLeg, homeScore: 2, awayScore: 3);
+        CompleteFixture(progression, league, otherSecondLeg, homeScore: 1, awayScore: 0);
+
+        Assert.Equal(leverkusen.Name, secondLeg.WinningTeamName);
+        Assert.Equal(leverkusen.Name, firstLeg.WinningTeamName);
+        Assert.Contains(league.Fixtures, fixture =>
+            fixture.RoundName == "Semi Final" &&
+            (fixture.HomeTeam.Name == leverkusen.Name || fixture.AwayTeam.Name == leverkusen.Name));
+        Assert.DoesNotContain(league.Fixtures, fixture =>
+            fixture.RoundName == "Semi Final" &&
+            (fixture.HomeTeam.Name == chelsea.Name || fixture.AwayTeam.Name == chelsea.Name));
+
+        foreach (var tieFixture in league.Fixtures.Where(fixture =>
+            fixture.KnockoutTieId == secondLeg.KnockoutTieId))
+        {
+            tieFixture.WinningTeamName = chelsea.Name;
+            tieFixture.LosingTeamName = leverkusen.Name;
+        }
+        var semiFinal = league.Fixtures.First(fixture =>
+            fixture.RoundName == "Semi Final" &&
+            (fixture.HomeTeam.Name == leverkusen.Name || fixture.AwayTeam.Name == leverkusen.Name));
+        if (semiFinal.HomeTeam.Name == leverkusen.Name)
+        {
+            semiFinal.HomeTeam = chelsea;
+        }
+        else
+        {
+            semiFinal.AwayTeam = chelsea;
+        }
+
+        Assert.True(progression.RecoverMissingKnockoutRound(league));
+        Assert.Equal(leverkusen.Name, secondLeg.WinningTeamName);
+        Assert.Contains(league.Fixtures, fixture =>
+            fixture.RoundName == "Semi Final" &&
+            (fixture.HomeTeam.Name == leverkusen.Name || fixture.AwayTeam.Name == leverkusen.Name));
+    }
+
+    [Fact]
     public void ChampionsLeague_CompletingFirstLegRoundDoesNotSimulateSecondLegs()
     {
         var calendar = new SeasonCalendarService();

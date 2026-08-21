@@ -23,7 +23,6 @@ public partial class TransferPlayerDetailPanel : UserControl
     public event EventHandler? MainPositionChanged;
 
     private bool _usesTransferListToggle;
-    private bool _isUpdatingMainPosition;
 
     public TransferPlayerDetailPanel()
     {
@@ -112,10 +111,8 @@ public partial class TransferPlayerDetailPanel : UserControl
         NegotiationDifficultyBadgeBorder.ToolTip = difficulty.Tooltip;
         GoalsTextBlock.Text = (stat?.Goals ?? 0).ToString(CultureInfo.InvariantCulture);
         AssistsTextBlock.Text = (stat?.Assists ?? 0).ToString(CultureInfo.InvariantCulture);
-        MatchesTextBlock.Text = (stat?.Appearances ?? 0).ToString(CultureInfo.InvariantCulture);
-        RatingTextBlock.Text = stat is { Appearances: > 0 }
-            ? stat.AverageRating.ToString("0.00", CultureInfo.InvariantCulture)
-            : "-";
+        MatchesTextBlock.Text = (stat?.KeyPasses ?? 0).ToString(CultureInfo.InvariantCulture);
+        RatingTextBlock.Text = (stat?.ShotsOnTarget ?? 0).ToString(CultureInfo.InvariantCulture);
         TacklesTextBlock.Text = (stat?.Tackles ?? 0).ToString(CultureInfo.InvariantCulture);
         InterceptionsTextBlock.Text = (stat?.Interceptions ?? 0).ToString(CultureInfo.InvariantCulture);
         BlocksTextBlock.Text = (stat?.Blocks ?? 0).ToString(CultureInfo.InvariantCulture);
@@ -168,15 +165,18 @@ public partial class TransferPlayerDetailPanel : UserControl
         {
             SetExtraSeasonStat(ExtraStatOneLabelTextBlock, ExtraStatOneValueTextBlock, "Saves", stat?.Saves ?? 0);
             SetExtraSeasonStat(ExtraStatTwoLabelTextBlock, ExtraStatTwoValueTextBlock, "Clean sheets", stat?.CleanSheets ?? 0);
-            SetExtraSeasonStat(ExtraStatThreeLabelTextBlock, ExtraStatThreeValueTextBlock, "Conceded", stat?.GoalsConceded ?? 0);
-            SetExtraSeasonStat(ExtraStatFourLabelTextBlock, ExtraStatFourValueTextBlock, "Minutes", stat?.MinutesPlayed ?? 0);
-            return;
+        }
+        else
+        {
+            SetExtraSeasonStat(ExtraStatOneLabelTextBlock, ExtraStatOneValueTextBlock, "Recoveries", stat?.Recoveries ?? 0);
+            SetExtraSeasonStat(ExtraStatTwoLabelTextBlock, ExtraStatTwoValueTextBlock, "Aerial wins", stat?.AerialDuelsWon ?? 0);
         }
 
-        SetExtraSeasonStat(ExtraStatOneLabelTextBlock, ExtraStatOneValueTextBlock, "Key passes", stat?.KeyPasses ?? 0);
-        SetExtraSeasonStat(ExtraStatTwoLabelTextBlock, ExtraStatTwoValueTextBlock, "Recoveries", stat?.Recoveries ?? 0);
-        SetExtraSeasonStat(ExtraStatThreeLabelTextBlock, ExtraStatThreeValueTextBlock, "Aerial wins", stat?.AerialDuelsWon ?? 0);
-        SetExtraSeasonStat(ExtraStatFourLabelTextBlock, ExtraStatFourValueTextBlock, "Shots on target", stat?.ShotsOnTarget ?? 0);
+        SetExtraSeasonStat(ExtraStatThreeLabelTextBlock, ExtraStatThreeValueTextBlock, "Matches", stat?.Appearances ?? 0);
+        ExtraStatFourLabelTextBlock.Text = "Avg";
+        ExtraStatFourValueTextBlock.Text = stat is { Appearances: > 0 }
+            ? stat.AverageRating.ToString("0.00", CultureInfo.InvariantCulture)
+            : "-";
     }
 
     private static void SetExtraSeasonStat(TextBlock label, TextBlock value, string labelText, int statistic)
@@ -187,46 +187,7 @@ public partial class TransferPlayerDetailPanel : UserControl
 
     private void UpdateMainPositionEditor(TransferPlayerDetailContext context, Player player)
     {
-        var showEditor = context.Mode is TransferDetailMode.Squad && context.IsOwnPlayer;
-        MainPositionEditorPanel.Visibility = showEditor ? Visibility.Visible : Visibility.Collapsed;
-        if (!showEditor)
-        {
-            return;
-        }
-
-        _isUpdatingMainPosition = true;
-        try
-        {
-            MainPositionComboBox.Items.Clear();
-            var positions = PositionSuitabilityService.GetNaturalExactPositions(player);
-            foreach (var position in positions)
-            {
-                MainPositionComboBox.Items.Add(new ComboBoxItem
-                {
-                    Content = position,
-                    Tag = position
-                });
-            }
-
-            foreach (ComboBoxItem item in MainPositionComboBox.Items)
-            {
-                if (item.Tag is string position &&
-                    position.Equals(player.PreferredPosition, StringComparison.OrdinalIgnoreCase))
-                {
-                    MainPositionComboBox.SelectedItem = item;
-                    break;
-                }
-            }
-
-            MainPositionComboBox.IsEnabled = positions.Count > 1;
-            MainPositionComboBox.ToolTip = positions.Count > 1
-                ? "Choose one of this player's natural positions."
-                : "No secondary natural positions available.";
-        }
-        finally
-        {
-            _isUpdatingMainPosition = false;
-        }
+        MainPositionEditorPanel.Visibility = Visibility.Collapsed;
     }
 
     private void UpdateOfferInfo(TransferPlayerDetailContext context)
@@ -435,11 +396,6 @@ public partial class TransferPlayerDetailPanel : UserControl
 
     private void MainPositionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (_isUpdatingMainPosition)
-        {
-            return;
-        }
-
         MainPositionChanged?.Invoke(this, EventArgs.Empty);
     }
 

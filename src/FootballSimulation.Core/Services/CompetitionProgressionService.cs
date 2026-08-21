@@ -110,6 +110,11 @@ public class CompetitionProgressionService
     {
         ArgumentNullException.ThrowIfNull(league);
 
+        if (RepairRecordedPenaltyWinner(league))
+        {
+            return true;
+        }
+
         if (RescheduleOverdueChampionsLeagueTies(league))
         {
             return true;
@@ -140,6 +145,139 @@ public class CompetitionProgressionService
         }
 
         return false;
+    }
+
+    private static bool RepairRecordedPenaltyWinner(League league)
+    {
+        foreach (var decidingFixture in league.Fixtures.Where(fixture =>
+            fixture.IsPlayed &&
+            fixture.IsKnockout &&
+            fixture.PenaltyHomeScore.HasValue &&
+            fixture.PenaltyAwayScore.HasValue &&
+            fixture.PenaltyHomeScore.Value != fixture.PenaltyAwayScore.Value))
+        {
+            var correctWinner = decidingFixture.PenaltyHomeScore > decidingFixture.PenaltyAwayScore
+                ? decidingFixture.HomeTeam
+                : decidingFixture.AwayTeam;
+            var correctLoser = ReferenceEquals(correctWinner, decidingFixture.HomeTeam)
+                ? decidingFixture.AwayTeam
+                : decidingFixture.HomeTeam;
+            if (decidingFixture.WinningTeamName.Equals(correctWinner.Name, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            var incorrectWinnerName = decidingFixture.WinningTeamName;
+            var affectedFixtures = decidingFixture.IsTwoLeggedTie
+                ? league.Fixtures.Where(fixture =>
+                    fixture.Competition == decidingFixture.Competition &&
+                    fixture.KnockoutTieId.Equals(decidingFixture.KnockoutTieId, StringComparison.OrdinalIgnoreCase))
+                : [decidingFixture];
+            foreach (var fixture in affectedFixtures)
+            {
+                SetWinner(fixture, correctWinner, correctLoser);
+            }
+
+            RepairUnplayedNextRoundFixture(
+                league,
+                decidingFixture,
+                incorrectWinnerName,
+                correctWinner);
+            RepairCompetitionStateWinner(
+                league,
+                decidingFixture,
+                incorrectWinnerName,
+                correctWinner.Name,
+                correctLoser.Name);
+            return true;
+        }
+
+        return false;
+    }
+
+    private static void RepairUnplayedNextRoundFixture(
+        League league,
+        Fixture decidingFixture,
+        string incorrectWinnerName,
+        Team correctWinner)
+    {
+        if (string.IsNullOrWhiteSpace(incorrectWinnerName) ||
+            !CupRoundMap.TryGetValue(decidingFixture.Competition, out var roundMap) ||
+            !roundMap.TryGetValue(decidingFixture.RoundName, out var roundInfo) ||
+            string.IsNullOrWhiteSpace(roundInfo.NextRound))
+        {
+            return;
+        }
+
+        var nextFixtures = league.Fixtures.Where(fixture =>
+            fixture.Competition == decidingFixture.Competition &&
+            fixture.RoundName.Equals(roundInfo.NextRound, StringComparison.OrdinalIgnoreCase) &&
+            !fixture.IsPlayed &&
+            (fixture.HomeTeam.Name.Equals(incorrectWinnerName, StringComparison.OrdinalIgnoreCase) ||
+             fixture.AwayTeam.Name.Equals(incorrectWinnerName, StringComparison.OrdinalIgnoreCase)))
+            .ToList();
+        foreach (var nextFixture in nextFixtures)
+        {
+            if (nextFixture.HomeTeam.Name.Equals(incorrectWinnerName, StringComparison.OrdinalIgnoreCase))
+            {
+                nextFixture.HomeTeam = correctWinner;
+                nextFixture.Venue = !string.IsNullOrWhiteSpace(correctWinner.StadiumName)
+                    ? correctWinner.StadiumName
+                    : !string.IsNullOrWhiteSpace(correctWinner.Venue)
+                        ? correctWinner.Venue
+                        : $"{correctWinner.Name} Stadium";
+            }
+            else
+            {
+                nextFixture.AwayTeam = correctWinner;
+            }
+        }
+    }
+
+    private static void RepairCompetitionStateWinner(
+        League league,
+        Fixture decidingFixture,
+        string incorrectWinnerName,
+        string correctWinnerName,
+        string correctLoserName)
+    {
+        var state = league.CompetitionStates.FirstOrDefault(state =>
+            state.Competition == decidingFixture.Competition);
+        if (state is null)
+        {
+            return;
+        }
+
+        ReplaceTeamName(state.QualifiedTeamNames, incorrectWinnerName, correctWinnerName);
+        state.EliminatedTeamNames.RemoveAll(name =>
+            name.Equals(correctWinnerName, StringComparison.OrdinalIgnoreCase));
+        if (!state.EliminatedTeamNames.Contains(correctLoserName, StringComparer.OrdinalIgnoreCase))
+        {
+            state.EliminatedTeamNames.Add(correctLoserName);
+        }
+
+        foreach (var record in state.ProgressRecords.Where(record =>
+            record.RoundName.Equals(decidingFixture.RoundName, StringComparison.OrdinalIgnoreCase)))
+        {
+            ReplaceTeamName(record.QualifiedTeamNames, incorrectWinnerName, correctWinnerName);
+            record.EliminatedTeamNames.RemoveAll(name =>
+                name.Equals(correctWinnerName, StringComparison.OrdinalIgnoreCase));
+            if (!record.EliminatedTeamNames.Contains(correctLoserName, StringComparer.OrdinalIgnoreCase))
+            {
+                record.EliminatedTeamNames.Add(correctLoserName);
+            }
+        }
+    }
+
+    private static void ReplaceTeamName(List<string> teamNames, string oldName, string newName)
+    {
+        for (var index = 0; index < teamNames.Count; index++)
+        {
+            if (teamNames[index].Equals(oldName, StringComparison.OrdinalIgnoreCase))
+            {
+                teamNames[index] = newName;
+            }
+        }
     }
 
     public void EnsureFixtureMetadata(Fixture fixture)
@@ -174,6 +312,12 @@ public class CompetitionProgressionService
 
         if (!string.IsNullOrWhiteSpace(fixture.WinningTeamName) || fixture.Result is null)
         {
+            return;
+        }
+
+        if (TryGetRecordedPenaltyWinner(fixture, out var penaltyWinner, out var penaltyLoser))
+        {
+            SetWinner(fixture, penaltyWinner, penaltyLoser);
             return;
         }
 
@@ -282,37 +426,62 @@ public class CompetitionProgressionService
         else
         {
             var decidingLeg = tieFixtures.Single(fixture => fixture.LegNumber == 2);
-            var random = seed.HasValue
-                ? new Random(unchecked(seed.Value * 397 ^ decidingLeg.FixtureId.GetHashCode()))
-                : Random.Shared;
-            var homeStrength = GetTeamStrength(decidingLeg.HomeTeam);
-            var awayStrength = GetTeamStrength(decidingLeg.AwayTeam);
-            var homeWins = random.NextDouble() < homeStrength / Math.Max(1.0, homeStrength + awayStrength);
-
-            decidingLeg.ExtraTimeHomeScore = decidingLeg.Result!.HomeScore;
-            decidingLeg.ExtraTimeAwayScore = decidingLeg.Result.AwayScore;
-            decidingLeg.PenaltyHomeScore = homeWins ? random.Next(4, 6) : random.Next(2, 5);
-            decidingLeg.PenaltyAwayScore = homeWins ? random.Next(2, 5) : random.Next(4, 6);
-            if (decidingLeg.PenaltyHomeScore == decidingLeg.PenaltyAwayScore)
+            if (TryGetRecordedPenaltyWinner(decidingLeg, out var recordedWinner, out var recordedLoser))
             {
-                if (homeWins)
-                {
-                    decidingLeg.PenaltyHomeScore++;
-                }
-                else
-                {
-                    decidingLeg.PenaltyAwayScore++;
-                }
+                winner = recordedWinner;
+                loser = recordedLoser;
             }
+            else
+            {
+                var random = seed.HasValue
+                    ? new Random(unchecked(seed.Value * 397 ^ decidingLeg.FixtureId.GetHashCode()))
+                    : Random.Shared;
+                var homeStrength = GetTeamStrength(decidingLeg.HomeTeam);
+                var awayStrength = GetTeamStrength(decidingLeg.AwayTeam);
+                var homeWins = random.NextDouble() < homeStrength / Math.Max(1.0, homeStrength + awayStrength);
 
-            winner = homeWins ? decidingLeg.HomeTeam : decidingLeg.AwayTeam;
-            loser = homeWins ? decidingLeg.AwayTeam : decidingLeg.HomeTeam;
+                decidingLeg.ExtraTimeHomeScore = decidingLeg.Result!.HomeScore;
+                decidingLeg.ExtraTimeAwayScore = decidingLeg.Result.AwayScore;
+                decidingLeg.PenaltyHomeScore = homeWins ? random.Next(4, 6) : random.Next(2, 5);
+                decidingLeg.PenaltyAwayScore = homeWins ? random.Next(2, 5) : random.Next(4, 6);
+                if (decidingLeg.PenaltyHomeScore == decidingLeg.PenaltyAwayScore)
+                {
+                    if (homeWins)
+                    {
+                        decidingLeg.PenaltyHomeScore++;
+                    }
+                    else
+                    {
+                        decidingLeg.PenaltyAwayScore++;
+                    }
+                }
+
+                winner = homeWins ? decidingLeg.HomeTeam : decidingLeg.AwayTeam;
+                loser = homeWins ? decidingLeg.AwayTeam : decidingLeg.HomeTeam;
+            }
         }
 
         foreach (var fixture in tieFixtures)
         {
             SetWinner(fixture, winner, loser);
         }
+    }
+
+    private static bool TryGetRecordedPenaltyWinner(Fixture fixture, out Team winner, out Team loser)
+    {
+        if (fixture.PenaltyHomeScore.HasValue &&
+            fixture.PenaltyAwayScore.HasValue &&
+            fixture.PenaltyHomeScore.Value != fixture.PenaltyAwayScore.Value)
+        {
+            var homeWon = fixture.PenaltyHomeScore.Value > fixture.PenaltyAwayScore.Value;
+            winner = homeWon ? fixture.HomeTeam : fixture.AwayTeam;
+            loser = homeWon ? fixture.AwayTeam : fixture.HomeTeam;
+            return true;
+        }
+
+        winner = null!;
+        loser = null!;
+        return false;
     }
 
     private void AdvanceKnockoutCompetitionIfReady(League league, CompetitionType competition, string roundName)

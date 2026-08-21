@@ -170,6 +170,56 @@ public class PlayerMatchRatingServiceTests
         Assert.True(rating > 6.0);
     }
 
+    [Fact]
+    public void CalculateContextualRating_DoesNotDoubleCountRoutineGoalkeeperSaves()
+    {
+        var match = CreateMatch(homeScore: 3, awayScore: 0);
+        match.AwayStats.TotalShots = 5;
+        match.AwayStats.ShotsOnTarget = 2;
+        match.AwayStats.ExpectedGoals = 0.4;
+        var goalkeeper = new PlayerMatchPerformance
+        {
+            PlayerName = "Routine Clean Sheet Keeper",
+            TeamName = match.HomeTeam.Name,
+            Position = Position.Goalkeeper,
+            Rating = 6.6,
+            Saves = 2
+        };
+
+        var rating = PlayerMatchRatingService.CalculateContextualRating(match, goalkeeper);
+
+        Assert.InRange(rating, 6.8, 6.9);
+    }
+
+    [Fact]
+    public void CalculateContextualRating_OnlyAddsExtraSaveBonusForHeavyWorkload()
+    {
+        var match = CreateMatch(homeScore: 1, awayScore: 0);
+        var routineGoalkeeper = new PlayerMatchPerformance
+        {
+            PlayerName = "Routine Keeper",
+            TeamName = match.HomeTeam.Name,
+            Position = Position.Goalkeeper,
+            Rating = 7.0,
+            Saves = 4
+        };
+        var busyGoalkeeper = new PlayerMatchPerformance
+        {
+            PlayerName = "Busy Keeper",
+            TeamName = match.HomeTeam.Name,
+            Position = Position.Goalkeeper,
+            Rating = 7.0,
+            Saves = 8
+        };
+
+        var routineRating = PlayerMatchRatingService.CalculateContextualRating(match, routineGoalkeeper);
+        var busyRating = PlayerMatchRatingService.CalculateContextualRating(match, busyGoalkeeper);
+
+        Assert.InRange(routineRating, 7.2, 7.3);
+        Assert.InRange(busyRating, 7.4, 7.5);
+        Assert.True(busyRating > routineRating);
+    }
+
     private static Match CreateMatch(int homeScore, int awayScore)
     {
         return new Match

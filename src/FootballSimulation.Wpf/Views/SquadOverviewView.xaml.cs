@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Threading;
 using FootballSimulation.Models;
 using FootballSimulation.Services;
@@ -954,12 +955,45 @@ public partial class SquadOverviewView : UserControl
             resultMessage += $"{Environment.NewLine}{Environment.NewLine}" +
                 $"Wage budget remaining: {PlayerContractService.FormatWage(finance.AvailableWageBudget)}.";
         }
-        MessageBox.Show(
-            resultMessage,
-            result.Accepted ? "Contract Extended" : "Contract Rejected",
-            MessageBoxButton.OK,
-            result.Accepted ? MessageBoxImage.Information : MessageBoxImage.Warning);
+        ShowContractExtensionModal(_selectedRow.Listing, result, resultMessage);
     }
+
+    private void ShowContractExtensionModal(
+        TransferPlayerListing listing,
+        ContractRenewalResult result,
+        string resultMessage)
+    {
+        var accepted = result.Accepted;
+        ContractExtensionModal.Show(new TransferNotificationModalContext(
+            accepted ? "Contract Extended" : "Contract Rejected",
+            accepted ? "Contract successfully agreed" : "Player representative response",
+            listing.Player.Name,
+            $"{listing.Team.Name} · {listing.Player.PreferredPosition} · Age {listing.Player.Age}",
+            resultMessage,
+            accepted
+                ? "The new contract is active and the squad budget has been updated."
+                : "Improve the wage, squad role, or contract length before trying again.",
+            string.Empty,
+            string.Empty,
+            "Weekly Wage",
+            PlayerContractService.FormatWage(result.WeeklyWage),
+            "New Expiry",
+            result.ContractEndYear.ToString(CultureInfo.InvariantCulture),
+            "Squad Role",
+            PlayerContractService.FormatRole(result.SquadRole),
+            "Decision",
+            accepted ? "Accepted" : "Rejected",
+            "Continue",
+            string.Empty,
+            string.Empty,
+            CreateBrush(accepted ? "#061226" : "#7F1D1D"),
+            CreateBrush(accepted ? "#ECFDF5" : "#FEF2F2"),
+            CreateBrush(accepted ? "#BBF7D0" : "#FECACA"),
+            CreateBrush(accepted ? "#166534" : "#991B1B")));
+    }
+
+    private static Brush CreateBrush(string color) =>
+        (Brush)new BrushConverter().ConvertFromString(color)!;
 
     private void PersistCurrentSaveSlot()
     {

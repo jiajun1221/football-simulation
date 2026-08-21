@@ -12,7 +12,7 @@ public static class PlayerMatchRatingService
 
         rating += performance.Position switch
         {
-            Position.Goalkeeper => GetGoalkeeperAdjustment(match, performance, goalsConceded),
+            Position.Goalkeeper => GetGoalkeeperAdjustment(performance, goalsConceded),
             Position.Defender => GetDefenderAdjustment(match, performance, player, goalsConceded),
             Position.Midfielder when IsDefensiveMidfielder(player) => GetDefenderAdjustment(match, performance, player, goalsConceded) * 0.75,
             Position.Midfielder => -goalsConceded * 0.02,
@@ -63,15 +63,20 @@ public static class PlayerMatchRatingService
         return cleanSheetBonus + teamDefensiveBonus + defensiveBonus - concessionPenalty - directErrorPenalty;
     }
 
-    private static double GetGoalkeeperAdjustment(Match match, PlayerMatchPerformance performance, int goalsConceded)
+    private static double GetGoalkeeperAdjustment(PlayerMatchPerformance performance, int goalsConceded)
     {
-        var cleanSheetBonus = goalsConceded == 0 ? 0.65 : 0.0;
-        var saveBonus = Math.Min(performance.Saves * 0.11, 0.90);
-        var teamDefensiveBonus = GetTeamDefensiveBonus(match, performance.TeamName, goalsConceded) * 0.75;
-        var directErrorPenalty = performance.ErrorsLeadingToGoal * 0.35;
+        // Saves already increase the live rating when they happen. Rewarding every save
+        // again here made routine goalkeeper performances dominate Man of the Match.
+        // Only exceptional workloads receive an additional full-time context bonus.
+        var cleanSheetBonus = goalsConceded == 0 ? 0.25 : 0.0;
+        var highWorkloadBonus = Math.Min(Math.Max(0, performance.Saves - 4) * 0.06, 0.30);
+        var directErrorPenalty =
+            performance.ErrorsLeadingToShot * 0.12 +
+            performance.ErrorsLeadingToGoal * 0.45 +
+            performance.PenaltiesConceded * 0.25;
         var concessionPenalty = goalsConceded * 0.34 + Math.Max(0, goalsConceded - 2) * 0.16;
 
-        return cleanSheetBonus + saveBonus + teamDefensiveBonus - concessionPenalty - directErrorPenalty;
+        return cleanSheetBonus + highWorkloadBonus - concessionPenalty - directErrorPenalty;
     }
 
     private static double ApplyConcessionCaps(PlayerMatchPerformance performance, int goalsConceded, double rating)

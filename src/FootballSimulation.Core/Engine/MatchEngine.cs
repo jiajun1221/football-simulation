@@ -4843,7 +4843,7 @@ public class MatchEngine
 
     private static Player ResolveChanceCreator(Player playmaker, Player shooter, string chanceType)
     {
-        return chanceType is "dribble run" or "long-range attempt" or "rebound shot" or "one-on-one"
+        return chanceType is "dribble run" or "rebound shot"
             ? shooter
             : playmaker;
     }
@@ -5793,6 +5793,13 @@ public class MatchEngine
             return defender;
         }
 
+        if (defender.Position is Position.Forward or Position.Midfielder)
+        {
+            performance.Recoveries++;
+            performance.Rating += GetDefensiveActionRating(defender, 0.10, 0.28, random);
+            return defender;
+        }
+
         performance.Clearances++;
         performance.Rating += GetDefensiveActionRating(defender, 0.10, 0.30, random);
         if (random.NextDouble() < 0.35)
@@ -6618,7 +6625,7 @@ public class MatchEngine
     private Player ChooseDefendingPlayer(Team team, Random random)
     {
         var candidates = GetAvailablePlayers(team)
-            .Where(player => player.Position is Position.Defender or Position.Midfielder)
+            .Where(IsOutfieldPlayer)
             .ToList();
 
         if (candidates.Count == 0)
@@ -6644,14 +6651,22 @@ public class MatchEngine
 
     private double GetDefendingPlayerWeight(Player player)
     {
-        return _teamStrengthCalculator.GetEffectiveDefense(player) * 1.24 +
+        var positionModifier = player.Position switch
+        {
+            Position.Defender => 1.25,
+            Position.Midfielder => 1.00,
+            Position.Forward => 0.32,
+            _ => 0.10
+        };
+
+        return (_teamStrengthCalculator.GetEffectiveDefense(player) * 1.24 +
             _teamStrengthCalculator.GetEffectivePassing(player) * 0.16 +
             (player.Traits.Contains(PlayerTrait.Interceptor) ? 18 : 0) +
             (player.Traits.Contains(PlayerTrait.BallWinner) ? 17 : 0) +
             (player.Traits.Contains(PlayerTrait.RecoveryPace) ? 10 : 0) +
             (player.Traits.Contains(PlayerTrait.RelentlessPresser) ? 9 : 0) +
             (player.Traits.Contains(PlayerTrait.DivesIntoTackles) ? 14 : 0) +
-            (player.Traits.Contains(PlayerTrait.BoxToBox) ? 7 : 0);
+            (player.Traits.Contains(PlayerTrait.BoxToBox) ? 7 : 0)) * positionModifier;
     }
 
     private bool IsGoal(double goalProbability, Random random)

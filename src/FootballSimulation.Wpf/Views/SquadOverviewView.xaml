@@ -441,5 +441,11 @@
                        Foreground="#FFFFFF"
                        FontWeight="SemiBold" />
         </Border>
+
+        <views:TransferNotificationModal x:Name="ContractExtensionModal"
+                                         Grid.RowSpan="3"
+                                         Margin="-22,-16,-22,-16"
+                                         HorizontalAlignment="Stretch"
+                                         VerticalAlignment="Stretch" />
     </Grid>
 </UserControl>

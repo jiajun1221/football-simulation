@@ -73,7 +73,7 @@ public partial class MyTeamResultsView : UserControl
         var opponent = isHome ? fixture.AwayTeam : fixture.HomeTeam;
         var selectedGoals = isHome ? result.HomeScore : result.AwayScore;
         var opponentGoals = isHome ? result.AwayScore : result.HomeScore;
-        var resultText = selectedGoals > opponentGoals ? "W" : selectedGoals < opponentGoals ? "L" : "D";
+        var resultText = CreateResultText(fixture, selectedTeam, selectedGoals, opponentGoals);
         var playerOfTheMatch = GetPlayerOfTheMatch(result);
         var leagueId = _state.League?.LeagueId ?? _state.SelectedLeagueId;
 
@@ -137,6 +137,24 @@ public partial class MyTeamResultsView : UserControl
         }
 
         return score;
+    }
+
+    private static string CreateResultText(
+        Fixture fixture,
+        Team selectedTeam,
+        int selectedGoals,
+        int opponentGoals)
+    {
+        if (fixture.IsKnockout &&
+            fixture.LegNumber != 1 &&
+            !string.IsNullOrWhiteSpace(fixture.WinningTeamName))
+        {
+            return fixture.WinningTeamName.Equals(selectedTeam.Name, StringComparison.OrdinalIgnoreCase)
+                ? "W"
+                : "L";
+        }
+
+        return selectedGoals > opponentGoals ? "W" : selectedGoals < opponentGoals ? "L" : "D";
     }
 
     private static string CreateNotesText(Fixture fixture, string resultText)

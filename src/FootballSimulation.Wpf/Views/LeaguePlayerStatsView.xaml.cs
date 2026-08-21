@@ -215,9 +215,9 @@ public partial class LeaguePlayerStatsView : UserControl
             var isActive = button.Tag is string tag &&
                 Enum.TryParse<StatsCategory>(tag, out var category) &&
                 category == _currentCategory;
-            button.Background = ToBrush(isActive ? "#2563EB" : ThemeManager.GetBrushHex("AppSecondaryCardBackground", "#111827"));
+            button.Background = ToBrush(isActive ? "#000000" : "#EAF0F7");
             button.Foreground = ToBrush(isActive ? "#FFFFFF" : ThemeManager.GetBrushHex("AppTextBrush", "#E5E7EB"));
-            button.BorderBrush = ToBrush(isActive ? "#2563EB" : ThemeManager.GetBrushHex("AppBorderBrush", "#243247"));
+            button.BorderBrush = ToBrush("Transparent");
         }
     }
 

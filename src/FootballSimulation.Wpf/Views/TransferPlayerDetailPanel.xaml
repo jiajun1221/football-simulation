@@ -28,6 +28,36 @@
             <Setter Property="Margin" Value="0,0,0,3" />
         </Style>
 
+        <Style x:Key="SeasonStatLabelStyle" TargetType="TextBlock" BasedOn="{StaticResource DetailMutedTextStyle}">
+            <Setter Property="FontSize" Value="10" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+
+        <Style x:Key="SeasonStatIconStyle" TargetType="TextBlock">
+            <Setter Property="Width" Value="16" />
+            <Setter Property="Height" Value="16" />
+            <Setter Property="Margin" Value="0,0,4,0" />
+            <Setter Property="FontFamily" Value="Segoe UI Symbol" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="LineHeight" Value="16" />
+            <Setter Property="LineStackingStrategy" Value="BlockLineHeight" />
+        </Style>
+
+        <Style x:Key="SeasonStatCategoryStyle" TargetType="Border">
+            <Setter Property="CornerRadius" Value="5" />
+            <Setter Property="Padding" Value="7,3" />
+            <Setter Property="Margin" Value="0,2,0,6" />
+        </Style>
+
+        <Style x:Key="SeasonStatCategoryTextStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="9" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+
         <Style x:Key="DetailSectionHeaderStyle" TargetType="Grid">
             <Setter Property="Margin" Value="0,12,0,7" />
         </Style>
@@ -381,61 +411,71 @@
                             <TextBlock Grid.Column="1" Text="Season Stats" Style="{StaticResource DetailSectionTitleStyle}" />
                             <Border Grid.Column="2" Style="{StaticResource DetailSectionDividerStyle}" />
                         </Grid>
-                        <UniformGrid Columns="4" Margin="0,0,0,10">
+                        <Border Style="{StaticResource SeasonStatCategoryStyle}" Background="#FEF3C7">
+                            <TextBlock Text="OVERVIEW" Foreground="#B45309" Style="{StaticResource SeasonStatCategoryTextStyle}" />
+                        </Border>
+                        <UniformGrid Columns="4" Margin="5,0,0,8">
                             <StackPanel>
-                                <TextBlock Text="Goals" Style="{StaticResource DetailMutedTextStyle}" />
-                                <TextBlock x:Name="GoalsTextBlock" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" />
+                                <TextBlock x:Name="ExtraStatThreeLabelTextBlock" Style="{StaticResource SeasonStatLabelStyle}" />
+                                <StackPanel Orientation="Horizontal"><TextBlock Text="#" Foreground="#D97706" Style="{StaticResource SeasonStatIconStyle}" /><TextBlock x:Name="ExtraStatThreeValueTextBlock" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" /></StackPanel>
                             </StackPanel>
                             <StackPanel>
-                                <TextBlock Text="Assists" Style="{StaticResource DetailMutedTextStyle}" />
-                                <TextBlock x:Name="AssistsTextBlock" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" />
-                            </StackPanel>
-                            <StackPanel>
-                                <TextBlock Text="Matches" Style="{StaticResource DetailMutedTextStyle}" />
-                                <TextBlock x:Name="MatchesTextBlock" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" />
-                            </StackPanel>
-                            <StackPanel>
-                                <TextBlock Text="Avg" Style="{StaticResource DetailMutedTextStyle}" />
-                                <TextBlock x:Name="RatingTextBlock" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" />
+                                <TextBlock x:Name="ExtraStatFourLabelTextBlock" Style="{StaticResource SeasonStatLabelStyle}" />
+                                <StackPanel Orientation="Horizontal"><TextBlock Text="&#x2605;" Foreground="#D97706" Style="{StaticResource SeasonStatIconStyle}" /><TextBlock x:Name="ExtraStatFourValueTextBlock" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" /></StackPanel>
                             </StackPanel>
                         </UniformGrid>
-                        <UniformGrid Columns="4" Margin="0,0,0,10">
+                        <Border Style="{StaticResource SeasonStatCategoryStyle}" Background="#FEE2E2">
+                            <TextBlock Text="ATTACK" Foreground="#DC2626" Style="{StaticResource SeasonStatCategoryTextStyle}" />
+                        </Border>
+                        <UniformGrid Columns="4" Margin="5,0,0,8">
                             <StackPanel>
-                                <TextBlock Text="Tackles" Style="{StaticResource DetailMutedTextStyle}" />
-                                <TextBlock x:Name="TacklesTextBlock" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" />
+                                <TextBlock Text="Goals" Style="{StaticResource SeasonStatLabelStyle}" />
+                                <StackPanel Orientation="Horizontal"><TextBlock Text="&#x26BD;" Foreground="#DC2626" Style="{StaticResource SeasonStatIconStyle}" /><TextBlock x:Name="GoalsTextBlock" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" /></StackPanel>
                             </StackPanel>
                             <StackPanel>
-                                <TextBlock Text="Interceptions" Style="{StaticResource DetailMutedTextStyle}" />
-                                <TextBlock x:Name="InterceptionsTextBlock" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" />
+                                <TextBlock Text="Assists" Style="{StaticResource SeasonStatLabelStyle}" />
+                                <StackPanel Orientation="Horizontal"><TextBlock Text="&#x2197;" Foreground="#DC2626" Style="{StaticResource SeasonStatIconStyle}" /><TextBlock x:Name="AssistsTextBlock" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" /></StackPanel>
                             </StackPanel>
                             <StackPanel>
-                                <TextBlock Text="Blocks" Style="{StaticResource DetailMutedTextStyle}" />
-                                <TextBlock x:Name="BlocksTextBlock" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" />
+                                <TextBlock Text="Key passes" Style="{StaticResource SeasonStatLabelStyle}" />
+                                <StackPanel Orientation="Horizontal"><TextBlock Text="&#x27A1;" Foreground="#DC2626" Style="{StaticResource SeasonStatIconStyle}" /><TextBlock x:Name="MatchesTextBlock" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" /></StackPanel>
                             </StackPanel>
                             <StackPanel>
-                                <TextBlock Text="Clearances" Style="{StaticResource DetailMutedTextStyle}" />
-                                <TextBlock x:Name="ClearancesTextBlock" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" />
-                            </StackPanel>
-                        </UniformGrid>
-                        <UniformGrid Columns="4" Margin="0,0,0,10">
-                            <StackPanel>
-                                <TextBlock x:Name="ExtraStatOneLabelTextBlock" Style="{StaticResource DetailMutedTextStyle}" />
-                                <TextBlock x:Name="ExtraStatOneValueTextBlock" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" />
-                            </StackPanel>
-                            <StackPanel>
-                                <TextBlock x:Name="ExtraStatTwoLabelTextBlock" Style="{StaticResource DetailMutedTextStyle}" />
-                                <TextBlock x:Name="ExtraStatTwoValueTextBlock" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" />
-                            </StackPanel>
-                            <StackPanel>
-                                <TextBlock x:Name="ExtraStatThreeLabelTextBlock" Style="{StaticResource DetailMutedTextStyle}" />
-                                <TextBlock x:Name="ExtraStatThreeValueTextBlock" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" />
-                            </StackPanel>
-                            <StackPanel>
-                                <TextBlock x:Name="ExtraStatFourLabelTextBlock" Style="{StaticResource DetailMutedTextStyle}" />
-                                <TextBlock x:Name="ExtraStatFourValueTextBlock" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" />
+                                <TextBlock Text="Shots on target" Style="{StaticResource SeasonStatLabelStyle}" ToolTip="Shots on target" />
+                                <StackPanel Orientation="Horizontal"><TextBlock Text="&#x1F3AF;" Foreground="#DC2626" Style="{StaticResource SeasonStatIconStyle}" /><TextBlock x:Name="RatingTextBlock" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" /></StackPanel>
                             </StackPanel>
                         </UniformGrid>
-
+                        <Border Style="{StaticResource SeasonStatCategoryStyle}" Background="#EFF6FF">
+                            <TextBlock Text="DEFEND" Foreground="#1D4ED8" Style="{StaticResource SeasonStatCategoryTextStyle}" />
+                        </Border>
+                        <UniformGrid Columns="4" Margin="5,0,0,8">
+                            <StackPanel>
+                                <TextBlock Text="Tackles" Style="{StaticResource SeasonStatLabelStyle}" />
+                                <StackPanel Orientation="Horizontal"><TextBlock Text="&#x1F6E1;" Foreground="#2563EB" Style="{StaticResource SeasonStatIconStyle}" /><TextBlock x:Name="TacklesTextBlock" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" /></StackPanel>
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock Text="Interceptions" Style="{StaticResource SeasonStatLabelStyle}" ToolTip="Interceptions" />
+                                <StackPanel Orientation="Horizontal"><TextBlock Text="&#x21C4;" Foreground="#2563EB" Style="{StaticResource SeasonStatIconStyle}" /><TextBlock x:Name="InterceptionsTextBlock" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" /></StackPanel>
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock Text="Blocks" Style="{StaticResource SeasonStatLabelStyle}" />
+                                <StackPanel Orientation="Horizontal"><TextBlock Text="&#x25A0;" Foreground="#2563EB" Style="{StaticResource SeasonStatIconStyle}" /><TextBlock x:Name="BlocksTextBlock" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" /></StackPanel>
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock Text="Clearances" Style="{StaticResource SeasonStatLabelStyle}" />
+                                <StackPanel Orientation="Horizontal"><TextBlock Text="&#x2B06;" Foreground="#2563EB" Style="{StaticResource SeasonStatIconStyle}" /><TextBlock x:Name="ClearancesTextBlock" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" /></StackPanel>
+                            </StackPanel>
+                        </UniformGrid>
+                        <UniformGrid Columns="4" Margin="5,0,0,8">
+                            <StackPanel>
+                                <TextBlock x:Name="ExtraStatOneLabelTextBlock" Style="{StaticResource SeasonStatLabelStyle}" />
+                                <StackPanel Orientation="Horizontal"><TextBlock Text="&#x21BA;" Foreground="#2563EB" Style="{StaticResource SeasonStatIconStyle}" /><TextBlock x:Name="ExtraStatOneValueTextBlock" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" /></StackPanel>
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock x:Name="ExtraStatTwoLabelTextBlock" Style="{StaticResource SeasonStatLabelStyle}" />
+                                <StackPanel Orientation="Horizontal"><TextBlock Text="&#x2191;" Foreground="#2563EB" Style="{StaticResource SeasonStatIconStyle}" /><TextBlock x:Name="ExtraStatTwoValueTextBlock" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" /></StackPanel>
+                            </StackPanel>
+                        </UniformGrid>
                         <Grid Style="{StaticResource DetailSectionHeaderStyle}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
