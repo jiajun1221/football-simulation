@@ -10,9 +10,9 @@
     <Window.Resources>
         <Style x:Key="SaveSlotActionButton" TargetType="Button">
             <Setter Property="Height" Value="42" />
-            <Setter Property="Background" Value="#2563EB" />
+            <Setter Property="Background" Value="{DynamicResource AppButtonBackground}" />
             <Setter Property="Foreground" Value="#FFFFFF" />
-            <Setter Property="BorderBrush" Value="#2563EB" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AppButtonBackground}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="Template">
@@ -34,8 +34,8 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="ButtonBorder" Property="Background" Value="#1D4ED8" />
-                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#1D4ED8" />
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource AppButtonHoverBackground}" />
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="{DynamicResource AppButtonHoverBackground}" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>

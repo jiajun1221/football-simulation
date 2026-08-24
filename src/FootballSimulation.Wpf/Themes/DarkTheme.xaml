@@ -17,16 +17,16 @@
     <SolidColorBrush x:Key="AppInverseTextBrush" Color="#F8FAFC" />
     <SolidColorBrush x:Key="AppBorderBrush" Color="#243247" />
     <SolidColorBrush x:Key="AppInputBackground" Color="#172033" />
-    <SolidColorBrush x:Key="AppButtonBackground" Color="#2563EB" />
+    <SolidColorBrush x:Key="AppButtonBackground" Color="#071226" />
     <SolidColorBrush x:Key="AppButtonForeground" Color="#F8FAFC" />
-    <SolidColorBrush x:Key="AppButtonHoverBackground" Color="#1D4ED8" />
+    <SolidColorBrush x:Key="AppButtonHoverBackground" Color="#0B2A5B" />
     <SolidColorBrush x:Key="AppToggleBackground" Color="#0F172A" />
     <SolidColorBrush x:Key="AppToggleForeground" Color="#F8FAFC" />
     <SolidColorBrush x:Key="AppToggleBorderBrush" Color="#38BDF8" />
     <SolidColorBrush x:Key="AppHighlightBrush" Color="#6B4A16" />
     <SolidColorBrush x:Key="MainMenuOverlayBrush" Color="#8C000000" />
-    <SolidColorBrush x:Key="MainMenuPrimaryButtonBackground" Color="#2563EB" />
-    <SolidColorBrush x:Key="MainMenuPrimaryButtonHoverBackground" Color="#1D4ED8" />
+    <SolidColorBrush x:Key="MainMenuPrimaryButtonBackground" Color="#071226" />
+    <SolidColorBrush x:Key="MainMenuPrimaryButtonHoverBackground" Color="#0B2A5B" />
     <SolidColorBrush x:Key="MainMenuDisabledButtonBackground" Color="#334155" />
     <SolidColorBrush x:Key="MainMenuDisabledButtonForeground" Color="#94A3B8" />
     <SolidColorBrush x:Key="TacticalFloatingPanelBackground" Color="#B80F172A" />

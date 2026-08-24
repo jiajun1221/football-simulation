@@ -9,14 +9,14 @@ public static class AiLineupSelectionService
     {
         ArgumentNullException.ThrowIfNull(team);
 
-        var selectedFormation = SelectPreferredFormation(team);
-        var slots = FormationSlotService.GetSlots(selectedFormation);
         var allPlayers = team.Players
             .Concat(team.Substitutes)
             .GroupBy(player => player.Name, StringComparer.OrdinalIgnoreCase)
             .Select(group => group.First())
             .ToList();
         var availablePlayers = allPlayers.Where(IsAvailableForSelection).ToList();
+        var selectedFormation = SelectBestCompatibleFormation(team, availablePlayers);
+        var slots = FormationSlotService.GetSlots(selectedFormation);
         var assignment = NaturalPositionAssignmentService.Assign(
             availablePlayers,
             slots,
@@ -131,6 +131,38 @@ public static class AiLineupSelectionService
         }
 
         return FormationCatalogService.NormalizeFormationName(team.Formation);
+    }
+
+    private static string SelectBestCompatibleFormation(Team team, IReadOnlyList<Player> availablePlayers)
+    {
+        var preferred = SelectPreferredFormation(team);
+        var current = FormationCatalogService.NormalizeFormationName(team.Formation);
+        var candidates = team.Tactics.Mentality switch
+        {
+            Mentality.AllOutAttack => new[] { preferred, current, "4-2-4", "3-4-3", "4-3-3 Attack" },
+            Mentality.Defensive or Mentality.UltraDefensive => new[] { preferred, current, "5-4-1", "5-3-2", "4-2-3-1 Wide", "4-3-3 Holding" },
+            _ => new[] { preferred, current, "4-3-3 Holding", "4-2-3-1 Wide", "4-4-2" }
+        };
+
+        return candidates
+            .Where(candidate => !string.IsNullOrWhiteSpace(candidate))
+            .Select(FormationCatalogService.NormalizeFormationName)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Select(formation => new
+            {
+                Formation = formation,
+                Assignment = NaturalPositionAssignmentService.Assign(
+                    availablePlayers,
+                    FormationSlotService.GetSlots(formation),
+                    allowEmergencyAssignments: true,
+                    candidateScoreAdjustment: CalculateFatigueRotationScoreAdjustment)
+            })
+            .Where(candidate => candidate.Assignment.Success)
+            .OrderBy(candidate => candidate.Assignment.EmergencyAssignments)
+            .ThenByDescending(candidate => candidate.Assignment.TotalScore)
+            .ThenByDescending(candidate => candidate.Formation.Equals(preferred, StringComparison.OrdinalIgnoreCase))
+            .Select(candidate => candidate.Formation)
+            .FirstOrDefault() ?? preferred;
     }
 
     private static string PickByTeamName(Team team, params string[] formations)

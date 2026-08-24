@@ -36,8 +36,11 @@ public partial class FormationSetupPanel : UserControl
     }
 
     public event EventHandler? SetupChanged;
+    public event EventHandler<Player>? PlayerSelected;
 
     public bool ShowUnavailablePlayers { get; set; } = true;
+    public bool MergeUnavailableIntoSubstitutes { get; set; }
+    public bool IsReadOnlyMode { get; set; }
 
     public void LoadTeam(Team team)
     {
@@ -45,8 +48,34 @@ public partial class FormationSetupPanel : UserControl
         _isLoadingSetup = true;
         FormationComboBox.SelectedValue = FormationCatalogService.NormalizeFormationName(team.Formation);
         TacticalSettingsPanel.LoadTactics(team.Tactics);
+        TacticsColumn.Width = IsReadOnlyMode ? new GridLength(0) : new GridLength(320);
+        TacticsPanelBorder.Visibility = IsReadOnlyMode ? Visibility.Collapsed : Visibility.Visible;
+        FormationAreaBorder.Margin = IsReadOnlyMode ? new Thickness(0) : new Thickness(0, 0, 18, 0);
+        FormationComboBox.IsHitTestVisible = !IsReadOnlyMode;
         var roster = GetDistinctRoster(team);
-        if (team.Players.Count == 11)
+        if (IsReadOnlyMode)
+        {
+            var selectedStarters = roster
+                .Where(player => player.IsStarter || player.IsOnPitch)
+                .Take(11)
+                .ToList();
+            if (selectedStarters.Count < 11)
+            {
+                var selectedKeys = selectedStarters.Select(CreateRosterKey).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                selectedStarters.AddRange(OrderPlayersForPitch(
+                    roster.Where(player => !selectedKeys.Contains(CreateRosterKey(player))),
+                    team.Formation).Take(11 - selectedStarters.Count));
+            }
+
+            var assignment = NaturalPositionAssignmentService.Assign(
+                selectedStarters,
+                FormationSlotService.GetSlots(FormationCatalogService.NormalizeFormationName(team.Formation)),
+                allowEmergencyAssignments: true);
+            _pitchSlots = assignment.Success
+                ? assignment.Assignments.Select(item => item.Player).ToList()
+                : OrderPlayersForPitch(selectedStarters, team.Formation).Take(11).ToList();
+        }
+        else if (team.Players.Count == 11)
         {
             _pitchSlots = team.Players
                 .DistinctBy(CreateRosterKey)
@@ -68,8 +97,11 @@ public partial class FormationSetupPanel : UserControl
                 .ToList();
         }
 
-        ApplyPitchSlotsToTeam();
-        AssignFormationPositions();
+        if (!IsReadOnlyMode)
+        {
+            ApplyPitchSlotsToTeam();
+            AssignFormationPositions();
+        }
         RefreshAll();
         RefreshPresetControls();
         _isLoadingSetup = false;
@@ -350,7 +382,10 @@ public partial class FormationSetupPanel : UserControl
         PitchCanvas.Children.Clear();
         var formation = GetSelectedFormation();
         var positions = _formationLayoutService.GetPositions(formation);
-        AssignFormationPositions(positions);
+        if (!IsReadOnlyMode)
+        {
+            AssignFormationPositions(positions);
+        }
 
         for (var index = 0; index < _pitchSlots.Count && index < positions.Count; index++)
         {
@@ -447,7 +482,7 @@ public partial class FormationSetupPanel : UserControl
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
         var players = _team.Substitutes
             .Where(player => !pitchKeys.Contains(CreateRosterKey(player)))
-            .Where(IsAvailable)
+            .Where(player => MergeUnavailableIntoSubstitutes || IsAvailable(player))
             .ToList();
         if (!string.IsNullOrWhiteSpace(filter))
         {
@@ -484,6 +519,8 @@ public partial class FormationSetupPanel : UserControl
             BenchFormBadgeText = form.Text,
             BenchFormBadgeBackground = form.Background,
             BenchFormBadgeForeground = form.Foreground,
+            AvailabilityText = player.IsInjured ? "Injured" : player.IsSuspended ? "Suspended" : string.Empty,
+            AvailabilityBackground = player.IsInjured ? "#DC2626" : "#B45309",
             CardBackground = colors.PrimaryColor,
             CardBorderBrush = colors.BorderColor,
             TextForeground = colors.TextColor,
@@ -516,6 +553,12 @@ public partial class FormationSetupPanel : UserControl
 
     private void FormationComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        if (IsReadOnlyMode)
+        {
+            RefreshAll();
+            return;
+        }
+
         if (_team is not null && FormationComboBox.SelectedValue is string formation)
         {
             _team.Formation = formation;
@@ -541,7 +584,16 @@ public partial class FormationSetupPanel : UserControl
         if (sender is not Button { Tag: Player player, DataContext: PitchPlayerCard card }) { return; }
         _selectedStarter = player;
         _selectedPositionFilter = card.PositionText;
+        PlayerSelected?.Invoke(this, player);
         RefreshAll();
+    }
+
+    private void SubstituteListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (SubstituteListBox.SelectedItem is BenchPlayerCard card)
+        {
+            PlayerSelected?.Invoke(this, card.Player);
+        }
     }
 
     private void PitchCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -554,6 +606,7 @@ public partial class FormationSetupPanel : UserControl
 
     private void StarterButton_MouseMove(object sender, MouseEventArgs e)
     {
+        if (IsReadOnlyMode) { return; }
         if (e.LeftButton != MouseButtonState.Pressed || sender is not Button { Tag: Player player } button || !MovedEnough(e.GetPosition(this))) { return; }
         StartDrag(button, player, DragSource.StartingXi);
     }
@@ -562,6 +615,7 @@ public partial class FormationSetupPanel : UserControl
 
     private void SubstituteCard_MouseMove(object sender, MouseEventArgs e)
     {
+        if (IsReadOnlyMode) { return; }
         if (e.LeftButton != MouseButtonState.Pressed || sender is not FrameworkElement { DataContext: BenchPlayerCard card } || !MovedEnough(e.GetPosition(this))) { return; }
         StartDrag((DependencyObject)sender, card.Player, DragSource.Substitute);
     }
@@ -753,6 +807,8 @@ public partial class FormationSetupPanel : UserControl
         public string BenchFormBadgeText { get; init; } = string.Empty;
         public string BenchFormBadgeBackground { get; init; } = "#E1E5EA";
         public string BenchFormBadgeForeground { get; init; } = "#465364";
+        public string AvailabilityText { get; init; } = string.Empty;
+        public string AvailabilityBackground { get; init; } = "#DC2626";
         public string CardBackground { get; init; } = "White";
         public string CardBorderBrush { get; init; } = "#D6DFEA";
         public string TextForeground { get; init; } = "#102033";

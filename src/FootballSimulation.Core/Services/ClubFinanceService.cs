@@ -89,6 +89,7 @@ public class ClubFinanceService
         finance.ClubWageBudget = Math.Round(summary.NewBudget * 0.22m, 0);
         finance.TransferSpent = 0;
         finance.TransferIncome = 0;
+        finance.WageCommitmentSpent = 0;
         finance.WageSpent = CalculateWageSpent(team);
 
         return summary;

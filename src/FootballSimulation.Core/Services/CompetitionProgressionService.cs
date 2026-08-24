@@ -596,7 +596,6 @@ public class CompetitionProgressionService
 
         return competitionFixtures
             .SelectMany(fixture => new[] { fixture.HomeTeam, fixture.AwayTeam })
-            .Concat(league.Teams)
             .Where(team =>
                 !team.Name.Equals(winnerTeamName, StringComparison.OrdinalIgnoreCase) &&
                 !eliminatedTeamNames.Contains(team.Name))

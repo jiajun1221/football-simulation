@@ -38,7 +38,8 @@ public enum OfferStatus
     Withdrawn,
     AgreedForNextWindow,
     CompletedWhenWindowOpens,
-    Completed
+    Completed,
+    Expired
 }
 
 public enum TransferNotificationType
@@ -61,10 +62,11 @@ public class ClubFinance
     public decimal ClubWageBudget { get; set; }
     public decimal TransferSpent { get; set; }
     public decimal TransferIncome { get; set; }
+    public decimal WageCommitmentSpent { get; set; }
     public decimal WageSpent { get; set; }
     public decimal YouthWageSpent { get; set; }
 
-    public decimal AvailableTransferBudget => Math.Max(0, ClubTransferBudget + TransferIncome - TransferSpent);
+    public decimal AvailableTransferBudget => Math.Max(0, ClubTransferBudget + TransferIncome - TransferSpent - WageCommitmentSpent);
     public decimal AvailableWageBudget => Math.Max(0, ClubWageBudget - WageSpent - YouthWageSpent);
 }
 
@@ -86,6 +88,7 @@ public class TransferOffer
     public PlayerRole SquadRole { get; set; } = PlayerRole.Rotation;
     public OfferStatus Status { get; set; } = OfferStatus.Pending;
     public int CreatedRound { get; set; }
+    public int ExpiresRound { get; set; }
     public int? AgreementRound { get; set; }
     public int? CompletedRound { get; set; }
     public bool IsUserOffer { get; set; }

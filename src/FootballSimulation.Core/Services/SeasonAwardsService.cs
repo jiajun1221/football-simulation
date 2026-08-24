@@ -296,21 +296,90 @@ public class SeasonAwardsService
                 var selectedResult = competition == CompetitionType.PremierLeague
                     ? GetOutcomeLabel(GetPosition(new LeagueTableService().SortTable(league.Table), selectedTeam.Name), league.Table.Count)
                     : CreateSelectedCompetitionResult(league, competition, selectedTeam.Name);
+                var winnerTeamName = competition == CompetitionType.PremierLeague
+                    ? new LeagueTableService().SortTable(league.Table).FirstOrDefault()?.TeamName ?? string.Empty
+                    : FirstNonBlank(state?.WinnerTeamName, finalFixture?.WinningTeamName);
+                var runnerUpTeamName = competition == CompetitionType.PremierLeague
+                    ? new LeagueTableService().SortTable(league.Table).Skip(1).FirstOrDefault()?.TeamName ?? string.Empty
+                    : FirstNonBlank(state?.RunnerUpTeamName, finalFixture?.LosingTeamName);
+
+                if (IsNeutralCompetition(competition))
+                {
+                    (winnerTeamName, runnerUpTeamName) = SanitizeNeutralCompetitionResult(
+                        league,
+                        competition,
+                        winnerTeamName,
+                        runnerUpTeamName);
+                    if (!DidEnterCompetition(league, competition, selectedTeam.Name))
+                    {
+                        selectedResult = "Did not participate.";
+                    }
+                }
 
                 return new ArchivedCompetitionResult
                 {
                     Competition = competition,
                     CompetitionName = CompetitionNames.GetDisplayName(competition),
-                    WinnerTeamName = competition == CompetitionType.PremierLeague
-                        ? new LeagueTableService().SortTable(league.Table).FirstOrDefault()?.TeamName ?? string.Empty
-                        : FirstNonBlank(state?.WinnerTeamName, finalFixture?.WinningTeamName),
-                    RunnerUpTeamName = competition == CompetitionType.PremierLeague
-                        ? new LeagueTableService().SortTable(league.Table).Skip(1).FirstOrDefault()?.TeamName ?? string.Empty
-                        : FirstNonBlank(state?.RunnerUpTeamName, finalFixture?.LosingTeamName),
+                    WinnerTeamName = winnerTeamName,
+                    RunnerUpTeamName = runnerUpTeamName,
                     SelectedClubResult = selectedResult
                 };
             })
             .ToList();
+    }
+
+    private static (string Winner, string RunnerUp) SanitizeNeutralCompetitionResult(
+        League league,
+        CompetitionType competition,
+        string winner,
+        string runnerUp)
+    {
+        var entrantNames = GetOpeningRoundEntrants(league, competition);
+        if (entrantNames.Count == 0)
+        {
+            return (winner, runnerUp);
+        }
+
+        var winnerIsValid = entrantNames.Contains(winner);
+        var runnerUpIsValid = entrantNames.Contains(runnerUp);
+        if (!winnerIsValid && runnerUpIsValid)
+        {
+            return (runnerUp, string.Empty);
+        }
+
+        return (winnerIsValid ? winner : string.Empty, runnerUpIsValid ? runnerUp : string.Empty);
+    }
+
+    private static bool DidEnterCompetition(League league, CompetitionType competition, string teamName)
+    {
+        return GetOpeningRoundEntrants(league, competition).Contains(teamName);
+    }
+
+    private static HashSet<string> GetOpeningRoundEntrants(League league, CompetitionType competition)
+    {
+        var competitionFixtures = league.Fixtures
+            .Where(fixture => fixture.Competition == competition)
+            .ToList();
+        if (competitionFixtures.Count == 0)
+        {
+            return new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        }
+
+        var openingRound = competitionFixtures.Min(fixture => GetFixtureCalendarRound(fixture));
+        return competitionFixtures
+            .Where(fixture => GetFixtureCalendarRound(fixture) == openingRound)
+            .SelectMany(fixture => new[] { fixture.HomeTeam.Name, fixture.AwayTeam.Name })
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+    }
+
+    private static bool IsNeutralCompetition(CompetitionType competition)
+    {
+        return competition is CompetitionType.CopaDelRey or
+            CompetitionType.DfbPokal or
+            CompetitionType.CoppaItalia or
+            CompetitionType.CoupeDeFrance or
+            CompetitionType.EuropaLeague or
+            CompetitionType.ConferenceLeague;
     }
 
     private static string CreateSelectedCompetitionResult(League league, CompetitionType competition, string selectedTeamName)

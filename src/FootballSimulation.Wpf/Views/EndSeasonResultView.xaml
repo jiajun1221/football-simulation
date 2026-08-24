@@ -24,6 +24,41 @@
             <Setter Property="FontWeight" Value="SemiBold" />
         </Style>
 
+        <Style x:Key="EndSeasonActionButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="160" />
+            <Setter Property="Height" Value="44" />
+            <Setter Property="Background" Value="{DynamicResource AppButtonBackground}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AppButtonBackground}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Foreground" Value="#FFFFFF" />
+            <Setter Property="FontWeight" Value="Black" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10">
+                            <TextBlock Text="{TemplateBinding Content}"
+                                       Foreground="#FFFFFF"
+                                       FontWeight="{TemplateBinding FontWeight}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource AppButtonHoverBackground}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.58" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="CleanDataGrid" TargetType="DataGrid">
             <Setter Property="Background" Value="{DynamicResource AppCardBackground}" />
             <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
@@ -505,7 +540,10 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <TextBlock x:Name="FooterTextBlock" VerticalAlignment="Center" Foreground="{DynamicResource AppMutedTextBrush}" />
-            <Button Grid.Column="1" Content="End Season" Width="160" Height="44" Background="#2563EB" Foreground="White" BorderBrush="#1D4ED8" FontWeight="Black" Click="EndSeasonButton_Click" />
+            <Button Grid.Column="1"
+                    Content="End Season"
+                    Style="{StaticResource EndSeasonActionButtonStyle}"
+                    Click="EndSeasonButton_Click" />
         </Grid>
     </Grid>
 </UserControl>

@@ -7,7 +7,7 @@ public class TransferMarketServiceTests
 {
     [Theory]
     [InlineData("Real Madrid", 86, 250_000_000)]
-    [InlineData("Chelsea", 84, 180_000_000)]
+    [InlineData("Chelsea", 84, 200_000_000)]
     [InlineData("Competitive FC", 82, 120_000_000)]
     [InlineData("Midtable FC", 78, 80_000_000)]
     [InlineData("Smaller FC", 74, 45_000_000)]
@@ -268,6 +268,7 @@ public class TransferMarketServiceTests
                 {
                     LeagueId = "premier-league",
                     ClubName = team.Name,
+                    ClubTransferBudget = 10_000_000m,
                     ClubWageBudget = 10_000_000m
                 }
             ]
@@ -299,6 +300,7 @@ public class TransferMarketServiceTests
         Assert.Equal(600_000m, rosterPlayer.WeeklyWage);
         Assert.Equal(2033, rosterPlayer.ContractEndYear);
         Assert.Equal(availableWageBudgetBefore - 55_000m, finance.AvailableWageBudget);
+        Assert.Equal(55_000m * 52m, finance.WageCommitmentSpent);
     }
 
     [Fact]
@@ -310,7 +312,9 @@ public class TransferMarketServiceTests
         var state = service.CreateInitialState(league);
         var target = service.GetAllPlayerListings(state, league.PlayerStats)
             .Where(listing => listing.Team != selectedTeam)
-            .Where(listing => listing.AskingPrice < service.GetFinance(state, league.LeagueId, selectedTeam).AvailableTransferBudget)
+            .Where(listing => listing.AskingPrice +
+                PlayerContractService.EstimateWeeklyWage(listing.Player, league.LeagueId) * 52m <
+                service.GetFinance(state, league.LeagueId, selectedTeam).AvailableTransferBudget)
             .OrderByDescending(listing => listing.Player.OverallRating)
             .First();
         var sellingTeam = target.Team;
@@ -412,6 +416,7 @@ public class TransferMarketServiceTests
             .Where(listing => listing.AskingPrice < service.GetFinance(state, league.LeagueId, selectedTeam).AvailableTransferBudget)
             .OrderByDescending(listing => listing.Player.OverallRating)
             .First();
+        service.GetFinance(state, league.LeagueId, selectedTeam).ClubTransferBudget += 100_000_000m;
         var staleOpponent = new Team
         {
             Name = target.Team.Name,
@@ -685,6 +690,22 @@ public class TransferMarketServiceTests
         Assert.Equal(OfferStatus.AgreedForNextWindow, offer.Status);
         Assert.Contains(selectedTeam.Players.Concat(selectedTeam.Substitutes), squadPlayer => squadPlayer.PlayerId == player.PlayerId);
         Assert.DoesNotContain(state.TransferHistory, item => item.PlayerId == player.PlayerId);
+    }
+
+    [Fact]
+    public void RefreshTransferWindowStatuses_MarksWaitingOfferPendingWhenWindowOpens()
+    {
+        var league = CreateLeague("premier-league");
+        var selectedTeam = league.Teams.Single(team => team.Name == "Chelsea");
+        var service = new TransferMarketService();
+        var state = service.CreateInitialState(league);
+        var player = selectedTeam.Players.Concat(selectedTeam.Substitutes).First();
+        var offer = service.CreateAiOfferForUserPlayer(state, league, selectedTeam, player, currentRound: 7);
+
+        service.RefreshTransferWindowStatuses(state, league, currentRound: 1);
+
+        Assert.Equal(OfferStatus.Pending, offer.Status);
+        Assert.DoesNotContain("window opens", offer.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

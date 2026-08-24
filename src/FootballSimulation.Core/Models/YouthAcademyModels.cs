@@ -70,7 +70,8 @@ public enum YouthScoutRating
 public enum AcademyHistoryEventType
 {
     Signed,
-    Promoted
+    Promoted,
+    Released
 }
 
 public enum YouthScoutPositionFocus
@@ -127,6 +128,7 @@ public class YouthPlayer
     public YouthPotentialTier PotentialTier { get; set; } = YouthPotentialTier.GoodProspect;
     public decimal MarketValue { get; set; }
     public decimal WeeklyWage { get; set; }
+    public int AcademyContractEndYear { get; set; }
     public string ClubId { get; set; } = string.Empty;
     public string ClubName { get; set; } = string.Empty;
     public bool IsPromoted { get; set; }

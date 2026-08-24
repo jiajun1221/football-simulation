@@ -51,8 +51,8 @@
         </Style>
 
         <Style x:Key="PrimaryModalButtonStyle" TargetType="Button" BasedOn="{StaticResource ModalActionButtonStyle}">
-            <Setter Property="Background" Value="#2563EB" />
-            <Setter Property="BorderBrush" Value="#2563EB" />
+            <Setter Property="Background" Value="{DynamicResource AppButtonBackground}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AppButtonBackground}" />
             <Setter Property="Foreground" Value="#FFFFFF" />
         </Style>
 

@@ -73,9 +73,9 @@
                TargetType="Button"
                BasedOn="{StaticResource PresetButtonStyle}">
             <Setter Property="Height" Value="30" />
-            <Setter Property="Background" Value="#2563EB" />
+            <Setter Property="Background" Value="{DynamicResource AppButtonBackground}" />
             <Setter Property="Foreground" Value="#FFFFFF" />
-            <Setter Property="BorderBrush" Value="#1D4ED8" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AppButtonBackground}" />
         </Style>
 
         <Style x:Key="PresetSecondaryButtonStyle"
@@ -296,6 +296,25 @@
                     <StackPanel Grid.Row="2"
                                 Orientation="Horizontal"
                                 Margin="0,3,0,0">
+                        <Border Background="{Binding AvailabilityBackground}"
+                                CornerRadius="7"
+                                Padding="5,1"
+                                Margin="0,0,2,0">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding AvailabilityText}" Value="">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <TextBlock Text="{Binding AvailabilityText}"
+                                       Foreground="#FFFFFF"
+                                       FontSize="7"
+                                       FontWeight="Bold" />
+                        </Border>
                         <Border Background="{Binding BenchFormBadgeBackground}"
                                 CornerRadius="7"
                                 Padding="5,1"
@@ -463,10 +482,10 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*" />
-            <ColumnDefinition Width="320" />
+            <ColumnDefinition x:Name="TacticsColumn" Width="320" />
         </Grid.ColumnDefinitions>
 
-        <Border Grid.Column="0"
+        <Border x:Name="FormationAreaBorder" Grid.Column="0"
                 Background="#0E7A3C"
                 CornerRadius="18"
                 Padding="18"
@@ -605,6 +624,7 @@
                                  Background="Transparent"
                                  ItemTemplate="{StaticResource SubstituteCardTemplate}"
                                  AllowDrop="True"
+                                 SelectionChanged="SubstituteListBox_SelectionChanged"
                                  PreviewDragOver="SubstituteListBox_DragOver"
                                  PreviewDrop="SubstituteListBox_Drop"
                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
@@ -660,7 +680,7 @@
             </Grid>
         </Border>
 
-        <Border Grid.Column="1"
+        <Border x:Name="TacticsPanelBorder" Grid.Column="1"
                 Background="{DynamicResource AppCardBackground}"
                 CornerRadius="18"
                 Padding="16">

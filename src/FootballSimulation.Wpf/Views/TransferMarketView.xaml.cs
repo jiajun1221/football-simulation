@@ -893,7 +893,7 @@ public partial class TransferMarketView : UserControl
                     listing is null ? "-" : listing.Player.OverallRating.ToString(CultureInfo.InvariantCulture),
                     TransferMarketService.FormatMoney(offer.CounterFee ?? offer.Fee),
                     listing is null ? "-" : TransferMarketService.FormatMoney(listing.MarketValue),
-                    FormatOfferStatus(offer.Status),
+                    FormatOfferStatus(offer, GetCurrentRound()),
                     GetOfferStatusBrush(offer.Status));
             })
             .ToList();
@@ -1457,21 +1457,25 @@ public partial class TransferMarketView : UserControl
             OfferStatus.Completed or OfferStatus.CompletedWhenWindowOpens or OfferStatus.Accepted => "#10B981",
             OfferStatus.AgreedForNextWindow => "#0EA5E9",
             OfferStatus.Countered => "#8B5CF6",
-            OfferStatus.Rejected or OfferStatus.Withdrawn => "#EF4444",
+            OfferStatus.Rejected or OfferStatus.Withdrawn or OfferStatus.Expired => "#EF4444",
             OfferStatus.PendingUntilWindowOpens => "#F97316",
             _ => "#2563EB"
         };
     }
 
-    private static string FormatOfferStatus(OfferStatus status)
+    private static string FormatOfferStatus(TransferOffer offer, int currentRound)
     {
-        return status switch
+        var statusText = offer.Status switch
         {
             OfferStatus.PendingUntilWindowOpens => "Pending Window",
             OfferStatus.AgreedForNextWindow => "Agreed for next window",
             OfferStatus.CompletedWhenWindowOpens => "Completed",
-            _ => status.ToString()
+            _ => offer.Status.ToString()
         };
+
+        return offer.Status is OfferStatus.Pending or OfferStatus.PendingUntilWindowOpens or OfferStatus.Countered
+            ? $"{statusText} · {Math.Max(0, offer.ExpiresRound - currentRound)}R left"
+            : statusText;
     }
 
     private bool HasActiveAiOffer(Player player)

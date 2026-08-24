@@ -1,6 +1,8 @@
 <UserControl x:Class="FootballSimulation.Wpf.Views.LeaguePlayerStatsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:FootballSimulation.Wpf.Controls"
+             xmlns:views="clr-namespace:FootballSimulation.Wpf.Views"
              Background="{DynamicResource AppPageBackground}">
     <UserControl.Resources>
         <Style x:Key="StatsCard" TargetType="Border">
@@ -243,7 +245,8 @@
             </Button>
         </Grid>
 
-        <TabControl Grid.Row="1"
+        <TabControl x:Name="StatisticsTabControl"
+                    Grid.Row="1"
                     Grid.RowSpan="2"
                     Style="{StaticResource StatisticsTabControlStyle}">
             <TabItem Style="{StaticResource StatisticsTabItemStyle}">
@@ -388,6 +391,167 @@
                 <ContentControl x:Name="MatchHistoryContentControl"
                                 Margin="0,12,0,0" />
             </TabItem>
+
+            <TabItem Style="{StaticResource StatisticsTabItemStyle}">
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="&#x26BD;"
+                                   FontFamily="Segoe UI Symbol"
+                                   FontSize="12"
+                                   Margin="0,0,6,0"
+                                   Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=TabItem}}" />
+                        <TextBlock Text="Other Clubs"
+                                   Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=TabItem}}" />
+                    </StackPanel>
+                </TabItem.Header>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="0" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Grid x:Name="OtherClubLegacySummaryGrid" Grid.Row="1" Visibility="Collapsed">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="330" />
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0" Style="{StaticResource StatsCard}" Padding="18">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <StackPanel Orientation="Horizontal">
+                                    <Image x:Name="OtherClubLogoImage" Width="44" Height="44" Stretch="Uniform" Margin="0,0,12,0" />
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock x:Name="OtherClubNameTextBlock" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" />
+                                        <TextBlock x:Name="OtherClubVenueTextBlock" FontSize="11" Foreground="{DynamicResource AppMutedTextBrush}" />
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <Border Grid.Row="1" Background="#061226" CornerRadius="12" Padding="14,9" Margin="0,14,0,10">
+                                    <DockPanel>
+                                        <TextBlock Text="Formation" Foreground="#94A3B8" FontWeight="SemiBold" />
+                                        <TextBlock x:Name="OtherClubFormationTextBlock" DockPanel.Dock="Right" Foreground="#FFFFFF" FontSize="18" FontWeight="Bold" />
+                                    </DockPanel>
+                                </Border>
+
+                                <WrapPanel Grid.Row="2" Margin="0,0,0,10">
+                                    <Border Background="#EAF0F7" CornerRadius="10" Padding="8,4" Margin="0,0,5,5"><TextBlock x:Name="OtherClubMentalityTextBlock" FontSize="10" FontWeight="SemiBold" /></Border>
+                                    <Border Background="#EAF0F7" CornerRadius="10" Padding="8,4" Margin="0,0,5,5"><TextBlock x:Name="OtherClubTempoTextBlock" FontSize="10" FontWeight="SemiBold" /></Border>
+                                    <Border Background="#EAF0F7" CornerRadius="10" Padding="8,4" Margin="0,0,5,5"><TextBlock x:Name="OtherClubWidthTextBlock" FontSize="10" FontWeight="SemiBold" /></Border>
+                                    <Border Background="#EAF0F7" CornerRadius="10" Padding="8,4" Margin="0,0,5,5"><TextBlock x:Name="OtherClubPressingTextBlock" FontSize="10" FontWeight="SemiBold" /></Border>
+                                </WrapPanel>
+
+                                <Grid Grid.Row="3">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="Starting XI" FontWeight="Bold" FontSize="14" Margin="0,0,0,7" />
+                                    <ListBox x:Name="OtherClubStartingListBox" Grid.Row="1" BorderThickness="0" Background="Transparent">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="2,3">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="38" />
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="{Binding Position}" Foreground="#2563EB" FontWeight="Bold" />
+                                                    <TextBlock Grid.Column="1" Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                                    <Border Grid.Column="2" Background="#061226" CornerRadius="8" Padding="7,2">
+                                                        <TextBlock Text="{Binding Overall}" Foreground="#FFFFFF" FontWeight="Bold" FontSize="10" />
+                                                    </Border>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </Grid>
+                            </Grid>
+                        </Border>
+
+                        <Border Grid.Column="2" Style="{StaticResource StatsCard}" Padding="18">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <TextBlock Text="First-Team Squad" FontSize="17" FontWeight="Bold" Margin="0,0,0,10" />
+                                <DataGrid x:Name="OtherClubSquadDataGrid"
+                                          Grid.Row="1"
+                                          Style="{StaticResource StatsGridStyle}"
+                                          RowStyle="{StaticResource StatsGridRowStyle}">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="No." Binding="{Binding Number}" Width="55" ElementStyle="{StaticResource StatsCenterTextStyle}" />
+                                        <DataGridTextColumn Header="Player" Binding="{Binding Name}" Width="2*" ElementStyle="{StaticResource StatsBoldLeftTextStyle}" />
+                                        <DataGridTextColumn Header="Pos" Binding="{Binding Position}" Width="70" ElementStyle="{StaticResource StatsCenterTextStyle}" />
+                                        <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="65" ElementStyle="{StaticResource StatsCenterTextStyle}" />
+                                        <DataGridTextColumn Header="OVR" Binding="{Binding Overall}" Width="70" ElementStyle="{StaticResource StatsCenterTextStyle}" />
+                                        <DataGridTextColumn Header="Role" Binding="{Binding Role}" Width="105" ElementStyle="{StaticResource StatsCenterTextStyle}" />
+                                        <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="110" ElementStyle="{StaticResource StatsCenterTextStyle}" />
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </Grid>
+                        </Border>
+                    </Grid>
+
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="72*" />
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="28*" />
+                        </Grid.ColumnDefinitions>
+                        <Viewbox Grid.Column="0"
+                                 Stretch="Uniform"
+                                 StretchDirection="Both"
+                                 HorizontalAlignment="Stretch"
+                                 VerticalAlignment="Stretch">
+                            <controls:FormationSetupPanel x:Name="OtherClubFormationPanel"
+                                                          Width="1100"
+                                                          Height="620"
+                                                          ShowUnavailablePlayers="False"
+                                                          MergeUnavailableIntoSubstitutes="True"
+                                                          PlayerSelected="OtherClubFormationPanel_PlayerSelected" />
+                        </Viewbox>
+                        <views:TransferPlayerDetailPanel x:Name="OtherClubPlayerDetailPanel"
+                                                         Grid.Column="2" />
+                    </Grid>
+                </Grid>
+            </TabItem>
         </TabControl>
+
+        <Border Grid.Row="1"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Margin="0,3,0,0"
+                Panel.ZIndex="10"
+                Background="Transparent">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding SelectedIndex, ElementName=StatisticsTabControl}" Value="2">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="View club"
+                           VerticalAlignment="Center"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource AppMutedTextBrush}"
+                           Margin="0,0,8,0" />
+                <ComboBox x:Name="OtherClubComboBox"
+                          Width="230"
+                          Height="34"
+                          SelectionChanged="OtherClubComboBox_SelectionChanged" />
+            </StackPanel>
+        </Border>
     </Grid>
 </UserControl>

@@ -286,6 +286,12 @@ public class YouthScoutService
             return new YouthOperationResult(false, "Insufficient wage budget.", Fee: prospect.WeeklyWage);
         }
 
+        var firstSeasonWageCost = Math.Round(prospect.WeeklyWage * 52m, 0);
+        if (finance.AvailableTransferBudget < firstSeasonWageCost)
+        {
+            return new YouthOperationResult(false, "Insufficient transfer budget for the prospect's first-season wages.", Fee: firstSeasonWageCost);
+        }
+
         var youthPlayer = CreateYouthPlayerFromProspect(prospect, academy, league.Season);
         academy.YouthPlayers.Add(youthPlayer);
         _academyService.RecordAcademySigning(
@@ -299,6 +305,7 @@ public class YouthScoutService
         prospect.SignedByClubId = academy.ClubId;
         prospect.SignedByClubName = academy.ClubName;
         finance.YouthWageSpent += prospect.WeeklyWage;
+        finance.WageCommitmentSpent += firstSeasonWageCost;
         academy.IntakeHistory.Add(new YouthIntakeRecord
         {
             Season = league.Season,

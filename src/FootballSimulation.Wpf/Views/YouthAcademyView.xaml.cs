@@ -74,7 +74,7 @@ public partial class YouthAcademyView : UserControl
             .Where(player => !player.IsPromoted)
             .OrderByDescending(player => player.PotentialMax)
             .ThenByDescending(player => player.CurrentOVR)
-            .Select((player, index) => YouthPlayerRow.From(player, academy, index + 1))
+            .Select((player, index) => YouthPlayerRow.From(player, academy, index + 1, GetSeasonEndYear(_state.League?.Season)))
             .ToList();
         AcademyPlayersDataGrid.ItemsSource = rows;
         _selectedYouthRow = rows.FirstOrDefault(row => row.Player.PlayerId == selectedPlayerId) ?? rows.FirstOrDefault();
@@ -128,6 +128,14 @@ public partial class YouthAcademyView : UserControl
         return _academyService.GetAcademy(_state.League, _state.SelectedTeam.Name);
     }
 
+    private static int GetSeasonEndYear(string? season)
+    {
+        var parts = (season ?? string.Empty).Split('/', StringSplitOptions.TrimEntries);
+        return parts.Length > 0 && int.TryParse(parts[0], out var startYear)
+            ? startYear + 1
+            : DateTime.Today.Year + 1;
+    }
+
     private void BackButton_Click(object sender, RoutedEventArgs e)
     {
         PersistCurrentSaveSlot();
@@ -176,6 +184,11 @@ public partial class YouthAcademyView : UserControl
         SelectedYouthPotentialTextBlock.Text = row.Potential;
         SelectedYouthDevelopmentTextBlock.Text = row.Development;
         SelectedYouthValueTextBlock.Text = row.Value;
+        SelectedYouthContractTextBlock.Text = row.ContractText;
+        SelectedYouthContractTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(
+            (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(row.ContractForeground));
+        SelectedYouthContractWarningTextBlock.Visibility = row.ContractWarningVisibility;
+        SelectedYouthContractWarningTextBlock.ToolTip = row.ContractWarningTooltip;
         SelectedYouthTraitsItemsControl.ItemsSource = row.TraitBadges;
         SelectedYouthNoTraitsTextBlock.Visibility = row.TraitBadges.Count == 0
             ? Visibility.Visible
@@ -218,6 +231,23 @@ public partial class YouthAcademyView : UserControl
         var result = _academyService.ReleaseYouthPlayer(_state.League, _state.SelectedTeam, row.Player.PlayerId);
         AcademyStatusTextBlock.Text = result.Message;
         LoadAcademy();
+        PersistCurrentSaveSlot();
+    }
+
+    private void ExtendYouthContractButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_state.League is null || _state.SelectedTeam is null ||
+            AcademyPlayersDataGrid.SelectedItem is not YouthPlayerRow row)
+        {
+            return;
+        }
+
+        var years = YouthContractYearsComboBox.SelectedItem is ComboBoxItem { Tag: string value } && int.TryParse(value, out var selectedYears)
+            ? selectedYears
+            : 2;
+        var result = _academyService.ExtendYouthContract(_state.League, _state.SelectedTeam, row.Player.PlayerId, years);
+        AcademyStatusTextBlock.Text = result.Message;
+        LoadAcademySquad();
         PersistCurrentSaveSlot();
     }
 
@@ -349,6 +379,10 @@ public partial class YouthAcademyView : UserControl
         public string Traits => Player.Traits.Count == 0 ? "-" : string.Join(", ", Player.Traits.Take(2));
         public IReadOnlyList<PlayerTraitBadge> TraitBadges => PlayerTraitBadgeHelper.Create(Player.Traits, maxVisibleTraits: 6);
         public string Value { get; private init; } = string.Empty;
+        public string ContractText { get; private init; } = string.Empty;
+        public string ContractForeground { get; private init; } = "#334155";
+        public Visibility ContractWarningVisibility { get; private init; }
+        public string ContractWarningTooltip { get; private init; } = string.Empty;
         public string ScoutReport => Player.ScoutReport;
         public string PotentialBadgeText { get; private init; } = string.Empty;
         public string PotentialBadgeBackground { get; private init; } = "#E5E7EB";
@@ -360,7 +394,7 @@ public partial class YouthAcademyView : UserControl
         public string StatusBrush { get; private init; } = "#64748B";
         public string StatusForeground { get; private init; } = "#FFFFFF";
 
-        public static YouthPlayerRow From(YouthPlayer player, YouthAcademy academy, int number)
+        public static YouthPlayerRow From(YouthPlayer player, YouthAcademy academy, int number, int currentSeasonEndYear)
         {
             var nationality = PlayerNationalityDisplayService.Resolve(player);
             var potentialBadge = CreatePotentialBadge(player);
@@ -373,6 +407,14 @@ public partial class YouthAcademyView : UserControl
                 NationalityFlagImagePath = nationality.FlagImagePath,
                 NationalityName = nationality.Name,
                 Value = FormatMoney(YouthMarketValueCalculator.CalculateMarketValue(player, academy)),
+                ContractText = player.AcademyContractEndYear.ToString(CultureInfo.InvariantCulture),
+                ContractForeground = player.AcademyContractEndYear <= currentSeasonEndYear + 1 ? "#EF4444" : "#334155",
+                ContractWarningVisibility = player.AcademyContractEndYear <= currentSeasonEndYear + 1
+                    ? Visibility.Visible
+                    : Visibility.Collapsed,
+                ContractWarningTooltip = player.AcademyContractEndYear <= currentSeasonEndYear
+                    ? "Danger: academy contract expires at the end of this season."
+                    : "Academy contract expires next season.",
                 PotentialBadgeText = potentialBadge.Text,
                 PotentialBadgeBackground = potentialBadge.Background,
                 PotentialBadgeForeground = potentialBadge.Foreground,
@@ -475,6 +517,7 @@ public partial class YouthAcademyView : UserControl
             return eventType switch
             {
                 AcademyHistoryEventType.Promoted => new BadgeDisplay("Promoted", "#3B82F6", "#FFFFFF"),
+                AcademyHistoryEventType.Released => new BadgeDisplay("Released", "#EF4444", "#FFFFFF"),
                 _ => new BadgeDisplay("Signed", "#10B981", "#FFFFFF")
             };
         }

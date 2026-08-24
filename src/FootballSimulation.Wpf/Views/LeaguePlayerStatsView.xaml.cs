@@ -14,6 +14,7 @@ public partial class LeaguePlayerStatsView : UserControl
     private readonly GameFlowState _state;
     private readonly Action<UserControl> _navigate;
     private readonly PlayerSeasonStatsService _statsService = new();
+    private readonly TransferMarketService _transferMarketService = new();
     private StatsCategory _currentCategory = StatsCategory.Goals;
 
     public LeaguePlayerStatsView(GameFlowState state, Action<UserControl> navigate)
@@ -38,7 +39,172 @@ public partial class LeaguePlayerStatsView : UserControl
 
         LeagueSubtitleTextBlock.Text = $"League: {_state.League.Name}";
         MatchHistoryContentControl.Content = new MyTeamResultsView(_state, _navigate, showHeader: false);
+        LoadOtherClubs();
         SelectCategory(StatsCategory.Goals);
+    }
+
+    private void LoadOtherClubs()
+    {
+        if (_state.League is null)
+        {
+            return;
+        }
+
+        var clubs = _state.League.Teams
+            .Where(team => _state.SelectedTeam is null ||
+                !team.Name.Equals(_state.SelectedTeam.Name, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(team => team.Name)
+            .ToList();
+
+        OtherClubFormationPanel.IsReadOnlyMode = true;
+        OtherClubComboBox.ItemsSource = clubs.Select(team => new ComboBoxItem
+        {
+            Content = team.Name,
+            Tag = team
+        }).ToList();
+        OtherClubComboBox.SelectedIndex = clubs.Count > 0 ? 0 : -1;
+    }
+
+    private void OtherClubComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (OtherClubComboBox.SelectedItem is ComboBoxItem { Tag: Team team })
+        {
+            ShowOtherClub(team);
+        }
+    }
+
+    private void ShowOtherClub(Team team)
+    {
+        OtherClubFormationPanel.LoadTeam(team);
+        var firstPlayer = team.Players
+            .Concat(team.Substitutes)
+            .OrderByDescending(player => player.IsStarter || player.IsOnPitch)
+            .ThenByDescending(player => player.OverallRating)
+            .FirstOrDefault();
+        if (firstPlayer is not null)
+        {
+            ShowOtherClubPlayer(firstPlayer);
+        }
+        else
+        {
+            OtherClubPlayerDetailPanel.ShowEmpty();
+        }
+        OtherClubNameTextBlock.Text = team.Name;
+        OtherClubVenueTextBlock.Text = string.IsNullOrWhiteSpace(team.StadiumName) ? team.Venue : team.StadiumName;
+        OtherClubLogoImage.Source = ClubLogoService.LoadClubLogo(team.Name, _state.League?.LeagueId ?? string.Empty);
+        OtherClubFormationTextBlock.Text = string.IsNullOrWhiteSpace(team.Formation) ? "4-3-3" : team.Formation;
+        OtherClubMentalityTextBlock.Text = $"Mentality: {team.Tactics.Mentality}";
+        OtherClubTempoTextBlock.Text = $"Tempo: {FormatTacticalLevel(team.Tactics.Tempo)}";
+        OtherClubWidthTextBlock.Text = $"Width: {FormatTacticalLevel(team.Tactics.Width)}";
+        OtherClubPressingTextBlock.Text = $"Pressing: {FormatTacticalLevel(team.Tactics.PressingIntensity)}";
+
+        var squad = team.Players
+            .Concat(team.Substitutes)
+            .GroupBy(player => string.IsNullOrWhiteSpace(player.PlayerId) ? player.Name : player.PlayerId, StringComparer.OrdinalIgnoreCase)
+            .Select(group => group.First())
+            .ToList();
+        var starters = squad.Where(player => player.IsStarter).ToList();
+        if (starters.Count == 0)
+        {
+            starters = squad
+                .OrderBy(GetPositionOrder)
+                .ThenByDescending(player => player.OverallRating)
+                .Take(11)
+                .ToList();
+        }
+
+        OtherClubStartingListBox.ItemsSource = starters
+            .OrderBy(GetPositionOrder)
+            .ThenByDescending(player => player.OverallRating)
+            .Select(player => new OtherClubStarterRow(GetPlayerPosition(player), player.Name, player.OverallRating))
+            .ToList();
+        OtherClubSquadDataGrid.ItemsSource = squad
+            .OrderByDescending(player => player.IsStarter)
+            .ThenBy(GetPositionOrder)
+            .ThenByDescending(player => player.OverallRating)
+            .Select(player => new OtherClubSquadRow(
+                player.SquadNumber <= 0 ? "-" : player.SquadNumber.ToString(),
+                player.Name,
+                GetPlayerPosition(player),
+                player.Age?.ToString() ?? "-",
+                player.OverallRating,
+                PlayerContractService.FormatRole(player.Role),
+                GetPlayerAvailability(player)))
+            .ToList();
+    }
+
+    private void OtherClubFormationPanel_PlayerSelected(object? sender, Player player)
+    {
+        ShowOtherClubPlayer(player);
+    }
+
+    private void ShowOtherClubPlayer(Player player)
+    {
+        if (_state.TransferMarket is null || _state.League is null)
+        {
+            OtherClubPlayerDetailPanel.ShowEmpty();
+            return;
+        }
+
+        var listing = _transferMarketService
+            .GetAllPlayerListings(_state.TransferMarket, _state.League.PlayerStats)
+            .FirstOrDefault(item => item.Player.PlayerId.Equals(player.PlayerId, StringComparison.OrdinalIgnoreCase));
+        if (listing is null)
+        {
+            OtherClubPlayerDetailPanel.ShowEmpty();
+            return;
+        }
+
+        var stat = _state.League.PlayerStats.FirstOrDefault(item =>
+            (!string.IsNullOrWhiteSpace(item.PlayerId) && item.PlayerId.Equals(player.PlayerId, StringComparison.OrdinalIgnoreCase)) ||
+            item.PlayerName.Equals(player.Name, StringComparison.OrdinalIgnoreCase));
+        var statusText = player.IsInjured ? "Injured" : player.IsSuspended ? "Suspended" : "Available";
+        var statusBrush = player.IsInjured || player.IsSuspended ? "#EF4444" : "#10B981";
+
+        OtherClubPlayerDetailPanel.ShowPlayer(new TransferPlayerDetailContext(
+            listing,
+            TransferDetailMode.Squad,
+            stat,
+            IsOwnPlayer: false,
+            IsTransferWindowOpen: false,
+            TransferWindowTooltip: null,
+            IsShortlisted: false,
+            IsListedForSale: player.IsListedForSale,
+            CanToggleShortlist: false,
+            statusText,
+            statusBrush,
+            statusText));
+    }
+
+    private static string FormatTacticalLevel(int value) => value switch
+    {
+        <= 30 => "Low",
+        <= 45 => "Cautious",
+        <= 60 => "Balanced",
+        <= 75 => "High",
+        _ => "Very High"
+    };
+
+    private static int GetPositionOrder(Player player) => player.Position switch
+    {
+        Position.Goalkeeper => 0,
+        Position.Defender => 1,
+        Position.Midfielder => 2,
+        Position.Forward => 3,
+        _ => 4
+    };
+
+    private static string GetPlayerPosition(Player player) =>
+        !string.IsNullOrWhiteSpace(player.AssignedPosition) ? player.AssignedPosition :
+        !string.IsNullOrWhiteSpace(player.PreferredPosition) ? player.PreferredPosition :
+        player.Position.ToString();
+
+    private static string GetPlayerAvailability(Player player)
+    {
+        if (player.IsInjured) return "Injured";
+        if (player.SuspendedMatches > 0) return "Suspended";
+        if (player.TransferStatus == PlayerTransferStatus.Listed) return "Listed";
+        return player.IsStarter ? "Starting XI" : "Available";
     }
 
     private void BackButton_Click(object sender, RoutedEventArgs e)
@@ -295,4 +461,15 @@ public partial class LeaguePlayerStatsView : UserControl
         string FormBadgeForeground,
         bool IsSelectedClubPlayer,
         string RowBackground);
+
+    private sealed record OtherClubStarterRow(string Position, string Name, int Overall);
+
+    private sealed record OtherClubSquadRow(
+        string Number,
+        string Name,
+        string Position,
+        string Age,
+        int Overall,
+        string Role,
+        string Status);
 }

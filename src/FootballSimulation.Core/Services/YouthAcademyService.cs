@@ -60,7 +60,7 @@ public class YouthAcademyService
             academy.ScoutReports ??= [];
             foreach (var player in academy.YouthPlayers)
             {
-                NormalizeYouthPlayer(player, academy);
+                NormalizeYouthPlayer(player, academy, season);
             }
 
             BackfillAcademyHistory(academy, season);
@@ -204,8 +204,25 @@ public class YouthAcademyService
     public void ApplySeasonRollover(League league, Team? selectedTeam = null)
     {
         EnsureAcademies(league);
+        var seasonEndYear = GetSeasonEndYear(league.Season);
         foreach (var academy in league.YouthAcademies)
         {
+            var expiredPlayers = academy.YouthPlayers
+                .Where(player => !player.IsPromoted && player.AcademyContractEndYear < seasonEndYear)
+                .ToList();
+            foreach (var player in expiredPlayers)
+            {
+                RecordAcademyHistory(
+                    academy,
+                    player,
+                    AcademyHistoryEventType.Released,
+                    league.Season,
+                    0,
+                    "Contract Expiry",
+                    $"Automatically released after academy contract expired in {player.AcademyContractEndYear}.");
+                academy.YouthPlayers.Remove(player);
+            }
+
             foreach (var player in academy.YouthPlayers.Where(player => !player.IsPromoted))
             {
                 player.Age = Math.Min(21, player.Age + 1);
@@ -300,8 +317,32 @@ public class YouthAcademyService
             return new YouthOperationResult(false, "Youth player not found.");
         }
 
+        RecordAcademyHistory(
+            academy,
+            youthPlayer,
+            AcademyHistoryEventType.Released,
+            league.Season,
+            0,
+            "Club Decision",
+            "Released manually from the youth academy.");
         academy.YouthPlayers.Remove(youthPlayer);
         return new YouthOperationResult(true, $"{youthPlayer.Name} released from the youth academy.", youthPlayer);
+    }
+
+    public YouthOperationResult ExtendYouthContract(League league, Team team, string youthPlayerId, int years = 2)
+    {
+        EnsureAcademies(league);
+        var academy = GetAcademy(league, team.Name);
+        var youthPlayer = academy.YouthPlayers.FirstOrDefault(player =>
+            player.PlayerId.Equals(youthPlayerId, StringComparison.OrdinalIgnoreCase));
+        if (youthPlayer is null)
+        {
+            return new YouthOperationResult(false, "Youth player not found.");
+        }
+
+        var extensionYears = Math.Clamp(years, 1, 3);
+        youthPlayer.AcademyContractEndYear = Math.Max(youthPlayer.AcademyContractEndYear, GetSeasonEndYear(league.Season)) + extensionYears;
+        return new YouthOperationResult(true, $"{youthPlayer.Name}'s academy contract was extended until {youthPlayer.AcademyContractEndYear}.", youthPlayer);
     }
 
     public bool CanPromote(Team team, YouthPlayer youthPlayer, out string reason)
@@ -612,7 +653,7 @@ public class YouthAcademyService
         return Math.Clamp(value, 1, 100);
     }
 
-    private static void NormalizeYouthPlayer(YouthPlayer player, YouthAcademy academy)
+    private static void NormalizeYouthPlayer(YouthPlayer player, YouthAcademy academy, string season)
     {
         player.ClubId = academy.ClubId;
         player.ClubName = academy.ClubName;
@@ -634,6 +675,21 @@ public class YouthAcademyService
         player.WeeklyWage = player.WeeklyWage > 0
             ? player.WeeklyWage
             : Math.Max(1_000m, Math.Round(player.MarketValue / 3_500m, 0));
+        if (player.AcademyContractEndYear <= 0)
+        {
+            player.AcademyContractEndYear = GetSeasonEndYear(season) + 2;
+        }
+    }
+
+    private static int GetSeasonEndYear(string season)
+    {
+        var parts = (season ?? string.Empty).Split('/', StringSplitOptions.TrimEntries);
+        if (parts.Length > 0 && int.TryParse(parts[0], out var startYear))
+        {
+            return startYear + 1;
+        }
+
+        return DateTime.Today.Year + 1;
     }
 
     private static int CalculateIntakeCount(YouthAcademy academy)

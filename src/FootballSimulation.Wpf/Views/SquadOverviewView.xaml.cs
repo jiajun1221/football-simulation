@@ -953,6 +953,7 @@ public partial class SquadOverviewView : UserControl
                 _state.League.LeagueId,
                 _state.SelectedTeam);
             resultMessage += $"{Environment.NewLine}{Environment.NewLine}" +
+                $"Transfer budget remaining: {TransferMarketService.FormatMoney(finance.AvailableTransferBudget)}.{Environment.NewLine}" +
                 $"Wage budget remaining: {PlayerContractService.FormatWage(finance.AvailableWageBudget)}.";
         }
         ShowContractExtensionModal(_selectedRow.Listing, result, resultMessage);
