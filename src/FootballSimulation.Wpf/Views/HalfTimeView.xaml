@@ -564,7 +564,7 @@
         </Grid.ColumnDefinitions>
 
         <Border Grid.Column="0"
-                Background="#0E7A3C"
+                Background="{DynamicResource MatchPitchBorderBrush}"
                 CornerRadius="18"
                 Padding="18"
                 Margin="0,0,18,0">
@@ -582,7 +582,7 @@
                                FontWeight="Black"
                                Margin="0,0,0,4" />
                     <TextBlock x:Name="ScoreTextBlock"
-                               Foreground="#DDF7E8"
+                               Foreground="{DynamicResource AppInverseTextBrush}"
                                FontSize="17"
                                FontWeight="SemiBold"
                                TextWrapping="Wrap" />
@@ -596,16 +596,16 @@
                     </Grid.ColumnDefinitions>
 
                     <Border Grid.Column="0"
-                            Background="#16894A"
-                            BorderBrush="#B8F2CD"
+                            Background="{DynamicResource MatchPitchBackgroundBrush}"
+                            BorderBrush="{DynamicResource MatchPitchLineBrush}"
                             BorderThickness="2"
                             CornerRadius="18">
                         <Grid>
-                            <Line X1="0" Y1="0" X2="900" Y2="0" Stroke="#8FE2AE" Opacity="0.45" />
-                            <Line X1="0" Y1="260" X2="900" Y2="260" Stroke="#8FE2AE" Opacity="0.35" />
+                            <Line X1="0" Y1="0" X2="900" Y2="0" Stroke="{DynamicResource MatchPitchLineBrush}" Opacity="0.45" />
+                            <Line X1="0" Y1="260" X2="900" Y2="260" Stroke="{DynamicResource MatchPitchLineBrush}" Opacity="0.35" />
                             <Ellipse Width="110"
                                      Height="110"
-                                     Stroke="#8FE2AE"
+                                     Stroke="{DynamicResource MatchPitchLineBrush}"
                                      StrokeThickness="2"
                                      Opacity="0.45"
                                      HorizontalAlignment="Center"
@@ -843,8 +843,8 @@
                     </Border>
 
                     <Border Grid.Column="2"
-                            Background="#0F6D39"
-                            BorderBrush="#B8F2CD"
+                            Background="{DynamicResource MatchPitchBorderBrush}"
+                            BorderBrush="{DynamicResource MatchPitchLineBrush}"
                             BorderThickness="1.5"
                             CornerRadius="18"
                             Padding="14">

@@ -129,12 +129,12 @@ public partial class MainWindow : Window
 
     private void UpdateThemeToggleButton()
     {
-        ThemeToggleButton.Content = ThemeManager.CurrentTheme == AppTheme.Dark
-            ? "☀"
-            : "🌙";
-        ThemeToggleButton.ToolTip = ThemeManager.CurrentTheme == AppTheme.Dark
-            ? "Switch to Light Mode"
-            : "Switch to Dark Mode";
+        (ThemeToggleButton.Content, ThemeToggleButton.ToolTip) = ThemeManager.CurrentTheme switch
+        {
+            AppTheme.Dark => ("\u2600", "Switch to Light Mode"),
+            AppTheme.Light => ("\u25A6", "Switch to Work Mode"),
+            _ => ("\U0001F319", "Switch to Dark Mode")
+        };
     }
 
     private void ShowMainMenu()

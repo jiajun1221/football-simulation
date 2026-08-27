@@ -902,13 +902,15 @@ public partial class HalfTimeView : UserControl
 
     private static string GetStaminaBrush(Player player)
     {
-        return GetStaminaPercentage(player) switch
+        var color = GetStaminaPercentage(player) switch
         {
             >= 75 => "#2FA84F",
             >= 50 => "#E3BC26",
             >= 25 => "#E8872E",
             _ => "#D94343"
         };
+
+        return ThemeManager.ToneDownColor(color);
     }
 
     private string CreateWorkloadRiskText(Player player)
@@ -925,12 +927,14 @@ public partial class HalfTimeView : UserControl
 
     private string GetWorkloadRiskBrush(Player player)
     {
-        return GetWorkloadRiskPercentage(player) switch
+        var color = GetWorkloadRiskPercentage(player) switch
         {
             >= 70 => "#DC2626",
             >= 40 => "#FACC15",
             _ => "#16A34A"
         };
+
+        return ThemeManager.ToneDownColor(color);
     }
 
     private string GetWorkloadRiskForeground(Player player)

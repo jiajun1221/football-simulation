@@ -60,6 +60,35 @@ public class MatchEngineScoringTests
     }
 
     [Fact]
+    public void SimulateMatch_StrongerTeamHasClearAdvantageAcrossManyMatches()
+    {
+        const int matchCount = 60;
+        var strongerWins = 0;
+        var weakerWins = 0;
+        var strongerGoals = 0;
+        var weakerGoals = 0;
+
+        for (var seed = 1; seed <= matchCount; seed++)
+        {
+            var (firstTeam, secondTeam) = new SeedDataService().CreateDemoTeams();
+            var strongerTeam = seed <= matchCount / 2 ? firstTeam : secondTeam;
+            BoostTeamQuality(strongerTeam, 9);
+
+            var result = new MatchEngine().SimulateMatch(firstTeam, secondTeam, seed);
+            var strongerScore = strongerTeam == firstTeam ? result.HomeScore : result.AwayScore;
+            var weakerScore = strongerTeam == firstTeam ? result.AwayScore : result.HomeScore;
+
+            strongerGoals += strongerScore;
+            weakerGoals += weakerScore;
+            strongerWins += strongerScore > weakerScore ? 1 : 0;
+            weakerWins += weakerScore > strongerScore ? 1 : 0;
+        }
+
+        Assert.True(strongerWins > weakerWins, $"Expected stronger team to win more often, but record was {strongerWins}-{weakerWins}.");
+        Assert.True(strongerGoals > weakerGoals, $"Expected stronger team to score more, but goals were {strongerGoals}-{weakerGoals}.");
+    }
+
+    [Fact]
     public void SimulateMatch_StillReturnsFullNinetyMinuteMatch()
     {
         var seedDataService = new SeedDataService();
@@ -1636,6 +1665,18 @@ public class MatchEngineScoringTests
             player.MatchesPlayedRecently = 0;
             player.SeasonFatigue = 0;
             player.Traits.Clear();
+        }
+    }
+
+    private static void BoostTeamQuality(Team team, int increase)
+    {
+        foreach (var player in team.Players)
+        {
+            player.OverallRating = Math.Clamp(player.OverallRating + increase, 1, 99);
+            player.Attack = Math.Clamp(player.Attack + increase, 1, 99);
+            player.Defense = Math.Clamp(player.Defense + increase, 1, 99);
+            player.Passing = Math.Clamp(player.Passing + increase, 1, 99);
+            player.Finishing = Math.Clamp(player.Finishing + increase, 1, 99);
         }
     }
 

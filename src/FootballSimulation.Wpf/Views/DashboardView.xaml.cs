@@ -1025,15 +1025,17 @@ public partial class DashboardView : UserControl
 
     private static ResultBadge CreateResultBadge(RecentMatchResult result)
     {
+        var badgeColor = result.ResultType switch
+        {
+            "W" => "#2FA84F",
+            "L" => "#D94343",
+            _ => "#9AA3AF"
+        };
+
         return new ResultBadge
         {
             ResultType = result.ResultType,
-            BadgeBrush = result.ResultType switch
-            {
-                "W" => "#2FA84F",
-                "L" => "#D94343",
-                _ => "#9AA3AF"
-            }
+            BadgeBrush = ThemeManager.ToneDownColor(badgeColor)
         };
     }
 
@@ -1041,35 +1043,35 @@ public partial class DashboardView : UserControl
     {
         if (position <= 4)
         {
-            return "#3B82F6";
+            return ThemeManager.ToneDownColor("#3B82F6");
         }
 
         if (position == 5)
         {
-            return "#F97316";
+            return ThemeManager.ToneDownColor("#F97316");
         }
 
         if (position == 6)
         {
-            return "#22C55E";
+            return ThemeManager.ToneDownColor("#22C55E");
         }
 
-        return position > tableSize - 3 ? "#EF4444" : "Transparent";
+        return position > tableSize - 3 ? ThemeManager.ToneDownColor("#EF4444") : "Transparent";
     }
 
     private static string GetChampionsLeagueZoneBrush(int position)
     {
         if (position <= 8)
         {
-            return "#3B82F6";
+            return ThemeManager.ToneDownColor("#3B82F6");
         }
 
         if (position <= 24)
         {
-            return "#F97316";
+            return ThemeManager.ToneDownColor("#F97316");
         }
 
-        return "#EF4444";
+        return ThemeManager.ToneDownColor("#EF4444");
     }
 
     private static string GetRowBackground(int position)

@@ -43,9 +43,7 @@ public static class TeamColorService
 
     public static TeamColorPalette GetPalette(string? teamName)
     {
-        (string Primary, string Secondary) colors = !string.IsNullOrWhiteSpace(teamName) && TeamColors.TryGetValue(teamName, out var configured)
-            ? configured
-            : (DefaultPrimaryColor, DefaultSecondaryColor);
+        var colors = GetConfiguredColors(teamName);
 
         return CreatePalette(colors.Primary, colors.Secondary);
     }
@@ -81,9 +79,13 @@ public static class TeamColorService
 
     private static (string Primary, string Secondary) GetConfiguredColors(string? teamName)
     {
-        return !string.IsNullOrWhiteSpace(teamName) && TeamColors.TryGetValue(teamName, out var configured)
+        (string Primary, string Secondary) colors = !string.IsNullOrWhiteSpace(teamName) && TeamColors.TryGetValue(teamName, out var configured)
             ? configured
             : (DefaultPrimaryColor, DefaultSecondaryColor);
+
+        return ThemeManager.CurrentTheme == AppTheme.Work
+            ? (ThemeManager.ToneDownColor(colors.Primary, 0.16), ThemeManager.ToneDownColor(colors.Secondary, 0.12))
+            : colors;
     }
 
     private static TeamColorPalette CreatePalette(string primaryColor, string secondaryColor)

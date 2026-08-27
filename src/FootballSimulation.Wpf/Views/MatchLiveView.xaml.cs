@@ -150,7 +150,15 @@ public partial class MatchLiveView : UserControl
 
     private void ThemeManager_ThemeChanged(object? sender, EventArgs e)
     {
+        _matchTeamColors = null;
         RefreshVisibleFeedTheme();
+        if (_state.CurrentMatch is not null)
+        {
+            SetScoreboardTeams(_state.CurrentMatch.HomeTeam, _state.CurrentMatch.AwayTeam);
+            RefreshPitchPlayers();
+            RefreshPlayerPanels();
+        }
+
         UpdatePlaybackControls();
     }
 
@@ -5273,13 +5281,15 @@ public partial class MatchLiveView : UserControl
 
     private static string GetStaminaBrush(int staminaPercentage)
     {
-        return staminaPercentage switch
+        var color = staminaPercentage switch
         {
             < 30 => "#EF4444",
             < 50 => "#FB923C",
             <= 70 => "#FACC15",
             _ => "#86EFAC"
         };
+
+        return ThemeManager.ToneDownColor(color);
     }
 
     private string CreateWorkloadRiskText(Player player, Team? team)
@@ -5294,12 +5304,14 @@ public partial class MatchLiveView : UserControl
 
     private string GetWorkloadRiskBrush(Player player, Team? team)
     {
-        return GetWorkloadRiskPercentage(player, team) switch
+        var color = GetWorkloadRiskPercentage(player, team) switch
         {
             >= 70 => "#DC2626",
             >= 40 => "#FACC15",
             _ => "#16A34A"
         };
+
+        return ThemeManager.ToneDownColor(color);
     }
 
     private string GetWorkloadRiskForeground(Player player, Team? team)

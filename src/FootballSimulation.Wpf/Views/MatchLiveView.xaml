@@ -905,28 +905,28 @@
             </Grid.RowDefinitions>
 
             <Border Grid.Row="0"
-                    Background="#08783F"
+                    Background="{DynamicResource MatchPitchBorderBrush}"
                     CornerRadius="14"
                     Padding="10">
                 <Grid ClipToBounds="True">
-                    <Rectangle Fill="#0BA956"
+                    <Rectangle Fill="{DynamicResource MatchPitchBackgroundBrush}"
                                RadiusX="12"
                                RadiusY="12" />
                     <Line X1="0" Y1="0" X2="0" Y2="900"
-                          Stroke="#B6F2CC"
+                          Stroke="{DynamicResource MatchPitchLineBrush}"
                           StrokeThickness="2"
                           Opacity="0.65"
                           HorizontalAlignment="Center" />
                     <Ellipse Width="150"
                              Height="150"
-                             Stroke="#B6F2CC"
+                             Stroke="{DynamicResource MatchPitchLineBrush}"
                              StrokeThickness="2"
                              Opacity="0.55"
                              HorizontalAlignment="Center"
                              VerticalAlignment="Center" />
                     <Rectangle Width="120"
                                Height="260"
-                               Stroke="#B6F2CC"
+                               Stroke="{DynamicResource MatchPitchLineBrush}"
                                StrokeThickness="2"
                                Opacity="0.45"
                                HorizontalAlignment="Left"
@@ -934,7 +934,7 @@
                                Margin="0,0,0,0" />
                     <Rectangle Width="120"
                                Height="260"
-                               Stroke="#B6F2CC"
+                               Stroke="{DynamicResource MatchPitchLineBrush}"
                                StrokeThickness="2"
                                Opacity="0.45"
                                HorizontalAlignment="Right"

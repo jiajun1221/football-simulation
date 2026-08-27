@@ -67,6 +67,23 @@
             <Setter Property="FontWeight" Value="Bold" />
         </Style>
 
+        <Style x:Key="StatisticsPlayerNameTextStyle" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+            <Setter Property="Padding" Value="8,0" />
+        </Style>
+
+        <DataTemplate x:Key="AppearancesStatHeaderTemplate"><StackPanel Orientation="Horizontal" HorizontalAlignment="Center"><TextBlock Text="#" Margin="0,0,5,0" Foreground="#D97706" FontWeight="Bold" /><TextBlock Text="{Binding}" /></StackPanel></DataTemplate>
+        <DataTemplate x:Key="RatingStatHeaderTemplate"><StackPanel Orientation="Horizontal" HorizontalAlignment="Center"><TextBlock Text="&#x2605;" Margin="0,0,5,0" Foreground="#D97706" /><TextBlock Text="{Binding}" /></StackPanel></DataTemplate>
+        <DataTemplate x:Key="GoalsStatHeaderTemplate"><StackPanel Orientation="Horizontal" HorizontalAlignment="Center"><TextBlock Text="&#x26BD;" Margin="0,0,5,0" Foreground="#DC2626" /><TextBlock Text="{Binding}" /></StackPanel></DataTemplate>
+        <DataTemplate x:Key="AssistsStatHeaderTemplate"><StackPanel Orientation="Horizontal" HorizontalAlignment="Center"><TextBlock Text="&#x2197;" Margin="0,0,5,0" Foreground="#DC2626" FontWeight="Bold" /><TextBlock Text="{Binding}" /></StackPanel></DataTemplate>
+        <DataTemplate x:Key="TacklesStatHeaderTemplate"><StackPanel Orientation="Horizontal" HorizontalAlignment="Center"><TextBlock Text="&#x1F6E1;" Margin="0,0,5,0" Foreground="#2563EB" /><TextBlock Text="{Binding}" /></StackPanel></DataTemplate>
+        <DataTemplate x:Key="InterceptionsStatHeaderTemplate"><StackPanel Orientation="Horizontal" HorizontalAlignment="Center"><TextBlock Text="&#x21C4;" Margin="0,0,5,0" Foreground="#2563EB" FontWeight="Bold" /><TextBlock Text="{Binding}" /></StackPanel></DataTemplate>
+        <DataTemplate x:Key="BlocksStatHeaderTemplate"><StackPanel Orientation="Horizontal" HorizontalAlignment="Center"><TextBlock Text="&#x25A0;" Margin="0,0,5,0" Foreground="#2563EB" /><TextBlock Text="{Binding}" /></StackPanel></DataTemplate>
+        <DataTemplate x:Key="ClearancesStatHeaderTemplate"><StackPanel Orientation="Horizontal" HorizontalAlignment="Center"><TextBlock Text="&#x2B06;" Margin="0,0,5,0" Foreground="#2563EB" FontWeight="Bold" /><TextBlock Text="{Binding}" /></StackPanel></DataTemplate>
+        <DataTemplate x:Key="SavesStatHeaderTemplate"><StackPanel Orientation="Horizontal" HorizontalAlignment="Center"><TextBlock Text="&#x21BA;" Margin="0,0,5,0" Foreground="#2563EB" FontWeight="Bold" /><TextBlock Text="{Binding}" /></StackPanel></DataTemplate>
+        <DataTemplate x:Key="CleanSheetsStatHeaderTemplate"><StackPanel Orientation="Horizontal" HorizontalAlignment="Center"><TextBlock Text="&#x2191;" Margin="0,0,5,0" Foreground="#2563EB" FontWeight="Bold" /><TextBlock Text="{Binding}" /></StackPanel></DataTemplate>
+
         <DataTemplate x:Key="TransferPlayerCellTemplate">
             <Grid VerticalAlignment="Center">
                 <Grid.ColumnDefinitions>
@@ -325,6 +342,12 @@
                              Tag="1"
                              Style="{StaticResource SegmentedTabButtonStyle}"
                              Click="SquadTabButton_Click" />
+                <RadioButton x:Name="StatisticsSegmentButton"
+                             Content="Statistics"
+                             GroupName="SquadTabs"
+                             Tag="2"
+                             Style="{StaticResource SegmentedTabButtonStyle}"
+                             Click="SquadTabButton_Click" />
             </StackPanel>
         </Border>
 
@@ -421,6 +444,88 @@
                 <controls:FormationSetupPanel x:Name="FormationSetupPanel"
                                               ShowUnavailablePlayers="False"
                                               SetupChanged="FormationSetupPanel_SetupChanged" />
+            </TabItem>
+
+            <TabItem Header="Statistics">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="72*" />
+                        <ColumnDefinition Width="28*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Grid Grid.Column="0" Margin="0,0,14,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <DockPanel Margin="4,0,4,12">
+                            <StackPanel DockPanel.Dock="Left">
+                                <TextBlock Text="Season Player Rankings"
+                                           FontSize="21"
+                                           FontWeight="Bold"
+                                           Foreground="{DynamicResource AppTextBrush}" />
+                                <TextBlock x:Name="StatisticsSeasonTextBlock"
+                                           Margin="0,3,0,0"
+                                           Foreground="{DynamicResource AppMutedTextBrush}" />
+                            </StackPanel>
+                            <StackPanel DockPanel.Dock="Right"
+                                        Orientation="Horizontal"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center">
+                                <TextBlock Text="Rank by"
+                                           Margin="0,0,8,0"
+                                           VerticalAlignment="Center"
+                                           Foreground="{DynamicResource AppMutedTextBrush}" />
+                                <ComboBox x:Name="StatisticsCategoryComboBox"
+                                          Width="150"
+                                          SelectedIndex="0"
+                                          SelectionChanged="StatisticsCategoryComboBox_SelectionChanged">
+                                    <ComboBoxItem Content="Goals" Tag="Goals" />
+                                    <ComboBoxItem Content="Assists" Tag="Assists" />
+                                    <ComboBoxItem Content="Average Rating" Tag="AverageRating" />
+                                    <ComboBoxItem Content="Defensive Actions" Tag="DefensiveActions" />
+                                    <ComboBoxItem Content="Tackles" Tag="Tackles" />
+                                    <ComboBoxItem Content="Interceptions" Tag="Interceptions" />
+                                    <ComboBoxItem Content="Clean Sheets" Tag="CleanSheets" />
+                                    <ComboBoxItem Content="Saves" Tag="Saves" />
+                                    <ComboBoxItem Content="Appearances" Tag="Appearances" />
+                                </ComboBox>
+                            </StackPanel>
+                        </DockPanel>
+
+                        <DataGrid x:Name="SeasonStatisticsDataGrid"
+                                  Grid.Row="1"
+                                  Style="{StaticResource ModernGridStyle}"
+                                  IsReadOnly="True"
+                                  CanUserSortColumns="True"
+                                  SelectionChanged="SeasonStatisticsDataGrid_SelectionChanged">
+                            <DataGrid.Columns>
+                            <DataGridTextColumn Header="#" Binding="{Binding Rank}" Width="42" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                            <DataGridTextColumn Header="Player" Binding="{Binding PlayerName}" Width="*" MinWidth="155" ElementStyle="{StaticResource StatisticsPlayerNameTextStyle}" />
+                            <DataGridTemplateColumn Header="Nat" Width="44" IsReadOnly="True">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <StaticResource ResourceKey="NationalityCellTemplate" />
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Pos" Binding="{Binding Position}" Width="58" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                            <DataGridTextColumn Header="Apps" HeaderTemplate="{StaticResource AppearancesStatHeaderTemplate}" Binding="{Binding Appearances}" Width="70" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                            <DataGridTextColumn Header="Goals" HeaderTemplate="{StaticResource GoalsStatHeaderTemplate}" Binding="{Binding Goals}" Width="78" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                            <DataGridTextColumn Header="Assists" HeaderTemplate="{StaticResource AssistsStatHeaderTemplate}" Binding="{Binding Assists}" Width="82" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                            <DataGridTextColumn Header="Rating" HeaderTemplate="{StaticResource RatingStatHeaderTemplate}" Binding="{Binding AverageRatingText}" Width="82" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                            <DataGridTextColumn Header="Tackles" HeaderTemplate="{StaticResource TacklesStatHeaderTemplate}" Binding="{Binding Tackles}" Width="86" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                            <DataGridTextColumn Header="Int." HeaderTemplate="{StaticResource InterceptionsStatHeaderTemplate}" Binding="{Binding Interceptions}" Width="72" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                            <DataGridTextColumn Header="Blocks" HeaderTemplate="{StaticResource BlocksStatHeaderTemplate}" Binding="{Binding Blocks}" Width="82" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                            <DataGridTextColumn Header="Clear." HeaderTemplate="{StaticResource ClearancesStatHeaderTemplate}" Binding="{Binding Clearances}" Width="80" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                            <DataGridTextColumn Header="Saves" HeaderTemplate="{StaticResource SavesStatHeaderTemplate}" Binding="{Binding Saves}" Width="80" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                            <DataGridTextColumn Header="CS" HeaderTemplate="{StaticResource CleanSheetsStatHeaderTemplate}" Binding="{Binding CleanSheets}" Width="66" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+
+                    <views:TransferPlayerDetailPanel x:Name="StatisticsDetailPanel"
+                                                     Grid.Column="1" />
+                </Grid>
             </TabItem>
         </TabControl>
 

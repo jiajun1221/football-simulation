@@ -291,7 +291,7 @@ public class YouthAcademyService
             return new YouthOperationResult(false, reason, youthPlayer);
         }
 
-        var player = CreateSeniorPlayer(youthPlayer, team);
+        var player = CreateSeniorPlayer(youthPlayer, team, GetSeasonEndYear(league.Season));
         team.Substitutes.Add(player);
         RecordAcademyHistory(
             academy,
@@ -369,7 +369,7 @@ public class YouthAcademyService
         return true;
     }
 
-    public Player CreateSeniorPlayer(YouthPlayer youthPlayer, Team team)
+    public Player CreateSeniorPlayer(YouthPlayer youthPlayer, Team team, int seasonEndYear = PlayerContractService.DefaultSeasonEndYear)
     {
         var player = new Player
         {
@@ -395,7 +395,7 @@ public class YouthAcademyService
             Stamina = 88,
             Traits = youthPlayer.Traits.ToList(),
             PreferredFoot = youthPlayer.PreferredPosition is "LB" or "LW" ? "Left" : "Right",
-            ContractEndYear = PlayerContractService.DefaultSeasonEndYear + 3,
+            ContractEndYear = seasonEndYear + 3,
             WeeklyWage = youthPlayer.WeeklyWage > 0
                 ? youthPlayer.WeeklyWage
                 : Math.Max(1_000, Math.Round(youthPlayer.MarketValue / 3_500m, 0)),
@@ -683,7 +683,7 @@ public class YouthAcademyService
 
     private static int GetSeasonEndYear(string season)
     {
-        var parts = (season ?? string.Empty).Split('/', StringSplitOptions.TrimEntries);
+        var parts = (season ?? string.Empty).Split(['-', '/'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
         if (parts.Length > 0 && int.TryParse(parts[0], out var startYear))
         {
             return startYear + 1;

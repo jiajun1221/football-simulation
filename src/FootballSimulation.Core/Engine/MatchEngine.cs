@@ -6,6 +6,9 @@ namespace FootballSimulation.Engine;
 
 public class MatchEngine
 {
+    private const double MinimumMatchDayStrengthModifier = 0.94;
+    private const double MatchDayStrengthModifierRange = 0.12;
+    private const double GoalStrengthDifferenceScale = 900.0;
     private const int MaximumAttackCompletionMinutes = 7;
     private const int CrowdMomentumCooldownMinutes = 12;
     private const int MaxCrowdMomentumEventsPerTeam = 2;
@@ -1662,7 +1665,7 @@ public class MatchEngine
 
     private static double GetRandomStrengthSwing(Random random)
     {
-        return 0.88 + (random.NextDouble() * 0.24);
+        return MinimumMatchDayStrengthModifier + (random.NextDouble() * MatchDayStrengthModifierRange);
     }
 
     private static double CalculateBaseAttack(Team team)
@@ -6696,7 +6699,7 @@ public class MatchEngine
             (chanceType == "dribble run" ? (attributes.Dribbling - 72) * 0.00035 : 0.0) +
             (chanceType == "through ball attempt" ? (attributes.Pace - 72) * 0.00030 : 0.0) +
             (chanceType.Contains("cross", StringComparison.OrdinalIgnoreCase) ? (attributes.Physical - 72) * 0.00025 : 0.0) +
-            (attackingTeamStrength - defendingTeamStrength) / 1050.0;
+            (attackingTeamStrength - defendingTeamStrength) / GoalStrengthDifferenceScale;
 
         var traitBonus =
             (attacker.Traits.Contains(PlayerTrait.FinesseShot) && (chanceType is "long-range attempt" or "quick combination") ? 0.018 : 0.0) +

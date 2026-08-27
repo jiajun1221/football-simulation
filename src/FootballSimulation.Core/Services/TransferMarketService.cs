@@ -6,6 +6,7 @@ namespace FootballSimulation.Services;
 
 public class TransferMarketService
 {
+    private League? _activeLeague;
     private const int OfferLifetimeRounds = 3;
     public const int AiTransferCooldownSeasons = 1;
 
@@ -79,6 +80,7 @@ public class TransferMarketService
     {
         ArgumentNullException.ThrowIfNull(state);
         ArgumentNullException.ThrowIfNull(activeLeague);
+        _activeLeague = activeLeague;
 
         var leagueState = state.Leagues.FirstOrDefault(league =>
             league.LeagueId.Equals(activeLeague.LeagueId, StringComparison.OrdinalIgnoreCase));
@@ -111,7 +113,47 @@ public class TransferMarketService
             _financeService.GetOrCreateFinance(state, activeLeague.LeagueId, team);
         }
 
+        RestoreCurrentSeasonAcademyPromotions(state, activeLeague);
         ProcessExpiredContracts(state, GetSeasonEndYear(activeLeague.Season));
+    }
+
+    private static void RestoreCurrentSeasonAcademyPromotions(TransferMarketState state, League activeLeague)
+    {
+        var seasonEndYear = GetSeasonEndYear(activeLeague.Season);
+        foreach (var academy in activeLeague.YouthAcademies)
+        {
+            var team = activeLeague.Teams.FirstOrDefault(candidate =>
+                candidate.Name.Equals(academy.ClubName, StringComparison.OrdinalIgnoreCase));
+            if (team is null)
+            {
+                continue;
+            }
+
+            var promotionRecords = academy.AcademyHistory
+                .Where(record => record.EventType == AcademyHistoryEventType.Promoted &&
+                    record.Season.Equals(activeLeague.Season, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            foreach (var player in state.FreeAgents
+                .Where(player => promotionRecords.Any(record =>
+                    (!string.IsNullOrWhiteSpace(record.PlayerId) && record.PlayerId.Equals(player.PlayerId, StringComparison.OrdinalIgnoreCase)) ||
+                    record.PlayerName.Equals(player.Name, StringComparison.OrdinalIgnoreCase)))
+                .ToList())
+            {
+                var alreadyInSquad = team.Players.Concat(team.Substitutes).Any(existing =>
+                    existing.PlayerId.Equals(player.PlayerId, StringComparison.OrdinalIgnoreCase) ||
+                    existing.Name.Equals(player.Name, StringComparison.OrdinalIgnoreCase));
+                if (!alreadyInSquad)
+                {
+                    player.ContractEndYear = Math.Max(player.ContractEndYear ?? 0, seasonEndYear + 3);
+                    PlayerContractService.EnsureContract(player, activeLeague.LeagueId, seasonEndYear);
+                    player.TransferStatus = PlayerTransferStatus.None;
+                    team.Substitutes.Add(player);
+                }
+
+                state.FreeAgents.Remove(player);
+            }
+        }
     }
 
     public IReadOnlyList<TransferPlayerListing> SearchPlayers(
@@ -1873,7 +1915,7 @@ public class TransferMarketService
         {
             transfer.PlayerSnapshot = targetTeamPlayer;
             var targetSyncAffectedTeams = new HashSet<Team>();
-            foreach (var team in GetAllTeams(state).Select(item => item.Team))
+            foreach (var team in GetTransferSynchronizedTeams(state))
             {
                 if (ReferenceEquals(team, toTeam))
                 {
@@ -1898,7 +1940,7 @@ public class TransferMarketService
         }
 
         var affectedTeams = new HashSet<Team>();
-        foreach (var team in GetAllTeams(state).Select(item => item.Team))
+        foreach (var team in GetTransferSynchronizedTeams(state))
         {
             if (RemovePlayerFromTeamById(team, player.PlayerId))
             {
@@ -2274,6 +2316,20 @@ public class TransferMarketService
     private IEnumerable<(string LeagueId, Team Team)> GetAllTeams(TransferMarketState state)
     {
         return state.Leagues.SelectMany(league => league.Teams.Select(team => (league.LeagueId, team)));
+    }
+
+    private IEnumerable<Team> GetTransferSynchronizedTeams(TransferMarketState state)
+    {
+        var leagueTeams = GetAllTeams(state).Select(item => item.Team);
+        if (_activeLeague is null)
+        {
+            return leagueTeams.Distinct();
+        }
+
+        var fixtureTeams = _activeLeague.Fixtures
+            .Where(fixture => !fixture.IsPlayed)
+            .SelectMany(fixture => new[] { fixture.HomeTeam, fixture.AwayTeam });
+        return leagueTeams.Concat(fixtureTeams).Distinct();
     }
 
     private static double GetTeamAverageRating(Team team)

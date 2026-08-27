@@ -219,6 +219,55 @@ public class YouthAcademySystemTests
     }
 
     [Fact]
+    public void PromoteYouthPlayer_InFutureSeasonCreatesActiveSeniorContract()
+    {
+        var league = CreateLeague();
+        league.Season = "2029-30";
+        var team = league.Teams[0];
+        var academy = new YouthAcademyService().GetAcademy(league, team.Name);
+        var prospect = academy.YouthPlayers[0];
+        prospect.Age = 18;
+        prospect.CurrentOVR = 75;
+
+        var result = new YouthAcademyService().PromoteYouthPlayer(league, team, prospect.PlayerId, currentRound: 4);
+        var promotedPlayer = Assert.Single(team.Substitutes, player => player.PlayerId == prospect.PlayerId);
+
+        Assert.True(result.Success, result.Message);
+        Assert.Equal(2033, promotedPlayer.ContractEndYear);
+        Assert.Equal(PlayerContractStatus.Active, PlayerContractService.GetContractStatus(promotedPlayer, seasonEndYear: 2030));
+    }
+
+    [Fact]
+    public void BindActiveLeague_RestoresCurrentSeasonPromotionIncorrectlyMovedToFreeAgents()
+    {
+        var league = CreateLeague();
+        league.Season = "2029-30";
+        var team = league.Teams[0];
+        var academy = new YouthAcademyService().GetAcademy(league, team.Name);
+        var prospect = academy.YouthPlayers[0];
+        prospect.Age = 18;
+        prospect.CurrentOVR = 75;
+        var academyService = new YouthAcademyService();
+        var result = academyService.PromoteYouthPlayer(league, team, prospect.PlayerId, currentRound: 4);
+        var promotedPlayer = result.PromotedPlayer!;
+        team.Substitutes.Remove(promotedPlayer);
+        promotedPlayer.ContractEndYear = 2029;
+        promotedPlayer.ContractStatus = PlayerContractStatus.FreeAgent;
+
+        var transferService = new TransferMarketService();
+        var transferState = transferService.CreateInitialState(league);
+        transferState.FreeAgents.Add(promotedPlayer);
+        Assert.Contains(academy.AcademyHistory, record =>
+            record.EventType == AcademyHistoryEventType.Promoted && record.PlayerName == prospect.Name && record.Season == league.Season);
+        transferService.BindActiveLeague(transferState, league);
+
+        Assert.DoesNotContain(transferState.FreeAgents, player => player.Name == prospect.Name);
+        Assert.Contains(team.Players.Concat(team.Substitutes), player => player.Name == prospect.Name);
+        Assert.Equal(2033, promotedPlayer.ContractEndYear);
+        Assert.Equal(PlayerContractStatus.Active, promotedPlayer.ContractStatus);
+    }
+
+    [Fact]
     public void PromoteYouthPlayer_AllowsPromotionWhenExpandedSeniorSquadHasOneOpenSlot()
     {
         var league = CreateLeague();

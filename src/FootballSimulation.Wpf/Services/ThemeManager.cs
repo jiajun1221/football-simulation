@@ -8,7 +8,8 @@ namespace FootballSimulation.Wpf.Services;
 public enum AppTheme
 {
     Light,
-    Dark
+    Dark,
+    Work
 }
 
 public static class ThemeManager
@@ -30,7 +31,14 @@ public static class ThemeManager
 
     public static void ToggleTheme()
     {
-        ApplyTheme(CurrentTheme == AppTheme.Dark ? AppTheme.Light : AppTheme.Dark);
+        var nextTheme = CurrentTheme switch
+        {
+            AppTheme.Dark => AppTheme.Light,
+            AppTheme.Light => AppTheme.Work,
+            _ => AppTheme.Dark
+        };
+
+        ApplyTheme(nextTheme);
     }
 
     public static void ApplyTheme(AppTheme theme)
@@ -82,6 +90,19 @@ public static class ThemeManager
         };
     }
 
+    public static string ToneDownColor(string hexColor, double saturationRetention = 0.22)
+    {
+        if (CurrentTheme != AppTheme.Work ||
+            !TryParseRgb(hexColor, out var red, out var green, out var blue))
+        {
+            return hexColor;
+        }
+
+        var gray = 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+        var retained = Math.Clamp(saturationRetention, 0, 1);
+        return $"#{ToByte(gray + (red - gray) * retained):X2}{ToByte(gray + (green - gray) * retained):X2}{ToByte(gray + (blue - gray) * retained):X2}";
+    }
+
     private static AppTheme LoadSavedTheme()
     {
         if (!File.Exists(PreferenceFilePath))
@@ -104,6 +125,26 @@ public static class ThemeManager
         }
 
         File.WriteAllText(PreferenceFilePath, theme.ToString());
+    }
+
+    private static bool TryParseRgb(string hexColor, out int red, out int green, out int blue)
+    {
+        var value = hexColor.Trim().TrimStart('#');
+        if (value.Length == 6 &&
+            int.TryParse(value[..2], NumberStyles.HexNumber, CultureInfo.InvariantCulture, out red) &&
+            int.TryParse(value.Substring(2, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out green) &&
+            int.TryParse(value.Substring(4, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out blue))
+        {
+            return true;
+        }
+
+        red = green = blue = 0;
+        return false;
+    }
+
+    private static int ToByte(double value)
+    {
+        return (int)Math.Clamp(Math.Round(value), 0, 255);
     }
 
     private static string ToHex(Color color)

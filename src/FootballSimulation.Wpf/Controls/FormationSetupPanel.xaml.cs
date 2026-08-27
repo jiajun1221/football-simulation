@@ -730,7 +730,11 @@ public partial class FormationSetupPanel : UserControl
     private bool MovedEnough(Point current) => Math.Abs(current.X - _dragStartPoint.X) >= SystemParameters.MinimumHorizontalDragDistance || Math.Abs(current.Y - _dragStartPoint.Y) >= SystemParameters.MinimumVerticalDragDistance;
     private static double ClampCanvas(double size, double position, double elementSize) => Math.Clamp((size * position) - (elementSize / 2), 4, Math.Max(4, size - elementSize - 4));
     private static bool IsAvailable(Player player) => !player.IsInjured && !player.IsSuspended && !player.IsSentOff;
-    private static string GetStaminaBrush(Player player) => player.Stamina < 35 ? "#EF4444" : player.Stamina < 60 ? "#F59E0B" : "#22C55E";
+    private static string GetStaminaBrush(Player player)
+    {
+        var color = player.Stamina < 35 ? "#EF4444" : player.Stamina < 60 ? "#F59E0B" : "#22C55E";
+        return ThemeManager.ToneDownColor(color);
+    }
     private static bool CanPlayerOccupySlot(Player player, string slot) => PositionSuitabilityService.NormalizeExactPosition(slot) == "GK" ? PositionSuitabilityService.IsGoalkeeperCapable(player) : !PositionSuitabilityService.IsGoalkeeperCapable(player) && PositionCompatibilityService.GetCompatibilityScore(player, slot) > PositionCompatibilityService.Impossible;
     private static bool CanAssignPlayerToSlot(Player player, string slot) => PositionCompatibilityService.CanOccupySlot(player, slot, allowOutOfPosition: true);
 

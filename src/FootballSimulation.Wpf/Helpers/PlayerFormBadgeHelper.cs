@@ -1,4 +1,5 @@
 using FootballSimulation.Models;
+using FootballSimulation.Wpf.Services;
 
 namespace FootballSimulation.Wpf.Helpers;
 
@@ -6,7 +7,7 @@ internal static class PlayerFormBadgeHelper
 {
     public static PlayerFormBadge Create(PlayerFormStatus status)
     {
-        return status switch
+        var badge = status switch
         {
             PlayerFormStatus.Excellent => new PlayerFormBadge("Excellent", "#10B981", "#FFFFFF"),
             PlayerFormStatus.Good => new PlayerFormBadge("Good", "#4ADE80", "#064E3B"),
@@ -14,6 +15,8 @@ internal static class PlayerFormBadgeHelper
             PlayerFormStatus.VeryPoor => new PlayerFormBadge("Very Poor", "#EF4444", "#FFFFFF"),
             _ => new PlayerFormBadge("Average", "#FACC15", "#1F2937")
         };
+
+        return badge with { Background = ThemeManager.ToneDownColor(badge.Background) };
     }
 }
 

@@ -486,7 +486,7 @@
         </Grid.ColumnDefinitions>
 
         <Border x:Name="FormationAreaBorder" Grid.Column="0"
-                Background="#0E7A3C"
+                Background="{DynamicResource MatchPitchBorderBrush}"
                 CornerRadius="18"
                 Padding="18"
                 Margin="0,0,18,0">
@@ -498,8 +498,8 @@
                 </Grid.ColumnDefinitions>
 
                 <Border Grid.Column="0"
-                        Background="#16894A"
-                        BorderBrush="#B8F2CD"
+                        Background="{DynamicResource MatchPitchBackgroundBrush}"
+                        BorderBrush="{DynamicResource MatchPitchLineBrush}"
                         BorderThickness="2"
                         CornerRadius="18">
                     <Grid ClipToBounds="True">
@@ -509,17 +509,17 @@
                             <Canvas Width="1000" Height="680">
                                 <Rectangle Width="1000"
                                            Height="680"
-                                           Stroke="#B8F2CD"
+                                           Stroke="{DynamicResource MatchPitchLineBrush}"
                                            StrokeThickness="5"
                                            Opacity="0.72" />
-                                <Line X1="0" Y1="0" X2="1000" Y2="0" Stroke="#B8F2CD" StrokeThickness="5" Opacity="0.72" />
-                                <Ellipse Width="230" Height="230" Canvas.Left="385" Canvas.Top="-115" Stroke="#B8F2CD" StrokeThickness="4" Opacity="0.58" />
-                                <Ellipse Width="10" Height="10" Canvas.Left="495" Canvas.Top="-5" Fill="#B8F2CD" Opacity="0.78" />
+                                <Line X1="0" Y1="0" X2="1000" Y2="0" Stroke="{DynamicResource MatchPitchLineBrush}" StrokeThickness="5" Opacity="0.72" />
+                                <Ellipse Width="230" Height="230" Canvas.Left="385" Canvas.Top="-115" Stroke="{DynamicResource MatchPitchLineBrush}" StrokeThickness="4" Opacity="0.58" />
+                                <Ellipse Width="10" Height="10" Canvas.Left="495" Canvas.Top="-5" Fill="{DynamicResource MatchPitchLineBrush}" Opacity="0.78" />
 
-                                <Rectangle Width="500" Height="156" Canvas.Left="250" Canvas.Top="524" Stroke="#B8F2CD" StrokeThickness="4" Opacity="0.66" />
-                                <Rectangle Width="250" Height="70" Canvas.Left="375" Canvas.Top="610" Stroke="#B8F2CD" StrokeThickness="4" Opacity="0.66" />
-                                <Ellipse Width="10" Height="10" Canvas.Left="495" Canvas.Top="557" Fill="#B8F2CD" Opacity="0.72" />
-                                <Path Data="M 414 524 A 96 96 0 0 1 586 524" Stroke="#B8F2CD" StrokeThickness="4" Opacity="0.55" Fill="Transparent" />
+                                <Rectangle Width="500" Height="156" Canvas.Left="250" Canvas.Top="524" Stroke="{DynamicResource MatchPitchLineBrush}" StrokeThickness="4" Opacity="0.66" />
+                                <Rectangle Width="250" Height="70" Canvas.Left="375" Canvas.Top="610" Stroke="{DynamicResource MatchPitchLineBrush}" StrokeThickness="4" Opacity="0.66" />
+                                <Ellipse Width="10" Height="10" Canvas.Left="495" Canvas.Top="557" Fill="{DynamicResource MatchPitchLineBrush}" Opacity="0.72" />
+                                <Path Data="M 414 524 A 96 96 0 0 1 586 524" Stroke="{DynamicResource MatchPitchLineBrush}" StrokeThickness="4" Opacity="0.55" Fill="Transparent" />
                             </Canvas>
                         </Viewbox>
 
@@ -561,7 +561,7 @@
                                                     <TextBlock Text="{Binding Name}"
                                                                FontSize="10"
                                                                FontWeight="Black"
-                                                               Foreground="#2563EB"
+                                                               Foreground="{DynamicResource AppAccentBrush}"
                                                                Margin="6,6,0,3" />
                                                 </DataTemplate>
                                             </GroupStyle.HeaderTemplate>
@@ -574,8 +574,8 @@
                 </Border>
 
                 <Border Grid.Column="2"
-                        Background="#0F6D39"
-                        BorderBrush="#B8F2CD"
+                        Background="{DynamicResource MatchPitchBorderBrush}"
+                        BorderBrush="{DynamicResource MatchPitchLineBrush}"
                         BorderThickness="1.5"
                         CornerRadius="18"
                         Padding="14">

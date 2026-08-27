@@ -1019,6 +1019,56 @@ public class TransferMarketServiceTests
     }
 
     [Fact]
+    public void BindActiveLeague_RemovesTransferredPlayerFromForeignCompetitionFixtureSquad()
+    {
+        var chelseaHato = CreateTransferTestPlayer("ajax:hato", "Jorrel Hato");
+        var staleAjaxHato = CreateTransferTestPlayer("ajax:hato", "Jorrel Hato");
+        chelseaHato.ContractEndYear = 2032;
+        chelseaHato.ContractStatus = PlayerContractStatus.Active;
+        var chelsea = new Team { Name = "Chelsea", Substitutes = [chelseaHato] };
+        var ajax = new Team { Name = "Ajax", Players = [staleAjaxHato] };
+        var league = new League
+        {
+            LeagueId = "premier-league",
+            Name = "Premier League",
+            Season = "2029-30",
+            Teams = [chelsea],
+            Fixtures =
+            [
+                new Fixture
+                {
+                    Competition = CompetitionType.ChampionsLeague,
+                    HomeTeam = chelsea,
+                    AwayTeam = ajax,
+                    IsPlayed = false
+                }
+            ]
+        };
+        var state = new TransferMarketState
+        {
+            TransferHistory =
+            [
+                new TransferHistoryItem
+                {
+                    PlayerId = chelseaHato.PlayerId,
+                    PlayerName = chelseaHato.Name,
+                    FromLeagueId = "eredivisie",
+                    FromClubName = ajax.Name,
+                    ToLeagueId = league.LeagueId,
+                    ToClubName = chelsea.Name,
+                    WindowId = "summer-2029",
+                    PlayerSnapshot = chelseaHato
+                }
+            ]
+        };
+
+        new TransferMarketService().BindActiveLeague(state, league);
+
+        Assert.Contains(chelsea.Players.Concat(chelsea.Substitutes), player => player.PlayerId == chelseaHato.PlayerId);
+        Assert.DoesNotContain(ajax.Players.Concat(ajax.Substitutes), player => player.PlayerId == chelseaHato.PlayerId);
+    }
+
+    [Fact]
     public void EvaluateListedPlayersForOffers_SkipsLockedUserPlayers()
     {
         var league = CreateLeague("premier-league");

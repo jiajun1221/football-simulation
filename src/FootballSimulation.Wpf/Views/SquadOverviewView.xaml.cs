@@ -20,6 +20,7 @@ public partial class SquadOverviewView : UserControl
     private readonly LeagueDataService _leagueDataService = new();
     private readonly PlayerMarketValueCalculator _marketValueCalculator = new();
     private readonly SaveGameService _saveGameService = new();
+    private readonly PlayerSeasonStatsService _playerSeasonStatsService = new();
     private readonly DispatcherTimer _toastTimer;
     private SquadPlayerRow? _selectedRow;
 
@@ -34,6 +35,10 @@ public partial class SquadOverviewView : UserControl
         SquadDetailPanel.CaptainAssignmentRequested += SquadDetailPanel_CaptainAssignmentRequested;
         SquadDetailPanel.TransferLockToggled += SquadDetailPanel_TransferLockToggled;
         SquadDetailPanel.MainPositionChanged += SquadDetailPanel_MainPositionChanged;
+        StatisticsDetailPanel.TransferListToggled += SquadDetailPanel_TransferListToggled;
+        StatisticsDetailPanel.ContractRenewalRequested += SquadDetailPanel_ContractRenewalRequested;
+        StatisticsDetailPanel.CaptainAssignmentRequested += SquadDetailPanel_CaptainAssignmentRequested;
+        StatisticsDetailPanel.TransferLockToggled += SquadDetailPanel_TransferLockToggled;
         _toastTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2.4) };
         _toastTimer.Tick += (_, _) =>
         {
@@ -656,10 +661,132 @@ public partial class SquadOverviewView : UserControl
     {
         SquadSegmentButton.IsChecked = SquadTabControl.SelectedIndex == 0;
         FormationSegmentButton.IsChecked = SquadTabControl.SelectedIndex == 1;
+        StatisticsSegmentButton.IsChecked = SquadTabControl.SelectedIndex == 2;
         if (SquadTabControl.SelectedIndex == 1)
         {
             LoadFormationEditor();
         }
+        else if (SquadTabControl.SelectedIndex == 2)
+        {
+            LoadSeasonStatistics();
+        }
+    }
+
+    private void StatisticsCategoryComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (IsLoaded)
+        {
+            LoadSeasonStatistics();
+        }
+    }
+
+    private void LoadSeasonStatistics()
+    {
+        if (_state.League is null || _state.SelectedTeam is null || SeasonStatisticsDataGrid is null)
+        {
+            return;
+        }
+
+        if (_state.League.PlayerStats.Count == 0)
+        {
+            _playerSeasonStatsService.RebuildLeagueSeasonStats(_state.League);
+        }
+
+        StatisticsSeasonTextBlock.Text = $"{_state.SelectedTeam.Name} · {_state.League.Season}";
+        var statsByPlayer = _state.League.PlayerStats
+            .Where(stat => stat.TeamName.Equals(_state.SelectedTeam.Name, StringComparison.OrdinalIgnoreCase))
+            .GroupBy(stat => string.IsNullOrWhiteSpace(stat.PlayerId) ? stat.PlayerName : stat.PlayerId, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
+
+        var players = _state.SelectedTeam.Players
+            .Concat(_state.SelectedTeam.Substitutes)
+            .GroupBy(player => string.IsNullOrWhiteSpace(player.PlayerId) ? player.Name : player.PlayerId, StringComparer.OrdinalIgnoreCase)
+            .Select(group => group.First());
+        var rows = players.Select(player =>
+        {
+            var key = string.IsNullOrWhiteSpace(player.PlayerId) ? player.Name : player.PlayerId;
+            statsByPlayer.TryGetValue(key, out var stat);
+            stat ??= _state.League.PlayerStats.FirstOrDefault(item =>
+                item.TeamName.Equals(_state.SelectedTeam.Name, StringComparison.OrdinalIgnoreCase) &&
+                item.PlayerName.Equals(player.Name, StringComparison.OrdinalIgnoreCase));
+            return SeasonStatisticsRow.Create(player, stat);
+        });
+
+        var category = (StatisticsCategoryComboBox.SelectedItem as ComboBoxItem)?.Tag as string ?? "Goals";
+        IOrderedEnumerable<SeasonStatisticsRow> rankedRows = category switch
+        {
+            "Assists" => rows.OrderByDescending(row => row.Assists).ThenByDescending(row => row.Goals),
+            "AverageRating" => rows.OrderByDescending(row => row.AverageRating).ThenByDescending(row => row.Appearances),
+            "DefensiveActions" => rows.OrderByDescending(row => row.DefensiveActions).ThenByDescending(row => row.Tackles),
+            "Tackles" => rows.OrderByDescending(row => row.Tackles).ThenByDescending(row => row.Interceptions),
+            "Interceptions" => rows.OrderByDescending(row => row.Interceptions).ThenByDescending(row => row.Tackles),
+            "CleanSheets" => rows.OrderByDescending(row => row.CleanSheets).ThenByDescending(row => row.Appearances),
+            "Saves" => rows.OrderByDescending(row => row.Saves).ThenByDescending(row => row.CleanSheets),
+            "Appearances" => rows.OrderByDescending(row => row.Appearances).ThenByDescending(row => row.MinutesPlayed),
+            _ => rows.OrderByDescending(row => row.Goals).ThenByDescending(row => row.Assists)
+        };
+
+        var selectedPlayerId = (SeasonStatisticsDataGrid.SelectedItem as SeasonStatisticsRow)?.Player.PlayerId;
+        var rankedList = rankedRows
+            .ThenBy(row => row.PlayerName)
+            .Select((row, index) => row with { Rank = index + 1 })
+            .ToList();
+        SeasonStatisticsDataGrid.ItemsSource = rankedList;
+        SeasonStatisticsDataGrid.SelectedItem = rankedList.FirstOrDefault(row =>
+                row.Player.PlayerId.Equals(selectedPlayerId, StringComparison.OrdinalIgnoreCase)) ??
+            rankedList.FirstOrDefault();
+        ShowSelectedStatisticsPlayer();
+    }
+
+    private void SeasonStatisticsDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        ShowSelectedStatisticsPlayer();
+    }
+
+    private void ShowSelectedStatisticsPlayer()
+    {
+        if (SeasonStatisticsDataGrid.SelectedItem is not SeasonStatisticsRow row ||
+            _state.League is null ||
+            _state.SelectedTeam is null ||
+            _state.TransferMarket is null)
+        {
+            StatisticsDetailPanel.ShowEmpty();
+            return;
+        }
+
+        var listings = _transferMarketService
+            .GetClubListings(_state.TransferMarket, _state.League.LeagueId, _state.SelectedTeam, _state.League.PlayerStats)
+            .ToList();
+        AddMissingRosterListings(listings);
+        var listing = listings.FirstOrDefault(item =>
+            item.Player.PlayerId.Equals(row.Player.PlayerId, StringComparison.OrdinalIgnoreCase));
+        if (listing is null)
+        {
+            StatisticsDetailPanel.ShowEmpty();
+            return;
+        }
+
+        var status = CreateStatusDisplay(row.Player);
+        var windowInfo = _transferMarketService.GetWindowInfo(_state.League, GetCurrentRound());
+        _selectedRow = (SquadDataGrid.ItemsSource as IEnumerable<SquadPlayerRow>)?.FirstOrDefault(item =>
+            item.Listing.Player.PlayerId.Equals(row.Player.PlayerId, StringComparison.OrdinalIgnoreCase));
+        StatisticsDetailPanel.ShowPlayer(new TransferPlayerDetailContext(
+            listing,
+            TransferDetailMode.Squad,
+            row.Stat,
+            IsOwnPlayer: true,
+            windowInfo.IsOpen,
+            windowInfo.Tooltip,
+            IsShortlisted: false,
+            row.Player.IsListedForSale,
+            CanToggleShortlist: false,
+            status.Text,
+            status.Brush,
+            status.Tooltip,
+            CanAssignCaptain: true,
+            IsCaptain: row.Player.IsCaptain,
+            CanToggleTransferLock: !HasAgreedTransfer(row.Player),
+            IsTransferLocked: row.Player.RejectTransferOffers));
     }
 
     private void LoadFormationEditor()
@@ -1217,6 +1344,54 @@ public partial class SquadOverviewView : UserControl
         public string StatusBrush { get; init; } = "#10B981";
         public string FormBrush { get; init; } = "#FACC15";
         public string FormTextBrush { get; init; } = "#061226";
+    }
+
+    private sealed record SeasonStatisticsRow(
+        int Rank,
+        string PlayerName,
+        string NationalityFlagImagePath,
+        string NationalityName,
+        string Position,
+        int Appearances,
+        int Goals,
+        int Assists,
+        double AverageRating,
+        int Tackles,
+        int Interceptions,
+        int Blocks,
+        int Clearances,
+        int Saves,
+        int CleanSheets,
+        int MinutesPlayed,
+        Player Player,
+        PlayerSeasonStats? Stat)
+    {
+        public int DefensiveActions => Tackles + Interceptions + Blocks + Clearances;
+        public string AverageRatingText => Appearances == 0 ? "-" : AverageRating.ToString("0.00", CultureInfo.InvariantCulture);
+
+        public static SeasonStatisticsRow Create(Player player, PlayerSeasonStats? stat)
+        {
+            var nationality = PlayerNationalityDisplayService.Resolve(player);
+            return new SeasonStatisticsRow(
+                0,
+                player.Name,
+                nationality.FlagImagePath,
+                nationality.Name,
+                string.IsNullOrWhiteSpace(player.PreferredPosition) ? player.Position.ToString() : player.PreferredPosition,
+                stat?.Appearances ?? 0,
+                stat?.Goals ?? 0,
+                stat?.Assists ?? 0,
+                stat?.AverageRating ?? 0,
+                stat?.Tackles ?? 0,
+                stat?.Interceptions ?? 0,
+                stat?.Blocks ?? 0,
+                stat?.Clearances ?? 0,
+                stat?.Saves ?? 0,
+                stat?.CleanSheets ?? 0,
+                stat?.MinutesPlayed ?? 0,
+                player,
+                stat);
+        }
     }
 
     private sealed record StatusDisplay(string Text, string Brush, string Tooltip);

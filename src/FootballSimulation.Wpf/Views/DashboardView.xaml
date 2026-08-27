@@ -650,7 +650,7 @@
                             </Border>
                         </Grid>
 
-                        <Button Content="📊 Statistics"
+                        <Button Content="📊 League"
                                 Grid.Row="3"
                                 Grid.Column="0"
                                 Style="{StaticResource DashboardWhiteActionButton}"

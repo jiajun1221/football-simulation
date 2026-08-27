@@ -1,5 +1,6 @@
 using FootballSimulation.Models;
 using FootballSimulation.Wpf.Models;
+using FootballSimulation.Wpf.Services;
 
 namespace FootballSimulation.Wpf.Helpers;
 
@@ -28,9 +29,9 @@ public static class PlayerCardStatusBadgeHelper
                 TooltipText = yellowCards > 1
                     ? "Second yellow: player is at serious dismissal risk."
                     : "Yellow card: substitution risk warning.",
-                Background = "#FACC15",
+                Background = ThemeManager.ToneDownColor("#FACC15"),
                 Foreground = "#1F2937",
-                BorderBrush = "#FEF3C7"
+                BorderBrush = ThemeManager.ToneDownColor("#FEF3C7")
             });
         }
 
@@ -40,9 +41,9 @@ public static class PlayerCardStatusBadgeHelper
             {
                 Text = "R",
                 TooltipText = "Red card: player has been sent off.",
-                Background = "#DC2626",
+                Background = ThemeManager.ToneDownColor("#DC2626"),
                 Foreground = "#FFFFFF",
-                BorderBrush = "#FCA5A5"
+                BorderBrush = ThemeManager.ToneDownColor("#FCA5A5")
             });
         }
 
