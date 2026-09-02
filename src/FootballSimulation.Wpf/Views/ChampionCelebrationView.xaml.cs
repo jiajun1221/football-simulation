@@ -63,11 +63,13 @@ public partial class ChampionCelebrationView : UserControl
         BackgroundImageBrush.ImageSource = CreateImageSource(
             _celebrationEvent.BackgroundImagePath,
             "pack://application:,,,/Assets/Backgrounds/main-menu-stadium.png");
-        TrophyImage.Source = CreateImageSource(
+        var trophyImageSource = CreateImageSource(
             TrophyCelebrationService.ResolveTrophyImagePath(
                 _celebrationEvent.TrophyImagePath,
                 _celebrationEvent.CompetitionName),
             TrophyCelebrationService.DefaultTrophyImagePath);
+        TrophyImage.Source = trophyImageSource;
+        ConfigureTrophyImageLayout(trophyImageSource);
         ClubLogoImage.Source = CreateImageSource(ClubLogoService.GetClubLogoPath(_celebrationEvent.ClubName, _celebrationEvent.LeagueId));
         if (_celebrationEvent.CompetitionId.StartsWith("league-", StringComparison.OrdinalIgnoreCase))
         {
@@ -105,6 +107,14 @@ public partial class ChampionCelebrationView : UserControl
                 ? null
                 : CreateImageSource(fallbackPath);
         }
+    }
+
+    private void ConfigureTrophyImageLayout(BitmapImage? imageSource)
+    {
+        var isLandscapeImage = imageSource is not null && imageSource.PixelWidth > imageSource.PixelHeight;
+        TrophyImage.Width = isLandscapeImage ? 360 : 190;
+        TrophyImage.Height = 220;
+        TrophyImage.Stretch = Stretch.Uniform;
     }
 
     private TrophyCelebrationEvent CreateFallbackEvent()

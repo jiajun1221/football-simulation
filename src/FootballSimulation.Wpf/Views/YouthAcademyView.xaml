@@ -643,15 +643,25 @@
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding ContractText}" VerticalAlignment="Center" />
-                                            <TextBlock Text="&#x26A0;"
-                                                       Margin="5,0,0,0"
-                                                       Foreground="#DC2626"
-                                                       FontWeight="Bold"
-                                                       FontSize="13"
-                                                       VerticalAlignment="Center"
-                                                       Visibility="{Binding ContractWarningVisibility}"
-                                                       ToolTip="{Binding ContractWarningTooltip}" />
+                                            <TextBlock Text="{Binding ContractText}"
+                                                       Foreground="{Binding ContractForeground}"
+                                                       FontWeight="SemiBold"
+                                                       VerticalAlignment="Center" />
+                                            <Border Width="16"
+                                                    Height="16"
+                                                    Margin="5,0,0,0"
+                                                    Background="#DC2626"
+                                                    CornerRadius="8"
+                                                    VerticalAlignment="Center"
+                                                    Visibility="{Binding ContractWarningVisibility}"
+                                                    ToolTip="{Binding ContractWarningTooltip}">
+                                                <TextBlock Text="!"
+                                                           Foreground="White"
+                                                           FontSize="11"
+                                                           FontWeight="Bold"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center" />
+                                            </Border>
                                         </StackPanel>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -733,12 +743,21 @@
                                         <TextBlock Text="Academy Contract" Foreground="{DynamicResource AppMutedTextBrush}" FontSize="11" FontWeight="SemiBold" />
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock x:Name="SelectedYouthContractTextBlock" FontWeight="Bold" />
-                                            <TextBlock x:Name="SelectedYouthContractWarningTextBlock"
-                                                       Text="&#x26A0;"
-                                                       Margin="5,0,0,0"
-                                                       Foreground="#DC2626"
-                                                       FontWeight="Bold"
-                                                       ToolTip="Contract expires soon" />
+                                            <Border x:Name="SelectedYouthContractWarningBadge"
+                                                    Width="16"
+                                                    Height="16"
+                                                    Margin="5,0,0,0"
+                                                    Background="#DC2626"
+                                                    CornerRadius="8"
+                                                    VerticalAlignment="Center"
+                                                    ToolTip="Contract expires soon">
+                                                <TextBlock Text="!"
+                                                           Foreground="White"
+                                                           FontSize="11"
+                                                           FontWeight="Bold"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center" />
+                                            </Border>
                                         </StackPanel>
                                     </StackPanel>
                                 </UniformGrid>

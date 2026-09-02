@@ -87,6 +87,50 @@ public class FreeAgentRegenServiceTests
         Assert.Equal(firstRegen.Traits, secondRegen.Traits);
     }
 
+    [Fact]
+    public void ProcessSeasonRollover_RetiresContractedStarAndAddsIdentifiableRegenToMarket()
+    {
+        var retiredStar = CreateOldFreeAgent(age: 40);
+        retiredStar.PlayerId = "club-star-test";
+        retiredStar.Name = "Thiago Marques";
+        retiredStar.ContractStatus = PlayerContractStatus.Active;
+        retiredStar.ClubId = "pl:test-club";
+        var team = new Team
+        {
+            Name = "Test Club",
+            Players = [retiredStar]
+        };
+        var state = new TransferMarketState
+        {
+            ActiveSeason = "2026-27",
+            Leagues =
+            [
+                new TransferLeagueState
+                {
+                    LeagueId = "pl",
+                    LeagueName = "Premier League",
+                    Season = "2026-27",
+                    Teams = [team]
+                }
+            ]
+        };
+
+        var result = new FreeAgentRegenService().ProcessSeasonRollover(state, "2026-27", [team]);
+
+        var regen = Assert.Single(result.Regens);
+        Assert.Single(result.RetiredPlayers);
+        Assert.Empty(team.Players);
+        Assert.StartsWith("regen-star-2026-27-club-star-test", regen.PlayerId);
+        Assert.EndsWith(" Marques", regen.Name);
+        Assert.NotEqual(retiredStar.Name, regen.Name);
+        Assert.Equal(retiredStar.Position, regen.Position);
+        Assert.Equal(retiredStar.NationalityName, regen.NationalityName);
+        Assert.InRange(regen.PotentialOverall.GetValueOrDefault(), 88, 96);
+        Assert.Contains(regen, state.FreeAgents);
+        Assert.Contains(state.Inbox, notification =>
+            notification.Message.Contains("star regen", StringComparison.OrdinalIgnoreCase));
+    }
+
     private static Player CreateOldFreeAgent(int age)
     {
         return new Player

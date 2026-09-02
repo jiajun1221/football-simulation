@@ -21,14 +21,14 @@ public class YouthPlayerGeneratorService
         "Ajax"
     ];
 
-    private static readonly (string Name, string Code, string FlagPath, string[] FirstNames, string[] LastNames)[] NationalityPools =
+    private static readonly (string Name, string Code, string FlagPath)[] NationalityPools =
     [
-        ("England", "GB-ENG", "Assets/Flags/england.png", ["Alfie", "Archie", "Ethan", "Leo", "Oscar", "Theo"], ["Bennett", "Cole", "Foster", "Hughes", "Parker", "Ward"]),
-        ("Spain", "ES", "Assets/Flags/spain.png", ["Diego", "Hugo", "Iker", "Mateo", "Nico", "Pablo"], ["Alonso", "Garcia", "Ramos", "Santos", "Vega", "Torres"]),
-        ("France", "FR", "Assets/Flags/france.png", ["Enzo", "Hugo", "Lucas", "Mathis", "Noah", "Theo"], ["Bernard", "Dubois", "Moreau", "Roux", "Lefevre", "Girard"]),
-        ("Germany", "DE", "Assets/Flags/germany.png", ["Ben", "Emil", "Finn", "Jonas", "Leon", "Lukas"], ["Bauer", "Fischer", "Klein", "Meyer", "Schulz", "Weber"]),
-        ("Brazil", "BR", "Assets/Flags/brazil.png", ["Bruno", "Caio", "Felipe", "Joao", "Lucas", "Rafael"], ["Alves", "Costa", "Lima", "Mendes", "Pereira", "Silva"]),
-        ("Netherlands", "NL", "Assets/Flags/netherlands.png", ["Daan", "Finn", "Jens", "Lars", "Milan", "Sem"], ["Bakker", "Jansen", "Meijer", "Smit", "Visser", "Vos"])
+        ("England", "GB-ENG", "Assets/Flags/england.png"),
+        ("Spain", "ES", "Assets/Flags/spain.png"),
+        ("France", "FR", "Assets/Flags/france.png"),
+        ("Germany", "DE", "Assets/Flags/germany.png"),
+        ("Brazil", "BR", "Assets/Flags/brazil.png"),
+        ("Netherlands", "NL", "Assets/Flags/netherlands.png")
     ];
 
     private static readonly (string Slot, Position Position, int Weight)[] PositionWeights =
@@ -69,9 +69,12 @@ public class YouthPlayerGeneratorService
         var seed = Math.Abs(HashCode.Combine(academy.ClubId, academy.ClubName, season, academy.IntakeHistory.Count));
         var random = new Random(seed);
         var players = new List<YouthPlayer>();
+        var usedNames = GeneratedPlayerNameService.CreateUsedNameSet(
+            team.Players.Concat(team.Substitutes).Select(player => player.Name)
+                .Concat(academy.YouthPlayers.Select(player => player.Name)));
         for (var index = 0; index < count; index++)
         {
-            players.Add(GeneratePlayer(academy, team, season, random, index));
+            players.Add(GeneratePlayer(academy, team, season, random, index, usedNames));
         }
 
         return players;
@@ -80,7 +83,10 @@ public class YouthPlayerGeneratorService
     public YouthPlayer GenerateScoutDiscovery(YouthAcademy academy, Team team, string season, int currentRound)
     {
         var seed = Math.Abs(HashCode.Combine(academy.ClubId, season, currentRound, academy.YouthPlayers.Count));
-        return GeneratePlayer(academy, team, season, new Random(seed), academy.YouthPlayers.Count, discoveryBoost: true);
+        var usedNames = GeneratedPlayerNameService.CreateUsedNameSet(
+            team.Players.Concat(team.Substitutes).Select(player => player.Name)
+                .Concat(academy.YouthPlayers.Select(player => player.Name)));
+        return GeneratePlayer(academy, team, season, new Random(seed), academy.YouthPlayers.Count, usedNames, discoveryBoost: true);
     }
 
     public static string CreateClubId(string leagueId, string clubName)
@@ -95,6 +101,7 @@ public class YouthPlayerGeneratorService
         string season,
         Random random,
         int index,
+        ISet<string> usedNames,
         bool discoveryBoost = false)
     {
         var tier = PickTier(academy, random, discoveryBoost);
@@ -107,7 +114,7 @@ public class YouthPlayerGeneratorService
         var player = new YouthPlayer
         {
             PlayerId = $"youth-{NormalizeId(academy.ClubName)}-{NormalizeId(season)}-{Guid.NewGuid():N}",
-            Name = CreateName(nationality, random),
+            Name = GeneratedPlayerNameService.CreateUniqueName(nationality.Name, random, usedNames),
             Nationality = nationality.Name,
             NationalityName = nationality.Name,
             NationalityCode = nationality.Code,
@@ -289,7 +296,7 @@ public class YouthPlayerGeneratorService
         return values[random.Next(values.Length)];
     }
 
-    private static (string Name, string Code, string FlagPath, string[] FirstNames, string[] LastNames) PickNationality(Team team, Random random)
+    private static (string Name, string Code, string FlagPath) PickNationality(Team team, Random random)
     {
         if (team.Players.Concat(team.Substitutes).Any(player => player.NationalityName.Equals("England", StringComparison.OrdinalIgnoreCase)) &&
             random.NextDouble() < 0.62)
@@ -298,11 +305,6 @@ public class YouthPlayerGeneratorService
         }
 
         return NationalityPools[random.Next(NationalityPools.Length)];
-    }
-
-    private static string CreateName((string Name, string Code, string FlagPath, string[] FirstNames, string[] LastNames) nationality, Random random)
-    {
-        return $"{nationality.FirstNames[random.Next(nationality.FirstNames.Length)]} {nationality.LastNames[random.Next(nationality.LastNames.Length)]}";
     }
 
     private static List<string> GetSecondaryPositions(string exactPosition)

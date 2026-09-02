@@ -851,6 +851,43 @@ public class TransferMarketServiceTests
     }
 
     [Fact]
+    public void RunAiTransferActivity_CanSignGeneratedFutureStarFromFreeAgents()
+    {
+        var league = CreateLeague("premier-league");
+        var selectedTeam = league.Teams.Single(team => team.Name == "Chelsea");
+        var service = new TransferMarketService(seed: 12);
+        var state = service.CreateInitialState(league);
+        var futureStar = new FutureStarMarketService()
+            .TryGenerateSeasonalFutureStar(state, league.Season, generationChance: 1);
+        Assert.NotNull(futureStar);
+
+        foreach (var player in state.Leagues
+            .SelectMany(item => item.Teams)
+            .SelectMany(team => team.Players.Concat(team.Substitutes)))
+        {
+            player.TransferStatus = PlayerTransferStatus.Unavailable;
+        }
+
+        foreach (var round in Enumerable.Range(1, 4))
+        {
+            service.RunAiTransferActivity(state, league, selectedTeam, round);
+            if (state.TransferHistory.Any(item => item.PlayerId == futureStar.PlayerId))
+            {
+                break;
+            }
+        }
+
+        Assert.Contains(state.TransferHistory, item =>
+            item.PlayerId == futureStar.PlayerId &&
+            item.FromClubName == "Free Agents" &&
+            item.Fee == 0);
+        Assert.DoesNotContain(futureStar, state.FreeAgents);
+        Assert.Contains(state.Leagues.SelectMany(item => item.Teams)
+            .SelectMany(team => team.Players.Concat(team.Substitutes)),
+            player => player.PlayerId == futureStar.PlayerId);
+    }
+
+    [Fact]
     public void RunAiTransferActivity_ClosedWindowDoesNotCompleteAiTransfers()
     {
         var league = CreateLeague("premier-league");

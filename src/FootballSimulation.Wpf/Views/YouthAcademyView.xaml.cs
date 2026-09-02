@@ -130,7 +130,9 @@ public partial class YouthAcademyView : UserControl
 
     private static int GetSeasonEndYear(string? season)
     {
-        var parts = (season ?? string.Empty).Split('/', StringSplitOptions.TrimEntries);
+        var parts = (season ?? string.Empty).Split(
+            ['-', '/'],
+            StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
         return parts.Length > 0 && int.TryParse(parts[0], out var startYear)
             ? startYear + 1
             : DateTime.Today.Year + 1;
@@ -187,8 +189,8 @@ public partial class YouthAcademyView : UserControl
         SelectedYouthContractTextBlock.Text = row.ContractText;
         SelectedYouthContractTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(
             (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(row.ContractForeground));
-        SelectedYouthContractWarningTextBlock.Visibility = row.ContractWarningVisibility;
-        SelectedYouthContractWarningTextBlock.ToolTip = row.ContractWarningTooltip;
+        SelectedYouthContractWarningBadge.Visibility = row.ContractWarningVisibility;
+        SelectedYouthContractWarningBadge.ToolTip = row.ContractWarningTooltip;
         SelectedYouthTraitsItemsControl.ItemsSource = row.TraitBadges;
         SelectedYouthNoTraitsTextBlock.Visibility = row.TraitBadges.Count == 0
             ? Visibility.Visible

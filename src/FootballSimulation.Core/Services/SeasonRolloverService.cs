@@ -17,6 +17,7 @@ public class SeasonRolloverService
     private readonly YouthAcademyService _youthAcademyService = new();
     private readonly YouthScoutService _youthScoutService = new();
     private readonly FreeAgentRegenService _freeAgentRegenService = new();
+    private readonly FutureStarMarketService _futureStarMarketService = new();
 
     public SeasonRolloverService()
         : this(
@@ -464,7 +465,8 @@ public class SeasonRolloverService
             offer.Status is OfferStatus.Pending or OfferStatus.PendingUntilWindowOpens or OfferStatus.Countered);
         transferMarketState.Inbox.RemoveAll(notification =>
             notification.Type == TransferNotificationType.WindowClosed || !notification.IsRead);
-        _freeAgentRegenService.ProcessSeasonRollover(transferMarketState, league.Season);
+        _freeAgentRegenService.ProcessSeasonRollover(transferMarketState, league.Season, league.Teams);
+        _futureStarMarketService.TryGenerateSeasonalFutureStar(transferMarketState, league.Season);
 
         foreach (var club in promotedClubs)
         {

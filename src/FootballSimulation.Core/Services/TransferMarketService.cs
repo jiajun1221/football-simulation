@@ -622,7 +622,6 @@ public class TransferMarketService
     {
         var listings = GetAllListings(state, activeLeague.PlayerStats)
             .Where(listing => listing.Team != selectedTeam)
-            .Where(listing => listing.Team.Name != "Free Agents")
             .Where(listing => listing.Player.TransferStatus != PlayerTransferStatus.Unavailable)
             .Where(listing => listing.Player.TransferStatus != PlayerTransferStatus.RecentlyTransferred)
             .Where(listing => !HasTransferredThisWindow(state, activeLeague, listing.Player, currentRound))

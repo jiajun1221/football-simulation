@@ -47,23 +47,23 @@ public class YouthScoutService
 
     private static readonly Dictionary<string, CountryProfile> CountryProfiles = new(StringComparer.OrdinalIgnoreCase)
     {
-        ["Brazil"] = new(["Lucas", "Joao", "Gabriel", "Rafael", "Bruno", "Caio"], ["Silva", "Mendes", "Costa", "Pereira", "Lima", "Alves"], [PlayerTrait.Flair, PlayerTrait.TechnicalDribbler, PlayerTrait.OutsideFootShot], YouthDevelopmentRate.Fast),
-        ["Argentina"] = new(["Mateo", "Thiago", "Nico", "Lautaro", "Julian", "Tomas"], ["Fernandez", "Romero", "Alvarez", "Sosa", "Acuna", "Vega"], [PlayerTrait.Playmaker, PlayerTrait.Flair, PlayerTrait.BigMatchPlayer], YouthDevelopmentRate.Fast),
-        ["France"] = new(["Enzo", "Hugo", "Lucas", "Mathis", "Noah", "Theo"], ["Bernard", "Dubois", "Moreau", "Roux", "Lefevre", "Girard"], [PlayerTrait.Rapid, PlayerTrait.Engine, PlayerTrait.AerialThreat], YouthDevelopmentRate.Fast),
-        ["Spain"] = new(["Diego", "Hugo", "Iker", "Mateo", "Nico", "Pablo"], ["Alonso", "Garcia", "Ramos", "Santos", "Vega", "Torres"], [PlayerTrait.Playmaker, PlayerTrait.PressResistant, PlayerTrait.TechnicalDribbler], YouthDevelopmentRate.Normal),
-        ["England"] = new(["Alfie", "Archie", "Ethan", "Leo", "Oscar", "Theo"], ["Bennett", "Cole", "Foster", "Hughes", "Parker", "Ward"], [PlayerTrait.Leadership, PlayerTrait.Engine, PlayerTrait.TeamPlayer], YouthDevelopmentRate.Normal),
-        ["Portugal"] = new(["Diogo", "Tomas", "Ruben", "Goncalo", "Tiago", "Andre"], ["Costa", "Fernandes", "Mendes", "Neves", "Ramos", "Silva"], [PlayerTrait.Flair, PlayerTrait.Playmaker, PlayerTrait.TechnicalDribbler], YouthDevelopmentRate.Fast),
-        ["Germany"] = new(["Ben", "Emil", "Finn", "Jonas", "Leon", "Lukas"], ["Bauer", "Fischer", "Klein", "Meyer", "Schulz", "Weber"], [PlayerTrait.TeamPlayer, PlayerTrait.BigMatchPlayer, PlayerTrait.LongPasser], YouthDevelopmentRate.Normal),
-        ["Netherlands"] = new(["Daan", "Finn", "Jens", "Lars", "Milan", "Sem"], ["Bakker", "Jansen", "Meijer", "Smit", "Visser", "Vos"], [PlayerTrait.BoxToBox, PlayerTrait.Playmaker, PlayerTrait.PressResistant], YouthDevelopmentRate.Normal),
-        ["Belgium"] = new(["Arthur", "Elias", "Liam", "Noah", "Milan", "Jules"], ["Claes", "Peeters", "Janssens", "Dubois", "Lambert", "Vermeulen"], [PlayerTrait.Playmaker, PlayerTrait.ClinicalFinisher, PlayerTrait.PressResistant], YouthDevelopmentRate.Normal),
-        ["Italy"] = new(["Luca", "Matteo", "Gabriele", "Andrea", "Marco", "Nico"], ["Ricci", "Conti", "Ferrari", "Rossi", "Bianchi", "Romano"], [PlayerTrait.Interceptor, PlayerTrait.TeamPlayer, PlayerTrait.LongPasser], YouthDevelopmentRate.Normal),
-        ["Croatia"] = new(["Luka", "Ivan", "Marko", "Ante", "Dino", "Niko"], ["Horvat", "Kovac", "Maric", "Novak", "Peric", "Vidic"], [PlayerTrait.Playmaker, PlayerTrait.LongPasser, PlayerTrait.PressResistant], YouthDevelopmentRate.Normal),
-        ["Uruguay"] = new(["Santiago", "Facundo", "Mateo", "Lucas", "Bruno", "Emiliano"], ["Suarez", "Nunez", "Rojas", "Silva", "Pereira", "Mendez"], [PlayerTrait.BigMatchPlayer, PlayerTrait.TeamPlayer, PlayerTrait.AggressiveTackler], YouthDevelopmentRate.Normal),
-        ["Colombia"] = new(["Juan", "Santiago", "Mateo", "Daniel", "Luis", "Andres"], ["Diaz", "Quintero", "Moreno", "Gomez", "Restrepo", "Torres"], [PlayerTrait.Rapid, PlayerTrait.Flair, PlayerTrait.TechnicalDribbler], YouthDevelopmentRate.Fast),
-        ["Norway"] = new(["Emil", "Magnus", "Oscar", "Sander", "Jonas", "Noah"], ["Hansen", "Johansen", "Larsen", "Olsen", "Berg", "Solberg"], [PlayerTrait.Engine, PlayerTrait.AerialThreat, PlayerTrait.TeamPlayer], YouthDevelopmentRate.Normal),
-        ["Denmark"] = new(["Mikkel", "Noah", "Oscar", "Viktor", "Emil", "Frederik"], ["Nielsen", "Jensen", "Larsen", "Madsen", "Pedersen", "Poulsen"], [PlayerTrait.TeamPlayer, PlayerTrait.Leadership, PlayerTrait.LongPasser], YouthDevelopmentRate.Normal),
-        ["Japan"] = new(["Haruto", "Ren", "Yuto", "Sota", "Riku", "Kaito"], ["Sato", "Suzuki", "Takahashi", "Tanaka", "Ito", "Kobayashi"], [PlayerTrait.Engine, PlayerTrait.TeamPlayer, PlayerTrait.TechnicalDribbler], YouthDevelopmentRate.Fast),
-        ["South Korea"] = new(["Min-jun", "Seo-jun", "Ji-ho", "Hyun-woo", "Do-yun", "Joon"], ["Kim", "Lee", "Park", "Choi", "Jung", "Kang"], [PlayerTrait.Engine, PlayerTrait.Rapid, PlayerTrait.TeamPlayer], YouthDevelopmentRate.Fast)
+        ["Brazil"] = new([PlayerTrait.Flair, PlayerTrait.TechnicalDribbler, PlayerTrait.OutsideFootShot], YouthDevelopmentRate.Fast),
+        ["Argentina"] = new([PlayerTrait.Playmaker, PlayerTrait.Flair, PlayerTrait.BigMatchPlayer], YouthDevelopmentRate.Fast),
+        ["France"] = new([PlayerTrait.Rapid, PlayerTrait.Engine, PlayerTrait.AerialThreat], YouthDevelopmentRate.Fast),
+        ["Spain"] = new([PlayerTrait.Playmaker, PlayerTrait.PressResistant, PlayerTrait.TechnicalDribbler], YouthDevelopmentRate.Normal),
+        ["England"] = new([PlayerTrait.Leadership, PlayerTrait.Engine, PlayerTrait.TeamPlayer], YouthDevelopmentRate.Normal),
+        ["Portugal"] = new([PlayerTrait.Flair, PlayerTrait.Playmaker, PlayerTrait.TechnicalDribbler], YouthDevelopmentRate.Fast),
+        ["Germany"] = new([PlayerTrait.TeamPlayer, PlayerTrait.BigMatchPlayer, PlayerTrait.LongPasser], YouthDevelopmentRate.Normal),
+        ["Netherlands"] = new([PlayerTrait.BoxToBox, PlayerTrait.Playmaker, PlayerTrait.PressResistant], YouthDevelopmentRate.Normal),
+        ["Belgium"] = new([PlayerTrait.Playmaker, PlayerTrait.ClinicalFinisher, PlayerTrait.PressResistant], YouthDevelopmentRate.Normal),
+        ["Italy"] = new([PlayerTrait.Interceptor, PlayerTrait.TeamPlayer, PlayerTrait.LongPasser], YouthDevelopmentRate.Normal),
+        ["Croatia"] = new([PlayerTrait.Playmaker, PlayerTrait.LongPasser, PlayerTrait.PressResistant], YouthDevelopmentRate.Normal),
+        ["Uruguay"] = new([PlayerTrait.BigMatchPlayer, PlayerTrait.TeamPlayer, PlayerTrait.AggressiveTackler], YouthDevelopmentRate.Normal),
+        ["Colombia"] = new([PlayerTrait.Rapid, PlayerTrait.Flair, PlayerTrait.TechnicalDribbler], YouthDevelopmentRate.Fast),
+        ["Norway"] = new([PlayerTrait.Engine, PlayerTrait.AerialThreat, PlayerTrait.TeamPlayer], YouthDevelopmentRate.Normal),
+        ["Denmark"] = new([PlayerTrait.TeamPlayer, PlayerTrait.Leadership, PlayerTrait.LongPasser], YouthDevelopmentRate.Normal),
+        ["Japan"] = new([PlayerTrait.Engine, PlayerTrait.TeamPlayer, PlayerTrait.TechnicalDribbler], YouthDevelopmentRate.Fast),
+        ["South Korea"] = new([PlayerTrait.Engine, PlayerTrait.Rapid, PlayerTrait.TeamPlayer], YouthDevelopmentRate.Fast)
     };
 
     private readonly YouthAcademyService _academyService;
@@ -390,9 +390,13 @@ public class YouthScoutService
 
         var hasPositionFocus = GetActiveFocusPositions(assignment).Any();
         var focusedTarget = hasPositionFocus ? (int)Math.Ceiling(count * 0.70) : 0;
+        var usedNames = GeneratedPlayerNameService.CreateUsedNameSet(
+            academy.YouthPlayers.Select(player => player.Name)
+                .Concat(academy.ScoutReports.SelectMany(existingReport =>
+                    existingReport.Prospects.Select(prospect => prospect.Name))));
         for (var index = 0; index < count; index++)
         {
-            report.Prospects.Add(GenerateProspect(country, profile, assignment, random, index, index < focusedTarget));
+            report.Prospects.Add(GenerateProspect(country, profile, assignment, random, index, index < focusedTarget, usedNames));
         }
 
         return report;
@@ -404,7 +408,8 @@ public class YouthScoutService
         YouthScoutAssignment assignment,
         Random random,
         int index,
-        bool shouldMatchFocus)
+        bool shouldMatchFocus,
+        ISet<string> usedNames)
     {
         var focusPositions = GetActiveFocusPositions(assignment).ToList();
         var isFocusedMatch = focusPositions.Count > 0 && shouldMatchFocus;
@@ -419,7 +424,7 @@ public class YouthScoutService
         var prospect = new YouthScoutProspect
         {
             ProspectId = $"scout-{NormalizeId(country.Name)}-{Guid.NewGuid():N}",
-            Name = $"{profile.FirstNames[random.Next(profile.FirstNames.Length)]} {profile.LastNames[random.Next(profile.LastNames.Length)]}",
+            Name = GeneratedPlayerNameService.CreateUniqueName(country.Name, random, usedNames),
             Nationality = country.Name,
             NationalityName = country.Name,
             NationalityCode = country.Code,
@@ -867,8 +872,6 @@ public class YouthScoutService
     }
 
     private sealed record CountryProfile(
-        string[] FirstNames,
-        string[] LastNames,
         PlayerTrait[] TraitBiases,
         YouthDevelopmentRate DevelopmentLean);
 }
