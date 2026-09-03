@@ -942,6 +942,6 @@ public class CompetitionProgressionService
 
     private static double GetTeamStrength(Team team)
     {
-        return team.Players.Concat(team.Substitutes).DefaultIfEmpty().Average(player => player?.OverallRating ?? 70);
+        return team.AllPlayers.DefaultIfEmpty().Average(player => player?.OverallRating ?? 70);
     }
 }

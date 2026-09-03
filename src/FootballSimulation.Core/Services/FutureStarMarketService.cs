@@ -53,7 +53,7 @@ public class FutureStarMarketService
         var id = $"future-star-{seasonKey}-{StableHash($"future-star|{season}") & 0xfffffff:x7}";
         var allPlayers = state.Leagues
             .SelectMany(league => league.Teams)
-            .SelectMany(team => team.Players.Concat(team.Substitutes))
+            .SelectMany(team => team.AllPlayers)
             .Concat(state.FreeAgents)
             .ToList();
         if (allPlayers.Any(player => player.PlayerId.Equals(id, StringComparison.OrdinalIgnoreCase)))

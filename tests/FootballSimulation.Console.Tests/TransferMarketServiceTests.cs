@@ -324,8 +324,8 @@ public class TransferMarketServiceTests
         var offer = service.MakeUserOffer(state, league, selectedTeam, target.Player.PlayerId, target.AskingPrice, currentRound: 1);
 
         Assert.Equal(OfferStatus.Completed, offer.Status);
-        Assert.Contains(selectedTeam.Substitutes, player => player.PlayerId == target.Player.PlayerId);
-        Assert.DoesNotContain(sellingTeam.Players.Concat(sellingTeam.Substitutes), player => player.PlayerId == target.Player.PlayerId);
+        Assert.Contains(selectedTeam.Reserves, player => player.PlayerId == target.Player.PlayerId);
+        Assert.DoesNotContain(sellingTeam.AllPlayers, player => player.PlayerId == target.Player.PlayerId);
         Assert.True(service.GetFinance(state, league.LeagueId, selectedTeam).AvailableTransferBudget < buyerBudgetBefore);
         Assert.True(service.GetFinance(state, target.LeagueId, sellingTeam).TransferIncome > sellerIncomeBefore);
         Assert.Contains(state.TransferHistory, item => item.PlayerId == target.Player.PlayerId);
@@ -364,11 +364,11 @@ public class TransferMarketServiceTests
 
         Assert.Equal(OfferStatus.Completed, offer.Status);
         Assert.Equal(negotiatedWage, target.Player.WeeklyWage);
-        Assert.Equal(2030, target.Player.ContractEndYear);
+        Assert.Equal(2031, target.Player.ContractEndYear);
         Assert.Equal(PlayerRole.KeyPlayer, target.Player.Role);
         var history = state.TransferHistory.Single(item => item.PlayerId == target.Player.PlayerId);
         Assert.Equal(negotiatedWage, history.WeeklyWage);
-        Assert.Equal(2030, history.ContractEndYear);
+        Assert.Equal(2031, history.ContractEndYear);
         Assert.Equal(PlayerRole.KeyPlayer, history.SquadRole);
     }
 
@@ -397,7 +397,7 @@ public class TransferMarketServiceTests
             currentRound: 1);
 
         Assert.Equal(OfferStatus.Completed, offer.Status);
-        var roster = selectedTeam.Players.Concat(selectedTeam.Substitutes).ToList();
+        var roster = selectedTeam.AllPlayers.ToList();
         Assert.Equal(roster.Count, roster.Select(player => player.SquadNumber).Distinct().Count());
         Assert.NotEqual(existingPlayer.SquadNumber, target.Player.SquadNumber);
         Assert.InRange(target.Player.SquadNumber, 1, 99);
@@ -441,7 +441,7 @@ public class TransferMarketServiceTests
         Assert.Equal(OfferStatus.Completed, offer.Status);
         Assert.Same(target.Team, fixture.AwayTeam);
         Assert.DoesNotContain(
-            fixture.AwayTeam.Players.Concat(fixture.AwayTeam.Substitutes),
+            fixture.AwayTeam.AllPlayers,
             player => player.PlayerId == target.Player.PlayerId);
     }
 
@@ -521,8 +521,8 @@ public class TransferMarketServiceTests
         Assert.True(player.IsStarter);
         Assert.True(player.IsOnPitch);
         Assert.Equal("CB", player.AssignedPosition);
-        Assert.DoesNotContain(acMilan.Players.Concat(acMilan.Substitutes), squadPlayer => squadPlayer.PlayerId == player.PlayerId);
-        Assert.DoesNotContain(barcelona.Players.Concat(barcelona.Substitutes), squadPlayer => squadPlayer.PlayerId == player.PlayerId);
+        Assert.DoesNotContain(acMilan.AllPlayers, squadPlayer => squadPlayer.PlayerId == player.PlayerId);
+        Assert.DoesNotContain(barcelona.AllPlayers, squadPlayer => squadPlayer.PlayerId == player.PlayerId);
     }
 
     [Fact]
@@ -568,7 +568,7 @@ public class TransferMarketServiceTests
 
         new TransferMarketService().SyncSquadsFromTransferHistory(state);
 
-        var restoredPlayer = chelsea.Players.Concat(chelsea.Substitutes)
+        var restoredPlayer = chelsea.AllPlayers
             .Single(player => player.PlayerId == developedPlayer.PlayerId);
         Assert.Equal(86, restoredPlayer.OverallRating);
         Assert.Equal(79, restoredPlayer.BaseOverallRating);
@@ -728,9 +728,71 @@ public class TransferMarketServiceTests
         service.AcceptOffer(state, offer.OfferId, league, currentRound: 1);
 
         Assert.Equal(OfferStatus.Completed, offer.Status);
-        Assert.DoesNotContain(selectedTeam.Players.Concat(selectedTeam.Substitutes), squadPlayer => squadPlayer.PlayerId == player.PlayerId);
-        Assert.Contains(buyer.Substitutes, squadPlayer => squadPlayer.PlayerId == player.PlayerId);
+        Assert.DoesNotContain(selectedTeam.AllPlayers, squadPlayer => squadPlayer.PlayerId == player.PlayerId);
+        Assert.Contains(buyer.Reserves, squadPlayer => squadPlayer.PlayerId == player.PlayerId);
         Assert.Contains(state.TransferHistory, item => item.PlayerId == player.PlayerId && item.ToClubName == buyer.Name);
+    }
+
+    [Fact]
+    public void AcceptAiLoanRequest_MovesYoungPlayerToBorrowerAndKeepsParentOwnership()
+    {
+        var league = CreateLeague("premier-league");
+        var selectedTeam = league.Teams.Single(team => team.Name == "Chelsea");
+        var service = new TransferMarketService();
+        var state = service.CreateInitialState(league);
+        var player = selectedTeam.AllPlayers
+            .First(candidate => candidate.Age is <= 23 && !candidate.IsOnLoan);
+        player.Role = PlayerRole.Prospect;
+
+        var offer = service.CreateAiLoanRequestForUserPlayer(state, league, selectedTeam, player, currentRound: 1);
+        service.AcceptOffer(state, offer.OfferId, league, currentRound: 1);
+
+        var borrower = state.Leagues.Single(item => item.LeagueId == offer.ToLeagueId).Teams
+            .Single(team => team.Name == offer.ToClubName);
+        Assert.True(offer.IsLoanOffer);
+        Assert.Equal(OfferStatus.Completed, offer.Status);
+        Assert.Contains(selectedTeam.LoanedOutPlayers, candidate => candidate.PlayerId == player.PlayerId);
+        Assert.Contains(borrower.Reserves, candidate => candidate.PlayerId == player.PlayerId);
+        Assert.True(player.IsOnLoan);
+        Assert.Equal(selectedTeam.Name, player.ParentClubName);
+        Assert.Contains(state.TransferHistory, item => item.PlayerId == player.PlayerId && item.Type == "Loan");
+    }
+
+    [Fact]
+    public void GenerateAiOffers_DoesNotFailWhenNoClubCanMakeALoanRequest()
+    {
+        var selectedTeam = new Team
+        {
+            Name = "Only Club",
+            Players =
+            [
+                new Player
+                {
+                    PlayerId = "young-player",
+                    Name = "Young Player",
+                    Age = 18,
+                    OverallRating = 65,
+                    PotentialOverall = 80,
+                    Position = Position.Midfielder,
+                    PreferredPosition = "CM",
+                    Role = PlayerRole.Prospect
+                }
+            ]
+        };
+        var league = new League { LeagueId = "test-league", Name = "Test League", Season = "2026-27", Teams = [selectedTeam] };
+        var state = new TransferMarketState
+        {
+            ActiveSeason = "2026-27",
+            Leagues = [new TransferLeagueState { LeagueId = "test-league", LeagueName = "Test League", Season = "2026-27", Teams = [selectedTeam] }]
+        };
+        var service = new TransferMarketService(seed: 1);
+
+        for (var attempt = 0; attempt < 20; attempt++)
+        {
+            service.GenerateAiOffersForUserPlayers(state, league, selectedTeam, currentRound: 1);
+        }
+
+        Assert.Empty(state.Offers);
     }
 
     [Fact]
@@ -751,8 +813,8 @@ public class TransferMarketServiceTests
             .Single(team => team.Name == offer.ToClubName);
 
         Assert.Equal(OfferStatus.CompletedWhenWindowOpens, offer.Status);
-        Assert.DoesNotContain(selectedTeam.Players.Concat(selectedTeam.Substitutes), squadPlayer => squadPlayer.PlayerId == player.PlayerId);
-        Assert.Contains(buyer.Substitutes, squadPlayer => squadPlayer.PlayerId == player.PlayerId);
+        Assert.DoesNotContain(selectedTeam.AllPlayers, squadPlayer => squadPlayer.PlayerId == player.PlayerId);
+        Assert.Contains(buyer.Reserves, squadPlayer => squadPlayer.PlayerId == player.PlayerId);
         Assert.Contains(state.TransferHistory, item => item.PlayerId == player.PlayerId && item.Type == "Agreed Transfer");
     }
 
@@ -863,7 +925,7 @@ public class TransferMarketServiceTests
 
         foreach (var player in state.Leagues
             .SelectMany(item => item.Teams)
-            .SelectMany(team => team.Players.Concat(team.Substitutes)))
+            .SelectMany(team => team.AllPlayers))
         {
             player.TransferStatus = PlayerTransferStatus.Unavailable;
         }
@@ -883,7 +945,7 @@ public class TransferMarketServiceTests
             item.Fee == 0);
         Assert.DoesNotContain(futureStar, state.FreeAgents);
         Assert.Contains(state.Leagues.SelectMany(item => item.Teams)
-            .SelectMany(team => team.Players.Concat(team.Substitutes)),
+            .SelectMany(team => team.AllPlayers),
             player => player.PlayerId == futureStar.PlayerId);
     }
 
@@ -1022,8 +1084,8 @@ public class TransferMarketServiceTests
         Assert.Equal(OfferStatus.Rejected, blockedOffer.Status);
         Assert.Contains("already moved", blockedOffer.Message, StringComparison.OrdinalIgnoreCase);
         Assert.Single(state.TransferHistory, item => item.PlayerId == target.PlayerId);
-        Assert.Contains(firstBuyer.Substitutes, player => player.PlayerId == target.PlayerId);
-        Assert.DoesNotContain(secondBuyer.Players.Concat(secondBuyer.Substitutes), player => player.PlayerId == target.PlayerId);
+        Assert.Contains(firstBuyer.Reserves, player => player.PlayerId == target.PlayerId);
+        Assert.DoesNotContain(secondBuyer.AllPlayers, player => player.PlayerId == target.PlayerId);
     }
 
     [Fact]
@@ -1034,7 +1096,7 @@ public class TransferMarketServiceTests
         var service = new TransferMarketService();
         var state = service.CreateInitialState(league);
         var seller = league.Teams.First(team => team.Name != buyer.Name);
-        var target = seller.Substitutes.OrderByDescending(player => player.OverallRating).First();
+        var target = seller.Substitutes.Where(player => !player.IsOnLoan).OrderByDescending(player => player.OverallRating).First();
         service.GetFinance(state, league.LeagueId, buyer).ClubTransferBudget = 1_000_000_000m;
         service.GetFinance(state, league.LeagueId, buyer).ClubWageBudget = 5_000_000m;
         var askingPrice = service
@@ -1043,15 +1105,15 @@ public class TransferMarketServiceTests
             .AskingPrice;
 
         service.MakeUserOffer(state, league, buyer, target.PlayerId, askingPrice * 2, currentRound: 1);
-        var movedPlayer = buyer.Substitutes.Single(player => player.PlayerId == target.PlayerId);
-        buyer.Substitutes.Remove(movedPlayer);
+        var movedPlayer = buyer.Reserves.Single(player => player.PlayerId == target.PlayerId);
+        buyer.Reserves.Remove(movedPlayer);
         seller.Substitutes.Add(movedPlayer);
         movedPlayer.ClubId = string.Empty;
 
         service.SyncSquadsFromTransferHistory(state);
 
-        Assert.DoesNotContain(seller.Players.Concat(seller.Substitutes), player => player.PlayerId == target.PlayerId);
-        Assert.Contains(buyer.Substitutes, player => player.PlayerId == target.PlayerId);
+        Assert.DoesNotContain(seller.AllPlayers, player => player.PlayerId == target.PlayerId);
+        Assert.Contains(buyer.Reserves, player => player.PlayerId == target.PlayerId);
         Assert.Equal(state.TransferHistory.Single(item => item.PlayerId == target.PlayerId).ToClubId, movedPlayer.ClubId);
     }
 
@@ -1112,7 +1174,7 @@ public class TransferMarketServiceTests
         var selectedTeam = league.Teams.Single(team => team.Name == "Chelsea");
         var service = new TransferMarketService(seed: 12);
         var state = service.CreateInitialState(league);
-        foreach (var player in selectedTeam.Players.Concat(selectedTeam.Substitutes))
+        foreach (var player in selectedTeam.AllPlayers)
         {
             player.TransferStatus = PlayerTransferStatus.Listed;
             player.RejectTransferOffers = true;
@@ -1159,7 +1221,7 @@ public class TransferMarketServiceTests
             Assert.NotNull(loadedData);
             Assert.NotEmpty(loadedData!.TransferMarketState.TransferHistory);
             Assert.Contains(loadedData.TransferMarketState.Leagues, item => item.LeagueId == "premier-league");
-            Assert.Contains(loadedData.TransferMarketState.Leagues.Single(item => item.LeagueId == league.LeagueId).Teams.Single(team => team.Name == selectedTeam.Name).Substitutes,
+            Assert.Contains(loadedData.TransferMarketState.Leagues.Single(item => item.LeagueId == league.LeagueId).Teams.Single(team => team.Name == selectedTeam.Name).Reserves,
                 player => player.PlayerId == target.Player.PlayerId);
         }
         finally
@@ -1240,7 +1302,7 @@ public class TransferMarketServiceTests
     {
         var league = CreateLeague("premier-league");
         var selectedTeam = league.Teams.Single(team => team.Name == "Chelsea");
-        var colePalmer = selectedTeam.Players.Concat(selectedTeam.Substitutes).Single(player => player.Name == "Cole Palmer");
+        var colePalmer = selectedTeam.AllPlayers.Single(player => player.Name == "Cole Palmer");
         var expectedAge = colePalmer.Age;
         var expectedFlagPath = colePalmer.FlagImagePath;
         colePalmer.Age = null;
@@ -1255,7 +1317,7 @@ public class TransferMarketServiceTests
         service.BindActiveLeague(state, league);
 
         Assert.Equal(expectedAge, colePalmer.Age);
-        Assert.Equal("GB", colePalmer.NationalityCode);
+        Assert.Equal("GB-ENG", colePalmer.NationalityCode);
         Assert.Equal("England", colePalmer.NationalityName);
         Assert.Equal(expectedFlagPath, colePalmer.FlagImagePath);
     }

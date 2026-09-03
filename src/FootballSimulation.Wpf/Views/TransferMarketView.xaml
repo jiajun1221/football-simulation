@@ -566,6 +566,7 @@
                     <views:TransferPlayerDetailPanel x:Name="SquadDetailPanel"
                                                      Grid.Column="1"
                                                      ContractRenewalRequested="DetailPanel_ContractRenewalRequested"
+                                                     LoanRecallRequested="DetailPanel_LoanRecallRequested"
                                                      ShortlistToggled="DetailPanel_ShortlistToggled"
                                                      TransferListToggled="DetailPanel_TransferListToggled" />
                 </Grid>
@@ -722,6 +723,7 @@
                                                      Grid.Row="1"
                                                      Grid.Column="1"
                                                      MakeOfferRequested="DetailPanel_MakeOfferRequested"
+                                                     LoanRequested="DetailPanel_LoanRequested"
                                                      ShortlistToggled="DetailPanel_ShortlistToggled"
                                                      TransferListToggled="DetailPanel_TransferListToggled" />
                 </Grid>
@@ -826,6 +828,7 @@
                     <views:TransferPlayerDetailPanel x:Name="RecommendedDetailPanel"
                                                      Grid.Column="1"
                                                      MakeOfferRequested="DetailPanel_MakeOfferRequested"
+                                                     LoanRequested="DetailPanel_LoanRequested"
                                                      ShortlistToggled="DetailPanel_ShortlistToggled"
                                                      TransferListToggled="DetailPanel_TransferListToggled" />
                 </Grid>

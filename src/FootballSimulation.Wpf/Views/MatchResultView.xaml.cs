@@ -374,7 +374,7 @@ public partial class MatchResultView : UserControl
         var isMotm = manOfTheMatch is not null
             && manOfTheMatch.PlayerName == performance.PlayerName
             && manOfTheMatch.TeamName == performance.TeamName;
-        var player = team.Players.Concat(team.Substitutes)
+        var player = team.AllPlayers
             .FirstOrDefault(candidate => string.Equals(candidate.Name, performance.PlayerName, StringComparison.OrdinalIgnoreCase));
         var formBadge = PlayerFormBadgeHelper.Create(player?.FormStatus ?? PlayerFormStatus.Average);
         var nationality = player is null

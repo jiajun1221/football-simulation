@@ -54,7 +54,7 @@ app.Run();
 
 static TeamSummaryDto ToTeamSummary(Team team)
 {
-    var squad = team.Players.Concat(team.Substitutes).ToList();
+    var squad = team.Players.Concat(team.Substitutes).Concat(team.Reserves).ToList();
     var averageRating = squad.Count == 0
         ? 0
         : Math.Round(squad.Average(player => player.OverallRating), 1);
@@ -66,6 +66,7 @@ static TeamSummaryDto ToTeamSummary(Team team)
         team.Formation,
         team.Players.Count,
         team.Substitutes.Count,
+        team.Reserves.Count,
         averageRating);
 }
 
@@ -74,7 +75,9 @@ static TeamDetailDto ToTeamDetail(Team team)
     return new TeamDetailDto(
         ToTeamSummary(team),
         team.Players.Select(ToPlayer).ToList(),
-        team.Substitutes.Select(ToPlayer).ToList());
+        team.Substitutes.Select(ToPlayer).ToList(),
+        team.Reserves.Select(ToPlayer).ToList(),
+        team.LoanedOutPlayers.Select(ToPlayer).ToList());
 }
 
 static PlayerDto ToPlayer(Player player)
@@ -93,7 +96,12 @@ static PlayerDto ToPlayer(Player player)
         player.Passing,
         player.Dribbling,
         player.Defending,
-        player.Physical);
+        player.Physical,
+        player.IsOnLoan,
+        player.ParentClubName,
+        player.LoanClubName,
+        player.LoanEndSeason,
+        player.LoanWagePercentage);
 }
 
 record TeamSummaryDto(
@@ -103,12 +111,15 @@ record TeamSummaryDto(
     string Formation,
     int StarterCount,
     int SubstituteCount,
+    int ReserveCount,
     double AverageRating);
 
 record TeamDetailDto(
     TeamSummaryDto Team,
     IReadOnlyList<PlayerDto> Starters,
-    IReadOnlyList<PlayerDto> Substitutes);
+    IReadOnlyList<PlayerDto> Substitutes,
+    IReadOnlyList<PlayerDto> Reserves,
+    IReadOnlyList<PlayerDto> LoanedOut);
 
 record PlayerDto(
     string PlayerId,
@@ -124,4 +135,9 @@ record PlayerDto(
     int Passing,
     int Dribbling,
     int Defending,
-    int Physical);
+    int Physical,
+    bool IsOnLoan,
+    string ParentClubName,
+    string LoanClubName,
+    string LoanEndSeason,
+    int LoanWagePercentage);

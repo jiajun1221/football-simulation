@@ -95,6 +95,23 @@ public class PositionCompatibilityServiceTests
         Assert.Equal(expectedScore, PositionCompatibilityService.GetCompatibilityScore(player, targetSlot));
     }
 
+    [Theory]
+    [InlineData("LB", "LWB")]
+    [InlineData("RB", "RWB")]
+    [InlineData("LW", "LM")]
+    [InlineData("RW", "RM")]
+    [InlineData("CAM", "LM")]
+    [InlineData("CAM", "RM")]
+    public void EnsurePositionMetadata_AddsCommonNaturalSecondaryPosition(string preferredPosition, string expectedSecondary)
+    {
+        var player = CreatePlayer("Versatile Player", PositionSuitabilityService.GetPositionGroup(preferredPosition), preferredPosition);
+
+        PositionSuitabilityService.EnsurePositionMetadata(player);
+
+        Assert.Contains(expectedSecondary, player.SecondaryPositions);
+        Assert.True(PositionCompatibilityService.CanPlayPosition(player, expectedSecondary));
+    }
+
     [Fact]
     public void TrySetPreferredPosition_AllowsNaturalSecondaryPositionAsNewMainPosition()
     {

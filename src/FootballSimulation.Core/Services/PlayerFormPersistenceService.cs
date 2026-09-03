@@ -114,13 +114,13 @@ public class PlayerFormPersistenceService
                 continue;
             }
 
-            var playersByName = team.Players
-                .Concat(team.Substitutes)
+            var playersByName = team.AllPlayers
                 .GroupBy(player => player.Name, StringComparer.OrdinalIgnoreCase)
                 .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
 
             UpdatePlayerRecords(teamRecord.StartingXI, playersByName);
             UpdatePlayerRecords(teamRecord.Substitutes, playersByName);
+            UpdatePlayerRecords(teamRecord.Reserves, playersByName);
         }
 
         File.WriteAllText(squadFilePath, JsonSerializer.Serialize(squadsFile, JsonOptions));

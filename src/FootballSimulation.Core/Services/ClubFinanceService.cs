@@ -40,7 +40,7 @@ public class ClubFinanceService
 
     public ClubFinance CreateFinance(string leagueId, Team team)
     {
-        var averageRating = team.Players.Concat(team.Substitutes).DefaultIfEmpty().Average(player => player?.OverallRating ?? 72);
+        var averageRating = team.AllPlayers.DefaultIfEmpty().Average(player => player?.OverallRating ?? 72);
         var budget = GetFirstSeasonBudget(team.Name, averageRating);
 
         return new ClubFinance
@@ -205,8 +205,7 @@ public class ClubFinanceService
 
     public static decimal CalculateWageSpent(Team team)
     {
-        return team.Players
-            .Concat(team.Substitutes)
+        return team.AllPlayers
             .Sum(player => player.WeeklyWage ?? 0);
     }
 
@@ -221,7 +220,7 @@ public class ClubFinanceService
         int finalPosition,
         int teamCount)
     {
-        var averageRating = team.Players.Concat(team.Substitutes).DefaultIfEmpty().Average(player => player?.OverallRating ?? 72);
+        var averageRating = team.AllPlayers.DefaultIfEmpty().Average(player => player?.OverallRating ?? 72);
         var carryover = Math.Round(finance.AvailableTransferBudget * 0.5m, 0);
         var baseBudget = GetBaseBudget(team.Name, averageRating);
         if (IsRelegated(finalPosition, teamCount))

@@ -98,6 +98,13 @@ public class PremierLeagueDataService
             .Select(player => _playerStatMappingService.MapToPlayer(player, isStarter: false))
             .ToList();
 
+        var reserves = teamRecord.Reserves
+            .Select(player => _playerStatMappingService.MapToPlayer(player, isStarter: false))
+            .ToList();
+        var loanedOut = teamRecord.LoanedOut
+            .Select(player => _playerStatMappingService.MapToPlayer(player, isStarter: false))
+            .ToList();
+
         ValidateSquad(teamRecord.Name, starters, substitutes);
         var venue = TeamVenueService.GetVenue(teamRecord.Name, teamRecord.Venue, teamRecord.StadiumName);
 
@@ -108,7 +115,9 @@ public class PremierLeagueDataService
             StadiumName = venue.StadiumName,
             Formation = teamRecord.Formation,
             Players = starters,
-            Substitutes = substitutes
+            Substitutes = substitutes,
+            Reserves = reserves,
+            LoanedOutPlayers = loanedOut
         };
     }
 

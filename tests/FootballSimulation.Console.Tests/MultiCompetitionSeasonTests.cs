@@ -35,8 +35,7 @@ public class MultiCompetitionSeasonTests
             .DistinctBy(team => team.Name, StringComparer.OrdinalIgnoreCase)
             .ToList();
         var owners = uclTeams
-            .Where(team => team.Players
-                .Concat(team.Substitutes)
+            .Where(team => team.AllPlayers
                 .Any(player => player.Name.StartsWith("Viktor Gy", StringComparison.OrdinalIgnoreCase)))
             .Select(team => team.Name)
             .ToList();
@@ -180,7 +179,7 @@ public class MultiCompetitionSeasonTests
     public void ChampionsLeague_LeaguePhaseUsesSwissStyleEuropeanOpponents()
     {
         var league = CreateLeague(teamCount: 20);
-        var selectedTeam = league.Teams.First(team => team.Name == "Chelsea");
+        var selectedTeam = league.Teams.First(team => team.Name == "Arsenal");
         var uclFixtures = league.Fixtures
             .Where(fixture => fixture.Competition == CompetitionType.ChampionsLeague && !fixture.IsKnockout)
             .ToList();
@@ -276,11 +275,32 @@ public class MultiCompetitionSeasonTests
         {
             Assert.Equal(11, team.Players.Count);
             Assert.InRange(team.Substitutes.Count, 7, 12);
-            Assert.DoesNotContain(team.Players.Concat(team.Substitutes), player =>
+            Assert.True(team.AllPlayers.Count() >= 18);
+            Assert.DoesNotContain(team.AllPlayers, player =>
                 player.Name.Contains(" Player ", StringComparison.OrdinalIgnoreCase));
-            Assert.DoesNotContain(team.Players.Concat(team.Substitutes), player =>
+            Assert.DoesNotContain(team.AllPlayers, player =>
                 player.PlayerId.StartsWith("placeholder-", StringComparison.OrdinalIgnoreCase));
         });
+    }
+
+    [Fact]
+    public void ChampionsLeague_InitialSeasonUsesExact2026_27Entrants()
+    {
+        var league = CreateLeague(teamCount: 20);
+        var expected = new[]
+        {
+            "Paris Saint-Germain", "Real Madrid", "Manchester City", "Bayern Munich", "Liverpool", "Inter Milan", "Arsenal", "Atletico Madrid", "Barcelona",
+            "Borussia Dortmund", "Roma", "Sporting CP", "Aston Villa", "Porto", "Manchester United", "Club Brugge", "Real Betis", "PSV",
+            "Feyenoord", "Lille", "Bodo/Glimt", "Napoli", "RB Leipzig", "Villarreal", "Shakhtar Donetsk", "Galatasaray", "Fenerbahce",
+            "Slavia Prague", "Stuttgart", "LASK", "Como", "Lens", "Sabah", "AEK Athens", "Viking", "Slovan Bratislava"
+        };
+        var actual = league.CompetitionStates
+            .Single(state => state.Competition == CompetitionType.ChampionsLeague)
+            .Standings.Select(row => row.TeamName)
+            .Order()
+            .ToList();
+
+        Assert.Equal(expected.Order(), actual);
     }
 
     [Fact]

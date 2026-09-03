@@ -20,7 +20,7 @@ public class FreeAgentRegenService
             .Distinct()
             .ToList();
         var allExistingPlayers = teams
-            .SelectMany(team => team.Players.Concat(team.Substitutes))
+            .SelectMany(team => team.AllPlayers)
             .Concat(state.FreeAgents)
             .ToList();
         var existingIds = allExistingPlayers
@@ -52,7 +52,7 @@ public class FreeAgentRegenService
             .Where(id => !string.IsNullOrWhiteSpace(id))
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
         var processedTeamPlayerReferences = new HashSet<Player>();
-        foreach (var player in teams.SelectMany(team => team.Players.Concat(team.Substitutes)).ToList())
+        foreach (var player in teams.SelectMany(team => team.AllPlayers).ToList())
         {
             if (!processedTeamPlayerReferences.Add(player) ||
                 (!string.IsNullOrWhiteSpace(player.PlayerId) && !processedTeamPlayerIds.Add(player.PlayerId)) ||
@@ -272,6 +272,7 @@ public class FreeAgentRegenService
                 candidate.PlayerId.Equals(retiredPlayer.PlayerId, StringComparison.OrdinalIgnoreCase));
         var removedStarter = team.Players.RemoveAll(player => matchesPlayer(player)) > 0;
         team.Substitutes.RemoveAll(player => matchesPlayer(player));
+        team.Reserves.RemoveAll(player => matchesPlayer(player));
         if (!removedStarter)
         {
             return;
@@ -289,7 +290,7 @@ public class FreeAgentRegenService
         }
 
         if (retiredPlayer.IsCaptain &&
-            !team.Players.Concat(team.Substitutes).Any(player => player.IsCaptain))
+            !team.AllPlayers.Any(player => player.IsCaptain))
         {
             var newCaptain = team.Players
                 .OrderByDescending(player => player.Role == PlayerRole.KeyPlayer)

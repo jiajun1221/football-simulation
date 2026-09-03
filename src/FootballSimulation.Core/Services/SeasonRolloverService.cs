@@ -59,6 +59,7 @@ public class SeasonRolloverService
         }
 
         transferMarketState ??= new TransferMarketState();
+        new LoanService().ReturnExpiredLoans(transferMarketState, league.Season);
         var sortedTable = _leagueTableService.SortTable(league.Table);
         var archive = _awardsService.CreateArchive(league, selectedTeam);
         var championsLeagueQualifiedTeamNames = GetChampionsLeagueQualifiedTeamNames(sortedTable, archive);
@@ -288,7 +289,7 @@ public class SeasonRolloverService
     {
         var allPlayers = activeLeagueTeams
             .Concat(transferMarketState.Leagues.SelectMany(leagueState => leagueState.Teams))
-            .SelectMany(team => team.Players.Concat(team.Substitutes))
+            .SelectMany(team => team.AllPlayers)
             .Concat(transferMarketState.FreeAgents)
             .Distinct();
 
@@ -333,8 +334,7 @@ public class SeasonRolloverService
 
         foreach (var team in teams)
         {
-            var roster = team.Players
-                .Concat(team.Substitutes)
+            var roster = team.AllPlayers
                 .Distinct()
                 .ToList();
             if (roster.Count == 0)
@@ -417,14 +417,14 @@ public class SeasonRolloverService
         var agedPlayerReferences = new HashSet<Player>();
         var agedPlayerIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var player in league.Teams.SelectMany(team => team.Players.Concat(team.Substitutes)))
+        foreach (var player in league.Teams.SelectMany(team => team.AllPlayers))
         {
             AgePlayerForSeasonRollover(player, agedPlayerReferences, agedPlayerIds);
         }
 
         foreach (var player in transferMarketState.Leagues
             .SelectMany(leagueState => leagueState.Teams)
-            .SelectMany(team => team.Players.Concat(team.Substitutes))
+            .SelectMany(team => team.AllPlayers)
             .Concat(transferMarketState.FreeAgents))
         {
             AgePlayerForSeasonRollover(player, agedPlayerReferences, agedPlayerIds);
@@ -511,7 +511,7 @@ public class SeasonRolloverService
                 !ReferenceEquals(team, selectedTeam) &&
                 !team.Name.Equals(selectedTeam.Name, StringComparison.OrdinalIgnoreCase)))
             {
-                var roster = team.Players.Concat(team.Substitutes).ToList();
+                var roster = team.AllPlayers.ToList();
                 var playersNeededToFieldEleven = Math.Max(0, 11 - roster.Count);
                 if (playersNeededToFieldEleven == 0 ||
                     transferMarketState.FreeAgents.Count < playersNeededToFieldEleven)
@@ -538,7 +538,7 @@ public class SeasonRolloverService
                         PlayerContractService.EstimateWeeklyWage(freeAgent, leagueState.LeagueId));
                     freeAgent.IsStarter = false;
                     freeAgent.IsOnPitch = false;
-                    team.Substitutes.Add(freeAgent);
+                    team.Reserves.Add(freeAgent);
                     roster.Add(freeAgent);
                 }
 

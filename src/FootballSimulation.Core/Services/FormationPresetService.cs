@@ -88,7 +88,7 @@ public class FormationPresetService
             return FormationPresetApplyResult.Failed("This preset does not contain a starting XI.");
         }
 
-        var allPlayers = team.Players.Concat(team.Substitutes)
+        var allPlayers = team.AllPlayers
             .Distinct()
             .ToList();
         var playersById = allPlayers

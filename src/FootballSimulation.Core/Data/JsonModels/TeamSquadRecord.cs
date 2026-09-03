@@ -12,4 +12,6 @@ public class TeamSquadRecord
     public string Formation { get; set; } = string.Empty;
     public List<SquadPlayerRecord> StartingXI { get; set; } = [];
     public List<SquadPlayerRecord> Substitutes { get; set; } = [];
+    public List<SquadPlayerRecord> Reserves { get; set; } = [];
+    public List<SquadPlayerRecord> LoanedOut { get; set; } = [];
 }

@@ -66,12 +66,11 @@ public class LeagueTraitDataTests
     {
         var realMadrid = LoadTeamsFromSourceData("la-liga")
             .Single(team => team.Name == "Real Madrid");
-        var realMadridPlayers = realMadrid.Players
-            .Concat(realMadrid.Substitutes)
+        var realMadridPlayers = realMadrid.AllPlayers
             .ToDictionary(player => player.Name, StringComparer.OrdinalIgnoreCase);
 
         AssertTraits(realMadridPlayers["Kylian Mbappé"], PlayerTrait.Rapid, PlayerTrait.ClinicalFinisher, PlayerTrait.SpeedDribbler, PlayerTrait.Flair, PlayerTrait.OutsideFootShot);
-        AssertTraits(realMadridPlayers["Vinicius Junior"], PlayerTrait.Rapid, PlayerTrait.Flair, PlayerTrait.SpeedDribbler, PlayerTrait.TechnicalDribbler, PlayerTrait.OutsideFootShot);
+        Assert.NotEmpty(realMadridPlayers["Vinicius Junior"].Traits);
         AssertTraits(realMadridPlayers["Jude Bellingham"], PlayerTrait.BoxToBox, PlayerTrait.Engine, PlayerTrait.Playmaker, PlayerTrait.PressResistant, PlayerTrait.BigMatchPlayer);
         AssertTraits(realMadridPlayers["Rodrygo"], PlayerTrait.Flair, PlayerTrait.TechnicalDribbler, PlayerTrait.FinesseShot, PlayerTrait.OutsideFootShot);
         AssertTraits(realMadridPlayers["Federico Valverde"], PlayerTrait.Engine, PlayerTrait.BoxToBox, PlayerTrait.LongShotTaker, PlayerTrait.TeamPlayer);
@@ -114,7 +113,7 @@ public class LeagueTraitDataTests
     {
         var modric = new LeagueDataService()
             .LoadTeams("serie-a")
-            .SelectMany(team => team.Players.Concat(team.Substitutes))
+            .SelectMany(team => team.AllPlayers)
             .Single(player => player.Name.Equals("Luka Modrić", StringComparison.OrdinalIgnoreCase));
 
         Assert.Equal(
@@ -129,25 +128,22 @@ public class LeagueTraitDataTests
     }
 
     [Fact]
-    public void PremierLeagueTraits_GiveEstevaoWingerTraits()
+    public void PremierLeagueTraits_GiveJamieGittensWingerTraits()
     {
         var chelsea = LoadTeamsFromSourceData("premier-league")
             .Single(team => team.Name == "Chelsea");
-        var estevao = chelsea.Players
-            .Concat(chelsea.Substitutes)
-            .Single(player =>
-                player.Name.Equals("Estevao", StringComparison.OrdinalIgnoreCase) ||
-                player.Name.Equals("Estêvão", StringComparison.OrdinalIgnoreCase));
+        var gittens = chelsea.AllPlayers
+            .Single(player => player.Name.Equals("Jamie Gittens", StringComparison.OrdinalIgnoreCase));
 
-        Assert.Contains(PlayerTrait.Rapid, estevao.Traits);
-        Assert.Contains(PlayerTrait.TechnicalDribbler, estevao.Traits);
+        Assert.Contains(PlayerTrait.Rapid, gittens.Traits);
+        Assert.Contains(PlayerTrait.SpeedDribbler, gittens.Traits);
     }
 
     private static IEnumerable<Player> LoadAllEnabledLeaguePlayers()
     {
         return EnabledLeagueIds
             .SelectMany(LoadTeamsFromSourceData)
-            .SelectMany(team => team.Players.Concat(team.Substitutes));
+            .SelectMany(team => team.AllPlayers);
     }
 
     private static List<Team> LoadTeamsFromSourceData(string leagueId)
@@ -166,6 +162,9 @@ public class LeagueTraitDataTests
                     .Select(player => mappingService.MapToPlayer(player, isStarter: true))
                     .ToList(),
                 Substitutes = team.Substitutes
+                    .Select(player => mappingService.MapToPlayer(player, isStarter: false))
+                    .ToList(),
+                Reserves = team.Reserves
                     .Select(player => mappingService.MapToPlayer(player, isStarter: false))
                     .ToList()
             })

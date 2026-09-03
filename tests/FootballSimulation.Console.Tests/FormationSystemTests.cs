@@ -12,6 +12,7 @@ public class FormationSystemTests
 
         Assert.Contains(formations, formation => formation.Category == FormationCategory.Attacking && formation.Name == "4-2-4");
         Assert.Contains(formations, formation => formation.Category == FormationCategory.Balanced && formation.Name == "4-3-3 Holding");
+        Assert.Contains(formations, formation => formation.Name == "4-4-1-1" && FormationSlotService.GetSlots(formation.Name).Contains("CF"));
         Assert.Contains(formations, formation => formation.Category == FormationCategory.Defensive && formation.Name == "5-4-1");
         Assert.All(formations, formation => Assert.Equal(11, FormationSlotService.GetSlots(formation.Name).Count));
         Assert.All(formations, formation =>
@@ -158,6 +159,17 @@ public class FormationSystemTests
         Assert.Equal(originalNames, team.Players.Select(player => player.Name).Order().ToList());
         Assert.Contains(team.Players, player => player.AssignedPosition == "LM");
         Assert.Contains(team.Players, player => player.AssignedPosition == "RM");
+    }
+
+    [Fact]
+    public void ThreeFourTwoOne_UsesWingBackSlots()
+    {
+        var slots = FormationSlotService.GetSlots("3-4-2-1");
+
+        Assert.Contains("LWB", slots);
+        Assert.Contains("RWB", slots);
+        Assert.DoesNotContain("LM", slots);
+        Assert.DoesNotContain("RM", slots);
     }
 
     [Fact]

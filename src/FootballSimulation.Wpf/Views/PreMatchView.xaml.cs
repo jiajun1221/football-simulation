@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Media.Animation;
 using System.Windows.Data;
 using FootballSimulation.Models;
 using FootballSimulation.Services;
@@ -33,6 +34,7 @@ public partial class PreMatchView : UserControl
     private Point _dragStartPoint;
     private bool _isDraggingPlayer;
     private bool _isLoadingSetup;
+    private bool _isTacticsPanelOpen;
 
     private sealed record PitchSlotAssignment(Player Player, PitchPosition Position);
 
@@ -54,9 +56,67 @@ public partial class PreMatchView : UserControl
         RenderPitch();
     }
 
+    private void ToggleTacticsPanelButton_Click(object sender, RoutedEventArgs e)
+    {
+        const double drawerWidth = 320;
+        var duration = TimeSpan.FromMilliseconds(180);
+
+        if (!_isTacticsPanelOpen)
+        {
+            _isTacticsPanelOpen = true;
+            TacticsColumn.Width = new GridLength(drawerWidth);
+            MatchdayAreaBorder.Margin = new Thickness(0, 0, 18, 0);
+            TacticsDrawer.Visibility = Visibility.Visible;
+            OpenTacticsButton.Visibility = Visibility.Collapsed;
+            TacticsDrawerTransform.BeginAnimation(
+                TranslateTransform.XProperty,
+                new DoubleAnimation(drawerWidth, 0, duration) { EasingFunction = new QuadraticEase() });
+            return;
+        }
+
+        _isTacticsPanelOpen = false;
+        var closeAnimation = new DoubleAnimation(0, drawerWidth, duration)
+        {
+            EasingFunction = new QuadraticEase()
+        };
+        closeAnimation.Completed += (_, _) =>
+        {
+            TacticsDrawer.Visibility = Visibility.Collapsed;
+            TacticsColumn.Width = new GridLength(0);
+            MatchdayAreaBorder.Margin = new Thickness(0);
+            OpenTacticsButton.Visibility = Visibility.Visible;
+        };
+        TacticsDrawerTransform.BeginAnimation(TranslateTransform.XProperty, closeAnimation);
+    }
+
     private void PreMatchView_Unloaded(object sender, RoutedEventArgs e)
     {
         ThemeManager.ThemeChanged -= ThemeManager_ThemeChanged;
+    }
+
+    private void ReserveListBox_Loaded(object sender, RoutedEventArgs e)
+    {
+        FindVisualChild<ScrollViewer>(ReserveListBox)?.ScrollToTop();
+    }
+
+    private static T? FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
+    {
+        for (var index = 0; index < VisualTreeHelper.GetChildrenCount(parent); index++)
+        {
+            var child = VisualTreeHelper.GetChild(parent, index);
+            if (child is T match)
+            {
+                return match;
+            }
+
+            var descendant = FindVisualChild<T>(child);
+            if (descendant is not null)
+            {
+                return descendant;
+            }
+        }
+
+        return null;
     }
 
     private void LoadPreMatch()
@@ -395,7 +455,7 @@ public partial class PreMatchView : UserControl
         }
 
         team.Players = validatedPitch;
-        team.Substitutes = bench;
+        AssignMatchdayBenchAndReserves(team, bench);
         _pitchSlots = validatedPitch;
     }
 
@@ -434,8 +494,12 @@ public partial class PreMatchView : UserControl
         var pitchKeys = pitchPlayers
             .Select(CreateRosterKey)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var remainingPlayers = team.Players
-            .Concat(team.Substitutes)
+        var previousStarters = team.Players.ToList();
+        var previousSubstitutes = team.Substitutes.ToList();
+        var previousReserves = team.Reserves.ToList();
+        var remainingPlayers = previousSubstitutes
+            .Concat(previousStarters)
+            .Concat(previousReserves)
             .Where(player => !pitchKeys.Contains(CreateRosterKey(player)))
             .DistinctBy(CreateRosterKey)
             .ToList();
@@ -454,13 +518,35 @@ public partial class PreMatchView : UserControl
 
         _pitchSlots = pitchPlayers;
         team.Players = pitchPlayers;
-        team.Substitutes = remainingPlayers;
+        AssignMatchdayBenchAndReserves(team, remainingPlayers);
+    }
+
+    private static void AssignMatchdayBenchAndReserves(Team team, IEnumerable<Player> players)
+    {
+        var orderedPlayers = players
+            .DistinctBy(CreateRosterKey)
+            .ToList();
+        var selectablePlayers = orderedPlayers
+            .Where(player => !player.IsInjured)
+            .ToList();
+        var injuredPlayers = orderedPlayers
+            .Where(player => player.IsInjured)
+            .ToList();
+
+        team.Substitutes = selectablePlayers
+            .Take(TeamRosterService.MatchdaySubstituteCount)
+            .ToList();
+        team.Reserves = selectablePlayers
+            .Skip(TeamRosterService.MatchdaySubstituteCount)
+            .Concat(injuredPlayers)
+            .ToList();
     }
 
     private static List<Player> GetDistinctRoster(Team team)
     {
         return team.Players
             .Concat(team.Substitutes)
+            .Concat(team.Reserves)
             .DistinctBy(CreateRosterKey)
             .ToList();
     }
@@ -763,10 +849,26 @@ public partial class PreMatchView : UserControl
         var substitutes = _state.SelectedTeam.Substitutes
             .Where(player => !pitchKeys.Contains(CreateRosterKey(player)))
             .ToList();
+        var reserves = _state.SelectedTeam.Reserves
+            .Where(player => !pitchKeys.Contains(CreateRosterKey(player)))
+            .ToList();
 
         if (!string.IsNullOrWhiteSpace(normalizedFilter))
         {
-            substitutes = substitutes
+            substitutes = OrderForFilter(substitutes, normalizedFilter);
+            reserves = OrderForFilter(reserves, normalizedFilter);
+        }
+
+        SubstituteListBox.ItemsSource = substitutes.Select(CreateBenchPlayerCard).ToList();
+        SubstituteListBox.IsEnabled = substitutes.Count > 0;
+        ReserveListBox.ItemsSource = reserves.Select(CreateBenchPlayerCard).ToList();
+        ReserveListBox.IsEnabled = reserves.Count > 0;
+        UpdateSubstituteFilterLabel(normalizedFilter);
+    }
+
+    private static List<Player> OrderForFilter(IEnumerable<Player> players, string normalizedFilter)
+    {
+        return players
                 .OrderByDescending(player => PositionCompatibilityService.IsReasonableFit(player, normalizedFilter))
                 .ThenByDescending(player => PositionCompatibilityService.GetCompatibilityScore(player, normalizedFilter))
                 .ThenBy(player => IsAvailableForSelection(player) ? 0 : 1)
@@ -774,16 +876,6 @@ public partial class PreMatchView : UserControl
                 .ThenBy(player => player.SquadNumber <= 0 ? int.MaxValue : player.SquadNumber)
                 .ThenBy(player => player.Name)
                 .ToList();
-        }
-
-        var benchCards = substitutes
-            .Select(CreateBenchPlayerCard)
-            .ToList();
-
-        SubstituteListBox.ItemsSource = null;
-        SubstituteListBox.ItemsSource = benchCards;
-        SubstituteListBox.IsEnabled = benchCards.Count > 0;
-        UpdateSubstituteFilterLabel(normalizedFilter);
     }
 
     private void UpdateSubstituteFilterLabel(string normalizedFilter)
@@ -1168,11 +1260,15 @@ public partial class PreMatchView : UserControl
         }
 
         e.Handled = true;
+        var team = _state.SelectedTeam;
+        var isReserve = team?.Reserves.Contains(benchCard.Player) == true;
         StartPlayerDrag(
             (DependencyObject)sender,
             benchCard.Player,
-            DragSource.Substitute,
-            _state.SelectedTeam?.Substitutes.IndexOf(benchCard.Player) ?? -1);
+            isReserve ? DragSource.Reserve : DragSource.Substitute,
+            isReserve
+                ? team?.Reserves.IndexOf(benchCard.Player) ?? -1
+                : team?.Substitutes.IndexOf(benchCard.Player) ?? -1);
     }
 
     private bool HasMovedEnoughToDrag(Point currentPosition)
@@ -1290,6 +1386,11 @@ public partial class PreMatchView : UserControl
 
     private void SubstituteCard_Drop(object sender, DragEventArgs e)
     {
+        if (!CanDropOnSubstituteCard(sender, e))
+        {
+            return;
+        }
+
         if (sender is not FrameworkElement { DataContext: BenchPlayerCard benchCard } element)
         {
             return;
@@ -1329,9 +1430,12 @@ public partial class PreMatchView : UserControl
 
     private void SubstituteListBox_DragOver(object sender, DragEventArgs e)
     {
-        var canDrop = GetDraggedPlayer(e)?.Source == DragSource.StartingXi;
+        // Reserve-to-bench swaps are completed by the card beneath this list.
+        // The tunnelling PreviewDragOver event must allow the drag to reach it.
+        var draggedPlayer = GetDraggedPlayer(e);
+        var canDrop = draggedPlayer is not null;
         e.Effects = canDrop ? DragDropEffects.Move : DragDropEffects.None;
-        e.Handled = true;
+        e.Handled = draggedPlayer?.Source == DragSource.StartingXi;
     }
 
     private void SubstituteListBox_DragLeave(object sender, DragEventArgs e)
@@ -1354,10 +1458,15 @@ public partial class PreMatchView : UserControl
         e.Handled = true;
     }
 
-    private static bool CanDropOnSubstituteCard(object sender, DragEventArgs e)
+    private bool CanDropOnSubstituteCard(object sender, DragEventArgs e)
     {
-        return GetDraggedPlayer(e) is not null &&
-            sender is FrameworkElement { DataContext: BenchPlayerCard { CanInteract: true } };
+        if (GetDraggedPlayer(e) is not { } dragged ||
+            sender is not FrameworkElement { DataContext: BenchPlayerCard { CanInteract: true } target })
+        {
+            return false;
+        }
+
+        return true;
     }
 
     private static DraggedPlayerInfo? GetDraggedPlayer(DragEventArgs e)
@@ -1446,15 +1555,28 @@ public partial class PreMatchView : UserControl
             return;
         }
 
-        var draggedIndex = _state.SelectedTeam.Substitutes.IndexOf(draggedPlayer);
-        var targetIndex = _state.SelectedTeam.Substitutes.IndexOf(targetPlayer);
-        if (draggedIndex < 0 || targetIndex < 0)
+        var bench = _state.SelectedTeam.Substitutes;
+        var reserves = _state.SelectedTeam.Reserves;
+        var draggedIndex = bench.IndexOf(draggedPlayer);
+        var targetIndex = bench.IndexOf(targetPlayer);
+        if (draggedIndex >= 0 && targetIndex >= 0)
+        {
+            (bench[draggedIndex], bench[targetIndex]) = (bench[targetIndex], bench[draggedIndex]);
+        }
+        else if (draggedIndex >= 0 && reserves.Remove(targetPlayer))
+        {
+            bench[draggedIndex] = targetPlayer;
+            reserves.Add(draggedPlayer);
+        }
+        else if (targetIndex >= 0 && reserves.Remove(draggedPlayer))
+        {
+            bench[targetIndex] = draggedPlayer;
+            reserves.Add(targetPlayer);
+        }
+        else
         {
             return;
         }
-
-        (_state.SelectedTeam.Substitutes[draggedIndex], _state.SelectedTeam.Substitutes[targetIndex]) =
-            (_state.SelectedTeam.Substitutes[targetIndex], _state.SelectedTeam.Substitutes[draggedIndex]);
 
         Debug.WriteLine(
             $"[PreMatchDrag] Swapped substitutes: {draggedPlayer.Name} -> index {targetIndex}; {targetPlayer.Name} -> index {draggedIndex}");
@@ -1869,7 +1991,8 @@ public partial class PreMatchView : UserControl
     private enum DragSource
     {
         StartingXi,
-        Substitute
+        Substitute,
+        Reserve
     }
 
     private sealed record DraggedPlayerInfo(Player Player, DragSource Source, int SourceIndex);

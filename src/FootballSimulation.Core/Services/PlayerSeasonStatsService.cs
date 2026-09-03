@@ -11,7 +11,7 @@ public class PlayerSeasonStatsService
         ArgumentNullException.ThrowIfNull(league);
 
         var playerLookup = league.Teams
-            .SelectMany(team => team.Players.Concat(team.Substitutes).Select(player =>
+            .SelectMany(team => team.AllPlayers.Select(player =>
                 new PlayerLookupEntry(team, player, CreatePlayerId(team, player))))
             .GroupBy(item => CreateLookupKey(item.Team.Name, item.Player.Name), StringComparer.OrdinalIgnoreCase)
             .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);

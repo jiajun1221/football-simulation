@@ -16,6 +16,7 @@ public partial class TransferMarketView : UserControl
     private readonly GameFlowState _state;
     private readonly Action<UserControl> _navigate;
     private readonly TransferMarketService _transferMarketService = new();
+    private readonly LoanService _loanService = new();
     private readonly SaveGameService _saveGameService = new();
     private TransferPlayerListing? _selectedListing;
     private TransferOffer? _selectedOffer;
@@ -175,48 +176,92 @@ public partial class TransferMarketView : UserControl
             return;
         }
 
-        var panel = sender as TransferPlayerDetailPanel ?? _activeDetailPanel;
-        var offerFeeText = panel?.OfferFeeText ?? string.Empty;
-        if (!TryParseMillionAmount(offerFeeText, out var fee))
-        {
-            ShowSimpleTransferModal(
-                "Invalid Offer",
-                "Transfer Market",
-                _selectedListing.Player.Name,
-                CreatePlayerMeta(_selectedListing),
-                "Enter a valid transfer fee in millions.",
-                "The board needs a valid amount before submitting the bid.",
-                "Continue");
-            return;
-        }
-
-        if (panel is null || !TryParseThousandAmount(panel.SigningWageText, out var weeklyWage))
-        {
-            ShowSimpleTransferModal(
-                "Invalid Contract Offer",
-                "Player Contract",
-                _selectedListing.Player.Name,
-                CreatePlayerMeta(_selectedListing),
-                "Enter a valid weekly wage in thousands.",
-                "The transfer cannot be completed until personal terms are agreed.",
-                "Continue");
-            return;
-        }
-
         var listing = _selectedListing;
+        var suggestedWage = Math.Max(listing.WeeklyWage, PlayerContractService.EstimateWeeklyWage(listing.Player, _state.League.LeagueId));
+        var dialog = new TransferTermsDialog(listing.Player.Name, isLoan: false, listing.AskingPrice, suggestedWage)
+        {
+            Owner = Window.GetWindow(this)
+        };
+        if (dialog.ShowDialog() != true)
+        {
+            return;
+        }
+
         var offer = _transferMarketService.MakeUserOffer(
             _state.TransferMarket,
             _state.League,
             _state.SelectedTeam,
             _selectedListing.Player.PlayerId,
-            fee,
+            dialog.Fee,
             GetCurrentRound(),
-            weeklyWage,
-            panel.SigningYears,
-            panel.SigningRole);
+            dialog.WeeklyWage,
+            dialog.ContractYears,
+            dialog.SquadRole);
 
         RefreshAll();
-        ShowOfferOutcomeModal(offer, listing, submittedFee: fee);
+        ShowOfferOutcomeModal(offer, listing, submittedFee: dialog.Fee);
+    }
+
+    private void DetailPanel_LoanRequested(object? sender, EventArgs e)
+    {
+        if (_state.TransferMarket is null || _state.League is null || _state.SelectedTeam is null || _selectedListing is null)
+        {
+            return;
+        }
+
+        var listing = _selectedListing;
+        if (!LoanEligibilityService.CanJoinOnLoan(listing.Player, out var eligibilityReason))
+        {
+            ShowSimpleTransferModal("Loan Unavailable", "Loan Request", listing.Player.Name, CreatePlayerMeta(listing),
+                eligibilityReason, "This club will only consider realistic development loans.", "Continue");
+            return;
+        }
+
+        var dialog = new TransferTermsDialog(listing.Player.Name, isLoan: true, suggestedFee: 0, suggestedWage: 0)
+        {
+            Owner = Window.GetWindow(this)
+        };
+        if (dialog.ShowDialog() != true)
+        {
+            return;
+        }
+
+        try
+        {
+            _loanService.CreateLoan(
+                _state.TransferMarket,
+                listing.LeagueId,
+                listing.Team,
+                _state.League.LeagueId,
+                _state.SelectedTeam,
+                listing.Player,
+                _state.TransferMarket.ActiveSeason,
+                GetCurrentRound(),
+                loanFee: dialog.Fee,
+                wagePercentage: dialog.WageShare);
+
+            PersistCurrentSaveSlot();
+            RefreshAll();
+            ShowSimpleTransferModal(
+                "Loan Accepted",
+                "Season Loan",
+                listing.Player.Name,
+                CreatePlayerMeta(listing),
+                $"{listing.Player.Name} will join {_state.SelectedTeam.Name} on loan from {listing.Team.Name}.",
+                $"The player has entered your reserves. Your club will pay {dialog.WageShare}% of the weekly wage.",
+                "Continue");
+        }
+        catch (InvalidOperationException exception)
+        {
+            ShowSimpleTransferModal(
+                "Loan Unavailable",
+                "Loan Request",
+                listing.Player.Name,
+                CreatePlayerMeta(listing),
+                exception.Message,
+                "This loan request cannot be completed.",
+                "Continue");
+        }
     }
 
     private void DetailPanel_ShortlistToggled(object? sender, EventArgs e)
@@ -306,17 +351,14 @@ public partial class TransferMarketView : UserControl
             return;
         }
 
-        var panel = sender as TransferPlayerDetailPanel ?? _activeDetailPanel;
-        if (panel is null || !TryParseThousandAmount(panel.RenewalWageText, out var weeklyWage))
+        var listing = _selectedListing;
+        var suggestedWage = Math.Max(listing.WeeklyWage * 1.10m, PlayerContractService.EstimateWeeklyWage(listing.Player, _state.League.LeagueId));
+        var dialog = new TransferTermsDialog(listing.Player.Name, isLoan: false, suggestedFee: 0, suggestedWage: suggestedWage, isRenewal: true)
         {
-            ShowSimpleTransferModal(
-                "Invalid Contract Offer",
-                "Contract Renewal",
-                _selectedListing.Player.Name,
-                CreatePlayerMeta(_selectedListing),
-                "Enter a valid weekly wage in thousands.",
-                "The player representative needs a clear wage proposal.",
-                "Continue");
+            Owner = Window.GetWindow(this)
+        };
+        if (dialog.ShowDialog() != true)
+        {
             return;
         }
 
@@ -324,13 +366,55 @@ public partial class TransferMarketView : UserControl
             _state.TransferMarket,
             _state.League.LeagueId,
             _state.SelectedTeam,
-            _selectedListing.Player,
-            weeklyWage,
-            panel.RenewalYears,
-            panel.RenewalRole,
+            listing.Player,
+            dialog.WeeklyWage,
+            dialog.ContractYears,
+            dialog.SquadRole,
             GetCurrentRound());
         RefreshAll();
-        ShowContractRenewalModal(_selectedListing, result);
+        ShowContractRenewalModal(listing, result);
+    }
+
+    private void DetailPanel_LoanRecallRequested(object? sender, EventArgs e)
+    {
+        if (_state.TransferMarket is null || _state.League is null || _state.SelectedTeam is null || _selectedListing is null)
+        {
+            return;
+        }
+
+        var listing = _selectedListing;
+        var agreement = _state.TransferMarket.LoanAgreements.FirstOrDefault(item => item.IsActive &&
+            item.PlayerId.Equals(listing.Player.PlayerId, StringComparison.OrdinalIgnoreCase));
+        if (agreement is null)
+        {
+            return;
+        }
+
+        var penalty = _loanService.CalculateRecallPenalty(listing.Player, agreement);
+        var confirmation = MessageBox.Show(
+            $"Recall {listing.Player.Name} from {listing.Player.LoanClubName}?\n\nEarly recall penalty: {TransferMarketService.FormatMoney(penalty)}\nThe player will return to your reserves.",
+            "Recall Loaned Player",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Question);
+        if (confirmation != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        try
+        {
+            _loanService.RecallLoan(_state.TransferMarket, _state.League.LeagueId, _state.SelectedTeam, listing.Player, GetCurrentRound());
+            PersistCurrentSaveSlot();
+            RefreshAll();
+            ShowSimpleTransferModal("Player Recalled", "Loan Recall", listing.Player.Name, CreatePlayerMeta(listing),
+                $"{listing.Player.Name} has returned to {_state.SelectedTeam.Name}.",
+                $"The {TransferMarketService.FormatMoney(penalty)} early-recall penalty was deducted from your transfer budget.", "Continue");
+        }
+        catch (InvalidOperationException exception)
+        {
+            ShowSimpleTransferModal("Recall Unavailable", "Loan Recall", listing.Player.Name, CreatePlayerMeta(listing),
+                exception.Message, "The player remains at the borrowing club.", "Continue");
+        }
     }
 
     private void DetailPanel_AcceptOfferRequested(object? sender, EventArgs e)
@@ -891,7 +975,7 @@ public partial class TransferMarketView : UserControl
                     offer.ToClubName,
                     ClubLogoService.GetClubLogoPath(offer.ToClubName, offer.ToLeagueId),
                     listing is null ? "-" : listing.Player.OverallRating.ToString(CultureInfo.InvariantCulture),
-                    TransferMarketService.FormatMoney(offer.CounterFee ?? offer.Fee),
+                    offer.IsLoanOffer ? "Loan Request" : TransferMarketService.FormatMoney(offer.CounterFee ?? offer.Fee),
                     listing is null ? "-" : TransferMarketService.FormatMoney(listing.MarketValue),
                     FormatOfferStatus(offer, GetCurrentRound()),
                     GetOfferStatusBrush(offer.Status));
@@ -1368,6 +1452,22 @@ public partial class TransferMarketView : UserControl
 
     private StatusDisplay CreateStatusDisplay(Player player)
     {
+        if (IsSelectedClubLoanedOutPlayer(player))
+        {
+            return new StatusDisplay(
+                "Loaned Out",
+                GetStatusBrush("Loaned Out"),
+                $"Loaned to {player.LoanClubName} until the end of {player.LoanEndSeason}.");
+        }
+
+        if (player.IsOnLoan)
+        {
+            return new StatusDisplay(
+                "On Loan",
+                GetStatusBrush("On Loan"),
+                $"On loan from {player.ParentClubName} until the end of {player.LoanEndSeason}.");
+        }
+
         var secondaryStatuses = GetSecondaryStatuses(player).ToList();
         var primaryStatus = secondaryStatuses.FirstOrDefault() ?? "Available";
         var displayStatus = GetCompactStatusText(primaryStatus);
@@ -1376,6 +1476,13 @@ public partial class TransferMarketView : UserControl
             : primaryStatus;
 
         return new StatusDisplay(displayStatus, GetStatusBrush(primaryStatus), tooltip);
+    }
+
+    private bool IsSelectedClubLoanedOutPlayer(Player player)
+    {
+        return _state.SelectedTeam?.LoanedOutPlayers.Any(candidate =>
+            ReferenceEquals(candidate, player) ||
+            candidate.PlayerId.Equals(player.PlayerId, StringComparison.OrdinalIgnoreCase)) == true;
     }
 
     private static string GetCompactStatusText(string status)
@@ -1446,6 +1553,8 @@ public partial class TransferMarketView : UserControl
             "Injured" => "#EF4444",
             "Banned" => "#991B1B",
             "Transfer Agreed" => "#0EA5E9",
+            "Loaned Out" => "#F59E0B",
+            "On Loan" => "#F59E0B",
             _ => "#10B981"
         };
     }

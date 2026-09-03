@@ -132,6 +132,7 @@ public partial class FormationSetupPanel : UserControl
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
         var remainingPlayers = _team.Players
             .Concat(_team.Substitutes)
+            .Concat(_team.Reserves)
             .Where(player => !pitchKeys.Contains(CreateRosterKey(player)))
             .DistinctBy(CreateRosterKey)
             .ToList();
@@ -151,12 +152,15 @@ public partial class FormationSetupPanel : UserControl
         _pitchSlots = pitchPlayers;
         _team.Players = pitchPlayers;
         _team.Substitutes = remainingPlayers;
+        _team.Reserves = [];
+        TeamRosterService.SelectMatchdayBench(_team);
     }
 
     private static List<Player> GetDistinctRoster(Team team)
     {
         return team.Players
             .Concat(team.Substitutes)
+            .Concat(team.Reserves)
             .DistinctBy(CreateRosterKey)
             .ToList();
     }
@@ -481,6 +485,7 @@ public partial class FormationSetupPanel : UserControl
             .Select(CreateRosterKey)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
         var players = _team.Substitutes
+            .Concat(_team.Reserves)
             .Where(player => !pitchKeys.Contains(CreateRosterKey(player)))
             .Where(player => MergeUnavailableIntoSubstitutes || IsAvailable(player))
             .ToList();
@@ -541,7 +546,7 @@ public partial class FormationSetupPanel : UserControl
             return;
         }
 
-        var unavailable = _team.Players.Concat(_team.Substitutes)
+        var unavailable = _team.AllPlayers
             .Where(player => player.IsInjured || player.IsSuspended || player.IsSentOff)
             .Distinct()
             .Select(player => UnavailablePlayerCard.Create(player, _team))
@@ -655,6 +660,17 @@ public partial class FormationSetupPanel : UserControl
     {
         if (_team is null) { return; }
         ApplyPitchSlotsToTeam();
+        if (_team.Reserves.Remove(substitute))
+        {
+            var displacedBenchPlayer = _team.Substitutes.LastOrDefault();
+            if (displacedBenchPlayer is not null)
+            {
+                _team.Substitutes.Remove(displacedBenchPlayer);
+                _team.Reserves.Add(displacedBenchPlayer);
+            }
+
+            _team.Substitutes.Add(substitute);
+        }
         var slot = starter.AssignedPosition;
         var result = _squadSelectionService.SwapStarterWithSubstitute(_team, starter, substitute);
         if (!result.Success) { MessageBox.Show(result.Message); return; }
@@ -693,8 +709,24 @@ public partial class FormationSetupPanel : UserControl
         if (_team is null || first == second) { return; }
         var firstIndex = _team.Substitutes.IndexOf(first);
         var secondIndex = _team.Substitutes.IndexOf(second);
-        if (firstIndex < 0 || secondIndex < 0) { return; }
-        (_team.Substitutes[firstIndex], _team.Substitutes[secondIndex]) = (_team.Substitutes[secondIndex], _team.Substitutes[firstIndex]);
+        if (firstIndex >= 0 && secondIndex >= 0)
+        {
+            (_team.Substitutes[firstIndex], _team.Substitutes[secondIndex]) = (_team.Substitutes[secondIndex], _team.Substitutes[firstIndex]);
+        }
+        else if (firstIndex >= 0 && _team.Reserves.Remove(second))
+        {
+            _team.Substitutes[firstIndex] = second;
+            _team.Reserves.Add(first);
+        }
+        else if (secondIndex >= 0 && _team.Reserves.Remove(first))
+        {
+            _team.Substitutes[secondIndex] = first;
+            _team.Reserves.Add(second);
+        }
+        else
+        {
+            return;
+        }
         RefreshSubstitutes();
         NotifyChanged();
     }

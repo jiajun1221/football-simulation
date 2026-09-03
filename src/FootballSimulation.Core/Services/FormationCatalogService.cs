@@ -28,6 +28,7 @@ public static class FormationCatalogService
         new("4-2-3-1 Wide", FormationCategory.Balanced),
         new("4-2-3-1 Narrow", FormationCategory.Balanced),
         new("4-4-2", FormationCategory.Balanced),
+        new("4-4-1-1", FormationCategory.Balanced),
         new("4-1-4-1", FormationCategory.Balanced),
         new("3-5-2", FormationCategory.Balanced),
         new("5-2-3", FormationCategory.Balanced),
@@ -47,6 +48,7 @@ public static class FormationCatalogService
         ["433"] = "4-3-3 Attack",
         ["4231"] = "4-2-3-1 Wide",
         ["442"] = "4-4-2",
+        ["4411"] = "4-4-1-1",
         ["352"] = "3-5-2"
     };
 

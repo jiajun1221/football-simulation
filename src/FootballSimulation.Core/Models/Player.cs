@@ -39,6 +39,12 @@ public class Player : INotifyPropertyChanged
     public PlayerTransferStatus TransferStatus { get; set; } = PlayerTransferStatus.None;
     public string ClubId { get; set; } = string.Empty;
     public string PreviousClubId { get; set; } = string.Empty;
+    public bool IsOnLoan { get; set; }
+    public string ParentClubId { get; set; } = string.Empty;
+    public string ParentClubName { get; set; } = string.Empty;
+    public string LoanClubName { get; set; } = string.Empty;
+    public string LoanEndSeason { get; set; } = string.Empty;
+    public int LoanWagePercentage { get; set; }
     public int? LastTransferRound { get; set; }
     public string LastTransferWindowId { get; set; } = string.Empty;
     public int? ContractEndYear { get; set; }

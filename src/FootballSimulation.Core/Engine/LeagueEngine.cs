@@ -248,6 +248,9 @@ public class LeagueEngine
 
     private void PrepareFixtureTeams(Fixture fixture, MatchSimulationOptions options, Random random)
     {
+        TeamRosterService.SelectMatchdayBench(fixture.HomeTeam);
+        TeamRosterService.SelectMatchdayBench(fixture.AwayTeam);
+
         if (options.EnableInjuries)
         {
             _ = _injuryRiskService.TryCreatePreparationInjury(fixture.HomeTeam, GetFixtureCalendarRound(fixture), random);
@@ -273,16 +276,14 @@ public class LeagueEngine
 
     private static void EnsureTeamCanFieldEleven(Team team)
     {
-        var availablePlayerCount = team.Players
-            .Concat(team.Substitutes)
+        var availablePlayerCount = team.AllPlayers
             .Count(player => !player.IsInjured && !player.IsSuspended && !player.IsSentOff);
         if (availablePlayerCount >= 11)
         {
             return;
         }
 
-        var baseOverall = team.Players
-            .Concat(team.Substitutes)
+        var baseOverall = team.AllPlayers
             .Select(player => player.OverallRating)
             .DefaultIfEmpty(65)
             .Average();

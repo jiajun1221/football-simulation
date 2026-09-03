@@ -664,7 +664,7 @@ public class YouthScoutService
 
     private static double GetAiProspectScore(Team team, YouthScoutProspect prospect)
     {
-        var depth = team.Players.Concat(team.Substitutes).Count(player => player.Position == prospect.Position);
+        var depth = team.AllPlayers.Count(player => player.Position == prospect.Position);
         var score = prospect.PotentialMax + prospect.CurrentOVR * 0.35;
         if (depth <= 4)
         {

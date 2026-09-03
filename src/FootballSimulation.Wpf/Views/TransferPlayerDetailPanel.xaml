@@ -572,6 +572,7 @@
 
                 <Grid Grid.Row="1">
                     <StackPanel x:Name="TransferActionPanel" Visibility="Collapsed">
+                        <StackPanel x:Name="InlineTransferFieldsPanel" Visibility="Collapsed">
                         <TextBlock Text="Offer Amount" Style="{StaticResource DetailLabelStyle}" />
                         <Grid Margin="0,0,0,8">
                             <TextBlock Text="€" VerticalAlignment="Center" Margin="12,0,0,0" Foreground="{DynamicResource AppMutedTextBrush}" />
@@ -605,11 +606,19 @@
                                    Foreground="{DynamicResource AppMutedTextBrush}"
                                    FontSize="10"
                                    TextWrapping="Wrap" />
-                        <Button x:Name="MakeOfferButton"
-                                Content="Make Offer"
-                                Style="{StaticResource DetailPrimaryButtonStyle}"
-                                HorizontalAlignment="Stretch"
-                                Click="MakeOfferButton_Click" />
+                        </StackPanel>
+                        <UniformGrid Columns="2">
+                            <Button x:Name="MakeOfferButton"
+                                    Content="Make Offer"
+                                    Style="{StaticResource DetailPrimaryButtonStyle}"
+                                    Margin="0,0,4,0"
+                                    Click="MakeOfferButton_Click" />
+                            <Button x:Name="AskForLoanButton"
+                                    Content="Ask for Loan"
+                                    Style="{StaticResource DetailPrimaryButtonStyle}"
+                                    Margin="4,0,0,0"
+                                    Click="AskForLoanButton_Click" />
+                        </UniformGrid>
                     </StackPanel>
 
                     <StackPanel x:Name="SquadActionPanel" Visibility="Collapsed">
@@ -623,6 +632,7 @@
                                       SelectionChanged="MainPositionComboBox_SelectionChanged"
                                       ToolTip="Choose one of this player's natural positions." />
                         </StackPanel>
+                        <StackPanel x:Name="InlineRenewalFieldsPanel" Visibility="Collapsed">
                         <TextBlock Text="Contract Extension" Style="{StaticResource DetailLabelStyle}" />
                         <UniformGrid Columns="3" Margin="0,0,0,8">
                             <TextBox x:Name="RenewalWageTextBox"
@@ -648,11 +658,18 @@
                                    Foreground="{DynamicResource AppMutedTextBrush}"
                                    FontSize="10"
                                    TextWrapping="Wrap" />
+                        </StackPanel>
                         <Button x:Name="RenewContractButton"
                                 Content="Offer Extension"
                                 Style="{StaticResource DetailPrimaryButtonStyle}"
                                 HorizontalAlignment="Stretch"
                                 Click="RenewContractButton_Click" />
+                        <Button x:Name="RecallLoanButton"
+                                Content="Recall Player"
+                                Visibility="Collapsed"
+                                Style="{StaticResource DetailPrimaryButtonStyle}"
+                                HorizontalAlignment="Stretch"
+                                Click="RecallLoanButton_Click" />
                     </StackPanel>
 
                     <StackPanel x:Name="OfferActionPanel" Visibility="Collapsed">

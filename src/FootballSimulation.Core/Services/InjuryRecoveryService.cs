@@ -6,7 +6,7 @@ public class InjuryRecoveryService
 {
     public void AdvanceRecoveryAfterCompletedRound(IEnumerable<Team> teams)
     {
-        foreach (var player in teams.SelectMany(team => team.Players.Concat(team.Substitutes)))
+        foreach (var player in teams.SelectMany(team => team.AllPlayers))
         {
             AdvanceSuspension(player);
 

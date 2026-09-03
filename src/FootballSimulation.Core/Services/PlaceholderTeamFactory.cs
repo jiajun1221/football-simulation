@@ -74,7 +74,7 @@ public static class PlaceholderTeamFactory
 
     public static bool HasPlaceholderNames(Team team)
     {
-        return team.Players.Concat(team.Substitutes).Any(IsPlaceholderPlayer);
+        return team.AllPlayers.Any(IsPlaceholderPlayer);
     }
 
     public static bool RepairPlaceholderNames(Team team, Team? sourceTeam = null, string country = "England")
@@ -90,7 +90,7 @@ public static class PlaceholderTeamFactory
             return true;
         }
 
-        var targetPlayers = team.Players.Concat(team.Substitutes).ToList();
+        var targetPlayers = team.AllPlayers.ToList();
         for (var index = 0; index < targetPlayers.Count; index++)
         {
             var player = targetPlayers[index];
@@ -154,6 +154,7 @@ public static class PlaceholderTeamFactory
         team.Formation = string.IsNullOrWhiteSpace(sourceTeam.Formation) ? team.Formation : sourceTeam.Formation;
         team.Players = sourceTeam.Players.Select(player => CloneSourcePlayer(player, isStarter: true)).ToList();
         team.Substitutes = sourceTeam.Substitutes.Select(player => CloneSourcePlayer(player, isStarter: false)).ToList();
+        team.Reserves = sourceTeam.Reserves.Select(player => CloneSourcePlayer(player, isStarter: false)).ToList();
     }
 
     private static Player CloneSourcePlayer(Player sourcePlayer, bool isStarter)

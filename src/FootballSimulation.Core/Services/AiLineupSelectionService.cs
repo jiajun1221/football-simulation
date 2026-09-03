@@ -9,11 +9,7 @@ public static class AiLineupSelectionService
     {
         ArgumentNullException.ThrowIfNull(team);
 
-        var allPlayers = team.Players
-            .Concat(team.Substitutes)
-            .GroupBy(player => player.Name, StringComparer.OrdinalIgnoreCase)
-            .Select(group => group.First())
-            .ToList();
+        var allPlayers = TeamRosterService.GetDistinctPlayers(team);
         var availablePlayers = allPlayers.Where(IsAvailableForSelection).ToList();
         var selectedFormation = SelectBestCompatibleFormation(team, availablePlayers);
         var slots = FormationSlotService.GetSlots(selectedFormation);
@@ -56,6 +52,8 @@ public static class AiLineupSelectionService
             .ThenByDescending(player => player.OverallRating)
             .ThenBy(player => player.SquadNumber <= 0 ? int.MaxValue : player.SquadNumber)
             .ToList();
+        team.Reserves = [];
+        TeamRosterService.SelectMatchdayBench(team);
     }
 
     private static bool IsAvailableForSelection(Player player)
@@ -116,8 +114,7 @@ public static class AiLineupSelectionService
             return PickByTeamName(team, "5-4-1", "5-3-2");
         }
 
-        var averageOverall = team.Players
-            .Concat(team.Substitutes)
+        var averageOverall = TeamRosterService.GetAllPlayers(team)
             .DefaultIfEmpty()
             .Average(player => player?.OverallRating ?? 72);
         if (averageOverall >= 83)

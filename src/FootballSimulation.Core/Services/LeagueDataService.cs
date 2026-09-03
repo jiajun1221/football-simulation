@@ -89,7 +89,7 @@ public class LeagueDataService
 
         return new LeagueDataIndex
         {
-            ActiveSeason = "2025-26",
+            ActiveSeason = "2026-27",
             Leagues =
             [
                 new LeagueDefinition
@@ -98,8 +98,8 @@ public class LeagueDataService
                     Name = GameSessionService.PremierLeagueName,
                     ShortName = "Premier League",
                     Country = "England",
-                    Season = "2025-26",
-                    SquadFile = "premier-league-2025-26-squads.json",
+                    Season = "2026-27",
+                    SquadFile = "premier-league-2026-27-squads.json",
                     LogoPath = "/Assets/Leagues/premier-league.png",
                     IsAvailable = true
                 }
@@ -117,7 +117,14 @@ public class LeagueDataService
             .Select(player => _playerStatMappingService.MapToPlayer(player, isStarter: false))
             .ToList();
 
-        ValidateSquad(teamRecord.Name, starters, substitutes);
+        var reserves = teamRecord.Reserves
+            .Select(player => _playerStatMappingService.MapToPlayer(player, isStarter: false))
+            .ToList();
+        var loanedOut = teamRecord.LoanedOut
+            .Select(player => _playerStatMappingService.MapToPlayer(player, isStarter: false))
+            .ToList();
+
+        ValidateSquad(teamRecord.Name, starters, substitutes, reserves);
         var venue = TeamVenueService.GetVenue(teamRecord.Name, teamRecord.Venue, teamRecord.StadiumName);
 
         return new Team
@@ -127,7 +134,9 @@ public class LeagueDataService
             StadiumName = venue.StadiumName,
             Formation = string.IsNullOrWhiteSpace(teamRecord.Formation) ? "4-3-3" : teamRecord.Formation,
             Players = starters,
-            Substitutes = substitutes
+            Substitutes = substitutes,
+            Reserves = reserves,
+            LoanedOutPlayers = loanedOut
         };
     }
 
@@ -139,7 +148,11 @@ public class LeagueDataService
             teamRecord.Substitutes.Any(player => IsGoalkeeper(player.Position));
     }
 
-    private static void ValidateSquad(string teamName, List<Player> starters, List<Player> substitutes)
+    private static void ValidateSquad(
+        string teamName,
+        List<Player> starters,
+        List<Player> substitutes,
+        List<Player> reserves)
     {
         if (starters.Count != 11)
         {
@@ -159,6 +172,28 @@ public class LeagueDataService
         if (substitutes.All(player => player.Position != Position.Goalkeeper))
         {
             throw new InvalidOperationException($"{teamName} must have a substitute goalkeeper in the JSON data.");
+        }
+
+        var duplicatePlayerId = starters
+            .Concat(substitutes)
+            .Concat(reserves)
+            .Where(player => !string.IsNullOrWhiteSpace(player.PlayerId))
+            .GroupBy(player => player.PlayerId, StringComparer.OrdinalIgnoreCase)
+            .FirstOrDefault(group => group.Count() > 1);
+        if (duplicatePlayerId is not null)
+        {
+            throw new InvalidOperationException($"{teamName} contains duplicate player id '{duplicatePlayerId.Key}'.");
+        }
+
+        var duplicateSquadNumber = starters
+            .Concat(substitutes)
+            .Concat(reserves)
+            .Where(player => player.SquadNumber > 0)
+            .GroupBy(player => player.SquadNumber)
+            .FirstOrDefault(group => group.Count() > 1);
+        if (duplicateSquadNumber is not null)
+        {
+            throw new InvalidOperationException($"{teamName} contains duplicate shirt number {duplicateSquadNumber.Key}.");
         }
     }
 

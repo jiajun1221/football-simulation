@@ -49,7 +49,7 @@ public static class ClubMatchSetupService
 
         TacticalProfileService.CopyTo(setup.Tactics, team.Tactics);
 
-        var originalPlayers = team.Players.Concat(team.Substitutes)
+        var originalPlayers = team.AllPlayers
             .GroupBy(CreatePlayerKey, StringComparer.OrdinalIgnoreCase)
             .Select(group => group.First())
             .ToList();
@@ -130,7 +130,8 @@ public static class ClubMatchSetupService
         }
 
         team.Players = starters;
-        team.Substitutes = bench;
+        team.Substitutes = bench.Take(TeamRosterService.MatchdaySubstituteCount).ToList();
+        team.Reserves = bench.Skip(TeamRosterService.MatchdaySubstituteCount).ToList();
     }
 
     private static Player? ResolvePlayer(

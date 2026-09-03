@@ -70,7 +70,7 @@ public class YouthPlayerGeneratorService
         var random = new Random(seed);
         var players = new List<YouthPlayer>();
         var usedNames = GeneratedPlayerNameService.CreateUsedNameSet(
-            team.Players.Concat(team.Substitutes).Select(player => player.Name)
+            team.AllPlayers.Select(player => player.Name)
                 .Concat(academy.YouthPlayers.Select(player => player.Name)));
         for (var index = 0; index < count; index++)
         {
@@ -84,7 +84,7 @@ public class YouthPlayerGeneratorService
     {
         var seed = Math.Abs(HashCode.Combine(academy.ClubId, season, currentRound, academy.YouthPlayers.Count));
         var usedNames = GeneratedPlayerNameService.CreateUsedNameSet(
-            team.Players.Concat(team.Substitutes).Select(player => player.Name)
+            team.AllPlayers.Select(player => player.Name)
                 .Concat(academy.YouthPlayers.Select(player => player.Name)));
         return GeneratePlayer(academy, team, season, new Random(seed), academy.YouthPlayers.Count, usedNames, discoveryBoost: true);
     }
@@ -172,7 +172,7 @@ public class YouthPlayerGeneratorService
 
     private static (string Slot, Position Position) PickPosition(YouthAcademy academy, Team team, Random random)
     {
-        var seniorCounts = team.Players.Concat(team.Substitutes)
+        var seniorCounts = team.AllPlayers
             .Select(player => PositionSuitabilityService.NormalizeExactPosition(player.PreferredPosition))
             .GroupBy(position => position)
             .ToDictionary(group => group.Key, group => group.Count(), StringComparer.OrdinalIgnoreCase);
@@ -298,7 +298,7 @@ public class YouthPlayerGeneratorService
 
     private static (string Name, string Code, string FlagPath) PickNationality(Team team, Random random)
     {
-        if (team.Players.Concat(team.Substitutes).Any(player => player.NationalityName.Equals("England", StringComparison.OrdinalIgnoreCase)) &&
+        if (team.AllPlayers.Any(player => player.NationalityName.Equals("England", StringComparison.OrdinalIgnoreCase)) &&
             random.NextDouble() < 0.62)
         {
             return NationalityPools[0];

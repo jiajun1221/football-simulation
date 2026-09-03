@@ -200,7 +200,7 @@ public class YouthAcademySystemTests
     }
 
     [Fact]
-    public void PromoteYouthPlayer_AddsProspectToSeniorSubstitutes()
+    public void PromoteYouthPlayer_AddsProspectToSeniorReserves()
     {
         var league = CreateLeague();
         var team = league.Teams[0];
@@ -213,8 +213,8 @@ public class YouthAcademySystemTests
         var result = new YouthAcademyService().PromoteYouthPlayer(league, team, prospect.PlayerId);
 
         Assert.True(result.Success, result.Message);
-        Assert.Contains(team.Substitutes, player => player.PlayerId == prospect.PlayerId);
-        Assert.Contains(team.Substitutes, player => player.Role == PlayerRole.Prospect);
+        Assert.Contains(team.Reserves, player => player.PlayerId == prospect.PlayerId);
+        Assert.Contains(team.Reserves, player => player.Role == PlayerRole.Prospect);
         Assert.DoesNotContain(academy.YouthPlayers, player => player.PlayerId == prospect.PlayerId);
     }
 
@@ -230,7 +230,7 @@ public class YouthAcademySystemTests
         prospect.CurrentOVR = 75;
 
         var result = new YouthAcademyService().PromoteYouthPlayer(league, team, prospect.PlayerId, currentRound: 4);
-        var promotedPlayer = Assert.Single(team.Substitutes, player => player.PlayerId == prospect.PlayerId);
+        var promotedPlayer = Assert.Single(team.Reserves, player => player.PlayerId == prospect.PlayerId);
 
         Assert.True(result.Success, result.Message);
         Assert.Equal(2033, promotedPlayer.ContractEndYear);
@@ -250,7 +250,7 @@ public class YouthAcademySystemTests
         var academyService = new YouthAcademyService();
         var result = academyService.PromoteYouthPlayer(league, team, prospect.PlayerId, currentRound: 4);
         var promotedPlayer = result.PromotedPlayer!;
-        team.Substitutes.Remove(promotedPlayer);
+        team.Reserves.Remove(promotedPlayer);
         promotedPlayer.ContractEndYear = 2029;
         promotedPlayer.ContractStatus = PlayerContractStatus.FreeAgent;
 
@@ -262,7 +262,7 @@ public class YouthAcademySystemTests
         transferService.BindActiveLeague(transferState, league);
 
         Assert.DoesNotContain(transferState.FreeAgents, player => player.Name == prospect.Name);
-        Assert.Contains(team.Players.Concat(team.Substitutes), player => player.Name == prospect.Name);
+        Assert.Contains(team.AllPlayers, player => player.Name == prospect.Name);
         Assert.Equal(2033, promotedPlayer.ContractEndYear);
         Assert.Equal(PlayerContractStatus.Active, promotedPlayer.ContractStatus);
     }
@@ -278,13 +278,14 @@ public class YouthAcademySystemTests
         prospect.CurrentOVR = 58;
         prospect.HiddenTruePotential = 86;
         team.Players = CreateSeniorSquadPlayers(11);
-        team.Substitutes = CreateSeniorSquadPlayers(YouthAcademyService.MaximumSeniorSquadSize - team.Players.Count - 1);
+        team.Substitutes = CreateSeniorSquadPlayers(12);
+        team.Reserves = CreateSeniorSquadPlayers(YouthAcademyService.MaximumSeniorSquadSize - team.Players.Count - team.Substitutes.Count - 1);
 
         var result = new YouthAcademyService().PromoteYouthPlayer(league, team, prospect.PlayerId);
 
         Assert.True(result.Success, result.Message);
-        Assert.Equal(YouthAcademyService.MaximumSeniorSquadSize, team.Players.Count + team.Substitutes.Count);
-        Assert.Contains(team.Substitutes, player => player.PlayerId == prospect.PlayerId);
+        Assert.Equal(YouthAcademyService.MaximumSeniorSquadSize, team.AllPlayers.Count());
+        Assert.Contains(team.Reserves, player => player.PlayerId == prospect.PlayerId);
     }
 
     [Fact]
@@ -297,13 +298,14 @@ public class YouthAcademySystemTests
         prospect.Age = 16;
         prospect.CurrentOVR = 58;
         team.Players = CreateSeniorSquadPlayers(11);
-        team.Substitutes = CreateSeniorSquadPlayers(YouthAcademyService.MaximumSeniorSquadSize - team.Players.Count);
+        team.Substitutes = CreateSeniorSquadPlayers(12);
+        team.Reserves = CreateSeniorSquadPlayers(YouthAcademyService.MaximumSeniorSquadSize - team.Players.Count - team.Substitutes.Count);
 
         var result = new YouthAcademyService().PromoteYouthPlayer(league, team, prospect.PlayerId);
 
         Assert.False(result.Success);
         Assert.Equal("Senior squad is full.", result.Message);
-        Assert.DoesNotContain(team.Substitutes, player => player.PlayerId == prospect.PlayerId);
+        Assert.DoesNotContain(team.Reserves, player => player.PlayerId == prospect.PlayerId);
     }
 
     [Fact]
@@ -320,7 +322,7 @@ public class YouthAcademySystemTests
         prospect.HiddenTruePotential = 86;
 
         var result = new YouthAcademyService().PromoteYouthPlayer(league, team, prospect.PlayerId);
-        var seniorPlayer = team.Substitutes.Single(player => player.PlayerId == prospect.PlayerId);
+        var seniorPlayer = team.Reserves.Single(player => player.PlayerId == prospect.PlayerId);
 
         Assert.True(result.Success, result.Message);
         Assert.InRange(seniorPlayer.Attack, 45, 60);
@@ -345,7 +347,7 @@ public class YouthAcademySystemTests
 
         var result = Assert.Single(results);
         Assert.True(result.Success, result.Message);
-        Assert.Contains(aiTeam.Substitutes, player => player.PlayerId == prospect.PlayerId);
+        Assert.Contains(aiTeam.Reserves, player => player.PlayerId == prospect.PlayerId);
         Assert.DoesNotContain(academy.YouthPlayers, player => player.PlayerId == prospect.PlayerId);
         Assert.Contains(academy.AcademyHistory, record =>
             record.EventType == AcademyHistoryEventType.Promoted &&
@@ -484,7 +486,6 @@ public class YouthAcademySystemTests
         var finance = transferState.ClubFinances.Single(item =>
             item.LeagueId.Equals(league.LeagueId, StringComparison.OrdinalIgnoreCase) &&
             item.ClubName.Equals(selectedTeam.Name, StringComparison.OrdinalIgnoreCase));
-        finance.TransferSpent = finance.ClubTransferBudget + finance.TransferIncome;
         var startingTransferSpent = finance.TransferSpent;
         var startingYouthWageSpent = finance.YouthWageSpent;
 

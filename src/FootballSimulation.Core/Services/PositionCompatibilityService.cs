@@ -40,7 +40,7 @@ public static class PositionCompatibilityService
 
         if (naturalPositions.Skip(1).Contains(slot, StringComparer.OrdinalIgnoreCase))
         {
-            return 85;
+            return Math.Max(85, GetAdjacentRoleScore(naturalPositions[0], slot));
         }
 
         return GetAdjacentRoleScore(naturalPositions, slot);

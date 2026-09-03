@@ -20,11 +20,11 @@ public class SaveGameService
         new("brunofernandes", "manchesterunited", Position.Midfielder, "CAM", ["CM"]),
         new("rodri", "manchestercity", Position.Midfielder, "CDM", ["CM", "CB"]),
         new("martinodegaard", "arsenal", Position.Midfielder, "CAM", ["CM"]),
-        new("joaopedro", "chelsea", Position.Forward, "CF", ["ST", "CAM", "LW"]),
+        new("joaopedro", "chelsea", Position.Forward, "ST", ["CF", "CAM", "LW"]),
         new("kaihavertz", "arsenal", Position.Forward, "CF", ["ST", "CAM", "LW", "RW"]),
-        new("matheuscunha", "manchesterunited", Position.Forward, "CF", ["ST", "CAM", "LW"]),
-        new("julianalvarez", "atleticomadrid", Position.Forward, "CF", ["ST", "CAM", "LW", "RW"]),
-        new("christophernkunku", "acmilan", Position.Forward, "CF", ["ST", "CAM", "LW", "RW"])
+        new("matheuscunha", "manchesterunited", Position.Midfielder, "CAM", ["ST", "CF", "LW"]),
+        new("julianalvarez", "atleticomadrid", Position.Forward, "ST", ["CF", "CAM", "LW", "RW"]),
+        new("christophernkunku", "acmilan", Position.Forward, "ST", ["CF", "CAM", "LW", "RW"])
     ];
 
     private static readonly JsonSerializerOptions JsonOptions = new()
@@ -302,8 +302,7 @@ public class SaveGameService
     {
         var arsenal = data.Teams.FirstOrDefault(team =>
             team.Name.Equals("Arsenal", StringComparison.OrdinalIgnoreCase));
-        var arsenalOwnsGyokeres = arsenal?.Players
-                .Concat(arsenal.Substitutes)
+        var arsenalOwnsGyokeres = arsenal?.AllPlayers
                 .Any(IsViktorGyokeres) == true;
         if (!arsenalOwnsGyokeres)
         {
@@ -322,6 +321,7 @@ public class SaveGameService
         {
             team.Players.RemoveAll(IsViktorGyokeres);
             team.Substitutes.RemoveAll(IsViktorGyokeres);
+            team.Reserves.RemoveAll(IsViktorGyokeres);
         }
 
         data.TransferMarketState.FreeAgents.RemoveAll(IsViktorGyokeres);
@@ -336,7 +336,7 @@ public class SaveGameService
     {
         foreach (var team in teams)
         {
-            foreach (var player in team.Players.Concat(team.Substitutes))
+            foreach (var player in team.AllPlayers)
             {
                 ApplyKnownPlayerDataCorrections(player, seasonStartYear, team.Name);
             }
@@ -379,12 +379,19 @@ public class SaveGameService
         player.OverallRating = Math.Max(player.OverallRating, 78);
         player.BaseOverallRating = Math.Max(player.BaseOverallRating, 78);
         player.PotentialOverall = Math.Max(player.PotentialOverall ?? 0, 88);
-        player.Position = Position.Forward;
-        player.PreferredPosition = "RW";
+        if (string.IsNullOrWhiteSpace(player.PreferredPosition))
+        {
+            player.PreferredPosition = "RM";
+        }
+        player.Position = PositionSuitabilityService.GetPositionGroup(player.PreferredPosition);
         player.AssignedPosition = string.IsNullOrWhiteSpace(player.AssignedPosition)
-            ? "RW"
+            ? player.PreferredPosition
             : player.AssignedPosition;
-        player.SecondaryPositions = ["LW", "CAM"];
+        player.SecondaryPositions = player.SecondaryPositions
+            .Concat(["RW", "RM", "LW", "CAM"])
+            .Where(position => !position.Equals(player.PreferredPosition, StringComparison.OrdinalIgnoreCase))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
         player.NationalityName = string.IsNullOrWhiteSpace(player.NationalityName) ? "Brazil" : player.NationalityName;
         player.NationalityCode = string.IsNullOrWhiteSpace(player.NationalityCode) ? "BR" : player.NationalityCode;
         player.FlagImagePath = string.IsNullOrWhiteSpace(player.FlagImagePath) ? "/Assets/Flags/brazil.png" : player.FlagImagePath;
@@ -603,7 +610,13 @@ public class SaveGameService
         RepairPlaceholderTeams(data);
         foreach (var team in data.Teams)
         {
-            foreach (var player in team.Players.Concat(team.Substitutes))
+            team.Reserves ??= [];
+            team.LoanedOutPlayers ??= [];
+            foreach (var player in team.AllPlayers)
+            {
+                PlayerAttributeService.ApplyMissingAttributes(player);
+            }
+            foreach (var player in team.LoanedOutPlayers)
             {
                 PlayerAttributeService.ApplyMissingAttributes(player);
             }
@@ -800,7 +813,7 @@ public class SaveGameService
 
     private static void ApplyMissingFixtureTeamData(Team team)
     {
-        foreach (var player in team.Players.Concat(team.Substitutes))
+        foreach (var player in team.AllPlayers)
         {
             PlayerAttributeService.ApplyMissingAttributes(player);
         }
@@ -872,7 +885,7 @@ public class SaveGameService
         }
 
         var sourceRows = sourceTeams
-            .SelectMany(team => team.Players.Concat(team.Substitutes)
+            .SelectMany(team => team.AllPlayers
                 .Select(player => new
                 {
                     TeamName = team.Name,
@@ -882,7 +895,7 @@ public class SaveGameService
 
         foreach (var team in data.Teams)
         {
-            foreach (var player in team.Players.Concat(team.Substitutes))
+            foreach (var player in team.AllPlayers)
             {
                 var sourcePlayer = sourceRows.FirstOrDefault(row =>
                         row.TeamName.Equals(team.Name, StringComparison.OrdinalIgnoreCase) &&
@@ -965,7 +978,7 @@ public class SaveGameService
 
     private static void NormalizeRepairedTeam(Team team)
     {
-        foreach (var player in team.Players.Concat(team.Substitutes))
+        foreach (var player in team.AllPlayers)
         {
             PositionSuitabilityService.EnsurePositionMetadata(player);
             PlayerAttributeService.ApplyMissingAttributes(player);

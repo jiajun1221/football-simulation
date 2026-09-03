@@ -12,12 +12,14 @@ namespace FootballSimulation.Wpf.Views;
 public partial class TransferPlayerDetailPanel : UserControl
 {
     public event EventHandler? MakeOfferRequested;
+    public event EventHandler? LoanRequested;
     public event EventHandler? ShortlistToggled;
     public event EventHandler? TransferListToggled;
     public event EventHandler? AcceptOfferRequested;
     public event EventHandler? RejectOfferRequested;
     public event EventHandler? CounterOfferRequested;
     public event EventHandler? ContractRenewalRequested;
+    public event EventHandler? LoanRecallRequested;
     public event EventHandler? CaptainAssignmentRequested;
     public event EventHandler? TransferLockToggled;
     public event EventHandler? MainPositionChanged;
@@ -72,7 +74,13 @@ public partial class TransferPlayerDetailPanel : UserControl
         UpdateCornerAction(context);
         UpdateCaptainAction(context);
         UpdateLockAction(context);
-        ClubLogoImage.Source = ClubLogoService.LoadClubLogo(listing.Team.Name, listing.LeagueId);
+        var isLoanedOut = listing.Team.LoanedOutPlayers.Any(candidate =>
+            ReferenceEquals(candidate, player) || candidate.PlayerId.Equals(player.PlayerId, StringComparison.OrdinalIgnoreCase));
+        var displayedClubName = isLoanedOut && !string.IsNullOrWhiteSpace(player.LoanClubName)
+            ? player.LoanClubName
+            : listing.Team.Name;
+        ClubLogoImage.Source = ClubLogoService.LoadClubLogo(displayedClubName, listing.LeagueId);
+        ClubLogoImage.ToolTip = displayedClubName;
         NameTextBlock.Text = player.Name;
         ClubTextBlock.Text = $"{listing.Team.Name} · {listing.LeagueName} · {player.PreferredPosition} · Age {player.Age?.ToString(CultureInfo.InvariantCulture) ?? "N/A"}";
         OverallBadgeTextBlock.Text = player.OverallRating.ToString(CultureInfo.InvariantCulture);
@@ -86,9 +94,19 @@ public partial class TransferPlayerDetailPanel : UserControl
         FormBadgeTextBlock.Foreground = ToBrush(formBadge.Foreground);
         FormBadgeTextBlock.Text = formBadge.Text;
 
+        StatusBadgeBorder.Visibility = isLoanedOut ? Visibility.Collapsed : Visibility.Visible;
         StatusBadgeBorder.Background = ToBrush(context.StatusBrush);
         StatusBadgeBorder.ToolTip = context.StatusTooltip;
-        StatusBadgeTextBlock.Text = context.StatusText;
+        StatusBadgeTextBlock.Text = isLoanedOut
+            ? $"LOANED OUT TO {player.LoanClubName.ToUpperInvariant()}"
+            : player.IsOnLoan
+                ? $"ON LOAN FROM {player.ParentClubName.ToUpperInvariant()}"
+            : context.StatusText;
+        StatusBadgeBorder.ToolTip = isLoanedOut
+            ? $"Loaned to {player.LoanClubName} until the end of {player.LoanEndSeason}."
+            : player.IsOnLoan
+            ? $"Loan ends after {player.LoanEndSeason}. Wage contribution: {player.LoanWagePercentage}%."
+            : context.StatusTooltip;
         ContractBadgeTextBlock.Text = PlayerContractService.FormatContractExpiry(player);
         WageBadgeTextBlock.Text = PlayerContractService.FormatWage(listing.WeeklyWage);
         ContractExpiryTextBlock.Text = PlayerContractService.FormatContractExpiry(player);
@@ -199,16 +217,20 @@ public partial class TransferPlayerDetailPanel : UserControl
         if (context.Mode is TransferDetailMode.Offers && context.Offer is not null)
         {
             OfferInfoPanel.Visibility = Visibility.Visible;
-            OfferInfoTitleTextBlock.Text = "Offer Details";
-            OfferInfoTextBlock.Text = context.Offer.Status switch
+            OfferInfoTitleTextBlock.Text = context.Offer.IsLoanOffer ? "Loan Request" : "Offer Details";
+            OfferInfoTextBlock.Text = context.Offer.IsLoanOffer
+                ? $"{context.Offer.ToClubName} want {context.Offer.PlayerName} on loan until the end of {context.Offer.LoanEndSeason}. They will pay {context.Offer.LoanWagePercentage}% of his wage."
+                : context.Offer.Status switch
             {
                 OfferStatus.PendingUntilWindowOpens => $"{context.Offer.ToClubName} want to sign {context.Offer.PlayerName} when the transfer window opens.",
                 OfferStatus.AgreedForNextWindow => "Transfer will complete when the transfer window opens.",
                 OfferStatus.CompletedWhenWindowOpens => $"{context.Offer.PlayerName} joined {context.Offer.ToClubName} when the transfer window opened.",
                 _ => $"{context.Offer.FromClubName} offered {TransferMarketService.FormatMoney(context.Offer.CounterFee ?? context.Offer.Fee)} to {context.Offer.ToClubName}."
             };
-            PriceLabelTextBlock.Text = "Offer Amount";
-            PriceTextBlock.Text = TransferMarketService.FormatMoney(context.Offer.CounterFee ?? context.Offer.Fee);
+            PriceLabelTextBlock.Text = context.Offer.IsLoanOffer ? "Wage Share" : "Offer Amount";
+            PriceTextBlock.Text = context.Offer.IsLoanOffer
+                ? $"{context.Offer.LoanWagePercentage}%"
+                : TransferMarketService.FormatMoney(context.Offer.CounterFee ?? context.Offer.Fee);
             return;
         }
 
@@ -246,7 +268,9 @@ public partial class TransferPlayerDetailPanel : UserControl
         var isPreWindowAiOffer = context.Offer is { IsUserOffer: false, Status: OfferStatus.PendingUntilWindowOpens or OfferStatus.Countered } &&
             !context.IsTransferWindowOpen;
 
-        MakeOfferButton.IsEnabled = context.IsTransferWindowOpen && !context.IsOwnPlayer && !context.HasTransferredThisWindow;
+        MakeOfferButton.IsEnabled = context.IsTransferWindowOpen && !context.IsOwnPlayer && !context.HasTransferredThisWindow && !context.Listing.Player.IsOnLoan;
+        var isLoanEligible = LoanEligibilityService.CanJoinOnLoan(context.Listing.Player, out var loanEligibilityReason);
+        AskForLoanButton.IsEnabled = MakeOfferButton.IsEnabled && isLoanEligible;
         OfferFeeTextBox.IsEnabled = MakeOfferButton.IsEnabled;
         SigningWageTextBox.IsEnabled = MakeOfferButton.IsEnabled;
         SigningYearsComboBox.IsEnabled = MakeOfferButton.IsEnabled;
@@ -255,16 +279,21 @@ public partial class TransferPlayerDetailPanel : UserControl
         AcceptOfferButton.Width = isPreWindowAiOffer ? 142 : 90;
         AcceptOfferButton.IsEnabled = canRespondToOffer && (context.IsTransferWindowOpen || !context.Offer!.IsUserOffer);
         RejectOfferButton.IsEnabled = canRespondToOffer;
-        CounterOfferButton.IsEnabled = canRespondToOffer;
-        CounterFeeTextBox.IsEnabled = canRespondToOffer;
+        CounterOfferButton.IsEnabled = canRespondToOffer && context.Offer?.IsLoanOffer != true;
+        CounterFeeTextBox.IsEnabled = CounterOfferButton.IsEnabled;
 
         MakeOfferButton.ToolTip = tooltip;
+        AskForLoanButton.ToolTip = !isLoanEligible ? loanEligibilityReason : tooltip;
         OfferFeeTextBox.ToolTip = tooltip ?? "Offer fee in millions";
         AcceptOfferButton.ToolTip = isPreWindowAiOffer ? "Agree now; transfer completes when the window opens." : context.IsTransferWindowOpen ? null : context.TransferWindowTooltip;
         RejectOfferButton.ToolTip = canRespondToOffer ? null : "Offer is no longer active.";
-        CounterOfferButton.ToolTip = canRespondToOffer ? null : "Offer is no longer active.";
-        CounterFeeTextBox.ToolTip = canRespondToOffer ? "Counter fee in millions" : "Offer is no longer active.";
-        RenewContractButton.IsEnabled = context.Mode is TransferDetailMode.Squad && context.IsOwnPlayer;
+        CounterOfferButton.ToolTip = context.Offer?.IsLoanOffer == true ? "Loan requests can be accepted or rejected." : canRespondToOffer ? null : "Offer is no longer active.";
+        CounterFeeTextBox.ToolTip = context.Offer?.IsLoanOffer == true ? "Loan requests do not use a transfer fee." : canRespondToOffer ? "Counter fee in millions" : "Offer is no longer active.";
+        var isLoanedOutForAction = context.Listing.Team.LoanedOutPlayers.Any(candidate =>
+            ReferenceEquals(candidate, context.Listing.Player) || candidate.PlayerId.Equals(context.Listing.Player.PlayerId, StringComparison.OrdinalIgnoreCase));
+        RenewContractButton.Visibility = isLoanedOutForAction ? Visibility.Collapsed : Visibility.Visible;
+        RecallLoanButton.Visibility = isLoanedOutForAction ? Visibility.Visible : Visibility.Collapsed;
+        RenewContractButton.IsEnabled = context.Mode is TransferDetailMode.Squad && context.IsOwnPlayer && !isLoanedOutForAction;
     }
 
     private void UpdateCornerAction(TransferPlayerDetailContext context)
@@ -353,6 +382,11 @@ public partial class TransferPlayerDetailPanel : UserControl
         MakeOfferRequested?.Invoke(this, EventArgs.Empty);
     }
 
+    private void AskForLoanButton_Click(object sender, RoutedEventArgs e)
+    {
+        LoanRequested?.Invoke(this, EventArgs.Empty);
+    }
+
     private void CornerActionButton_Click(object sender, RoutedEventArgs e)
     {
         if (_usesTransferListToggle)
@@ -392,6 +426,11 @@ public partial class TransferPlayerDetailPanel : UserControl
     private void RenewContractButton_Click(object sender, RoutedEventArgs e)
     {
         ContractRenewalRequested?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void RecallLoanButton_Click(object sender, RoutedEventArgs e)
+    {
+        LoanRecallRequested?.Invoke(this, EventArgs.Empty);
     }
 
     private void MainPositionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)

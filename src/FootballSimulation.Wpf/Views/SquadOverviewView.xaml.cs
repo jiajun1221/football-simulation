@@ -108,7 +108,7 @@ public partial class SquadOverviewView : UserControl
             return false;
         }
 
-        var currentPlayers = _state.SelectedTeam.Players.Concat(_state.SelectedTeam.Substitutes).Distinct().ToList();
+        var currentPlayers = _state.SelectedTeam.AllPlayers.Distinct().ToList();
         var restoredAny = false;
         var sourceTeam = LoadSourceTeam(_state.League.LeagueId, _state.SelectedTeam.Name);
         if (sourceTeam is null)
@@ -116,7 +116,7 @@ public partial class SquadOverviewView : UserControl
             return false;
         }
 
-        foreach (var sourcePlayer in sourceTeam.Players.Concat(sourceTeam.Substitutes))
+        foreach (var sourcePlayer in sourceTeam.AllPlayers)
         {
             if (RosterContainsPlayer(currentPlayers, sourcePlayer.PlayerId, sourcePlayer.Name) ||
                 HasCompletedOutgoingTransfer(sourcePlayer.Name))
@@ -153,7 +153,7 @@ public partial class SquadOverviewView : UserControl
             return false;
         }
 
-        var currentPlayers = _state.SelectedTeam.Players.Concat(_state.SelectedTeam.Substitutes).Distinct().ToList();
+        var currentPlayers = _state.SelectedTeam.AllPlayers.Distinct().ToList();
         var incomingTransfers = _state.TransferMarket.TransferHistory
             .Where(transfer => transfer.ToClubName.Equals(_state.SelectedTeam.Name, StringComparison.OrdinalIgnoreCase) &&
                 transfer.ToLeagueId.Equals(_state.League.LeagueId, StringComparison.OrdinalIgnoreCase))
@@ -193,9 +193,9 @@ public partial class SquadOverviewView : UserControl
             return false;
         }
 
-        var currentPlayers = _state.SelectedTeam.Players.Concat(_state.SelectedTeam.Substitutes).Distinct().ToList();
+        var currentPlayers = _state.SelectedTeam.AllPlayers.Distinct().ToList();
         var sourceTeam = LoadSourceTeam(_state.League.LeagueId, _state.SelectedTeam.Name);
-        var sourcePlayers = sourceTeam?.Players.Concat(sourceTeam.Substitutes).ToList() ?? [];
+        var sourcePlayers = sourceTeam?.AllPlayers.ToList() ?? [];
         var restoredAny = false;
 
         foreach (var stat in _state.League.PlayerStats
@@ -340,8 +340,7 @@ public partial class SquadOverviewView : UserControl
         try
         {
             var sourceTeam = LoadSourceTeam(transfer.FromLeagueId, transfer.FromClubName);
-            return sourceTeam?.Players
-                .Concat(sourceTeam.Substitutes)
+            return sourceTeam?.AllPlayers
                 .FirstOrDefault(player => IsTransferPlayerMatch(player, transfer));
         }
         catch (InvalidOperationException)
@@ -439,8 +438,7 @@ public partial class SquadOverviewView : UserControl
 
     private bool IsSquadNumberUsed(int squadNumber)
     {
-        return _state.SelectedTeam?.Players
-            .Concat(_state.SelectedTeam.Substitutes)
+        return _state.SelectedTeam?.AllPlayers
             .Any(player => player.SquadNumber == squadNumber) == true;
     }
 
@@ -605,7 +603,7 @@ public partial class SquadOverviewView : UserControl
             .Select(listing => listing.Player.Name)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var player in _state.SelectedTeam.Players.Concat(_state.SelectedTeam.Substitutes).Distinct())
+        foreach (var player in _state.SelectedTeam.AllPlayers.Distinct())
         {
             if (!string.IsNullOrWhiteSpace(player.PlayerId) && listedIds.Contains(player.PlayerId) ||
                 listedNames.Contains(player.Name))
@@ -698,8 +696,7 @@ public partial class SquadOverviewView : UserControl
             .GroupBy(stat => string.IsNullOrWhiteSpace(stat.PlayerId) ? stat.PlayerName : stat.PlayerId, StringComparer.OrdinalIgnoreCase)
             .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
 
-        var players = _state.SelectedTeam.Players
-            .Concat(_state.SelectedTeam.Substitutes)
+        var players = _state.SelectedTeam.AllPlayers
             .GroupBy(player => string.IsNullOrWhiteSpace(player.PlayerId) ? player.Name : player.PlayerId, StringComparer.OrdinalIgnoreCase)
             .Select(group => group.First());
         var rows = players.Select(player =>
@@ -841,8 +838,7 @@ public partial class SquadOverviewView : UserControl
             return;
         }
 
-        var squadPlayers = _state.SelectedTeam?.Players
-            .Concat(_state.SelectedTeam.Substitutes)
+        var squadPlayers = _state.SelectedTeam?.AllPlayers
             .Distinct()
             .ToList() ?? [];
         var editedPlayer = row.Listing.Player;
@@ -873,7 +869,7 @@ public partial class SquadOverviewView : UserControl
             return;
         }
 
-        foreach (var player in _state.SelectedTeam.Players.Concat(_state.SelectedTeam.Substitutes).Distinct())
+        foreach (var player in _state.SelectedTeam.AllPlayers.Distinct())
         {
             player.IsCaptain = ReferenceEquals(player, captain);
         }
@@ -1222,11 +1218,34 @@ public partial class SquadOverviewView : UserControl
     private StatusDisplay CreateStatusDisplay(Player player)
     {
         var primaryStatus = GetPrimaryStatus(player);
+        if (primaryStatus == "Loaned Out")
+        {
+            return new StatusDisplay("Loaned Out", GetStatusBrush(primaryStatus),
+                $"Loaned to {player.LoanClubName} until the end of {player.LoanEndSeason}.");
+        }
+
+        if (primaryStatus == "On Loan")
+        {
+            return new StatusDisplay("On Loan", GetStatusBrush(primaryStatus),
+                $"On loan from {player.ParentClubName} until the end of {player.LoanEndSeason}.");
+        }
+
         return new StatusDisplay(GetCompactStatusText(primaryStatus), GetStatusBrush(primaryStatus), primaryStatus);
     }
 
     private string GetPrimaryStatus(Player player)
     {
+        if (_state.SelectedTeam?.LoanedOutPlayers.Any(candidate =>
+                ReferenceEquals(candidate, player) || candidate.PlayerId.Equals(player.PlayerId, StringComparison.OrdinalIgnoreCase)) == true)
+        {
+            return "Loaned Out";
+        }
+
+        if (player.IsOnLoan)
+        {
+            return "On Loan";
+        }
+
         if (player.IsSuspended)
         {
             return "Banned";
@@ -1317,6 +1336,8 @@ public partial class SquadOverviewView : UserControl
             "Injured" => "#EF4444",
             "Banned" => "#991B1B",
             "Transfer Agreed" => "#0EA5E9",
+            var value when value.StartsWith("Loaned Out", StringComparison.OrdinalIgnoreCase) => "#F59E0B",
+            var value when value.StartsWith("On Loan", StringComparison.OrdinalIgnoreCase) => "#06B6D4",
             _ => "#10B981"
         };
     }

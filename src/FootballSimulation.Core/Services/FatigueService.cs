@@ -18,7 +18,7 @@ public class FatigueService
 
     public void RecoverTeamForNewMatch(Team team, int? recoveryPoints = null)
     {
-        foreach (var player in team.Players.Concat(team.Substitutes))
+        foreach (var player in team.AllPlayers)
         {
             var recovery = recoveryPoints ?? Random.Shared.Next(
                 MinimumMatchStartRecoveryPoints,
@@ -38,7 +38,7 @@ public class FatigueService
             .ToDictionary(performance => performance.PlayerName, StringComparer.OrdinalIgnoreCase) ?? [];
         var playedMatch = relevantMatch is not null;
 
-        foreach (var player in team.Players.Concat(team.Substitutes).Distinct())
+        foreach (var player in team.AllPlayers.Distinct())
         {
             var performance = performances.GetValueOrDefault(player.Name);
             var recovery = CalculateRecoveryPoints(player, calendarGap, performance, playedMatch);

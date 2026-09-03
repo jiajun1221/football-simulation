@@ -14,6 +14,7 @@ public class FormationLayoutService
             "4-2-3-1 Wide" => FourTwoThreeOneWide,
             "4-2-3-1 Narrow" => FourTwoThreeOneNarrow,
             "4-4-2" => FourFourTwo,
+            "4-4-1-1" => FourFourOneOne,
             "4-2-4" => FourTwoFour,
             "3-5-2" => ThreeFiveTwo,
             "3-5-2 Attack" => ThreeFiveTwoAttack,
@@ -74,6 +75,12 @@ public class FormationLayoutService
         (0.12, 0.67, "LB"), (0.37, 0.70, "CB"), (0.63, 0.70, "CB"), (0.88, 0.67, "RB"),
         (0.14, 0.43, "LM"), (0.38, 0.43, "CM"), (0.62, 0.43, "CM"), (0.86, 0.43, "RM"),
         (0.36, 0.12, "ST"), (0.64, 0.12, "ST"));
+
+    private static readonly IReadOnlyList<PitchPosition> FourFourOneOne = Create(
+        (0.50, 0.93, "GK"),
+        (0.12, 0.67, "LB"), (0.37, 0.70, "CB"), (0.63, 0.70, "CB"), (0.88, 0.67, "RB"),
+        (0.14, 0.43, "LM"), (0.38, 0.43, "CM"), (0.62, 0.43, "CM"), (0.86, 0.43, "RM"),
+        (0.50, 0.25, "CF"), (0.50, 0.09, "ST"));
 
     private static readonly IReadOnlyList<PitchPosition> FourTwoFour = Create(
         (0.50, 0.93, "GK"),
@@ -156,7 +163,7 @@ public class FormationLayoutService
     private static readonly IReadOnlyList<PitchPosition> ThreeFourTwoOne = Create(
         (0.50, 0.93, "GK"),
         (0.24, 0.69, "CB"), (0.50, 0.72, "CB"), (0.76, 0.69, "CB"),
-        (0.12, 0.43, "LM"), (0.38, 0.46, "CM"), (0.62, 0.46, "CM"), (0.88, 0.43, "RM"),
+        (0.12, 0.50, "LWB"), (0.38, 0.46, "CM"), (0.62, 0.46, "CM"), (0.88, 0.50, "RWB"),
         (0.34, 0.28, "CAM"), (0.66, 0.28, "CAM"),
         (0.50, 0.10, "ST"));
 }

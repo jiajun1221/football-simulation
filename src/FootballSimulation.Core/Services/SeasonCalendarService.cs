@@ -29,44 +29,44 @@ public class SeasonCalendarService
 
     private static readonly UclClubDefinition[] ChampionsLeagueClubPool =
     [
+        new("Paris Saint-Germain", "France", 1, 88),
         new("Real Madrid", "Spain", 1, 90),
         new("Manchester City", "England", 1, 90),
         new("Bayern Munich", "Germany", 1, 89),
-        new("Paris Saint-Germain", "France", 1, 88),
-        new("Inter Milan", "Italy", 1, 87),
         new("Liverpool", "England", 1, 87),
-        new("Barcelona", "Spain", 1, 87),
-        new("Borussia Dortmund", "Germany", 1, 85),
+        new("Inter Milan", "Italy", 1, 87),
+        new("Arsenal", "England", 1, 86),
         new("Atletico Madrid", "Spain", 1, 85),
+        new("Barcelona", "Spain", 1, 87),
 
-        new("Arsenal", "England", 2, 86),
-        new("Bayer Leverkusen", "Germany", 2, 84),
-        new("Juventus", "Italy", 2, 84),
-        new("AC Milan", "Italy", 2, 83),
-        new("Benfica", "Portugal", 2, 82),
+        new("Borussia Dortmund", "Germany", 2, 85),
+        new("Roma", "Italy", 2, 81),
+        new("Sporting CP", "Portugal", 2, 80),
+        new("Aston Villa", "England", 2, 80),
         new("Porto", "Portugal", 2, 82),
-        new("Napoli", "Italy", 2, 83),
-        new("RB Leipzig", "Germany", 2, 82),
-        new("Chelsea", "England", 2, 84),
+        new("Manchester United", "England", 2, 82),
+        new("Club Brugge", "Belgium", 2, 76),
+        new("Real Betis", "Spain", 2, 76),
+        new("PSV", "Netherlands", 2, 80),
 
-        new("Ajax", "Netherlands", 3, 80),
-        new("PSV", "Netherlands", 3, 80),
-        new("Sporting CP", "Portugal", 3, 80),
         new("Feyenoord", "Netherlands", 3, 79),
-        new("Celtic", "Scotland", 3, 78),
+        new("Lille", "France", 3, 79),
+        new("Bodo/Glimt", "Norway", 3, 75),
+        new("Napoli", "Italy", 3, 83),
+        new("RB Leipzig", "Germany", 3, 82),
+        new("Villarreal", "Spain", 3, 81),
+        new("Shakhtar Donetsk", "Ukraine", 3, 76),
         new("Galatasaray", "Turkey", 3, 79),
-        new("Monaco", "France", 3, 80),
-        new("Marseille", "France", 3, 79),
-        new("Atalanta", "Italy", 3, 80),
+        new("Fenerbahce", "Turkey", 3, 78),
 
-        new("Club Brugge", "Belgium", 4, 76),
-        new("Salzburg", "Austria", 4, 76),
-        new("Shakhtar Donetsk", "Ukraine", 4, 76),
-        new("Dinamo Zagreb", "Croatia", 4, 74),
-        new("Young Boys", "Switzerland", 4, 74),
-        new("Sparta Prague", "Czech Republic", 4, 73),
-        new("Red Star Belgrade", "Serbia", 4, 73),
-        new("Sturm Graz", "Austria", 4, 72),
+        new("Slavia Prague", "Czech Republic", 4, 74),
+        new("Stuttgart", "Germany", 4, 78),
+        new("LASK", "Austria", 4, 73),
+        new("Como", "Italy", 4, 77),
+        new("Lens", "France", 4, 76),
+        new("Sabah", "Azerbaijan", 4, 67),
+        new("AEK Athens", "Greece", 4, 75),
+        new("Viking", "Norway", 4, 72),
         new("Slovan Bratislava", "Slovakia", 4, 71),
 
         // Reserve clubs fill slots when a user's league team misses UCL qualification after rollover.
@@ -99,7 +99,8 @@ public class SeasonCalendarService
     ];
 
     private static readonly Dictionary<string, UclClubDefinition> ChampionsLeagueClubByName = ChampionsLeagueClubPool
-        .ToDictionary(club => club.Name, StringComparer.OrdinalIgnoreCase);
+        .GroupBy(club => club.Name, StringComparer.OrdinalIgnoreCase)
+        .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
 
     private static readonly Dictionary<CompetitionType, NeutralCompetitionDefinition> NeutralCompetitions = new()
     {
@@ -463,7 +464,7 @@ public class SeasonCalendarService
             .Where(team => team is not null)
             .Cast<Team>()
             .Concat(premierLeagueTeams
-                .OrderByDescending(team => team.Players.Concat(team.Substitutes).DefaultIfEmpty().Average(player => player?.OverallRating ?? 72)))
+                .OrderByDescending(team => team.AllPlayers.DefaultIfEmpty().Average(player => player?.OverallRating ?? 72)))
             .Distinct()
             .Take(4);
     }
@@ -473,6 +474,27 @@ public class SeasonCalendarService
         IReadOnlyCollection<string>? championsLeagueQualifiedTeamNames = null)
     {
         var availableEuropeanTeams = LoadAvailableEuropeanTeamsByName();
+        if (championsLeagueQualifiedTeamNames is null)
+        {
+            var activeLeagueTeams = premierLeagueTeams
+                .Concat(availableEuropeanTeams.Values)
+                .GroupBy(team => team.Name, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
+
+            return ChampionsLeagueClubPool
+                .Take(36)
+                .Select(definition =>
+                {
+                    var team = activeLeagueTeams.GetValueOrDefault(definition.Name) ??
+                        PlaceholderTeamFactory.Create(definition.Name, definition.Strength, venueSuffix: "Arena", country: definition.Country);
+                    return new UclTeamEntry(team, definition.Country, definition.Pot, definition.Strength);
+                })
+                .OrderBy(entry => entry.Pot)
+                .ThenByDescending(entry => entry.Strength)
+                .ThenBy(entry => entry.Team.Name)
+                .ToList();
+        }
+
         var selectedPremierLeagueTeams = SelectChampionsLeagueTeams(premierLeagueTeams, championsLeagueQualifiedTeamNames).ToList();
         var entries = selectedPremierLeagueTeams
             .Select(team =>
@@ -877,7 +899,7 @@ public class SeasonCalendarService
 
     private static int GetTeamStrength(Team team)
     {
-        return (int)Math.Round(team.Players.Concat(team.Substitutes).DefaultIfEmpty().Average(player => player?.OverallRating ?? 75));
+        return (int)Math.Round(team.AllPlayers.DefaultIfEmpty().Average(player => player?.OverallRating ?? 75));
     }
 
     private static IEnumerable<(Team Home, Team Away)> PairTeams(IReadOnlyList<Team> teams)

@@ -292,7 +292,7 @@ public class YouthAcademyService
         }
 
         var player = CreateSeniorPlayer(youthPlayer, team, GetSeasonEndYear(league.Season));
-        team.Substitutes.Add(player);
+        team.Reserves.Add(player);
         RecordAcademyHistory(
             academy,
             youthPlayer,
@@ -359,7 +359,7 @@ public class YouthAcademyService
             return false;
         }
 
-        if (team.Players.Count + team.Substitutes.Count >= MaximumSeniorSquadSize)
+        if (team.AllPlayers.Count() >= MaximumSeniorSquadSize)
         {
             reason = "Senior squad is full.";
             return false;
@@ -519,7 +519,7 @@ public class YouthAcademyService
 
     private static double GetAiPromotionScore(Team team, YouthPlayer player)
     {
-        var squadDepth = team.Players.Concat(team.Substitutes)
+        var squadDepth = team.AllPlayers
             .Count(existing => existing.Position == player.Position);
         var score = player.CurrentOVR + (player.HiddenTruePotential - player.CurrentOVR) * 0.9;
         if (squadDepth <= 4)
@@ -708,7 +708,7 @@ public class YouthAcademyService
 
     private static int GetNextSquadNumber(Team team)
     {
-        var used = team.Players.Concat(team.Substitutes)
+        var used = team.AllPlayers
             .Select(player => player.SquadNumber)
             .ToHashSet();
         for (var number = 12; number <= 99; number++)

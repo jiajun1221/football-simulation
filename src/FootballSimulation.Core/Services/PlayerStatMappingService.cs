@@ -81,6 +81,7 @@ public class PlayerStatMappingService
             record.WeeklyWage,
             record.ReleaseClause,
             MapContractStatus(record.ContractStatus));
+        PositionSuitabilityService.EnsurePositionMetadata(player);
         return player;
     }
 
@@ -123,6 +124,12 @@ public class PlayerStatMappingService
             Age = record.Age,
             PotentialOverall = record.PotentialOverall,
             TransferStatus = MapTransferStatus(record.TransferStatus),
+            IsOnLoan = record.IsOnLoan,
+            ParentClubId = record.ParentClubId?.Trim() ?? string.Empty,
+            ParentClubName = record.ParentClubName?.Trim() ?? string.Empty,
+            LoanClubName = record.LoanClubName?.Trim() ?? string.Empty,
+            LoanEndSeason = record.LoanEndSeason?.Trim() ?? string.Empty,
+            LoanWagePercentage = Math.Clamp(record.LoanWagePercentage ?? 0, 0, 100),
             Role = MapRole(record.Role, overall, record.Age, position),
             RejectTransferOffers = record.RejectTransferOffers == true,
             Form = form,
@@ -164,6 +171,7 @@ public class PlayerStatMappingService
             record.WeeklyWage,
             record.ReleaseClause,
             MapContractStatus(record.ContractStatus));
+        PositionSuitabilityService.EnsurePositionMetadata(player);
         return player;
     }
 

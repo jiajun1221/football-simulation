@@ -73,7 +73,38 @@ public class TransferMarketService
         }
 
         ProcessExpiredContracts(state, GetSeasonEndYear(state.ActiveSeason));
+        new LoanService().InitializeFromSquads(state);
         return state;
+    }
+
+    public LoanAgreement LoanPlayer(
+        TransferMarketState state,
+        string parentLeagueId,
+        Team parentClub,
+        string borrowerLeagueId,
+        Team borrowerClub,
+        Player player,
+        string endSeason,
+        int currentRound,
+        decimal loanFee = 0,
+        int wagePercentage = 100)
+    {
+        return new LoanService().CreateLoan(
+            state,
+            parentLeagueId,
+            parentClub,
+            borrowerLeagueId,
+            borrowerClub,
+            player,
+            endSeason,
+            currentRound,
+            loanFee,
+            wagePercentage);
+    }
+
+    public int ReturnExpiredLoans(TransferMarketState state, string completedSeason, int currentRound = 0)
+    {
+        return new LoanService().ReturnExpiredLoans(state, completedSeason, currentRound);
     }
 
     public void BindActiveLeague(TransferMarketState state, League activeLeague)
@@ -140,7 +171,7 @@ public class TransferMarketService
                     record.PlayerName.Equals(player.Name, StringComparison.OrdinalIgnoreCase)))
                 .ToList())
             {
-                var alreadyInSquad = team.Players.Concat(team.Substitutes).Any(existing =>
+                var alreadyInSquad = team.AllPlayers.Any(existing =>
                     existing.PlayerId.Equals(player.PlayerId, StringComparison.OrdinalIgnoreCase) ||
                     existing.Name.Equals(player.Name, StringComparison.OrdinalIgnoreCase));
                 if (!alreadyInSquad)
@@ -148,7 +179,7 @@ public class TransferMarketService
                     player.ContractEndYear = Math.Max(player.ContractEndYear ?? 0, seasonEndYear + 3);
                     PlayerContractService.EnsureContract(player, activeLeague.LeagueId, seasonEndYear);
                     player.TransferStatus = PlayerTransferStatus.None;
-                    team.Substitutes.Add(player);
+                    team.Reserves.Add(player);
                 }
 
                 state.FreeAgents.Remove(player);
@@ -183,12 +214,41 @@ public class TransferMarketService
         IEnumerable<PlayerSeasonStats>? stats = null)
     {
         var clubId = GetClubId(leagueId, team.Name);
-        return GetAllListings(state, stats)
+        var listings = GetAllListings(state, stats)
             .Where(listing =>
                 listing.LeagueId.Equals(leagueId, StringComparison.OrdinalIgnoreCase) &&
                 (ReferenceEquals(listing.Team, team) ||
                     GetClubId(listing.LeagueId, listing.Team.Name).Equals(clubId, StringComparison.OrdinalIgnoreCase) ||
                     listing.Team.Name.Equals(team.Name, StringComparison.OrdinalIgnoreCase)))
+            .ToList();
+
+        var leagueName = state.Leagues.FirstOrDefault(league => league.LeagueId.Equals(leagueId, StringComparison.OrdinalIgnoreCase))?.LeagueName
+            ?? leagueId;
+        foreach (var player in team.AllPlayers.Where(player => player.IsOnLoan).Concat(team.LoanedOutPlayers))
+        {
+            if (listings.Any(listing => ReferenceEquals(listing.Player, player)))
+            {
+                continue;
+            }
+
+            EnsurePlayerId(player, leagueId, team.Name);
+            PlayerContractService.EnsureContract(player, leagueId, GetSeasonEndYear(state.ActiveSeason));
+            var marketValue = _valueCalculator.CalculateMarketValue(player, leagueId, stats);
+            listings.Add(new TransferPlayerListing(
+                player,
+                team,
+                leagueId,
+                leagueName,
+                marketValue,
+                marketValue,
+                team.LoanedOutPlayers.Contains(player) ? "Loaned Out" : "On Loan",
+                player.WeeklyWage ?? PlayerContractService.EstimateWeeklyWage(player, leagueId),
+                player.ContractEndYear,
+                PlayerContractService.GetYearsRemaining(player, GetSeasonEndYear(state.ActiveSeason)),
+                GetContractStatusText(player)));
+        }
+
+        return listings
             .OrderByDescending(listing => listing.Player.OverallRating)
             .ThenBy(listing => listing.Player.Name)
             .ToList();
@@ -202,7 +262,7 @@ public class TransferMarketService
     {
         var userFinance = _financeService.GetOrCreateFinance(state, activeLeague.LeagueId, selectedTeam);
         var weakPositions = GetWeakPositions(selectedTeam);
-        var ownPlayerIds = selectedTeam.Players.Concat(selectedTeam.Substitutes)
+        var ownPlayerIds = selectedTeam.AllPlayers
             .Select(player => player.PlayerId)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
@@ -400,6 +460,105 @@ public class TransferMarketService
     public void GenerateAiOffersForUserPlayers(TransferMarketState state, League activeLeague, Team selectedTeam, int currentRound)
     {
         EvaluateListedPlayersForOffers(state, activeLeague, selectedTeam, currentRound);
+        GenerateAiLoanRequestForYoungPlayer(state, activeLeague, selectedTeam, currentRound);
+    }
+
+    public TransferOffer CreateAiLoanRequestForUserPlayer(
+        TransferMarketState state,
+        League activeLeague,
+        Team selectedTeam,
+        Player player,
+        int currentRound)
+    {
+        if (player.Age is null or > 23)
+        {
+            throw new InvalidOperationException("AI clubs only request development loans for players aged 23 or younger.");
+        }
+
+
+        if (!LoanEligibilityService.CanJoinOnLoan(player, out var eligibilityReason))
+        {
+            throw new InvalidOperationException(eligibilityReason);
+        }
+
+        if (player.IsOnLoan || selectedTeam.LoanedOutPlayers.Any(candidate =>
+                candidate.PlayerId.Equals(player.PlayerId, StringComparison.OrdinalIgnoreCase)))
+        {
+            throw new InvalidOperationException($"{player.Name} is already on loan.");
+        }
+
+        if (HasActiveOfferForPlayer(state, player.PlayerId))
+        {
+            throw new InvalidOperationException($"{player.Name} already has an active transfer deal.");
+        }
+
+        var buyer = SelectAiBuyerForPlayer(state, selectedTeam, player, 0);
+        if (buyer is null)
+        {
+            throw new InvalidOperationException("No AI club currently needs this player.");
+        }
+
+        var borrower = buyer.Value;
+        var borrowerAverage = !borrower.Team.AllPlayers.Any()
+            ? 70
+            : borrower.Team.AllPlayers.Average(candidate => candidate.OverallRating);
+        var wagePercentage = player.OverallRating >= borrowerAverage ? 70 : 50;
+        var offer = new TransferOffer
+        {
+            PlayerId = player.PlayerId,
+            PlayerName = player.Name,
+            FromLeagueId = activeLeague.LeagueId,
+            FromClubId = GetClubId(activeLeague.LeagueId, selectedTeam.Name),
+            FromClubName = selectedTeam.Name,
+            ToLeagueId = borrower.LeagueId,
+            ToClubId = GetClubId(borrower.LeagueId, borrower.Team.Name),
+            ToClubName = borrower.Team.Name,
+            Fee = 0,
+            Status = OfferStatus.Pending,
+            CreatedRound = currentRound,
+            ExpiresRound = currentRound + OfferLifetimeRounds,
+            IsUserOffer = false,
+            IsLoanOffer = true,
+            LoanWagePercentage = wagePercentage,
+            LoanEndSeason = state.ActiveSeason,
+            Message = $"{borrower.Team.Name} request {player.Name} on loan until the end of {state.ActiveSeason}, paying {wagePercentage}% of his wage."
+        };
+
+        state.Offers.Add(offer);
+        AddNotification(state, TransferNotificationType.AiOfferReceived, offer.Message, currentRound, offer.OfferId);
+        return offer;
+    }
+
+    private void GenerateAiLoanRequestForYoungPlayer(TransferMarketState state, League activeLeague, Team selectedTeam, int currentRound)
+    {
+        if (!_windowService.IsWindowOpen(activeLeague, currentRound) || _random.NextDouble() > 0.45)
+        {
+            return;
+        }
+
+        var candidate = selectedTeam.AllPlayers
+            .Where(player => player.Age is <= 23)
+            .Where(player => player.Role is PlayerRole.Prospect or PlayerRole.Backup or PlayerRole.Rotation)
+            .Where(player => !player.IsOnLoan && !player.RejectTransferOffers)
+            .Where(player => LoanEligibilityService.CanJoinOnLoan(player, out _))
+            .Where(player => !HasActiveOfferForPlayer(state, player.PlayerId))
+            .Where(player => !HasTransferredThisWindow(state, activeLeague, player, currentRound))
+            .OrderBy(player => player.Age)
+            .ThenBy(player => player.OverallRating)
+            .FirstOrDefault();
+
+        if (candidate is not null)
+        {
+            try
+            {
+                CreateAiLoanRequestForUserPlayer(state, activeLeague, selectedTeam, candidate, currentRound);
+            }
+            catch (InvalidOperationException)
+            {
+                // A development-loan request is optional. If no AI club has a genuine
+                // squad need, the round continues without manufacturing an offer.
+            }
+        }
     }
 
     public IReadOnlyList<TransferOffer> EvaluateListedPlayersForOffers(
@@ -411,7 +570,7 @@ public class TransferMarketService
         var existingPlayerIds = GetPlayersWithActiveOffers(state);
         var createdOffers = new List<TransferOffer>();
         var maxOffers = _random.Next(1, 4);
-        var targets = selectedTeam.Players.Concat(selectedTeam.Substitutes)
+        var targets = selectedTeam.AllPlayers
             .Where(player => !player.RejectTransferOffers)
             .Where(player => player.TransferStatus is not PlayerTransferStatus.Transferred and not PlayerTransferStatus.RecentlyTransferred)
             .Where(player => !HasTransferredThisWindow(state, activeLeague, player, currentRound))
@@ -514,7 +673,7 @@ public class TransferMarketService
         foreach (var league in state.Leagues.Where(league =>
             !league.LeagueId.Equals(activeLeagueId, StringComparison.OrdinalIgnoreCase)))
         {
-            foreach (var player in league.Teams.SelectMany(team => team.Players.Concat(team.Substitutes)))
+            foreach (var player in league.Teams.SelectMany(team => team.AllPlayers))
             {
                 ApplyPassiveGrowth(player, growthRounds);
             }
@@ -574,8 +733,17 @@ public class TransferMarketService
             PlayerRole.Rotation => 1,
             _ => 0
         };
+        var loanPerformanceBonus = player.IsOnLoan
+            ? player.FormStatus switch
+            {
+                PlayerFormStatus.Excellent => 10,
+                PlayerFormStatus.Good => 5,
+                PlayerFormStatus.Poor or PlayerFormStatus.VeryPoor => -3,
+                _ => 1
+            }
+            : 0;
 
-        return Math.Max(0, agePoints + potentialBonus + roleBonus);
+        return Math.Max(0, agePoints + potentialBonus + roleBonus + loanPerformanceBonus);
     }
 
     private static bool CanPassivelyGrow(Player player)
@@ -774,7 +942,7 @@ public class TransferMarketService
         var isWonderkid = player.Age is <= 23 && player.PotentialOverall >= 86;
         var isUrgent = needScore >= 18 ||
             windowPhase is TransferWindowPhase.SummerDeadline or TransferWindowPhase.JanuaryDeadline ||
-            buyer.Team.Players.Concat(buyer.Team.Substitutes).Any(candidate => candidate.Position == player.Position && candidate.IsInjured);
+            buyer.Team.AllPlayers.Any(candidate => candidate.Position == player.Position && candidate.IsInjured);
         var modifier = 0.90m + (decimal)_random.NextDouble() * 0.30m;
 
         if (buyer.IsEliteClub)
@@ -842,7 +1010,7 @@ public class TransferMarketService
         TransferWindowPhase windowPhase)
     {
         var player = listing.Player;
-        var positionGroup = buyer.Team.Players.Concat(buyer.Team.Substitutes)
+        var positionGroup = buyer.Team.AllPlayers
             .Where(candidate => candidate.Position == player.Position)
             .ToList();
         var bestCurrent = positionGroup.Count == 0 ? 0 : positionGroup.Max(candidate => candidate.OverallRating);
@@ -873,7 +1041,7 @@ public class TransferMarketService
         }
 
         var player = listing.Player;
-        var remainingRoster = listing.Team.Players.Concat(listing.Team.Substitutes)
+        var remainingRoster = listing.Team.AllPlayers
             .Where(candidate => candidate.PlayerId != player.PlayerId)
             .ToList();
         if (remainingRoster.Count < 18)
@@ -1141,7 +1309,7 @@ public class TransferMarketService
 
     private static double GetSquadNeedScore(Team team, Player player)
     {
-        var samePositionPlayers = team.Players.Concat(team.Substitutes)
+        var samePositionPlayers = team.AllPlayers
             .Where(candidate => candidate.Position == player.Position)
             .ToList();
         var averageRating = samePositionPlayers.Count == 0
@@ -1242,6 +1410,35 @@ public class TransferMarketService
     public void AcceptOffer(TransferMarketState state, string offerId, League activeLeague, int currentRound)
     {
         var offer = state.Offers.First(item => item.OfferId == offerId);
+        if (offer.IsLoanOffer)
+        {
+            if (offer.Status is OfferStatus.Completed or OfferStatus.Rejected or OfferStatus.Withdrawn or OfferStatus.Expired)
+            {
+                return;
+            }
+
+            var parentClub = FindTeam(state, offer.FromLeagueId, offer.FromClubName);
+            var borrowerClub = FindTeam(state, offer.ToLeagueId, offer.ToClubName);
+            var loanPlayer = parentClub.AllPlayers.First(player =>
+                player.PlayerId.Equals(offer.PlayerId, StringComparison.OrdinalIgnoreCase));
+            new LoanService().CreateLoan(
+                state,
+                offer.FromLeagueId,
+                parentClub,
+                offer.ToLeagueId,
+                borrowerClub,
+                loanPlayer,
+                string.IsNullOrWhiteSpace(offer.LoanEndSeason) ? state.ActiveSeason : offer.LoanEndSeason,
+                currentRound,
+                offer.Fee,
+                offer.LoanWagePercentage);
+            offer.Status = OfferStatus.Completed;
+            offer.CompletedRound = currentRound;
+            offer.Message = $"Loan accepted: {offer.PlayerName} joined {offer.ToClubName} until the end of {offer.LoanEndSeason}.";
+            AddNotification(state, TransferNotificationType.UserOfferAccepted, offer.Message, currentRound, offer.OfferId);
+            return;
+        }
+
         var listing = GetAllListings(state, activeLeague.PlayerStats).FirstOrDefault(item => item.Player.PlayerId == offer.PlayerId);
         if (listing is not null)
         {
@@ -1396,12 +1593,11 @@ public class TransferMarketService
         Team team,
         Player player)
     {
-        var candidates = team.Players
-            .Concat(team.Substitutes)
+        var candidates = team.AllPlayers
             .Concat(state.Leagues
                 .SelectMany(league => league.Teams)
                 .Where(candidateTeam => candidateTeam.Name.Equals(team.Name, StringComparison.OrdinalIgnoreCase))
-                .SelectMany(candidateTeam => candidateTeam.Players.Concat(candidateTeam.Substitutes)))
+                .SelectMany(candidateTeam => candidateTeam.AllPlayers))
             .Append(player)
             .Distinct()
             .ToList();
@@ -1653,6 +1849,11 @@ public class TransferMarketService
     {
         var sellingTeam = listing.Team;
         var player = listing.Player;
+        if (player.IsOnLoan)
+        {
+            AddNotification(state, TransferNotificationType.Info, $"{player.Name} is on loan and cannot be transferred permanently until returning to {player.ParentClubName}.", currentRound);
+            return false;
+        }
         var buyerFinance = _financeService.GetOrCreateFinance(state, toLeagueId, buyingTeam);
         var sellerFinance = _financeService.GetOrCreateFinance(state, listing.LeagueId, sellingTeam);
         var proposedWage = negotiatedWeeklyWage ?? PlayerContractService.EstimateWeeklyWage(player, toLeagueId);
@@ -1836,7 +2037,7 @@ public class TransferMarketService
 
         foreach (var player in state.Leagues
             .SelectMany(league => league.Teams)
-            .SelectMany(team => team.Players.Concat(team.Substitutes))
+            .SelectMany(team => team.AllPlayers)
             .Concat(state.FreeAgents))
         {
             if (player.TransferStatus == PlayerTransferStatus.RecentlyTransferred &&
@@ -1956,7 +2157,7 @@ public class TransferMarketService
 
         if (!TeamContainsPlayer(toTeam, player))
         {
-            toTeam.Substitutes.Add(player);
+            toTeam.Reserves.Add(player);
         }
         EnsureUniqueSquadNumbers(toTeam);
 
@@ -1979,7 +2180,7 @@ public class TransferMarketService
         ArgumentNullException.ThrowIfNull(team);
 
         var usedNumbers = new HashSet<int>();
-        foreach (var player in team.Players.Concat(team.Substitutes))
+        foreach (var player in team.AllPlayers)
         {
             if (player.SquadNumber is >= 1 and <= 99 && usedNumbers.Add(player.SquadNumber))
             {
@@ -2000,7 +2201,7 @@ public class TransferMarketService
 
     private static Player? FindPlayerInTeam(Team team, string playerId)
     {
-        return team.Players.Concat(team.Substitutes)
+        return team.AllPlayers
             .FirstOrDefault(candidate => candidate.PlayerId.Equals(playerId, StringComparison.OrdinalIgnoreCase));
     }
 
@@ -2040,7 +2241,7 @@ public class TransferMarketService
 
     private static void RemovePlayerFromTeam(Team team, Player player)
     {
-        if (team.Substitutes.Remove(player))
+        if (team.Reserves.Remove(player) || team.Substitutes.Remove(player))
         {
             return;
         }
@@ -2096,7 +2297,7 @@ public class TransferMarketService
 
     private static bool TeamContainsPlayer(Team team, Player player)
     {
-        return team.Players.Concat(team.Substitutes)
+        return team.AllPlayers
             .Any(candidate => candidate.PlayerId.Equals(player.PlayerId, StringComparison.OrdinalIgnoreCase));
     }
 
@@ -2136,7 +2337,7 @@ public class TransferMarketService
     {
         var clubListings = state.Leagues
             .SelectMany(league => league.Teams.SelectMany(team =>
-                team.Players.Concat(team.Substitutes).Select(player =>
+                team.AllPlayers.Where(player => !player.IsOnLoan).Select(player =>
                 {
                     EnsurePlayerId(player, league.LeagueId, team.Name);
                     PlayerContractService.EnsureContract(player, league.LeagueId, GetSeasonEndYear(league.Season));
@@ -2278,7 +2479,7 @@ public class TransferMarketService
                 position => position,
                 position =>
                 {
-                    var players = selectedTeam.Players.Concat(selectedTeam.Substitutes)
+                    var players = selectedTeam.AllPlayers
                         .Where(player => player.Position == position)
                         .ToList();
                     return players.Count == 0 ? 100 : 82 - players.Average(player => player.OverallRating);
@@ -2289,7 +2490,7 @@ public class TransferMarketService
     {
         var weakness = weakPositions.TryGetValue(listing.Player.Position, out var value) ? value : 0;
         var ageBonus = listing.Player.Age is <= 23 ? 5 : 0;
-        var ratingGap = listing.Player.OverallRating - selectedTeam.Players.Concat(selectedTeam.Substitutes)
+        var ratingGap = listing.Player.OverallRating - selectedTeam.AllPlayers
             .Where(player => player.Position == listing.Player.Position)
             .DefaultIfEmpty()
             .Average(player => player?.OverallRating ?? 70);
@@ -2333,7 +2534,7 @@ public class TransferMarketService
 
     private static double GetTeamAverageRating(Team team)
     {
-        return team.Players.Concat(team.Substitutes)
+        return team.AllPlayers
             .DefaultIfEmpty()
             .Average(player => player?.OverallRating ?? 72);
     }
@@ -2371,7 +2572,7 @@ public class TransferMarketService
     {
         return state.Leagues
             .SelectMany(league => league.Teams)
-            .SelectMany(team => team.Players.Concat(team.Substitutes))
+            .SelectMany(team => team.AllPlayers)
             .Concat(state.FreeAgents)
             .FirstOrDefault(player => player.PlayerId.Equals(playerId, StringComparison.OrdinalIgnoreCase));
     }
@@ -2539,7 +2740,7 @@ public class TransferMarketService
         {
             foreach (var team in league.Teams)
             {
-                foreach (var player in team.Players.Concat(team.Substitutes).ToList())
+                foreach (var player in team.AllPlayers.ToList())
                 {
                     PlayerContractService.EnsureContract(player, league.LeagueId, seasonEndYear);
                     if (player.ContractStatus != PlayerContractStatus.FreeAgent)
@@ -2589,7 +2790,7 @@ public class TransferMarketService
         }
 
         var sourceRows = sourceTeams
-            .SelectMany(team => team.Players.Concat(team.Substitutes)
+            .SelectMany(team => team.AllPlayers
                 .Select(player => new
                 {
                     TeamKey = NormalizeKey(team.Name),
@@ -2612,7 +2813,7 @@ public class TransferMarketService
 
         foreach (var team in teams)
         {
-            foreach (var player in team.Players.Concat(team.Substitutes))
+            foreach (var player in team.AllPlayers)
             {
                 var teamKey = NormalizeKey(team.Name);
                 var playerKey = NormalizeKey(player.Name);
@@ -2670,7 +2871,7 @@ public class TransferMarketService
     {
         foreach (var team in teams)
         {
-            foreach (var player in team.Players.Concat(team.Substitutes))
+            foreach (var player in team.AllPlayers)
             {
                 EnsurePlayerId(player, leagueId, team.Name);
                 player.ClubId = GetClubId(leagueId, team.Name);

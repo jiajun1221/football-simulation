@@ -710,7 +710,7 @@ public class SeasonRolloverServiceTests
 
         SeasonRolloverService.ReplenishAiClubRosters(state, selectedTeam, 2031);
 
-        var restoredRoster = juventus.Players.Concat(juventus.Substitutes).ToList();
+        var restoredRoster = juventus.AllPlayers.ToList();
         Assert.Equal(18, restoredRoster.Count);
         Assert.DoesNotContain(restoredRoster, player => player.Name.Contains("Emergency Player"));
         Assert.All(restoredRoster.Skip(5), player =>

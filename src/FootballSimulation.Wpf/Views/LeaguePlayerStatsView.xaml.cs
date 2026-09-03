@@ -76,8 +76,7 @@ public partial class LeaguePlayerStatsView : UserControl
     private void ShowOtherClub(Team team)
     {
         OtherClubFormationPanel.LoadTeam(team);
-        var firstPlayer = team.Players
-            .Concat(team.Substitutes)
+        var firstPlayer = team.AllPlayers
             .OrderByDescending(player => player.IsStarter || player.IsOnPitch)
             .ThenByDescending(player => player.OverallRating)
             .FirstOrDefault();
@@ -98,8 +97,7 @@ public partial class LeaguePlayerStatsView : UserControl
         OtherClubWidthTextBlock.Text = $"Width: {FormatTacticalLevel(team.Tactics.Width)}";
         OtherClubPressingTextBlock.Text = $"Pressing: {FormatTacticalLevel(team.Tactics.PressingIntensity)}";
 
-        var squad = team.Players
-            .Concat(team.Substitutes)
+        var squad = team.AllPlayers
             .GroupBy(player => string.IsNullOrWhiteSpace(player.PlayerId) ? player.Name : player.PlayerId, StringComparer.OrdinalIgnoreCase)
             .Select(group => group.First())
             .ToList();
@@ -328,8 +326,7 @@ public partial class LeaguePlayerStatsView : UserControl
         var team = _state.League?.Teams
             .FirstOrDefault(team => string.Equals(team.Name, stat.TeamName, StringComparison.OrdinalIgnoreCase));
 
-        return team?.Players
-            .Concat(team.Substitutes)
+        return team?.AllPlayers
             .FirstOrDefault(player => string.Equals(player.Name, stat.PlayerName, StringComparison.OrdinalIgnoreCase));
     }
 

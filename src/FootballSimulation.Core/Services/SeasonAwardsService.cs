@@ -570,11 +570,11 @@ public class SeasonAwardsService
     private static Player? FindPlayer(League league, string playerId, string playerName)
     {
         return league.Teams
-            .SelectMany(team => team.Players.Concat(team.Substitutes))
+            .SelectMany(team => team.AllPlayers)
             .FirstOrDefault(player => !string.IsNullOrWhiteSpace(playerId) &&
                     player.PlayerId.Equals(playerId, StringComparison.OrdinalIgnoreCase)) ??
             league.Teams
-                .SelectMany(team => team.Players.Concat(team.Substitutes))
+                .SelectMany(team => team.AllPlayers)
                 .FirstOrDefault(player => player.Name.Equals(playerName, StringComparison.OrdinalIgnoreCase));
     }
 
@@ -614,7 +614,7 @@ public class SeasonAwardsService
             .Select(team => new
             {
                 TeamName = team.Name,
-                Strength = team.Players.Concat(team.Substitutes).DefaultIfEmpty().Average(player => player?.OverallRating ?? 70)
+                Strength = team.AllPlayers.DefaultIfEmpty().Average(player => player?.OverallRating ?? 70)
             })
             .OrderByDescending(item => item.Strength)
             .Select((item, index) => new { item.TeamName, StrengthRank = index + 1 })

@@ -92,6 +92,9 @@ public class TransferOffer
     public int? AgreementRound { get; set; }
     public int? CompletedRound { get; set; }
     public bool IsUserOffer { get; set; }
+    public bool IsLoanOffer { get; set; }
+    public int LoanWagePercentage { get; set; } = 100;
+    public string LoanEndSeason { get; set; } = string.Empty;
     public string Message { get; set; } = string.Empty;
 }
 
@@ -134,6 +137,23 @@ public class TransferLeagueState
     public List<Team> Teams { get; set; } = [];
 }
 
+public class LoanAgreement
+{
+    public string LoanId { get; set; } = Guid.NewGuid().ToString("N");
+    public string PlayerId { get; set; } = string.Empty;
+    public string PlayerName { get; set; } = string.Empty;
+    public string ParentLeagueId { get; set; } = string.Empty;
+    public string ParentClubId { get; set; } = string.Empty;
+    public string ParentClubName { get; set; } = string.Empty;
+    public string BorrowerLeagueId { get; set; } = string.Empty;
+    public string BorrowerClubId { get; set; } = string.Empty;
+    public string BorrowerClubName { get; set; } = string.Empty;
+    public string EndSeason { get; set; } = string.Empty;
+    public decimal LoanFee { get; set; }
+    public int WagePercentage { get; set; } = 100;
+    public bool IsActive { get; set; } = true;
+}
+
 public class TransferMarketState
 {
     public string ActiveSeason { get; set; } = string.Empty;
@@ -142,6 +162,7 @@ public class TransferMarketState
     public List<TransferOffer> Offers { get; set; } = [];
     public List<TransferNotification> Inbox { get; set; } = [];
     public List<TransferHistoryItem> TransferHistory { get; set; } = [];
+    public List<LoanAgreement> LoanAgreements { get; set; } = [];
     public List<string> ShortlistedPlayerIds { get; set; } = [];
     public List<Player> FreeAgents { get; set; } = [];
     public int LastAiActivityRound { get; set; }

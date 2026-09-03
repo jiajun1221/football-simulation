@@ -41,9 +41,27 @@ public static class PositionSuitabilityService
         player.SecondaryPositions = preferredPositions
             .Skip(1)
             .Concat(player.SecondaryPositions.SelectMany(NormalizeExactPositions))
+            .Concat(GetCommonSecondaryPositions(normalizedPreferred))
             .Where(position => position.Length > 0 && position != player.PreferredPosition)
-            .Distinct()
+            .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
+    }
+
+    private static IReadOnlyList<string> GetCommonSecondaryPositions(string preferredPosition)
+    {
+        return preferredPosition switch
+        {
+            "LB" => ["LWB"],
+            "RB" => ["RWB"],
+            "LWB" => ["LB", "LM"],
+            "RWB" => ["RB", "RM"],
+            "LW" => ["LM"],
+            "RW" => ["RM"],
+            "LM" => ["LW", "LWB"],
+            "RM" => ["RW", "RWB"],
+            "CAM" => ["LM", "RM"],
+            _ => []
+        };
     }
 
     public static string NormalizeExactPosition(string? position)

@@ -11,7 +11,8 @@ public static class FormationSlotService
             "4-3-3 Flat" => ["GK", "LB", "CB", "CB", "RB", "CM", "CM", "CM", "LW", "ST", "RW"],
             "4-2-3-1 Wide" => ["GK", "LB", "CB", "CB", "RB", "CDM", "CDM", "LW", "CAM", "RW", "ST"],
             "4-2-3-1 Narrow" => ["GK", "LB", "CB", "CB", "RB", "CDM", "CDM", "CAM", "CAM", "CAM", "ST"],
-            "4-4-2" => ["GK", "LB", "CB", "CB", "RB", "CM", "CM", "CM", "CM", "ST", "ST"],
+            "4-4-2" => ["GK", "LB", "CB", "CB", "RB", "LM", "CM", "CM", "RM", "ST", "ST"],
+            "4-4-1-1" => ["GK", "LB", "CB", "CB", "RB", "LM", "CM", "CM", "RM", "CF", "ST"],
             "4-2-4" => ["GK", "LB", "CB", "CB", "RB", "CM", "CM", "LW", "ST", "ST", "RW"],
             "3-5-2" => ["GK", "CB", "CB", "CB", "LWB", "CDM", "CM", "CDM", "RWB", "ST", "ST"],
             "3-5-2 Attack" => ["GK", "CB", "CB", "CB", "LWB", "CM", "CAM", "CM", "RWB", "ST", "ST"],
@@ -25,7 +26,7 @@ public static class FormationSlotService
             "5-4-1" => ["GK", "LWB", "CB", "CB", "CB", "RWB", "LM", "CM", "CM", "RM", "ST"],
             "5-2-2-1" => ["GK", "LWB", "CB", "CB", "CB", "RWB", "CDM", "CDM", "CAM", "CAM", "ST"],
             "4-1-4-1 Defensive" => ["GK", "LB", "CB", "CB", "RB", "CDM", "LM", "CM", "CM", "RM", "ST"],
-            "3-4-2-1" => ["GK", "CB", "CB", "CB", "LM", "CM", "CM", "RM", "CAM", "CAM", "ST"],
+            "3-4-2-1" => ["GK", "CB", "CB", "CB", "LWB", "CM", "CM", "RWB", "CAM", "CAM", "ST"],
             _ => ["GK", "LB", "CB", "CB", "RB", "CDM", "CM", "CM", "LW", "ST", "RW"]
         };
     }

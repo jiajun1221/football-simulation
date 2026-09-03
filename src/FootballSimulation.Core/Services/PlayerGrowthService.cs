@@ -18,7 +18,7 @@ public class PlayerGrowthService
                 : string.Equals(performance.TeamName, match.AwayTeam.Name, StringComparison.OrdinalIgnoreCase)
                     ? match.AwayTeam
                     : null;
-            var player = team?.Players.Concat(team.Substitutes)
+            var player = team?.AllPlayers
                 .FirstOrDefault(candidate => string.Equals(candidate.Name, performance.PlayerName, StringComparison.OrdinalIgnoreCase));
 
             if (player is null || !PlayerPlayed(match, performance))
@@ -32,7 +32,7 @@ public class PlayerGrowthService
 
     private static void ResetLastMatchGrowth(Team team)
     {
-        foreach (var player in team.Players.Concat(team.Substitutes))
+        foreach (var player in team.AllPlayers)
         {
             player.LastMatchGrowthPoints = 0;
             player.LastMatchOverallIncrease = 0;

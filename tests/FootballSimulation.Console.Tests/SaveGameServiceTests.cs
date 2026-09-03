@@ -131,15 +131,15 @@ public class SaveGameServiceTests
         var teams = dataService.LoadTeams(definition);
         var league = new GameSessionService().CreateLeague(definition, teams);
         var selectedTeam = league.Teams.Single(team => team.Name == "Chelsea");
-        var expectedAges = selectedTeam.Players.Concat(selectedTeam.Substitutes)
+        var expectedAges = selectedTeam.AllPlayers
             .ToDictionary(player => player.Name, player => player.Age);
-        var expectedFlagPaths = selectedTeam.Players.Concat(selectedTeam.Substitutes)
+        var expectedFlagPaths = selectedTeam.AllPlayers
             .ToDictionary(player => player.Name, player => player.FlagImagePath);
-        var expectedContractYears = selectedTeam.Players.Concat(selectedTeam.Substitutes)
+        var expectedContractYears = selectedTeam.AllPlayers
             .ToDictionary(player => player.Name, player => player.ContractEndYear);
-        var expectedPreferredPositions = selectedTeam.Players.Concat(selectedTeam.Substitutes)
+        var expectedPreferredPositions = selectedTeam.AllPlayers
             .ToDictionary(player => player.Name, player => player.PreferredPosition);
-        foreach (var player in league.Teams.SelectMany(team => team.Players.Concat(team.Substitutes)))
+        foreach (var player in league.Teams.SelectMany(team => team.AllPlayers))
         {
             player.Age = null;
             player.Position = Position.Midfielder;
@@ -159,21 +159,15 @@ public class SaveGameServiceTests
         var restoredLeague = SaveGameService.CreateLeague(saveData);
         var restoredChelsea = restoredLeague.Teams.Single(team => team.Name == "Chelsea");
 
-        Assert.All(restoredLeague.Teams.SelectMany(team => team.Players.Concat(team.Substitutes)), player =>
+        Assert.All(restoredLeague.Teams.SelectMany(team => team.AllPlayers), player =>
         {
             Assert.NotNull(player.Age);
             Assert.InRange(player.Age!.Value, 15, 45);
         });
-        foreach (var player in restoredChelsea.Players.Concat(restoredChelsea.Substitutes))
+        foreach (var player in restoredChelsea.AllPlayers)
         {
             Assert.Equal(expectedAges[player.Name], player.Age);
-            var isJoaoPedro = player.PlayerId.Contains("joao-pedro", StringComparison.OrdinalIgnoreCase) ||
-                (player.Name.Contains("Jo", StringComparison.OrdinalIgnoreCase) &&
-                    player.Name.Contains("Pedro", StringComparison.OrdinalIgnoreCase));
-            var expectedPreferredPosition = isJoaoPedro
-                ? "CF"
-                : expectedPreferredPositions[player.Name];
-            Assert.Equal(expectedPreferredPosition, player.PreferredPosition);
+            Assert.Equal(expectedPreferredPositions[player.Name], player.PreferredPosition);
             Assert.Equal(expectedFlagPaths[player.Name], player.FlagImagePath);
             Assert.Equal(expectedContractYears[player.Name], player.ContractEndYear);
             Assert.NotNull(player.WeeklyWage);
@@ -424,7 +418,7 @@ public class SaveGameServiceTests
         var dataService = new LeagueDataService();
         var teams = dataService.LoadTeams(LeagueDataService.DefaultLeagueId);
         var selectedTeam = teams.Single(team => team.Name == "Chelsea");
-        var benficaPlaceholder = PlaceholderTeamFactory.Create("Benfica", 82, venueSuffix: "Arena", country: "Portugal");
+        var portoPlaceholder = PlaceholderTeamFactory.Create("Porto", 82, venueSuffix: "Arena", country: "Portugal");
         var league = new League
         {
             LeagueId = LeagueDataService.DefaultLeagueId,
@@ -439,16 +433,15 @@ public class SaveGameServiceTests
                     CalendarRound = 1,
                     RoundNumber = 1,
                     RoundName = "League Phase MD1",
-                    HomeTeam = benficaPlaceholder,
+                    HomeTeam = portoPlaceholder,
                     AwayTeam = selectedTeam
                 }
             ]
         };
-        var sourceBenfica = dataService.LoadSquadSourceDefinitions()
+        var sourcePorto = dataService.LoadSquadSourceDefinitions()
             .SelectMany(dataService.LoadTeams)
-            .Single(team => team.Name == "Benfica");
-        var sourceBenficaNames = sourceBenfica.Players
-            .Concat(sourceBenfica.Substitutes)
+            .Single(team => team.Name == "Porto");
+        var sourcePortoNames = sourcePorto.AllPlayers
             .Select(player => player.Name)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
@@ -457,11 +450,11 @@ public class SaveGameServiceTests
             saveGameService.SaveGame(1, SaveGameService.CreateSaveData(league, selectedTeam));
 
             var loadedData = saveGameService.LoadGame(1);
-            var restoredBenfica = loadedData!.Fixtures.Single(fixture => fixture.Competition == CompetitionType.ChampionsLeague).HomeTeam;
-            var restoredNames = restoredBenfica.Players.Concat(restoredBenfica.Substitutes).Select(player => player.Name).ToList();
+            var restoredPorto = loadedData!.Fixtures.Single(fixture => fixture.Competition == CompetitionType.ChampionsLeague).HomeTeam;
+            var restoredNames = restoredPorto.AllPlayers.Select(player => player.Name).ToList();
 
-            Assert.DoesNotContain(restoredNames, name => name.Contains("Benfica Player", StringComparison.OrdinalIgnoreCase));
-            Assert.All(restoredNames, name => Assert.Contains(name, sourceBenficaNames));
+            Assert.DoesNotContain(restoredNames, name => name.Contains("Porto Player", StringComparison.OrdinalIgnoreCase));
+            Assert.All(restoredNames, name => Assert.Contains(name, sourcePortoNames));
         }
         finally
         {
@@ -504,17 +497,17 @@ public class SaveGameServiceTests
 
             var loadedData = saveGameService.LoadGame(1);
             var restoredJuventus = loadedData!.Fixtures.Single(fixture => fixture.Competition == CompetitionType.ChampionsLeague).HomeTeam;
-            var restoredPlayers = restoredJuventus.Players.Concat(restoredJuventus.Substitutes).ToList();
+            var restoredPlayers = restoredJuventus.AllPlayers.ToList();
             var locatelli = restoredPlayers.Single(player => player.Name == "Manuel Locatelli");
-            var vlahovic = restoredPlayers.Single(player => player.Name.Contains("Vlah", StringComparison.OrdinalIgnoreCase));
+            var striker = restoredPlayers.Single(player => player.Name == "Jonathan David");
 
             Assert.DoesNotContain(restoredPlayers, player => player.PlayerId.StartsWith("placeholder-", StringComparison.OrdinalIgnoreCase));
             Assert.Equal(Position.Midfielder, locatelli.Position);
             Assert.Equal("CDM", locatelli.PreferredPosition);
             Assert.Equal("CDM", locatelli.AssignedPosition);
-            Assert.Equal(Position.Forward, vlahovic.Position);
-            Assert.Equal("ST", vlahovic.PreferredPosition);
-            Assert.Equal("ST", vlahovic.AssignedPosition);
+            Assert.Equal(Position.Forward, striker.Position);
+            Assert.Equal("ST", striker.PreferredPosition);
+            Assert.Equal("ST", striker.AssignedPosition);
         }
         finally
         {
@@ -763,7 +756,7 @@ public class SaveGameServiceTests
     }
 
     [Fact]
-    public void LoadGame_CorrectsKnownCenterForwardProfiles()
+    public void LoadGame_CorrectsKnownFc27ForwardProfiles()
     {
         var saveDirectory = CreateTempSaveDirectory();
         var saveGameService = new SaveGameService(saveDirectory);
@@ -795,9 +788,9 @@ public class SaveGameServiceTests
             var loadedPlayer = saveGameService.LoadGame(1)!.Teams.Single().Players.Single();
 
             Assert.Equal(Position.Forward, loadedPlayer.Position);
-            Assert.Equal("CF", loadedPlayer.PreferredPosition);
-            Assert.Equal("CF", loadedPlayer.AssignedPosition);
-            Assert.Contains("ST", loadedPlayer.SecondaryPositions);
+            Assert.Equal("ST", loadedPlayer.PreferredPosition);
+            Assert.Equal("ST", loadedPlayer.AssignedPosition);
+            Assert.Contains("CF", loadedPlayer.SecondaryPositions);
             Assert.Contains("CAM", loadedPlayer.SecondaryPositions);
         }
         finally

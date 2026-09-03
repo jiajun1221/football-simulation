@@ -28,6 +28,12 @@ public class SquadPlayerRecord
     public int? Defending { get; set; }
     public int? Physical { get; set; }
     public string? TransferStatus { get; set; }
+    public bool IsOnLoan { get; set; }
+    public string? ParentClubId { get; set; }
+    public string? ParentClubName { get; set; }
+    public string? LoanClubName { get; set; }
+    public string? LoanEndSeason { get; set; }
+    public int? LoanWagePercentage { get; set; }
     public string? Role { get; set; }
     public bool? RejectTransferOffers { get; set; }
     public int? ContractEndYear { get; set; }

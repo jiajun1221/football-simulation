@@ -592,7 +592,7 @@
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="Substitutes"
+                            <TextBlock Text="Matchday Bench &amp; Reserves"
                                        Foreground="White"
                                        FontSize="17"
                                        FontWeight="Bold" />
