@@ -10,7 +10,7 @@ public static class PlayerTraitDisplayService
         [PlayerTrait.PowerHeader] = new("HDR", "🧠", "Power Header", "More dangerous from headers.", HeaderGoalBonus: 0.20, CornerThreatBonus: 0.10),
         [PlayerTrait.Flair] = new("FLR", "✨", "Flair", "More creative in tight attacking moments.", DribbleEventBonus: 0.14),
         [PlayerTrait.SpeedDribbler] = new("SPD", "⚡", "Speed Dribbler", "More likely to drive past defenders.", DribbleEventBonus: 0.18),
-        [PlayerTrait.Playmaker] = new("PM", "🪄", "Playmaker", "Receives more attacks and creates chances.", KeyPassBonus: 0.12, AssistEventBonus: 0.10),
+        [PlayerTrait.Playmaker] = new("PM", "🎯", "Playmaker", "Receives more attacks and creates chances.", KeyPassBonus: 0.12, AssistEventBonus: 0.10),
         [PlayerTrait.LongPasser] = new("LPS", "📡", "Long Passer", "More likely to switch play or play through balls.", LongPassBonus: 0.12),
         [PlayerTrait.LongShotTaker] = new("LST", "🚀", "Long Shot Taker", "More likely to shoot from distance.", LongShotBonus: 0.14),
         [PlayerTrait.OutsideFootShot] = new("OFS", "🌀", "Outside Foot Shot", "Can attempt outside-foot finishes.", ShotAccuracyBonus: 0.04),

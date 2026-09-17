@@ -167,6 +167,14 @@ public partial class MatchLiveView : UserControl
         ApplyCompactLiveMatchView(!_isCompactLiveMatchView, resizeWindow: true);
     }
 
+    internal void PrepareForStealthMode()
+    {
+        if (_isCompactLiveMatchView)
+        {
+            ApplyCompactLiveMatchView(isCompact: false, resizeWindow: true);
+        }
+    }
+
     private void ApplyCompactLiveMatchView(bool isCompact, bool resizeWindow)
     {
         _isCompactLiveMatchView = isCompact;
@@ -215,6 +223,11 @@ public partial class MatchLiveView : UserControl
             return;
         }
 
+        if (window is MainWindow { IsStealthMode: true })
+        {
+            return;
+        }
+
         if (!isCompact)
         {
             RestoreExpandedWindowSize();
@@ -242,6 +255,11 @@ public partial class MatchLiveView : UserControl
     {
         var window = Window.GetWindow(this);
         if (window is null || !_hasStoredExpandedWindowSize)
+        {
+            return;
+        }
+
+        if (window is MainWindow { IsStealthMode: true })
         {
             return;
         }

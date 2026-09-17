@@ -58,6 +58,8 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="36" />
+                <ColumnDefinition Width="36" />
+                <ColumnDefinition Width="36" />
                 <ColumnDefinition Width="40" />
                 <ColumnDefinition Width="40" />
                 <ColumnDefinition Width="40" />
@@ -70,8 +72,18 @@
                            FontSize="12" />
             </StackPanel>
 
-            <Button x:Name="PinToTopButton"
+            <Button x:Name="StealthModeButton"
                     Grid.Column="1"
+                    Style="{StaticResource TitleBarButtonStyle}"
+                    WindowChrome.IsHitTestVisibleInChrome="True"
+                    Click="StealthModeButton_Click"
+                    ToolTip="Enter Stealth Mode (Ctrl+Shift+S)"
+                    Content="&#xE73F;"
+                    FontFamily="Segoe MDL2 Assets"
+                    FontSize="14"
+                    Cursor="Hand" />
+            <Button x:Name="PinToTopButton"
+                    Grid.Column="2"
                     Style="{StaticResource TitleBarButtonStyle}"
                     WindowChrome.IsHitTestVisibleInChrome="True"
                     Click="PinToTopButton_Click"
@@ -83,7 +95,17 @@
                     BorderThickness="0"
                     Background="Transparent"
                     Foreground="#FFFFFF" />
-            <Button Grid.Column="2"
+            <Button x:Name="HoverVisibilityButton"
+                    Grid.Column="3"
+                    Style="{StaticResource TitleBarButtonStyle}"
+                    WindowChrome.IsHitTestVisibleInChrome="True"
+                    Click="HoverVisibilityButton_Click"
+                    ToolTip="Hide window when the pointer leaves"
+                    Content="&#xE890;"
+                    FontFamily="Segoe MDL2 Assets"
+                    FontSize="14"
+                    Cursor="Hand" />
+            <Button Grid.Column="4"
                     Style="{StaticResource TitleBarButtonStyle}"
                     WindowChrome.IsHitTestVisibleInChrome="True"
                     Click="MinimizeWindowButton_Click"
@@ -95,7 +117,7 @@
                     Background="Transparent"
                     Foreground="#FFFFFF" />
             <Button x:Name="MaximizeWindowButton"
-                    Grid.Column="3"
+                    Grid.Column="5"
                     Style="{StaticResource TitleBarButtonStyle}"
                     WindowChrome.IsHitTestVisibleInChrome="True"
                     Click="MaximizeWindowButton_Click"
@@ -106,7 +128,7 @@
                     BorderThickness="0"
                     Background="Transparent"
                     Foreground="#FFFFFF" />
-            <Button Grid.Column="4"
+            <Button Grid.Column="6"
                     Style="{StaticResource TitleBarButtonStyle}"
                     WindowChrome.IsHitTestVisibleInChrome="True"
                     Click="CloseWindowButton_Click"
@@ -119,7 +141,10 @@
                     Foreground="#FFFFFF" />
         </Grid>
 
-        <Grid Grid.Row="1">
+        <Grid x:Name="ApplicationContentRoot"
+              Grid.Row="1"
+              HorizontalAlignment="Stretch"
+              VerticalAlignment="Stretch">
         <ContentControl x:Name="MainContent" />
         <StackPanel x:Name="ShellActionsPanel"
                     HorizontalAlignment="Right"
