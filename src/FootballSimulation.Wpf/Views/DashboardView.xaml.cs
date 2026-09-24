@@ -24,6 +24,7 @@ public partial class DashboardView : UserControl
     private readonly CompetitionProgressionService _competitionProgressionService = new();
     private CompetitionType? _fixtureFilter;
     private DashboardTableView _activeTableView = DashboardTableView.League;
+    private bool _isCompactMode;
     private const string ClubsAssetPath = "Assets/Clubs";
     private const string DefaultLogoPath = "pack://application:,,,/Assets/Clubs/default.png";
 
@@ -66,6 +67,12 @@ public partial class DashboardView : UserControl
     private void ThemeManager_ThemeChanged(object? sender, EventArgs e)
     {
         LoadDashboard();
+    }
+
+    public void SetCompactMode(bool isCompactMode)
+    {
+        _isCompactMode = isCompactMode;
+        RefreshSelectedTableView();
     }
 
     private void DashboardView_Unloaded(object sender, RoutedEventArgs e)
@@ -194,8 +201,8 @@ public partial class DashboardView : UserControl
         ChampionsLeagueBracketLegendPanel.Visibility = showingChampionsLeagueBracket
             ? Visibility.Visible
             : Visibility.Collapsed;
-        LastFiveLegendPanel.Visibility = showingChampionsLeagueBracket ? Visibility.Collapsed : Visibility.Visible;
-        LastFiveColumn.Visibility = showingChampionsLeagueBracket ? Visibility.Collapsed : Visibility.Visible;
+        LastFiveLegendPanel.Visibility = showingChampionsLeagueBracket || _isCompactMode ? Visibility.Collapsed : Visibility.Visible;
+        LastFiveColumn.Visibility = showingChampionsLeagueBracket || _isCompactMode ? Visibility.Collapsed : Visibility.Visible;
         LeagueTableDataGrid.Visibility = showingChampionsLeagueBracket ? Visibility.Collapsed : Visibility.Visible;
         ChampionsLeagueBracketScrollViewer.Visibility = showingChampionsLeagueBracket ? Visibility.Visible : Visibility.Collapsed;
         ChampionsLeagueBracketItemsControl.ItemsSource = showingChampionsLeagueBracket

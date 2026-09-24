@@ -60,7 +60,7 @@ public class FormationLayoutService
         (0.50, 0.93, "GK"),
         (0.12, 0.67, "LB"), (0.37, 0.70, "CB"), (0.63, 0.70, "CB"), (0.88, 0.67, "RB"),
         (0.36, 0.50, "CDM"), (0.64, 0.50, "CDM"),
-        (0.16, 0.30, "LW"), (0.50, 0.25, "CAM"), (0.84, 0.30, "RW"),
+        (0.16, 0.30, "LM"), (0.50, 0.25, "CAM"), (0.84, 0.30, "RM"),
         (0.50, 0.09, "ST"));
 
     private static readonly IReadOnlyList<PitchPosition> FourTwoThreeOneNarrow = Create(

@@ -263,6 +263,9 @@
                             <Trigger Property="AlternationIndex" Value="1">
                                 <Setter Property="Background" Value="{DynamicResource TableAlternateRowBackground}" />
                             </Trigger>
+                            <DataTrigger Binding="{Binding Status}" Value="Loaned Out">
+                                <Setter Property="Opacity" Value="0.45" />
+                            </DataTrigger>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter Property="Background" Value="#E0F2FE" />
                             </Trigger>

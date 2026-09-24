@@ -331,7 +331,6 @@ public partial class HalfTimeView : UserControl
             MinHeight = PitchCardHeight,
             Tag = player,
             DataContext = card,
-            ToolTip = "Drag this player or drop another player here.",
             Content = card,
             ContentTemplate = (DataTemplate)FindResource("PitchPlayerCardTemplate"),
             Style = (Style)FindResource("PitchPlayerButtonStyle"),

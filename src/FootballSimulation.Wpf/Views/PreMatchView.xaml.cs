@@ -35,6 +35,7 @@ public partial class PreMatchView : UserControl
     private bool _isDraggingPlayer;
     private bool _isLoadingSetup;
     private bool _isTacticsPanelOpen;
+    private bool _isCompactMode;
 
     private sealed record PitchSlotAssignment(Player Player, PitchPosition Position);
 
@@ -54,6 +55,35 @@ public partial class PreMatchView : UserControl
     {
         RefreshSubstitutes();
         RenderPitch();
+    }
+
+    public void SetCompactMode(bool isCompactMode)
+    {
+        _isCompactMode = isCompactMode;
+        SelectedPlayerPanelBorder.Visibility = isCompactMode ? Visibility.Collapsed : Visibility.Visible;
+        FormationPanelBorder.Visibility = isCompactMode ? Visibility.Collapsed : Visibility.Visible;
+        CompactPlayerInfoButton.Visibility = isCompactMode ? Visibility.Visible : Visibility.Collapsed;
+        CompactFormationButton.Visibility = isCompactMode ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private void CompactPlayerInfoButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (!_isCompactMode) { return; }
+
+        SelectedPlayerPanelBorder.Visibility = SelectedPlayerPanelBorder.Visibility == Visibility.Visible
+            ? Visibility.Collapsed
+            : Visibility.Visible;
+        FormationPanelBorder.Visibility = Visibility.Collapsed;
+    }
+
+    private void CompactFormationButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (!_isCompactMode) { return; }
+
+        FormationPanelBorder.Visibility = FormationPanelBorder.Visibility == Visibility.Visible
+            ? Visibility.Collapsed
+            : Visibility.Visible;
+        SelectedPlayerPanelBorder.Visibility = Visibility.Collapsed;
     }
 
     private void ToggleTacticsPanelButton_Click(object sender, RoutedEventArgs e)
@@ -571,7 +601,6 @@ public partial class PreMatchView : UserControl
             MinHeight = PitchCardHeight,
             Tag = player,
             DataContext = card,
-            ToolTip = "Drag this player or drop another player here.",
             Content = card,
             ContentTemplate = (DataTemplate)FindResource("PitchPlayerCardTemplate"),
             Style = (Style)FindResource("PitchPlayerButtonStyle"),
@@ -899,6 +928,11 @@ public partial class PreMatchView : UserControl
         var nationality = PlayerNationalityDisplayService.Resolve(player);
         var isAvailable = IsAvailableForSelection(player);
         var fatigueBadge = CreateFatigueBadge(player);
+        var normalizedFilter = PositionSuitabilityService.NormalizeExactPosition(_selectedPositionFilter);
+        var matchesSelectedPosition = isAvailable &&
+            !string.IsNullOrWhiteSpace(normalizedFilter) &&
+            PositionSuitabilityService.GetNaturalExactPositions(player)
+                .Contains(normalizedFilter, StringComparer.OrdinalIgnoreCase);
 
         return new BenchPlayerCard
         {
@@ -922,8 +956,16 @@ public partial class PreMatchView : UserControl
             BenchFormBadgeBackground = form.Background,
             BenchFormBadgeForeground = form.Foreground,
             CardBackground = teamColors.PrimaryColor,
-            CardBorderBrush = isAvailable ? teamColors.BorderColor : "#7F1D1D",
-            CardBorderThickness = isAvailable ? new Thickness(1) : new Thickness(2),
+            CardBorderBrush = !isAvailable
+                ? "#7F1D1D"
+                : matchesSelectedPosition
+                    ? teamColors.SelectedGlowColor
+                    : teamColors.BorderColor,
+            CardBorderThickness = !isAvailable
+                ? new Thickness(2)
+                : matchesSelectedPosition
+                    ? new Thickness(3)
+                    : new Thickness(1),
             CardOpacity = isAvailable ? 1.0 : 0.68,
             CardCursor = isAvailable ? Cursors.Hand : Cursors.No,
             CanInteract = isAvailable,

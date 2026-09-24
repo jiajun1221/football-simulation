@@ -217,6 +217,12 @@
             </Style.Triggers>
         </Style>
 
+        <Style x:Key="CenteredLeagueTableTextStyle" TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextAlignment" Value="Center" />
+        </Style>
+
         <DataTemplate x:Key="LastFiveBadgeTemplate">
             <Border Width="20"
                     Height="20"
@@ -807,8 +813,9 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="#" Binding="{Binding Position}" Width="38" />
-                            <DataGridTemplateColumn Header="" Width="40">
+                            <DataGridTextColumn Header="#" Binding="{Binding Position}" Width="34"
+                                                ElementStyle="{StaticResource CenteredLeagueTableTextStyle}" />
+                            <DataGridTemplateColumn Header="" Width="36">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Image Source="{Binding LogoPath}"
@@ -827,18 +834,18 @@
                                                    FontWeight="Bold"
                                                    Foreground="{DynamicResource AppTextBrush}"
                                                    VerticalAlignment="Center"
-                                                   TextTrimming="CharacterEllipsis" />
+                                                   TextWrapping="NoWrap" />
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="MP" Binding="{Binding Played}" Width="44" />
-                            <DataGridTextColumn Header="W" Binding="{Binding Wins}" Width="40" />
-                            <DataGridTextColumn Header="D" Binding="{Binding Draws}" Width="40" />
-                            <DataGridTextColumn Header="L" Binding="{Binding Losses}" Width="40" />
-                            <DataGridTextColumn Header="GF" Binding="{Binding GoalsFor}" Width="46" />
-                            <DataGridTextColumn Header="GA" Binding="{Binding GoalsAgainst}" Width="46" />
-                            <DataGridTextColumn Header="GD" Binding="{Binding GoalDifference}" Width="50" />
-                            <DataGridTextColumn Header="Pts" Binding="{Binding Points}" Width="52" />
+                            <DataGridTextColumn Header="MP" Binding="{Binding Played}" Width="38" ElementStyle="{StaticResource CenteredLeagueTableTextStyle}" />
+                            <DataGridTextColumn Header="W" Binding="{Binding Wins}" Width="34" ElementStyle="{StaticResource CenteredLeagueTableTextStyle}" />
+                            <DataGridTextColumn Header="D" Binding="{Binding Draws}" Width="34" ElementStyle="{StaticResource CenteredLeagueTableTextStyle}" />
+                            <DataGridTextColumn Header="L" Binding="{Binding Losses}" Width="34" ElementStyle="{StaticResource CenteredLeagueTableTextStyle}" />
+                            <DataGridTextColumn Header="GF" Binding="{Binding GoalsFor}" Width="38" ElementStyle="{StaticResource CenteredLeagueTableTextStyle}" />
+                            <DataGridTextColumn Header="GA" Binding="{Binding GoalsAgainst}" Width="38" ElementStyle="{StaticResource CenteredLeagueTableTextStyle}" />
+                            <DataGridTextColumn Header="GD" Binding="{Binding GoalDifference}" Width="40" ElementStyle="{StaticResource CenteredLeagueTableTextStyle}" />
+                            <DataGridTextColumn Header="Pts" Binding="{Binding Points}" Width="42" ElementStyle="{StaticResource CenteredLeagueTableTextStyle}" />
                             <DataGridTemplateColumn x:Name="LastFiveColumn" Header="Last 5" Width="122">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>

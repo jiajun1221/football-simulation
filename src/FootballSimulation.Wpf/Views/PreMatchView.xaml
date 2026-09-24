@@ -634,7 +634,8 @@
                                     Background="Transparent"
                                     MouseLeftButtonDown="PitchCanvas_MouseLeftButtonDown"
                                     SizeChanged="PitchCanvas_SizeChanged" />
-                            <Border HorizontalAlignment="Left"
+                            <Border x:Name="SelectedPlayerPanelBorder"
+                                    HorizontalAlignment="Left"
                                     VerticalAlignment="Bottom"
                                     Margin="10,0,0,10"
                                     Padding="7"
@@ -840,7 +841,8 @@
                                     </Grid>
                                 </Grid>
                             </Border>
-                            <Border HorizontalAlignment="Right"
+                            <Border x:Name="FormationPanelBorder"
+                                    HorizontalAlignment="Right"
                                     VerticalAlignment="Bottom"
                                     Margin="0,0,18,18"
                                     Padding="10,8"
@@ -880,6 +882,33 @@
                                     </ComboBox>
                                 </StackPanel>
                             </Border>
+                            <Button x:Name="CompactPlayerInfoButton"
+                                    Content="ⓘ"
+                                    Width="38"
+                                    Height="38"
+                                    Padding="0"
+                                    Margin="10,0,0,10"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Bottom"
+                                    Panel.ZIndex="20"
+                                    FontSize="18"
+                                    FontWeight="Bold"
+                                    ToolTip="Show player information"
+                                    Visibility="Collapsed"
+                                    Click="CompactPlayerInfoButton_Click" />
+                            <Button x:Name="CompactFormationButton"
+                                    Content="⚽"
+                                    Width="38"
+                                    Height="38"
+                                    Padding="0"
+                                    Margin="0,0,10,10"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Bottom"
+                                    Panel.ZIndex="20"
+                                    FontSize="17"
+                                    ToolTip="Change formation"
+                                    Visibility="Collapsed"
+                                    Click="CompactFormationButton_Click" />
                         </Grid>
                     </Border>
 

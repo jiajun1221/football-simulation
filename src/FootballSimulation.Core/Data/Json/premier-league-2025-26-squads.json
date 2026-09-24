@@ -3175,7 +3175,8 @@
           "position": "CAM",
           "preferredPosition": "CAM",
           "secondaryPositions": [
-            "CM"
+            "CM",
+            "LM"
           ],
           "preferredFoot": null,
           "nationality": null,

@@ -102,9 +102,9 @@ public class FormationSystemTests
             CreatePlayer("Reece James", Position.Defender, "RB", 86, ["RWB", "CB"]),
             CreatePlayer("Moises Caicedo", Position.Midfielder, "CDM", 87, ["CM"]),
             CreatePlayer("Enzo Fernandez", Position.Midfielder, "CM", 86, ["CDM"]),
-            CreatePlayer("Alejandro Garnacho", Position.Forward, "LW", 82),
+            CreatePlayer("Alejandro Garnacho", Position.Midfielder, "LM", 82),
             CreatePlayer("Cole Palmer", Position.Midfielder, "CAM", 88, ["RW"]),
-            CreatePlayer("Pedro Neto", Position.Forward, "RW", 82, ["LW"]),
+            CreatePlayer("Pedro Neto", Position.Midfielder, "RM", 82, ["LM"]),
             CreatePlayer("Liam Delap", Position.Forward, "ST", 80)
         }.OrderBy(player => player.Name).ToList();
         var slots = FormationSlotService.GetSlots("4-2-3-1 Wide");
@@ -114,8 +114,8 @@ public class FormationSystemTests
         Assert.True(result.Success, string.Join("; ", result.Warnings));
         Assert.Equal("ST", result.Assignments.Single(item => item.Player.Name == "Liam Delap").Slot);
         Assert.Equal("CAM", result.Assignments.Single(item => item.Player.Name == "Cole Palmer").Slot);
-        Assert.Equal("LW", result.Assignments.Single(item => item.Player.Name == "Alejandro Garnacho").Slot);
-        Assert.Equal("RW", result.Assignments.Single(item => item.Player.Name == "Pedro Neto").Slot);
+        Assert.Equal("LM", result.Assignments.Single(item => item.Player.Name == "Alejandro Garnacho").Slot);
+        Assert.Equal("RM", result.Assignments.Single(item => item.Player.Name == "Pedro Neto").Slot);
         Assert.Equal("CDM", result.Assignments.Single(item => item.Player.Name == "Moises Caicedo").Slot);
         Assert.Equal("CDM", result.Assignments.Single(item => item.Player.Name == "Enzo Fernandez").Slot);
         Assert.Equal("RB", result.Assignments.Single(item => item.Player.Name == "Reece James").Slot);

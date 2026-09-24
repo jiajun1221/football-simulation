@@ -1,10 +1,12 @@
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
+using System.Windows.Media.Effects;
+using System.Windows.Threading;
 using FootballSimulation.Models;
 using FootballSimulation.Services;
 using FootballSimulation.Wpf.Services;
@@ -20,7 +22,6 @@ public partial class MainWindow : Window
     private const double StealthContentWidth = 1040;
     private const double StealthContentHeight = 670;
     private const double StealthContentScale = 0.5;
-    private const double HiddenWindowOpacity = 0.06;
 
     private GameFlowState _state = new();
     private readonly TransferMarketService _transferMarketService = new();
@@ -31,6 +32,15 @@ public partial class MainWindow : Window
     private double _normalMinHeight;
     private bool _hasStoredNormalWindowBounds;
     private bool _isHoverVisibilityEnabled;
+    private readonly DispatcherTimer _hiddenWindowPointerTimer = new() { Interval = TimeSpan.FromMilliseconds(75) };
+    private NativeRect _hiddenWindowBounds;
+    private IntPtr _hiddenWindowHandle;
+    private bool _isNativeWindowHidden;
+    private FrameworkElement? _stealthHoverTarget;
+    private Transform? _stealthHoverOriginalTransform;
+    private Point _stealthHoverOriginalTransformOrigin;
+    private int _stealthHoverOriginalZIndex;
+    private Popup? _stealthPlayerPopover;
 
     public bool IsStealthMode { get; private set; }
 
@@ -42,6 +52,8 @@ public partial class MainWindow : Window
         PreviewKeyDown += MainWindow_PreviewKeyDown;
         MouseEnter += MainWindow_MouseEnter;
         MouseLeave += MainWindow_MouseLeave;
+        PreviewMouseMove += MainWindow_PreviewMouseMove;
+        _hiddenWindowPointerTimer.Tick += HiddenWindowPointerTimer_Tick;
         ThemeManager.ThemeChanged += ThemeManager_ThemeChanged;
         UpdateThemeToggleButton();
         UpdateStealthModeButton();
@@ -72,7 +84,7 @@ public partial class MainWindow : Window
 
         if (!_isHoverVisibilityEnabled)
         {
-            AnimateWindowOpacity(1.0);
+            RestoreHiddenWindow();
         }
     }
 
@@ -80,23 +92,292 @@ public partial class MainWindow : Window
     {
         if (_isHoverVisibilityEnabled)
         {
-            AnimateWindowOpacity(1.0);
+            Opacity = 1.0;
         }
     }
 
     private void MainWindow_MouseLeave(object sender, MouseEventArgs e)
     {
+        ClearStealthHoverZoom();
+
         if (_isHoverVisibilityEnabled)
         {
-            AnimateWindowOpacity(HiddenWindowOpacity);
+            HideWindowIfPointerIsOutside();
         }
     }
 
-    private void AnimateWindowOpacity(double targetOpacity)
+    private void HideWindowIfPointerIsOutside()
     {
-        BeginAnimation(OpacityProperty, new DoubleAnimation(
-            targetOpacity,
-            TimeSpan.FromMilliseconds(140)));
+        if (_isNativeWindowHidden)
+        {
+            return;
+        }
+
+        var windowHandle = new WindowInteropHelper(this).Handle;
+        if (windowHandle == IntPtr.Zero ||
+            !GetWindowRect(windowHandle, out _hiddenWindowBounds) ||
+            !GetCursorPos(out var pointerPosition) ||
+            IsPointInside(_hiddenWindowBounds, pointerPosition))
+        {
+            return;
+        }
+
+        var emptyRegion = CreateRectRgn(0, 0, 0, 0);
+        if (emptyRegion == IntPtr.Zero)
+        {
+            return;
+        }
+
+        if (SetWindowRgn(windowHandle, emptyRegion, true) == 0)
+        {
+            DeleteObject(emptyRegion);
+            return;
+        }
+
+        _hiddenWindowHandle = windowHandle;
+        _isNativeWindowHidden = true;
+        _hiddenWindowPointerTimer.Start();
+    }
+
+    private void HiddenWindowPointerTimer_Tick(object? sender, EventArgs e)
+    {
+        if (!GetCursorPos(out var pointerPosition))
+        {
+            return;
+        }
+
+        if (IsPointInside(_hiddenWindowBounds, pointerPosition))
+        {
+            RestoreHiddenWindow();
+        }
+    }
+
+    private static bool IsPointInside(NativeRect bounds, NativePoint point)
+    {
+        return point.X >= bounds.Left &&
+               point.X < bounds.Right &&
+               point.Y >= bounds.Top &&
+               point.Y < bounds.Bottom;
+    }
+
+    private void RestoreHiddenWindow()
+    {
+        _hiddenWindowPointerTimer.Stop();
+        Opacity = 1.0;
+        if (_isNativeWindowHidden && _hiddenWindowHandle != IntPtr.Zero)
+        {
+            SetWindowRgn(_hiddenWindowHandle, IntPtr.Zero, true);
+            _isNativeWindowHidden = false;
+            _hiddenWindowHandle = IntPtr.Zero;
+        }
+
+        if (!IsVisible)
+        {
+            var showActivated = ShowActivated;
+            ShowActivated = false;
+            Show();
+            ShowActivated = showActivated;
+        }
+    }
+
+    private void MainWindow_PreviewMouseMove(object sender, MouseEventArgs e)
+    {
+        if (!IsStealthMode)
+        {
+            ClearStealthHoverZoom();
+            return;
+        }
+
+        var target = FindStealthHoverTarget(e.OriginalSource as DependencyObject);
+        if (ReferenceEquals(target, _stealthHoverTarget))
+        {
+            return;
+        }
+
+        ClearStealthHoverZoom();
+        if (target is null)
+        {
+            return;
+        }
+
+        _stealthHoverTarget = target;
+        _stealthHoverOriginalTransform = target.RenderTransform;
+        _stealthHoverOriginalTransformOrigin = target.RenderTransformOrigin;
+        _stealthHoverOriginalZIndex = Panel.GetZIndex(target);
+
+        if (IsPlayerCard(target.DataContext))
+        {
+            ShowStealthPlayerPopover(target);
+            return;
+        }
+
+        const double zoom = 1.3;
+        target.RenderTransformOrigin = GetStealthHoverTransformOrigin(target);
+        target.RenderTransform = new ScaleTransform(zoom, zoom);
+        Panel.SetZIndex(target, 1000);
+    }
+
+    private void ShowStealthPlayerPopover(FrameworkElement target)
+    {
+        const double playerPreviewWidth = 120;
+        var cardTemplate = target switch
+        {
+            ListBoxItem => target.TryFindResource("SubstituteCardTemplate") as DataTemplate,
+            Button button => button.ContentTemplate,
+            _ => null
+        };
+        var cardPreview = new ContentControl
+        {
+            Width = playerPreviewWidth,
+            Content = target.DataContext,
+            ContentTemplate = cardTemplate,
+            HorizontalContentAlignment = HorizontalAlignment.Stretch,
+            IsHitTestVisible = false
+        };
+        var preview = new Border
+        {
+            Width = playerPreviewWidth,
+            Child = cardPreview,
+            Background = Brushes.Transparent,
+            CornerRadius = new CornerRadius(10),
+            Effect = new DropShadowEffect
+            {
+                BlurRadius = 14,
+                ShadowDepth = 2,
+                Opacity = 0.45,
+                Color = Colors.Black
+            },
+            IsHitTestVisible = false
+        };
+
+        _stealthPlayerPopover = new Popup
+        {
+            AllowsTransparency = true,
+            Child = preview,
+            HorizontalOffset = 8,
+            IsHitTestVisible = false,
+            Placement = GetStealthPlayerPopoverPlacement(target),
+            PlacementTarget = target,
+            StaysOpen = true,
+            IsOpen = true
+        };
+    }
+
+    private static PlacementMode GetStealthPlayerPopoverPlacement(FrameworkElement target)
+    {
+        for (var current = GetParent(target); current is not null; current = GetParent(current))
+        {
+            if (current is not ListBox listBox || listBox.ActualWidth <= 0)
+            {
+                continue;
+            }
+
+            var center = target.TranslatePoint(new Point(target.ActualWidth / 2, 0), listBox);
+            return center.X <= listBox.ActualWidth / 2 ? PlacementMode.Right : PlacementMode.Left;
+        }
+
+        return PlacementMode.Right;
+    }
+
+    private FrameworkElement? FindStealthHoverTarget(DependencyObject? source)
+    {
+        Button? nearestButton = null;
+        Button? playerCardButton = null;
+        Border? playerCardBorder = null;
+        ListBoxItem? playerCardContainer = null;
+
+        for (var current = source; current is not null && current != ApplicationContentRoot; current = GetParent(current))
+        {
+            if (current is Button button)
+            {
+                nearestButton ??= button;
+                if (IsPlayerCard(button.DataContext))
+                {
+                    playerCardButton = button;
+                }
+            }
+
+            if (current is Border border && IsPlayerCard(border.DataContext))
+            {
+                playerCardBorder = border;
+            }
+
+            if (current is ListBoxItem listBoxItem && IsPlayerCard(listBoxItem.DataContext))
+            {
+                playerCardContainer = listBoxItem;
+            }
+        }
+
+        var target = (FrameworkElement?)playerCardContainer ??
+                     playerCardButton ??
+                     (FrameworkElement?)playerCardBorder ??
+                     nearestButton;
+        return target is not null && ApplicationContentRoot.IsAncestorOf(target) ? target : null;
+    }
+
+    private static Point GetStealthHoverTransformOrigin(FrameworkElement target)
+    {
+        for (var current = GetParent(target); current is not null; current = GetParent(current))
+        {
+            if (current is not ListBox listBox || listBox.ActualWidth <= 0 || listBox.ActualHeight <= 0)
+            {
+                continue;
+            }
+
+            var center = target.TranslatePoint(
+                new Point(target.ActualWidth / 2, target.ActualHeight / 2),
+                listBox);
+            return new Point(
+                center.X <= listBox.ActualWidth / 2 ? 0 : 1,
+                center.Y <= listBox.ActualHeight / 2 ? 0 : 1);
+        }
+
+        return new Point(0.5, 0.5);
+    }
+
+    private static DependencyObject? GetParent(DependencyObject child)
+    {
+        if (child is FrameworkContentElement contentElement)
+        {
+            return contentElement.Parent;
+        }
+
+        return child is Visual
+            ? VisualTreeHelper.GetParent(child)
+            : LogicalTreeHelper.GetParent(child);
+    }
+
+    private static bool IsPlayerCard(object? dataContext)
+    {
+        if (dataContext is null)
+        {
+            return false;
+        }
+
+        var typeName = dataContext.GetType().Name;
+        return typeName.Contains("PlayerCard", StringComparison.Ordinal) ||
+               typeName.Contains("PlayerIcon", StringComparison.Ordinal);
+    }
+
+    private void ClearStealthHoverZoom()
+    {
+        if (_stealthPlayerPopover is not null)
+        {
+            _stealthPlayerPopover.IsOpen = false;
+            _stealthPlayerPopover.Child = null;
+            _stealthPlayerPopover = null;
+        }
+
+        if (_stealthHoverTarget is null)
+        {
+            return;
+        }
+
+        _stealthHoverTarget.RenderTransform = _stealthHoverOriginalTransform ?? Transform.Identity;
+        _stealthHoverTarget.RenderTransformOrigin = _stealthHoverOriginalTransformOrigin;
+        Panel.SetZIndex(_stealthHoverTarget, _stealthHoverOriginalZIndex);
+        _stealthHoverTarget = null;
+        _stealthHoverOriginalTransform = null;
     }
 
     private void ToggleStealthMode()
@@ -116,6 +397,16 @@ public partial class MainWindow : Window
         if (MainContent.Content is MatchLiveView liveMatchView)
         {
             liveMatchView.PrepareForStealthMode();
+        }
+
+        if (MainContent.Content is DashboardView dashboardView)
+        {
+            dashboardView.SetCompactMode(true);
+        }
+
+        if (MainContent.Content is PreMatchView preMatchView)
+        {
+            preMatchView.SetCompactMode(true);
         }
 
         _normalWindowState = WindowState;
@@ -145,6 +436,15 @@ public partial class MainWindow : Window
 
     private void ExitStealthMode()
     {
+        ClearStealthHoverZoom();
+        if (MainContent.Content is DashboardView dashboardView)
+        {
+            dashboardView.SetCompactMode(false);
+        }
+        if (MainContent.Content is PreMatchView preMatchView)
+        {
+            preMatchView.SetCompactMode(false);
+        }
         ApplicationContentRoot.LayoutTransform = Transform.Identity;
         ApplicationContentRoot.Width = double.NaN;
         ApplicationContentRoot.Height = double.NaN;
@@ -368,6 +668,14 @@ public partial class MainWindow : Window
     private void Navigate(UserControl view)
     {
         MainContent.Content = view;
+        if (IsStealthMode && view is DashboardView dashboardView)
+        {
+            dashboardView.SetCompactMode(true);
+        }
+        if (IsStealthMode && view is PreMatchView preMatchView)
+        {
+            preMatchView.SetCompactMode(true);
+        }
         ShellActionsPanel.Visibility = Visibility.Visible;
         ShellSaveButton.Visibility = Visibility.Collapsed;
         ShellStatsButton.Visibility = view is LeaguePlayerStatsView ? Visibility.Visible : Visibility.Collapsed;
@@ -464,7 +772,6 @@ public partial class MainWindow : Window
     private const int DwmCaptionColor = 35;
     private const int DwmTextColor = 36;
     private const uint MonitorDefaultToNearest = 2;
-
     [StructLayout(LayoutKind.Sequential)]
     private struct NativeRect
     {
@@ -472,6 +779,13 @@ public partial class MainWindow : Window
         public int Top;
         public int Right;
         public int Bottom;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct NativePoint
+    {
+        public int X;
+        public int Y;
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -488,6 +802,27 @@ public partial class MainWindow : Window
 
     [DllImport("user32.dll")]
     private static extern IntPtr MonitorFromRect(ref NativeRect rectangle, uint flags);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool GetCursorPos(out NativePoint point);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool GetWindowRect(IntPtr windowHandle, out NativeRect rectangle);
+
+    [DllImport("gdi32.dll")]
+    private static extern IntPtr CreateRectRgn(int left, int top, int right, int bottom);
+
+    [DllImport("user32.dll")]
+    private static extern int SetWindowRgn(
+        IntPtr windowHandle,
+        IntPtr windowRegion,
+        [MarshalAs(UnmanagedType.Bool)] bool redraw);
+
+    [DllImport("gdi32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool DeleteObject(IntPtr objectHandle);
 
     [DllImport("user32.dll", CharSet = CharSet.Auto)]
     [return: MarshalAs(UnmanagedType.Bool)]
