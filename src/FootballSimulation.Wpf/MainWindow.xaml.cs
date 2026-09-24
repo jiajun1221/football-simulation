@@ -22,6 +22,11 @@ public partial class MainWindow : Window
     private const double StealthContentWidth = 1040;
     private const double StealthContentHeight = 670;
     private const double StealthContentScale = 0.5;
+    private const double StealthCompactLiveWindowWidth = 260;
+    private const double StealthCompactLiveWindowHeight = 540;
+    private const double StealthCompactLiveContentWidth = 420;
+    private const double StealthCompactLiveScale = 0.6;
+    private const double StealthCompactLiveContentHeight = (StealthCompactLiveWindowHeight - 30) / StealthCompactLiveScale;
 
     private GameFlowState _state = new();
     private readonly TransferMarketService _transferMarketService = new();
@@ -355,6 +360,11 @@ public partial class MainWindow : Window
         }
 
         var typeName = dataContext.GetType().Name;
+        if (string.Equals(typeName, "LivePlayerIconViewModel", StringComparison.Ordinal))
+        {
+            return false;
+        }
+
         return typeName.Contains("PlayerCard", StringComparison.Ordinal) ||
                typeName.Contains("PlayerIcon", StringComparison.Ordinal);
     }
@@ -432,6 +442,24 @@ public partial class MainWindow : Window
         IsStealthMode = true;
         UpdateStealthModeButton();
         UpdateMaximizeButton();
+    }
+
+    internal void SetStealthLiveMatchCompactMode(bool isCompact)
+    {
+        if (!IsStealthMode)
+        {
+            return;
+        }
+
+        MinWidth = isCompact ? StealthCompactLiveWindowWidth : StealthWindowWidth;
+        MinHeight = isCompact ? StealthCompactLiveWindowHeight : StealthWindowHeight;
+        Width = isCompact ? StealthCompactLiveWindowWidth : StealthWindowWidth;
+        Height = isCompact ? StealthCompactLiveWindowHeight : StealthWindowHeight;
+        ApplicationContentRoot.Width = isCompact ? StealthCompactLiveContentWidth : StealthContentWidth;
+        ApplicationContentRoot.Height = isCompact ? StealthCompactLiveContentHeight : StealthContentHeight;
+        ApplicationContentRoot.LayoutTransform = isCompact
+            ? new ScaleTransform(StealthCompactLiveScale, StealthCompactLiveScale)
+            : new ScaleTransform(StealthContentScale, StealthContentScale);
     }
 
     private void ExitStealthMode()

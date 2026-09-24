@@ -92,7 +92,7 @@
         </DataTemplate>
     </Window.Resources>
 
-    <Grid Margin="24">
+    <Grid x:Name="SaveDialogRoot" Margin="24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />

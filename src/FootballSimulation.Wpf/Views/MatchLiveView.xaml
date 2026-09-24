@@ -50,7 +50,160 @@
                   PreviewMouseMove="PitchPlayerIcon_PreviewMouseMove"
                   MouseLeftButtonUp="PitchPlayerIcon_MouseLeftButtonUp"
                   Drop="PitchPlayerIcon_Drop"
-                  ToolTip="{Binding DetailText}">
+                  ToolTipService.InitialShowDelay="180"
+                  ToolTipService.ShowDuration="12000">
+                <Grid.ToolTip>
+                    <Border Width="205"
+                                Padding="8"
+                                CornerRadius="10"
+                                Background="{DynamicResource AppCardBackground}"
+                                BorderBrush="{Binding RatingBadgeBorderBrush}"
+                                BorderThickness="2">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Border Width="28"
+                                            Height="28"
+                                            CornerRadius="14"
+                                            Background="{Binding IconBrush}"
+                                            BorderBrush="{Binding BorderBrush}"
+                                            BorderThickness="2"
+                                            Margin="0,0,6,0">
+                                        <TextBlock Text="{Binding ShirtNumberText}"
+                                                   Foreground="{Binding IconForeground}"
+                                                   FontSize="10"
+                                                   FontWeight="Bold"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center" />
+                                    </Border>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Name}"
+                                                   Foreground="{DynamicResource AppTextBrush}"
+                                                   FontSize="12"
+                                                   FontWeight="Bold"
+                                                   TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Foreground="{DynamicResource AppMutedTextBrush}"
+                                                   FontSize="8.5">
+                                            <Run Text="{Binding TeamName}" />
+                                            <Run Text=" · " />
+                                            <Run Text="{Binding ExactPosition}" />
+                                        </TextBlock>
+                                    </StackPanel>
+                                    <Border Grid.Column="2"
+                                            MinWidth="38"
+                                            Height="28"
+                                            Padding="5,0"
+                                            CornerRadius="8"
+                                            Background="{Binding RatingBadgeBackground}"
+                                            BorderBrush="{Binding RatingBadgeBorderBrush}"
+                                            BorderThickness="1">
+                                        <TextBlock Text="{Binding LiveStats.RatingDisplay}"
+                                                   Foreground="{Binding RatingBadgeForeground}"
+                                                   FontSize="12"
+                                                   FontWeight="Black"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center" />
+                                    </Border>
+                                </Grid>
+
+                                <Grid Grid.Row="1" Margin="0,8,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Stamina"
+                                               Foreground="{DynamicResource AppMutedTextBrush}"
+                                               FontSize="8.5"
+                                               VerticalAlignment="Center" />
+                                    <ProgressBar Grid.Column="1"
+                                                 Height="6"
+                                                 Margin="6,0"
+                                                 Minimum="0"
+                                                 Maximum="100"
+                                                 Value="{Binding Stamina, Mode=OneWay}"
+                                                 Foreground="{Binding StaminaBrush}"
+                                                 Background="{DynamicResource AppBorderBrush}"
+                                                 BorderThickness="0"
+                                                 VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="2"
+                                               Text="{Binding Stamina, StringFormat={}{0:0}%}"
+                                               Foreground="{DynamicResource AppTextBrush}"
+                                               FontSize="8.5"
+                                               FontWeight="Bold" />
+                                </Grid>
+
+                                <StackPanel Grid.Row="2" Margin="0,7,0,0" Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <TextBlock Text="STATUS" Foreground="{DynamicResource AppMutedTextBrush}" FontSize="7" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,3,0" />
+                                    <Border Background="#FEE2E2" CornerRadius="7" Padding="4,2" Margin="1">
+                                        <TextBlock Text="{Binding AttackRatingText}" FontFamily="Segoe UI Emoji" Foreground="#B91C1C" FontSize="8" FontWeight="Bold" />
+                                    </Border>
+                                    <Border Background="#DBEAFE" CornerRadius="7" Padding="4,2" Margin="1">
+                                        <TextBlock Text="{Binding DefenseRatingText}" FontFamily="Segoe UI Emoji" Foreground="#1D4ED8" FontSize="8" FontWeight="Bold" />
+                                    </Border>
+                                    <Border Background="#FEF3C7" CornerRadius="7" Padding="4,2" Margin="1" ToolTip="{Binding WorkloadRiskTooltip}">
+                                        <TextBlock Text="{Binding InjuryRiskText}" FontFamily="Segoe UI Emoji" Foreground="#92400E" FontSize="8" FontWeight="Bold" />
+                                    </Border>
+                                </StackPanel>
+
+                                <WrapPanel Grid.Row="3" Margin="0,8,0,0" HorizontalAlignment="Center">
+                                    <WrapPanel.Style>
+                                        <Style TargetType="WrapPanel">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding HasMatchStatBadges}" Value="False">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </WrapPanel.Style>
+                                    <Border Background="#DCFCE7" CornerRadius="8" Padding="6,3" Margin="2">
+                                        <Border.Style><Style TargetType="Border"><Setter Property="Visibility" Value="Visible" /><Style.Triggers><DataTrigger Binding="{Binding GoalBadgeText}" Value=""><Setter Property="Visibility" Value="Collapsed" /></DataTrigger></Style.Triggers></Style></Border.Style>
+                                        <TextBlock Text="{Binding GoalBadgeText}" Foreground="#166534" FontSize="9" FontWeight="Bold" />
+                                    </Border>
+                                    <Border Background="#FFEDD5" CornerRadius="8" Padding="6,3" Margin="2">
+                                        <Border.Style><Style TargetType="Border"><Setter Property="Visibility" Value="Visible" /><Style.Triggers><DataTrigger Binding="{Binding AssistBadgeText}" Value=""><Setter Property="Visibility" Value="Collapsed" /></DataTrigger></Style.Triggers></Style></Border.Style>
+                                        <TextBlock Text="{Binding AssistBadgeText}" Foreground="#C2410C" FontSize="9" FontWeight="Bold" />
+                                    </Border>
+                                    <Border Background="#DBEAFE" CornerRadius="8" Padding="6,3" Margin="2">
+                                        <Border.Style><Style TargetType="Border"><Setter Property="Visibility" Value="Visible" /><Style.Triggers><DataTrigger Binding="{Binding DefensiveBadgeText}" Value=""><Setter Property="Visibility" Value="Collapsed" /></DataTrigger></Style.Triggers></Style></Border.Style>
+                                        <TextBlock Text="{Binding DefensiveBadgeText}" Foreground="#1D4ED8" FontSize="9" FontWeight="Bold" />
+                                    </Border>
+                                    <Border Background="#CFFAFE" CornerRadius="8" Padding="6,3" Margin="2">
+                                        <Border.Style><Style TargetType="Border"><Setter Property="Visibility" Value="Visible" /><Style.Triggers><DataTrigger Binding="{Binding SaveBadgeText}" Value=""><Setter Property="Visibility" Value="Collapsed" /></DataTrigger></Style.Triggers></Style></Border.Style>
+                                        <TextBlock Text="{Binding SaveBadgeText}" Foreground="#0E7490" FontSize="9" FontWeight="Bold" />
+                                    </Border>
+                                    <Border Background="#FEF3C7" CornerRadius="8" Padding="6,3" Margin="2">
+                                        <Border.Style><Style TargetType="Border"><Setter Property="Visibility" Value="Visible" /><Style.Triggers><DataTrigger Binding="{Binding YellowBadgeText}" Value=""><Setter Property="Visibility" Value="Collapsed" /></DataTrigger></Style.Triggers></Style></Border.Style>
+                                        <TextBlock Text="{Binding YellowBadgeText}" Foreground="#92400E" FontSize="9" FontWeight="Bold" />
+                                    </Border>
+                                    <Border Background="#FEE2E2" CornerRadius="8" Padding="6,3" Margin="2">
+                                        <Border.Style><Style TargetType="Border"><Setter Property="Visibility" Value="Visible" /><Style.Triggers><DataTrigger Binding="{Binding RedBadgeText}" Value=""><Setter Property="Visibility" Value="Collapsed" /></DataTrigger></Style.Triggers></Style></Border.Style>
+                                        <TextBlock Text="{Binding RedBadgeText}" Foreground="#B91C1C" FontSize="9" FontWeight="Bold" />
+                                    </Border>
+                                    <Border Background="#FEE2E2" CornerRadius="8" Padding="6,3" Margin="2">
+                                        <Border.Style><Style TargetType="Border"><Setter Property="Visibility" Value="Visible" /><Style.Triggers><DataTrigger Binding="{Binding ErrorBadgeText}" Value=""><Setter Property="Visibility" Value="Collapsed" /></DataTrigger></Style.Triggers></Style></Border.Style>
+                                        <TextBlock Text="{Binding ErrorBadgeText}" Foreground="#B91C1C" FontSize="9" FontWeight="Bold" />
+                                    </Border>
+                                    <Border Background="#FEF3C7" CornerRadius="8" Padding="6,3" Margin="2">
+                                        <Border.Style><Style TargetType="Border"><Setter Property="Visibility" Value="Visible" /><Style.Triggers><DataTrigger Binding="{Binding InjuryBadgeText}" Value=""><Setter Property="Visibility" Value="Collapsed" /></DataTrigger></Style.Triggers></Style></Border.Style>
+                                        <TextBlock Text="{Binding InjuryBadgeText}" Foreground="#92400E" FontSize="9" FontWeight="Bold" />
+                                    </Border>
+                                </WrapPanel>
+                            </Grid>
+                    </Border>
+                </Grid.ToolTip>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="15" />
                     <RowDefinition Height="5" />

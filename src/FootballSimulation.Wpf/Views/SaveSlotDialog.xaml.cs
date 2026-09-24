@@ -1,18 +1,41 @@
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using FootballSimulation.Models;
 
 namespace FootballSimulation.Wpf.Views;
 
 public partial class SaveSlotDialog : Window
 {
+    private const double CompactScale = 0.5;
+    private const double NormalContentWidth = 780;
+    private const double NormalContentHeight = 400;
+
     public int? SelectedSlotNumber { get; private set; }
 
     public SaveSlotDialog(IReadOnlyList<SaveGameSlotInfo> slots)
     {
         InitializeComponent();
         SaveSlotsItemsControl.ItemsSource = slots.Select(CreateSlotRow).ToList();
+        Loaded += SaveSlotDialog_Loaded;
+    }
+
+    private void SaveSlotDialog_Loaded(object sender, RoutedEventArgs e)
+    {
+        Loaded -= SaveSlotDialog_Loaded;
+        if (Owner is not MainWindow { IsStealthMode: true })
+        {
+            return;
+        }
+
+        SaveDialogRoot.Width = NormalContentWidth;
+        SaveDialogRoot.Height = NormalContentHeight;
+        SaveDialogRoot.HorizontalAlignment = HorizontalAlignment.Left;
+        SaveDialogRoot.VerticalAlignment = VerticalAlignment.Top;
+        SaveDialogRoot.LayoutTransform = new ScaleTransform(CompactScale, CompactScale);
+        Width = NormalContentWidth * CompactScale;
+        Height = 230;
     }
 
     private void SelectSlotButton_Click(object sender, RoutedEventArgs e)

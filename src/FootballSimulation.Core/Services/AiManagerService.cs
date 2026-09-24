@@ -170,6 +170,14 @@ public class AiManagerService
         {
             outgoingSlot = PositionSuitabilityService.GetDefaultExactPosition(outgoingPlayer.Position);
         }
+        if (string.Equals(outgoingSlot, "GK", StringComparison.OrdinalIgnoreCase) && outgoingPlayer.IsInjured)
+        {
+            TeamRosterService.PromoteReserveGoalkeeperForInjury(team);
+            substitutes = team.Substitutes
+                .Where(player => !player.IsSuspended && !player.IsInjured && !player.IsSentOff)
+                .Where(player => !_squadSelectionService.WasPlayerSubstitutedOff(match, team.Name, player.Name))
+                .ToList();
+        }
         var reasonableSubstitutes = substitutes
             .Where(substitute => PositionCompatibilityService.GetCompatibilityScore(substitute, outgoingSlot) > PositionCompatibilityService.Emergency)
             .ToList();

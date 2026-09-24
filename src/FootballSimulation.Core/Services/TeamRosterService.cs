@@ -5,6 +5,17 @@ namespace FootballSimulation.Services;
 public static class TeamRosterService
 {
     public const int MatchdaySubstituteCount = 8;
+    private static readonly string[][] MatchdayBenchRoles =
+    [
+        ["ST"],
+        ["LW"],
+        ["RW"],
+        ["CAM"],
+        ["CB"],
+        ["LB"],
+        ["RB"],
+        ["CM", "CDM"]
+    ];
 
     public static IEnumerable<Player> GetAllPlayers(Team team)
     {
@@ -28,13 +39,17 @@ public static class TeamRosterService
         var candidates = GetDistinctPlayers(team)
             .Where(player => !starterKeys.Contains(CreatePlayerKey(player)))
             .ToList();
-        var available = candidates.Where(IsAvailable).ToList();
+        var available = candidates
+            .Where(IsAvailable)
+            .Where(player => !PositionSuitabilityService.IsGoalkeeperCapable(player))
+            .ToList();
         var selected = new List<Player>();
 
-        AddBest(selected, available, player => player.Position == Position.Goalkeeper, 1);
-        AddBest(selected, available, player => player.Position == Position.Defender, 3);
-        AddBest(selected, available, player => player.Position == Position.Midfielder, 5);
-        AddBest(selected, available, player => player.Position == Position.Forward, 7);
+        foreach (var roles in MatchdayBenchRoles)
+        {
+            AddBestForRole(selected, available, roles);
+        }
+
         AddBest(selected, available, _ => true, MatchdaySubstituteCount);
 
         var selectedKeys = selected.Select(CreatePlayerKey).ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -51,6 +66,47 @@ public static class TeamRosterService
             .ThenByDescending(player => player.OverallRating)
             .ThenBy(player => player.SquadNumber <= 0 ? int.MaxValue : player.SquadNumber)
             .ToList();
+    }
+
+    public static Player? PromoteReserveGoalkeeperForInjury(Team team)
+    {
+        ArgumentNullException.ThrowIfNull(team);
+
+        var benchGoalkeeper = team.Substitutes.FirstOrDefault(player =>
+            IsAvailable(player) && PositionSuitabilityService.IsGoalkeeperCapable(player));
+        if (benchGoalkeeper is not null)
+        {
+            return benchGoalkeeper;
+        }
+
+        var reserveGoalkeeper = team.Reserves
+            .Where(IsAvailable)
+            .Where(PositionSuitabilityService.IsGoalkeeperCapable)
+            .OrderByDescending(player => player.OverallRating)
+            .ThenBy(player => player.SquadNumber <= 0 ? int.MaxValue : player.SquadNumber)
+            .FirstOrDefault();
+        if (reserveGoalkeeper is null)
+        {
+            return null;
+        }
+
+        if (team.Substitutes.Count >= MatchdaySubstituteCount)
+        {
+            var playerToReserve = team.Substitutes
+                .Where(player => !PositionSuitabilityService.IsGoalkeeperCapable(player))
+                .OrderBy(player => player.OverallRating)
+                .ThenByDescending(player => player.SquadNumber)
+                .FirstOrDefault();
+            if (playerToReserve is not null)
+            {
+                team.Substitutes.Remove(playerToReserve);
+                team.Reserves.Add(playerToReserve);
+            }
+        }
+
+        team.Reserves.Remove(reserveGoalkeeper);
+        team.Substitutes.Add(reserveGoalkeeper);
+        return reserveGoalkeeper;
     }
 
     public static void MoveToReserves(Team team, Player player)
@@ -92,6 +148,25 @@ public static class TeamRosterService
             {
                 return;
             }
+        }
+    }
+
+    private static void AddBestForRole(
+        ICollection<Player> selected,
+        IEnumerable<Player> candidates,
+        IReadOnlyCollection<string> roles)
+    {
+        var used = selected.Select(CreatePlayerKey).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var player = candidates
+            .Where(candidate => !used.Contains(CreatePlayerKey(candidate)))
+            .Where(candidate => PositionSuitabilityService.GetNaturalExactPositions(candidate)
+                .Any(position => roles.Contains(position, StringComparer.OrdinalIgnoreCase)))
+            .OrderByDescending(candidate => candidate.OverallRating)
+            .ThenBy(candidate => candidate.SquadNumber <= 0 ? int.MaxValue : candidate.SquadNumber)
+            .FirstOrDefault();
+        if (player is not null)
+        {
+            selected.Add(player);
         }
     }
 

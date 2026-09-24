@@ -223,8 +223,9 @@ public partial class MatchLiveView : UserControl
             return;
         }
 
-        if (window is MainWindow { IsStealthMode: true })
+        if (window is MainWindow { IsStealthMode: true } mainWindow)
         {
+            mainWindow.SetStealthLiveMatchCompactMode(isCompact);
             return;
         }
 
@@ -842,6 +843,10 @@ public partial class MatchLiveView : UserControl
         }
 
         _mandatoryInjurySubstitutionPlayer = injuredPlayer;
+        if (PositionSuitabilityService.IsGoalkeeperCapable(injuredPlayer))
+        {
+            TeamRosterService.PromoteReserveGoalkeeperForInjury(_state.SelectedTeam);
+        }
         _selectedPitchPlayerKey = CreatePlayerId(_state.SelectedTeam, injuredPlayer);
         _hasManualPitchPlayerSelection = true;
         _isPlaybackPaused = true;
@@ -919,6 +924,11 @@ public partial class MatchLiveView : UserControl
         if (string.IsNullOrWhiteSpace(outgoingSlot))
         {
             outgoingSlot = PositionSuitabilityService.GetDefaultExactPosition(injuredPlayer.Position);
+        }
+
+        if (string.Equals(outgoingSlot, "GK", StringComparison.OrdinalIgnoreCase))
+        {
+            TeamRosterService.PromoteReserveGoalkeeperForInjury(opponentTeam);
         }
 
         return opponentTeam.Substitutes
@@ -2221,6 +2231,28 @@ public partial class MatchLiveView : UserControl
             : DisplayedPitchStats.Empty;
     }
 
+    private static string CreateAttackPerformanceRating(DisplayedPitchStats stats)
+    {
+        var rating = 6.0 +
+            stats.Goals * 1.0 +
+            stats.Assists * 0.6 -
+            stats.DefensiveErrors * 0.15 -
+            stats.YellowCards * 0.1 -
+            stats.RedCards * 0.6;
+        return RatingDisplayHelper.CreateRatingText(Math.Clamp(rating, 1.0, 10.0));
+    }
+
+    private static string CreateDefensePerformanceRating(DisplayedPitchStats stats)
+    {
+        var rating = 6.0 +
+            stats.DefensiveContributions * 0.18 +
+            stats.Saves * 0.25 -
+            stats.DefensiveErrors * 0.75 -
+            stats.YellowCards * 0.1 -
+            stats.RedCards * 0.6;
+        return RatingDisplayHelper.CreateRatingText(Math.Clamp(rating, 1.0, 10.0));
+    }
+
     private void RefreshPitchPlayers()
     {
         if (_state.CurrentMatch is null)
@@ -2430,6 +2462,17 @@ public partial class MatchLiveView : UserControl
             CardsText = yellowCards == 0 && redCards == 0 ? "None" : $"Y{yellowCards} R{redCards}",
             InjuryStatusText = displayedStats.Injuries > 0 ? "Injured" : "Fit",
             WorkloadRiskText = workloadRiskText,
+            AttackRatingText = $"⚔ {CreateAttackPerformanceRating(displayedStats)}",
+            DefenseRatingText = $"🛡 {CreateDefensePerformanceRating(displayedStats)}",
+            InjuryRiskText = $"⚠ {GetWorkloadRiskPercentage(player, team)}%",
+            HasMatchStatBadges = displayedStats.Goals > 0 ||
+                displayedStats.Assists > 0 ||
+                displayedStats.DefensiveContributions > 0 ||
+                displayedStats.Saves > 0 ||
+                displayedStats.YellowCards > 0 ||
+                displayedStats.RedCards > 0 ||
+                displayedStats.DefensiveErrors > 0 ||
+                displayedStats.Injuries > 0,
             WorkloadRiskBrush = GetWorkloadRiskBrush(player, team),
             WorkloadRiskForeground = GetWorkloadRiskForeground(player, team),
             WorkloadRiskTooltip = workloadRiskTooltip,

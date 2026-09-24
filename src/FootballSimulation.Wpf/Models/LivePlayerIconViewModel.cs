@@ -60,6 +60,10 @@ public class LivePlayerIconViewModel
     public string CardsText { get; init; } = "None";
     public string InjuryStatusText { get; init; } = string.Empty;
     public string WorkloadRiskText { get; init; } = string.Empty;
+    public string AttackRatingText { get; init; } = string.Empty;
+    public string DefenseRatingText { get; init; } = string.Empty;
+    public string InjuryRiskText { get; init; } = string.Empty;
+    public bool HasMatchStatBadges { get; init; }
     public string WorkloadRiskBrush { get; init; } = "#16A34A";
     public string WorkloadRiskForeground { get; init; } = "#FFFFFF";
     public string WorkloadRiskTooltip { get; init; } = string.Empty;

@@ -7,7 +7,7 @@ namespace FootballSimulation.Console.Tests;
 public class TeamRosterServiceTests
 {
     [Fact]
-    public void SelectMatchdayBench_UsesFullRosterAndBuildsBalancedEight()
+    public void SelectMatchdayBench_CoversEveryRequiredOutfieldRoleWithoutGoalkeeper()
     {
         var team = new Team
         {
@@ -16,9 +16,14 @@ public class TeamRosterServiceTests
             Reserves =
             [
                 CreatePlayer("gk", Position.Goalkeeper, 70),
-                .. Enumerable.Range(1, 4).Select(index => CreatePlayer($"def-{index}", Position.Defender, 70 + index)),
-                .. Enumerable.Range(1, 4).Select(index => CreatePlayer($"mid-{index}", Position.Midfielder, 70 + index)),
-                .. Enumerable.Range(1, 3).Select(index => CreatePlayer($"fwd-{index}", Position.Forward, 70 + index)),
+                CreatePlayer("st", Position.Forward, 78, "ST"),
+                CreatePlayer("lw", Position.Forward, 77, "LW"),
+                CreatePlayer("rw", Position.Forward, 76, "RW"),
+                CreatePlayer("cam", Position.Midfielder, 75, "CAM"),
+                CreatePlayer("cb", Position.Defender, 74, "CB"),
+                CreatePlayer("lb", Position.Defender, 73, "LB"),
+                CreatePlayer("rb", Position.Defender, 72, "RB"),
+                CreatePlayer("cdm", Position.Midfielder, 71, "CDM"),
                 CreatePlayer("extra", Position.Forward, 60)
             ]
         };
@@ -26,11 +31,10 @@ public class TeamRosterServiceTests
         TeamRosterService.SelectMatchdayBench(team);
 
         Assert.Equal(8, team.Substitutes.Count);
-        Assert.Contains(team.Substitutes, player => player.Position == Position.Goalkeeper);
-        Assert.True(team.Substitutes.Count(player => player.Position == Position.Defender) >= 2);
-        Assert.True(team.Substitutes.Count(player => player.Position == Position.Midfielder) >= 2);
-        Assert.True(team.Substitutes.Count(player => player.Position == Position.Forward) >= 2);
-        Assert.Equal(5, team.Reserves.Count);
+        Assert.DoesNotContain(team.Substitutes, player => player.Position == Position.Goalkeeper);
+        Assert.All(new[] { "ST", "LW", "RW", "CAM", "CB", "LB", "RB", "CDM" }, role =>
+            Assert.Contains(team.Substitutes, player => player.PreferredPosition == role));
+        Assert.Contains(team.Reserves, player => player.Position == Position.Goalkeeper);
     }
 
     [Fact]
@@ -69,11 +73,41 @@ public class TeamRosterServiceTests
         Assert.Contains(injuredStar, team.Reserves);
     }
 
-    private static Player CreatePlayer(string id, Position position, int overall) => new()
+    [Fact]
+    public void PromoteReserveGoalkeeperForInjury_ReplacesLowestRatedOutfieldSubstitute()
+    {
+        var goalkeeper = CreatePlayer("reserve-gk", Position.Goalkeeper, 75, "GK");
+        var weakestSubstitute = CreatePlayer("weakest", Position.Forward, 60, "ST");
+        var team = new Team
+        {
+            Substitutes =
+            [
+                weakestSubstitute,
+                CreatePlayer("lw", Position.Forward, 70, "LW"),
+                CreatePlayer("rw", Position.Forward, 70, "RW"),
+                CreatePlayer("cam", Position.Midfielder, 70, "CAM"),
+                CreatePlayer("cb", Position.Defender, 70, "CB"),
+                CreatePlayer("lb", Position.Defender, 70, "LB"),
+                CreatePlayer("rb", Position.Defender, 70, "RB"),
+                CreatePlayer("cm", Position.Midfielder, 70, "CM")
+            ],
+            Reserves = [goalkeeper]
+        };
+
+        var promoted = TeamRosterService.PromoteReserveGoalkeeperForInjury(team);
+
+        Assert.Same(goalkeeper, promoted);
+        Assert.Contains(goalkeeper, team.Substitutes);
+        Assert.Contains(weakestSubstitute, team.Reserves);
+        Assert.Equal(8, team.Substitutes.Count);
+    }
+
+    private static Player CreatePlayer(string id, Position position, int overall, string? preferredPosition = null) => new()
     {
         PlayerId = id,
         Name = id,
         Position = position,
+        PreferredPosition = preferredPosition ?? string.Empty,
         OverallRating = overall,
         Stamina = 100
     };

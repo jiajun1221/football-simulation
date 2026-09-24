@@ -41,9 +41,9 @@
     <SolidColorBrush x:Key="TacticalOptionForeground" Color="#30343A" />
     <SolidColorBrush x:Key="TacticalOptionHoverBackground" Color="#E2E4E3" />
 
-    <SolidColorBrush x:Key="MatchPitchBorderBrush" Color="#58665E" />
-    <SolidColorBrush x:Key="MatchPitchBackgroundBrush" Color="#718078" />
-    <SolidColorBrush x:Key="MatchPitchLineBrush" Color="#C9D0CC" />
+    <SolidColorBrush x:Key="MatchPitchBorderBrush" Color="#737B84" />
+    <SolidColorBrush x:Key="MatchPitchBackgroundBrush" Color="#9098A1" />
+    <SolidColorBrush x:Key="MatchPitchLineBrush" Color="#E1E5E9" />
 
     <SolidColorBrush x:Key="BackgroundBrush" Color="#E7E9EC" />
     <SolidColorBrush x:Key="CardBrush" Color="#F5F5F4" />
