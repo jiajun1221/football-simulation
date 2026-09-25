@@ -216,7 +216,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        const double zoom = 1.3;
+        var zoom = IsStealthHoverCard(target) ? 1.18 : 1.3;
         target.RenderTransformOrigin = GetStealthHoverTransformOrigin(target);
         target.RenderTransform = new ScaleTransform(zoom, zoom);
         Panel.SetZIndex(target, 1000);
@@ -290,9 +290,15 @@ public partial class MainWindow : Window
         Button? playerCardButton = null;
         Border? playerCardBorder = null;
         ListBoxItem? playerCardContainer = null;
+        FrameworkElement? stealthHoverCard = null;
 
         for (var current = source; current is not null && current != ApplicationContentRoot; current = GetParent(current))
         {
+            if (current is FrameworkElement element && IsStealthHoverCard(element))
+            {
+                stealthHoverCard = element;
+            }
+
             if (current is Button button)
             {
                 nearestButton ??= button;
@@ -313,7 +319,8 @@ public partial class MainWindow : Window
             }
         }
 
-        var target = (FrameworkElement?)playerCardContainer ??
+        var target = stealthHoverCard ??
+                     (FrameworkElement?)playerCardContainer ??
                      playerCardButton ??
                      (FrameworkElement?)playerCardBorder ??
                      nearestButton;
@@ -335,6 +342,17 @@ public partial class MainWindow : Window
             return new Point(
                 center.X <= listBox.ActualWidth / 2 ? 0 : 1,
                 center.Y <= listBox.ActualHeight / 2 ? 0 : 1);
+        }
+
+        if (IsStealthHoverCard(target))
+        {
+            var horizontalOrigin = Grid.GetColumn(target) switch
+            {
+                0 => 0,
+                1 => 0.5,
+                _ => 1
+            };
+            return new Point(horizontalOrigin, 1);
         }
 
         return new Point(0.5, 0.5);
@@ -367,6 +385,11 @@ public partial class MainWindow : Window
 
         return typeName.Contains("PlayerCard", StringComparison.Ordinal) ||
                typeName.Contains("PlayerIcon", StringComparison.Ordinal);
+    }
+
+    private static bool IsStealthHoverCard(FrameworkElement element)
+    {
+        return string.Equals(element.Tag as string, "StealthHoverCard", StringComparison.Ordinal);
     }
 
     private void ClearStealthHoverZoom()

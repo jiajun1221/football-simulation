@@ -74,6 +74,28 @@ public class TeamRosterServiceTests
     }
 
     [Fact]
+    public void SelectMatchdayBench_MovesPlayersBeyondStartingElevenIntoBenchOrReserves()
+    {
+        var fullRoster = Enumerable.Range(1, 23)
+            .Select(index => CreatePlayer($"player-{index}", Position.Midfielder, 90 - index, "CM"))
+            .ToList();
+        var team = new Team
+        {
+            Players = fullRoster.Take(13).ToList(),
+            Substitutes = fullRoster.Skip(13).Take(6).ToList(),
+            Reserves = fullRoster.Skip(19).ToList()
+        };
+
+        TeamRosterService.SelectMatchdayBench(team);
+
+        var selectedRoster = TeamRosterService.GetDistinctPlayers(team);
+        Assert.Equal(11, team.Players.Count);
+        Assert.Equal(8, team.Substitutes.Count);
+        Assert.Equal(4, team.Reserves.Count);
+        Assert.Equal(fullRoster.Select(player => player.PlayerId).Order(), selectedRoster.Select(player => player.PlayerId).Order());
+    }
+
+    [Fact]
     public void PromoteReserveGoalkeeperForInjury_ReplacesLowestRatedOutfieldSubstitute()
     {
         var goalkeeper = CreatePlayer("reserve-gk", Position.Goalkeeper, 75, "GK");

@@ -60,6 +60,7 @@ public class LivePlayerIconViewModel
     public string CardsText { get; init; } = "None";
     public string InjuryStatusText { get; init; } = string.Empty;
     public string WorkloadRiskText { get; init; } = string.Empty;
+    public int WorkloadRiskPercentage { get; init; }
     public string AttackRatingText { get; init; } = string.Empty;
     public string DefenseRatingText { get; init; } = string.Empty;
     public string InjuryRiskText { get; init; } = string.Empty;

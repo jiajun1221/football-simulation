@@ -2396,7 +2396,7 @@ public partial class MatchLiveView : UserControl
             string.Equals(_selectedPitchPlayerKey, playerKey, StringComparison.OrdinalIgnoreCase);
         var teamColors = GetMatchPalette(team);
         var formBadge = PlayerFormBadgeHelper.Create(GetDisplayedFormStatus(liveStats.CurrentRating));
-        var ratingBadgeColors = GetRatingBadgeColors(liveStats.CurrentRating, formBadge);
+        var ratingBadgeColors = GetRatingBadgeColors(liveStats.CurrentRating);
         var nationality = PlayerNationalityDisplayService.Resolve(player);
         var activeBallIndicator = string.Equals(_activeBallIndicator?.PlayerKey, playerKey, StringComparison.OrdinalIgnoreCase)
             ? _activeBallIndicator
@@ -2462,6 +2462,7 @@ public partial class MatchLiveView : UserControl
             CardsText = yellowCards == 0 && redCards == 0 ? "None" : $"Y{yellowCards} R{redCards}",
             InjuryStatusText = displayedStats.Injuries > 0 ? "Injured" : "Fit",
             WorkloadRiskText = workloadRiskText,
+            WorkloadRiskPercentage = GetWorkloadRiskPercentage(player, team),
             AttackRatingText = $"⚔ {CreateAttackPerformanceRating(displayedStats)}",
             DefenseRatingText = $"🛡 {CreateDefensePerformanceRating(displayedStats)}",
             InjuryRiskText = $"⚠ {GetWorkloadRiskPercentage(player, team)}%",
@@ -2498,14 +2499,16 @@ public partial class MatchLiveView : UserControl
         return (Math.Clamp(x, 0.06, 0.94), y);
     }
 
-    private static (string Background, string Foreground, string Border) GetRatingBadgeColors(double rating, PlayerFormBadge formBadge)
+    private static (string Background, string Foreground, string Border) GetRatingBadgeColors(double rating)
     {
-        if (rating >= 9.0)
+        return rating switch
         {
-            return ("#10B981", "#FFFFFF", "#D1FAE5");
-        }
-
-        return ("#102033", formBadge.Background, formBadge.Background);
+            >= 9.0 => ("#10B981", "#FFFFFF", "#047857"),
+            >= 7.5 => ("#4ADE80", "#064E3B", "#16A34A"),
+            >= 6.0 => ("#FACC15", "#1F2937", "#CA8A04"),
+            >= 5.0 => ("#FB923C", "#FFFFFF", "#EA580C"),
+            _ => ("#EF4444", "#FFFFFF", "#B91C1C")
+        };
     }
 
     private static DropShadowEffect? CreateBallIndicatorEffect(string? color)
@@ -2603,9 +2606,8 @@ public partial class MatchLiveView : UserControl
             ? Visibility.Collapsed
             : Visibility.Visible;
         SelectedPlayerCardStatusItemsControl.ItemsSource = selectedPlayer.CardStatusBadges;
-        SelectedPlayerCardStatusItemsControl.Visibility = selectedPlayer.CardStatusBadges.Count == 0
-            ? Visibility.Collapsed
-            : Visibility.Visible;
+        SelectedPlayerCardStatusItemsControl.Visibility = Visibility.Collapsed;
+        SelectedPlayerMatchBadgesItemsControl.ItemsSource = CreateSelectedPlayerMatchBadges(selectedPlayer);
 
         var playerContext = FindSelectedPlayerContext(selectedPlayer);
         var player = playerContext?.Player;
@@ -2616,19 +2618,21 @@ public partial class MatchLiveView : UserControl
 
         if (player?.Position == Position.Goalkeeper)
         {
+            SelectedPlayerAttackHeadingTextBlock.Text = "GOALKEEPING";
+            SelectedPlayerDefendHeadingTextBlock.Text = "STATUS";
             SetSelectedPlayerStatRows(
                 [
-                    new("Rating", selectedPlayer.LiveStats.RatingDisplay),
                     new("Saves", selectedPlayer.Saves.ToString()),
                     new("Clean Sheet", IsCleanSheet(team) ? "Yes" : "No"),
                     new("Punches", GetEstimatedPunches(performance).ToString()),
                     new("Claims", GetEstimatedClaims(performance).ToString()),
-                    new("Pass Accuracy", $"{passAccuracy:0}%")
+                    new("Pass Accuracy", $"{passAccuracy:0}%"),
+                    new("Goals Conceded", GetGoalsConceded(team).ToString())
                 ],
                 [
-                    new("Stamina", $"{selectedPlayer.Stamina:0}%"),
-                    new("Risk", selectedPlayer.WorkloadRiskText),
-                    new("Goals Conceded", GetGoalsConceded(team).ToString()),
+                    new("Clearances", (performance?.Clearances ?? 0).ToString()),
+                    new("Recoveries", (performance?.Recoveries ?? 0).ToString()),
+                    new("Duels Won", GetDuelsWon(performance).ToString()),
                     new("Cards", selectedPlayer.CardsText),
                     new("Condition", GetConditionDisplayText(selectedPlayer)),
                     new("Injury", selectedPlayer.InjuryStatusText)
@@ -2636,29 +2640,49 @@ public partial class MatchLiveView : UserControl
         }
         else
         {
+            SelectedPlayerAttackHeadingTextBlock.Text = "ATTACK";
+            SelectedPlayerDefendHeadingTextBlock.Text = "DEFEND";
             SetSelectedPlayerStatRows(
                 [
-                    new("Rating", selectedPlayer.LiveStats.RatingDisplay),
-                    new("Goals", selectedPlayer.Goals.ToString()),
-                    new("Assists", selectedPlayer.Assists.ToString()),
-                    new("Successful Tackles", (performance?.Tackles ?? 0).ToString()),
                     new("Key Passes", (performance?.KeyPasses ?? 0).ToString()),
-                    new("Interceptions", (performance?.Interceptions ?? 0).ToString())
+                    new("Pass Accuracy", $"{passAccuracy:0}%"),
+                    new("Shots", (performance?.Shots ?? 0).ToString()),
+                    new("Shots on Target", (performance?.ShotsOnTarget ?? 0).ToString()),
+                    new("Goals", selectedPlayer.Goals.ToString()),
+                    new("Assists", selectedPlayer.Assists.ToString())
                 ],
                 [
-                    new("Stamina", $"{selectedPlayer.Stamina:0}%"),
-                    new("Risk", selectedPlayer.WorkloadRiskText),
-                    new("Pass Accuracy", $"{passAccuracy:0}%"),
+                    new("Tackles", (performance?.Tackles ?? 0).ToString()),
+                    new("Clearances", (performance?.Clearances ?? 0).ToString()),
+                    new("Interceptions", (performance?.Interceptions ?? 0).ToString()),
                     new("Duels Won", GetDuelsWon(performance).ToString()),
-                    new("Condition", GetConditionDisplayText(selectedPlayer)),
-                    new("Cards", selectedPlayer.CardsText)
+                    new("Blocks", (performance?.Blocks ?? 0).ToString()),
+                    new("Recoveries", (performance?.Recoveries ?? 0).ToString())
                 ]);
         }
 
-        var formBadge = PlayerFormBadgeHelper.Create(player?.FormStatus ?? PlayerFormStatus.Average);
-        SelectedPlayerFormBadgeBorder.Background = ToBrush(formBadge.Background);
-        SelectedPlayerFormBadgeTextBlock.Foreground = ToBrush(formBadge.Foreground);
-        SelectedPlayerFormBadgeTextBlock.Text = formBadge.Text;
+    }
+
+    private static IReadOnlyList<StatusBadge> CreateSelectedPlayerMatchBadges(LivePlayerIconViewModel player)
+    {
+        var badges = new List<StatusBadge>();
+        AddBadge(player.GoalBadgeText, "#DCFCE7", "#166534");
+        AddBadge(player.AssistBadgeText, "#FFEDD5", "#C2410C");
+        AddBadge(player.DefensiveBadgeText, "#DBEAFE", "#1D4ED8");
+        AddBadge(player.SaveBadgeText, "#CFFAFE", "#0E7490");
+        AddBadge(player.YellowBadgeText, "#FEF3C7", "#92400E");
+        AddBadge(player.RedBadgeText, "#FEE2E2", "#B91C1C");
+        AddBadge(player.ErrorBadgeText, "#FEE2E2", "#B91C1C");
+        AddBadge(player.InjuryBadgeText, "#FEF3C7", "#92400E");
+        return badges;
+
+        void AddBadge(string text, string background, string foreground)
+        {
+            if (!string.IsNullOrWhiteSpace(text))
+            {
+                badges.Add(new StatusBadge(text, background, foreground));
+            }
+        }
     }
 
     private LivePlayerIconViewModel? GetDisplayedPlayerForDetailPanel()
@@ -2799,8 +2823,8 @@ public partial class MatchLiveView : UserControl
             "Goals Conceded" => (SoccerBallIcon(), "#DC2626"),
             "Assists" => (AssistIcon(), "#EA580C"),
             "Saves" or "Punches" or "Claims" or "Clean Sheet" => (GloveIcon(), "#2563EB"),
-            "Successful Tackles" or "Interceptions" or "Duels Won" => (ShieldIcon(), "#2563EB"),
-            "Key Passes" or "Pass Accuracy" => (TargetIcon(), "#EA580C"),
+            "Tackles" or "Successful Tackles" or "Clearances" or "Interceptions" or "Duels Won" or "Blocks" or "Recoveries" => (ShieldIcon(), "#2563EB"),
+            "Key Passes" or "Pass Accuracy" or "Shots" or "Shots on Target" => (TargetIcon(), "#EA580C"),
             "Stamina" or "Condition" => (BatteryIcon(), "#16A34A"),
             "Risk" or "Injury" => (WarningIcon(), "#B45309"),
             "Cards" => (YellowCardIcon(), "#CA8A04"),

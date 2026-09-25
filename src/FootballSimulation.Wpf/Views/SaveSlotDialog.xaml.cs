@@ -9,8 +9,10 @@ namespace FootballSimulation.Wpf.Views;
 public partial class SaveSlotDialog : Window
 {
     private const double CompactScale = 0.5;
-    private const double NormalContentWidth = 780;
-    private const double NormalContentHeight = 400;
+    private const double CompactContentWidth = 732;
+    private const double CompactContentHeight = 352;
+    private const double CompactWindowWidth = 390;
+    private const double CompactWindowHeight = 230;
 
     public int? SelectedSlotNumber { get; private set; }
 
@@ -29,13 +31,14 @@ public partial class SaveSlotDialog : Window
             return;
         }
 
-        SaveDialogRoot.Width = NormalContentWidth;
-        SaveDialogRoot.Height = NormalContentHeight;
+        SaveDialogRoot.Margin = new Thickness(12);
+        SaveDialogRoot.Width = CompactContentWidth;
+        SaveDialogRoot.Height = CompactContentHeight;
         SaveDialogRoot.HorizontalAlignment = HorizontalAlignment.Left;
         SaveDialogRoot.VerticalAlignment = VerticalAlignment.Top;
         SaveDialogRoot.LayoutTransform = new ScaleTransform(CompactScale, CompactScale);
-        Width = NormalContentWidth * CompactScale;
-        Height = 230;
+        Width = CompactWindowWidth;
+        Height = CompactWindowHeight;
     }
 
     private void SelectSlotButton_Click(object sender, RoutedEventArgs e)

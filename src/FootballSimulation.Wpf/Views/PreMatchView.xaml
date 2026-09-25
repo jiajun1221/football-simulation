@@ -204,18 +204,6 @@
                     <StackPanel Grid.Row="2"
                                 Orientation="Horizontal"
                                 Margin="0,3,0,0">
-                        <Border Background="{Binding WorkloadRiskBrush}"
-                                CornerRadius="7"
-                                Padding="3,1"
-                                HorizontalAlignment="Left"
-                                Margin="0,0,2,0"
-                                ToolTip="{Binding WorkloadRiskTooltip}">
-                            <TextBlock Text="{Binding WorkloadRiskText}"
-                                       FontFamily="Segoe UI Emoji"
-                                       Foreground="{Binding WorkloadRiskForeground}"
-                                       FontSize="7"
-                                       FontWeight="Black" />
-                        </Border>
                         <Border Background="{Binding FatigueWarningBadgeBackground}"
                                 CornerRadius="7"
                                 Padding="5,1"
@@ -241,7 +229,8 @@
                                 CornerRadius="7"
                                 Padding="5,1"
                                 HorizontalAlignment="Left"
-                                Margin="0,0,2,0">
+                                Margin="0,0,2,0"
+                                ToolTip="Previous match rating">
                             <TextBlock Text="{Binding FormBadgeText}"
                                        Foreground="{Binding FormBadgeForeground}"
                                        FontSize="7"
@@ -291,15 +280,25 @@
                         </Border>
                     </StackPanel>
 
-                    <ProgressBar Grid.Row="3"
-                                 Height="5"
-                                 Minimum="0"
-                                 Maximum="100"
-                                 Value="{Binding Stamina}"
-                                 Foreground="{Binding StaminaBrush}"
-                                 Background="{DynamicResource AppBorderBrush}"
-                                 BorderThickness="0"
-                                 Margin="0,5,0,0" />
+                    <Grid Grid.Row="3" Margin="0,4,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="4" />
+                            <RowDefinition Height="6" />
+                        </Grid.RowDefinitions>
+                        <ProgressBar Minimum="0" Maximum="100"
+                                     Value="{Binding Stamina, Mode=OneWay}"
+                                     Foreground="{Binding StaminaBrush}"
+                                     Background="{DynamicResource AppBorderBrush}"
+                                     BorderThickness="0"
+                                     ToolTip="Stamina" />
+                        <ProgressBar Grid.Row="1" Margin="0,2,0,0"
+                                     Minimum="0" Maximum="100"
+                                     Value="{Binding WorkloadRiskBarValue, Mode=OneWay}"
+                                     Foreground="{Binding WorkloadRiskBrush}"
+                                     Background="#334155"
+                                     BorderThickness="0"
+                                     ToolTip="{Binding WorkloadRiskTooltip}" />
+                    </Grid>
                 </Grid>
             </Border>
         </DataTemplate>
@@ -407,18 +406,6 @@
                     <StackPanel Grid.Row="2"
                                 Orientation="Horizontal"
                                 Margin="0,3,0,0">
-                        <Border Background="{Binding WorkloadRiskBrush}"
-                                CornerRadius="7"
-                                Padding="3,1"
-                                HorizontalAlignment="Left"
-                                Margin="0,0,2,0"
-                                ToolTip="{Binding WorkloadRiskTooltip}">
-                            <TextBlock Text="{Binding WorkloadRiskText}"
-                                       FontFamily="Segoe UI Emoji"
-                                       Foreground="{Binding WorkloadRiskForeground}"
-                                       FontSize="7"
-                                       FontWeight="Black" />
-                        </Border>
                         <Border Background="{Binding StatusBadgeBackground}"
                                 CornerRadius="7"
                                 Padding="5,1"
@@ -464,7 +451,8 @@
                                 CornerRadius="7"
                                 Padding="5,1"
                                 HorizontalAlignment="Left"
-                                Margin="0,0,2,0">
+                                Margin="0,0,2,0"
+                                ToolTip="Previous match rating">
                             <TextBlock Text="{Binding BenchFormBadgeText}"
                                        Foreground="{Binding BenchFormBadgeForeground}"
                                        FontSize="7"
@@ -514,15 +502,25 @@
                         </Border>
                     </StackPanel>
 
-                    <ProgressBar Grid.Row="3"
-                                 Height="5"
-                                 Minimum="0"
-                                 Maximum="100"
-                                 Value="{Binding Stamina}"
-                                 Foreground="{Binding StaminaBrush}"
-                                 Background="{DynamicResource AppBorderBrush}"
-                                 BorderThickness="0"
-                                 Margin="0,5,0,0" />
+                    <Grid Grid.Row="3" Margin="0,4,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="4" />
+                            <RowDefinition Height="6" />
+                        </Grid.RowDefinitions>
+                        <ProgressBar Minimum="0" Maximum="100"
+                                     Value="{Binding Stamina, Mode=OneWay}"
+                                     Foreground="{Binding StaminaBrush}"
+                                     Background="{DynamicResource AppBorderBrush}"
+                                     BorderThickness="0"
+                                     ToolTip="Stamina" />
+                        <ProgressBar Grid.Row="1" Margin="0,2,0,0"
+                                     Minimum="0" Maximum="100"
+                                     Value="{Binding WorkloadRiskBarValue, Mode=OneWay}"
+                                     Foreground="{Binding WorkloadRiskBrush}"
+                                     Background="#334155"
+                                     BorderThickness="0"
+                                     ToolTip="{Binding WorkloadRiskTooltip}" />
+                    </Grid>
                 </Grid>
             </Border>
         </DataTemplate>
@@ -1015,7 +1013,8 @@
                                  Loaded="ReserveListBox_Loaded">
                             <ListBox.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <UniformGrid Columns="4" />
+                                    <UniformGrid Columns="4"
+                                                 VerticalAlignment="Top" />
                                 </ItemsPanelTemplate>
                             </ListBox.ItemsPanel>
                             <ListBox.ItemContainerStyle>

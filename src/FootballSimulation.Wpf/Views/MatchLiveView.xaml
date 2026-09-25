@@ -59,6 +59,9 @@
                                 Background="{DynamicResource AppCardBackground}"
                                 BorderBrush="{Binding RatingBadgeBorderBrush}"
                                 BorderThickness="2">
+                            <Border.LayoutTransform>
+                                <ScaleTransform ScaleX="0.8" ScaleY="0.8" />
+                            </Border.LayoutTransform>
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
@@ -73,16 +76,16 @@
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
-                                    <Border Width="28"
+                                    <Border Width="32"
                                             Height="28"
                                             CornerRadius="14"
                                             Background="{Binding IconBrush}"
                                             BorderBrush="{Binding BorderBrush}"
                                             BorderThickness="2"
                                             Margin="0,0,6,0">
-                                        <TextBlock Text="{Binding ShirtNumberText}"
+                                        <TextBlock Text="{Binding ExactPosition}"
                                                    Foreground="{Binding IconForeground}"
-                                                   FontSize="10"
+                                                   FontSize="8.5"
                                                    FontWeight="Bold"
                                                    HorizontalAlignment="Center"
                                                    VerticalAlignment="Center" />
@@ -96,8 +99,6 @@
                                         <TextBlock Foreground="{DynamicResource AppMutedTextBrush}"
                                                    FontSize="8.5">
                                             <Run Text="{Binding TeamName}" />
-                                            <Run Text=" · " />
-                                            <Run Text="{Binding ExactPosition}" />
                                         </TextBlock>
                                     </StackPanel>
                                     <Border Grid.Column="2"
@@ -144,18 +145,32 @@
                                                FontWeight="Bold" />
                                 </Grid>
 
-                                <StackPanel Grid.Row="2" Margin="0,7,0,0" Orientation="Horizontal" HorizontalAlignment="Center">
-                                    <TextBlock Text="STATUS" Foreground="{DynamicResource AppMutedTextBrush}" FontSize="7" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,3,0" />
-                                    <Border Background="#FEE2E2" CornerRadius="7" Padding="4,2" Margin="1">
-                                        <TextBlock Text="{Binding AttackRatingText}" FontFamily="Segoe UI Emoji" Foreground="#B91C1C" FontSize="8" FontWeight="Bold" />
-                                    </Border>
-                                    <Border Background="#DBEAFE" CornerRadius="7" Padding="4,2" Margin="1">
-                                        <TextBlock Text="{Binding DefenseRatingText}" FontFamily="Segoe UI Emoji" Foreground="#1D4ED8" FontSize="8" FontWeight="Bold" />
-                                    </Border>
-                                    <Border Background="#FEF3C7" CornerRadius="7" Padding="4,2" Margin="1" ToolTip="{Binding WorkloadRiskTooltip}">
-                                        <TextBlock Text="{Binding InjuryRiskText}" FontFamily="Segoe UI Emoji" Foreground="#92400E" FontSize="8" FontWeight="Bold" />
-                                    </Border>
-                                </StackPanel>
+                                <Grid Grid.Row="2" Margin="0,7,0,0" ToolTip="{Binding WorkloadRiskTooltip}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Injury risk"
+                                               Foreground="{DynamicResource AppMutedTextBrush}"
+                                               FontSize="8.5"
+                                               VerticalAlignment="Center" />
+                                    <ProgressBar Grid.Column="1"
+                                                 Height="6"
+                                                 Margin="6,0"
+                                                 Minimum="0"
+                                                 Maximum="100"
+                                                 Value="{Binding WorkloadRiskPercentage, Mode=OneWay}"
+                                                 Foreground="{Binding WorkloadRiskBrush}"
+                                                 Background="{DynamicResource AppBorderBrush}"
+                                                 BorderThickness="0"
+                                                 VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="2"
+                                               Text="{Binding WorkloadRiskPercentage, StringFormat={}{0}%}"
+                                               Foreground="{Binding WorkloadRiskBrush}"
+                                               FontSize="8.5"
+                                               FontWeight="Bold" />
+                                </Grid>
 
                                 <WrapPanel Grid.Row="3" Margin="0,8,0,0" HorizontalAlignment="Center">
                                     <WrapPanel.Style>
@@ -1233,6 +1248,7 @@
                 </Grid.ColumnDefinitions>
 
                 <Border x:Name="SelectedPlayerDetailCardBorder"
+                        Tag="StealthHoverCard"
                         Grid.Column="0"
                         Background="{DynamicResource AppCardBackground}"
                         BorderBrush="Transparent"
@@ -1255,6 +1271,7 @@
                             <Grid Margin="0,0,0,1">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
 
@@ -1316,39 +1333,98 @@
                                             </ItemsPanelTemplate>
                                         </ItemsControl.ItemsPanel>
                                     </ItemsControl>
-                                    <Border x:Name="SelectedPlayerFormBadgeBorder"
-                                            CornerRadius="10"
-                                            Padding="8,3"
-                                            Background="{DynamicResource AppSecondaryCardBackground}"
-                                            VerticalAlignment="Center">
-                                        <Border.Effect>
-                                            <DropShadowEffect Color="#203B2D"
-                                                              BlurRadius="6"
-                                                              ShadowDepth="1"
-                                                              Opacity="0.18" />
-                                        </Border.Effect>
-                                        <TextBlock x:Name="SelectedPlayerFormBadgeTextBlock"
-                                                   Foreground="{DynamicResource AppMutedTextBrush}"
-                                                   FontSize="10"
-                                                   FontWeight="Bold" />
-                                    </Border>
                                 </StackPanel>
+
+                                <Border Grid.Column="2"
+                                        MinWidth="38"
+                                        Height="25"
+                                        Margin="6,0,0,0"
+                                        Padding="5,0"
+                                        CornerRadius="8"
+                                        Background="{Binding RatingBadgeBackground}"
+                                        BorderBrush="{Binding RatingBadgeBorderBrush}"
+                                        BorderThickness="1">
+                                    <TextBlock Text="{Binding LiveStats.RatingDisplay}"
+                                               Foreground="{Binding RatingBadgeForeground}"
+                                               FontSize="11"
+                                               FontWeight="Black"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" />
+                                </Border>
                             </Grid>
 
                             <TextBlock x:Name="SelectedPlayerMetaTextBlock"
                                        Foreground="{DynamicResource AppMutedTextBrush}"
                                        FontSize="10"
                                        FontWeight="SemiBold"
-                                       Margin="0,1,0,6" />
+                                       Margin="0,1,0,4" />
+
+                            <ItemsControl x:Name="SelectedPlayerMatchBadgesItemsControl"
+                                          Margin="0,0,0,4">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{Binding Background}"
+                                                CornerRadius="6"
+                                                Padding="4,1"
+                                                Margin="0,0,3,2">
+                                            <TextBlock Text="{Binding Text}"
+                                                       Foreground="{Binding Foreground}"
+                                                       FontFamily="Segoe UI Emoji"
+                                                       FontSize="7.5"
+                                                       FontWeight="Bold" />
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <Grid Margin="0,0,0,3">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="42" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="32" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Stamina" Foreground="{DynamicResource AppMutedTextBrush}" FontSize="8" />
+                                <ProgressBar Grid.Column="1" Height="5" Margin="4,0" Minimum="0" Maximum="100"
+                                             Value="{Binding Stamina, Mode=OneWay}" Foreground="{Binding StaminaBrush}"
+                                             Background="{DynamicResource AppBorderBrush}" BorderThickness="0" />
+                                <TextBlock Grid.Column="2" Text="{Binding Stamina, StringFormat={}{0:0}%}"
+                                           Foreground="{DynamicResource AppTextBrush}" FontSize="8" FontWeight="Bold" TextAlignment="Right" />
+                            </Grid>
 
                             <Grid Margin="0,0,0,5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="42" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="32" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Risk" Foreground="{DynamicResource AppMutedTextBrush}" FontSize="8" />
+                                <ProgressBar Grid.Column="1" Height="5" Margin="4,0" Minimum="0" Maximum="100"
+                                             Value="{Binding WorkloadRiskPercentage, Mode=OneWay}" Foreground="{Binding WorkloadRiskBrush}"
+                                             Background="{DynamicResource AppBorderBrush}" BorderThickness="0" />
+                                <TextBlock Grid.Column="2" Text="{Binding WorkloadRiskPercentage, StringFormat={}{0}%}"
+                                           Foreground="{Binding WorkloadRiskBrush}" FontSize="8" FontWeight="Bold" TextAlignment="Right" />
+                            </Grid>
+
+                            <Grid Margin="0,0,0,5">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="14" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
 
-                                <StackPanel Grid.Column="0">
+                                <TextBlock x:Name="SelectedPlayerAttackHeadingTextBlock" Text="ATTACK" Foreground="#C2410C" FontSize="8" FontWeight="Bold" Margin="0,0,0,3" />
+                                <TextBlock x:Name="SelectedPlayerDefendHeadingTextBlock" Grid.Column="2" Text="DEFEND" Foreground="#1D4ED8" FontSize="8" FontWeight="Bold" Margin="0,0,0,3" />
+
+                                <StackPanel Grid.Row="1" Grid.Column="0">
                                     <Grid Margin="0,0,0,4">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
@@ -1399,7 +1475,7 @@
                                     </Grid>
                                 </StackPanel>
 
-                                <StackPanel Grid.Column="2">
+                                <StackPanel Grid.Row="1" Grid.Column="2">
                                     <Grid Margin="0,0,0,4">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
@@ -1455,6 +1531,7 @@
                 </Border>
 
                 <Border Grid.Column="1"
+                        Tag="StealthHoverCard"
                         Background="{DynamicResource AppCardBackground}"
                         CornerRadius="12"
                         Padding="8"
@@ -1542,6 +1619,7 @@
                 </Border>
 
                 <Border x:Name="PausedSubstitutionPanelBorder"
+                        Tag="StealthHoverCard"
                         Grid.Column="2"
                         Background="{DynamicResource AppCardBackground}"
                         BorderBrush="Transparent"

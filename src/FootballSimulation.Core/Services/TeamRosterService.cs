@@ -35,8 +35,13 @@ public static class TeamRosterService
     {
         ArgumentNullException.ThrowIfNull(team);
 
-        var starterKeys = team.Players.Select(CreatePlayerKey).ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var candidates = GetDistinctPlayers(team)
+        var fullRoster = GetDistinctPlayers(team);
+        var starters = team.Players
+            .DistinctBy(CreatePlayerKey)
+            .Take(11)
+            .ToList();
+        var starterKeys = starters.Select(CreatePlayerKey).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var candidates = fullRoster
             .Where(player => !starterKeys.Contains(CreatePlayerKey(player)))
             .ToList();
         var available = candidates
@@ -59,6 +64,7 @@ public static class TeamRosterService
             player.IsOnPitch = false;
         }
 
+        team.Players = starters;
         team.Substitutes = selected.Take(MatchdaySubstituteCount).ToList();
         team.Reserves = candidates
             .Where(player => !selectedKeys.Contains(CreatePlayerKey(player)))

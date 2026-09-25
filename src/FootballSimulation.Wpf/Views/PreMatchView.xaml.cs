@@ -635,7 +635,7 @@ public partial class PreMatchView : UserControl
                 $"[LINEUP WARNING] Reason=RenderPitch; Method={nameof(CreatePitchPlayerCard)}; Player={player.Name}; Invalid Slot={displayedPosition}");
         }
 
-        var form = PlayerFormBadgeHelper.Create(player.FormStatus);
+        var recentForm = GetRecentMatchRatingBadge(player);
         var isOutOfPosition = PositionSuitabilityService.IsOutOfPosition(player);
         var suitability = PositionSuitabilityService.GetEffectivenessMultiplier(player);
         var ratingVisual = GetRatingVisual(player, suitability);
@@ -672,12 +672,13 @@ public partial class PreMatchView : UserControl
             Stamina = GetStaminaPercentage(player),
             StaminaBrush = GetStaminaBrush(player),
             WorkloadRiskText = CreateWorkloadRiskText(player),
+            WorkloadRiskPercentage = GetWorkloadRiskPercentage(player),
             WorkloadRiskBrush = GetWorkloadRiskBrush(player),
             WorkloadRiskForeground = GetWorkloadRiskForeground(player),
             WorkloadRiskTooltip = CreateWorkloadRiskTooltip(player),
-            FormBadgeText = form.Text,
-            FormBadgeBackground = form.Background,
-            FormBadgeForeground = form.Foreground,
+            FormBadgeText = recentForm.Text,
+            FormBadgeBackground = recentForm.Background,
+            FormBadgeForeground = recentForm.Foreground,
             FatigueWarningText = fatigueBadge.Text,
             FatigueWarningTooltip = fatigueBadge.Tooltip,
             FatigueWarningBadgeBackground = fatigueBadge.Background,
@@ -923,7 +924,7 @@ public partial class PreMatchView : UserControl
     private BenchPlayerCard CreateBenchPlayerCard(Player player)
     {
         PositionSuitabilityService.EnsurePositionMetadata(player);
-        var form = PlayerFormBadgeHelper.Create(player.FormStatus);
+        var recentForm = GetRecentMatchRatingBadge(player);
         var teamColors = TeamColorService.GetPalette(_state.SelectedTeam);
         var nationality = PlayerNationalityDisplayService.Resolve(player);
         var isAvailable = IsAvailableForSelection(player);
@@ -949,12 +950,13 @@ public partial class PreMatchView : UserControl
             Stamina = GetStaminaPercentage(player),
             StaminaBrush = GetStaminaBrush(player),
             WorkloadRiskText = CreateWorkloadRiskText(player),
+            WorkloadRiskPercentage = GetWorkloadRiskPercentage(player),
             WorkloadRiskBrush = GetWorkloadRiskBrush(player),
             WorkloadRiskForeground = GetWorkloadRiskForeground(player),
             WorkloadRiskTooltip = CreateWorkloadRiskTooltip(player),
-            BenchFormBadgeText = form.Text,
-            BenchFormBadgeBackground = form.Background,
-            BenchFormBadgeForeground = form.Foreground,
+            BenchFormBadgeText = recentForm.Text,
+            BenchFormBadgeBackground = recentForm.Background,
+            BenchFormBadgeForeground = recentForm.Foreground,
             CardBackground = teamColors.PrimaryColor,
             CardBorderBrush = !isAvailable
                 ? "#7F1D1D"
@@ -1070,6 +1072,25 @@ public partial class PreMatchView : UserControl
             : string.Join(" / ", ratings);
     }
 
+    private (string Text, string Background, string Foreground) GetRecentMatchRatingBadge(Player player)
+    {
+        var rating = _state.League?.Fixtures
+            .Where(fixture => fixture.IsPlayed && fixture.Result is not null)
+            .OrderByDescending(fixture => fixture.RoundNumber)
+            .SelectMany(fixture => fixture.Result!.PlayerPerformances)
+            .FirstOrDefault(performance => performance.PlayerName == player.Name)
+            ?.Rating;
+
+        return rating switch
+        {
+            >= 7.5 => (rating.Value.ToString("0.0"), "#4ADE80", "#064E3B"),
+            >= 6.0 => (rating.Value.ToString("0.0"), "#FACC15", "#422006"),
+            >= 5.0 => (rating.Value.ToString("0.0"), "#FB923C", "#431407"),
+            not null => (rating.Value.ToString("0.0"), "#EF4444", "#FFFFFF"),
+            null => ("—", "#E2E8F0", "#334155")
+        };
+    }
+
     private void RefreshTacticalInsight()
     {
         if (_isLoadingSetup || _state.SelectedTeam is null || _state.CurrentFixture is null || TacticalInsightInfoIcon is null)
@@ -1152,11 +1173,12 @@ public partial class PreMatchView : UserControl
         var color = GetWorkloadRiskPercentage(player) switch
         {
             >= 70 => "#DC2626",
-            >= 40 => "#FACC15",
-            _ => "#16A34A"
+            >= 50 => "#F97316",
+            >= 25 => "#FACC15",
+            _ => "#22C55E"
         };
 
-        return ThemeManager.ToneDownColor(color);
+        return color;
     }
 
     private string GetWorkloadRiskForeground(Player player)
@@ -2054,6 +2076,8 @@ public partial class PreMatchView : UserControl
         public double Stamina { get; init; }
         public string StaminaBrush { get; init; } = "#2FA84F";
         public string WorkloadRiskText { get; init; } = string.Empty;
+        public int WorkloadRiskPercentage { get; init; }
+        public int WorkloadRiskBarValue => Math.Max(8, WorkloadRiskPercentage);
         public string WorkloadRiskBrush { get; init; } = "#16A34A";
         public string WorkloadRiskForeground { get; init; } = "#FFFFFF";
         public string WorkloadRiskTooltip { get; init; } = string.Empty;

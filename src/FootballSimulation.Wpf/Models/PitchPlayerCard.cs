@@ -25,6 +25,8 @@ public class PitchPlayerCard
     public double Stamina { get; init; }
     public string StaminaBrush { get; init; } = "#2FA84F";
     public string WorkloadRiskText { get; init; } = string.Empty;
+    public int WorkloadRiskPercentage { get; init; }
+    public int WorkloadRiskBarValue => Math.Max(8, WorkloadRiskPercentage);
     public string WorkloadRiskBrush { get; init; } = "#16A34A";
     public string WorkloadRiskForeground { get; init; } = "#FFFFFF";
     public string WorkloadRiskTooltip { get; init; } = string.Empty;
