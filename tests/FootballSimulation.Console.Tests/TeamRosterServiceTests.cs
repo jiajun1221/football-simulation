@@ -96,6 +96,43 @@ public class TeamRosterServiceTests
     }
 
     [Fact]
+    public void RestoreMissingPlayers_AddsEveryMissingSourcePlayerToReserves()
+    {
+        var existingPlayer = CreatePlayer("existing", Position.Midfielder, 75);
+        var missingPlayer = CreatePlayer("missing", Position.Defender, 72);
+        missingPlayer.IsStarter = true;
+        missingPlayer.IsOnPitch = true;
+        var team = new Team { Players = [existingPlayer] };
+
+        var restoredCount = TeamRosterService.RestoreMissingPlayers(
+            team,
+            [existingPlayer, missingPlayer]);
+
+        Assert.Equal(1, restoredCount);
+        Assert.Contains(missingPlayer, team.Reserves);
+        Assert.False(missingPlayer.IsStarter);
+        Assert.False(missingPlayer.IsOnPitch);
+    }
+
+    [Fact]
+    public void RestoreMissingPlayers_DoesNotRestoreExcludedOrDuplicatePlayers()
+    {
+        var existingPlayer = CreatePlayer("existing", Position.Midfielder, 75);
+        var duplicateByName = CreatePlayer("different-id", Position.Midfielder, 70);
+        duplicateByName.Name = existingPlayer.Name;
+        var transferredPlayer = CreatePlayer("transferred", Position.Forward, 80);
+        var team = new Team { Players = [existingPlayer] };
+
+        var restoredCount = TeamRosterService.RestoreMissingPlayers(
+            team,
+            [duplicateByName, transferredPlayer],
+            player => player == transferredPlayer);
+
+        Assert.Equal(0, restoredCount);
+        Assert.Empty(team.Reserves);
+    }
+
+    [Fact]
     public void PromoteReserveGoalkeeperForInjury_ReplacesLowestRatedOutfieldSubstitute()
     {
         var goalkeeper = CreatePlayer("reserve-gk", Position.Goalkeeper, 75, "GK");

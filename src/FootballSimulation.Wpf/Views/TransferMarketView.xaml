@@ -2,9 +2,19 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:controls="clr-namespace:FootballSimulation.Wpf.Controls"
+             xmlns:helpers="clr-namespace:FootballSimulation.Wpf.Helpers"
              xmlns:views="clr-namespace:FootballSimulation.Wpf.Views"
              Background="{DynamicResource AppPageBackground}">
     <UserControl.Resources>
+        <helpers:OverallBadgeBrushConverter x:Key="OverallBadgeBrushConverter" />
+        <helpers:PositionBadgeBrushConverter x:Key="PositionBadgeBrushConverter" />
+        <DataTemplate x:Key="PositionBadgeTemplate">
+            <Border Background="{Binding Position, Converter={StaticResource PositionBadgeBrushConverter}}"
+                    CornerRadius="6" Padding="6,2" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock Text="{Binding Position}" Foreground="#FFFFFF" FontSize="11"
+                           FontWeight="Bold" HorizontalAlignment="Center" />
+            </Border>
+        </DataTemplate>
         <DropShadowEffect x:Key="SoftCardShadow"
                           BlurRadius="18"
                           ShadowDepth="3"
@@ -177,7 +187,7 @@
         </Style>
 
         <Style x:Key="OvrBadgeBorderStyle" TargetType="Border">
-            <Setter Property="Background" Value="#061226" />
+            <Setter Property="Background" Value="{Binding OverallText, Converter={StaticResource OverallBadgeBrushConverter}}" />
             <Setter Property="BorderBrush" Value="#1E293B" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="8" />
@@ -527,13 +537,13 @@
                                     <StaticResource ResourceKey="NationalityCellTemplate" />
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="Pos" Binding="{Binding Position}" Width="45" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                            <DataGridTemplateColumn Header="Pos" Width="52" CellTemplate="{StaticResource PositionBadgeTemplate}" />
                             <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="45" ElementStyle="{StaticResource CenteredGridTextStyle}" />
                             <DataGridTemplateColumn Header="OVR" Width="58">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border Style="{StaticResource OvrBadgeBorderStyle}">
-                                            <TextBlock Text="{Binding OverallText}" Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            <TextBlock Text="{Binding OverallText}" Foreground="{Binding OverallText, Converter={StaticResource OverallBadgeBrushConverter}, ConverterParameter=Foreground}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Border>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -682,13 +692,13 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="Pos" Binding="{Binding Position}" Width="45" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                            <DataGridTemplateColumn Header="Pos" Width="52" CellTemplate="{StaticResource PositionBadgeTemplate}" />
                             <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="45" ElementStyle="{StaticResource CenteredGridTextStyle}" />
                             <DataGridTemplateColumn Header="OVR" Width="58">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border Style="{StaticResource OvrBadgeBorderStyle}">
-                                            <TextBlock Text="{Binding OverallText}" Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            <TextBlock Text="{Binding OverallText}" Foreground="{Binding OverallText, Converter={StaticResource OverallBadgeBrushConverter}, ConverterParameter=Foreground}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Border>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -771,13 +781,13 @@
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
-                                    <DataGridTextColumn Header="Pos" Binding="{Binding Position}" Width="45" ElementStyle="{StaticResource CenteredGridTextStyle}" />
+                                    <DataGridTemplateColumn Header="Pos" Width="52" CellTemplate="{StaticResource PositionBadgeTemplate}" />
                                     <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="45" ElementStyle="{StaticResource CenteredGridTextStyle}" />
                                     <DataGridTemplateColumn Header="OVR" Width="58">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <Border Style="{StaticResource OvrBadgeBorderStyle}">
-                                                    <TextBlock Text="{Binding OverallText}" Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                    <TextBlock Text="{Binding OverallText}" Foreground="{Binding OverallText, Converter={StaticResource OverallBadgeBrushConverter}, ConverterParameter=Foreground}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                                 </Border>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
@@ -862,7 +872,7 @@
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border Style="{StaticResource OvrBadgeBorderStyle}">
-                                            <TextBlock Text="{Binding OverallText}" Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            <TextBlock Text="{Binding OverallText}" Foreground="{Binding OverallText, Converter={StaticResource OverallBadgeBrushConverter}, ConverterParameter=Foreground}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Border>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -938,7 +948,7 @@
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border Style="{StaticResource OvrBadgeBorderStyle}">
-                                            <TextBlock Text="{Binding OverallText}" Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            <TextBlock Text="{Binding OverallText}" Foreground="{Binding OverallText, Converter={StaticResource OverallBadgeBrushConverter}, ConverterParameter=Foreground}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Border>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>

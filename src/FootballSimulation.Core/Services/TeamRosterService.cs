@@ -31,6 +31,43 @@ public static class TeamRosterService
             .ToList();
     }
 
+    public static int RestoreMissingPlayers(
+        Team team,
+        IEnumerable<Player> sourcePlayers,
+        Func<Player, bool>? shouldExclude = null)
+    {
+        ArgumentNullException.ThrowIfNull(team);
+        ArgumentNullException.ThrowIfNull(sourcePlayers);
+
+        var currentPlayers = GetDistinctPlayers(team);
+        var currentKeys = currentPlayers
+            .Select(CreatePlayerKey)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var currentNames = currentPlayers
+            .Select(player => player.Name)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var restoredCount = 0;
+
+        foreach (var player in sourcePlayers)
+        {
+            if (shouldExclude?.Invoke(player) == true ||
+                currentKeys.Contains(CreatePlayerKey(player)) ||
+                currentNames.Contains(player.Name))
+            {
+                continue;
+            }
+
+            player.IsStarter = false;
+            player.IsOnPitch = false;
+            team.Reserves.Add(player);
+            currentKeys.Add(CreatePlayerKey(player));
+            currentNames.Add(player.Name);
+            restoredCount++;
+        }
+
+        return restoredCount;
+    }
+
     public static void SelectMatchdayBench(Team team)
     {
         ArgumentNullException.ThrowIfNull(team);

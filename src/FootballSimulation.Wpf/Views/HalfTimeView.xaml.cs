@@ -9,6 +9,7 @@ using System.Windows.Data;
 using FootballSimulation.Engine;
 using FootballSimulation.Models;
 using FootballSimulation.Services;
+using FootballSimulation.Wpf.Controls;
 using FootballSimulation.Wpf.Helpers;
 using FootballSimulation.Wpf.Models;
 using FootballSimulation.Wpf.Services;
@@ -34,6 +35,7 @@ public partial class HalfTimeView : UserControl
     private Point _dragStartPoint;
     private bool _isDraggingPlayer;
     private bool _isLoadingSetup;
+    private bool _isCompactMode;
 
     private sealed record PitchSlotAssignment(Player Player, PitchPosition Position);
     private sealed record PendingHalftimeSubstitution(Player Starter, Player Substitute, string AssignedPosition);
@@ -52,6 +54,40 @@ public partial class HalfTimeView : UserControl
         _setupMode = setupMode;
 
         LoadHalfTime();
+    }
+
+    internal void SetCompactMode(bool isCompact)
+    {
+        _isCompactMode = isCompact;
+        MainRootGrid.Margin = isCompact ? new Thickness(8) : new Thickness(24);
+        CompactPitchToggleButton.Visibility = isCompact ? Visibility.Visible : Visibility.Collapsed;
+        CompactHalfTimeInsightsPanel.Visibility = isCompact ? Visibility.Visible : Visibility.Collapsed;
+        TacticalSettingsPanel.IsCompact = isCompact;
+        TacticalSettingsPanel.ShowCompactTitle = false;
+        TacticalSettingsPanel.PanelMaxHeight = isCompact ? 220 : 620;
+        HalfTimeSetupPanel.Padding = isCompact ? new Thickness(12) : new Thickness(16);
+        HalfTimePitchColumnDefinition.Width = isCompact ? new GridLength(0) : new GridLength(2, GridUnitType.Star);
+        HalfTimeSetupColumnDefinition.Width = isCompact ? new GridLength(1, GridUnitType.Star) : new GridLength(320);
+        HalfTimePitchPanel.Visibility = isCompact ? Visibility.Collapsed : Visibility.Visible;
+        HalfTimeSetupPanel.Visibility = Visibility.Visible;
+        CompactPitchToggleButton.Content = "↗";
+        CompactPitchToggleButton.ToolTip = "Expand pitch";
+        RefreshCompactHalfTimePanels();
+    }
+
+    private void CompactPitchToggleButton_Click(object sender, RoutedEventArgs e)
+    {
+        var showPitch = HalfTimePitchPanel.Visibility != Visibility.Visible;
+        HalfTimePitchColumnDefinition.Width = showPitch ? new GridLength(1, GridUnitType.Star) : new GridLength(0);
+        HalfTimeSetupColumnDefinition.Width = showPitch ? new GridLength(0) : new GridLength(1, GridUnitType.Star);
+        HalfTimePitchPanel.Visibility = showPitch ? Visibility.Visible : Visibility.Collapsed;
+        HalfTimeSetupPanel.Visibility = showPitch ? Visibility.Collapsed : Visibility.Visible;
+        CompactPitchToggleButton.Content = showPitch ? "←" : "↗";
+        CompactPitchToggleButton.ToolTip = showPitch ? "Return to setup" : "Expand pitch";
+        if (showPitch)
+        {
+            Dispatcher.BeginInvoke(RenderPitch);
+        }
     }
 
     private void LoadHalfTime()
@@ -158,6 +194,15 @@ public partial class HalfTimeView : UserControl
     private void LoadTactics(TeamTactics tactics)
     {
         TacticalSettingsPanel.LoadTactics(tactics);
+        if (_state.SelectedTeam is not null)
+        {
+            TacticalSettingsPanel.LoadFormation(_state.SelectedTeam.Formation);
+        }
+    }
+
+    private void TacticalSettingsPanel_FormationChanged(object? sender, FormationSelectionChangedEventArgs e)
+    {
+        FormationComboBox.SelectedValue = e.Formation;
     }
 
     private void RenderPitch()
@@ -357,7 +402,7 @@ public partial class HalfTimeView : UserControl
     private PitchPlayerCard CreatePitchPlayerCard(Player player, string displayedPosition)
     {
         PositionSuitabilityService.EnsurePositionMetadata(player, displayedPosition);
-        var form = PlayerFormBadgeHelper.Create(player.FormStatus);
+        var halfRating = GetFirstHalfRatingBadge(player);
         var isOutOfPosition = PositionSuitabilityService.IsOutOfPosition(player);
         var suitability = PositionSuitabilityService.GetEffectivenessMultiplier(player);
         var ratingVisual = GetRatingVisual(player, suitability);
@@ -366,6 +411,9 @@ public partial class HalfTimeView : UserControl
         var positionBackground = teamColors.SecondaryColor;
         var nationality = PlayerNationalityDisplayService.Resolve(player);
         var fatigueBadge = CreateFatigueBadge(player);
+        var positionVisual = GetCompactPositionVisual(player.PreferredPosition);
+        var overallVisual = GetCompactOverallVisual(GetOverallRating(player));
+        var riskPercentage = GetWorkloadRiskPercentage(player);
 
         return new PitchPlayerCard
         {
@@ -378,21 +426,25 @@ public partial class HalfTimeView : UserControl
             NationalityName = nationality.Name,
             PositionText = displayedPosition,
             OverallText = $"OVR {ratingVisual.Rating}",
+            OverallValueText = ratingVisual.Rating.ToString(),
+            OverallBadgeBackground = overallVisual.Background,
+            OverallBadgeForeground = overallVisual.Foreground,
             OverallForeground = textForeground,
             TextForeground = textForeground,
             MutedForeground = textForeground,
-            PositionBackground = positionBackground,
-            PositionForeground = TeamColorService.GetReadableTextColor(positionBackground),
+            PositionBackground = positionVisual.Color,
+            PositionForeground = "#FFFFFF",
             GrowthText = PlayerGrowthDisplayHelper.CreateGrowthText(player),
             Stamina = GetStaminaPercentage(player),
             StaminaBrush = GetStaminaBrush(player),
             WorkloadRiskText = CreateWorkloadRiskText(player),
+            WorkloadRiskPercentage = riskPercentage,
             WorkloadRiskBrush = GetWorkloadRiskBrush(player),
             WorkloadRiskForeground = GetWorkloadRiskForeground(player),
             WorkloadRiskTooltip = CreateWorkloadRiskTooltip(player),
-            FormBadgeText = form.Text,
-            FormBadgeBackground = form.Background,
-            FormBadgeForeground = form.Foreground,
+            FormBadgeText = halfRating.Text,
+            FormBadgeBackground = halfRating.Background,
+            FormBadgeForeground = halfRating.Foreground,
             FatigueWarningText = fatigueBadge.Text,
             FatigueWarningTooltip = fatigueBadge.Tooltip,
             FatigueWarningBadgeBackground = fatigueBadge.Background,
@@ -400,12 +452,8 @@ public partial class HalfTimeView : UserControl
             SubstitutionStatusBadge = CreateSubstitutionStatusBadge(player, pendingIn: false),
             CardStatusBadges = CreateCardStatusBadges(player),
             CardBackground = teamColors.PrimaryColor,
-            CardBorderBrush = player == _selectedStarter
-                ? teamColors.SelectedGlowColor
-                : isOutOfPosition
-                    ? ratingVisual.Foreground
-                    : teamColors.BorderColor,
-            CardBorderThickness = player == _selectedStarter ? new Thickness(3) : new Thickness(1)
+            CardBorderBrush = positionVisual.Color,
+            CardBorderThickness = player == _selectedStarter ? new Thickness(4) : new Thickness(3)
         };
     }
 
@@ -563,6 +611,10 @@ public partial class HalfTimeView : UserControl
         SubstitutionStatusTextBlock.Text = _pendingHalftimeSubstitutions.Count == 0
             ? $"{GetUsedSubstitutions()}/{GetMaxSubstitutions()} used"
             : $"{GetUsedSubstitutions()}/{GetMaxSubstitutions()} used · {_pendingHalftimeSubstitutions.Count} queued";
+        if (CompactHalfTimeInsightsPanel.Visibility == Visibility.Visible)
+        {
+            RefreshCompactHalfTimePanels();
+        }
     }
 
     private bool IsAvailableSubstitute(Player player)
@@ -599,10 +651,13 @@ public partial class HalfTimeView : UserControl
     private BenchPlayerCard CreateBenchPlayerCard(Player player)
     {
         PositionSuitabilityService.EnsurePositionMetadata(player);
-        var form = PlayerFormBadgeHelper.Create(player.FormStatus);
+        var halfRating = GetFirstHalfRatingBadge(player);
         var teamColors = TeamColorService.GetPalette(_state.SelectedTeam);
         var nationality = PlayerNationalityDisplayService.Resolve(player);
         var fatigueBadge = CreateFatigueBadge(player);
+        var positionVisual = GetCompactPositionVisual(player.PreferredPosition);
+        var overallVisual = GetCompactOverallVisual(GetOverallRating(player));
+        var riskPercentage = GetWorkloadRiskPercentage(player);
 
         return new BenchPlayerCard
         {
@@ -614,30 +669,60 @@ public partial class HalfTimeView : UserControl
             PlayerImagePath = GetPlayerImagePath(player),
             Position = player.PreferredPosition,
             OverallText = $"OVR {GetOverallRating(player)}",
+            OverallValueText = GetOverallRating(player).ToString(),
+            OverallBadgeBackground = overallVisual.Background,
+            OverallBadgeForeground = overallVisual.Foreground,
             OverallRating = GetOverallRating(player),
             GrowthText = PlayerGrowthDisplayHelper.CreateGrowthText(player),
             Stamina = GetStaminaPercentage(player),
             StaminaBrush = GetStaminaBrush(player),
             WorkloadRiskText = CreateWorkloadRiskText(player),
+            WorkloadRiskBarValue = Math.Max(12, riskPercentage),
             WorkloadRiskBrush = GetWorkloadRiskBrush(player),
             WorkloadRiskForeground = GetWorkloadRiskForeground(player),
             WorkloadRiskTooltip = CreateWorkloadRiskTooltip(player),
-            BenchFormBadgeText = form.Text,
-            BenchFormBadgeBackground = form.Background,
-            BenchFormBadgeForeground = form.Foreground,
+            BenchFormBadgeText = halfRating.Text,
+            BenchFormBadgeBackground = halfRating.Background,
+            BenchFormBadgeForeground = halfRating.Foreground,
             FatigueWarningText = fatigueBadge.Text,
             FatigueWarningTooltip = fatigueBadge.Tooltip,
             FatigueWarningBadgeBackground = fatigueBadge.Background,
             CardBackground = teamColors.PrimaryColor,
-            CardBorderBrush = teamColors.BorderColor,
+            CardBorderBrush = positionVisual.Color,
             TextForeground = teamColors.TextColor,
-            PositionBackground = teamColors.SecondaryColor,
-            PositionForeground = TeamColorService.GetReadableTextColor(teamColors.SecondaryColor),
+            PositionBackground = positionVisual.Color,
+            PositionForeground = "#FFFFFF",
             TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits, int.MaxValue),
             SubstitutionStatusBadge = CreateSubstitutionStatusBadge(player, pendingIn: true),
             CardStatusBadges = CreateCardStatusBadges(player)
         };
     }
+
+    private static (string Color, string Foreground) GetCompactPositionVisual(string position)
+    {
+        var color = PositionSuitabilityService.NormalizeExactPosition(position) switch
+        {
+            "ST" => "#991B1B",
+            "LW" or "RW" or "LM" or "RM" => "#F87171",
+            "CAM" => "#F97316",
+            "CM" => "#FACC15",
+            "CDM" => "#A16207",
+            "CB" => "#2563EB",
+            "LB" or "RB" => "#60A5FA",
+            "GK" => "#7C3AED",
+            _ => "#64748B"
+        };
+        return (color, "#FFFFFF");
+    }
+
+    private static (string Background, string Foreground) GetCompactOverallVisual(int rating) => rating switch
+    {
+        >= 90 => ("#FF9800", "#172033"),
+        >= 80 => ("#FFD700", "#172033"),
+        >= 70 => ("#C0C0C0", "#172033"),
+        >= 60 => ("#CD7F32", "#172033"),
+        _ => ("#FFFFFF", "#172033")
+    };
 
     private bool CancelPendingSubstitutionForSubstitute(Player substitute)
     {
@@ -832,6 +917,320 @@ public partial class HalfTimeView : UserControl
         return _state.CurrentMatch?.PlayerPerformances.FirstOrDefault(performance =>
             string.Equals(performance.PlayerName, player.Name, StringComparison.OrdinalIgnoreCase) &&
             string.Equals(performance.TeamName, team?.Name, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private (string Text, string Background, string Foreground) GetFirstHalfRatingBadge(Player player)
+    {
+        var performance = FindSelectedPlayerPerformance(player, FindSelectedPlayerTeam(player));
+        if (performance is null)
+        {
+            return ("—", "#64748B", "#FFFFFF");
+        }
+
+        return (
+            RatingDisplayHelper.CreateRatingText(performance.Rating),
+            RatingDisplayHelper.GetRatingBrush(performance.Rating),
+            RatingDisplayHelper.GetRatingForeground(performance.Rating));
+    }
+
+    private void RefreshCompactHalfTimePanels()
+    {
+        if (_state.SelectedTeam is null)
+        {
+            CompactFirstHalfRatingsListBox.ItemsSource = null;
+            CompactHalfTimeRecommendationsItemsControl.ItemsSource = null;
+            return;
+        }
+
+        var activePlayers = GetActivePitchPlayers(_state.SelectedTeam).ToList();
+        var activePlayerKeys = activePlayers
+            .Select(PlayerRosterKeyService.CreateKey)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var substitutePlayers = _state.SelectedTeam.Substitutes
+            .Where(player => !activePlayerKeys.Contains(PlayerRosterKeyService.CreateKey(player)))
+            .Where(IsAvailableSubstitute)
+            .ToList();
+        var compactPlayerRows = activePlayers
+            .Select(player => CreateCompactHalfTimePlayerRow(player, isStarter: true))
+            .Concat(substitutePlayers.Select(player => CreateCompactHalfTimePlayerRow(player, isStarter: false)))
+            .ToList();
+        var compactPlayersView = CollectionViewSource.GetDefaultView(compactPlayerRows);
+        compactPlayersView.GroupDescriptions.Clear();
+        compactPlayersView.GroupDescriptions.Add(new PropertyGroupDescription(nameof(CompactHalfTimeRating.Category)));
+        compactPlayersView.SortDescriptions.Clear();
+        compactPlayersView.SortDescriptions.Add(new SortDescription(nameof(CompactHalfTimeRating.CategoryOrder), ListSortDirection.Ascending));
+        compactPlayersView.SortDescriptions.Add(new SortDescription(nameof(CompactHalfTimeRating.SortRating), ListSortDirection.Descending));
+        CompactFirstHalfRatingsListBox.ItemsSource = compactPlayersView;
+
+        var queuedPlayersOut = _pendingHalftimeSubstitutions.Select(item => item.Starter).ToHashSet();
+        var queuedPlayersIn = _pendingHalftimeSubstitutions.Select(item => item.Substitute).ToHashSet();
+        var availableSubstitutes = _state.SelectedTeam.Substitutes
+            .Where(IsAvailableSubstitute)
+            .Where(player => !queuedPlayersIn.Contains(player))
+            .ToList();
+        var candidates = activePlayers
+            .Where(player => !queuedPlayersOut.Contains(player))
+            .Select(player => CreateCompactHalfTimeRecommendation(player, availableSubstitutes))
+            .Where(item => item is not null)
+            .OrderByDescending(item => item!.Priority)
+            .Cast<CompactHalfTimeRecommendation>()
+            .ToList();
+        var usedIncomingPlayers = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        CompactHalfTimeRecommendationsItemsControl.ItemsSource = candidates
+            .Where(item => usedIncomingPlayers.Add(PlayerRosterKeyService.CreateKey(item.PlayerInPlayer)))
+            .Take(3)
+            .ToList();
+    }
+
+    private CompactHalfTimeRating CreateCompactHalfTimePlayerRow(Player player, bool isStarter)
+    {
+        var nationality = PlayerNationalityDisplayService.Resolve(player);
+        var stamina = GetStaminaPercentage(player);
+        var injuryRisk = GetWorkloadRiskPercentage(player);
+        var pendingSubstitution = isStarter
+            ? _pendingHalftimeSubstitutions.FirstOrDefault(item => item.Starter == player)
+            : null;
+        var pendingNationality = pendingSubstitution is null
+            ? null
+            : PlayerNationalityDisplayService.Resolve(pendingSubstitution.Substitute);
+        string ratingText;
+        string ratingBackground;
+        string ratingForeground;
+        double sortRating;
+        if (isStarter)
+        {
+            var badge = GetFirstHalfRatingBadge(player);
+            var ratingValue = badge.Text == "—" ? (double?)null : double.Parse(badge.Text);
+            var ratingVisual = GetCompactFirstHalfRatingVisual(ratingValue);
+            ratingText = badge.Text;
+            ratingBackground = ratingVisual.Background;
+            ratingForeground = ratingVisual.Foreground;
+            sortRating = ratingValue ?? 0;
+        }
+        else
+        {
+            var overall = GetOverallRating(player);
+            var overallVisual = GetCompactOverallVisual(overall);
+            ratingText = overall.ToString();
+            ratingBackground = overallVisual.Background;
+            ratingForeground = overallVisual.Foreground;
+            sortRating = overall;
+        }
+
+        return new CompactHalfTimeRating
+        {
+            Player = player,
+            IsStarter = isStarter,
+            Category = isStarter ? "Starting Players" : "Sub Players",
+            CategoryOrder = isStarter ? 0 : 1,
+            SortRating = sortRating,
+            RowToolTip = isStarter
+                ? "Drop a substitute here to queue the change"
+                : "Drag this substitute onto a starting player",
+            Position = PositionSuitabilityService.NormalizeExactPosition(
+                isStarter ? player.AssignedPosition : player.PreferredPosition),
+            Name = player.Name,
+            FlagImagePath = nationality.FlagImagePath,
+            NationalityName = nationality.Name,
+            Rating = ratingText,
+            RatingBackground = ratingBackground,
+            RatingForeground = ratingForeground,
+            Stamina = stamina,
+            StaminaText = $"STA {stamina}%",
+            StaminaBrush = GetStaminaBrush(player),
+            InjuryRisk = injuryRisk,
+            InjuryRiskText = $"INJ {injuryRisk}%",
+            InjuryRiskBrush = GetWorkloadRiskBrush(player),
+            PendingSubstituteName = pendingSubstitution?.Substitute.Name ?? string.Empty,
+            PendingSubstituteFlagImagePath = pendingNationality?.FlagImagePath ?? "/Assets/Flags/default.png",
+            PendingSubstituteNationalityName = pendingNationality?.Name ?? "Unknown nationality",
+            PendingSubstitutionVisibility = pendingSubstitution is null ? Visibility.Collapsed : Visibility.Visible
+        };
+    }
+
+    private void CompactFirstHalfRatingsListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        if (_state.SelectedTeam is null ||
+            CompactFirstHalfRatingsListBox.SelectedItem is not CompactHalfTimeRating selectedPlayer)
+        {
+            return;
+        }
+
+        if (!selectedPlayer.IsStarter)
+        {
+            if (CancelPendingSubstitutionForSubstitute(selectedPlayer.Player))
+            {
+                e.Handled = true;
+            }
+            return;
+        }
+
+        if (_pendingHalftimeSubstitutions.Any(item => item.Starter == selectedPlayer.Player))
+        {
+            CancelPendingSubstitutionForStarter(selectedPlayer.Player);
+            e.Handled = true;
+            return;
+        }
+
+        var position = PositionSuitabilityService.NormalizeExactPosition(selectedPlayer.Player.AssignedPosition);
+        var queuedSubstitutes = _pendingHalftimeSubstitutions
+            .Select(item => item.Substitute)
+            .ToHashSet();
+        var substitute = _state.SelectedTeam.Substitutes
+            .Where(IsAvailableSubstitute)
+            .Where(player => !queuedSubstitutes.Contains(player))
+            .Where(player => position != "GK" || PositionSuitabilityService.IsGoalkeeperCapable(player))
+            .OrderByDescending(player => PositionCompatibilityService.GetCompatibilityScore(player, position))
+            .ThenByDescending(GetOverallRating)
+            .FirstOrDefault();
+
+        if (substitute is null)
+        {
+            MessageBox.Show("No available substitute can replace this player.");
+            return;
+        }
+
+        ExecuteHalftimeSwap(selectedPlayer.Player, substitute);
+        e.Handled = true;
+    }
+
+    private void CompactPlayerRow_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        _dragStartPoint = e.GetPosition(this);
+    }
+
+    private void CompactPlayerRow_MouseMove(object sender, MouseEventArgs e)
+    {
+        if (e.LeftButton != MouseButtonState.Pressed ||
+            sender is not FrameworkElement { DataContext: CompactHalfTimeRating { IsStarter: false } substituteRow } element ||
+            !HasMovedEnoughToDrag(e.GetPosition(this)))
+        {
+            return;
+        }
+
+        e.Handled = true;
+        StartPlayerDrag(
+            element,
+            substituteRow.Player,
+            DragSource.Substitute,
+            _state.SelectedTeam?.Substitutes.IndexOf(substituteRow.Player) ?? -1);
+    }
+
+    private void CompactPlayerRow_DragOver(object sender, DragEventArgs e)
+    {
+        var canDrop = sender is FrameworkElement { DataContext: CompactHalfTimeRating { IsStarter: true } } &&
+            GetDraggedPlayer(e) is { Source: DragSource.Substitute };
+        e.Effects = canDrop ? DragDropEffects.Move : DragDropEffects.None;
+        e.Handled = true;
+    }
+
+    private void CompactPlayerRow_Drop(object sender, DragEventArgs e)
+    {
+        if (sender is not FrameworkElement { DataContext: CompactHalfTimeRating { IsStarter: true } starterRow } ||
+            GetDraggedPlayer(e) is not { Source: DragSource.Substitute } draggedPlayer)
+        {
+            return;
+        }
+
+        ExecuteHalftimeSwap(starterRow.Player, draggedPlayer.Player);
+        e.Handled = true;
+    }
+
+    private static (string Background, string Foreground) GetCompactFirstHalfRatingVisual(double? rating) => rating switch
+    {
+        >= 9.0 => ("#10B981", "#FFFFFF"),
+        >= 7.5 => ("#4ADE80", "#064E3B"),
+        >= 6.0 => ("#FACC15", "#1F2937"),
+        >= 5.0 => ("#FB923C", "#FFFFFF"),
+        not null => ("#EF4444", "#FFFFFF"),
+        _ => ("#64748B", "#FFFFFF")
+    };
+
+    private CompactHalfTimeRecommendation? CreateCompactHalfTimeRecommendation(
+        Player playerOut,
+        IReadOnlyCollection<Player> availableSubstitutes)
+    {
+        var performance = FindSelectedPlayerPerformance(playerOut, FindSelectedPlayerTeam(playerOut));
+        var rating = performance?.Rating ?? 6.0;
+        var stamina = GetStaminaPercentage(playerOut);
+        var injuryRisk = GetWorkloadRiskPercentage(playerOut);
+        var reasons = new List<string>();
+        var priority = 0;
+        if (playerOut.IsInjured)
+        {
+            reasons.Add("injured");
+            priority += 100;
+        }
+        if (stamina <= 60)
+        {
+            reasons.Add($"stamina {stamina}%");
+            priority += 60 - stamina;
+        }
+        if (injuryRisk >= 40)
+        {
+            reasons.Add($"injury risk {injuryRisk}%");
+            priority += injuryRisk / 2;
+        }
+        if ((performance?.YellowCards ?? 0) > 0 || playerOut.YellowCards > 0)
+        {
+            reasons.Add("yellow card");
+            priority += 25;
+        }
+        if (rating < 6.0)
+        {
+            reasons.Add($"rating {rating:0.0}");
+            priority += (int)Math.Round((6.0 - rating) * 20);
+        }
+        if (reasons.Count == 0)
+        {
+            return null;
+        }
+
+        var position = PositionSuitabilityService.NormalizeExactPosition(playerOut.AssignedPosition);
+        var playerIn = availableSubstitutes
+            .Where(player => PositionCompatibilityService.CanOccupySlot(player, position, allowOutOfPosition: true))
+            .OrderByDescending(player => PositionCompatibilityService.GetCompatibilityScore(player, position))
+            .ThenByDescending(GetOverallRating)
+            .FirstOrDefault();
+        if (playerIn is null)
+        {
+            return null;
+        }
+
+        var playerOutNationality = PlayerNationalityDisplayService.Resolve(playerOut);
+        var playerInNationality = PlayerNationalityDisplayService.Resolve(playerIn);
+        var playerOutRatingVisual = GetCompactFirstHalfRatingVisual(rating);
+        var playerInOverall = GetOverallRating(playerIn);
+        var playerInRatingVisual = GetCompactOverallVisual(playerInOverall);
+        return new CompactHalfTimeRecommendation
+        {
+            PlayerOutPlayer = playerOut,
+            PlayerOutPosition = position,
+            PlayerOutFlag = playerOutNationality.FlagImagePath,
+            PlayerOutNationalityName = playerOutNationality.Name,
+            PlayerOutName = playerOut.Name,
+            PlayerOutRating = RatingDisplayHelper.CreateRatingText(rating),
+            PlayerOutRatingBackground = playerOutRatingVisual.Background,
+            PlayerOutRatingForeground = playerOutRatingVisual.Foreground,
+            PlayerInPlayer = playerIn,
+            PlayerInPosition = PositionSuitabilityService.NormalizeExactPosition(playerIn.PreferredPosition),
+            PlayerInFlag = playerInNationality.FlagImagePath,
+            PlayerInNationalityName = playerInNationality.Name,
+            PlayerInName = playerIn.Name,
+            PlayerInRating = playerInOverall.ToString(),
+            PlayerInRatingBackground = playerInRatingVisual.Background,
+            PlayerInRatingForeground = playerInRatingVisual.Foreground,
+            Reason = string.Join(" · ", reasons),
+            Priority = priority
+        };
+    }
+
+    private void CompactRecommendedSubstitutionButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement { DataContext: CompactHalfTimeRecommendation recommendation })
+        {
+            ExecuteHalftimeSwap(recommendation.PlayerOutPlayer, recommendation.PlayerInPlayer);
+        }
     }
 
     private void SetSelectedPlayerStatRows(IReadOnlyList<PlayerStatRow> leftRows, IReadOnlyList<PlayerStatRow> rightRows)
@@ -1557,6 +1956,7 @@ public partial class HalfTimeView : UserControl
             SaveSetup(_state.SelectedTeam);
         }
 
+        _state.IsCompactLiveMatchView = _isCompactMode;
         _navigate(new MatchLiveView(_state, _navigate, GetNextLiveSegment()));
     }
 
@@ -1765,6 +2165,55 @@ public partial class HalfTimeView : UserControl
 
     private sealed record DraggedPlayerInfo(Player Player, DragSource Source, int SourceIndex);
 
+    private sealed class CompactHalfTimeRating
+    {
+        public Player Player { get; init; } = new();
+        public bool IsStarter { get; init; }
+        public string Category { get; init; } = string.Empty;
+        public int CategoryOrder { get; init; }
+        public double SortRating { get; init; }
+        public string RowToolTip { get; init; } = string.Empty;
+        public string Position { get; init; } = string.Empty;
+        public string Name { get; init; } = string.Empty;
+        public string FlagImagePath { get; init; } = "/Assets/Flags/default.png";
+        public string NationalityName { get; init; } = "Unknown nationality";
+        public string Rating { get; init; } = "—";
+        public string RatingBackground { get; init; } = "#64748B";
+        public string RatingForeground { get; init; } = "#FFFFFF";
+        public int Stamina { get; init; }
+        public string StaminaText { get; init; } = "STA —";
+        public string StaminaBrush { get; init; } = "#64748B";
+        public int InjuryRisk { get; init; }
+        public string InjuryRiskText { get; init; } = "INJ —";
+        public string InjuryRiskBrush { get; init; } = "#64748B";
+        public string PendingSubstituteName { get; init; } = string.Empty;
+        public string PendingSubstituteFlagImagePath { get; init; } = "/Assets/Flags/default.png";
+        public string PendingSubstituteNationalityName { get; init; } = "Unknown nationality";
+        public Visibility PendingSubstitutionVisibility { get; init; } = Visibility.Collapsed;
+    }
+
+    private sealed class CompactHalfTimeRecommendation
+    {
+        public Player PlayerOutPlayer { get; init; } = new();
+        public string PlayerOutPosition { get; init; } = string.Empty;
+        public string PlayerOutFlag { get; init; } = "/Assets/Flags/default.png";
+        public string PlayerOutNationalityName { get; init; } = "Unknown nationality";
+        public string PlayerOutName { get; init; } = string.Empty;
+        public string PlayerOutRating { get; init; } = "—";
+        public string PlayerOutRatingBackground { get; init; } = "#64748B";
+        public string PlayerOutRatingForeground { get; init; } = "#FFFFFF";
+        public Player PlayerInPlayer { get; init; } = new();
+        public string PlayerInPosition { get; init; } = string.Empty;
+        public string PlayerInFlag { get; init; } = "/Assets/Flags/default.png";
+        public string PlayerInNationalityName { get; init; } = "Unknown nationality";
+        public string PlayerInName { get; init; } = string.Empty;
+        public string PlayerInRating { get; init; } = "—";
+        public string PlayerInRatingBackground { get; init; } = "#64748B";
+        public string PlayerInRatingForeground { get; init; } = "#FFFFFF";
+        public string Reason { get; init; } = string.Empty;
+        public int Priority { get; init; }
+    }
+
     private sealed class BenchPlayerCard
     {
         public Player Player { get; init; } = new();
@@ -1775,11 +2224,15 @@ public partial class HalfTimeView : UserControl
         public string PlayerImagePath { get; init; } = string.Empty;
         public string Position { get; init; } = string.Empty;
         public string OverallText { get; init; } = string.Empty;
+        public string OverallValueText { get; init; } = string.Empty;
+        public string OverallBadgeBackground { get; init; } = "#FFFFFF";
+        public string OverallBadgeForeground { get; init; } = "#172033";
         public int OverallRating { get; init; }
         public string GrowthText { get; init; } = string.Empty;
         public double Stamina { get; init; }
         public string StaminaBrush { get; init; } = "#2FA84F";
         public string WorkloadRiskText { get; init; } = string.Empty;
+        public int WorkloadRiskBarValue { get; init; }
         public string WorkloadRiskBrush { get; init; } = "#16A34A";
         public string WorkloadRiskForeground { get; init; } = "#FFFFFF";
         public string WorkloadRiskTooltip { get; init; } = string.Empty;

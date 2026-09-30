@@ -10,6 +10,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Data;
 using FootballSimulation.Models;
 using FootballSimulation.Services;
+using FootballSimulation.Wpf.Controls;
 using FootballSimulation.Wpf.Helpers;
 using FootballSimulation.Wpf.Models;
 using FootballSimulation.Wpf.Services;
@@ -25,6 +26,7 @@ public partial class PreMatchView : UserControl
     private readonly TacticalInsightService _tacticalInsightService = new();
     private readonly SaveGameService _saveGameService = new();
     private readonly FormationPresetService _formationPresetService = new();
+    private readonly LeagueDataService _leagueDataService = new();
     private const double PitchCardWidth = 128;
     private const double PitchCardHeight = 70;
 
@@ -60,10 +62,194 @@ public partial class PreMatchView : UserControl
     public void SetCompactMode(bool isCompactMode)
     {
         _isCompactMode = isCompactMode;
+        MatchdayAreaBorder.Visibility = isCompactMode ? Visibility.Collapsed : Visibility.Visible;
+        CompactMatchSetupPanel.Visibility = isCompactMode ? Visibility.Visible : Visibility.Collapsed;
         SelectedPlayerPanelBorder.Visibility = isCompactMode ? Visibility.Collapsed : Visibility.Visible;
         FormationPanelBorder.Visibility = isCompactMode ? Visibility.Collapsed : Visibility.Visible;
         CompactPlayerInfoButton.Visibility = isCompactMode ? Visibility.Visible : Visibility.Collapsed;
         CompactFormationButton.Visibility = isCompactMode ? Visibility.Visible : Visibility.Collapsed;
+        if (isCompactMode)
+        {
+            CompactFixtureTextBlock.Text = FixtureTextBlock.Text;
+            RefreshCompactPreMatchPlayers();
+        }
+    }
+
+    private void RefreshCompactPreMatchPlayers()
+    {
+        if (_state.SelectedTeam is null)
+        {
+            CompactPreMatchPlayersListBox.ItemsSource = null;
+            CompactPreMatchSubPlayersListBox.ItemsSource = null;
+            CompactPreMatchReservePlayersListBox.ItemsSource = null;
+            return;
+        }
+
+        var pitchKeys = _pitchSlots
+            .Select(CreateRosterKey)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var startingRows = _pitchSlots
+            .Select(player => CreateCompactPreMatchPlayerRow(player, isStarter: true))
+            .OrderBy(row => row.PositionOrder)
+            .ThenByDescending(row => row.RatingValue)
+            .ToList();
+        var substituteRows = _state.SelectedTeam.Substitutes
+            .Where(player => !pitchKeys.Contains(CreateRosterKey(player)))
+            .Select(player => CreateCompactPreMatchPlayerRow(player, isStarter: false))
+            .OrderBy(row => row.PositionOrder)
+            .ThenByDescending(row => row.RatingValue)
+            .ToList();
+        var reserveRows = _state.SelectedTeam.Reserves
+            .Where(player => !pitchKeys.Contains(CreateRosterKey(player)))
+            .Select(player => CreateCompactPreMatchPlayerRow(player, isStarter: false, isReserve: true))
+            .OrderBy(row => row.PositionOrder)
+            .ThenByDescending(row => row.RatingValue)
+            .ToList();
+        CompactPreMatchPlayersListBox.ItemsSource = startingRows;
+        CompactPreMatchSubPlayersListBox.ItemsSource = substituteRows;
+        CompactPreMatchReservePlayersListBox.ItemsSource = reserveRows;
+    }
+
+    private CompactPreMatchPlayerRow CreateCompactPreMatchPlayerRow(Player player, bool isStarter, bool isReserve = false)
+    {
+        var nationality = PlayerNationalityDisplayService.Resolve(player);
+        var overall = GetOverallRating(player);
+        var overallVisual = GetOverallBadgeVisual(overall);
+        var stamina = GetStaminaPercentage(player);
+        var injuryRisk = GetWorkloadRiskPercentage(player);
+        var position = PositionSuitabilityService.NormalizeExactPosition(
+            isStarter ? player.AssignedPosition : player.PreferredPosition);
+        var positionVisual = GetPositionCardVisual(position);
+        var growthText = PlayerGrowthDisplayHelper.CreateGrowthText(player);
+        return new CompactPreMatchPlayerRow
+        {
+            Player = player,
+            IsStarter = isStarter,
+            Source = isStarter ? DragSource.StartingXi : isReserve ? DragSource.Reserve : DragSource.Substitute,
+            Category = isStarter ? "Starting Players" : isReserve ? "Reserve Players" : "Sub Players",
+            CategoryOrder = isStarter ? 0 : isReserve ? 2 : 1,
+            Position = position,
+            PositionOrder = GetCompactPositionOrder(position),
+            PositionBackground = positionVisual.BadgeBackground,
+            PositionForeground = positionVisual.BadgeForeground,
+            Name = player.Name,
+            ShirtNumberText = player.SquadNumber > 0 ? $"#{player.SquadNumber}" : string.Empty,
+            GrowthText = growthText,
+            GrowthForeground = growthText.StartsWith('▼') ? "#EF4444" : "#16A34A",
+            TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits, 3),
+            FlagImagePath = nationality.FlagImagePath,
+            NationalityName = nationality.Name,
+            Rating = overall.ToString(),
+            RatingValue = overall,
+            RatingBackground = overallVisual.Background,
+            RatingForeground = overallVisual.Foreground,
+            Stamina = stamina,
+            StaminaText = $"STA {stamina}%",
+            StaminaBrush = GetStaminaBrush(player),
+            InjuryRisk = injuryRisk,
+            InjuryRiskText = $"INJ {injuryRisk}%",
+            InjuryRiskBrush = GetWorkloadRiskBrush(player)
+        };
+    }
+
+    private static int GetCompactPositionOrder(string position)
+    {
+        return PositionSuitabilityService.NormalizeExactPosition(position) switch
+        {
+            "ST" => 0,
+            "CF" => 1,
+            "LW" => 2,
+            "LM" => 3,
+            "RW" => 4,
+            "RM" => 5,
+            "CAM" => 6,
+            "CM" => 7,
+            "CDM" => 8,
+            "LB" => 9,
+            "RB" => 10,
+            "CB" => 11,
+            "GK" => 12,
+            _ => 13
+        };
+    }
+
+    private void CompactPreMatchPlayerRow_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ClickCount == 2)
+        {
+            CompactPreMatchPlayerRow_MouseDoubleClick(sender, e);
+            return;
+        }
+
+        _dragStartPoint = e.GetPosition(this);
+    }
+
+    private void CompactPreMatchPlayerRow_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        if (_state.SelectedTeam is null ||
+            sender is not FrameworkElement { DataContext: CompactPreMatchPlayerRow { IsStarter: true } starterRow })
+        {
+            return;
+        }
+
+        var position = GetDisplayedSlotForStarter(starterRow.Player);
+        var replacement = _state.SelectedTeam.Substitutes
+            .Where(IsAvailableForSelection)
+            .Where(player => CanPlayerOccupySlot(player, position))
+            .Where(player => GetSlotFitScore(player, position) > PositionCompatibilityService.Impossible)
+            .OrderByDescending(player => GetSlotFitScore(player, position))
+            .ThenByDescending(GetOverallRating)
+            .ThenBy(player => player.SquadNumber <= 0 ? int.MaxValue : player.SquadNumber)
+            .ThenBy(player => player.Name)
+            .FirstOrDefault();
+
+        if (replacement is null)
+        {
+            MessageBox.Show($"No available player can cover {position}.");
+            return;
+        }
+
+        ExecuteSwap(starterRow.Player, replacement);
+        e.Handled = true;
+    }
+
+    private void CompactPreMatchPlayerRow_MouseMove(object sender, MouseEventArgs e)
+    {
+        if (e.LeftButton != MouseButtonState.Pressed ||
+            sender is not FrameworkElement { DataContext: CompactPreMatchPlayerRow { IsStarter: false } substituteRow } element ||
+            !HasMovedEnoughToDrag(e.GetPosition(this)))
+        {
+            return;
+        }
+
+        e.Handled = true;
+        StartPlayerDrag(
+            element,
+            substituteRow.Player,
+            substituteRow.Source,
+            substituteRow.Source == DragSource.Reserve
+                ? _state.SelectedTeam?.Reserves.IndexOf(substituteRow.Player) ?? -1
+                : _state.SelectedTeam?.Substitutes.IndexOf(substituteRow.Player) ?? -1);
+    }
+
+    private void CompactPreMatchPlayerRow_DragOver(object sender, DragEventArgs e)
+    {
+        var canDrop = sender is FrameworkElement { DataContext: CompactPreMatchPlayerRow { IsStarter: true } } &&
+            GetDraggedPlayer(e) is { Source: DragSource.Substitute or DragSource.Reserve };
+        e.Effects = canDrop ? DragDropEffects.Move : DragDropEffects.None;
+        e.Handled = true;
+    }
+
+    private void CompactPreMatchPlayerRow_Drop(object sender, DragEventArgs e)
+    {
+        if (sender is not FrameworkElement { DataContext: CompactPreMatchPlayerRow { IsStarter: true } starterRow } ||
+            GetDraggedPlayer(e) is not { Source: DragSource.Substitute or DragSource.Reserve } draggedPlayer)
+        {
+            return;
+        }
+
+        ExecuteSwap(starterRow.Player, draggedPlayer.Player);
+        e.Handled = true;
     }
 
     private void CompactPlayerInfoButton_Click(object sender, RoutedEventArgs e)
@@ -159,6 +345,7 @@ public partial class PreMatchView : UserControl
         _isLoadingSetup = true;
 
         FixtureTextBlock.Text = $"{CompetitionDisplayService.GetName(_state.CurrentFixture.Competition)} - {GetFixtureRoundText(_state.CurrentFixture)} - {_state.CurrentFixture.HomeTeam.Name} vs {_state.CurrentFixture.AwayTeam.Name}";
+        var restoredMissingPlayers = RestoreMissingSourceRosterPlayers();
         var goalkeeperValidation = ReconcileUnavailablePlayers(_state.SelectedTeam);
         ShowGoalkeeperWarningIfNeeded(goalkeeperValidation);
         ValidateLineupAssignments("PrepareMatchLoaded");
@@ -171,6 +358,53 @@ public partial class PreMatchView : UserControl
 
         _isLoadingSetup = false;
         RefreshTacticalInsight();
+        if (restoredMissingPlayers)
+        {
+            PersistCurrentSaveSlot();
+        }
+    }
+
+    private bool RestoreMissingSourceRosterPlayers()
+    {
+        if (_state.SelectedTeam is null || _state.League is null)
+        {
+            return false;
+        }
+
+        Team? sourceTeam;
+        try
+        {
+            sourceTeam = _leagueDataService.LoadTeams(_state.League.LeagueId)
+                .FirstOrDefault(team => team.Name.Equals(
+                    _state.SelectedTeam.Name,
+                    StringComparison.OrdinalIgnoreCase));
+        }
+        catch (InvalidOperationException)
+        {
+            return false;
+        }
+
+        if (sourceTeam is null)
+        {
+            return false;
+        }
+
+        var completedOutgoingPlayers = _state.TransferMarket?.Offers
+            .Where(offer => offer.FromClubName.Equals(
+                _state.SelectedTeam.Name,
+                StringComparison.OrdinalIgnoreCase))
+            .Where(offer => offer.Status is OfferStatus.Completed or OfferStatus.CompletedWhenWindowOpens)
+            .ToList() ?? [];
+
+        var restoredCount = TeamRosterService.RestoreMissingPlayers(
+            _state.SelectedTeam,
+            sourceTeam.AllPlayers,
+            sourcePlayer => completedOutgoingPlayers.Any(offer =>
+                (!string.IsNullOrWhiteSpace(sourcePlayer.PlayerId) &&
+                    sourcePlayer.PlayerId.Equals(offer.PlayerId, StringComparison.OrdinalIgnoreCase)) ||
+                sourcePlayer.Name.Equals(offer.PlayerName, StringComparison.OrdinalIgnoreCase)));
+
+        return restoredCount > 0;
     }
 
     private void InitializePitchSlots()
@@ -315,6 +549,15 @@ public partial class PreMatchView : UserControl
     private void LoadTactics(TeamTactics tactics)
     {
         TacticalSettingsPanel.LoadTactics(tactics);
+        if (_state.SelectedTeam is not null)
+        {
+            TacticalSettingsPanel.LoadFormation(_state.SelectedTeam.Formation);
+        }
+    }
+
+    private void TacticalSettingsPanel_FormationChanged(object? sender, FormationSelectionChangedEventArgs e)
+    {
+        FormationComboBox.SelectedValue = e.Formation;
     }
 
     private void LoadSavedFormationSelector(Team team)
@@ -639,6 +882,9 @@ public partial class PreMatchView : UserControl
         var isOutOfPosition = PositionSuitabilityService.IsOutOfPosition(player);
         var suitability = PositionSuitabilityService.GetEffectivenessMultiplier(player);
         var ratingVisual = GetRatingVisual(player, suitability);
+        var positionVisual = GetPositionCardVisual(displayedPosition);
+        var ratingBadge = GetOverallBadgeVisual(ratingVisual.Rating);
+        var growthText = CreateGrowthTrendText(player);
         var teamColors = TeamColorService.GetPalette(_state.SelectedTeam);
         var cardBackground = player.IsInjured ? "#FFE4E4" : teamColors.PrimaryColor;
         var cardBorder = player.IsInjured
@@ -663,12 +909,16 @@ public partial class PreMatchView : UserControl
             NationalityName = nationality.Name,
             PositionText = displayedPosition,
             OverallText = $"OVR {ratingVisual.Rating}",
+            OverallValueText = ratingVisual.Rating.ToString(),
+            OverallBadgeBackground = ratingBadge.Background,
+            OverallBadgeForeground = ratingBadge.Foreground,
             OverallForeground = player.IsInjured ? ratingVisual.Foreground : textForeground,
             TextForeground = textForeground,
             MutedForeground = textForeground,
-            PositionBackground = player.IsInjured ? "#FFD1D1" : teamColors.SecondaryColor,
-            PositionForeground = TeamColorService.GetReadableTextColor(player.IsInjured ? "#FFD1D1" : teamColors.SecondaryColor),
-            GrowthText = PlayerGrowthDisplayHelper.CreateGrowthText(player),
+            PositionBackground = positionVisual.BadgeBackground,
+            PositionForeground = positionVisual.BadgeForeground,
+            GrowthText = growthText,
+            GrowthForeground = growthText.StartsWith('▼') ? "#EF4444" : "#22C55E",
             Stamina = GetStaminaPercentage(player),
             StaminaBrush = GetStaminaBrush(player),
             WorkloadRiskText = CreateWorkloadRiskText(player),
@@ -684,8 +934,8 @@ public partial class PreMatchView : UserControl
             FatigueWarningBadgeBackground = fatigueBadge.Background,
             TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits, int.MaxValue),
             CardBackground = cardBackground,
-            CardBorderBrush = cardBorder,
-            CardBorderThickness = player == _selectedStarter ? new Thickness(3) : new Thickness(1)
+            CardBorderBrush = positionVisual.Border,
+            CardBorderThickness = player == _selectedStarter ? new Thickness(4) : new Thickness(3)
         };
     }
 
@@ -894,6 +1144,10 @@ public partial class PreMatchView : UserControl
         ReserveListBox.ItemsSource = reserves.Select(CreateBenchPlayerCard).ToList();
         ReserveListBox.IsEnabled = reserves.Count > 0;
         UpdateSubstituteFilterLabel(normalizedFilter);
+        if (_isCompactMode)
+        {
+            RefreshCompactPreMatchPlayers();
+        }
     }
 
     private static List<Player> OrderForFilter(IEnumerable<Player> players, string normalizedFilter)
@@ -925,6 +1179,9 @@ public partial class PreMatchView : UserControl
     {
         PositionSuitabilityService.EnsurePositionMetadata(player);
         var recentForm = GetRecentMatchRatingBadge(player);
+        var positionVisual = GetPositionCardVisual(player.PreferredPosition);
+        var ratingBadge = GetOverallBadgeVisual(GetOverallRating(player));
+        var growthText = CreateGrowthTrendText(player);
         var teamColors = TeamColorService.GetPalette(_state.SelectedTeam);
         var nationality = PlayerNationalityDisplayService.Resolve(player);
         var isAvailable = IsAvailableForSelection(player);
@@ -946,7 +1203,11 @@ public partial class PreMatchView : UserControl
             Position = player.PreferredPosition,
             OverallText = $"OVR {GetOverallRating(player)}",
             OverallRating = GetOverallRating(player),
-            GrowthText = PlayerGrowthDisplayHelper.CreateGrowthText(player),
+            OverallValueText = GetOverallRating(player).ToString(),
+            OverallBadgeBackground = ratingBadge.Background,
+            OverallBadgeForeground = ratingBadge.Foreground,
+            GrowthText = growthText,
+            GrowthForeground = growthText.StartsWith('▼') ? "#EF4444" : "#22C55E",
             Stamina = GetStaminaPercentage(player),
             StaminaBrush = GetStaminaBrush(player),
             WorkloadRiskText = CreateWorkloadRiskText(player),
@@ -958,22 +1219,14 @@ public partial class PreMatchView : UserControl
             BenchFormBadgeBackground = recentForm.Background,
             BenchFormBadgeForeground = recentForm.Foreground,
             CardBackground = teamColors.PrimaryColor,
-            CardBorderBrush = !isAvailable
-                ? "#7F1D1D"
-                : matchesSelectedPosition
-                    ? teamColors.SelectedGlowColor
-                    : teamColors.BorderColor,
-            CardBorderThickness = !isAvailable
-                ? new Thickness(2)
-                : matchesSelectedPosition
-                    ? new Thickness(3)
-                    : new Thickness(1),
+            CardBorderBrush = positionVisual.Border,
+            CardBorderThickness = matchesSelectedPosition ? new Thickness(4) : new Thickness(3),
             CardOpacity = isAvailable ? 1.0 : 0.68,
             CardCursor = isAvailable ? Cursors.Hand : Cursors.No,
             CanInteract = isAvailable,
             TextForeground = teamColors.TextColor,
-            PositionBackground = teamColors.SecondaryColor,
-            PositionForeground = TeamColorService.GetReadableTextColor(teamColors.SecondaryColor),
+            PositionBackground = positionVisual.BadgeBackground,
+            PositionForeground = positionVisual.BadgeForeground,
             StatusText = CreateUnavailableStatusText(player),
             StatusBadgeBackground = player.IsSuspended || player.IsSentOff ? "#7F1D1D" : "#B91C1C",
             Tooltip = CreateUnavailableTooltip(player),
@@ -1091,6 +1344,50 @@ public partial class PreMatchView : UserControl
         };
     }
 
+    private static (string Border, string BadgeBackground, string BadgeForeground) GetPositionCardVisual(string position)
+    {
+        var color = PositionSuitabilityService.NormalizeExactPosition(position) switch
+        {
+            "ST" or "CF" => "#EF4444",
+            "LW" or "RW" or "LM" or "RM" => "#F87171",
+            "CAM" => "#F97316",
+            "CM" => "#FACC15",
+            "CDM" => "#A16207",
+            "CB" => "#2563EB",
+            "LB" or "RB" => "#60A5FA",
+            "GK" => "#7C3AED",
+            _ => "#64748B"
+        };
+        return (color, color, "#FFFFFF");
+    }
+
+    private static (string Background, string Foreground) GetOverallBadgeVisual(int rating)
+    {
+        return rating switch
+        {
+            >= 90 => ("#FF9800", "#172033"),
+            >= 80 => ("#FFD700", "#172033"),
+            >= 70 => ("#C0C0C0", "#172033"),
+            >= 60 => ("#CD7F32", "#172033"),
+            _ => ("#FFFFFF", "#172033")
+        };
+    }
+
+    private static string CreateGrowthTrendText(Player player)
+    {
+        if (player.LastMatchOverallIncrease > 0)
+        {
+            return $"▲+{player.LastMatchOverallIncrease}";
+        }
+
+        if (player.LastMatchOverallIncrease < 0)
+        {
+            return $"▼{player.LastMatchOverallIncrease}";
+        }
+
+        return player.GrowthPoints > 0 ? $"▲{Math.Min(player.GrowthPoints, 99)}%" : string.Empty;
+    }
+
     private void RefreshTacticalInsight()
     {
         if (_isLoadingSetup || _state.SelectedTeam is null || _state.CurrentFixture is null || TacticalInsightInfoIcon is null)
@@ -1145,15 +1442,13 @@ public partial class PreMatchView : UserControl
 
     private static string GetStaminaBrush(Player player)
     {
-        var color = GetStaminaPercentage(player) switch
+        return GetStaminaPercentage(player) switch
         {
-            >= 75 => "#2FA84F",
-            >= 50 => "#E3BC26",
-            >= 25 => "#E8872E",
-            _ => "#D94343"
+            >= 75 => "#22C55E",
+            >= 50 => "#FACC15",
+            >= 25 => "#F97316",
+            _ => "#EF4444"
         };
-
-        return ThemeManager.ToneDownColor(color);
     }
 
     private string CreateWorkloadRiskText(Player player)
@@ -2061,6 +2356,36 @@ public partial class PreMatchView : UserControl
 
     private sealed record DraggedPlayerInfo(Player Player, DragSource Source, int SourceIndex);
 
+    private sealed class CompactPreMatchPlayerRow
+    {
+        public Player Player { get; init; } = new();
+        public bool IsStarter { get; init; }
+        public DragSource Source { get; init; }
+        public string Category { get; init; } = string.Empty;
+        public int CategoryOrder { get; init; }
+        public string Position { get; init; } = string.Empty;
+        public int PositionOrder { get; init; }
+        public string PositionBackground { get; init; } = "#E2E8F0";
+        public string PositionForeground { get; init; } = "#334155";
+        public string Name { get; init; } = string.Empty;
+        public string ShirtNumberText { get; init; } = string.Empty;
+        public string GrowthText { get; init; } = string.Empty;
+        public string GrowthForeground { get; init; } = "#16A34A";
+        public IReadOnlyList<PlayerTraitBadge> TraitBadges { get; init; } = [];
+        public string FlagImagePath { get; init; } = "/Assets/Flags/default.png";
+        public string NationalityName { get; init; } = "Unknown nationality";
+        public string Rating { get; init; } = string.Empty;
+        public int RatingValue { get; init; }
+        public string RatingBackground { get; init; } = "#64748B";
+        public string RatingForeground { get; init; } = "#FFFFFF";
+        public int Stamina { get; init; }
+        public string StaminaText { get; init; } = string.Empty;
+        public string StaminaBrush { get; init; } = "#22C55E";
+        public int InjuryRisk { get; init; }
+        public string InjuryRiskText { get; init; } = string.Empty;
+        public string InjuryRiskBrush { get; init; } = "#22C55E";
+    }
+
     private sealed class BenchPlayerCard
     {
         public Player Player { get; init; } = new();
@@ -2072,12 +2397,16 @@ public partial class PreMatchView : UserControl
         public string Position { get; init; } = string.Empty;
         public string OverallText { get; init; } = string.Empty;
         public int OverallRating { get; init; }
+        public string OverallValueText { get; init; } = string.Empty;
+        public string OverallBadgeBackground { get; init; } = "#94A3B8";
+        public string OverallBadgeForeground { get; init; } = "#FFFFFF";
         public string GrowthText { get; init; } = string.Empty;
+        public string GrowthForeground { get; init; } = "#16A34A";
         public double Stamina { get; init; }
         public string StaminaBrush { get; init; } = "#2FA84F";
         public string WorkloadRiskText { get; init; } = string.Empty;
         public int WorkloadRiskPercentage { get; init; }
-        public int WorkloadRiskBarValue => Math.Max(8, WorkloadRiskPercentage);
+        public int WorkloadRiskBarValue => Math.Max(12, WorkloadRiskPercentage);
         public string WorkloadRiskBrush { get; init; } = "#16A34A";
         public string WorkloadRiskForeground { get; init; } = "#FFFFFF";
         public string WorkloadRiskTooltip { get; init; } = string.Empty;

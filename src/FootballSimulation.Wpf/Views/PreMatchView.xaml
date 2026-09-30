@@ -114,14 +114,14 @@
         </DataTemplate>
 
         <DataTemplate x:Key="PitchPlayerCardTemplate">
-            <Border MinWidth="100"
+            <Border Width="108"
                     Height="70"
                     VerticalAlignment="Top"
                     Background="{Binding CardBackground}"
                     BorderBrush="{Binding CardBorderBrush}"
                     BorderThickness="{Binding CardBorderThickness}"
                     CornerRadius="10"
-                    Padding="5">
+                    Padding="3">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -137,50 +137,33 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Text="{Binding ShirtNumberText}"
-                                   Foreground="{Binding MutedForeground}"
-                                   FontSize="10"
-                                   FontWeight="Bold"
-                                   VerticalAlignment="Center"
-                                   Margin="0,0,4,0" />
-
-                        <StackPanel Grid.Column="1"
-                                    Orientation="Horizontal"
-                                    VerticalAlignment="Center">
-                            <TextBlock Text="{Binding OverallText}"
-                                       Foreground="{Binding OverallForeground}"
-                                       FontSize="9.5"
-                                       FontWeight="Black" />
-                            <TextBlock Text="{Binding GrowthText}"
-                                       Foreground="#16A34A"
-                                       FontSize="7.5"
-                                       FontWeight="Black"
-                                       Margin="4,0,0,0">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Visibility" Value="Visible" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding GrowthText}" Value="">
-                                                <Setter Property="Visibility" Value="Collapsed" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
+                        <StackPanel Orientation="Horizontal">
+                            <Border Background="{Binding PositionBackground}"
+                                    CornerRadius="7" Padding="5,1"
+                                    Margin="0,0,3,0">
+                                <TextBlock Text="{Binding PositionText}"
+                                           Foreground="{Binding PositionForeground}"
+                                           FontSize="7.5" FontWeight="Black" />
+                            </Border>
+                            <TextBlock Text="{Binding ShirtNumberText}"
+                                       Foreground="#FFFFFF"
+                                       FontSize="8" FontWeight="Black"
+                                       VerticalAlignment="Center" />
                         </StackPanel>
 
                         <Border Grid.Column="2"
-                                Background="{Binding PositionBackground}"
+                                Background="{Binding FormBadgeBackground}"
                                 CornerRadius="7"
-                                Padding="5,1">
-                            <TextBlock Text="{Binding PositionText}"
-                                       Foreground="{Binding PositionForeground}"
-                                       FontSize="7.5"
+                                Padding="6,1"
+                                ToolTip="Previous match rating">
+                            <TextBlock Text="{Binding FormBadgeText}"
+                                       Foreground="{Binding FormBadgeForeground}"
+                                       FontSize="8"
                                        FontWeight="Black" />
                         </Border>
                     </Grid>
 
-                    <Grid Grid.Row="1" VerticalAlignment="Center" Margin="0,4,0,0">
+                    <Grid Grid.Row="1" VerticalAlignment="Center" Margin="0,2,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
@@ -201,46 +184,42 @@
                                    VerticalAlignment="Center" />
                     </Grid>
 
-                    <StackPanel Grid.Row="2"
-                                Orientation="Horizontal"
-                                Margin="0,3,0,0">
-                        <Border Background="{Binding FatigueWarningBadgeBackground}"
-                                CornerRadius="7"
-                                Padding="5,1"
-                                HorizontalAlignment="Left"
-                                Margin="0,0,2,0"
-                                ToolTip="{Binding FatigueWarningTooltip}">
-                            <Border.Style>
-                                <Style TargetType="Border">
+                    <Grid Grid.Row="2" Margin="0,1,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Border Background="{Binding OverallBadgeBackground}"
+                                MinWidth="20" Height="14" CornerRadius="7"
+                                Padding="4,0" Margin="0,0,3,0">
+                            <TextBlock Text="{Binding OverallValueText}"
+                                       Foreground="{Binding OverallBadgeForeground}"
+                                       FontSize="7.5" FontWeight="Black"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding GrowthText}"
+                                   Foreground="{Binding GrowthForeground}"
+                                   FontSize="7" FontWeight="Black"
+                                   VerticalAlignment="Center" Margin="0,0,3,0">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
                                     <Setter Property="Visibility" Value="Visible" />
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding FatigueWarningText}" Value="">
+                                        <DataTrigger Binding="{Binding GrowthText}" Value="">
                                             <Setter Property="Visibility" Value="Collapsed" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
-                            </Border.Style>
-                            <TextBlock Text="{Binding FatigueWarningText}"
-                                       Foreground="#FFFFFF"
-                                       FontSize="7"
-                                       FontWeight="Bold" />
-                        </Border>
-                        <Border Background="{Binding FormBadgeBackground}"
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <Border Grid.Column="3"
+                                Background="#EAF1FF"
                                 CornerRadius="7"
                                 Padding="5,1"
-                                HorizontalAlignment="Left"
-                                Margin="0,0,2,0"
-                                ToolTip="Previous match rating">
-                            <TextBlock Text="{Binding FormBadgeText}"
-                                       Foreground="{Binding FormBadgeForeground}"
-                                       FontSize="7"
-                                       FontWeight="Bold" />
-                        </Border>
-                        <Border Background="#EAF1FF"
-                                CornerRadius="7"
-                                Padding="5,1"
-                                HorizontalAlignment="Left"
-                                Margin="0,0,2,0"
+                                HorizontalAlignment="Right"
                                 ToolTipService.ShowDuration="20000">
                             <Border.ToolTip>
                                 <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
@@ -278,17 +257,19 @@
                                            FontWeight="Black" />
                             </StackPanel>
                         </Border>
-                    </StackPanel>
+                    </Grid>
 
-                    <Grid Grid.Row="3" Margin="0,4,0,0">
+                    <Grid Grid.Row="3"
+                          Margin="0,2,0,0"
+                          VerticalAlignment="Bottom">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="4" />
-                            <RowDefinition Height="6" />
+                            <RowDefinition Height="3" />
+                            <RowDefinition Height="5" />
                         </Grid.RowDefinitions>
                         <ProgressBar Minimum="0" Maximum="100"
                                      Value="{Binding Stamina, Mode=OneWay}"
                                      Foreground="{Binding StaminaBrush}"
-                                     Background="{DynamicResource AppBorderBrush}"
+                                     Background="#334155"
                                      BorderThickness="0"
                                      ToolTip="Stamina" />
                         <ProgressBar Grid.Row="1" Margin="0,2,0,0"
@@ -304,9 +285,9 @@
         </DataTemplate>
 
         <DataTemplate x:Key="SubstituteCardTemplate">
-            <Border MinWidth="100"
-                    Height="70"
-                    HorizontalAlignment="Stretch"
+            <Border Width="108"
+                    Height="74"
+                    HorizontalAlignment="Center"
                     VerticalAlignment="Top"
                     Background="{Binding CardBackground}"
                     BorderBrush="{Binding CardBorderBrush}"
@@ -339,50 +320,33 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Text="{Binding ShirtNumberText}"
-                                   Foreground="{Binding TextForeground}"
-                                   FontSize="10"
-                                   FontWeight="Bold"
-                                   VerticalAlignment="Center"
-                                   Margin="0,0,4,0" />
-
-                        <StackPanel Grid.Column="1"
-                                    Orientation="Horizontal"
-                                    VerticalAlignment="Center">
-                            <TextBlock Text="{Binding OverallText}"
-                                       Foreground="{Binding TextForeground}"
-                                       FontSize="9.5"
-                                       FontWeight="Black" />
-                            <TextBlock Text="{Binding GrowthText}"
-                                       Foreground="#16A34A"
-                                       FontSize="7.5"
-                                       FontWeight="Black"
-                                       Margin="4,0,0,0">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Visibility" Value="Visible" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding GrowthText}" Value="">
-                                                <Setter Property="Visibility" Value="Collapsed" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
+                        <StackPanel Orientation="Horizontal">
+                            <Border Background="{Binding PositionBackground}"
+                                    CornerRadius="7" Padding="5,1"
+                                    Margin="0,0,3,0">
+                                <TextBlock Text="{Binding Position}"
+                                           Foreground="{Binding PositionForeground}"
+                                           FontSize="7.5" FontWeight="Black" />
+                            </Border>
+                            <TextBlock Text="{Binding ShirtNumberText}"
+                                       Foreground="#FFFFFF"
+                                       FontSize="8" FontWeight="Black"
+                                       VerticalAlignment="Center" />
                         </StackPanel>
 
                         <Border Grid.Column="2"
-                                Background="{Binding PositionBackground}"
+                                Background="{Binding BenchFormBadgeBackground}"
                                 CornerRadius="7"
-                                Padding="5,1">
-                            <TextBlock Text="{Binding Position}"
-                                   Foreground="{Binding PositionForeground}"
-                                       FontSize="7.5"
+                                Padding="6,1"
+                                ToolTip="Previous match rating">
+                            <TextBlock Text="{Binding BenchFormBadgeText}"
+                                       Foreground="{Binding BenchFormBadgeForeground}"
+                                       FontSize="8"
                                        FontWeight="Black" />
                         </Border>
                     </Grid>
 
-                    <Grid Grid.Row="1" VerticalAlignment="Center" Margin="0,4,0,0">
+                    <Grid Grid.Row="1" VerticalAlignment="Center" Margin="0,2,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
@@ -403,66 +367,42 @@
                                    VerticalAlignment="Center" />
                     </Grid>
 
-                    <StackPanel Grid.Row="2"
-                                Orientation="Horizontal"
-                                Margin="0,3,0,0">
-                        <Border Background="{Binding StatusBadgeBackground}"
-                                CornerRadius="7"
-                                Padding="5,1"
-                                HorizontalAlignment="Left"
-                                Margin="0,0,2,0">
-                            <Border.Style>
-                                <Style TargetType="Border">
+                    <Grid Grid.Row="2" Margin="0,1,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Border Background="{Binding OverallBadgeBackground}"
+                                MinWidth="20" Height="14" CornerRadius="7"
+                                Padding="4,0" Margin="0,0,3,0">
+                            <TextBlock Text="{Binding OverallValueText}"
+                                       Foreground="{Binding OverallBadgeForeground}"
+                                       FontSize="7.5" FontWeight="Black"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding GrowthText}"
+                                   Foreground="{Binding GrowthForeground}"
+                                   FontSize="7" FontWeight="Black"
+                                   VerticalAlignment="Center" Margin="0,0,3,0">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
                                     <Setter Property="Visibility" Value="Visible" />
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding StatusText}" Value="">
+                                        <DataTrigger Binding="{Binding GrowthText}" Value="">
                                             <Setter Property="Visibility" Value="Collapsed" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
-                            </Border.Style>
-                            <TextBlock Text="{Binding StatusText}"
-                                       Foreground="#FFFFFF"
-                                       FontSize="7"
-                                       FontWeight="Bold" />
-                        </Border>
-                        <Border Background="{Binding FatigueWarningBadgeBackground}"
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <Border Grid.Column="3"
+                                Background="#EAF1FF"
                                 CornerRadius="7"
                                 Padding="5,1"
-                                HorizontalAlignment="Left"
-                                Margin="0,0,2,0"
-                                ToolTip="{Binding FatigueWarningTooltip}">
-                            <Border.Style>
-                                <Style TargetType="Border">
-                                    <Setter Property="Visibility" Value="Visible" />
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding FatigueWarningText}" Value="">
-                                            <Setter Property="Visibility" Value="Collapsed" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Border.Style>
-                            <TextBlock Text="{Binding FatigueWarningText}"
-                                       Foreground="#FFFFFF"
-                                       FontSize="7"
-                                       FontWeight="Bold" />
-                        </Border>
-                        <Border Background="{Binding BenchFormBadgeBackground}"
-                                CornerRadius="7"
-                                Padding="5,1"
-                                HorizontalAlignment="Left"
-                                Margin="0,0,2,0"
-                                ToolTip="Previous match rating">
-                            <TextBlock Text="{Binding BenchFormBadgeText}"
-                                       Foreground="{Binding BenchFormBadgeForeground}"
-                                       FontSize="7"
-                                       FontWeight="Bold" />
-                        </Border>
-                        <Border Background="#EAF1FF"
-                                CornerRadius="7"
-                                Padding="5,1"
-                                HorizontalAlignment="Left"
-                                Margin="0,0,2,0"
+                                HorizontalAlignment="Right"
                                 ToolTipService.ShowDuration="20000">
                             <Border.ToolTip>
                                 <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
@@ -500,17 +440,19 @@
                                            FontWeight="Black" />
                             </StackPanel>
                         </Border>
-                    </StackPanel>
+                    </Grid>
 
-                    <Grid Grid.Row="3" Margin="0,4,0,0">
+                    <Grid Grid.Row="3"
+                          Margin="0,2,0,0"
+                          VerticalAlignment="Bottom">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="4" />
-                            <RowDefinition Height="6" />
+                            <RowDefinition Height="3" />
+                            <RowDefinition Height="5" />
                         </Grid.RowDefinitions>
                         <ProgressBar Minimum="0" Maximum="100"
                                      Value="{Binding Stamina, Mode=OneWay}"
                                      Foreground="{Binding StaminaBrush}"
-                                     Background="{DynamicResource AppBorderBrush}"
+                                     Background="#334155"
                                      BorderThickness="0"
                                      ToolTip="Stamina" />
                         <ProgressBar Grid.Row="1" Margin="0,2,0,0"
@@ -961,7 +903,7 @@
                         <ListBox x:Name="SubstituteListBox"
                                  Grid.Row="2"
                                  Margin="0,0,4,6"
-                                 Padding="0,0,18,0"
+                                 Padding="0"
                                  BorderThickness="0"
                                  Background="Transparent"
                                  AllowDrop="True"
@@ -980,9 +922,9 @@
                             <ListBox.ItemContainerStyle>
                                 <Style TargetType="ListBoxItem">
                                     <Setter Property="Padding" Value="0" />
-                                    <Setter Property="Height" Value="77" />
-                                    <Setter Property="Margin" Value="4,0,4,0" />
-                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                    <Setter Property="Height" Value="81" />
+                                    <Setter Property="Margin" Value="1,0,1,0" />
+                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
                                     <Setter Property="VerticalContentAlignment" Value="Top" />
                                     <Setter Property="Background" Value="Transparent" />
                                     <Setter Property="BorderThickness" Value="0" />
@@ -1020,9 +962,9 @@
                             <ListBox.ItemContainerStyle>
                                 <Style TargetType="ListBoxItem">
                                     <Setter Property="Padding" Value="0" />
-                                    <Setter Property="Height" Value="77" />
-                                    <Setter Property="Margin" Value="4,0,4,0" />
-                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                    <Setter Property="Height" Value="81" />
+                                    <Setter Property="Margin" Value="1,0,1,0" />
+                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
                                     <Setter Property="VerticalContentAlignment" Value="Top" />
                                     <Setter Property="Background" Value="Transparent" />
                                     <Setter Property="BorderThickness" Value="0" />
@@ -1035,6 +977,200 @@
                     </Grid>
                     </Border>
                 </Grid>
+            </Grid>
+        </Border>
+
+        <Border x:Name="CompactMatchSetupPanel"
+                Grid.Column="0" Visibility="Collapsed"
+                Background="{DynamicResource AppCardBackground}"
+                BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="1"
+                CornerRadius="14" Padding="12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.05*" />
+                    <ColumnDefinition Width="12" />
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid Grid.ColumnSpan="3" Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock x:Name="CompactFixtureTextBlock" Foreground="{DynamicResource AppTextBrush}"
+                               FontSize="13" FontWeight="Bold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                    <Button Grid.Column="1" Content="Tactics" Style="{StaticResource PrimaryTextButton}"
+                            Foreground="#FFFFFF" Height="28" MinWidth="64" Margin="6,0"
+                            Padding="10,0" FontSize="10" FontWeight="Bold"
+                            Click="ToggleTacticsPanelButton_Click" />
+                    <Button Grid.Column="2" Content="Back" Style="{StaticResource PrimaryTextButton}"
+                            Foreground="#FFFFFF" Height="28" MinWidth="52" Padding="10,0"
+                            FontSize="10" FontWeight="Bold" Click="BackToDashboardButton_Click" />
+                    <Button Grid.Column="3" Content="Start Match" Style="{StaticResource PrimaryTextButton}"
+                            Foreground="#FFFFFF" Height="28" MinWidth="82" Margin="6,0,0,0" Padding="10,0"
+                            FontSize="10" FontWeight="Bold" Click="StartFirstHalfButton_Click" />
+                </Grid>
+                <TextBlock Grid.Row="1" Text="Starting Players (11)" Foreground="{DynamicResource AppTextBrush}"
+                           FontSize="15" FontWeight="Black" Margin="0,0,0,6" />
+                <ListBox x:Name="CompactPreMatchPlayersListBox" Grid.Row="2" Grid.RowSpan="3"
+                         Background="{DynamicResource AppSecondaryCardBackground}"
+                         BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="1" Padding="5"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="Margin" Value="0,0,0,5" />
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="BorderThickness" Value="0" />
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="{DynamicResource AppCardBackground}" CornerRadius="8" Padding="8,7"
+                                    RenderTransformOrigin="0,0.5"
+                                    AllowDrop="True"
+                                    PreviewMouseLeftButtonDown="CompactPreMatchPlayerRow_PreviewMouseLeftButtonDown"
+                                    MouseMove="CompactPreMatchPlayerRow_MouseMove"
+                                    DragOver="CompactPreMatchPlayerRow_DragOver"
+                                    Drop="CompactPreMatchPlayerRow_Drop">
+                                <Border.RenderTransform>
+                                    <ScaleTransform x:Name="CompactPlayerHoverScale" ScaleX="1" ScaleY="1" />
+                                </Border.RenderTransform>
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Panel.ZIndex" Value="0" />
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Panel.ZIndex" Value="20" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <Border.Triggers>
+                                    <EventTrigger RoutedEvent="MouseEnter">
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="CompactPlayerHoverScale"
+                                                                 Storyboard.TargetProperty="ScaleX"
+                                                                 To="1" Duration="0:0:0.12" />
+                                                <DoubleAnimation Storyboard.TargetName="CompactPlayerHoverScale"
+                                                                 Storyboard.TargetProperty="ScaleY"
+                                                                 To="1.22" Duration="0:0:0.12" />
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </EventTrigger>
+                                    <EventTrigger RoutedEvent="MouseLeave">
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="CompactPlayerHoverScale"
+                                                                 Storyboard.TargetProperty="ScaleX"
+                                                                 To="1" Duration="0:0:0.1" />
+                                                <DoubleAnimation Storyboard.TargetName="CompactPlayerHoverScale"
+                                                                 Storyboard.TargetProperty="ScaleY"
+                                                                 To="1" Duration="0:0:0.1" />
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </EventTrigger>
+                                </Border.Triggers>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="42" /><ColumnDefinition Width="28" />
+                                        <ColumnDefinition Width="*" /><ColumnDefinition Width="176" />
+                                        <ColumnDefinition Width="46" />
+                                    </Grid.ColumnDefinitions>
+                                    <Border Grid.RowSpan="2" Background="{Binding PositionBackground}" CornerRadius="6"
+                                            Padding="4,1" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Position}" Foreground="{Binding PositionForeground}" FontSize="12" FontWeight="Black" />
+                                    </Border>
+                                    <controls:FlagBadge Grid.Column="1" Grid.RowSpan="2" FlagSource="{Binding FlagImagePath}"
+                                                        ToolTip="{Binding NationalityName}" Width="25" Height="18" VerticalAlignment="Center" />
+                                    <Grid Grid.Column="2" Grid.RowSpan="2" Margin="0,0,5,0" VerticalAlignment="Center">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding ShirtNumberText}" Foreground="{DynamicResource AppMutedTextBrush}"
+                                                   FontSize="10" FontWeight="Black" Margin="0,0,4,0" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" Text="{Binding Name}" Foreground="{DynamicResource AppTextBrush}"
+                                                   FontSize="13.5" FontWeight="Bold" TextWrapping="NoWrap"
+                                                   TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                    </Grid>
+                                    <Grid Grid.Column="3" Grid.RowSpan="2" Margin="0,0,6,0" VerticalAlignment="Center">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="72" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding GrowthText}" Foreground="{Binding GrowthForeground}"
+                                                       FontSize="9.5" FontWeight="Bold" Margin="0,0,3,0" VerticalAlignment="Center" />
+                                            <ItemsControl ItemsSource="{Binding TraitBadges}" ItemTemplate="{StaticResource TraitIconBadgeTemplate}"
+                                                          VerticalAlignment="Center">
+                                                <ItemsControl.LayoutTransform>
+                                                    <ScaleTransform ScaleX="1.12" ScaleY="1.12" />
+                                                </ItemsControl.LayoutTransform>
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                        <Grid Grid.Column="1" VerticalAlignment="Center">
+                                            <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions><ColumnDefinition Width="30" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                                <TextBlock Text="{Binding StaminaText}" Foreground="{DynamicResource AppMutedTextBrush}" FontSize="9" FontWeight="Bold" />
+                                                <ProgressBar Grid.Column="1" Value="{Binding Stamina}" Maximum="100" Height="6"
+                                                             Foreground="{Binding StaminaBrush}" Background="#D7DEE8" BorderThickness="0" />
+                                            </Grid>
+                                            <Grid Grid.Row="1" Margin="0,3,0,0">
+                                                <Grid.ColumnDefinitions><ColumnDefinition Width="30" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                                <TextBlock Text="{Binding InjuryRiskText}" Foreground="{DynamicResource AppMutedTextBrush}" FontSize="9" FontWeight="Bold" />
+                                                <ProgressBar Grid.Column="1" Value="{Binding InjuryRisk}" Maximum="100" Height="6"
+                                                             Foreground="{Binding InjuryRiskBrush}" Background="#D7DEE8" BorderThickness="0" />
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+                                    <Border Grid.Column="4" Grid.RowSpan="2" Background="{Binding RatingBackground}" CornerRadius="8" Padding="6,2" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Rating}" Foreground="{Binding RatingForeground}"
+                                                   FontSize="12" FontWeight="Black" HorizontalAlignment="Center" />
+                                    </Border>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <TextBlock Grid.Row="1" Grid.Column="2" Text="Sub Players" Foreground="{DynamicResource AppTextBrush}"
+                           FontSize="13" FontWeight="Black" Margin="2,0,0,6" />
+                <ListBox x:Name="CompactPreMatchSubPlayersListBox" Grid.Row="2" Grid.Column="2"
+                         Background="{DynamicResource AppSecondaryCardBackground}"
+                         BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="1" Padding="5"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         ItemContainerStyle="{Binding ElementName=CompactPreMatchPlayersListBox, Path=ItemContainerStyle}"
+                         ItemTemplate="{Binding ElementName=CompactPreMatchPlayersListBox, Path=ItemTemplate}" />
+                <TextBlock Grid.Row="3" Grid.Column="2" Text="Reserve Players" Foreground="{DynamicResource AppTextBrush}"
+                           FontSize="13" FontWeight="Black" Margin="2,7,0,6" />
+                <ListBox x:Name="CompactPreMatchReservePlayersListBox" Grid.Row="4" Grid.Column="2"
+                         Background="{DynamicResource AppSecondaryCardBackground}"
+                         BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="1" Padding="5"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         ItemContainerStyle="{Binding ElementName=CompactPreMatchPlayersListBox, Path=ItemContainerStyle}"
+                         ItemTemplate="{Binding ElementName=CompactPreMatchPlayersListBox, Path=ItemTemplate}" />
             </Grid>
         </Border>
 
@@ -1136,7 +1272,8 @@
                     <controls:TacticalSettingsPanel x:Name="TacticalSettingsPanel"
                                                     Grid.Row="2"
                                                     PanelMaxHeight="620"
-                                                    TacticsChanged="TacticalSettingsPanel_TacticsChanged" />
+                                                    TacticsChanged="TacticalSettingsPanel_TacticsChanged"
+                                                    FormationChanged="TacticalSettingsPanel_FormationChanged" />
 
                     <Button Content="Start First Half"
                             Grid.Row="3"

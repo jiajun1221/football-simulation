@@ -77,7 +77,7 @@
                     Style="{StaticResource TitleBarButtonStyle}"
                     WindowChrome.IsHitTestVisibleInChrome="True"
                     Click="StealthModeButton_Click"
-                    ToolTip="Enter Stealth Mode (Ctrl+Shift+S)"
+                    ToolTip="Enter Minimize Mode (Ctrl+Shift+S)"
                     Content="&#xE73F;"
                     FontFamily="Segoe MDL2 Assets"
                     FontSize="14"

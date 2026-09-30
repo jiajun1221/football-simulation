@@ -23,7 +23,7 @@ public partial class MainWindow : Window
     private const double StealthContentHeight = 670;
     private const double StealthContentScale = 0.5;
     private const double StealthCompactLiveWindowWidth = 260;
-    private const double StealthCompactLiveWindowHeight = 540;
+    private const double StealthCompactLiveWindowHeight = 400;
     private const double StealthCompactLiveContentWidth = 420;
     private const double StealthCompactLiveScale = 0.6;
     private const double StealthCompactLiveContentHeight = (StealthCompactLiveWindowHeight - 30) / StealthCompactLiveScale;
@@ -441,6 +441,10 @@ public partial class MainWindow : Window
         {
             preMatchView.SetCompactMode(true);
         }
+        if (MainContent.Content is HalfTimeView halfTimeView)
+        {
+            halfTimeView.SetCompactMode(true);
+        }
 
         _normalWindowState = WindowState;
         _normalWindowBounds = WindowState == WindowState.Normal
@@ -488,6 +492,10 @@ public partial class MainWindow : Window
     private void ExitStealthMode()
     {
         ClearStealthHoverZoom();
+        if (MainContent.Content is MatchLiveView liveMatchView)
+        {
+            liveMatchView.SetStealthModeLayout(false);
+        }
         if (MainContent.Content is DashboardView dashboardView)
         {
             dashboardView.SetCompactMode(false);
@@ -495,6 +503,10 @@ public partial class MainWindow : Window
         if (MainContent.Content is PreMatchView preMatchView)
         {
             preMatchView.SetCompactMode(false);
+        }
+        if (MainContent.Content is HalfTimeView halfTimeView)
+        {
+            halfTimeView.SetCompactMode(false);
         }
         ApplicationContentRoot.LayoutTransform = Transform.Identity;
         ApplicationContentRoot.Width = double.NaN;
@@ -599,8 +611,8 @@ public partial class MainWindow : Window
     private void UpdateStealthModeButton()
     {
         StealthModeButton.ToolTip = IsStealthMode
-            ? "Exit Stealth Mode (Ctrl+Shift+S)"
-            : "Enter Stealth Mode (Ctrl+Shift+S)";
+            ? "Exit Minimize Mode (Ctrl+Shift+S)"
+            : "Enter Minimize Mode (Ctrl+Shift+S)";
         StealthModeButton.Opacity = IsStealthMode ? 1.0 : 0.65;
         StealthModeButton.Background = IsStealthMode
             ? new SolidColorBrush(Color.FromRgb(37, 99, 235))
@@ -653,7 +665,7 @@ public partial class MainWindow : Window
         (ThemeToggleButton.Content, ThemeToggleButton.ToolTip) = ThemeManager.CurrentTheme switch
         {
             AppTheme.Dark => ("\u2600", "Switch to Light Mode"),
-            AppTheme.Light => ("\u25A6", "Switch to Work Mode"),
+            AppTheme.Light => ("\u25D0", "Switch to Dull Mode"),
             _ => ("\U0001F319", "Switch to Dark Mode")
         };
     }
@@ -718,6 +730,15 @@ public partial class MainWindow : Window
 
     private void Navigate(UserControl view)
     {
+        if (view is MatchResultView)
+        {
+            _state.IsCompactLiveMatchView = false;
+            if (IsStealthMode)
+            {
+                SetStealthLiveMatchCompactMode(isCompact: false);
+            }
+        }
+
         MainContent.Content = view;
         if (IsStealthMode && view is DashboardView dashboardView)
         {
@@ -726,6 +747,14 @@ public partial class MainWindow : Window
         if (IsStealthMode && view is PreMatchView preMatchView)
         {
             preMatchView.SetCompactMode(true);
+        }
+        if (IsStealthMode && view is MatchLiveView liveMatchView)
+        {
+            liveMatchView.PrepareForStealthMode();
+        }
+        if (IsStealthMode && view is HalfTimeView halfTimeView)
+        {
+            halfTimeView.SetCompactMode(true);
         }
         ShellActionsPanel.Visibility = Visibility.Visible;
         ShellSaveButton.Visibility = Visibility.Collapsed;

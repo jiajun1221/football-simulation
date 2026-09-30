@@ -14,19 +14,23 @@ public class PitchPlayerCard
     public string NationalityName { get; init; } = "Unknown nationality";
     public string PositionText { get; init; } = string.Empty;
     public string OverallText { get; init; } = string.Empty;
+    public string OverallValueText { get; init; } = string.Empty;
+    public string OverallBadgeBackground { get; init; } = "#94A3B8";
+    public string OverallBadgeForeground { get; init; } = "#FFFFFF";
     public string OverallForeground { get; init; } = "#071A2E";
     public string TextForeground { get; init; } = "#102033";
     public string MutedForeground { get; init; } = "#143052";
     public string PositionBackground { get; init; } = "#E7EEF8";
     public string PositionForeground { get; init; } = "#071A2E";
     public string GrowthText { get; init; } = string.Empty;
+    public string GrowthForeground { get; init; } = "#16A34A";
     public string RatingText { get; init; } = string.Empty;
     public string MatchStatsText { get; init; } = string.Empty;
     public double Stamina { get; init; }
     public string StaminaBrush { get; init; } = "#2FA84F";
     public string WorkloadRiskText { get; init; } = string.Empty;
     public int WorkloadRiskPercentage { get; init; }
-    public int WorkloadRiskBarValue => Math.Max(8, WorkloadRiskPercentage);
+    public int WorkloadRiskBarValue => Math.Max(12, WorkloadRiskPercentage);
     public string WorkloadRiskBrush { get; init; } = "#16A34A";
     public string WorkloadRiskForeground { get; init; } = "#FFFFFF";
     public string WorkloadRiskTooltip { get; init; } = string.Empty;

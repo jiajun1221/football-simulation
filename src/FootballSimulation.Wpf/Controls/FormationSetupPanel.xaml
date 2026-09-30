@@ -694,7 +694,8 @@
                     <controls:TacticalSettingsPanel x:Name="TacticalSettingsPanel"
                                                     PanelMaxHeight="350"
                                                     IsCompact="False"
-                                                    TacticsChanged="TacticalSettingsPanel_TacticsChanged" />
+                                                    TacticsChanged="TacticalSettingsPanel_TacticsChanged"
+                                                    FormationChanged="TacticalSettingsPanel_FormationChanged" />
 
                     <Border Background="{DynamicResource AppSecondaryCardBackground}"
                             BorderBrush="{DynamicResource AppCardBorderBrush}"

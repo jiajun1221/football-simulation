@@ -392,6 +392,7 @@ public partial class MatchResultView : UserControl
             GrowthText = player is null ? string.Empty : PlayerGrowthDisplayHelper.CreateGrowthText(player),
             RatingText = RatingDisplayHelper.CreateRatingText(performance.Rating),
             RatingBackground = RatingDisplayHelper.GetRatingBrush(performance.Rating),
+            RatingForeground = RatingDisplayHelper.GetRatingForeground(performance.Rating),
             StatusText = GetSubStatus(performance),
             GoalText = performance.Goals > 1 ? $"{SoccerBallIcon()} {performance.Goals}" : SoccerBallIcon(),
             AssistText = performance.Assists > 1 ? $"{AssistIcon()} {performance.Assists}" : AssistIcon(),
@@ -516,6 +517,7 @@ public partial class MatchResultView : UserControl
         public string GrowthText { get; init; } = string.Empty;
         public string RatingText { get; init; } = string.Empty;
         public string RatingBackground { get; init; } = "#102033";
+        public string RatingForeground { get; init; } = "#FFFFFF";
         public string StatusText { get; init; } = string.Empty;
         public string GoalText { get; init; } = string.Empty;
         public string AssistText { get; init; } = string.Empty;

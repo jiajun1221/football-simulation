@@ -11,16 +11,18 @@ internal static class RatingDisplayHelper
     {
         return rating switch
         {
-            >= 8.5 => "#166534",
-            >= 7.0 => "#15803D",
-            >= 6.0 => "#1E3A8A",
-            >= 5.0 => "#C2410C",
-            _ => "#B91C1C"
+            >= 9.0 => "#10B981",
+            >= 7.5 => "#4ADE80",
+            >= 6.0 => "#FACC15",
+            >= 5.0 => "#FB923C",
+            _ => "#EF4444"
         };
     }
 
     public static string GetRatingForeground(double rating)
     {
-        return "#FFFFFF";
+        return rating is >= 6.0 and < 9.0
+            ? "#1F2937"
+            : "#FFFFFF";
     }
 }

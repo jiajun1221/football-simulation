@@ -14,7 +14,7 @@
 
             <Style TargetType="Button">
                 <Setter Property="Background" Value="{DynamicResource AppButtonBackground}" />
-                <Setter Property="Foreground" Value="{DynamicResource AppButtonForeground}" />
+                <Setter Property="Foreground" Value="#FFFFFF" />
                 <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}" />
                 <Setter Property="BorderThickness" Value="1" />
                 <Setter Property="Padding" Value="14,8" />
@@ -24,10 +24,10 @@
                         <ControlTemplate TargetType="Button">
                             <ControlTemplate.Resources>
                                 <Style TargetType="TextBlock">
-                                    <Setter Property="Foreground" Value="{DynamicResource AppButtonForeground}" />
+                                    <Setter Property="Foreground" Value="#FFFFFF" />
                                 </Style>
                                 <Style TargetType="AccessText">
-                                    <Setter Property="Foreground" Value="{DynamicResource AppButtonForeground}" />
+                                    <Setter Property="Foreground" Value="#FFFFFF" />
                                 </Style>
                             </ControlTemplate.Resources>
                             <Border x:Name="ButtonBorder"
@@ -51,7 +51,7 @@
                                 </Trigger>
                                 <Trigger Property="IsEnabled" Value="False">
                                     <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.86" />
-                                    <Setter Property="Foreground" Value="{DynamicResource AppButtonForeground}" />
+                                    <Setter Property="Foreground" Value="#FFFFFF" />
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -61,7 +61,7 @@
 
             <Style x:Key="PrimaryTextButton" TargetType="Button">
                 <Setter Property="Background" Value="{DynamicResource AppButtonBackground}" />
-                <Setter Property="Foreground" Value="{DynamicResource AppButtonForeground}" />
+                <Setter Property="Foreground" Value="#FFFFFF" />
                 <Setter Property="BorderBrush" Value="{DynamicResource AppButtonBackground}" />
                 <Setter Property="BorderThickness" Value="0" />
                 <Setter Property="Padding" Value="14,8" />
@@ -90,7 +90,7 @@
                                 </Trigger>
                                 <Trigger Property="IsEnabled" Value="False">
                                     <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.86" />
-                                    <Setter Property="Foreground" Value="{DynamicResource AppButtonForeground}" />
+                                    <Setter Property="Foreground" Value="#FFFFFF" />
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>

@@ -48,6 +48,7 @@ public partial class FormationSetupPanel : UserControl
         _isLoadingSetup = true;
         FormationComboBox.SelectedValue = FormationCatalogService.NormalizeFormationName(team.Formation);
         TacticalSettingsPanel.LoadTactics(team.Tactics);
+        TacticalSettingsPanel.LoadFormation(team.Formation);
         TacticsColumn.Width = IsReadOnlyMode ? new GridLength(0) : new GridLength(320);
         TacticsPanelBorder.Visibility = IsReadOnlyMode ? Visibility.Collapsed : Visibility.Visible;
         FormationAreaBorder.Margin = IsReadOnlyMode ? new Thickness(0) : new Thickness(0, 0, 18, 0);
@@ -581,6 +582,11 @@ public partial class FormationSetupPanel : UserControl
     }
 
     private void TacticalSettingsPanel_TacticsChanged(object? sender, EventArgs e) => NotifyChanged();
+
+    private void TacticalSettingsPanel_FormationChanged(object? sender, FormationSelectionChangedEventArgs e)
+    {
+        FormationComboBox.SelectedValue = e.Formation;
+    }
     private void PitchCanvas_SizeChanged(object sender, SizeChangedEventArgs e) => RenderPitch();
     private void ClearFilterButton_Click(object sender, RoutedEventArgs e) { _selectedStarter = null; _selectedPositionFilter = null; RefreshAll(); }
 

@@ -58,6 +58,22 @@ public static class TacticalProfileService
             Tempo = 24,
             DefensiveLine = 18
         }),
+        new("catenaccio", "Catenaccio", "Very defensive shape with a deep line and controlled counter attacks.", new TeamTactics
+        {
+            Mentality = Mentality.UltraDefensive,
+            PressingIntensity = 28,
+            Width = 34,
+            Tempo = 38,
+            DefensiveLine = 20
+        }),
+        new("low-block", "Low Block", "Protect the penalty area and deny space behind the defence.", new TeamTactics
+        {
+            Mentality = Mentality.Defensive,
+            PressingIntensity = 22,
+            Width = 38,
+            Tempo = 34,
+            DefensiveLine = 24
+        }),
         new("tiki-taka", "Tiki-Taka", "Patient narrow buildup with high possession control.", new TeamTactics
         {
             Mentality = Mentality.Balanced,
@@ -65,6 +81,14 @@ public static class TacticalProfileService
             Width = 28,
             Tempo = 28,
             DefensiveLine = 58
+        }),
+        new("possession", "Possession Play", "Recycle the ball patiently and control the match through midfield.", new TeamTactics
+        {
+            Mentality = Mentality.Balanced,
+            PressingIntensity = 52,
+            Width = 44,
+            Tempo = 32,
+            DefensiveLine = 54
         }),
         new("gegenpress", "Gegenpress", "Win the ball back quickly with relentless pressure.", new TeamTactics
         {
@@ -81,6 +105,30 @@ public static class TacticalProfileService
             Width = 88,
             Tempo = 66,
             DefensiveLine = 55
+        }),
+        new("direct-play", "Direct Play", "Attack quickly with vertical passes and runners beyond the defence.", new TeamTactics
+        {
+            Mentality = Mentality.Attacking,
+            PressingIntensity = 62,
+            Width = 60,
+            Tempo = 84,
+            DefensiveLine = 62
+        }),
+        new("total-football", "Total Football", "Fluid attacking movement with aggressive pressing and a high line.", new TeamTactics
+        {
+            Mentality = Mentality.Attacking,
+            PressingIntensity = 82,
+            Width = 68,
+            Tempo = 74,
+            DefensiveLine = 78
+        }),
+        new("all-out-attack", "All Out Attack", "Commit everyone forward for maximum pressure and maximum risk.", new TeamTactics
+        {
+            Mentality = Mentality.AllOutAttack,
+            PressingIntensity = 94,
+            Width = 82,
+            Tempo = 94,
+            DefensiveLine = 90
         }),
         new("counter-attack", "Counter Attack", "Compact defending with fast direct transitions.", new TeamTactics
         {

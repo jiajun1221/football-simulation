@@ -518,12 +518,13 @@
                             Click="CancelPendingSubstitutionButton_Click" />
                 </Grid>
 
-                <Border MinHeight="70"
+                <Border Width="108"
+                        Height="74"
                         Padding="6"
                         CornerRadius="8"
                         Background="{Binding CardBackground}"
                         BorderBrush="{Binding CardBorderBrush}"
-                        BorderThickness="1"
+                        BorderThickness="3"
                         PreviewMouseMove="BenchPlayerCard_PreviewMouseMove">
                     <Grid>
                         <Grid.RowDefinitions>
@@ -533,81 +534,41 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
-                        <Grid Grid.Row="0" VerticalAlignment="Center" Margin="0,0,0,4">
+                        <Grid Grid.Row="0" VerticalAlignment="Center">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <controls:FlagBadge FlagSource="{Binding FlagImagePath}"
-                                                ToolTip="{Binding NationalityName}"
-                                                Width="20"
-                                                Height="14"
-                                                Margin="0,0,4,0"
-                                                VerticalAlignment="Center" />
-                            <TextBlock Grid.Column="1"
-                                       Text="{Binding DisplayName}"
-                                       Foreground="{Binding NameForeground}"
-                                       FontSize="9.2"
-                                       FontWeight="Black"
-                                       TextTrimming="CharacterEllipsis"
-                                       TextWrapping="NoWrap"
-                                       VerticalAlignment="Center" />
+                            <StackPanel Orientation="Horizontal">
+                                <Border Background="{Binding PositionBackground}" CornerRadius="7" Padding="5,1" Margin="0,0,3,0">
+                                    <TextBlock Text="{Binding Position}" Foreground="White" FontSize="7.5" FontWeight="Black" />
+                                </Border>
+                                <TextBlock Text="{Binding ShirtNumberText}" Foreground="White" FontSize="8" FontWeight="Black" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <Border Grid.Column="2" Background="{Binding FormBadgeBackground}" CornerRadius="7" Padding="6,1">
+                                <TextBlock Text="{Binding FormBadgeText}" Foreground="{Binding FormBadgeForeground}" FontSize="8" FontWeight="Black" />
+                            </Border>
                         </Grid>
 
-                        <Grid Grid.Row="1">
+                        <Grid Grid.Row="1" VerticalAlignment="Center" Margin="0,2,0,0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-
-                            <TextBlock Text="{Binding ShirtNumberText}"
-                                       Foreground="{Binding TextForeground}"
-                                       FontSize="10"
-                                       FontWeight="Bold"
-                                       VerticalAlignment="Center"
-                                       Margin="0,0,4,0" />
-
-                            <StackPanel Grid.Column="1"
-                                        Orientation="Horizontal"
-                                        VerticalAlignment="Center">
-                                <TextBlock Text="{Binding OverallText}"
-                                           Foreground="{Binding TextForeground}"
-                                           FontSize="9.5"
-                                           FontWeight="Black" />
-                                <TextBlock Text="{Binding GrowthText}"
-                                           Foreground="#16A34A"
-                                           FontSize="7.5"
-                                           FontWeight="Black"
-                                           Margin="4,0,0,0">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Visibility" Value="Visible" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding GrowthText}" Value="">
-                                                    <Setter Property="Visibility" Value="Collapsed" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                            </StackPanel>
-
-                            <Border Grid.Column="2"
-                                    Background="{Binding PositionBackground}"
-                                    CornerRadius="7"
-                                    Padding="5,1">
-                                <TextBlock Text="{Binding Position}"
-                                           Foreground="{Binding PositionForeground}"
-                                           FontSize="7.5"
-                                           FontWeight="Black" />
-                            </Border>
+                            <controls:FlagBadge FlagSource="{Binding FlagImagePath}" ToolTip="{Binding NationalityName}" Width="20" Height="14" Margin="0,0,4,0" />
+                            <TextBlock Grid.Column="1" Text="{Binding DisplayName}" Foreground="{Binding NameForeground}" FontSize="9.2" FontWeight="Black" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
                         </Grid>
 
                         <StackPanel Grid.Row="2"
                                     Orientation="Horizontal"
-                                    Margin="0,4,0,0">
+                                    Margin="0,1,0,0">
+                            <Border Background="{Binding OverallBadgeBackground}" MinWidth="20" Height="14" CornerRadius="7" Padding="4,0" Margin="0,0,3,0">
+                                <TextBlock Text="{Binding OverallValueText}" Foreground="{Binding OverallBadgeForeground}" FontSize="7.5" FontWeight="Black" HorizontalAlignment="Center" />
+                            </Border>
+                            <TextBlock Text="{Binding GrowthText}" Foreground="#22C55E" FontSize="7" FontWeight="Black" VerticalAlignment="Center" Margin="0,0,3,0" />
                             <Border Background="{Binding FormBadgeBackground}"
+                                    Visibility="Collapsed"
                                     CornerRadius="7"
                                     Padding="5,1"
                                     HorizontalAlignment="Left"
@@ -618,6 +579,7 @@
                                            FontWeight="Bold" />
                             </Border>
                             <Border Background="{Binding WorkloadRiskBrush}"
+                                    Visibility="Collapsed"
                                     CornerRadius="7"
                                     Padding="3,1"
                                     HorizontalAlignment="Left"
@@ -630,6 +592,7 @@
                                            FontWeight="Black" />
                             </Border>
                             <Border Background="{Binding FatigueWarningBadgeBackground}"
+                                    Visibility="Collapsed"
                                     CornerRadius="7"
                                     Padding="5,1"
                                     HorizontalAlignment="Left"
@@ -688,15 +651,22 @@
                             </ItemsControl>
                         </StackPanel>
 
-                        <ProgressBar Grid.Row="3"
-                                     Height="5"
-                                     Minimum="0"
-                                     Maximum="100"
-                                     Value="{Binding Stamina}"
-                                     Foreground="{Binding StaminaBrush}"
-                                     Background="{DynamicResource AppBorderBrush}"
-                                     BorderThickness="0"
-                                     Margin="0,5,0,0" />
+                        <Grid Grid.Row="3" Margin="0,3,0,0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="3" />
+                                <RowDefinition Height="5" />
+                            </Grid.RowDefinitions>
+                            <ProgressBar Minimum="0" Maximum="100"
+                                         Value="{Binding Stamina}"
+                                         Foreground="{Binding StaminaBrush}"
+                                         Background="#334155" BorderThickness="0" />
+                            <ProgressBar Grid.Row="1" Margin="0,2,0,0"
+                                         Minimum="0" Maximum="100"
+                                         Value="{Binding WorkloadRiskBarValue}"
+                                         Foreground="{Binding WorkloadRiskBrush}"
+                                         Background="#334155" BorderThickness="0"
+                                         ToolTip="{Binding WorkloadRiskTooltip}" />
+                        </Grid>
                     </Grid>
                 </Border>
             </StackPanel>
@@ -716,6 +686,7 @@
               Margin="0,0,16,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
@@ -731,7 +702,7 @@
                             Width="30"
                             Height="30"
                             Padding="0"
-                            HorizontalAlignment="Right"
+                            HorizontalAlignment="Left"
                             VerticalAlignment="Top"
                             Panel.ZIndex="2"
                             Content="⤢"
@@ -842,67 +813,305 @@
                                    FontWeight="Bold"
                                    TextAlignment="Center" />
                     </Border>
-                    <StackPanel x:Name="CompactScoreControlsPanel"
-                                Orientation="Horizontal"
-                                HorizontalAlignment="Center"
-                                Margin="0,8,0,0"
-                                Visibility="Collapsed">
-                        <StackPanel.Resources>
-                            <Style TargetType="Button">
-                                <Setter Property="Width" Value="34" />
-                                <Setter Property="Height" Value="30" />
-                                <Setter Property="Margin" Value="2" />
-                                <Setter Property="Background" Value="#263B58" />
-                                <Setter Property="Foreground" Value="#F8FAFC" />
-                                <Setter Property="BorderBrush" Value="#4B6383" />
-                                <Setter Property="BorderThickness" Value="1" />
-                                <Setter Property="FontFamily" Value="Segoe UI Symbol" />
-                                <Setter Property="FontSize" Value="13" />
-                                <Setter Property="FontWeight" Value="Bold" />
-                            </Style>
-                        </StackPanel.Resources>
-                        <Button x:Name="CompactPauseResumeButton"
-                                Content="&#x23F8;"
-                                ToolTip="Pause / Resume"
-                                Click="PauseResumeButton_Click" />
-                        <Button x:Name="CompactDecreaseSpeedButton"
-                                Content="&#x23EA;"
-                                ToolTip="Slower"
-                                Click="DecreaseSpeedButton_Click" />
-                        <Border Width="54"
-                                Height="30"
-                                CornerRadius="10"
-                                Background="#DCEBFF"
-                                Margin="3"
-                                VerticalAlignment="Center">
-                            <TextBlock x:Name="CompactSpeedLevelTextBlock"
-                                       Text="1x"
-                                       Foreground="#071226"
-                                       FontSize="13"
-                                       FontWeight="Bold"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center" />
-                        </Border>
-                        <Button x:Name="CompactIncreaseSpeedButton"
-                                Content="&#x23E9;"
-                                ToolTip="Faster"
-                                Click="IncreaseSpeedButton_Click" />
-                        <Button x:Name="CompactContinueButton"
-                                Content="Continue"
-                                Width="82"
-                                FontFamily="Segoe UI"
-                                FontSize="11"
-                                ToolTip="Continue"
-                                Visibility="Collapsed"
-                                IsEnabled="False"
-                                Click="ContinueButton_Click" />
-                    </StackPanel>
                     </StackPanel>
                 </Grid>
             </Border>
 
-            <Border x:Name="FeedPanel"
+            <Border x:Name="CompactSetupPanel"
                     Grid.Row="1"
+                    Visibility="Collapsed"
+                    Background="{DynamicResource AppCardBackground}"
+                    BorderBrush="{DynamicResource AppBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Padding="8"
+                    Margin="0,0,0,8">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Border x:Name="CompactBallHolderCardBorder"
+                            Grid.Row="0" Margin="0,0,0,6" Padding="7,5"
+                            VerticalAlignment="Center"
+                            Cursor="Hand"
+                            MouseLeftButtonUp="CompactBallHolderCardBorder_MouseLeftButtonUp"
+                            CornerRadius="9"
+                            Background="Transparent"
+                            BorderBrush="#94A3B8"
+                            BorderThickness="2">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Visibility" Value="Visible" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Visibility, ElementName=CompactContinueButton}" Value="Visible">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="30" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="30" />
+                            <ColumnDefinition Width="40" />
+                        </Grid.ColumnDefinitions>
+                        <Border x:Name="CompactBallHolderActionBadge"
+                                Width="28" Height="28" CornerRadius="14"
+                                Background="#EEF2F7" BorderBrush="#CBD5E1" BorderThickness="1">
+                            <TextBlock x:Name="CompactBallHolderActionIconTextBlock"
+                                       Text="•" Foreground="#667085" FontFamily="Segoe UI Emoji"
+                                       FontSize="13" FontWeight="Black"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <Border x:Name="CompactBallHolderPositionBadge"
+                                Grid.Column="2"
+                                Width="28" Height="28" CornerRadius="14"
+                                Background="#64748B" BorderBrush="#94A3B8" BorderThickness="2">
+                            <TextBlock x:Name="CompactBallHolderPositionTextBlock"
+                                       Text="--" Foreground="White" FontSize="10" FontWeight="Black"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <Grid Grid.Column="1" Margin="6,0" VerticalAlignment="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <controls:FlagBadge x:Name="CompactBallHolderFlagBadge"
+                                                Width="22" Height="15" Margin="0,0,5,0"
+                                                VerticalAlignment="Center" Visibility="Collapsed" />
+                            <TextBlock x:Name="CompactBallHolderNameTextBlock" Grid.Column="1"
+                                       Text="Waiting for possession" Foreground="{DynamicResource AppTextBrush}"
+                                       FontSize="16" FontWeight="Black" TextWrapping="NoWrap"
+                                       TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                        </Grid>
+                        <Border x:Name="CompactBallHolderRatingBadge"
+                                Grid.Column="3" MinWidth="38" Height="28" CornerRadius="9"
+                                Background="#FACC15" BorderBrush="#CA8A04" BorderThickness="1">
+                            <TextBlock x:Name="CompactBallHolderRatingTextBlock"
+                                       Text="--" Foreground="#1F2937" FontSize="11" FontWeight="Black"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                    </Grid>
+                    </Border>
+
+                    <Border x:Name="CompactBallHolderDetailsBorder" Grid.Row="1"
+                            Visibility="Collapsed" Margin="0,0,0,6" Padding="9,7"
+                            Background="{DynamicResource AppPanelBackground}"
+                            BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="1"
+                            CornerRadius="8">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="58" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="34" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Stamina" Foreground="{DynamicResource AppMutedTextBrush}" FontSize="9" />
+                                <ProgressBar x:Name="CompactBallHolderStaminaBar" Grid.Column="1" Height="6"
+                                             Minimum="0" Maximum="100" Background="#D7DEE8" BorderThickness="0" VerticalAlignment="Center" />
+                                <TextBlock x:Name="CompactBallHolderStaminaTextBlock" Grid.Column="2" Text="--"
+                                           Foreground="{DynamicResource AppTextBrush}" FontSize="9" FontWeight="Black" HorizontalAlignment="Right" />
+                            </Grid>
+                            <Grid Grid.Row="1" Margin="0,5,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="58" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="34" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Injury risk" Foreground="{DynamicResource AppMutedTextBrush}" FontSize="9" />
+                                <ProgressBar x:Name="CompactBallHolderInjuryRiskBar" Grid.Column="1" Height="6"
+                                             Minimum="0" Maximum="100" Background="#D7DEE8" BorderThickness="0" VerticalAlignment="Center" />
+                                <TextBlock x:Name="CompactBallHolderInjuryRiskTextBlock" Grid.Column="2" Text="--"
+                                           Foreground="{DynamicResource AppTextBrush}" FontSize="9" FontWeight="Black" HorizontalAlignment="Right" />
+                            </Grid>
+                            <ItemsControl x:Name="CompactBallHolderStatsBadgesItemsControl" Grid.Row="2"
+                                          HorizontalAlignment="Center" Margin="0,7,0,0">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{Binding Background}" CornerRadius="8" Padding="7,2" Margin="2,0">
+                                            <TextBlock Text="{Binding Text}" Foreground="{Binding Foreground}"
+                                                       FontFamily="Segoe UI Emoji" FontSize="9" FontWeight="Black" />
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Grid>
+                    </Border>
+
+                    <Button x:Name="CompactContinueButton" Grid.Row="0"
+                            Height="42" Margin="0,0,0,6"
+                            HorizontalAlignment="Stretch"
+                            FontSize="13" FontWeight="Black"
+                            Visibility="Collapsed" IsEnabled="False"
+                            Click="ContinueButton_Click">
+                        <TextBlock x:Name="CompactContinueButtonTextBlock"
+                                   Text="Continue" Foreground="#FFFFFF"
+                                   FontSize="13" FontWeight="Black"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Foreground" Value="#FFFFFF" />
+                                <Setter Property="Background" Value="#071226" />
+                                <Setter Property="BorderBrush" Value="#071226" />
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#15345F" />
+                                        <Setter Property="BorderBrush" Value="#2563EB" />
+                                    </Trigger>
+                                    <Trigger Property="IsPressed" Value="True">
+                                        <Setter Property="Background" Value="#2563EB" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <StackPanel x:Name="CompactScoreControlsPanel" Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button x:Name="CompactPauseResumeButton" Content="&#x2161;" Width="54" Height="28" Margin="2"
+                                ToolTip="Pause match" FontFamily="Segoe UI Symbol" FontSize="15" FontWeight="Black" Foreground="#991B1B"
+                                Background="#FEE2E2" BorderBrush="#F87171" BorderThickness="1"
+                                Click="PauseResumeButton_Click" />
+                        <Button x:Name="CompactDecreaseSpeedButton" Content="&#x25C0;&#x25C0;" Width="38" Height="28" Margin="2"
+                                ToolTip="Slower" FontFamily="Segoe UI Symbol" FontSize="10" FontWeight="Black" Foreground="#1E3A5F"
+                                Background="#DBEAFE" BorderBrush="#60A5FA" BorderThickness="1"
+                                Click="DecreaseSpeedButton_Click" />
+                        <Border Width="46" Height="28" CornerRadius="9" Background="#DCEBFF" Margin="2">
+                            <TextBlock x:Name="CompactSpeedLevelTextBlock" Text="1x" Foreground="#071226" FontSize="12" FontWeight="Black" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <Button x:Name="CompactIncreaseSpeedButton" Content="&#x25B6;&#x25B6;" Width="38" Height="28" Margin="2"
+                                ToolTip="Faster" FontFamily="Segoe UI Symbol" FontSize="10" FontWeight="Black" Foreground="#1E3A5F"
+                                Background="#DBEAFE" BorderBrush="#60A5FA" BorderThickness="1"
+                                Click="IncreaseSpeedButton_Click" />
+                    </StackPanel>
+
+                    <StackPanel x:Name="CompactPausedControlsPanel" Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Visibility="Collapsed">
+                        <Button x:Name="CompactResumeButton" Content="&#x25B6;" Width="48" Height="28" Margin="2" ToolTip="Resume match"
+                                FontFamily="Segoe UI Symbol" FontSize="14" FontWeight="Black" Foreground="#166534" Background="#DCFCE7"
+                                BorderBrush="#4ADE80" BorderThickness="1" Click="PauseResumeButton_Click" />
+                        <Button x:Name="CompactTacticsButton" Content="Tactics" Width="64" Height="28" Margin="2"
+                                FontSize="10" FontWeight="Black" Foreground="#1D4ED8" Background="#DBEAFE"
+                                BorderBrush="#60A5FA" BorderThickness="1" Click="CompactTacticsButton_Click" />
+                        <Button x:Name="CompactSubsButton" Content="Subs" Width="54" Height="28" Margin="2"
+                                FontSize="10" FontWeight="Black" Foreground="#6D28D9" Background="#EDE9FE"
+                                BorderBrush="#C4B5FD" BorderThickness="1" Click="CompactSubsButton_Click" />
+                    </StackPanel>
+
+                    <Popup x:Name="CompactTacticsPopup" PlacementTarget="{Binding ElementName=CompactTacticsButton}"
+                           Placement="Bottom" StaysOpen="False" AllowsTransparency="True">
+                        <Border Width="350" Margin="0,5,0,0" Padding="9" CornerRadius="9"
+                                Background="{DynamicResource AppCardBackground}" BorderBrush="#60A5FA" BorderThickness="2">
+                            <controls:TacticalSettingsPanel x:Name="CompactTacticalSettingsPanel"
+                                                            IsCompact="True" ShowCompactTitle="False" PanelMaxHeight="250"
+                                                            TacticsChanged="CompactTacticalSettingsPanel_TacticsChanged"
+                                                            FormationChanged="TacticalSettingsPanel_FormationChanged" />
+                        </Border>
+                    </Popup>
+
+                    <Popup x:Name="CompactSubsPopup" PlacementTarget="{Binding ElementName=CompactSubsButton}"
+                           Placement="Bottom" StaysOpen="False" AllowsTransparency="True">
+                        <Border Width="350" Margin="0,5,0,0" Padding="9" CornerRadius="9"
+                                Background="{DynamicResource AppCardBackground}" BorderBrush="#C4B5FD" BorderThickness="2">
+                            <StackPanel>
+                                <TextBlock Text="Recommended Substitutions" Foreground="{DynamicResource AppTextBrush}"
+                                           FontSize="12" FontWeight="Black" Margin="0,0,0,5" />
+                                <ItemsControl x:Name="CompactSubstitutionRecommendationsItemsControl">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="{DynamicResource AppPanelBackground}" BorderBrush="{DynamicResource AppBorderBrush}"
+                                            BorderThickness="1" CornerRadius="8" Padding="7" Margin="0,0,0,5">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="62" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel>
+                                                <Grid Margin="0,0,0,3">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="34" /><ColumnDefinition Width="24" />
+                                                        <ColumnDefinition Width="*" /><ColumnDefinition Width="42" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <Border Background="#FEE2E2" BorderBrush="#FCA5A5" BorderThickness="1" CornerRadius="6" Padding="3,1" HorizontalAlignment="Left">
+                                                        <TextBlock Text="{Binding PlayerOutPosition}" Foreground="#991B1B" FontSize="8.5" FontWeight="Black" />
+                                                    </Border>
+                                                    <controls:FlagBadge Grid.Column="1" FlagSource="{Binding PlayerOutFlagImagePath}"
+                                                                        ToolTip="{Binding PlayerOutNationalityName}" Width="20" Height="14" />
+                                                    <TextBlock Grid.Column="2" Text="{Binding PlayerOutName}" Foreground="{DynamicResource AppTextBrush}"
+                                                               FontSize="10" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+                                                    <Border Grid.Column="3" Background="{Binding PlayerOutRatingBackground}" CornerRadius="7" Padding="4,1">
+                                                        <TextBlock Text="{Binding PlayerOutRating}" Foreground="{Binding PlayerOutRatingForeground}"
+                                                                   FontSize="8.5" FontWeight="Black" HorizontalAlignment="Center" />
+                                                    </Border>
+                                                </Grid>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="34" /><ColumnDefinition Width="24" />
+                                                        <ColumnDefinition Width="*" /><ColumnDefinition Width="42" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <Border Background="#DCFCE7" BorderBrush="#86EFAC" BorderThickness="1" CornerRadius="6" Padding="3,1" HorizontalAlignment="Left">
+                                                        <TextBlock Text="{Binding PlayerInPosition}" Foreground="#166534" FontSize="8.5" FontWeight="Black" />
+                                                    </Border>
+                                                    <controls:FlagBadge Grid.Column="1" FlagSource="{Binding PlayerInFlagImagePath}"
+                                                                        ToolTip="{Binding PlayerInNationalityName}" Width="20" Height="14" />
+                                                    <TextBlock Grid.Column="2" Text="{Binding PlayerInName}" Foreground="{DynamicResource AppTextBrush}"
+                                                               FontSize="10" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+                                                    <Border Grid.Column="3" Background="{Binding PlayerInRatingBackground}" CornerRadius="7" Padding="4,1">
+                                                        <TextBlock Text="{Binding PlayerInRating}" Foreground="{Binding PlayerInRatingForeground}"
+                                                                   FontSize="8.5" FontWeight="Black" HorizontalAlignment="Center" />
+                                                    </Border>
+                                                </Grid>
+                                                <TextBlock Text="{Binding Reason}" Foreground="{Binding ReasonBrush}" FontSize="8.5"
+                                                           FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,3,0,0" />
+                                            </StackPanel>
+                                            <Button Grid.Column="1" Width="32" Height="32" Margin="6,0,0,0"
+                                                    ToolTip="Make this substitution"
+                                                    Background="{DynamicResource AppAccentBrush}" Foreground="White"
+                                                    BorderThickness="0" Visibility="{Binding ActionButtonVisibility}"
+                                                    Click="CompactRecommendedSubstitutionButton_Click">
+                                                <Grid Width="18" Height="18">
+                                                    <Path Data="M 1,5 L 13,5 M 10,2 L 13,5 L 10,8"
+                                                          Stroke="White" StrokeThickness="2.2" StrokeStartLineCap="Round"
+                                                          StrokeEndLineCap="Round" StrokeLineJoin="Round" />
+                                                    <Path Data="M 17,13 L 5,13 M 8,10 L 5,13 L 8,16"
+                                                          Stroke="White" StrokeThickness="2.2" StrokeStartLineCap="Round"
+                                                          StrokeEndLineCap="Round" StrokeLineJoin="Round" />
+                                                </Grid>
+                                            </Button>
+                                            <Border Grid.Column="1" Visibility="{Binding PendingVisibility}"
+                                                    Background="#DCFCE7" BorderBrush="#4ADE80" BorderThickness="1"
+                                                    CornerRadius="8" Padding="6,3" Margin="5,0,0,0"
+                                                    HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <TextBlock Text="Pending" Foreground="#166534" FontSize="8.5" FontWeight="Black" />
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock x:Name="NoCompactSubstitutionRecommendationsTextBlock"
+                                   Text="No urgent substitutions recommended."
+                                   Foreground="{DynamicResource AppMutedTextBrush}"
+                                   FontSize="9"
+                                   Margin="4,5"
+                                   Visibility="Collapsed" />
+                            </StackPanel>
+                        </Border>
+                    </Popup>
+                </Grid>
+            </Border>
+
+            <Border x:Name="FeedPanel"
+                    Grid.Row="2"
                     Background="{DynamicResource AppCardBackground}"
                     CornerRadius="12"
                     Padding="12">
@@ -912,7 +1121,7 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <Grid Margin="0,0,0,10">
+                    <Grid Grid.Row="0" Margin="0,0,0,10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
@@ -923,6 +1132,12 @@
                                    FontSize="18"
                                    FontWeight="Bold"
                                    VerticalAlignment="Center" />
+
+                        <Grid x:Name="CompactFeedControlsTarget"
+                              Grid.Column="1"
+                              HorizontalAlignment="Right"
+                              VerticalAlignment="Center"
+                              Visibility="Collapsed" />
 
                         <Border x:Name="LiveStatusBadge"
                                 Grid.Column="1"
@@ -1068,8 +1283,8 @@
         <Grid x:Name="FullMatchLayoutGrid"
               Grid.Column="1">
             <Grid.RowDefinitions>
-                <RowDefinition Height="7*" />
-                <RowDefinition Height="3*" />
+                <RowDefinition x:Name="FullMatchPitchRowDefinition" Height="6.3*" />
+                <RowDefinition x:Name="FullMatchControlsRowDefinition" Height="3.7*" />
             </Grid.RowDefinitions>
 
             <Border Grid.Row="0"
@@ -1242,9 +1457,9 @@
             <Grid Grid.Row="1"
                   Margin="0,8,0,0">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1.05*" />
-                    <ColumnDefinition Width="0.95*" />
-                    <ColumnDefinition Width="1.1*" />
+                    <ColumnDefinition x:Name="PlayerInfoColumnDefinition" Width="0.85*" />
+                    <ColumnDefinition x:Name="InlineTacticsColumnDefinition" Width="1.15*" />
+                    <ColumnDefinition x:Name="InlineSubstitutesColumnDefinition" Width="1.1*" />
                 </Grid.ColumnDefinitions>
 
                 <Border x:Name="SelectedPlayerDetailCardBorder"
@@ -1555,6 +1770,7 @@
 
                                     <Button x:Name="ActionFormationButton"
                                             Grid.Column="1"
+                                            Visibility="Collapsed"
                                             Content="Formation"
                                             Style="{StaticResource PrimaryTextButton}"
                                             Height="17"
@@ -1567,6 +1783,7 @@
                                 </Grid>
 
                                 <Popup x:Name="ActionFormationPopup"
+                                       IsOpen="False"
                                        PlacementTarget="{Binding ElementName=ActionFormationButton}"
                                        Placement="Bottom"
                                        StaysOpen="True"
@@ -1606,7 +1823,8 @@
                                 <controls:TacticalSettingsPanel x:Name="ActionTacticalSettingsPanel"
                                                                 IsCompact="True"
                                                                 ShowCompactTitle="False"
-                                                                PanelMaxHeight="170" />
+                                                                PanelMaxHeight="210"
+                                                                FormationChanged="TacticalSettingsPanel_FormationChanged" />
 
                                 <TextBlock x:Name="PausedActionStatusTextBlock"
                                            Foreground="{DynamicResource AppMutedTextBrush}"
@@ -1647,6 +1865,7 @@
                         </TextBlock>
                         <ListBox x:Name="PausedBenchListBox"
                                  Grid.Row="1"
+                                 Tag="2"
                                  SelectionChanged="PausedBenchListBox_SelectionChanged"
                                  ItemTemplate="{StaticResource SubstitutionPlayerTemplate}"
                                  Background="Transparent"
@@ -1654,9 +1873,13 @@
                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                  ScrollViewer.VerticalScrollBarVisibility="Auto"
                                  ScrollViewer.CanContentScroll="False">
+                            <ListBox.LayoutTransform>
+                                <ScaleTransform x:Name="StealthSubstitutesScaleTransform" ScaleX="1" ScaleY="1" />
+                            </ListBox.LayoutTransform>
                             <ListBox.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <UniformGrid Columns="2" />
+                                    <UniformGrid Columns="{Binding Tag, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                 VerticalAlignment="Top" />
                                 </ItemsPanelTemplate>
                             </ListBox.ItemsPanel>
                             <ListBox.ItemContainerStyle>
@@ -1666,6 +1889,11 @@
                                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                                     <Setter Property="Background" Value="Transparent" />
                                     <Setter Property="BorderThickness" Value="0" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource AncestorType=ListBox}}" Value="4">
+                                            <Setter Property="Margin" Value="0,0,2,3" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
                                 </Style>
                             </ListBox.ItemContainerStyle>
                         </ListBox>
@@ -1840,7 +2068,8 @@
 
                         <controls:TacticalSettingsPanel x:Name="TacticalSettingsPanel"
                                                         IsCompact="True"
-                                                        PanelMaxHeight="320" />
+                                                        PanelMaxHeight="320"
+                                                        FormationChanged="TacticalSettingsPanel_FormationChanged" />
 
                         <StackPanel Orientation="Horizontal"
                                     HorizontalAlignment="Right"

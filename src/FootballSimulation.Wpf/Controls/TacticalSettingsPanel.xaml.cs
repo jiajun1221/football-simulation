@@ -39,6 +39,8 @@ public partial class TacticalSettingsPanel : UserControl
     ];
 
     private TeamTactics _currentTactics = new();
+    private string _currentFormation = "4-3-3 Holding";
+    private int _selectedTabIndex;
 
     public TacticalSettingsPanel()
     {
@@ -47,6 +49,7 @@ public partial class TacticalSettingsPanel : UserControl
     }
 
     public event EventHandler? TacticsChanged;
+    public event EventHandler<FormationSelectionChangedEventArgs>? FormationChanged;
 
     public double PanelMaxHeight
     {
@@ -72,6 +75,12 @@ public partial class TacticalSettingsPanel : UserControl
         Refresh();
     }
 
+    public void LoadFormation(string formation)
+    {
+        _currentFormation = FormationCatalogService.NormalizeFormationName(formation);
+        RefreshFormations();
+    }
+
     public void ApplyTo(TeamTactics tactics)
     {
         TacticalProfileService.CopyTo(_currentTactics, tactics);
@@ -95,40 +104,92 @@ public partial class TacticalSettingsPanel : UserControl
         }
         RefreshPresets();
         RefreshCards();
+        RefreshFormations();
+        ShowSelectedTab();
     }
 
     private void RefreshPresets()
     {
         PresetPanel.Children.Clear();
-        if (IsCompact)
-        {
-            return;
-        }
-
         foreach (var preset in TacticalProfileService.GetPresets())
         {
             var button = new Button
             {
-                Content = IsCompact ? GetCompactPresetLabel(preset) : preset.Label,
+                Content = preset.Label,
                 ToolTip = preset.Description,
-                FontSize = IsCompact ? 7 : 8.5,
+                FontSize = IsCompact ? 9 : 8.5,
                 FontWeight = FontWeights.SemiBold,
-                Padding = IsCompact ? new Thickness(4, 1, 4, 1) : new Thickness(6, 2, 6, 2),
-                Margin = IsCompact ? new Thickness(0, 0, 3, 2) : new Thickness(0, 0, 4, 4),
-                MinHeight = IsCompact ? 16 : 20,
-                Width = IsCompact ? 45 : double.NaN,
+                Padding = IsCompact ? new Thickness(8, 3, 8, 3) : new Thickness(6, 2, 6, 2),
+                Margin = IsCompact ? new Thickness(0, 0, 6, 5) : new Thickness(0, 0, 4, 4),
+                MinHeight = IsCompact ? 27 : 20,
+                MinWidth = IsCompact ? 68 : 0,
                 Style = (Style)Resources["TacticalPillButtonStyle"]
             };
-            ApplyPresetButtonVisual(button, IsPresetSelected(preset));
-            AddHoverGlow(button);
+            ApplyTacticalPresetVisual(button, preset, IsPresetSelected(preset));
             button.Click += (_, _) =>
             {
                 _currentTactics = TacticalProfileService.Clone(preset.Tactics);
                 NotifyTacticsChanged();
+                _selectedTabIndex = 1;
+                ShowSelectedTab();
             };
 
             PresetPanel.Children.Add(button);
         }
+    }
+
+    private void RefreshFormations()
+    {
+        FormationPanel.Children.Clear();
+        foreach (var formation in FormationCatalogService.GetFormations())
+        {
+            var button = new Button
+            {
+                Content = formation.Name,
+                ToolTip = formation.Category.ToString(),
+                FontSize = IsCompact ? 9 : 8,
+                Padding = IsCompact ? new Thickness(9, 3, 9, 3) : new Thickness(6, 2, 6, 2),
+                Margin = new Thickness(0, 0, 6, 5),
+                MinHeight = IsCompact ? 27 : 20,
+                Style = (Style)Resources["TacticalPillButtonStyle"]
+            };
+            ApplyPresetButtonVisual(button, formation.Name == _currentFormation);
+            button.Click += (_, _) =>
+            {
+                _currentFormation = formation.Name;
+                RefreshFormations();
+                FormationChanged?.Invoke(this, new FormationSelectionChangedEventArgs(_currentFormation));
+            };
+            FormationPanel.Children.Add(button);
+        }
+    }
+
+    private void PresetTabButton_Click(object sender, RoutedEventArgs e)
+    {
+        _selectedTabIndex = 0;
+        ShowSelectedTab();
+    }
+
+    private void RangeTabButton_Click(object sender, RoutedEventArgs e)
+    {
+        _selectedTabIndex = 1;
+        ShowSelectedTab();
+    }
+
+    private void FormationTabButton_Click(object sender, RoutedEventArgs e)
+    {
+        _selectedTabIndex = 2;
+        ShowSelectedTab();
+    }
+
+    private void ShowSelectedTab()
+    {
+        PresetPanel.Visibility = _selectedTabIndex == 0 ? Visibility.Visible : Visibility.Collapsed;
+        CardsPanel.Visibility = _selectedTabIndex == 1 ? Visibility.Visible : Visibility.Collapsed;
+        FormationPanel.Visibility = _selectedTabIndex == 2 ? Visibility.Visible : Visibility.Collapsed;
+        ApplyPresetButtonVisual(PresetTabButton, _selectedTabIndex == 0);
+        ApplyPresetButtonVisual(RangeTabButton, _selectedTabIndex == 1);
+        ApplyPresetButtonVisual(FormationTabButton, _selectedTabIndex == 2);
     }
 
     private void RefreshCards()
@@ -197,6 +258,7 @@ public partial class TacticalSettingsPanel : UserControl
             TextAlignment = TextAlignment.Center
         };
         label.Child = labelText;
+        ApplyRangeBadgeVisual(label, labelText, selected);
         Grid.SetColumn(label, 2);
         titleGrid.Children.Add(label);
 
@@ -212,7 +274,11 @@ public partial class TacticalSettingsPanel : UserControl
         });
         ((TextBlock)stack.Children[^1]).SetResourceReference(TextBlock.ForegroundProperty, "AppMutedTextBrush");
 
-        stack.Children.Add(CreateScale(dimension, selected));
+        stack.Children.Add(CreateRangeSlider(
+            dimension,
+            TacticalProfileService.GetOptions(dimension),
+            selected,
+            option => ApplyRangeBadgeVisual(label, labelText, option)));
 
         border.Child = stack;
         return border;
@@ -240,6 +306,7 @@ public partial class TacticalSettingsPanel : UserControl
             VerticalAlignment = VerticalAlignment.Center
         };
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(48) });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
@@ -252,12 +319,82 @@ public partial class TacticalSettingsPanel : UserControl
         Grid.SetColumn(title, 1);
         grid.Children.Add(title);
 
-        var dropdown = CreateCompactDropdown(dimension, selected, options);
-        Grid.SetColumn(dropdown, 2);
-        grid.Children.Add(dropdown);
+        var valueBadge = CreateSelectedBadge(selected.Label);
+        var valueText = (TextBlock)valueBadge.Child;
+        ApplyRangeBadgeVisual(valueBadge, valueText, selected);
+        Grid.SetColumn(valueBadge, 3);
+        grid.Children.Add(valueBadge);
+
+        var slider = CreateRangeSlider(
+            dimension,
+            options,
+            selected,
+            option => ApplyRangeBadgeVisual(valueBadge, valueText, option));
+        slider.Margin = new Thickness(5, 0, 5, 0);
+        Grid.SetColumn(slider, 2);
+        grid.Children.Add(slider);
 
         border.Child = grid;
         return border;
+    }
+
+    private Slider CreateRangeSlider(
+        TacticalDimension dimension,
+        IReadOnlyList<TacticalOption> options,
+        TacticalOption selected,
+        Action<TacticalOption> updateValueVisual)
+    {
+        var selectedIndex = options
+            .Select((option, index) => new { option, index })
+            .Where(item => item.option == selected)
+            .Select(item => item.index)
+            .DefaultIfEmpty(0)
+            .First();
+        var slider = new Slider
+        {
+            Minimum = 0,
+            Maximum = Math.Max(0, options.Count - 1),
+            Value = selectedIndex,
+            SmallChange = 1,
+            LargeChange = 1,
+            IsMoveToPointEnabled = true,
+            ToolTip = selected.Description,
+            Style = (Style)Resources["TacticalRangeSliderStyle"]
+        };
+
+        slider.ValueChanged += (_, args) =>
+        {
+            var optionIndex = Math.Clamp((int)Math.Round(args.NewValue), 0, options.Count - 1);
+            var option = options[optionIndex];
+            TacticalProfileService.ApplyOption(_currentTactics, option);
+            slider.ToolTip = option.Description;
+            updateValueVisual(option);
+            RefreshSummaryAndPresets();
+            TacticsChanged?.Invoke(this, EventArgs.Empty);
+        };
+
+        return slider;
+    }
+
+    private void RefreshSummaryAndPresets()
+    {
+        if (!IsCompact)
+        {
+            SummaryTextBlock.Text = TacticalProfileService.CreateSummary(_currentTactics);
+        }
+
+        RefreshPresets();
+    }
+
+    private static void ApplyRangeBadgeVisual(Border badge, TextBlock textBlock, TacticalOption option)
+    {
+        textBlock.Text = option.Label;
+        var normalizedKey = option.Key.ToLowerInvariant();
+        badge.Background = normalizedKey is "defensive" or "slow" or "narrow" or "low-block" or "deep"
+            ? new SolidColorBrush(Color.FromRgb(37, 99, 235))
+            : normalizedKey is "attacking" or "fast" or "wide" or "aggressive" or "higher"
+                ? new SolidColorBrush(Color.FromRgb(239, 68, 68))
+                : new SolidColorBrush(Color.FromRgb(100, 116, 139));
     }
 
     private Button CreateCompactDropdown(TacticalDimension dimension, TacticalOption selected, IReadOnlyList<TacticalOption> options)
@@ -332,7 +469,6 @@ public partial class TacticalSettingsPanel : UserControl
             };
 
             ApplyOptionButtonVisual(button, isSelected);
-            AddHoverGlow(button);
             if (isSelected)
             {
                 AnimateSelectedButton(button);
@@ -351,72 +487,76 @@ public partial class TacticalSettingsPanel : UserControl
 
     private void ApplyPresetButtonVisual(Button button, bool isSelected)
     {
-        button.SetResourceReference(
-            BackgroundProperty,
-            isSelected ? "TacticalPresetActiveBackground" : "TacticalPresetBackground");
-        if (isSelected)
+        ApplyHuePillVisual(button, Color.FromRgb(71, 85, 105), isSelected);
+    }
+
+    private static void ApplyTacticalPresetVisual(Button button, TacticalPreset preset, bool isSelected)
+    {
+        var color = preset.Tactics.Mentality switch
         {
-            button.Foreground = Brushes.White;
-        }
-        else
-        {
-            button.SetResourceReference(ForegroundProperty, "TacticalPresetForeground");
-        }
-        button.SetResourceReference(
-            BorderBrushProperty,
-            isSelected ? "TacticalPresetActiveBackground" : "TacticalPresetBorder");
-        button.FontWeight = isSelected ? FontWeights.Bold : FontWeights.SemiBold;
-        button.Effect = isSelected ? CreateSelectedGlow(0.22, 7) : null;
+            Mentality.UltraDefensive => Color.FromRgb(30, 58, 138),
+            Mentality.Defensive => Color.FromRgb(37, 99, 235),
+            Mentality.Attacking => Color.FromRgb(239, 68, 68),
+            Mentality.AllOutAttack => Color.FromRgb(153, 27, 27),
+            _ => Color.FromRgb(100, 116, 139)
+        };
+        ApplyHuePillVisual(button, color, isSelected);
     }
 
     private void ApplyOptionButtonVisual(Button button, bool isSelected)
     {
-        button.SetResourceReference(
-            BackgroundProperty,
-            isSelected ? "TacticalPresetActiveBackground" : "TacticalOptionBackground");
-        if (isSelected)
-        {
-            button.Foreground = Brushes.White;
-        }
-        else
-        {
-            button.SetResourceReference(ForegroundProperty, "TacticalOptionForeground");
-        }
-        button.SetResourceReference(
-            BorderBrushProperty,
-            isSelected ? "TacticalPresetActiveBackground" : "TacticalPresetBorder");
-        button.Effect = isSelected ? CreateSelectedGlow(0.28, 8) : null;
+        ApplyHuePillVisual(button, Color.FromRgb(71, 85, 105), isSelected);
     }
 
-    private void AddHoverGlow(Button button)
+    private static void ApplyHuePillVisual(Button button, Color hue, bool isSelected)
     {
-        var baseBlur = 0.0;
-        var baseOpacity = 0.0;
-        if (button.Effect is DropShadowEffect selectedGlow)
+        var state = button.Tag as PillVisualState;
+        if (state is null)
         {
-            baseBlur = selectedGlow.BlurRadius;
-            baseOpacity = selectedGlow.Opacity;
+            state = new PillVisualState(button.Content?.ToString() ?? string.Empty);
+            button.Tag = state;
+            button.MouseEnter += PillButton_MouseEnter;
+            button.MouseLeave += PillButton_MouseLeave;
         }
 
-        var glow = button.Effect as DropShadowEffect ?? new DropShadowEffect
-        {
-            Color = Colors.DeepSkyBlue,
-            BlurRadius = 0,
-            ShadowDepth = 0,
-            Opacity = 0
-        };
-        button.Effect = glow;
+        state.Hue = hue;
+        state.IsSelected = isSelected;
+        button.Content = isSelected ? $"✓ {state.Label}" : state.Label;
+        button.Background = new SolidColorBrush(isSelected ? Blend(hue, Colors.Black, 0.18) : Blend(hue, Colors.White, 0.82));
+        button.Foreground = isSelected ? Brushes.White : new SolidColorBrush(Blend(hue, Colors.Black, 0.48));
+        button.BorderBrush = new SolidColorBrush(isSelected ? Blend(hue, Colors.White, 0.34) : hue);
+        button.BorderThickness = new Thickness(1);
+        button.FontWeight = isSelected ? FontWeights.Black : FontWeights.SemiBold;
+        button.Opacity = 1;
+        button.Effect = isSelected
+            ? new DropShadowEffect { Color = hue, BlurRadius = 7, ShadowDepth = 0, Opacity = 0.38 }
+            : null;
+    }
 
-        button.MouseEnter += (_, _) =>
+    private static void PillButton_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
+    {
+        if (sender is Button { Tag: PillVisualState { IsSelected: false } state } button)
         {
-            glow.BeginAnimation(DropShadowEffect.BlurRadiusProperty, new DoubleAnimation(baseBlur, 12, TimeSpan.FromMilliseconds(140)));
-            glow.BeginAnimation(DropShadowEffect.OpacityProperty, new DoubleAnimation(baseOpacity, Math.Max(0.32, baseOpacity), TimeSpan.FromMilliseconds(140)));
-        };
-        button.MouseLeave += (_, _) =>
+            button.Background = new SolidColorBrush(Blend(state.Hue, Colors.White, 0.68));
+            button.Effect = new DropShadowEffect { Color = state.Hue, BlurRadius = 5, ShadowDepth = 0, Opacity = 0.22 };
+        }
+    }
+
+    private static void PillButton_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+    {
+        if (sender is Button { Tag: PillVisualState { IsSelected: false } state } button)
         {
-            glow.BeginAnimation(DropShadowEffect.BlurRadiusProperty, new DoubleAnimation(12, baseBlur, TimeSpan.FromMilliseconds(160)));
-            glow.BeginAnimation(DropShadowEffect.OpacityProperty, new DoubleAnimation(Math.Max(0.32, baseOpacity), baseOpacity, TimeSpan.FromMilliseconds(160)));
-        };
+            button.Background = new SolidColorBrush(Blend(state.Hue, Colors.White, 0.82));
+            button.Effect = null;
+        }
+    }
+
+    private static Color Blend(Color source, Color target, double targetAmount)
+    {
+        return Color.FromRgb(
+            (byte)Math.Round(source.R + ((target.R - source.R) * targetAmount)),
+            (byte)Math.Round(source.G + ((target.G - source.G) * targetAmount)),
+            (byte)Math.Round(source.B + ((target.B - source.B) * targetAmount)));
     }
 
     private static void AnimateSelectedButton(Button button)
@@ -461,7 +601,6 @@ public partial class TacticalSettingsPanel : UserControl
     {
         CompactTitleTextBlock.Visibility = IsCompact && ShowCompactTitle ? Visibility.Visible : Visibility.Collapsed;
         SummaryTextBlock.Visibility = IsCompact ? Visibility.Collapsed : Visibility.Visible;
-        PresetPanel.Visibility = IsCompact ? Visibility.Collapsed : Visibility.Visible;
         SummaryTextBlock.FontSize = 10;
         SummaryTextBlock.LineHeight = 14;
         SummaryTextBlock.MaxHeight = double.PositiveInfinity;
@@ -562,6 +701,13 @@ public partial class TacticalSettingsPanel : UserControl
         };
     }
 
+    private sealed class PillVisualState(string label)
+    {
+        public string Label { get; } = label;
+        public Color Hue { get; set; }
+        public bool IsSelected { get; set; }
+    }
+
     private static IReadOnlyList<TacticalOption> GetCompactOptions(TacticalDimension dimension)
     {
         return TacticalProfileService.GetOptions(dimension);
@@ -612,4 +758,9 @@ public partial class TacticalSettingsPanel : UserControl
             Opacity = opacity
         };
     }
+}
+
+public sealed class FormationSelectionChangedEventArgs(string formation) : EventArgs
+{
+    public string Formation { get; } = formation;
 }
