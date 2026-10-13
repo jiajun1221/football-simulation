@@ -382,20 +382,20 @@
                               CellEditEnding="SquadDataGrid_CellEditEnding"
                               SelectionChanged="SquadDataGrid_SelectionChanged">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="No." Binding="{Binding ShirtNumber, UpdateSourceTrigger=PropertyChanged}" Width="54" ElementStyle="{StaticResource CenteredValueTextStyle}" />
-                            <DataGridTemplateColumn Header="Player" Width="175" IsReadOnly="True">
+                            <DataGridTextColumn Header="No." Binding="{Binding ShirtNumber, UpdateSourceTrigger=PropertyChanged}" Width="54" ElementStyle="{StaticResource CenteredValueTextStyle}" SortMemberPath="ShirtNumberValue" />
+                            <DataGridTemplateColumn Header="Player" Width="175" IsReadOnly="True" SortMemberPath="PlayerName">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <StaticResource ResourceKey="TransferPlayerCellTemplate" />
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Nat" Width="42" IsReadOnly="True">
+                            <DataGridTemplateColumn Header="Nat" Width="42" IsReadOnly="True" SortMemberPath="NationalityName">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <StaticResource ResourceKey="NationalityCellTemplate" />
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Pos" Width="52" CellTemplate="{StaticResource PositionBadgeTemplate}" IsReadOnly="True" />
-                            <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="45" ElementStyle="{StaticResource CenteredGridTextStyle}" IsReadOnly="True" />
-                            <DataGridTemplateColumn Header="OVR" Width="58" IsReadOnly="True">
+                            <DataGridTemplateColumn Header="Pos" Width="52" CellTemplate="{StaticResource PositionBadgeTemplate}" IsReadOnly="True" SortMemberPath="Position" />
+                            <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="45" ElementStyle="{StaticResource CenteredGridTextStyle}" IsReadOnly="True" SortMemberPath="AgeValue" />
+                            <DataGridTemplateColumn Header="OVR" Width="58" IsReadOnly="True" SortMemberPath="OverallValue">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border Style="{StaticResource OvrBadgeBorderStyle}">
@@ -404,7 +404,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Form" Width="78" IsReadOnly="True">
+                            <DataGridTemplateColumn Header="Form" Width="78" IsReadOnly="True" SortMemberPath="Form">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border Background="{Binding FormBrush}" CornerRadius="10" Height="24" Padding="7,0" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -413,14 +413,14 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Value" Width="88" IsReadOnly="True">
+                            <DataGridTemplateColumn Header="Value" Width="88" IsReadOnly="True" SortMemberPath="MarketValue">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding MarketValueText}" Style="{StaticResource CenteredValueTextStyle}" />
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Exp." Width="76" IsReadOnly="True">
+                            <DataGridTemplateColumn Header="Exp." Width="76" IsReadOnly="True" SortMemberPath="ContractEndYear">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal"
@@ -440,8 +440,8 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="Wage" Binding="{Binding WageText}" Width="78" ElementStyle="{StaticResource CenteredValueTextStyle}" IsReadOnly="True" />
-                            <DataGridTemplateColumn Header="Status" Width="100" IsReadOnly="True">
+                            <DataGridTextColumn Header="Wage" Binding="{Binding WageText}" Width="78" ElementStyle="{StaticResource CenteredValueTextStyle}" IsReadOnly="True" SortMemberPath="WeeklyWage" />
+                            <DataGridTemplateColumn Header="Status" Width="100" IsReadOnly="True" SortMemberPath="Status">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <StaticResource ResourceKey="StatusCellTemplate" />
                                 </DataGridTemplateColumn.CellTemplate>

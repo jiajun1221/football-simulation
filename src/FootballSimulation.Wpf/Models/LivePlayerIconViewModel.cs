@@ -15,6 +15,8 @@ public class LivePlayerIconViewModel
     public string Initials { get; init; } = string.Empty;
     public string PositionText { get; init; } = string.Empty;
     public string ExactPosition { get; init; } = string.Empty;
+    public string PositionBadgeBackground { get; init; } = "#64748B";
+    public string PositionBadgeForeground { get; init; } = "#FFFFFF";
     public string TeamSide { get; init; } = string.Empty;
     public double X { get; init; }
     public double Y { get; init; }

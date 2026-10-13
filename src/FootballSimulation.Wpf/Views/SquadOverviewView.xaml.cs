@@ -1198,15 +1198,20 @@ public partial class SquadOverviewView : UserControl
             NationalityName = nationality.Name,
             Position = player.PreferredPosition,
             Age = player.Age?.ToString(CultureInfo.InvariantCulture) ?? "-",
+            AgeValue = player.Age ?? -1,
             OverallText = player.OverallRating.ToString(CultureInfo.InvariantCulture),
+            OverallValue = player.OverallRating,
             Form = formBadge.Text,
             MarketValueText = TransferMarketService.FormatMoney(listing.MarketValue),
+            MarketValue = listing.MarketValue,
             ContractText = player.ContractEndYear?.ToString(CultureInfo.InvariantCulture) ?? "-",
+            ContractEndYear = player.ContractEndYear ?? int.MaxValue,
             ContractWarningVisibility = showContractWarning ? Visibility.Visible : Visibility.Collapsed,
             ContractWarningTooltip = contractYearsRemaining == 0
                 ? "Danger: contract expires at the end of this season."
                 : "Warning: only one season remains on this contract.",
             WageText = PlayerContractService.FormatWage(listing.WeeklyWage),
+            WeeklyWage = listing.WeeklyWage,
             Status = status.Text,
             StatusTooltip = status.Tooltip,
             StatusBrush = status.Brush,
@@ -1346,6 +1351,9 @@ public partial class SquadOverviewView : UserControl
     {
         public required TransferPlayerListing Listing { get; init; }
         public string ShirtNumber { get; set; } = string.Empty;
+        public int ShirtNumberValue => int.TryParse(ShirtNumber, NumberStyles.Integer, CultureInfo.InvariantCulture, out var number)
+            ? number
+            : int.MaxValue;
         public Visibility CaptainBadgeVisibility { get; init; } = Visibility.Collapsed;
         public string CaptainBadgeTooltip { get; init; } = string.Empty;
         public string PlayerName { get; init; } = string.Empty;
@@ -1353,13 +1361,18 @@ public partial class SquadOverviewView : UserControl
         public string NationalityName { get; init; } = string.Empty;
         public string Position { get; init; } = string.Empty;
         public string Age { get; init; } = string.Empty;
+        public int AgeValue { get; init; }
         public string OverallText { get; init; } = string.Empty;
+        public int OverallValue { get; init; }
         public string Form { get; init; } = string.Empty;
         public string MarketValueText { get; init; } = string.Empty;
+        public decimal MarketValue { get; init; }
         public string ContractText { get; init; } = string.Empty;
+        public int ContractEndYear { get; init; }
         public Visibility ContractWarningVisibility { get; init; }
         public string ContractWarningTooltip { get; init; } = string.Empty;
         public string WageText { get; init; } = string.Empty;
+        public decimal WeeklyWage { get; init; }
         public string Status { get; init; } = string.Empty;
         public string StatusTooltip { get; init; } = string.Empty;
         public string StatusBrush { get; init; } = "#10B981";

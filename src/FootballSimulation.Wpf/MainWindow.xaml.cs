@@ -58,6 +58,7 @@ public partial class MainWindow : Window
         MouseEnter += MainWindow_MouseEnter;
         MouseLeave += MainWindow_MouseLeave;
         PreviewMouseMove += MainWindow_PreviewMouseMove;
+        Loaded += MainWindow_Loaded;
         _hiddenWindowPointerTimer.Tick += HiddenWindowPointerTimer_Tick;
         ThemeManager.ThemeChanged += ThemeManager_ThemeChanged;
         UpdateThemeToggleButton();
@@ -66,6 +67,16 @@ public partial class MainWindow : Window
         UpdatePinToTopButton();
         UpdateMaximizeButton();
         ShowMainMenu();
+    }
+
+    private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+    {
+        Loaded -= MainWindow_Loaded;
+
+        if (!IsStealthMode)
+        {
+            EnterStealthMode();
+        }
     }
 
     private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -730,6 +741,15 @@ public partial class MainWindow : Window
 
     private void Navigate(UserControl view)
     {
+        if (view is HalfTimeView)
+        {
+            _state.IsCompactLiveMatchView = false;
+            if (IsStealthMode)
+            {
+                SetStealthLiveMatchCompactMode(isCompact: false);
+            }
+        }
+
         if (view is MatchResultView)
         {
             _state.IsCompactLiveMatchView = false;

@@ -8,14 +8,38 @@ public static class TeamRosterService
     private static readonly string[][] MatchdayBenchRoles =
     [
         ["ST"],
-        ["LW"],
-        ["RW"],
+        ["LW", "LM"],
+        ["RW", "RM"],
         ["CAM"],
-        ["CB"],
+        ["CM", "CDM"],
         ["LB"],
         ["RB"],
-        ["CM", "CDM"]
+        ["CB"]
     ];
+
+    public static IReadOnlyList<string> GetMatchdayBenchRole(int substituteIndex)
+    {
+        return substituteIndex >= 0 && substituteIndex < MatchdayBenchRoles.Length
+            ? MatchdayBenchRoles[substituteIndex]
+            : [];
+    }
+
+    public static IReadOnlyList<string> GetMatchdayBenchRole(Player player)
+    {
+        ArgumentNullException.ThrowIfNull(player);
+
+        var preferredPosition = PositionSuitabilityService.NormalizeExactPosition(player.PreferredPosition);
+        var preferredRole = MatchdayBenchRoles.FirstOrDefault(role =>
+            role.Contains(preferredPosition, StringComparer.OrdinalIgnoreCase));
+        if (preferredRole is not null)
+        {
+            return preferredRole;
+        }
+
+        var naturalPositions = PositionSuitabilityService.GetNaturalExactPositions(player);
+        return MatchdayBenchRoles.FirstOrDefault(role =>
+            role.Any(position => naturalPositions.Contains(position, StringComparer.OrdinalIgnoreCase))) ?? [];
+    }
 
     public static IEnumerable<Player> GetAllPlayers(Team team)
     {
@@ -204,7 +228,10 @@ public static class TeamRosterService
             .Where(candidate => !used.Contains(CreatePlayerKey(candidate)))
             .Where(candidate => PositionSuitabilityService.GetNaturalExactPositions(candidate)
                 .Any(position => roles.Contains(position, StringComparer.OrdinalIgnoreCase)))
-            .OrderByDescending(candidate => candidate.OverallRating)
+            .OrderByDescending(candidate => roles.Contains(
+                PositionSuitabilityService.NormalizeExactPosition(candidate.PreferredPosition),
+                StringComparer.OrdinalIgnoreCase))
+            .ThenByDescending(candidate => candidate.OverallRating)
             .ThenBy(candidate => candidate.SquadNumber <= 0 ? int.MaxValue : candidate.SquadNumber)
             .FirstOrDefault();
         if (player is not null)

@@ -61,7 +61,11 @@ public partial class HalfTimeView : UserControl
         _isCompactMode = isCompact;
         MainRootGrid.Margin = isCompact ? new Thickness(8) : new Thickness(24);
         CompactPitchToggleButton.Visibility = isCompact ? Visibility.Visible : Visibility.Collapsed;
-        CompactHalfTimeInsightsPanel.Visibility = isCompact ? Visibility.Visible : Visibility.Collapsed;
+        CompactHalfTimeInsightsPanel.Visibility = Visibility.Collapsed;
+        CompactHalfTimeWidePanel.Visibility = isCompact ? Visibility.Visible : Visibility.Collapsed;
+        SetupHeaderTextBlock.Visibility = isCompact ? Visibility.Collapsed : Visibility.Visible;
+        TacticsHeaderGrid.Visibility = isCompact ? Visibility.Collapsed : Visibility.Visible;
+        TacticalSettingsPanel.Visibility = isCompact ? Visibility.Collapsed : Visibility.Visible;
         TacticalSettingsPanel.IsCompact = isCompact;
         TacticalSettingsPanel.ShowCompactTitle = false;
         TacticalSettingsPanel.PanelMaxHeight = isCompact ? 220 : 620;
@@ -70,6 +74,7 @@ public partial class HalfTimeView : UserControl
         HalfTimeSetupColumnDefinition.Width = isCompact ? new GridLength(1, GridUnitType.Star) : new GridLength(320);
         HalfTimePitchPanel.Visibility = isCompact ? Visibility.Collapsed : Visibility.Visible;
         HalfTimeSetupPanel.Visibility = Visibility.Visible;
+        StartSecondHalfButton.Visibility = isCompact ? Visibility.Collapsed : Visibility.Visible;
         CompactPitchToggleButton.Content = "↗";
         CompactPitchToggleButton.ToolTip = "Expand pitch";
         RefreshCompactHalfTimePanels();
@@ -109,12 +114,14 @@ public partial class HalfTimeView : UserControl
             MatchSetupMode.ExtraTimeHalftime => "Extra Time Half-Time Setup",
             _ => "Half-Time Setup"
         };
-        StartSecondHalfButton.Content = _setupMode switch
+        var continueButtonText = _setupMode switch
         {
             MatchSetupMode.ExtraTimeSetup => "Continue to Extra Time",
             MatchSetupMode.ExtraTimeHalftime => "Continue Extra Time",
             _ => "Start Second Half"
         };
+        StartSecondHalfButton.Content = continueButtonText;
+        CompactStartSecondHalfButton.Content = continueButtonText;
 
         if (_state.SelectedTeam is null)
         {
@@ -194,15 +201,25 @@ public partial class HalfTimeView : UserControl
     private void LoadTactics(TeamTactics tactics)
     {
         TacticalSettingsPanel.LoadTactics(tactics);
+        CompactTacticalSettingsPanel.LoadTactics(tactics);
         if (_state.SelectedTeam is not null)
         {
             TacticalSettingsPanel.LoadFormation(_state.SelectedTeam.Formation);
+            CompactTacticalSettingsPanel.LoadFormation(_state.SelectedTeam.Formation);
         }
     }
 
     private void TacticalSettingsPanel_FormationChanged(object? sender, FormationSelectionChangedEventArgs e)
     {
         FormationComboBox.SelectedValue = e.Formation;
+        if (!ReferenceEquals(sender, TacticalSettingsPanel))
+        {
+            TacticalSettingsPanel.LoadFormation(e.Formation);
+        }
+        if (!ReferenceEquals(sender, CompactTacticalSettingsPanel))
+        {
+            CompactTacticalSettingsPanel.LoadFormation(e.Formation);
+        }
     }
 
     private void RenderPitch()
@@ -508,6 +525,16 @@ public partial class HalfTimeView : UserControl
 
     private void TacticalSettingsPanel_TacticsChanged(object? sender, EventArgs e)
     {
+        var sourcePanel = sender as TacticalSettingsPanel ?? TacticalSettingsPanel;
+        var tactics = sourcePanel.GetCurrentTactics();
+        if (!ReferenceEquals(sourcePanel, TacticalSettingsPanel))
+        {
+            TacticalSettingsPanel.LoadTactics(tactics);
+        }
+        if (!ReferenceEquals(sourcePanel, CompactTacticalSettingsPanel))
+        {
+            CompactTacticalSettingsPanel.LoadTactics(tactics);
+        }
         RefreshTacticalInsight();
     }
 
@@ -611,7 +638,7 @@ public partial class HalfTimeView : UserControl
         SubstitutionStatusTextBlock.Text = _pendingHalftimeSubstitutions.Count == 0
             ? $"{GetUsedSubstitutions()}/{GetMaxSubstitutions()} used"
             : $"{GetUsedSubstitutions()}/{GetMaxSubstitutions()} used · {_pendingHalftimeSubstitutions.Count} queued";
-        if (CompactHalfTimeInsightsPanel.Visibility == Visibility.Visible)
+        if (_isCompactMode)
         {
             RefreshCompactHalfTimePanels();
         }
@@ -938,6 +965,8 @@ public partial class HalfTimeView : UserControl
         if (_state.SelectedTeam is null)
         {
             CompactFirstHalfRatingsListBox.ItemsSource = null;
+            CompactHalfTimeStartingPlayersListBox.ItemsSource = null;
+            CompactHalfTimeSubPlayersListBox.ItemsSource = null;
             CompactHalfTimeRecommendationsItemsControl.ItemsSource = null;
             return;
         }
@@ -961,6 +990,16 @@ public partial class HalfTimeView : UserControl
         compactPlayersView.SortDescriptions.Add(new SortDescription(nameof(CompactHalfTimeRating.CategoryOrder), ListSortDirection.Ascending));
         compactPlayersView.SortDescriptions.Add(new SortDescription(nameof(CompactHalfTimeRating.SortRating), ListSortDirection.Descending));
         CompactFirstHalfRatingsListBox.ItemsSource = compactPlayersView;
+        CompactHalfTimeStartingPlayersListBox.ItemsSource = activePlayers
+            .Select(player => CreateCompactHalfTimePlayerRow(player, isStarter: true))
+            .OrderBy(row => row.PositionOrder)
+            .ThenByDescending(row => row.OverallValue)
+            .ToList();
+        CompactHalfTimeSubPlayersListBox.ItemsSource = substitutePlayers
+            .Select(player => CreateCompactHalfTimePlayerRow(player, isStarter: false))
+            .OrderBy(row => row.PositionOrder)
+            .ThenByDescending(row => row.OverallValue)
+            .ToList();
 
         var queuedPlayersOut = _pendingHalftimeSubstitutions.Select(item => item.Starter).ToHashSet();
         var queuedPlayersIn = _pendingHalftimeSubstitutions.Select(item => item.Substitute).ToHashSet();
@@ -993,6 +1032,12 @@ public partial class HalfTimeView : UserControl
         var pendingNationality = pendingSubstitution is null
             ? null
             : PlayerNationalityDisplayService.Resolve(pendingSubstitution.Substitute);
+        var position = PositionSuitabilityService.NormalizeExactPosition(
+            isStarter ? player.AssignedPosition : player.PreferredPosition);
+        var positionVisual = GetCompactPositionVisual(position);
+        var growthText = PlayerGrowthDisplayHelper.CreateGrowthText(player);
+        var overall = GetOverallRating(player);
+        var overallVisual = GetCompactOverallVisual(overall);
         string ratingText;
         string ratingBackground;
         string ratingForeground;
@@ -1009,11 +1054,9 @@ public partial class HalfTimeView : UserControl
         }
         else
         {
-            var overall = GetOverallRating(player);
-            var overallVisual = GetCompactOverallVisual(overall);
-            ratingText = overall.ToString();
-            ratingBackground = overallVisual.Background;
-            ratingForeground = overallVisual.Foreground;
+            ratingText = "—";
+            ratingBackground = "#E2E8F0";
+            ratingForeground = "#64748B";
             sortRating = overall;
         }
 
@@ -1027,14 +1070,24 @@ public partial class HalfTimeView : UserControl
             RowToolTip = isStarter
                 ? "Drop a substitute here to queue the change"
                 : "Drag this substitute onto a starting player",
-            Position = PositionSuitabilityService.NormalizeExactPosition(
-                isStarter ? player.AssignedPosition : player.PreferredPosition),
+            Position = position,
+            PositionOrder = GetCompactPositionOrder(position),
+            PositionBackground = positionVisual.Color,
+            PositionForeground = positionVisual.Foreground,
             Name = player.Name,
+            ShirtNumberText = player.SquadNumber > 0 ? $"#{player.SquadNumber}" : string.Empty,
+            GrowthText = growthText,
+            GrowthForeground = growthText.StartsWith("▼", StringComparison.Ordinal) ? "#EF4444" : "#16A34A",
+            TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits, 3),
             FlagImagePath = nationality.FlagImagePath,
             NationalityName = nationality.Name,
             Rating = ratingText,
             RatingBackground = ratingBackground,
             RatingForeground = ratingForeground,
+            Overall = overall.ToString(),
+            OverallValue = overall,
+            OverallBackground = overallVisual.Background,
+            OverallForeground = overallVisual.Foreground,
             Stamina = stamina,
             StaminaText = $"STA {stamina}%",
             StaminaBrush = GetStaminaBrush(player),
@@ -1048,10 +1101,31 @@ public partial class HalfTimeView : UserControl
         };
     }
 
+    private static int GetCompactPositionOrder(string position)
+    {
+        return PositionSuitabilityService.NormalizeExactPosition(position) switch
+        {
+            "ST" => 0,
+            "CF" => 1,
+            "LW" => 2,
+            "LM" => 3,
+            "RW" => 4,
+            "RM" => 5,
+            "CAM" => 6,
+            "CM" => 7,
+            "CDM" => 8,
+            "LB" => 9,
+            "RB" => 10,
+            "CB" => 11,
+            "GK" => 12,
+            _ => 13
+        };
+    }
+
     private void CompactFirstHalfRatingsListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
         if (_state.SelectedTeam is null ||
-            CompactFirstHalfRatingsListBox.SelectedItem is not CompactHalfTimeRating selectedPlayer)
+            sender is not ListBox { SelectedItem: CompactHalfTimeRating selectedPlayer })
         {
             return;
         }
@@ -2024,7 +2098,14 @@ public partial class HalfTimeView : UserControl
             team.Formation = formation;
         }
 
-        TacticalSettingsPanel.ApplyTo(team.Tactics);
+        if (_isCompactMode)
+        {
+            CompactTacticalSettingsPanel.ApplyTo(team.Tactics);
+        }
+        else
+        {
+            TacticalSettingsPanel.ApplyTo(team.Tactics);
+        }
     }
 
     private void SyncActivePitchSlotsIntoTeamPlayers()
@@ -2174,12 +2255,23 @@ public partial class HalfTimeView : UserControl
         public double SortRating { get; init; }
         public string RowToolTip { get; init; } = string.Empty;
         public string Position { get; init; } = string.Empty;
+        public int PositionOrder { get; init; }
+        public string PositionBackground { get; init; } = "#64748B";
+        public string PositionForeground { get; init; } = "#FFFFFF";
         public string Name { get; init; } = string.Empty;
+        public string ShirtNumberText { get; init; } = string.Empty;
+        public string GrowthText { get; init; } = string.Empty;
+        public string GrowthForeground { get; init; } = "#16A34A";
+        public IReadOnlyList<PlayerTraitBadge> TraitBadges { get; init; } = [];
         public string FlagImagePath { get; init; } = "/Assets/Flags/default.png";
         public string NationalityName { get; init; } = "Unknown nationality";
         public string Rating { get; init; } = "—";
         public string RatingBackground { get; init; } = "#64748B";
         public string RatingForeground { get; init; } = "#FFFFFF";
+        public string Overall { get; init; } = "—";
+        public int OverallValue { get; init; }
+        public string OverallBackground { get; init; } = "#64748B";
+        public string OverallForeground { get; init; } = "#FFFFFF";
         public int Stamina { get; init; }
         public string StaminaText { get; init; } = "STA —";
         public string StaminaBrush { get; init; } = "#64748B";

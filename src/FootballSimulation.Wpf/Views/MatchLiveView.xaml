@@ -750,6 +750,10 @@
                                 Background="#172A45"
                                 CornerRadius="9"
                                 Padding="6"
+                                Cursor="Hand"
+                                ToolTipService.InitialShowDelay="120"
+                                ToolTipService.BetweenShowDelay="50"
+                                ToolTipService.ShowDuration="60000"
                                 HorizontalAlignment="Left">
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock x:Name="HomeTeamNameTextBlock"
@@ -766,14 +770,33 @@
                             </StackPanel>
                         </Border>
 
-                        <TextBlock x:Name="ScoreSeparatorTextBlock"
-                                   Grid.Column="1"
-                                   Text="-"
-                                   Foreground="#F8FAFC"
-                                   FontSize="22"
-                                   FontWeight="Black"
-                                   VerticalAlignment="Center"
-                                   Margin="6,0" />
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Border x:Name="HomeCompactRoleBadge"
+                                    Width="24" Height="24" CornerRadius="5"
+                                    Background="#B42318" BorderBrush="#FCA5A5" BorderThickness="1"
+                                    ToolTip="Home team attacking" Visibility="Collapsed">
+                                <TextBlock x:Name="HomeCompactRoleIconTextBlock"
+                                           Foreground="White" FontFamily="Segoe UI Emoji"
+                                           FontSize="12" FontWeight="Black"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <TextBlock x:Name="ScoreSeparatorTextBlock"
+                                       Text="-"
+                                       Foreground="#F8FAFC"
+                                       FontSize="22"
+                                       FontWeight="Black"
+                                       VerticalAlignment="Center"
+                                       Margin="6,0" />
+                            <Border x:Name="AwayCompactRoleBadge"
+                                    Width="24" Height="24" CornerRadius="5"
+                                    Background="#174A8B" BorderBrush="#93C5FD" BorderThickness="1"
+                                    ToolTip="Away team defending" Visibility="Collapsed">
+                                <TextBlock x:Name="AwayCompactRoleIconTextBlock"
+                                           Foreground="White" FontFamily="Segoe UI Emoji"
+                                           FontSize="12" FontWeight="Black"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                        </StackPanel>
 
                         <Border x:Name="AwayScorePanel"
                                 Grid.Column="2"
@@ -782,6 +805,10 @@
                                 Background="#172A45"
                                 CornerRadius="9"
                                 Padding="6"
+                                Cursor="Hand"
+                                ToolTipService.InitialShowDelay="120"
+                                ToolTipService.BetweenShowDelay="50"
+                                ToolTipService.ShowDuration="60000"
                                 HorizontalAlignment="Right">
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock x:Name="AwayTeamNameTextBlock"
@@ -884,7 +911,7 @@
                                                 VerticalAlignment="Center" Visibility="Collapsed" />
                             <TextBlock x:Name="CompactBallHolderNameTextBlock" Grid.Column="1"
                                        Text="Waiting for possession" Foreground="{DynamicResource AppTextBrush}"
-                                       FontSize="16" FontWeight="Black" TextWrapping="NoWrap"
+                                       FontSize="16" FontWeight="Normal" TextWrapping="NoWrap"
                                        TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
                         </Grid>
                         <Border x:Name="CompactBallHolderRatingBadge"
@@ -978,33 +1005,46 @@
                     </Button>
 
                     <StackPanel x:Name="CompactScoreControlsPanel" Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button x:Name="CompactRatingsButton" Width="38" Height="28" Margin="2" Padding="0"
+                                ToolTip="View team player ratings"
+                                Foreground="#166534" Background="#DCFCE7" BorderBrush="#4ADE80" BorderThickness="1"
+                                Click="CompactRatingsButton_Click">
+                            <Viewbox Width="16" Height="16">
+                                <Path Data="M 2,14 L 2,9 L 5,9 L 5,14 M 7,14 L 7,5 L 10,5 L 10,14 M 12,14 L 12,2 L 15,2 L 15,14"
+                                      Stroke="#166534" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+                            </Viewbox>
+                        </Button>
+                        <Button x:Name="CompactSpeedLevelButton" Width="52" Height="28" Margin="2"
+                                Padding="0" ToolTip="Choose match speed"
+                                Background="#DCEBFF" BorderBrush="#60A5FA" BorderThickness="1"
+                                Click="CompactSpeedLevelButton_Click">
+                            <TextBlock x:Name="CompactSpeedLevelTextBlock" Text="1x" Foreground="#071226" FontSize="12" FontWeight="Black" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Button>
                         <Button x:Name="CompactPauseResumeButton" Content="&#x2161;" Width="54" Height="28" Margin="2"
                                 ToolTip="Pause match" FontFamily="Segoe UI Symbol" FontSize="15" FontWeight="Black" Foreground="#991B1B"
                                 Background="#FEE2E2" BorderBrush="#F87171" BorderThickness="1"
                                 Click="PauseResumeButton_Click" />
-                        <Button x:Name="CompactDecreaseSpeedButton" Content="&#x25C0;&#x25C0;" Width="38" Height="28" Margin="2"
-                                ToolTip="Slower" FontFamily="Segoe UI Symbol" FontSize="10" FontWeight="Black" Foreground="#1E3A5F"
-                                Background="#DBEAFE" BorderBrush="#60A5FA" BorderThickness="1"
-                                Click="DecreaseSpeedButton_Click" />
-                        <Border Width="46" Height="28" CornerRadius="9" Background="#DCEBFF" Margin="2">
-                            <TextBlock x:Name="CompactSpeedLevelTextBlock" Text="1x" Foreground="#071226" FontSize="12" FontWeight="Black" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                        </Border>
-                        <Button x:Name="CompactIncreaseSpeedButton" Content="&#x25B6;&#x25B6;" Width="38" Height="28" Margin="2"
-                                ToolTip="Faster" FontFamily="Segoe UI Symbol" FontSize="10" FontWeight="Black" Foreground="#1E3A5F"
-                                Background="#DBEAFE" BorderBrush="#60A5FA" BorderThickness="1"
-                                Click="IncreaseSpeedButton_Click" />
                     </StackPanel>
 
                     <StackPanel x:Name="CompactPausedControlsPanel" Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Visibility="Collapsed">
-                        <Button x:Name="CompactResumeButton" Content="&#x25B6;" Width="48" Height="28" Margin="2" ToolTip="Resume match"
-                                FontFamily="Segoe UI Symbol" FontSize="14" FontWeight="Black" Foreground="#166534" Background="#DCFCE7"
-                                BorderBrush="#4ADE80" BorderThickness="1" Click="PauseResumeButton_Click" />
+                        <Button x:Name="CompactPausedRatingsButton" Width="38" Height="28" Margin="2" Padding="0"
+                                ToolTip="View team player ratings"
+                                Foreground="#166534" Background="#DCFCE7" BorderBrush="#4ADE80" BorderThickness="1"
+                                Click="CompactRatingsButton_Click">
+                            <Viewbox Width="16" Height="16">
+                                <Path Data="M 2,14 L 2,9 L 5,9 L 5,14 M 7,14 L 7,5 L 10,5 L 10,14 M 12,14 L 12,2 L 15,2 L 15,14"
+                                      Stroke="#166534" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+                            </Viewbox>
+                        </Button>
                         <Button x:Name="CompactTacticsButton" Content="Tactics" Width="64" Height="28" Margin="2"
                                 FontSize="10" FontWeight="Black" Foreground="#1D4ED8" Background="#DBEAFE"
                                 BorderBrush="#60A5FA" BorderThickness="1" Click="CompactTacticsButton_Click" />
                         <Button x:Name="CompactSubsButton" Content="Subs" Width="54" Height="28" Margin="2"
                                 FontSize="10" FontWeight="Black" Foreground="#6D28D9" Background="#EDE9FE"
                                 BorderBrush="#C4B5FD" BorderThickness="1" Click="CompactSubsButton_Click" />
+                        <Button x:Name="CompactResumeButton" Content="&#x25B6;" Width="48" Height="28" Margin="2" ToolTip="Resume match"
+                                FontFamily="Segoe UI Symbol" FontSize="14" FontWeight="Black" Foreground="#166534" Background="#DCFCE7"
+                                BorderBrush="#4ADE80" BorderThickness="1" Click="PauseResumeButton_Click" />
                     </StackPanel>
 
                     <Popup x:Name="CompactTacticsPopup" PlacementTarget="{Binding ElementName=CompactTacticsButton}"
@@ -1063,36 +1103,45 @@
                                                     </Border>
                                                     <controls:FlagBadge Grid.Column="1" FlagSource="{Binding PlayerInFlagImagePath}"
                                                                         ToolTip="{Binding PlayerInNationalityName}" Width="20" Height="14" />
+                                                    <TextBlock Grid.Column="2" Text="{Binding PlayerInName}"
+                                                               Foreground="{DynamicResource AppTextBrush}"
+                                                               FontSize="10" FontWeight="Bold" TextTrimming="CharacterEllipsis"
+                                                               VerticalAlignment="Center" Cursor="Hand"
+                                                               Visibility="{Binding ActionButtonVisibility}"
+                                                               ToolTip="Click to choose a different substitute"
+                                                               MouseLeftButtonUp="CompactPlayerInTextBlock_MouseLeftButtonUp" />
                                                     <TextBlock Grid.Column="2" Text="{Binding PlayerInName}" Foreground="{DynamicResource AppTextBrush}"
-                                                               FontSize="10" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+                                                               FontSize="10" FontWeight="Bold" TextTrimming="CharacterEllipsis"
+                                                               Visibility="{Binding PendingVisibility}" />
                                                     <Border Grid.Column="3" Background="{Binding PlayerInRatingBackground}" CornerRadius="7" Padding="4,1">
                                                         <TextBlock Text="{Binding PlayerInRating}" Foreground="{Binding PlayerInRatingForeground}"
                                                                    FontSize="8.5" FontWeight="Black" HorizontalAlignment="Center" />
                                                     </Border>
                                                 </Grid>
                                                 <TextBlock Text="{Binding Reason}" Foreground="{Binding ReasonBrush}" FontSize="8.5"
-                                                           FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,3,0,0" />
+                                                           FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,3,0,0"
+                                                           Visibility="{Binding ReasonVisibility}" />
                                             </StackPanel>
                                             <Button Grid.Column="1" Width="32" Height="32" Margin="6,0,0,0"
                                                     ToolTip="Make this substitution"
                                                     Background="{DynamicResource AppAccentBrush}" Foreground="White"
                                                     BorderThickness="0" Visibility="{Binding ActionButtonVisibility}"
                                                     Click="CompactRecommendedSubstitutionButton_Click">
-                                                <Grid Width="18" Height="18">
-                                                    <Path Data="M 1,5 L 13,5 M 10,2 L 13,5 L 10,8"
-                                                          Stroke="White" StrokeThickness="2.2" StrokeStartLineCap="Round"
-                                                          StrokeEndLineCap="Round" StrokeLineJoin="Round" />
-                                                    <Path Data="M 17,13 L 5,13 M 8,10 L 5,13 L 8,16"
-                                                          Stroke="White" StrokeThickness="2.2" StrokeStartLineCap="Round"
-                                                          StrokeEndLineCap="Round" StrokeLineJoin="Round" />
-                                                </Grid>
+                                                <Viewbox Width="18" Height="18" Stretch="Uniform">
+                                                    <Path Data="M 2,5 L 14,5 M 10,1 L 14,5 L 10,9 M 14,12 L 2,12 M 6,8 L 2,12 L 6,16"
+                                                          Stroke="White" StrokeThickness="2" Fill="Transparent"
+                                                          StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                                          StrokeLineJoin="Round" />
+                                                </Viewbox>
                                             </Button>
-                                            <Border Grid.Column="1" Visibility="{Binding PendingVisibility}"
-                                                    Background="#DCFCE7" BorderBrush="#4ADE80" BorderThickness="1"
-                                                    CornerRadius="8" Padding="6,3" Margin="5,0,0,0"
-                                                    HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                <TextBlock Text="Pending" Foreground="#166534" FontSize="8.5" FontWeight="Black" />
-                                            </Border>
+                                            <Button Grid.Column="1" Visibility="{Binding PendingVisibility}"
+                                                    Content="Cancel" ToolTip="Cancel this pending substitution"
+                                                    Background="#FEE2E2" Foreground="#B91C1C"
+                                                    BorderBrush="#F87171" BorderThickness="1"
+                                                    Padding="6,3" Margin="5,0,0,0"
+                                                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                    FontSize="8.5" FontWeight="Black"
+                                                    Click="CancelCompactPendingSubstitutionButton_Click" />
                                         </Grid>
                                     </Border>
                                 </DataTemplate>
@@ -1104,6 +1153,59 @@
                                    FontSize="9"
                                    Margin="4,5"
                                    Visibility="Collapsed" />
+                            </StackPanel>
+                        </Border>
+                    </Popup>
+
+                    <Popup x:Name="CompactRatingsPopup" Placement="Bottom" StaysOpen="False" AllowsTransparency="True">
+                        <Border Width="310" Margin="0,5,0,0" Padding="9" CornerRadius="9"
+                                Background="{DynamicResource AppCardBackground}" BorderBrush="#4ADE80" BorderThickness="2">
+                            <StackPanel>
+                                <TextBlock Text="Player Ratings" Foreground="{DynamicResource AppTextBrush}"
+                                           FontSize="12" FontWeight="Black" Margin="0,0,0,6" />
+                                <ScrollViewer MaxHeight="330" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                    <ItemsControl x:Name="CompactPlayerRatingsItemsControl">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Background="{DynamicResource AppPanelBackground}"
+                                                        BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="1"
+                                                        CornerRadius="7" Padding="7,5" Margin="0,0,0,4">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="34" />
+                                                            <ColumnDefinition Width="24" />
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="42" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <Border Background="{Binding PositionBadgeBackground}" BorderBrush="{Binding PositionBadgeBackground}"
+                                                                BorderThickness="1" CornerRadius="6" Padding="3,1"
+                                                                HorizontalAlignment="Left" VerticalAlignment="Center">
+                                                            <TextBlock Text="{Binding ExactPosition}" Foreground="{Binding PositionBadgeForeground}"
+                                                                       FontSize="8.5" FontWeight="Black" />
+                                                        </Border>
+                                                        <controls:FlagBadge Grid.Column="1" FlagSource="{Binding FlagImagePath}"
+                                                                            ToolTip="{Binding NationalityName}" Width="20" Height="14" />
+                                                        <TextBlock Grid.Column="2" Text="{Binding Name}" Foreground="{DynamicResource AppTextBrush}"
+                                                                   FontSize="10" FontWeight="Bold" TextTrimming="CharacterEllipsis"
+                                                                   VerticalAlignment="Center" />
+                                                        <TextBlock Grid.Column="3" Text="{Binding ContributionBadgesText}"
+                                                                   Foreground="{DynamicResource AppMutedTextBrush}"
+                                                                   FontFamily="Segoe UI Emoji" FontSize="9" Margin="4,0"
+                                                                   VerticalAlignment="Center" />
+                                                        <Border Grid.Column="4" Background="{Binding RatingBadgeBackground}"
+                                                                BorderBrush="{Binding RatingBadgeBorderBrush}" BorderThickness="1"
+                                                                CornerRadius="8" Padding="5,2" VerticalAlignment="Center">
+                                                            <TextBlock Text="{Binding LiveStats.RatingDisplay}"
+                                                                       Foreground="{Binding RatingBadgeForeground}"
+                                                                       FontSize="10" FontWeight="Black" HorizontalAlignment="Center" />
+                                                        </Border>
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
                             </StackPanel>
                         </Border>
                     </Popup>
@@ -1229,12 +1331,13 @@
                                                 </Border>
                                             </StackPanel>
 
-                                            <TextBlock Text="{Binding Title}"
-                                                       Foreground="{Binding TitleForeground}"
+                                            <TextBlock Foreground="{Binding TitleForeground}"
                                                        FontSize="13"
-                                                       FontWeight="Bold"
+                                                       FontWeight="Normal"
                                                        TextWrapping="Wrap"
-                                                       Margin="0,3,0,0" />
+                                                       Margin="0,3,0,0"
+                                                       Loaded="FeedTitleTextBlock_Loaded"
+                                                       DataContextChanged="FeedTitleTextBlock_DataContextChanged" />
 
                                             <TextBlock Text="{Binding Description}"
                                                        Foreground="{Binding DescriptionForeground}"

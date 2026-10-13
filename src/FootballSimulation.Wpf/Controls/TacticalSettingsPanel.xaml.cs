@@ -6,6 +6,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
 using FootballSimulation.Models;
 using FootballSimulation.Services;
+using FootballSimulation.Wpf.Services;
 
 namespace FootballSimulation.Wpf.Controls;
 
@@ -37,6 +38,7 @@ public partial class TacticalSettingsPanel : UserControl
         TacticalDimension.PressingIntensity,
         TacticalDimension.DefensiveLine
     ];
+    private readonly FormationLayoutService _formationLayoutService = new();
 
     private TeamTactics _currentTactics = new();
     private string _currentFormation = "4-3-3 Holding";
@@ -45,6 +47,7 @@ public partial class TacticalSettingsPanel : UserControl
     public TacticalSettingsPanel()
     {
         InitializeComponent();
+        FormationPreviewCanvas.SizeChanged += (_, _) => RenderFormationPreview();
         Refresh();
     }
 
@@ -111,17 +114,17 @@ public partial class TacticalSettingsPanel : UserControl
     private void RefreshPresets()
     {
         PresetPanel.Children.Clear();
-        foreach (var preset in TacticalProfileService.GetPresets())
+        foreach (var preset in TacticalProfileService.GetPresets().OrderBy(GetTacticalPresetColorOrder))
         {
             var button = new Button
             {
                 Content = preset.Label,
                 ToolTip = preset.Description,
-                FontSize = IsCompact ? 9 : 8.5,
+                FontSize = IsCompact ? 10.5 : 11,
                 FontWeight = FontWeights.SemiBold,
-                Padding = IsCompact ? new Thickness(8, 3, 8, 3) : new Thickness(6, 2, 6, 2),
+                Padding = IsCompact ? new Thickness(9, 4, 9, 4) : new Thickness(9, 4, 9, 4),
                 Margin = IsCompact ? new Thickness(0, 0, 6, 5) : new Thickness(0, 0, 4, 4),
-                MinHeight = IsCompact ? 27 : 20,
+                MinHeight = IsCompact ? 30 : 30,
                 MinWidth = IsCompact ? 68 : 0,
                 Style = (Style)Resources["TacticalPillButtonStyle"]
             };
@@ -130,7 +133,7 @@ public partial class TacticalSettingsPanel : UserControl
             {
                 _currentTactics = TacticalProfileService.Clone(preset.Tactics);
                 NotifyTacticsChanged();
-                _selectedTabIndex = 1;
+                _selectedTabIndex = 0;
                 ShowSelectedTab();
             };
 
@@ -147,10 +150,10 @@ public partial class TacticalSettingsPanel : UserControl
             {
                 Content = formation.Name,
                 ToolTip = formation.Category.ToString(),
-                FontSize = IsCompact ? 9 : 8,
-                Padding = IsCompact ? new Thickness(9, 3, 9, 3) : new Thickness(6, 2, 6, 2),
+                FontSize = IsCompact ? 10.5 : 11,
+                Padding = IsCompact ? new Thickness(10, 4, 10, 4) : new Thickness(10, 4, 10, 4),
                 Margin = new Thickness(0, 0, 6, 5),
-                MinHeight = IsCompact ? 27 : 20,
+                MinHeight = IsCompact ? 30 : 30,
                 Style = (Style)Resources["TacticalPillButtonStyle"]
             };
             ApplyPresetButtonVisual(button, formation.Name == _currentFormation);
@@ -162,6 +165,8 @@ public partial class TacticalSettingsPanel : UserControl
             };
             FormationPanel.Children.Add(button);
         }
+
+        RenderFormationPreview();
     }
 
     private void PresetTabButton_Click(object sender, RoutedEventArgs e)
@@ -170,26 +175,94 @@ public partial class TacticalSettingsPanel : UserControl
         ShowSelectedTab();
     }
 
-    private void RangeTabButton_Click(object sender, RoutedEventArgs e)
-    {
-        _selectedTabIndex = 1;
-        ShowSelectedTab();
-    }
-
     private void FormationTabButton_Click(object sender, RoutedEventArgs e)
     {
-        _selectedTabIndex = 2;
+        _selectedTabIndex = 1;
         ShowSelectedTab();
     }
 
     private void ShowSelectedTab()
     {
         PresetPanel.Visibility = _selectedTabIndex == 0 ? Visibility.Visible : Visibility.Collapsed;
-        CardsPanel.Visibility = _selectedTabIndex == 1 ? Visibility.Visible : Visibility.Collapsed;
-        FormationPanel.Visibility = _selectedTabIndex == 2 ? Visibility.Visible : Visibility.Collapsed;
+        CardsPanel.Visibility = _selectedTabIndex == 0 ? Visibility.Visible : Visibility.Collapsed;
+        FormationPanel.Visibility = _selectedTabIndex == 1 ? Visibility.Visible : Visibility.Collapsed;
+        FormationPreviewBorder.Visibility = _selectedTabIndex == 1 ? Visibility.Visible : Visibility.Collapsed;
         ApplyPresetButtonVisual(PresetTabButton, _selectedTabIndex == 0);
-        ApplyPresetButtonVisual(RangeTabButton, _selectedTabIndex == 1);
-        ApplyPresetButtonVisual(FormationTabButton, _selectedTabIndex == 2);
+        ApplyPresetButtonVisual(FormationTabButton, _selectedTabIndex == 1);
+        if (_selectedTabIndex == 1)
+        {
+            RenderFormationPreview();
+        }
+    }
+
+    private void RenderFormationPreview()
+    {
+        if (FormationPreviewCanvas is null)
+        {
+            return;
+        }
+
+        FormationPreviewTitleTextBlock.Text = _currentFormation;
+        FormationPreviewCanvas.Children.Clear();
+        var width = FormationPreviewCanvas.ActualWidth;
+        var height = FormationPreviewCanvas.ActualHeight;
+        if (width <= 0 || height <= 0)
+        {
+            return;
+        }
+
+        var halfwayLine = new Border
+        {
+            Height = 1,
+            Width = width,
+            Background = new SolidColorBrush(Color.FromArgb(105, 255, 255, 255))
+        };
+        Canvas.SetTop(halfwayLine, height / 2);
+        FormationPreviewCanvas.Children.Add(halfwayLine);
+
+        foreach (var slot in _formationLayoutService.GetPositions(_currentFormation))
+        {
+            const double badgeWidth = 38;
+            const double badgeHeight = 24;
+            var badge = new Border
+            {
+                Width = badgeWidth,
+                Height = badgeHeight,
+                CornerRadius = new CornerRadius(8),
+                Background = GetPositionPreviewBrush(slot.ExactPosition),
+                BorderBrush = Brushes.White,
+                BorderThickness = new Thickness(1),
+                Child = new TextBlock
+                {
+                    Text = slot.ExactPosition,
+                    Foreground = Brushes.White,
+                    FontSize = 10,
+                    FontWeight = FontWeights.Black,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center
+                }
+            };
+            Canvas.SetLeft(badge, Math.Clamp((slot.X * width) - (badgeWidth / 2), 0, width - badgeWidth));
+            Canvas.SetTop(badge, Math.Clamp((slot.Y * height) - (badgeHeight / 2), 0, height - badgeHeight));
+            FormationPreviewCanvas.Children.Add(badge);
+        }
+    }
+
+    private static Brush GetPositionPreviewBrush(string position)
+    {
+        var color = PositionSuitabilityService.NormalizeExactPosition(position) switch
+        {
+            "ST" or "CF" => "#EF4444",
+            "LW" or "RW" or "LM" or "RM" => "#F87171",
+            "CAM" => "#F97316",
+            "CM" => "#FACC15",
+            "CDM" => "#A16207",
+            "CB" => "#2563EB",
+            "LB" or "RB" => "#60A5FA",
+            "GK" => "#7C3AED",
+            _ => "#64748B"
+        };
+        return (Brush)new BrushConverter().ConvertFromString(color)!;
     }
 
     private void RefreshCards()
@@ -236,7 +309,7 @@ public partial class TacticalSettingsPanel : UserControl
         icon.Margin = new Thickness(0, 0, 6, 0);
         titleGrid.Children.Add(icon);
 
-        var title = CreateText(GetDimensionTitle(dimension), 11, FontWeights.Bold, "AppTextBrush");
+        var title = CreateText(GetDimensionTitle(dimension), 12.5, FontWeights.Bold, "AppTextBrush");
         Grid.SetColumn(title, 1);
         titleGrid.Children.Add(title);
 
@@ -252,7 +325,7 @@ public partial class TacticalSettingsPanel : UserControl
         {
             Text = selected.Label,
             Foreground = Brushes.White,
-            FontSize = 8,
+            FontSize = 9.5,
             FontWeight = FontWeights.Bold,
             VerticalAlignment = VerticalAlignment.Center,
             TextAlignment = TextAlignment.Center
@@ -266,8 +339,8 @@ public partial class TacticalSettingsPanel : UserControl
         stack.Children.Add(new TextBlock
         {
             Text = GetCompactDescription(dimension, selected),
-            FontSize = 8.5,
-            LineHeight = 12,
+            FontSize = 10.5,
+            LineHeight = 14,
             MaxHeight = double.PositiveInfinity,
             TextTrimming = TextTrimming.CharacterEllipsis,
             Margin = new Thickness(0, 3, 0, 5)
@@ -457,11 +530,11 @@ public partial class TacticalSettingsPanel : UserControl
             {
                 Content = IsCompact ? GetReadableCompactOptionLabel(option) : option.Label,
                 ToolTip = option.Description,
-                FontSize = IsCompact ? 7.2 : 8,
+                FontSize = IsCompact ? 9 : 10,
                 FontWeight = isSelected ? FontWeights.Bold : FontWeights.SemiBold,
                 Padding = IsCompact ? new Thickness(3, 1, 3, 1) : new Thickness(3, 2, 3, 2),
                 Margin = new Thickness(2, 0, 2, 0),
-                MinHeight = IsCompact ? 19 : 20,
+                MinHeight = IsCompact ? 24 : 26,
                 Opacity = isSelected ? 1.0 : 0.84,
                 RenderTransformOrigin = new Point(0.5, 0.5),
                 RenderTransform = new ScaleTransform(1, 1),
@@ -501,6 +574,16 @@ public partial class TacticalSettingsPanel : UserControl
             _ => Color.FromRgb(100, 116, 139)
         };
         ApplyHuePillVisual(button, color, isSelected);
+    }
+
+    private static int GetTacticalPresetColorOrder(TacticalPreset preset)
+    {
+        return preset.Tactics.Mentality switch
+        {
+            Mentality.UltraDefensive or Mentality.Defensive => 0,
+            Mentality.Attacking or Mentality.AllOutAttack => 2,
+            _ => 1
+        };
     }
 
     private void ApplyOptionButtonVisual(Button button, bool isSelected)
@@ -601,8 +684,8 @@ public partial class TacticalSettingsPanel : UserControl
     {
         CompactTitleTextBlock.Visibility = IsCompact && ShowCompactTitle ? Visibility.Visible : Visibility.Collapsed;
         SummaryTextBlock.Visibility = IsCompact ? Visibility.Collapsed : Visibility.Visible;
-        SummaryTextBlock.FontSize = 10;
-        SummaryTextBlock.LineHeight = 14;
+        SummaryTextBlock.FontSize = 12;
+        SummaryTextBlock.LineHeight = 17;
         SummaryTextBlock.MaxHeight = double.PositiveInfinity;
         SummaryTextBlock.TextTrimming = IsCompact ? TextTrimming.CharacterEllipsis : TextTrimming.None;
         SummaryTextBlock.Margin = new Thickness(0, 0, 0, 7);

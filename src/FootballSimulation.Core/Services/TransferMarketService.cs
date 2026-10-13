@@ -2066,8 +2066,9 @@ public class TransferMarketService
             offer.Status = OfferStatus.Expired;
             offer.Message = $"Offer expired after no response by round {offer.ExpiresRound}.";
 
-            var player = FindPlayer(state, offer.PlayerId);
-            if (player.TransferStatus == PlayerTransferStatus.Negotiating &&
+            var player = FindPlayerOrDefault(state, offer.PlayerId);
+            if (player is not null &&
+                player.TransferStatus == PlayerTransferStatus.Negotiating &&
                 !HasActiveOfferForPlayer(state, player.PlayerId))
             {
                 player.TransferStatus = PlayerTransferStatus.None;

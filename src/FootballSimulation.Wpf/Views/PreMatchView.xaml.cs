@@ -187,11 +187,41 @@ public partial class PreMatchView : UserControl
     private void CompactPreMatchPlayerRow_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
         if (_state.SelectedTeam is null ||
-            sender is not FrameworkElement { DataContext: CompactPreMatchPlayerRow { IsStarter: true } starterRow })
+            sender is not FrameworkElement { DataContext: CompactPreMatchPlayerRow playerRow })
         {
             return;
         }
 
+        if (playerRow.Source == DragSource.Substitute)
+        {
+            var rolePositions = TeamRosterService.GetMatchdayBenchRole(playerRow.Player);
+            var reserveReplacement = _state.SelectedTeam.Reserves
+                .Where(IsAvailableForSelection)
+                .Where(player => rolePositions.Any(position => CanPlayerOccupySlot(player, position)))
+                .OrderByDescending(player => rolePositions.Max(position => GetSlotFitScore(player, position)))
+                .ThenByDescending(GetOverallRating)
+                .ThenBy(player => player.SquadNumber <= 0 ? int.MaxValue : player.SquadNumber)
+                .ThenBy(player => player.Name)
+                .FirstOrDefault();
+
+            if (reserveReplacement is null)
+            {
+                var roleLabel = string.Join("/", rolePositions);
+                MessageBox.Show($"No available reserve player can cover {roleLabel}.");
+                return;
+            }
+
+            SwapSubstitutes(reserveReplacement, playerRow.Player);
+            e.Handled = true;
+            return;
+        }
+
+        if (!playerRow.IsStarter)
+        {
+            return;
+        }
+
+        var starterRow = playerRow;
         var position = GetDisplayedSlotForStarter(starterRow.Player);
         var replacement = _state.SelectedTeam.Substitutes
             .Where(IsAvailableForSelection)
@@ -234,22 +264,33 @@ public partial class PreMatchView : UserControl
 
     private void CompactPreMatchPlayerRow_DragOver(object sender, DragEventArgs e)
     {
-        var canDrop = sender is FrameworkElement { DataContext: CompactPreMatchPlayerRow { IsStarter: true } } &&
-            GetDraggedPlayer(e) is { Source: DragSource.Substitute or DragSource.Reserve };
+        var targetRow = (sender as FrameworkElement)?.DataContext as CompactPreMatchPlayerRow;
+        var draggedPlayer = GetDraggedPlayer(e);
+        var canDrop = targetRow is not null && draggedPlayer is not null &&
+            ((targetRow.IsStarter && draggedPlayer.Source is DragSource.Substitute or DragSource.Reserve) ||
+             (targetRow.Source == DragSource.Substitute && draggedPlayer.Source == DragSource.Reserve));
         e.Effects = canDrop ? DragDropEffects.Move : DragDropEffects.None;
         e.Handled = true;
     }
 
     private void CompactPreMatchPlayerRow_Drop(object sender, DragEventArgs e)
     {
-        if (sender is not FrameworkElement { DataContext: CompactPreMatchPlayerRow { IsStarter: true } starterRow } ||
-            GetDraggedPlayer(e) is not { Source: DragSource.Substitute or DragSource.Reserve } draggedPlayer)
+        if (sender is not FrameworkElement { DataContext: CompactPreMatchPlayerRow targetRow } ||
+            GetDraggedPlayer(e) is not { } draggedPlayer)
         {
             return;
         }
 
-        ExecuteSwap(starterRow.Player, draggedPlayer.Player);
-        e.Handled = true;
+        if (targetRow.IsStarter && draggedPlayer.Source is DragSource.Substitute or DragSource.Reserve)
+        {
+            ExecuteSwap(targetRow.Player, draggedPlayer.Player);
+            e.Handled = true;
+        }
+        else if (targetRow.Source == DragSource.Substitute && draggedPlayer.Source == DragSource.Reserve)
+        {
+            SwapSubstitutes(draggedPlayer.Player, targetRow.Player);
+            e.Handled = true;
+        }
     }
 
     private void CompactPlayerInfoButton_Click(object sender, RoutedEventArgs e)
@@ -274,7 +315,7 @@ public partial class PreMatchView : UserControl
 
     private void ToggleTacticsPanelButton_Click(object sender, RoutedEventArgs e)
     {
-        const double drawerWidth = 320;
+        const double drawerWidth = 400;
         var duration = TimeSpan.FromMilliseconds(180);
 
         if (!_isTacticsPanelOpen)
@@ -557,7 +598,15 @@ public partial class PreMatchView : UserControl
 
     private void TacticalSettingsPanel_FormationChanged(object? sender, FormationSelectionChangedEventArgs e)
     {
+        if (_isLoadingSetup || _state.SelectedTeam is null)
+        {
+            return;
+        }
+
+        _isLoadingSetup = true;
         FormationComboBox.SelectedValue = e.Formation;
+        _isLoadingSetup = false;
+        ApplyFormationSelection(e.Formation);
     }
 
     private void LoadSavedFormationSelector(Team team)
@@ -799,20 +848,9 @@ public partial class PreMatchView : UserControl
         var orderedPlayers = players
             .DistinctBy(CreateRosterKey)
             .ToList();
-        var selectablePlayers = orderedPlayers
-            .Where(player => !player.IsInjured)
-            .ToList();
-        var injuredPlayers = orderedPlayers
-            .Where(player => player.IsInjured)
-            .ToList();
-
-        team.Substitutes = selectablePlayers
-            .Take(TeamRosterService.MatchdaySubstituteCount)
-            .ToList();
-        team.Reserves = selectablePlayers
-            .Skip(TeamRosterService.MatchdaySubstituteCount)
-            .Concat(injuredPlayers)
-            .ToList();
+        team.Substitutes = orderedPlayers;
+        team.Reserves = [];
+        TeamRosterService.SelectMatchdayBench(team);
     }
 
     private static List<Player> GetDistinctRoster(Team team)
@@ -991,18 +1029,30 @@ public partial class PreMatchView : UserControl
 
         if (_state.SelectedTeam is not null && FormationComboBox.SelectedValue is string formation)
         {
-            _state.SelectedTeam.Formation = formation;
-            _pitchSlots = OrderPlayersForPitch(GetDistinctRoster(_state.SelectedTeam), formation)
-                .Take(11)
-                .ToList();
-            ApplyPitchSlotsToTeam();
-            AssignFormationPositions();
-            ValidateLineupAssignments("FormationChanged");
-            SaveSetup(_state.SelectedTeam);
+            ApplyFormationSelection(formation);
+        }
+    }
+
+    private void ApplyFormationSelection(string formation)
+    {
+        if (_state.SelectedTeam is null)
+        {
+            return;
         }
 
+        var normalizedFormation = FormationCatalogService.NormalizeFormationName(formation);
+        _state.SelectedTeam.Formation = normalizedFormation;
+        _pitchSlots = OrderPlayersForPitch(GetDistinctRoster(_state.SelectedTeam), normalizedFormation)
+            .Take(11)
+            .ToList();
+        ApplyPitchSlotsToTeam();
+        AssignFormationPositions();
+        ValidateLineupAssignments("FormationChanged");
+        TacticalSettingsPanel.LoadFormation(normalizedFormation);
+        RefreshSubstitutes();
         RenderPitch();
         RefreshTacticalInsight();
+        SaveSetup(_state.SelectedTeam);
     }
 
     private void TacticalSettingsPanel_TacticsChanged(object? sender, EventArgs e)
@@ -1929,6 +1979,13 @@ public partial class PreMatchView : UserControl
         }
         else if (targetIndex >= 0 && reserves.Remove(draggedPlayer))
         {
+            if (!CanCoverMatchdayBenchRole(draggedPlayer, targetPlayer))
+            {
+                reserves.Add(draggedPlayer);
+                MessageBox.Show($"{draggedPlayer.Name} cannot cover this substitute role.");
+                return;
+            }
+
             bench[targetIndex] = draggedPlayer;
             reserves.Add(targetPlayer);
         }
@@ -1942,6 +1999,13 @@ public partial class PreMatchView : UserControl
 
         RefreshSubstitutes();
         SaveSetup(_state.SelectedTeam);
+    }
+
+    private static bool CanCoverMatchdayBenchRole(Player player, Player playerBeingReplaced)
+    {
+        var rolePositions = TeamRosterService.GetMatchdayBenchRole(playerBeingReplaced);
+        return rolePositions.Count == 0 ||
+            rolePositions.Any(position => CanPlayerOccupySlot(player, position));
     }
 
     private static void ApplyDropTargetStyle(Button button, bool canDrop)

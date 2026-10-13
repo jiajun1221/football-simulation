@@ -49,6 +49,12 @@ public static class ThemeManager
             return;
         }
 
+        var themeResourceName = theme == AppTheme.Work ? "Dull" : theme.ToString();
+        var replacementDictionary = new ResourceDictionary
+        {
+            Source = new Uri($"/Themes/{themeResourceName}Theme.xaml", UriKind.Relative)
+        };
+
         var dictionaries = application.Resources.MergedDictionaries;
         for (var index = dictionaries.Count - 1; index >= 0; index--)
         {
@@ -59,10 +65,7 @@ public static class ThemeManager
             }
         }
 
-        dictionaries.Add(new ResourceDictionary
-        {
-            Source = new Uri($"/Themes/{theme}Theme.xaml", UriKind.Relative)
-        });
+        dictionaries.Add(replacementDictionary);
 
         CurrentTheme = theme;
         SaveTheme(theme);

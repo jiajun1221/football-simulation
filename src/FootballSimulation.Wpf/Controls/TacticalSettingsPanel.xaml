@@ -183,24 +183,20 @@
 
             <TextBlock x:Name="SummaryTextBlock"
                        Foreground="{DynamicResource AppMutedTextBrush}"
-                       FontSize="10"
+                       FontSize="12"
                        FontWeight="SemiBold"
-                       LineHeight="14"
+                       LineHeight="17"
                        TextWrapping="Wrap"
                        Margin="0,0,0,7" />
 
-            <UniformGrid Columns="3" Margin="0,0,0,5">
+            <UniformGrid Columns="2" Margin="0,0,0,5">
                 <Button x:Name="PresetTabButton" Content="Types"
                         Style="{StaticResource TacticalTabButtonStyle}"
-                        FontSize="9.5" Padding="6,4" MinHeight="28" Margin="0,0,2,0"
+                        FontSize="12" Padding="8,5" MinHeight="34" Margin="0,0,2,0"
                         Click="PresetTabButton_Click" />
-                <Button x:Name="RangeTabButton" Content="Ranges"
-                        Style="{StaticResource TacticalTabButtonStyle}"
-                        FontSize="9.5" Padding="6,4" MinHeight="28" Margin="1,0"
-                        Click="RangeTabButton_Click" />
                 <Button x:Name="FormationTabButton" Content="Formations"
                         Style="{StaticResource TacticalTabButtonStyle}"
-                        FontSize="9.5" Padding="6,4" MinHeight="28" Margin="2,0,0,0"
+                        FontSize="12" Padding="8,5" MinHeight="34" Margin="2,0,0,0"
                         Click="FormationTabButton_Click" />
             </UniformGrid>
 
@@ -211,6 +207,28 @@
 
             <WrapPanel x:Name="FormationPanel"
                        Margin="0,0,0,6" />
+
+            <Border x:Name="FormationPreviewBorder"
+                    Height="230"
+                    Margin="0,4,0,6"
+                    Background="#173F2C"
+                    BorderBrush="#86B99A"
+                    BorderThickness="1"
+                    CornerRadius="12"
+                    ClipToBounds="True"
+                    Visibility="Collapsed">
+                <Grid>
+                    <TextBlock x:Name="FormationPreviewTitleTextBlock"
+                               Margin="10,7,10,0"
+                               Foreground="#FFFFFF"
+                               FontSize="12"
+                               FontWeight="Bold"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Top"
+                               Panel.ZIndex="2" />
+                    <Canvas x:Name="FormationPreviewCanvas" Margin="8,28,8,8" />
+                </Grid>
+            </Border>
         </StackPanel>
     </ScrollViewer>
 </UserControl>

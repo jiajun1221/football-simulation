@@ -37,6 +37,35 @@ public class TeamRosterServiceTests
         Assert.Contains(team.Reserves, player => player.Position == Position.Goalkeeper);
     }
 
+    [Theory]
+    [InlineData("LW", "LW", "LM")]
+    [InlineData("LM", "LW", "LM")]
+    [InlineData("RW", "RW", "RM")]
+    [InlineData("RM", "RW", "RM")]
+    public void GetMatchdayBenchRole_UsesPlayersActualWidePosition(
+        string preferredPosition,
+        string firstExpectedRole,
+        string secondExpectedRole)
+    {
+        var player = CreatePlayer("wide-player", Position.Midfielder, 75, preferredPosition);
+
+        var role = TeamRosterService.GetMatchdayBenchRole(player);
+
+        Assert.Equal([firstExpectedRole, secondExpectedRole], role);
+    }
+
+    [Fact]
+    public void SelectMatchdayBench_ChelseaDefaultsIncludeBothWideRoles()
+    {
+        var chelsea = new LeagueDataService().LoadTeams("premier-league")
+            .Single(team => team.Name == "Chelsea");
+
+        TeamRosterService.SelectMatchdayBench(chelsea);
+
+        Assert.Contains(chelsea.Substitutes, player => player.PreferredPosition is "LW" or "LM");
+        Assert.Contains(chelsea.Substitutes, player => player.PreferredPosition is "RW" or "RM");
+    }
+
     [Fact]
     public void LegacyTeamJson_WithoutReserves_LoadsAnEmptyReserveList()
     {

@@ -1007,20 +1007,22 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <TextBlock x:Name="CompactFixtureTextBlock" Foreground="{DynamicResource AppTextBrush}"
-                               FontSize="13" FontWeight="Bold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
-                    <Button Grid.Column="1" Content="Tactics" Style="{StaticResource PrimaryTextButton}"
-                            Foreground="#FFFFFF" Height="28" MinWidth="64" Margin="6,0"
-                            Padding="10,0" FontSize="10" FontWeight="Bold"
-                            Click="ToggleTacticsPanelButton_Click" />
-                    <Button Grid.Column="2" Content="Back" Style="{StaticResource PrimaryTextButton}"
+                               FontSize="15" FontWeight="Black" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                    <Button Grid.Column="1" Content="Back" Style="{StaticResource PrimaryTextButton}"
+                            Background="#64748B" BorderBrush="#94A3B8"
                             Foreground="#FFFFFF" Height="28" MinWidth="52" Padding="10,0"
                             FontSize="10" FontWeight="Bold" Click="BackToDashboardButton_Click" />
+                    <Button Grid.Column="2" Content="Tactics" Style="{StaticResource PrimaryTextButton}"
+                            Background="#2563EB" BorderBrush="#60A5FA"
+                            Foreground="#FFFFFF" Height="28" MinWidth="64" Margin="6,0,0,0"
+                            Padding="10,0" FontSize="10" FontWeight="Bold"
+                            Click="ToggleTacticsPanelButton_Click" />
                     <Button Grid.Column="3" Content="Start Match" Style="{StaticResource PrimaryTextButton}"
                             Foreground="#FFFFFF" Height="28" MinWidth="82" Margin="6,0,0,0" Padding="10,0"
                             FontSize="10" FontWeight="Bold" Click="StartFirstHalfButton_Click" />
                 </Grid>
                 <TextBlock Grid.Row="1" Text="Starting Players (11)" Foreground="{DynamicResource AppTextBrush}"
-                           FontSize="15" FontWeight="Black" Margin="0,0,0,6" />
+                           FontSize="13" FontWeight="Black" Margin="0,0,0,6" />
                 <ListBox x:Name="CompactPreMatchPlayersListBox" Grid.Row="2" Grid.RowSpan="3"
                          Background="{DynamicResource AppSecondaryCardBackground}"
                          BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="1" Padding="5"
@@ -1038,51 +1040,107 @@
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <Border Background="{DynamicResource AppCardBackground}" CornerRadius="8" Padding="8,7"
-                                    RenderTransformOrigin="0,0.5"
                                     AllowDrop="True"
+                                    ToolTipService.InitialShowDelay="120"
+                                    ToolTipService.BetweenShowDelay="50"
+                                    ToolTipService.ShowDuration="60000"
                                     PreviewMouseLeftButtonDown="CompactPreMatchPlayerRow_PreviewMouseLeftButtonDown"
                                     MouseMove="CompactPreMatchPlayerRow_MouseMove"
                                     DragOver="CompactPreMatchPlayerRow_DragOver"
                                     Drop="CompactPreMatchPlayerRow_Drop">
-                                <Border.RenderTransform>
-                                    <ScaleTransform x:Name="CompactPlayerHoverScale" ScaleX="1" ScaleY="1" />
-                                </Border.RenderTransform>
                                 <Border.Style>
                                     <Style TargetType="Border">
-                                        <Setter Property="Panel.ZIndex" Value="0" />
+                                        <Setter Property="BorderBrush" Value="Transparent" />
+                                        <Setter Property="BorderThickness" Value="1" />
                                         <Style.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Panel.ZIndex" Value="20" />
+                                                <Setter Property="BorderBrush" Value="#3B82F6" />
+                                                <Setter Property="Background" Value="#EFF6FF" />
                                             </Trigger>
                                         </Style.Triggers>
                                     </Style>
                                 </Border.Style>
-                                <Border.Triggers>
-                                    <EventTrigger RoutedEvent="MouseEnter">
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetName="CompactPlayerHoverScale"
-                                                                 Storyboard.TargetProperty="ScaleX"
-                                                                 To="1" Duration="0:0:0.12" />
-                                                <DoubleAnimation Storyboard.TargetName="CompactPlayerHoverScale"
-                                                                 Storyboard.TargetProperty="ScaleY"
-                                                                 To="1.22" Duration="0:0:0.12" />
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </EventTrigger>
-                                    <EventTrigger RoutedEvent="MouseLeave">
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetName="CompactPlayerHoverScale"
-                                                                 Storyboard.TargetProperty="ScaleX"
-                                                                 To="1" Duration="0:0:0.1" />
-                                                <DoubleAnimation Storyboard.TargetName="CompactPlayerHoverScale"
-                                                                 Storyboard.TargetProperty="ScaleY"
-                                                                 To="1" Duration="0:0:0.1" />
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </EventTrigger>
-                                </Border.Triggers>
+                                <Border.ToolTip>
+                                    <ToolTip Placement="Mouse" HorizontalOffset="12" VerticalOffset="12"
+                                             Background="Transparent" BorderThickness="0" Padding="0">
+                                        <Border Width="240" Padding="6" CornerRadius="7"
+                                                Background="{DynamicResource AppPanelBackground}"
+                                                BorderBrush="#3B82F6" BorderThickness="2">
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="34" />
+                                                    <ColumnDefinition Width="23" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="38" />
+                                                </Grid.ColumnDefinitions>
+                                                <Border Background="{Binding PositionBackground}" CornerRadius="8"
+                                                        Padding="4,1" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Position}" Foreground="{Binding PositionForeground}"
+                                                               FontSize="9" FontWeight="Black" />
+                                                </Border>
+                                                <controls:FlagBadge Grid.Column="1" FlagSource="{Binding FlagImagePath}"
+                                                                    ToolTip="{Binding NationalityName}"
+                                                                    Width="19" Height="13" VerticalAlignment="Center" />
+                                                <StackPanel Grid.Column="2" Margin="3,0,5,0" VerticalAlignment="Center">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="{Binding ShirtNumberText}" Foreground="{DynamicResource AppMutedTextBrush}"
+                                                                   FontSize="8" FontWeight="Black" Margin="0,0,2,0" />
+                                                        <TextBlock Text="{Binding Name}" Foreground="{DynamicResource AppTextBrush}"
+                                                                   FontSize="11" FontWeight="Black" TextWrapping="NoWrap"
+                                                                   TextTrimming="CharacterEllipsis" />
+                                                    </StackPanel>
+                                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                                        <TextBlock Text="{Binding GrowthText}" Foreground="{Binding GrowthForeground}"
+                                                                   FontSize="8" FontWeight="Bold" Margin="0,0,3,0" />
+                                                        <ItemsControl ItemsSource="{Binding TraitBadges}"
+                                                                      ItemTemplate="{StaticResource TraitIconBadgeTemplate}">
+                                                            <ItemsControl.LayoutTransform>
+                                                                <ScaleTransform ScaleX="1" ScaleY="1" />
+                                                            </ItemsControl.LayoutTransform>
+                                                            <ItemsControl.ItemsPanel>
+                                                                <ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                                                            </ItemsControl.ItemsPanel>
+                                                        </ItemsControl>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                                <Border Grid.Column="3" Background="{Binding RatingBackground}" CornerRadius="10"
+                                                        Padding="4,2" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Rating}" Foreground="{Binding RatingForeground}"
+                                                               FontSize="11" FontWeight="Black" HorizontalAlignment="Center" />
+                                                </Border>
+                                                <Grid Grid.Row="1" Grid.ColumnSpan="4" Margin="0,5,0,0">
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto" />
+                                                        <RowDefinition Height="Auto" />
+                                                    </Grid.RowDefinitions>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="55" />
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="42" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="Stamina" Foreground="{DynamicResource AppMutedTextBrush}"
+                                                               FontSize="8" FontWeight="Bold" VerticalAlignment="Center" />
+                                                    <ProgressBar Grid.Column="1" Value="{Binding Stamina}" Maximum="100" Height="5"
+                                                                 Foreground="{Binding StaminaBrush}" Background="#D7DEE8" BorderThickness="0" />
+                                                    <TextBlock Grid.Column="2" Text="{Binding StaminaText}" Foreground="{DynamicResource AppTextBrush}"
+                                                               FontSize="8" FontWeight="Black" HorizontalAlignment="Right" />
+                                                    <TextBlock Grid.Row="1" Text="Injury risk" Margin="0,3,0,0"
+                                                               Foreground="{DynamicResource AppMutedTextBrush}" FontSize="8" FontWeight="Bold" />
+                                                    <ProgressBar Grid.Row="1" Grid.Column="1" Value="{Binding InjuryRisk}" Maximum="100"
+                                                                 Height="5" Margin="0,3,0,0" Foreground="{Binding InjuryRiskBrush}"
+                                                                 Background="#D7DEE8" BorderThickness="0" />
+                                                    <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding InjuryRiskText}" Margin="0,3,0,0"
+                                                               Foreground="{DynamicResource AppTextBrush}" FontSize="8" FontWeight="Black"
+                                                               HorizontalAlignment="Right" />
+                                                </Grid>
+                                            </Grid>
+                                        </Border>
+                                    </ToolTip>
+                                </Border.ToolTip>
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
@@ -1181,7 +1239,7 @@
                 Padding="16"
                 Visibility="Collapsed">
             <Border.RenderTransform>
-                <TranslateTransform x:Name="TacticsDrawerTransform" X="320" />
+                <TranslateTransform x:Name="TacticsDrawerTransform" X="400" />
             </Border.RenderTransform>
             <Grid>
                 <Grid.RowDefinitions>

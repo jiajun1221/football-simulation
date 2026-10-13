@@ -3,6 +3,7 @@
     <Color x:Key="ThemeWindowChromeColor">#071226</Color>
     <Color x:Key="ThemeWindowChromeTextColor">#F8FAFC</Color>
     <Color x:Key="ThemeWindowChromeBorderColor">#111827</Color>
+    <SolidColorBrush x:Key="WindowHeaderBackground" Color="#071226" />
 
     <SolidColorBrush x:Key="AppPageBackground" Color="#071226" />
     <SolidColorBrush x:Key="AppCardBackground" Color="#0F172A" />

@@ -1,8 +1,9 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <Color x:Key="ThemeWindowChromeColor">#4B5563</Color>
+    <Color x:Key="ThemeWindowChromeColor">#3F454D</Color>
     <Color x:Key="ThemeWindowChromeTextColor">#F3F4F6</Color>
     <Color x:Key="ThemeWindowChromeBorderColor">#374151</Color>
+    <SolidColorBrush x:Key="WindowHeaderBackground" Color="#dee2e6" />
 
     <SolidColorBrush x:Key="AppPageBackground" Color="#E7E9EC" />
     <SolidColorBrush x:Key="AppCardBackground" Color="#F5F5F4" />

@@ -709,6 +709,28 @@ public class TransferMarketServiceTests
     }
 
     [Fact]
+    public void RefreshTransferWindowStatuses_ExpiresStaleOfferWhenPlayerNoLongerExists()
+    {
+        var league = CreateLeague("premier-league");
+        var service = new TransferMarketService();
+        var state = service.CreateInitialState(league);
+        var offer = new TransferOffer
+        {
+            PlayerId = "ea:248695",
+            PlayerName = "Missing Player",
+            Status = OfferStatus.Pending,
+            CreatedRound = 1,
+            ExpiresRound = 2
+        };
+        state.Offers.Add(offer);
+
+        service.RefreshTransferWindowStatuses(state, league, currentRound: 3);
+
+        Assert.Equal(OfferStatus.Expired, offer.Status);
+        Assert.Contains(state.Inbox, notification => notification.RelatedOfferId == offer.OfferId);
+    }
+
+    [Fact]
     public void AcceptAiOffer_CompletesExistingCommittedOfferEvenIfBuyerBudgetChanged()
     {
         var league = CreateLeague("premier-league");

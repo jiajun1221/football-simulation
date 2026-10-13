@@ -187,7 +187,7 @@ public partial class MatchResultView : UserControl
             .ThenBy(row => row.PlayerName)
             .ToList();
 
-        return new ScorerPanel($"{team.Name} scorers", scoringEvents);
+        return new ScorerPanel("GOALS", scoringEvents, scoringEvents.Count == 0 ? Visibility.Collapsed : Visibility.Visible);
     }
 
     private static List<MatchEvent> CreateAllowedScoringEvents(Match match)
@@ -225,12 +225,7 @@ public partial class MatchResultView : UserControl
         var badgeText = mode == ScorerSummaryMode.UltraCompact
             ? $"x{goalCount}"
             : CreateGoalBadgeText(goalCount);
-        var summary = mode switch
-        {
-            ScorerSummaryMode.Detailed => $"{playerName} ({minuteList})",
-            ScorerSummaryMode.Compact => $"{playerName} x{goalCount}",
-            _ => $"{playerName} x{goalCount}"
-        };
+        var summary = $"{playerName} ({minuteList})";
 
         return new ScorerRow(
             playerName,
@@ -545,7 +540,7 @@ public partial class MatchResultView : UserControl
 
     private sealed record StatComparisonRow(string Label, string HomeValue, string AwayValue);
 
-    private sealed record ScorerPanel(string Title, List<ScorerRow> Scorers);
+    private sealed record ScorerPanel(string Title, List<ScorerRow> Scorers, Visibility Visibility);
 
     private sealed record ScorerRow(
         string PlayerName,
