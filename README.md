@@ -2,6 +2,18 @@
 
 A C# .NET football simulation game with a Windows desktop interface.
 
+## Repository layout
+
+- `src/FootballSimulation.Core` - reusable simulation logic with categorized engines, models, services, data contracts, and canonical JSON data
+- `src/FootballSimulation.Wpf` - Windows desktop UI with categorized controls, helpers, models, services, and workflow views
+- `src/FootballSimulation.Console` - text-based UI
+- `src/FootballSimulation.Api` - HTTP API
+- `src/FootballSimulation.React` - experimental web client (not part of the .NET solution)
+- `tests/FootballSimulation.Console.Tests` - automated tests for simulation and console behavior
+- `tools/data-maintenance` - one-off scripts for refreshing squad, rating, and badge data
+
+Generated `bin`, `obj`, and `artifacts` directories are intentionally excluded from source control. Run maintenance scripts from the repository root because their data paths are repository-relative.
+
 ## Requirements
 
 - Windows
@@ -48,6 +60,16 @@ dotnet run --project .\src\FootballSimulation.Console\FootballSimulation.Console
 ```powershell
 dotnet test .\FootballSimulation.sln
 ```
+
+## Data maintenance
+
+The scripts in `tools/data-maintenance` update canonical files under `src/FootballSimulation.Core/Data/Json` or WPF club assets. For example:
+
+```powershell
+node .\tools\data-maintenance\update-2026-27-squads.mjs
+```
+
+Review a script's options before using it. Some scripts download external data or require an explicit `--write` argument.
 
 ## Troubleshooting
 
