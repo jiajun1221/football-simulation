@@ -11,6 +11,7 @@ public class MatchEvent
     public string? SecondaryPlayerName { get; set; }
     public PlayerTrait? TriggeredTrait { get; set; }
     public WeatherCondition? WeatherCondition { get; set; }
+    public int? AddedMinutes { get; set; }
     public ShotClassification ShotClassification { get; set; } = ShotClassification.Standard;
     public FoulLocation FoulLocation { get; set; } = FoulLocation.OpenPlay;
     public bool IsPenaltyFoul { get; set; }

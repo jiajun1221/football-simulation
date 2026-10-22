@@ -84,8 +84,15 @@ public static class AiLineupSelectionService
             : player.ConsecutiveStarts >= 7
                 ? 70
                 : 0;
+        var workloadRiskPenalty = FatigueBadgeService.CalculateWorkloadRiskPercentage(player) switch
+        {
+            >= 90 => 240,
+            >= 75 => 140,
+            >= 60 => 70,
+            _ => 0
+        };
 
-        return -(staminaPenalty + seasonFatiguePenalty + loadPenalty + consecutiveStartPenalty);
+        return -(staminaPenalty + seasonFatiguePenalty + loadPenalty + consecutiveStartPenalty + workloadRiskPenalty);
     }
 
     private static double GetFreshnessScore(Player player)

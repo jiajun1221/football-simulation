@@ -1045,24 +1045,37 @@
                                     ToolTipService.BetweenShowDelay="50"
                                     ToolTipService.ShowDuration="60000"
                                     PreviewMouseLeftButtonDown="CompactPreMatchPlayerRow_PreviewMouseLeftButtonDown"
+                                    MouseLeftButtonUp="CompactPreMatchPlayerRow_MouseLeftButtonUp"
                                     MouseMove="CompactPreMatchPlayerRow_MouseMove"
                                     DragOver="CompactPreMatchPlayerRow_DragOver"
                                     Drop="CompactPreMatchPlayerRow_Drop">
                                 <Border.Style>
                                     <Style TargetType="Border">
-                                        <Setter Property="BorderBrush" Value="Transparent" />
+                                        <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}" />
                                         <Setter Property="BorderThickness" Value="1" />
                                         <Style.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
                                                 <Setter Property="BorderBrush" Value="#3B82F6" />
+                                                <Setter Property="BorderThickness" Value="1" />
                                                 <Setter Property="Background" Value="#EFF6FF" />
                                             </Trigger>
                                         </Style.Triggers>
                                     </Style>
                                 </Border.Style>
-                                <Border.ToolTip>
-                                    <ToolTip Placement="Mouse" HorizontalOffset="12" VerticalOffset="12"
-                                             Background="Transparent" BorderThickness="0" Padding="0">
+                                <Border.ContextMenu>
+                                    <ContextMenu Placement="Right"
+                                                 DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
+                                                 Background="Transparent" BorderThickness="0" Padding="0"
+                                                 HasDropShadow="False">
+                                        <ContextMenu.Template>
+                                            <ControlTemplate TargetType="{x:Type ContextMenu}">
+                                                <Border Background="Transparent"
+                                                        BorderThickness="0"
+                                                        Padding="0">
+                                                    <ItemsPresenter />
+                                                </Border>
+                                            </ControlTemplate>
+                                        </ContextMenu.Template>
                                         <Border Width="240" Padding="6" CornerRadius="7"
                                                 Background="{DynamicResource AppPanelBackground}"
                                                 BorderBrush="#3B82F6" BorderThickness="2">
@@ -1105,6 +1118,17 @@
                                                                 <ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate>
                                                             </ItemsControl.ItemsPanel>
                                                         </ItemsControl>
+                                                        <Border Background="{Binding PreviousMatchRatingBackground}"
+                                                                CornerRadius="5"
+                                                                Padding="5,1"
+                                                                Margin="4,0,0,0"
+                                                                VerticalAlignment="Center"
+                                                                ToolTip="Previous match rating">
+                                                            <TextBlock Text="{Binding PreviousMatchRating}"
+                                                                       Foreground="{Binding PreviousMatchRatingForeground}"
+                                                                       FontSize="8"
+                                                                       FontWeight="Black" />
+                                                        </Border>
                                                     </StackPanel>
                                                 </StackPanel>
                                                 <Border Grid.Column="3" Background="{Binding RatingBackground}" CornerRadius="10"
@@ -1139,8 +1163,8 @@
                                                 </Grid>
                                             </Grid>
                                         </Border>
-                                    </ToolTip>
-                                </Border.ToolTip>
+                                    </ContextMenu>
+                                </Border.ContextMenu>
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
@@ -1149,7 +1173,7 @@
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="42" /><ColumnDefinition Width="28" />
                                         <ColumnDefinition Width="*" /><ColumnDefinition Width="176" />
-                                        <ColumnDefinition Width="46" />
+                                        <ColumnDefinition Width="48" />
                                     </Grid.ColumnDefinitions>
                                     <Border Grid.RowSpan="2" Background="{Binding PositionBackground}" CornerRadius="6"
                                             Padding="4,1" HorizontalAlignment="Left" VerticalAlignment="Center">
@@ -1160,11 +1184,16 @@
                                     <Grid Grid.Column="2" Grid.RowSpan="2" Margin="0,0,5,0" VerticalAlignment="Center">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Text="{Binding ShirtNumberText}" Foreground="{DynamicResource AppMutedTextBrush}"
+                                        <Ellipse Width="9" Height="9" Margin="0,0,4,0"
+                                                 Fill="{Binding PreviousMatchRatingBackground}"
+                                                 Stroke="{DynamicResource AppBorderBrush}" StrokeThickness="0.5"
+                                                 VerticalAlignment="Center" ToolTip="Previous match rating status" />
+                                        <TextBlock Grid.Column="1" Text="{Binding ShirtNumberText}" Foreground="{DynamicResource AppMutedTextBrush}"
                                                    FontSize="10" FontWeight="Black" Margin="0,0,4,0" VerticalAlignment="Center" />
-                                        <TextBlock Grid.Column="1" Text="{Binding Name}" Foreground="{DynamicResource AppTextBrush}"
+                                        <TextBlock Grid.Column="2" Text="{Binding Name}" Foreground="{DynamicResource AppTextBrush}"
                                                    FontSize="13.5" FontWeight="Bold" TextWrapping="NoWrap"
                                                    TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
                                     </Grid>
@@ -1202,10 +1231,14 @@
                                             </Grid>
                                         </Grid>
                                     </Grid>
-                                    <Border Grid.Column="4" Grid.RowSpan="2" Background="{Binding RatingBackground}" CornerRadius="8" Padding="6,2" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding Rating}" Foreground="{Binding RatingForeground}"
-                                                   FontSize="12" FontWeight="Black" HorizontalAlignment="Center" />
-                                    </Border>
+                                    <StackPanel Grid.Column="4" Grid.RowSpan="2" VerticalAlignment="Center"
+                                                HorizontalAlignment="Right">
+                                        <Border Background="{Binding RatingBackground}" CornerRadius="7"
+                                                MinWidth="44" Padding="5,2" ToolTip="Current overall rating">
+                                            <TextBlock Text="{Binding Rating}" Foreground="{Binding RatingForeground}"
+                                                       FontSize="11" FontWeight="Black" HorizontalAlignment="Center" />
+                                        </Border>
+                                    </StackPanel>
                                 </Grid>
                             </Border>
                         </DataTemplate>

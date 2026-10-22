@@ -107,6 +107,15 @@ public class AiManagerService
         {
             score += 120;
         }
+        else
+        {
+            score += FatigueBadgeService.CalculateWorkloadRiskPercentage(player) switch
+            {
+                >= 90 => 65,
+                >= 75 => 40,
+                _ => 0
+            };
+        }
 
         if (fatigue > 85)
         {
@@ -198,9 +207,10 @@ public class AiManagerService
 
     private double GetReplacementScore(Player substitute, Player outgoingPlayer, string outgoingSlot, bool isLosing, bool isWinning)
     {
-        var score = substitute.OverallRating;
+        var score = (double)substitute.OverallRating;
         score += PositionCompatibilityService.GetCompatibilityScore(substitute, outgoingSlot) * 3;
         score += 100 - _fatigueService.GetFatiguePercentage(substitute);
+        score -= FatigueBadgeService.CalculateWorkloadRiskPercentage(substitute) * 0.8;
 
         if (substitute.Position == outgoingPlayer.Position)
         {

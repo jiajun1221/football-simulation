@@ -25,7 +25,7 @@ public static class PlayerCardStatusBadgeHelper
         {
             badges.Add(new PlayerCardStatusBadge
             {
-                Text = yellowCards > 1 ? $"{yellowCards}Y" : "Y",
+                Text = yellowCards > 1 ? $"🟨{yellowCards}" : "🟨",
                 TooltipText = yellowCards > 1
                     ? "Second yellow: player is at serious dismissal risk."
                     : "Yellow card: substitution risk warning.",

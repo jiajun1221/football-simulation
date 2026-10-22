@@ -144,6 +144,47 @@ public class MatchEngineScoringTests
     }
 
     [Fact]
+    public void SimulateSecondHalf_GivesEveryHalftimeSubstitutionItsOwnFeedEvent()
+    {
+        var (homeTeam, awayTeam) = new SeedDataService().CreateDemoTeams();
+        var engine = new MatchEngine();
+        var match = engine.SimulateFirstHalf(homeTeam, awayTeam, seed: 42);
+        var firstPlayerOff = homeTeam.Players[1].Name;
+        var secondPlayerOff = homeTeam.Players[2].Name;
+        const string firstPlayerOn = "First substitute";
+        const string secondPlayerOn = "Second substitute";
+        match.Substitutions.Add(new MatchSubstitution
+        {
+            Minute = 45,
+            TeamName = homeTeam.Name,
+            PlayerOffName = firstPlayerOff,
+            PlayerOnName = firstPlayerOn
+        });
+        match.Substitutions.Add(new MatchSubstitution
+        {
+            Minute = 45,
+            TeamName = homeTeam.Name,
+            PlayerOffName = secondPlayerOff,
+            PlayerOnName = secondPlayerOn
+        });
+
+        engine.SimulateSecondHalf(match, seed: 142);
+
+        var firstFeedEvent = Assert.Single(match.Events, matchEvent =>
+            matchEvent.EventType == EventType.Substitution &&
+            matchEvent.PrimaryPlayerName == firstPlayerOn &&
+            matchEvent.SecondaryPlayerName == firstPlayerOff);
+        var secondFeedEvent = Assert.Single(match.Events, matchEvent =>
+            matchEvent.EventType == EventType.Substitution &&
+            matchEvent.PrimaryPlayerName == secondPlayerOn &&
+            matchEvent.SecondaryPlayerName == secondPlayerOff);
+        Assert.Contains(firstPlayerOn, firstFeedEvent.Description);
+        Assert.Contains(firstPlayerOff, firstFeedEvent.Description);
+        Assert.Contains(secondPlayerOn, secondFeedEvent.Description);
+        Assert.Contains(secondPlayerOff, secondFeedEvent.Description);
+    }
+
+    [Fact]
     public void SimulateMatch_DoesNotCreateConsecutiveAttackEventsForSameTeam()
     {
         var seedDataService = new SeedDataService();

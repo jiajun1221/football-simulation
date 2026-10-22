@@ -42,6 +42,7 @@ public class LivePlayerIconViewModel
     public int RedCards { get; init; }
     public bool IsInjured { get; init; }
     public string ContributionBadgesText { get; init; } = string.Empty;
+    public IReadOnlyList<PlayerCardStatusBadge> ContributionBadges { get; init; } = [];
     public string GoalBadgeText { get; init; } = string.Empty;
     public string AssistBadgeText { get; init; } = string.Empty;
     public string DefensiveBadgeText { get; init; } = string.Empty;

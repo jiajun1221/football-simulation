@@ -8,6 +8,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
+using System.Windows.Media.Imaging;
 using FootballSimulation.Engine;
 using FootballSimulation.Models;
 using FootballSimulation.Services;
@@ -68,13 +69,15 @@ public partial class MatchLiveView : UserControl
     private bool _isFinalizingFixture;
     private bool _fixtureFinalizationFailed;
     private bool _isCompactLiveMatchView;
-    private bool _isCompactBallHolderExpanded;
+    private bool _isCompactBallHolderExpanded = true;
     private bool _hasStoredExpandedWindowSize;
     private bool _isCancellingPendingSubstitution;
     private bool _isLoadingFormationControls;
     private bool _hasLoggedMinute24OpponentStamina;
     private Player? _selectedStarterForSubstitution;
     private Player? _selectedBenchForSubstitution;
+    private Player? _selectedCompactPlayerOut;
+    private bool _isRefreshingCompactSubstitutionLists;
     private Player? _mandatoryInjurySubstitutionPlayer;
     private Team? _currentPossessionTeam;
     private ActiveBallIndicator? _activeBallIndicator;
@@ -644,7 +647,10 @@ public partial class MatchLiveView : UserControl
         }
 
         var feedItem = CreateFeedItem(matchEvent, _state.CurrentMatch);
-        InsertFeedItemAtTop(feedItem);
+        if (matchEvent.EventType != EventType.YellowCard)
+        {
+            InsertFeedItemAtTop(feedItem);
+        }
         UpdateScoreboardScorerToolTips();
         await Dispatcher.InvokeAsync(() => { }, System.Windows.Threading.DispatcherPriority.Render);
         RecordDisplayedPitchStats(matchEvent);
@@ -1222,10 +1228,90 @@ public partial class MatchLiveView : UserControl
 
     private void CompactSubsButton_Click(object sender, RoutedEventArgs e)
     {
+        _selectedCompactPlayerOut = null;
+        RefreshCompactSubstitutionPlayerLists();
         RefreshCompactSubstitutionRecommendations();
         CompactTacticsPopup.IsOpen = false;
         CompactRatingsPopup.IsOpen = false;
         CompactSubsPopup.IsOpen = !CompactSubsPopup.IsOpen;
+    }
+
+    private void CompactPitchPlayersListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_isRefreshingCompactSubstitutionLists ||
+            e.AddedItems.Count == 0 ||
+            e.AddedItems[0] is not SubstitutionPlayerCard selectedPlayer)
+        {
+            return;
+        }
+
+        _selectedCompactPlayerOut = selectedPlayer.Player;
+        RefreshCompactReplacementList();
+    }
+
+    private void CompactBenchPlayersListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_isRefreshingCompactSubstitutionLists ||
+            _selectedCompactPlayerOut is null ||
+            CompactBenchPlayersListBox.SelectedItem is not SubstitutionPlayerCard replacement)
+        {
+            return;
+        }
+
+        if (QueuePendingSubstitution(_selectedCompactPlayerOut, replacement.Player))
+        {
+            _selectedCompactPlayerOut = null;
+            RefreshCompactSubstitutionRecommendations();
+        }
+
+        RefreshCompactSubstitutionPlayerLists();
+    }
+
+    private void RefreshCompactSubstitutionPlayerLists()
+    {
+        if (_state.CurrentMatch is null || _state.SelectedTeam is null)
+        {
+            return;
+        }
+
+        _isRefreshingCompactSubstitutionLists = true;
+        var userTeam = GetUserTeam();
+        CompactPitchPlayersListBox.ItemsSource = CreateSubstitutionPlayerCards(
+            GetActivePitchPlayers(userTeam).Where(player => !_pendingSubstitutions.Any(pending =>
+                string.Equals(pending.PlayerOut.Name, player.Name, StringComparison.OrdinalIgnoreCase))),
+            showPendingState: false,
+            userTeam);
+
+        RefreshCompactReplacementList();
+        CompactPitchPlayersListBox.SelectedItem = null;
+        _isRefreshingCompactSubstitutionLists = false;
+    }
+
+    private void RefreshCompactReplacementList()
+    {
+        if (_state.CurrentMatch is null || _state.SelectedTeam is null)
+        {
+            return;
+        }
+
+        _isRefreshingCompactSubstitutionLists = true;
+        var userTeam = GetUserTeam();
+
+        CompactBenchPlayersListBox.ItemsSource = _selectedCompactPlayerOut is null
+            ? null
+            : CreateSubstitutionPlayerCards(
+                GetAvailableBenchPlayers(userTeam).Where(player => !_pendingSubstitutions.Any(pending =>
+                    string.Equals(pending.PlayerIn.Name, player.Name, StringComparison.OrdinalIgnoreCase))),
+                showPendingState: false,
+                userTeam);
+        CompactReplacementPanel.Visibility = _selectedCompactPlayerOut is null
+            ? Visibility.Collapsed
+            : Visibility.Visible;
+        CompactSelectedPlayerTextBlock.Text = _selectedCompactPlayerOut is null
+            ? string.Empty
+            : $"Choose a replacement for {_selectedCompactPlayerOut.Name}";
+        CompactBenchPlayersListBox.SelectedItem = null;
+        _isRefreshingCompactSubstitutionLists = false;
     }
 
     private void CompactRatingsButton_Click(object sender, RoutedEventArgs e)
@@ -1244,6 +1330,18 @@ public partial class MatchLiveView : UserControl
         CompactSubsPopup.IsOpen = false;
         CompactRatingsPopup.PlacementTarget = button;
         CompactRatingsPopup.IsOpen = !CompactRatingsPopup.IsOpen;
+    }
+
+    private void CompactPlayerRatingRow_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is not FrameworkElement { ContextMenu: not null } playerRow)
+        {
+            return;
+        }
+
+        playerRow.ContextMenu.PlacementTarget = playerRow;
+        playerRow.ContextMenu.IsOpen = true;
+        e.Handled = true;
     }
 
     private void ActionFormationButton_Click(object sender, RoutedEventArgs e)
@@ -1604,7 +1702,7 @@ public partial class MatchLiveView : UserControl
         ConfirmSubstitutionButton.IsEnabled = false;
         _isPausedForSubstitution = false;
         _isPlaybackPaused = true;
-        PausedActionStatusTextBlock.Text = "Queued substitutions confirm on resume.";
+        PausedActionStatusTextBlock.Text = "Substitution queued for the next stoppage.";
         UpdatePlaybackControls();
     }
 
@@ -2276,6 +2374,7 @@ public partial class MatchLiveView : UserControl
         }
 
         CompactBallHolderPositionBadge.Visibility = Visibility.Visible;
+        CompactBallHolderPositionColumn.Width = new GridLength(36);
         CompactBallHolderRatingBadge.Visibility = Visibility.Visible;
         CompactBallHolderPositionTextBlock.Text = ballHolder.ExactPosition;
         var ballHolderTeam = _state.CurrentMatch is null
@@ -2294,6 +2393,11 @@ public partial class MatchLiveView : UserControl
         CompactBallHolderFlagBadge.FlagSource = ballHolder.FlagImagePath;
         CompactBallHolderFlagBadge.ToolTip = ballHolder.NationalityName;
         CompactBallHolderFlagBadge.Visibility = Visibility.Visible;
+        CompactBallHolderClubLogoImage.Source = new BitmapImage(new Uri(
+            ClubLogoService.GetClubLogoPath(ballHolder.TeamName, _state.League?.LeagueId ?? _state.SelectedLeagueId),
+            UriKind.RelativeOrAbsolute));
+        CompactBallHolderClubLogoImage.ToolTip = ballHolder.TeamName;
+        CompactBallHolderClubLogoImage.Visibility = Visibility.Visible;
         SetCompactBallHolderHeadline(ballHolder.Name, ballHolder.Name);
         CompactBallHolderNameTextBlock.Foreground = ToBrush(activeEventStyle?.TitleForeground ?? teamColors.TextColor);
         CompactBallHolderRatingTextBlock.Text = ballHolder.LiveStats.RatingDisplay;
@@ -2307,23 +2411,47 @@ public partial class MatchLiveView : UserControl
         CompactBallHolderInjuryRiskBar.Foreground = ToBrush(ballHolder.WorkloadRiskBrush);
         CompactBallHolderInjuryRiskTextBlock.Text = $"{ballHolder.WorkloadRiskPercentage}%";
         CompactBallHolderStatsBadgesItemsControl.ItemsSource = CreateSelectedPlayerMatchBadges(ballHolder);
+        CompactBallHolderDetailsBorder.Visibility = _isCompactBallHolderExpanded
+            ? Visibility.Visible
+            : Visibility.Collapsed;
     }
 
     private void SetCompactBallHolderHeadline(string headline, string? playerName)
     {
         CompactBallHolderNameTextBlock.Inlines.Clear();
-        if (!string.IsNullOrWhiteSpace(playerName) &&
-            headline.StartsWith(playerName, StringComparison.OrdinalIgnoreCase))
+        if (!string.IsNullOrWhiteSpace(playerName))
         {
-            CompactBallHolderNameTextBlock.Inlines.Add(new Run(headline[..playerName.Length])
+            var displayedPlayerName = headline.Contains(playerName, StringComparison.OrdinalIgnoreCase)
+                ? playerName
+                : GetHeadlinePlayerName(playerName);
+            var playerNameIndex = headline.IndexOf(displayedPlayerName, StringComparison.OrdinalIgnoreCase);
+            if (playerNameIndex >= 0)
             {
-                FontWeight = FontWeights.Black
-            });
-            CompactBallHolderNameTextBlock.Inlines.Add(new Run(headline[playerName.Length..])
-            {
-                FontWeight = FontWeights.Normal
-            });
-            return;
+                if (playerNameIndex > 0)
+                {
+                    CompactBallHolderNameTextBlock.Inlines.Add(new Run(headline[..playerNameIndex])
+                    {
+                        FontWeight = FontWeights.Normal
+                    });
+                }
+
+                CompactBallHolderNameTextBlock.Inlines.Add(new Run(
+                    headline.Substring(playerNameIndex, displayedPlayerName.Length))
+                {
+                    FontWeight = FontWeights.Black
+                });
+
+                var remainingTextIndex = playerNameIndex + displayedPlayerName.Length;
+                if (remainingTextIndex < headline.Length)
+                {
+                    CompactBallHolderNameTextBlock.Inlines.Add(new Run(headline[remainingTextIndex..])
+                    {
+                        FontWeight = FontWeights.Normal
+                    });
+                }
+
+                return;
+            }
         }
 
         CompactBallHolderNameTextBlock.Inlines.Add(new Run(headline)
@@ -2334,13 +2462,16 @@ public partial class MatchLiveView : UserControl
 
     private void ResetCompactBallHolderDetails()
     {
+        CompactBallHolderClubLogoImage.Source = null;
+        CompactBallHolderClubLogoImage.ToolTip = null;
+        CompactBallHolderClubLogoImage.Visibility = Visibility.Collapsed;
         CompactBallHolderStaminaBar.Value = 0;
         CompactBallHolderStaminaTextBlock.Text = "--";
         CompactBallHolderInjuryRiskBar.Value = 0;
         CompactBallHolderInjuryRiskTextBlock.Text = "--";
         CompactBallHolderStatsBadgesItemsControl.ItemsSource = null;
-        _isCompactBallHolderExpanded = false;
         CompactBallHolderDetailsBorder.Visibility = Visibility.Collapsed;
+        CompactBallHolderPositionColumn.Width = new GridLength(0);
     }
 
     private void RefreshCompactSubstitutionRecommendations()
@@ -3048,6 +3179,7 @@ public partial class MatchLiveView : UserControl
             RedCards = redCards,
             IsInjured = displayedStats.Injuries > 0,
             ContributionBadgesText = BuildContributionBadgesText(displayedStats),
+            ContributionBadges = CreateContributionBadges(displayedStats),
             GoalBadgeText = displayedStats.Goals > 0 ? $"{SoccerBallIcon()}{displayedStats.Goals}" : string.Empty,
             AssistBadgeText = displayedStats.Assists > 0 ? $"{AssistIcon()}{displayedStats.Assists}" : string.Empty,
             DefensiveBadgeText = displayedStats.DefensiveContributions > 0 ? $"{ShieldIcon()}{displayedStats.DefensiveContributions}" : string.Empty,
@@ -3288,6 +3420,35 @@ public partial class MatchLiveView : UserControl
             if (!string.IsNullOrWhiteSpace(text))
             {
                 badges.Add(new StatusBadge(text, background, foreground));
+            }
+        }
+    }
+
+    private static IReadOnlyList<PlayerCardStatusBadge> CreateContributionBadges(DisplayedPitchStats stats)
+    {
+        var badges = new List<PlayerCardStatusBadge>();
+        Add(stats.Goals > 0 ? $"{SoccerBallIcon()}{stats.Goals}" : string.Empty, "#DCFCE7", "#166534", "Goals");
+        Add(stats.Assists > 0 ? $"{AssistIcon()}{stats.Assists}" : string.Empty, "#FFEDD5", "#C2410C", "Assists");
+        Add(stats.DefensiveContributions > 0 ? $"{ShieldIcon()}{stats.DefensiveContributions}" : string.Empty, "#DBEAFE", "#1D4ED8", "Defensive contributions");
+        Add(stats.Saves > 0 ? $"{GloveIcon()}{stats.Saves}" : string.Empty, "#CFFAFE", "#0E7490", "Saves");
+        Add(stats.YellowCards > 0 ? YellowCardIcon() : string.Empty, "#FEF3C7", "#92400E", "Yellow card");
+        Add(stats.RedCards > 0 ? RedCardIcon() : string.Empty, "#FEE2E2", "#B91C1C", "Red card");
+        Add(stats.DefensiveErrors > 0 ? WarningIcon() : string.Empty, "#FEE2E2", "#B91C1C", "Defensive error");
+        Add(stats.Injuries > 0 ? InjuryIcon() : string.Empty, "#FEF3C7", "#92400E", "Injury");
+        return badges;
+
+        void Add(string text, string background, string foreground, string tooltip)
+        {
+            if (!string.IsNullOrWhiteSpace(text))
+            {
+                badges.Add(new PlayerCardStatusBadge
+                {
+                    Text = text,
+                    Background = background,
+                    Foreground = foreground,
+                    BorderBrush = foreground,
+                    TooltipText = tooltip
+                });
             }
         }
     }
@@ -4106,7 +4267,7 @@ public partial class MatchLiveView : UserControl
         {
             content.Children.Add(new TextBlock
             {
-                Text = "No goals or cards yet",
+                Text = "No goals yet",
                 Foreground = mutedTextBrush,
                 FontSize = 10,
                 FontStyle = FontStyles.Italic
@@ -5147,6 +5308,9 @@ public partial class MatchLiveView : UserControl
             case EventType.PenaltyTaker:
                 return primaryPlayerTeam ?? FindMentionedTeamName(matchEvent, match);
 
+            case EventType.PenaltyDecision:
+                return FindPenaltyAwardedTeamName(matchEvent, match, primaryPlayerTeam, secondaryPlayerTeam);
+
             case EventType.Save:
                 return secondaryPlayerTeam ?? FindSavingTeamName(matchEvent, match) ?? FindMentionedTeamName(matchEvent, match);
 
@@ -5162,6 +5326,32 @@ public partial class MatchLiveView : UserControl
             case EventType.BlockedPass:
             case EventType.RefereeControversy:
                 return primaryPlayerTeam ?? FindMentionedTeamName(matchEvent, match);
+        }
+
+        return FindMentionedTeamName(matchEvent, match);
+    }
+
+    private static string FindPenaltyAwardedTeamName(
+        MatchEvent matchEvent,
+        Match match,
+        string? defendingPlayerTeam,
+        string? fouledPlayerTeam)
+    {
+        if (!string.IsNullOrWhiteSpace(fouledPlayerTeam))
+        {
+            return fouledPlayerTeam;
+        }
+
+        if (ContainsTeamPhrase(matchEvent.Description, "against", match.HomeTeam.Name)
+            || string.Equals(defendingPlayerTeam, match.HomeTeam.Name, StringComparison.OrdinalIgnoreCase))
+        {
+            return match.AwayTeam.Name;
+        }
+
+        if (ContainsTeamPhrase(matchEvent.Description, "against", match.AwayTeam.Name)
+            || string.Equals(defendingPlayerTeam, match.AwayTeam.Name, StringComparison.OrdinalIgnoreCase))
+        {
+            return match.HomeTeam.Name;
         }
 
         return FindMentionedTeamName(matchEvent, match);
@@ -5288,7 +5478,7 @@ public partial class MatchLiveView : UserControl
             EventType.LateDrama => $"{teamName} push late",
             EventType.RivalryAtmosphere => "Derby tension rises",
             EventType.Weather => GetWeatherDisplayName(matchEvent),
-            EventType.AddedTime => "Added time announced",
+            EventType.AddedTime => CreateAddedTimeHeadline(matchEvent.AddedMinutes),
             EventType.VarCheck => "VAR checking incident",
             EventType.VarDecision => IsGoalDisallowedEvent(matchEvent)
                 ? "Goal ruled out"
@@ -5310,6 +5500,16 @@ public partial class MatchLiveView : UserControl
         };
 
         return LimitHeadlineWords(headline, 8);
+    }
+
+    private static string CreateAddedTimeHeadline(int? addedMinutes)
+    {
+        return addedMinutes switch
+        {
+            1 => "1 minute of added time",
+            int minutes => $"{minutes} minutes of added time",
+            _ => "Added time announced"
+        };
     }
 
     private static string GetWeatherDisplayName(MatchEvent matchEvent)
@@ -6440,6 +6640,8 @@ public partial class MatchLiveView : UserControl
         var positionVisual = GetSubstitutionPositionColor(exactPosition);
         var overall = PositionSuitabilityService.GetEffectiveOverall(player);
         var overallVisual = GetSubstitutionOverallVisual(overall);
+        var matchRating = team is null ? null : GetOrCreateLivePlayerStats(team, player);
+        var matchRatingVisual = GetRatingBadgeColors(matchRating?.CurrentRating ?? 0);
         var riskPercentage = GetWorkloadRiskPercentage(player, team);
 
         return new SubstitutionPlayerCard
@@ -6455,6 +6657,13 @@ public partial class MatchLiveView : UserControl
             OverallValueText = overall.ToString(),
             OverallBadgeBackground = overallVisual.Background,
             OverallBadgeForeground = overallVisual.Foreground,
+            MatchRatingText = matchRating?.RatingDisplay ?? string.Empty,
+            MatchRatingBackground = matchRatingVisual.Background,
+            MatchRatingBorderBrush = matchRatingVisual.Border,
+            MatchRatingForeground = matchRatingVisual.Foreground,
+            MatchRatingVisibility = player.IsOnPitch && matchRating is not null
+                ? Visibility.Visible
+                : Visibility.Collapsed,
             GrowthText = PlayerGrowthDisplayHelper.CreateGrowthText(player),
             Stamina = stamina,
             StaminaBrush = GetStaminaBrush(stamina),
@@ -6673,6 +6882,11 @@ public partial class MatchLiveView : UserControl
         public string OverallValueText { get; init; } = string.Empty;
         public string OverallBadgeBackground { get; init; } = "#FFFFFF";
         public string OverallBadgeForeground { get; init; } = "#172033";
+        public string MatchRatingText { get; init; } = string.Empty;
+        public string MatchRatingBackground { get; init; } = "#64748B";
+        public string MatchRatingBorderBrush { get; init; } = "#475569";
+        public string MatchRatingForeground { get; init; } = "#FFFFFF";
+        public Visibility MatchRatingVisibility { get; init; } = Visibility.Collapsed;
         public string GrowthText { get; init; } = string.Empty;
         public double Stamina { get; init; }
         public string StaminaBrush { get; init; } = "#7CFC9A";

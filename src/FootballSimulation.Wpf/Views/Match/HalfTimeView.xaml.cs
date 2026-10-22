@@ -106,6 +106,21 @@ public partial class HalfTimeView : UserControl
                 _ => _state.CurrentMatch.CurrentPhase
             };
             ScoreTextBlock.Text = $"{_state.CurrentMatch.HomeTeam.Name} {_state.CurrentMatch.HomeScore} - {_state.CurrentMatch.AwayScore} {_state.CurrentMatch.AwayTeam.Name}";
+            HalfTimeHomeTeamTextBlock.Text = _state.CurrentMatch.HomeTeam.Name;
+            HalfTimeHomeLogoImage.Source = ClubLogoService.LoadClubLogo(
+                _state.CurrentMatch.HomeTeam.Name,
+                _state.League?.LeagueId ?? _state.SelectedLeagueId);
+            HalfTimeHomeLogoImage.ToolTip = _state.CurrentMatch.HomeTeam.Name;
+            HalfTimeScoreTextBlock.Text = $"{_state.CurrentMatch.HomeScore} - {_state.CurrentMatch.AwayScore}";
+            HalfTimeScoresheetTextBlock.Text = CreateHalfTimeScoresheet(_state.CurrentMatch);
+            HalfTimeAwayTeamTextBlock.Text = _state.CurrentMatch.AwayTeam.Name;
+            HalfTimeAwayLogoImage.Source = ClubLogoService.LoadClubLogo(
+                _state.CurrentMatch.AwayTeam.Name,
+                _state.League?.LeagueId ?? _state.SelectedLeagueId);
+            HalfTimeAwayLogoImage.ToolTip = _state.CurrentMatch.AwayTeam.Name;
+            HalfTimeLabelTextBlock.Text = _setupMode == MatchSetupMode.ExtraTimeHalftime
+                ? "EXTRA TIME HALF TIME"
+                : "HALF TIME";
         }
 
         SetupTitleTextBlock.Text = _setupMode switch
@@ -786,7 +801,22 @@ public partial class HalfTimeView : UserControl
 
     private IReadOnlyList<PlayerCardStatusBadge> CreateCardStatusBadges(Player player)
     {
-        return PlayerCardStatusBadgeHelper.Create(player, FindSelectedPlayerPerformance(player, _state.SelectedTeam));
+        var performance = FindSelectedPlayerPerformance(player, FindSelectedPlayerTeam(player));
+        var yellowCardEvents = _state.CurrentMatch?.Events.Count(matchEvent =>
+            matchEvent.EventType == EventType.YellowCard &&
+            (string.Equals(matchEvent.PrimaryPlayerName, player.Name, StringComparison.OrdinalIgnoreCase) ||
+             string.Equals(matchEvent.SecondaryPlayerName, player.Name, StringComparison.OrdinalIgnoreCase))) ?? 0;
+        var redCardEvents = _state.CurrentMatch?.Events.Count(matchEvent =>
+            matchEvent.EventType == EventType.RedCard &&
+            string.Equals(matchEvent.PrimaryPlayerName, player.Name, StringComparison.OrdinalIgnoreCase)) ?? 0;
+
+        var yellowCards = Math.Max(Math.Max(player.YellowCards, performance?.YellowCards ?? 0), yellowCardEvents);
+        var hasRedCard = player.IsSentOff ||
+            player.RedCardMinute.HasValue ||
+            (performance?.RedCards ?? 0) > 0 ||
+            redCardEvents > 0;
+
+        return PlayerCardStatusBadgeHelper.Create(yellowCards, hasRedCard);
     }
 
     private PlayerCardStatusBadge? CreateSubstitutionStatusBadge(Player player, bool pendingIn)
@@ -1038,6 +1068,10 @@ public partial class HalfTimeView : UserControl
         var growthText = PlayerGrowthDisplayHelper.CreateGrowthText(player);
         var overall = GetOverallRating(player);
         var overallVisual = GetCompactOverallVisual(overall);
+        var performance = FindSelectedPlayerPerformance(player, FindSelectedPlayerTeam(player));
+        var statusBadge = performance is null
+            ? new PlayerFormBadge("Not played", "#E2E8F0", "#475569")
+            : PlayerFormBadgeHelper.Create(GetHalfTimeStatus(performance.Rating));
         string ratingText;
         string ratingBackground;
         string ratingForeground;
@@ -1075,10 +1109,14 @@ public partial class HalfTimeView : UserControl
             PositionBackground = positionVisual.Color,
             PositionForeground = positionVisual.Foreground,
             Name = player.Name,
+            StatusText = statusBadge.Text,
+            StatusBackground = statusBadge.Background,
+            StatusForeground = statusBadge.Foreground,
             ShirtNumberText = player.SquadNumber > 0 ? $"#{player.SquadNumber}" : string.Empty,
             GrowthText = growthText,
             GrowthForeground = growthText.StartsWith("▼", StringComparison.Ordinal) ? "#EF4444" : "#16A34A",
             TraitBadges = PlayerTraitBadgeHelper.Create(player.Traits, 3),
+            CardStatusBadges = CreateCardStatusBadges(player),
             FlagImagePath = nationality.FlagImagePath,
             NationalityName = nationality.Name,
             Rating = ratingText,
@@ -1099,6 +1137,76 @@ public partial class HalfTimeView : UserControl
             PendingSubstituteNationalityName = pendingNationality?.Name ?? "Unknown nationality",
             PendingSubstitutionVisibility = pendingSubstitution is null ? Visibility.Collapsed : Visibility.Visible
         };
+    }
+
+    private static PlayerFormStatus GetHalfTimeStatus(double rating)
+    {
+        return rating switch
+        {
+            >= 9.0 => PlayerFormStatus.Excellent,
+            >= 7.5 => PlayerFormStatus.Good,
+            >= 6.0 => PlayerFormStatus.Average,
+            >= 5.0 => PlayerFormStatus.Poor,
+            _ => PlayerFormStatus.VeryPoor
+        };
+    }
+
+    private static string CreateHalfTimeScoresheet(Match match)
+    {
+        var goals = new List<MatchEvent>();
+        foreach (var matchEvent in match.Events.OrderBy(matchEvent => matchEvent.Minute))
+        {
+            var isGoal = matchEvent.EventType is EventType.Goal or EventType.WonderGoal ||
+                (matchEvent.EventType == EventType.Penalty &&
+                 matchEvent.Description.Contains("scores", StringComparison.OrdinalIgnoreCase));
+            if (isGoal)
+            {
+                goals.Add(matchEvent);
+                continue;
+            }
+
+            var isDisallowed = matchEvent.EventType is EventType.VarDecision or EventType.Offside &&
+                (matchEvent.Description.Contains("goal ruled out", StringComparison.OrdinalIgnoreCase) ||
+                 matchEvent.Description.Contains("goal is ruled out", StringComparison.OrdinalIgnoreCase) ||
+                 matchEvent.Description.Contains("goal disallowed", StringComparison.OrdinalIgnoreCase));
+            if (isDisallowed)
+            {
+                var index = goals.FindLastIndex(goal => string.Equals(
+                    goal.PrimaryPlayerName,
+                    matchEvent.PrimaryPlayerName,
+                    StringComparison.OrdinalIgnoreCase));
+                if (index >= 0)
+                {
+                    goals.RemoveAt(index);
+                }
+            }
+        }
+
+        var home = CreateTeamScoresheet(match, match.HomeTeam, goals);
+        var away = CreateTeamScoresheet(match, match.AwayTeam, goals);
+        return string.Join("   |   ", new[] { home, away }.Where(text => !string.IsNullOrWhiteSpace(text)));
+    }
+
+    private static string CreateTeamScoresheet(Match match, Team team, IEnumerable<MatchEvent> goals)
+    {
+        var scorers = goals
+            .Where(goal => IsGoalForTeam(match, team, goal))
+            .GroupBy(goal => goal.PrimaryPlayerName ?? "Unknown scorer")
+            .Select(group => $"{group.Key} {string.Join(", ", group.Select(goal => !string.IsNullOrWhiteSpace(goal.DisplayMinuteText) ? goal.DisplayMinuteText : $"{goal.Minute}'"))}")
+            .ToList();
+        return scorers.Count == 0 ? string.Empty : $"{team.Name}: {string.Join("; ", scorers)}";
+    }
+
+    private static bool IsGoalForTeam(Match match, Team team, MatchEvent goal)
+    {
+        if (!string.IsNullOrWhiteSpace(goal.AttackingTeam))
+        {
+            return string.Equals(goal.AttackingTeam, team.Name, StringComparison.OrdinalIgnoreCase);
+        }
+
+        return match.PlayerPerformances.Any(performance =>
+            string.Equals(performance.PlayerName, goal.PrimaryPlayerName, StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(performance.TeamName, team.Name, StringComparison.OrdinalIgnoreCase));
     }
 
     private static int GetCompactPositionOrder(string position)
@@ -1171,6 +1279,18 @@ public partial class HalfTimeView : UserControl
     private void CompactPlayerRow_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         _dragStartPoint = e.GetPosition(this);
+    }
+
+    private void CompactPlayerRow_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ClickCount != 1 || sender is not FrameworkElement { ContextMenu: not null } playerRow)
+        {
+            return;
+        }
+
+        playerRow.ContextMenu.PlacementTarget = playerRow;
+        playerRow.ContextMenu.IsOpen = true;
+        e.Handled = true;
     }
 
     private void CompactPlayerRow_MouseMove(object sender, MouseEventArgs e)
@@ -2259,10 +2379,14 @@ public partial class HalfTimeView : UserControl
         public string PositionBackground { get; init; } = "#64748B";
         public string PositionForeground { get; init; } = "#FFFFFF";
         public string Name { get; init; } = string.Empty;
+        public string StatusText { get; init; } = string.Empty;
+        public string StatusBackground { get; init; } = "#E2E8F0";
+        public string StatusForeground { get; init; } = "#475569";
         public string ShirtNumberText { get; init; } = string.Empty;
         public string GrowthText { get; init; } = string.Empty;
         public string GrowthForeground { get; init; } = "#16A34A";
         public IReadOnlyList<PlayerTraitBadge> TraitBadges { get; init; } = [];
+        public IReadOnlyList<PlayerCardStatusBadge> CardStatusBadges { get; init; } = [];
         public string FlagImagePath { get; init; } = "/Assets/Flags/default.png";
         public string NationalityName { get; init; } = "Unknown nationality";
         public string Rating { get; init; } = "—";

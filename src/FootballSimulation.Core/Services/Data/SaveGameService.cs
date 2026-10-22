@@ -79,6 +79,7 @@ public class SaveGameService
         ValidateSaveVersion(data);
         RehydrateReferences(data);
         ApplyKnownPlayerDataCorrections(data);
+        RestoreMissingSelectedClubPlayers(data);
         return data;
     }
 
@@ -255,7 +256,7 @@ public class SaveGameService
                 LeagueName = data.LeagueState.Name,
                 Season = data.LeagueState.Season,
                 SelectedClubName = data.SelectedClubName,
-                CurrentRound = data.CurrentRound,
+                CurrentRound = GetCompletedMatchCount(data.Fixtures, data.SelectedClubName),
                 LeaguePosition = tableEntry?.Position,
                 Points = tableEntry?.Entry.Points
             };
@@ -296,6 +297,70 @@ public class SaveGameService
 
         ApplyKnownPlayerDataCorrections(data.TransferMarketState.FreeAgents, seasonStartYear);
         RepairDuplicateGyokeresOwnership(data);
+    }
+
+    private static void RestoreMissingSelectedClubPlayers(SaveGameData data)
+    {
+        var selectedTeam = data.Teams.FirstOrDefault(team =>
+            team.Name.Equals(data.SelectedClubName, StringComparison.OrdinalIgnoreCase));
+        if (selectedTeam is null)
+        {
+            return;
+        }
+
+        var leagueId = string.IsNullOrWhiteSpace(data.LeagueId)
+            ? LeagueDataService.DefaultLeagueId
+            : data.LeagueId;
+        Team? sourceTeam;
+        try
+        {
+            sourceTeam = new LeagueDataService().LoadTeams(leagueId)
+                .FirstOrDefault(team => team.Name.Equals(
+                    data.SelectedClubName,
+                    StringComparison.OrdinalIgnoreCase));
+        }
+        catch (InvalidOperationException)
+        {
+            return;
+        }
+
+        if (sourceTeam is null)
+        {
+            return;
+        }
+
+        var outgoingTransfers = data.TransferMarketState.TransferHistory
+            .Where(transfer => transfer.FromClubName.Equals(
+                selectedTeam.Name,
+                StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        var completedOutgoingOffers = data.TransferMarketState.Offers
+            .Where(offer => offer.FromClubName.Equals(
+                selectedTeam.Name,
+                StringComparison.OrdinalIgnoreCase))
+            .Where(offer => offer.Status is OfferStatus.Completed or OfferStatus.CompletedWhenWindowOpens)
+            .ToList();
+
+        var existingPlayerNames = selectedTeam.AllPlayers
+            .Select(player => NormalizePlayerKey(player.Name))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var missingSourcePlayers = sourceTeam.AllPlayers
+            .Where(player => !existingPlayerNames.Contains(NormalizePlayerKey(player.Name)));
+
+        TeamRosterService.RestoreMissingPlayers(
+            selectedTeam,
+            missingSourcePlayers,
+            sourcePlayer => outgoingTransfers.Any(transfer =>
+                    IsSamePlayer(sourcePlayer, transfer.PlayerId, transfer.PlayerName)) ||
+                completedOutgoingOffers.Any(offer =>
+                    IsSamePlayer(sourcePlayer, offer.PlayerId, offer.PlayerName)));
+    }
+
+    private static bool IsSamePlayer(Player player, string playerId, string playerName)
+    {
+        return (!string.IsNullOrWhiteSpace(player.PlayerId) &&
+                player.PlayerId.Equals(playerId, StringComparison.OrdinalIgnoreCase)) ||
+            player.Name.Equals(playerName, StringComparison.OrdinalIgnoreCase);
     }
 
     private static void RepairDuplicateGyokeresOwnership(SaveGameData data)
@@ -369,6 +434,7 @@ public class SaveGameService
         }
 
         ApplyKnownPositionCorrection(player, teamName);
+        PlayerNationalityCorrectionService.ApplyKnownCorrections(player);
         RepairMissingSeniorOverallAttributes(player);
         PlayerTraitAssignmentService.EnsureMinimumTraits(player);
         ExpandedPlayerTraitService.ApplyInferredTrait(player);
@@ -548,20 +614,15 @@ public class SaveGameService
 
     private static int GetCurrentRound(League league, Team selectedTeam)
     {
-        var nextFixture = league.Fixtures
-            .Where(fixture => !fixture.IsPlayed && IsTeamInFixture(fixture, selectedTeam))
-            .OrderBy(GetFixtureCalendarRound)
-            .ThenBy(fixture => fixture.Competition)
-            .FirstOrDefault();
+        return GetCompletedMatchCount(league.Fixtures, selectedTeam.Name);
+    }
 
-        if (nextFixture is not null)
-        {
-            return GetFixtureCalendarRound(nextFixture);
-        }
-
-        return league.Fixtures.Count == 0
-            ? 1
-            : league.Fixtures.Max(GetFixtureCalendarRound);
+    private static int GetCompletedMatchCount(IEnumerable<Fixture> fixtures, string teamName)
+    {
+        return fixtures.Count(fixture =>
+            fixture.IsPlayed &&
+            (string.Equals(fixture.HomeTeam.Name, teamName, StringComparison.OrdinalIgnoreCase) ||
+             string.Equals(fixture.AwayTeam.Name, teamName, StringComparison.OrdinalIgnoreCase)));
     }
 
     private static int GetFixtureCalendarRound(Fixture fixture)

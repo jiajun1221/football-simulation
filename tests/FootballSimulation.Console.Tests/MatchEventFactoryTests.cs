@@ -6,6 +6,17 @@ namespace FootballSimulation.Console.Tests;
 public class MatchEventFactoryTests
 {
     [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(4)]
+    public void CreateAddedTimeAnnouncement_StoresAddedMinutes(int addedMinutes)
+    {
+        var matchEvent = new MatchEventFactory().CreateAddedTimeAnnouncement(45, addedMinutes, isSecondHalf: false);
+
+        Assert.Equal(addedMinutes, matchEvent.AddedMinutes);
+    }
+
+    [Theory]
     [InlineData("free-kick header")]
     [InlineData("corner header")]
     public void CreateShot_ClassifiesHeaderAttemptsWithoutChangingShotEventType(string chanceType)

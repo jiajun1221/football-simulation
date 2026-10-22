@@ -786,18 +786,14 @@ public class MatchEngine
         var halftimeSubstitutions = match.Substitutions
             .Where(substitution => substitution.Minute == MatchConstants.HalftimeMinute)
             .Where(substitution => !HasVisibleSubstitutionEvent(match, substitution))
-            .GroupBy(substitution => substitution.TeamName)
             .ToList();
 
-        foreach (var group in halftimeSubstitutions)
+        foreach (var substitution in halftimeSubstitutions)
         {
-            var team = string.Equals(group.Key, match.HomeTeam.Name, StringComparison.OrdinalIgnoreCase)
+            var team = string.Equals(substitution.TeamName, match.HomeTeam.Name, StringComparison.OrdinalIgnoreCase)
                 ? match.HomeTeam
                 : match.AwayTeam;
-            var substitutions = group.ToList();
-            var matchEvent = substitutions.Count > 1
-                ? simulationState.EventFactory.CreateGroupedHalftimeSubstitution(minute, team, substitutions)
-                : simulationState.EventFactory.CreateHalftimeSubstitution(minute, team, substitutions[0]);
+            var matchEvent = simulationState.EventFactory.CreateHalftimeSubstitution(minute, team, substitution);
             simulationState.MatchLog.AddEvent(matchEvent);
         }
     }

@@ -73,6 +73,7 @@ public class PlayerStatMappingService
             ConsecutiveStarts = 0,
             Finishing = CalculateFinishing(position, preferredPosition, overall)
         };
+        PlayerNationalityCorrectionService.ApplyKnownCorrections(player);
         ExpandedPlayerTraitService.ApplyInferredTrait(player);
         PlayerContractService.ApplyContractData(
             player,
@@ -163,6 +164,7 @@ public class PlayerStatMappingService
             ConsecutiveStarts = 0,
             Finishing = CalculateFinishing(position, preferredPosition, overall)
         };
+        PlayerNationalityCorrectionService.ApplyKnownCorrections(player);
         ExpandedPlayerTraitService.ApplyInferredTrait(player);
         PlayerContractService.ApplyContractData(
             player,

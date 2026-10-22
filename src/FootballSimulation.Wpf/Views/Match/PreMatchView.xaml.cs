@@ -33,6 +33,7 @@ public partial class PreMatchView : UserControl
     private Player? _selectedStarter;
     private string? _selectedPositionFilter;
     private List<Player> _pitchSlots = [];
+    private List<Player> _completePreMatchRoster = [];
     private Point _dragStartPoint;
     private bool _isDraggingPlayer;
     private bool _isLoadingSetup;
@@ -115,6 +116,7 @@ public partial class PreMatchView : UserControl
         var nationality = PlayerNationalityDisplayService.Resolve(player);
         var overall = GetOverallRating(player);
         var overallVisual = GetOverallBadgeVisual(overall);
+        var previousMatchRating = GetRecentMatchRatingBadge(player);
         var stamina = GetStaminaPercentage(player);
         var injuryRisk = GetWorkloadRiskPercentage(player);
         var position = PositionSuitabilityService.NormalizeExactPosition(
@@ -143,6 +145,9 @@ public partial class PreMatchView : UserControl
             RatingValue = overall,
             RatingBackground = overallVisual.Background,
             RatingForeground = overallVisual.Foreground,
+            PreviousMatchRating = previousMatchRating.Text,
+            PreviousMatchRatingBackground = previousMatchRating.Background,
+            PreviousMatchRatingForeground = previousMatchRating.Foreground,
             Stamina = stamina,
             StaminaText = $"STA {stamina}%",
             StaminaBrush = GetStaminaBrush(player),
@@ -184,6 +189,18 @@ public partial class PreMatchView : UserControl
         _dragStartPoint = e.GetPosition(this);
     }
 
+    private void CompactPreMatchPlayerRow_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ClickCount != 1 || sender is not FrameworkElement { ContextMenu: not null } playerRow)
+        {
+            return;
+        }
+
+        playerRow.ContextMenu.PlacementTarget = playerRow;
+        playerRow.ContextMenu.IsOpen = true;
+        e.Handled = true;
+    }
+
     private void CompactPreMatchPlayerRow_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
         if (_state.SelectedTeam is null ||
@@ -197,8 +214,11 @@ public partial class PreMatchView : UserControl
             var rolePositions = TeamRosterService.GetMatchdayBenchRole(playerRow.Player);
             var reserveReplacement = _state.SelectedTeam.Reserves
                 .Where(IsAvailableForSelection)
-                .Where(player => rolePositions.Any(position => CanPlayerOccupySlot(player, position)))
-                .OrderByDescending(player => rolePositions.Max(position => GetSlotFitScore(player, position)))
+                .Where(player => PositionSuitabilityService.IsGoalkeeperCapable(player) ==
+                    PositionSuitabilityService.IsGoalkeeperCapable(playerRow.Player))
+                .OrderByDescending(player => rolePositions.Count > 0
+                    ? rolePositions.Max(position => GetSlotFitScore(player, position))
+                    : 0)
                 .ThenByDescending(GetOverallRating)
                 .ThenBy(player => player.SquadNumber <= 0 ? int.MaxValue : player.SquadNumber)
                 .ThenBy(player => player.Name)
@@ -206,8 +226,7 @@ public partial class PreMatchView : UserControl
 
             if (reserveReplacement is null)
             {
-                var roleLabel = string.Join("/", rolePositions);
-                MessageBox.Show($"No available reserve player can cover {roleLabel}.");
+                MessageBox.Show("No available reserve player can be selected.");
                 return;
             }
 
@@ -225,8 +244,7 @@ public partial class PreMatchView : UserControl
         var position = GetDisplayedSlotForStarter(starterRow.Player);
         var replacement = _state.SelectedTeam.Substitutes
             .Where(IsAvailableForSelection)
-            .Where(player => CanPlayerOccupySlot(player, position))
-            .Where(player => GetSlotFitScore(player, position) > PositionCompatibilityService.Impossible)
+            .Where(player => !IsHardBlockedManualSubstituteSlot(player, position))
             .OrderByDescending(player => GetSlotFitScore(player, position))
             .ThenByDescending(GetOverallRating)
             .ThenBy(player => player.SquadNumber <= 0 ? int.MaxValue : player.SquadNumber)
@@ -235,7 +253,7 @@ public partial class PreMatchView : UserControl
 
         if (replacement is null)
         {
-            MessageBox.Show($"No available player can cover {position}.");
+            MessageBox.Show("No available substitute can be selected.");
             return;
         }
 
@@ -387,6 +405,7 @@ public partial class PreMatchView : UserControl
 
         FixtureTextBlock.Text = $"{CompetitionDisplayService.GetName(_state.CurrentFixture.Competition)} - {GetFixtureRoundText(_state.CurrentFixture)} - {_state.CurrentFixture.HomeTeam.Name} vs {_state.CurrentFixture.AwayTeam.Name}";
         var restoredMissingPlayers = RestoreMissingSourceRosterPlayers();
+        _completePreMatchRoster = GetDistinctRoster(_state.SelectedTeam);
         var goalkeeperValidation = ReconcileUnavailablePlayers(_state.SelectedTeam);
         ShowGoalkeeperWarningIfNeeded(goalkeeperValidation);
         ValidateLineupAssignments("PrepareMatchLoaded");
@@ -407,15 +426,21 @@ public partial class PreMatchView : UserControl
 
     private bool RestoreMissingSourceRosterPlayers()
     {
-        if (_state.SelectedTeam is null || _state.League is null)
+        if (_state.SelectedTeam is null)
         {
             return false;
+        }
+
+        var leagueId = _state.League?.LeagueId ?? _state.SelectedLeagueId;
+        if (string.IsNullOrWhiteSpace(leagueId))
+        {
+            leagueId = LeagueDataService.DefaultLeagueId;
         }
 
         Team? sourceTeam;
         try
         {
-            sourceTeam = _leagueDataService.LoadTeams(_state.League.LeagueId)
+            sourceTeam = _leagueDataService.LoadTeams(leagueId)
                 .FirstOrDefault(team => team.Name.Equals(
                     _state.SelectedTeam.Name,
                     StringComparison.OrdinalIgnoreCase));
@@ -436,6 +461,11 @@ public partial class PreMatchView : UserControl
                 StringComparison.OrdinalIgnoreCase))
             .Where(offer => offer.Status is OfferStatus.Completed or OfferStatus.CompletedWhenWindowOpens)
             .ToList() ?? [];
+        var completedOutgoingHistory = _state.TransferMarket?.TransferHistory
+            .Where(transfer => transfer.FromClubName.Equals(
+                _state.SelectedTeam.Name,
+                StringComparison.OrdinalIgnoreCase))
+            .ToList() ?? [];
 
         var restoredCount = TeamRosterService.RestoreMissingPlayers(
             _state.SelectedTeam,
@@ -443,7 +473,11 @@ public partial class PreMatchView : UserControl
             sourcePlayer => completedOutgoingPlayers.Any(offer =>
                 (!string.IsNullOrWhiteSpace(sourcePlayer.PlayerId) &&
                     sourcePlayer.PlayerId.Equals(offer.PlayerId, StringComparison.OrdinalIgnoreCase)) ||
-                sourcePlayer.Name.Equals(offer.PlayerName, StringComparison.OrdinalIgnoreCase)));
+                sourcePlayer.Name.Equals(offer.PlayerName, StringComparison.OrdinalIgnoreCase)) ||
+                completedOutgoingHistory.Any(transfer =>
+                    (!string.IsNullOrWhiteSpace(sourcePlayer.PlayerId) &&
+                        sourcePlayer.PlayerId.Equals(transfer.PlayerId, StringComparison.OrdinalIgnoreCase)) ||
+                    sourcePlayer.Name.Equals(transfer.PlayerName, StringComparison.OrdinalIgnoreCase)));
 
         return restoredCount > 0;
     }
@@ -840,14 +874,29 @@ public partial class PreMatchView : UserControl
 
         _pitchSlots = pitchPlayers;
         team.Players = pitchPlayers;
-        AssignMatchdayBenchAndReserves(team, remainingPlayers);
+        AssignMatchdayBenchAndReserves(team, remainingPlayers, preserveSelectionOrder: true);
     }
 
-    private static void AssignMatchdayBenchAndReserves(Team team, IEnumerable<Player> players)
+    private static void AssignMatchdayBenchAndReserves(
+        Team team,
+        IEnumerable<Player> players,
+        bool preserveSelectionOrder = false)
     {
         var orderedPlayers = players
             .DistinctBy(CreateRosterKey)
             .ToList();
+
+        if (preserveSelectionOrder)
+        {
+            team.Substitutes = orderedPlayers
+                .Take(TeamRosterService.MatchdaySubstituteCount)
+                .ToList();
+            team.Reserves = orderedPlayers
+                .Skip(TeamRosterService.MatchdaySubstituteCount)
+                .ToList();
+            return;
+        }
+
         team.Substitutes = orderedPlayers;
         team.Reserves = [];
         TeamRosterService.SelectMatchdayBench(team);
@@ -1172,6 +1221,8 @@ public partial class PreMatchView : UserControl
             return;
         }
 
+        EnsureCompletePreMatchRoster();
+
         var normalizedFilter = PositionSuitabilityService.NormalizeExactPosition(_selectedPositionFilter);
         var pitchKeys = _pitchSlots
             .Select(CreateRosterKey)
@@ -1198,6 +1249,18 @@ public partial class PreMatchView : UserControl
         {
             RefreshCompactPreMatchPlayers();
         }
+    }
+
+    private void EnsureCompletePreMatchRoster()
+    {
+        if (_state.SelectedTeam is null || _completePreMatchRoster.Count == 0)
+        {
+            return;
+        }
+
+        TeamRosterService.RestoreMissingPlayers(
+            _state.SelectedTeam,
+            _completePreMatchRoster);
     }
 
     private static List<Player> OrderForFilter(IEnumerable<Player> players, string normalizedFilter)
@@ -1979,13 +2042,6 @@ public partial class PreMatchView : UserControl
         }
         else if (targetIndex >= 0 && reserves.Remove(draggedPlayer))
         {
-            if (!CanCoverMatchdayBenchRole(draggedPlayer, targetPlayer))
-            {
-                reserves.Add(draggedPlayer);
-                MessageBox.Show($"{draggedPlayer.Name} cannot cover this substitute role.");
-                return;
-            }
-
             bench[targetIndex] = draggedPlayer;
             reserves.Add(targetPlayer);
         }
@@ -1999,13 +2055,6 @@ public partial class PreMatchView : UserControl
 
         RefreshSubstitutes();
         SaveSetup(_state.SelectedTeam);
-    }
-
-    private static bool CanCoverMatchdayBenchRole(Player player, Player playerBeingReplaced)
-    {
-        var rolePositions = TeamRosterService.GetMatchdayBenchRole(playerBeingReplaced);
-        return rolePositions.Count == 0 ||
-            rolePositions.Any(position => CanPlayerOccupySlot(player, position));
     }
 
     private static void ApplyDropTargetStyle(Button button, bool canDrop)
@@ -2442,6 +2491,9 @@ public partial class PreMatchView : UserControl
         public int RatingValue { get; init; }
         public string RatingBackground { get; init; } = "#64748B";
         public string RatingForeground { get; init; } = "#FFFFFF";
+        public string PreviousMatchRating { get; init; } = "—";
+        public string PreviousMatchRatingBackground { get; init; } = "#E2E8F0";
+        public string PreviousMatchRatingForeground { get; init; } = "#334155";
         public int Stamina { get; init; }
         public string StaminaText { get; init; } = string.Empty;
         public string StaminaBrush { get; init; } = "#22C55E";

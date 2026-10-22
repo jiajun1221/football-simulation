@@ -1208,7 +1208,9 @@ public class MatchEventFactory
                     ? $"{NumberWord(addedMinutes)} minutes of added time to play."
                     : $"Minimum of {addedMinutes} minutes added.";
 
-        return CreateEvent(minute, EventType.AddedTime, description);
+        var matchEvent = CreateEvent(minute, EventType.AddedTime, description);
+        matchEvent.AddedMinutes = addedMinutes;
+        return matchEvent;
     }
 
     public MatchEvent CreateTimeWasting(int minute, Team team, Random random, Player? player = null, PlayerTrait? triggeredTrait = null)

@@ -361,7 +361,7 @@
                     <ColumnDefinition Width="0" />
                     <ColumnDefinition Width="84" />
                     <ColumnDefinition Width="1.25*" />
-                    <ColumnDefinition Width="140" />
+                    <ColumnDefinition Width="120" />
                     <ColumnDefinition Width="1.25*" />
                     <ColumnDefinition Width="84" />
                     <ColumnDefinition Width="0" />
@@ -411,7 +411,7 @@
                            Grid.Row="1"
                            Grid.Column="2"
                            Foreground="#FFFFFF"
-                           FontSize="20"
+                           FontSize="16"
                            FontWeight="Bold"
                            TextWrapping="NoWrap"
                            TextAlignment="Right"
@@ -420,21 +420,30 @@
                            VerticalAlignment="Center"
                            Margin="0,0,8,0" />
 
-                <TextBlock x:Name="ScoreTextBlock"
-                           Grid.Row="1"
-                           Grid.Column="3"
-                           Foreground="White"
-                           FontSize="58"
-                           FontWeight="Black"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"
-                           TextAlignment="Center" />
+                <StackPanel Grid.Row="1" Grid.Column="3"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center">
+                    <TextBlock x:Name="ScoreTextBlock"
+                               Foreground="White"
+                               FontSize="46"
+                               FontWeight="Black"
+                               HorizontalAlignment="Center"
+                               TextAlignment="Center"
+                               TextWrapping="NoWrap" />
+                    <TextBlock x:Name="ScoreDetailTextBlock"
+                               Foreground="#90A4BE"
+                               FontSize="10"
+                               FontWeight="Black"
+                               HorizontalAlignment="Center"
+                               TextAlignment="Center"
+                               TextWrapping="Wrap" />
+                </StackPanel>
 
                 <TextBlock x:Name="AwayTeamTextBlock"
                            Grid.Row="1"
                            Grid.Column="4"
                            Foreground="#FFFFFF"
-                           FontSize="20"
+                           FontSize="16"
                            FontWeight="Bold"
                            TextWrapping="NoWrap"
                            TextAlignment="Left"

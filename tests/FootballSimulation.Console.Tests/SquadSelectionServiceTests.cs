@@ -410,6 +410,37 @@ public class SquadSelectionServiceTests
         Assert.NotEqual("Bryan Mbeumo", decision.PlayerOn.Name);
     }
 
+    [Fact]
+    public void AiManager_ProtectsPlayerWithExtremeWorkloadRisk()
+    {
+        var service = new AiManagerService();
+        var team = CreateTeam();
+        var highRiskPlayer = team.Players[1];
+        PositionSuitabilityService.EnsurePositionMetadata(highRiskPlayer, "CB");
+        highRiskPlayer.Stamina = 99;
+        highRiskPlayer.SeasonFatigue = 100;
+        highRiskPlayer.MatchesPlayedRecently = 6;
+        highRiskPlayer.ConsecutiveStarts = 12;
+        highRiskPlayer.ConsecutiveFullMatches = 5;
+        highRiskPlayer.RecentMatchMinutes = [90, 90, 90, 90, 90];
+        team.Substitutes =
+        [
+            CreateExactPlayer("Fresh Center Back", Position.Defender, "CB", 74, false)
+        ];
+        var match = new Match { HomeTeam = team, AwayTeam = CreateTeam("Opponent") };
+
+        var decision = service.TryMakeSubstitution(
+            match,
+            team,
+            minute: 60,
+            new MatchSimulationOptions { EnableAiSubstitutions = true },
+            new Random(1));
+
+        Assert.NotNull(decision);
+        Assert.Equal(highRiskPlayer.Name, decision!.PlayerOff.Name);
+        Assert.Equal("Fresh Center Back", decision.PlayerOn.Name);
+    }
+
     private static Team CreateTeam(string name = "Test FC", int substituteCount = 7)
     {
         var players = new List<Player>

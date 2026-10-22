@@ -85,6 +85,7 @@
                     ToolTip="{Binding TooltipText}">
                 <TextBlock Text="{Binding Text}"
                            Foreground="{Binding Foreground}"
+                           FontFamily="Segoe UI Emoji"
                            FontSize="7.5"
                            FontWeight="Black"
                            HorizontalAlignment="Center"
@@ -536,12 +537,98 @@
     <Grid x:Name="MainRootGrid"
           Background="{DynamicResource AppPageBackground}"
           Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition x:Name="HalfTimePitchColumnDefinition" Width="2*" />
             <ColumnDefinition x:Name="HalfTimeSetupColumnDefinition" Width="320" />
         </Grid.ColumnDefinitions>
 
+        <Border Grid.Row="0"
+                Grid.ColumnSpan="2"
+                Background="{DynamicResource AppSecondaryCardBackground}"
+                BorderBrush="{DynamicResource AppBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="12"
+                Padding="14,9"
+                Margin="0,0,0,10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Right">
+                    <TextBlock x:Name="HalfTimeHomeTeamTextBlock"
+                               VerticalAlignment="Center"
+                               TextAlignment="Right"
+                               Foreground="{DynamicResource AppTextBrush}"
+                               FontSize="15"
+                               FontWeight="Bold"
+                               TextTrimming="CharacterEllipsis" />
+                    <Image x:Name="HalfTimeHomeLogoImage"
+                           Width="30"
+                           Height="30"
+                           Margin="9,0,0,0"
+                           Stretch="Uniform" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Margin="20,0" HorizontalAlignment="Center">
+                    <TextBlock x:Name="HalfTimeLabelTextBlock"
+                               Text="HALF TIME"
+                               HorizontalAlignment="Center"
+                               Foreground="{DynamicResource AppMutedTextBrush}"
+                               FontSize="10"
+                               FontWeight="Black" />
+                    <TextBlock x:Name="HalfTimeScoreTextBlock"
+                               Text="0 - 0"
+                               HorizontalAlignment="Center"
+                               Foreground="{DynamicResource AppTextBrush}"
+                               FontSize="24"
+                               FontWeight="Black"
+                               LineHeight="25" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="2"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Left">
+                    <Image x:Name="HalfTimeAwayLogoImage"
+                           Width="30"
+                           Height="30"
+                           Margin="0,0,9,0"
+                           Stretch="Uniform" />
+                    <TextBlock x:Name="HalfTimeAwayTeamTextBlock"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource AppTextBrush}"
+                               FontSize="15"
+                               FontWeight="Bold"
+                               TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+
+                <TextBlock x:Name="HalfTimeScoresheetTextBlock"
+                           Grid.Row="1" Grid.ColumnSpan="3"
+                           HorizontalAlignment="Center"
+                           Margin="4,4,4,0"
+                           Foreground="{DynamicResource AppMutedTextBrush}"
+                           FontSize="9"
+                           FontWeight="SemiBold"
+                           TextAlignment="Center"
+                           TextWrapping="Wrap" />
+            </Grid>
+        </Border>
+
         <Button x:Name="CompactPitchToggleButton"
+                Grid.Row="1"
                 Width="30" Height="30" Margin="4"
                 HorizontalAlignment="Left" VerticalAlignment="Top"
                 Panel.ZIndex="20" Visibility="Collapsed"
@@ -549,7 +636,7 @@
                 FontFamily="Segoe UI Symbol" FontSize="14" FontWeight="Black"
                 Click="CompactPitchToggleButton_Click" />
 
-        <Border x:Name="HalfTimePitchPanel" Grid.Column="0"
+        <Border x:Name="HalfTimePitchPanel" Grid.Row="1" Grid.Column="0"
                 Background="{DynamicResource MatchPitchBorderBrush}"
                 CornerRadius="18"
                 Padding="18"
@@ -926,7 +1013,7 @@
             </Grid>
         </Border>
 
-        <Border x:Name="HalfTimeSetupPanel" Grid.Column="1"
+        <Border x:Name="HalfTimeSetupPanel" Grid.Row="1" Grid.Column="1"
                 Background="{DynamicResource AppCardBackground}"
                 CornerRadius="18"
                 Padding="16">
@@ -1018,6 +1105,7 @@
                                         ToolTipService.BetweenShowDelay="50"
                                         ToolTipService.ShowDuration="60000"
                                         PreviewMouseLeftButtonDown="CompactPlayerRow_PreviewMouseLeftButtonDown"
+                                        MouseLeftButtonUp="CompactPlayerRow_MouseLeftButtonUp"
                                         MouseMove="CompactPlayerRow_MouseMove"
                                         DragOver="CompactPlayerRow_DragOver"
                                         Drop="CompactPlayerRow_Drop">
@@ -1033,9 +1121,18 @@
                                         </Style.Triggers>
                                     </Style>
                                 </Border.Style>
-                                <Border.ToolTip>
-                                    <ToolTip Placement="Mouse" HorizontalOffset="12" VerticalOffset="12"
-                                             Background="Transparent" BorderThickness="0" Padding="0">
+                                <Border.ContextMenu>
+                                    <ContextMenu Placement="Right"
+                                                 DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
+                                                 Background="Transparent" BorderThickness="0" Padding="0"
+                                                 HasDropShadow="False">
+                                        <ContextMenu.Template>
+                                            <ControlTemplate TargetType="{x:Type ContextMenu}">
+                                                <Border Background="Transparent" BorderThickness="0" Padding="0">
+                                                    <ItemsPresenter />
+                                                </Border>
+                                            </ControlTemplate>
+                                        </ContextMenu.Template>
                                         <Border Width="240" Padding="6" CornerRadius="7"
                                                 Background="{DynamicResource AppPanelBackground}"
                                                 BorderBrush="#3B82F6" BorderThickness="2">
@@ -1064,6 +1161,13 @@
                                                                    FontSize="8" FontWeight="Black" Margin="0,0,2,0" />
                                                         <TextBlock Text="{Binding Name}" Foreground="{DynamicResource AppTextBrush}"
                                                                    FontSize="11" FontWeight="Black" TextTrimming="CharacterEllipsis" />
+                                                        <ItemsControl ItemsSource="{Binding CardStatusBadges}"
+                                                                      ItemTemplate="{StaticResource CardStatusBadgeTemplate}"
+                                                                      VerticalAlignment="Center">
+                                                            <ItemsControl.ItemsPanel>
+                                                                <ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                                                            </ItemsControl.ItemsPanel>
+                                                        </ItemsControl>
                                                     </StackPanel>
                                                     <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
                                                         <TextBlock Text="{Binding GrowthText}" Foreground="{Binding GrowthForeground}"
@@ -1103,8 +1207,8 @@
                                                 </Grid>
                                             </Grid>
                                         </Border>
-                                    </ToolTip>
-                                </Border.ToolTip>
+                                    </ContextMenu>
+                                </Border.ContextMenu>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="42" />
@@ -1132,6 +1236,20 @@
                                             <TextBlock Text="{Binding Name}" Foreground="{DynamicResource AppTextBrush}"
                                                        FontSize="15" FontWeight="Bold" TextTrimming="CharacterEllipsis"
                                                        VerticalAlignment="Center" />
+                                            <Border Background="{Binding StatusBackground}"
+                                                    CornerRadius="6" Padding="4,1" Margin="4,0,0,0"
+                                                    VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding StatusText}"
+                                                           Foreground="{Binding StatusForeground}"
+                                                           FontSize="7.5" FontWeight="Black" />
+                                            </Border>
+                                            <ItemsControl ItemsSource="{Binding CardStatusBadges}"
+                                                          ItemTemplate="{StaticResource CardStatusBadgeTemplate}"
+                                                          VerticalAlignment="Center">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                            </ItemsControl>
                                         </StackPanel>
                                         <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center">
                                             <StackPanel.Style>

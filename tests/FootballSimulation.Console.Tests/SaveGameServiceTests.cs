@@ -8,6 +8,45 @@ namespace FootballSimulation.Console.Tests;
 public class SaveGameServiceTests
 {
     [Fact]
+    public void LoadGame_RestoresMissingSelectedClubSourcePlayerToReserves()
+    {
+        var saveDirectory = CreateTempSaveDirectory();
+        var saveGameService = new SaveGameService(saveDirectory);
+        var teams = new LeagueDataService().LoadTeams(LeagueDataService.DefaultLeagueId);
+        var chelsea = teams.Single(team => team.Name == "Chelsea");
+        var jordanHenderson = chelsea.AllPlayers.Single(player => player.Name == "Jordan Henderson");
+        chelsea.Players.Remove(jordanHenderson);
+        chelsea.Substitutes.Remove(jordanHenderson);
+        chelsea.Reserves.Remove(jordanHenderson);
+        var saveData = new SaveGameData
+        {
+            LeagueId = LeagueDataService.DefaultLeagueId,
+            SelectedClubName = chelsea.Name,
+            LeagueState = new LeagueState
+            {
+                LeagueId = LeagueDataService.DefaultLeagueId,
+                Name = GameSessionService.PremierLeagueName,
+                Season = "2026-27"
+            },
+            Teams = teams
+        };
+
+        try
+        {
+            saveGameService.SaveGame(1, saveData);
+
+            var loadedChelsea = saveGameService.LoadGame(1)!.Teams
+                .Single(team => team.Name == "Chelsea");
+
+            Assert.Contains(loadedChelsea.Reserves, player => player.Name == "Jordan Henderson");
+        }
+        finally
+        {
+            DeleteDirectory(saveDirectory);
+        }
+    }
+
+    [Fact]
     public void SaveSlots_KeepPlayerConditionIndependent()
     {
         var saveDirectory = CreateTempSaveDirectory();
@@ -271,11 +310,13 @@ public class SaveGameServiceTests
 
             var loadedData = saveGameService.LoadGame(1);
             var loadedLeague = SaveGameService.CreateLeague(loadedData!);
-            var loadedPlayer = loadedLeague.Teams.Single().Players.Single();
+            var loadedPlayer = loadedLeague.Teams.Single().Players.Single(player =>
+                player.PlayerId.Equals("premier-league:chelsea:estevao:41", StringComparison.OrdinalIgnoreCase));
             var loadedTransferPlayer = loadedData!.TransferMarketState.Leagues
                 .Single(leagueState => leagueState.LeagueId == LeagueDataService.DefaultLeagueId)
-                .Teams.Single()
-                .Players.Single();
+                .Teams.Single(team => team.Name.Equals("Chelsea", StringComparison.OrdinalIgnoreCase))
+                .Players.Single(player =>
+                    player.PlayerId.Equals("premier-league:chelsea:estevao:41", StringComparison.OrdinalIgnoreCase));
 
             Assert.Equal(19, loadedPlayer.Age);
             Assert.Equal(19, loadedTransferPlayer.Age);
@@ -689,10 +730,39 @@ public class SaveGameServiceTests
             Assert.True(slots.Single(slot => slot.SlotNumber == 1).IsEmpty);
             Assert.False(savedSlot.IsEmpty);
             Assert.Equal(selectedTeam.Name, savedSlot.SelectedClubName);
-            Assert.Equal(2, savedSlot.CurrentRound);
+            Assert.Equal(0, savedSlot.CurrentRound);
             Assert.Equal(0, savedSlot.Points);
             Assert.Equal(1, savedSlot.LeaguePosition);
             Assert.NotNull(savedSlot.SavedAt);
+        }
+        finally
+        {
+            DeleteDirectory(saveDirectory);
+        }
+    }
+
+    [Fact]
+    public void GetSaveSlots_UsesCompletedClubMatchesForCurrentRound()
+    {
+        var saveDirectory = CreateTempSaveDirectory();
+        var saveGameService = new SaveGameService(saveDirectory);
+        var gameSessionService = new GameSessionService();
+        var teams = new LeagueSeedDataService().CreateLeagueTeams();
+        var selectedTeam = teams[0];
+        var league = gameSessionService.CreatePremierLeague(teams);
+        var firstClubFixture = league.Fixtures.First(fixture =>
+            fixture.HomeTeam.Name == selectedTeam.Name || fixture.AwayTeam.Name == selectedTeam.Name);
+        firstClubFixture.IsPlayed = true;
+        var saveData = SaveGameService.CreateSaveData(league, selectedTeam);
+        saveData.CurrentRound = 4;
+
+        try
+        {
+            saveGameService.SaveGame(1, saveData);
+
+            var savedSlot = saveGameService.GetSaveSlots().Single(slot => slot.SlotNumber == 1);
+
+            Assert.Equal(1, savedSlot.CurrentRound);
         }
         finally
         {

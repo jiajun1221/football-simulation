@@ -67,6 +67,7 @@ public partial class MatchResultView : UserControl
         HomeTeamTextBlock.Text = match.HomeTeam.Name;
         AwayTeamTextBlock.Text = match.AwayTeam.Name;
         ScoreTextBlock.Text = CreateScoreText(match);
+        ScoreDetailTextBlock.Text = CreateScoreDetailText(match);
         ApplyTeamHeaderColors(match.HomeTeam, HomeTeamTextBlock, HomeTeamLogoBorder);
         ApplyTeamHeaderColors(match.AwayTeam, AwayTeamTextBlock, AwayTeamLogoBorder);
         HomePlayersTitleTextBlock.Text = $"{match.HomeTeam.Name} Players";
@@ -94,23 +95,28 @@ public partial class MatchResultView : UserControl
 
     private string CreateScoreText(Match match)
     {
+        return $"{match.HomeScore} - {match.AwayScore}";
+    }
+
+    private string CreateScoreDetailText(Match match)
+    {
         var fixture = _state.CurrentFixture;
         if (fixture?.PenaltyHomeScore is not null && fixture.PenaltyAwayScore is not null)
         {
             var winner = string.IsNullOrWhiteSpace(fixture.WinningTeamName)
                 ? fixture.PenaltyHomeScore > fixture.PenaltyAwayScore ? match.HomeTeam.Name : match.AwayTeam.Name
                 : fixture.WinningTeamName;
-            return $"{match.HomeScore} - {match.AwayScore}\n{winner} win {fixture.PenaltyHomeScore} - {fixture.PenaltyAwayScore} on penalties";
+            return $"{winner} win {fixture.PenaltyHomeScore} - {fixture.PenaltyAwayScore} on penalties";
         }
 
         if (fixture?.ExtraTimeHomeScore is not null &&
             fixture.ExtraTimeAwayScore is not null &&
             match.HomeScore != match.AwayScore)
         {
-            return $"{match.HomeScore} - {match.AwayScore} AET";
+            return "AET";
         }
 
-        return $"{match.HomeScore} - {match.AwayScore}";
+        return string.Empty;
     }
 
     private static Brush ToBrush(string color)
@@ -333,6 +339,16 @@ public partial class MatchResultView : UserControl
 
     private static string FindScoringTeam(MatchEvent matchEvent, Match match)
     {
+        if (string.Equals(matchEvent.AttackingTeam, match.HomeTeam.Name, StringComparison.OrdinalIgnoreCase))
+        {
+            return match.HomeTeam.Name;
+        }
+
+        if (string.Equals(matchEvent.AttackingTeam, match.AwayTeam.Name, StringComparison.OrdinalIgnoreCase))
+        {
+            return match.AwayTeam.Name;
+        }
+
         if (matchEvent.Description.Contains($"for {match.HomeTeam.Name}", StringComparison.OrdinalIgnoreCase))
         {
             return match.HomeTeam.Name;
@@ -343,7 +359,42 @@ public partial class MatchResultView : UserControl
             return match.AwayTeam.Name;
         }
 
+        var performanceTeam = match.PlayerPerformances
+            .FirstOrDefault(performance => string.Equals(
+                performance.PlayerName,
+                matchEvent.PrimaryPlayerName,
+                StringComparison.OrdinalIgnoreCase))
+            ?.TeamName;
+        if (string.Equals(performanceTeam, match.HomeTeam.Name, StringComparison.OrdinalIgnoreCase))
+        {
+            return match.HomeTeam.Name;
+        }
+
+        if (string.Equals(performanceTeam, match.AwayTeam.Name, StringComparison.OrdinalIgnoreCase))
+        {
+            return match.AwayTeam.Name;
+        }
+
+        if (TeamContainsPlayer(match.HomeTeam, matchEvent.PrimaryPlayerName))
+        {
+            return match.HomeTeam.Name;
+        }
+
+        if (TeamContainsPlayer(match.AwayTeam, matchEvent.PrimaryPlayerName))
+        {
+            return match.AwayTeam.Name;
+        }
+
         return string.Empty;
+    }
+
+    private static bool TeamContainsPlayer(Team team, string? playerName)
+    {
+        return !string.IsNullOrWhiteSpace(playerName) &&
+            team.AllPlayers.Any(player => string.Equals(
+                player.Name,
+                playerName,
+                StringComparison.OrdinalIgnoreCase));
     }
 
     private static List<PlayerPerformanceRow> CreatePlayerRows(
