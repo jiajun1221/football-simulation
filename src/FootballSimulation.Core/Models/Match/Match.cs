@@ -23,6 +23,7 @@ public class Match
     public MatchPhase CurrentPhase { get; set; }
     public WeatherCondition WeatherCondition { get; set; } = WeatherCondition.Clear;
     public bool IsRivalryMatch { get; set; }
+    public int? SimulationSeed { get; set; }
     public List<MatchEvent> Events { get; set; } = [];
     public List<PlayerMatchPerformance> PlayerPerformances { get; set; } = [];
     public List<MatchSubstitution> Substitutions { get; set; } = [];

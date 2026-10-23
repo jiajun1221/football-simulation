@@ -8,4 +8,5 @@ public class MatchSimulationOptions
     public bool EnableInjuries { get; set; } = true;
     public bool PreserveMatchStartStamina { get; set; }
     public bool IsExtraTimeSegment { get; set; }
+    public bool EnableMentalSystem { get; set; }
 }

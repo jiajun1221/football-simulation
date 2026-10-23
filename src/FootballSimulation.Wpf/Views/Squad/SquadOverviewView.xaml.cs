@@ -48,6 +48,9 @@ public partial class SquadOverviewView : UserControl
 
         LoadSquad();
         LoadFormationEditor();
+        var mentalSystemEnabled = MentalSystemSettings.IsEnabled;
+        DressingRoomSegmentButton.Visibility = mentalSystemEnabled ? Visibility.Visible : Visibility.Collapsed;
+        DressingRoomTab.Visibility = mentalSystemEnabled ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void LoadSquad()
@@ -657,14 +660,26 @@ public partial class SquadOverviewView : UserControl
 
     private void SquadTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        // SelectionChanged bubbles from child controls such as the Morale player grid.
+        // Only reload tab content when the TabControl selection itself changes.
+        if (!ReferenceEquals(e.OriginalSource, SquadTabControl))
+        {
+            return;
+        }
+
         SquadSegmentButton.IsChecked = SquadTabControl.SelectedIndex == 0;
-        FormationSegmentButton.IsChecked = SquadTabControl.SelectedIndex == 1;
-        StatisticsSegmentButton.IsChecked = SquadTabControl.SelectedIndex == 2;
+        DressingRoomSegmentButton.IsChecked = SquadTabControl.SelectedIndex == 1;
+        FormationSegmentButton.IsChecked = SquadTabControl.SelectedIndex == 2;
+        StatisticsSegmentButton.IsChecked = SquadTabControl.SelectedIndex == 3;
         if (SquadTabControl.SelectedIndex == 1)
+        {
+            DressingRoomView.LoadTeam(_state.SelectedTeam);
+        }
+        else if (SquadTabControl.SelectedIndex == 2)
         {
             LoadFormationEditor();
         }
-        else if (SquadTabControl.SelectedIndex == 2)
+        else if (SquadTabControl.SelectedIndex == 3)
         {
             LoadSeasonStatistics();
         }

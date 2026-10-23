@@ -14,4 +14,5 @@ public class Team
     public IEnumerable<Player> AllPlayers => Players.Concat(Substitutes).Concat(Reserves);
     public TeamTactics Tactics { get; set; } = new();
     public List<FormationPreset> FormationPresets { get; set; } = [];
+    public DressingRoomState DressingRoom { get; set; } = new();
 }

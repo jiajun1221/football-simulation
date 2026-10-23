@@ -53,6 +53,11 @@ public sealed class ContextualPlayerPerformanceCalculator
         // a genuine late-match collapse rather than a small linear penalty.
         score *= GetExhaustionModifier(player.Stamina);
 
+        if (player.MentalState.MatchEffectsEnabled)
+        {
+            score *= 1.0 + EmotionService.GetActionModifier(player, actionType);
+        }
+
         if (player.IsInjured || player.IsSuspended || player.IsSentOff)
         {
             score *= 0.35;

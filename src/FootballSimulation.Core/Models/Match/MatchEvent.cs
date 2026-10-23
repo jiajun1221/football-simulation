@@ -13,6 +13,13 @@ public class MatchEvent
     public WeatherCondition? WeatherCondition { get; set; }
     public int? AddedMinutes { get; set; }
     public ShotClassification ShotClassification { get; set; } = ShotClassification.Standard;
+    public double? ExpectedGoals { get; set; }
+    public double? ShotDistanceMeters { get; set; }
+    public double? ShotAngleDegrees { get; set; }
+    public double? BallSpeedMetersPerSecond { get; set; }
+    public double? BallArrivalSpeedMetersPerSecond { get; set; }
+    public double? BallLateralDriftMeters { get; set; }
+    public bool IsSetPieceShot { get; set; }
     public FoulLocation FoulLocation { get; set; } = FoulLocation.OpenPlay;
     public bool IsPenaltyFoul { get; set; }
     public string FouledPlayer { get; set; } = string.Empty;

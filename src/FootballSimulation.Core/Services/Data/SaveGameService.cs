@@ -8,7 +8,7 @@ namespace FootballSimulation.Services;
 
 public class SaveGameService
 {
-    public const int CurrentSaveVersion = 8;
+    public const int CurrentSaveVersion = 9;
     public const int MaxSaveSlots = 3;
 
     private const string SaveFolderName = "WPFFootballSimulator";
@@ -673,6 +673,7 @@ public class SaveGameService
         {
             team.Reserves ??= [];
             team.LoanedOutPlayers ??= [];
+            DressingRoomService.EnsureTeam(team);
             foreach (var player in team.AllPlayers)
             {
                 PlayerAttributeService.ApplyMissingAttributes(player);

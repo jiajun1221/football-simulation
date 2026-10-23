@@ -272,6 +272,8 @@ public class LeagueEngine
 
         _ = LineupValidationService.RepairUnavailablePlayers(fixture.HomeTeam);
         _ = LineupValidationService.RepairUnavailablePlayers(fixture.AwayTeam);
+        RepairMalformedLiveTeamRoster(fixture.HomeTeam, options);
+        RepairMalformedLiveTeamRoster(fixture.AwayTeam, options);
     }
 
     private static void EnsureTeamCanFieldEleven(Team team)
@@ -337,7 +339,7 @@ public class LeagueEngine
 
         while (team.Players.Count < 11)
         {
-            var replacement = team.Substitutes
+            var replacement = team.Substitutes.Concat(team.Reserves)
                 .Where(player => !player.IsInjured && !player.IsSuspended && !player.IsSentOff)
                 .OrderByDescending(player => player.OverallRating)
                 .FirstOrDefault();
@@ -347,6 +349,7 @@ public class LeagueEngine
             }
 
             team.Substitutes.Remove(replacement);
+            team.Reserves.Remove(replacement);
             replacement.IsStarter = true;
             replacement.IsOnPitch = true;
             team.Players.Add(replacement);
@@ -365,11 +368,13 @@ public class LeagueEngine
         {
             return new MatchSimulationOptions
             {
-                PreserveMatchStartStamina = true
+                PreserveMatchStartStamina = true,
+                EnableMentalSystem = MentalSystemSettings.IsEnabled
             };
         }
 
         options.PreserveMatchStartStamina = true;
+        options.EnableMentalSystem = MentalSystemSettings.IsEnabled;
         return options;
     }
 

@@ -88,6 +88,7 @@ public class MatchEngine
     {
         ValidateTeam(match.HomeTeam, nameof(match.HomeTeam));
         ValidateTeam(match.AwayTeam, nameof(match.AwayTeam));
+        match.SimulationSeed ??= seed;
 
         var simulationState = new MatchSimulationState(
             match,
@@ -140,6 +141,7 @@ public class MatchEngine
     {
         ValidateTeam(match.HomeTeam, nameof(match.HomeTeam));
         ValidateTeam(match.AwayTeam, nameof(match.AwayTeam));
+        match.SimulationSeed ??= seed;
 
         if (startMinute < 1 || endMinute < startMinute)
         {
@@ -189,6 +191,7 @@ public class MatchEngine
 
         var random = CreateRandom(seed);
         var match = CreateMatch(homeTeam, awayTeam);
+        match.SimulationSeed = seed;
         AssignWeather(match, random);
         var simulationState = new MatchSimulationState(match, new MatchLogService(), new MatchEventFactory(), 0, 0, CreateOptions(options));
         InitializeAttackFlowState(simulationState);
@@ -912,6 +915,7 @@ public class MatchEngine
 
     private static void InitializeAttackFlowState(MatchSimulationState simulationState)
     {
+        ConfigureMentalSystem(simulationState);
         var lastEvent = simulationState.Match.Events.LastOrDefault(IsPossessionStateEvent);
         if (lastEvent is null)
         {
@@ -935,6 +939,35 @@ public class MatchEngine
         RestoreErrorStateFromExistingEvents(simulationState);
         var possessionTeam = InferPossessionAfterEvent(lastEvent, simulationState.Match);
         SetPossession(simulationState, possessionTeam, GetBallStateAfterEvent(lastEvent.EventType), lastEvent.EventType);
+    }
+
+    private static void ConfigureMentalSystem(MatchSimulationState simulationState)
+    {
+        var match = simulationState.Match;
+        foreach (var player in match.HomeTeam.AllPlayers.Concat(match.AwayTeam.AllPlayers))
+        {
+            player.MentalState ??= new PlayerMentalState();
+            player.MentalState.MatchEffectsEnabled = simulationState.Options.EnableMentalSystem;
+            player.MentalState.MatchChemistryModifier = 0;
+        }
+
+        if (!simulationState.Options.EnableMentalSystem)
+        {
+            simulationState.MatchLog.EventAdded = null;
+            return;
+        }
+
+        DressingRoomService.EnsureTeam(match.HomeTeam);
+        DressingRoomService.EnsureTeam(match.AwayTeam);
+        var chemistry = new FormationChemistryService();
+        chemistry.ApplyMatchSnapshot(match.HomeTeam);
+        chemistry.ApplyMatchSnapshot(match.AwayTeam);
+        foreach (var player in match.HomeTeam.AllPlayers.Concat(match.AwayTeam.AllPlayers))
+        {
+            EmotionService.RefreshMatchModifier(player);
+        }
+        var emotions = new EmotionService(match);
+        simulationState.MatchLog.EventAdded = matchEvent => emotions.ProcessEvent(match, matchEvent);
     }
 
     private static void RestoreActiveAttackNarrative(MatchSimulationState simulationState, MatchEvent lastEvent)
@@ -1097,7 +1130,7 @@ public class MatchEngine
 
         var tempoAdjustment = (attackingTeam.Tactics.Tempo - 50) * 0.004;
         var counterattackBonus = simulationState.ActiveAttackNarrative?.Route == "counterattack" ? 0.12 : 0.0;
-        var baseChance = additionalAttackSteps == 0 ? 0.46 : 0.16;
+        var baseChance = additionalAttackSteps == 0 ? 0.60 : 0.20;
         var continuationChance = Math.Clamp(baseChance + tempoAdjustment + counterattackBonus, 0.18, 0.78);
         return random.NextDouble() < continuationChance;
     }
@@ -3523,6 +3556,9 @@ public class MatchEngine
         double defensiveErrorBoost)
     {
         var shooterPerformance = GetOrCreatePerformance(match, attackingTeam, shooter);
+        var shotPressure = Math.Clamp((defendingTeamStrength - attackingTeamStrength + 20.0) / 80.0, 0.0, 1.0);
+        var shotFlight = BallFlightModel.SampleShot(shooter, chanceType, match.WeatherCondition, shotPressure, random);
+        RecordShotPhysics(attackingStats, shotFlight);
         var scorerKey = CreateErrorPlayerKey(attackingTeam, shooter);
         var scorerCooldownPenalty = GetScorerCooldownPenalty(simulationState, scorerKey, minute);
         var goalProbability = Math.Clamp(
@@ -3536,10 +3572,20 @@ public class MatchEngine
                 random,
                 shooterHasSuperSubBoost,
                 shooterPerformance.Goals,
-                scorerCooldownPenalty) + defensiveErrorBoost,
+                scorerCooldownPenalty) * shotFlight.GoalProbabilityModifier + defensiveErrorBoost,
             MatchConstants.MinimumGoalProbability,
             MatchConstants.MaximumGoalProbability);
         attackingStats.ExpectedGoals += goalProbability;
+        var shotEvent = matchLog.GetEvents().LastOrDefault(matchEvent => matchEvent.EventType == EventType.Shot);
+        if (shotEvent is not null)
+        {
+            shotEvent.ExpectedGoals = Math.Round(goalProbability, 4);
+            shotEvent.ShotDistanceMeters = Math.Round(shotFlight.DistanceMeters, 2);
+            shotEvent.ShotAngleDegrees = Math.Round(shotFlight.AngleDegrees, 2);
+            shotEvent.BallSpeedMetersPerSecond = Math.Round(shotFlight.InitialSpeedMetersPerSecond, 2);
+            shotEvent.BallArrivalSpeedMetersPerSecond = Math.Round(shotFlight.ArrivalSpeedMetersPerSecond, 2);
+            shotEvent.BallLateralDriftMeters = Math.Round(shotFlight.LateralDriftMeters, 3);
+        }
 
         shooterPerformance.Shots++;
 
@@ -3647,7 +3693,7 @@ public class MatchEngine
             return defendingTeam;
         }
 
-        if (ShouldHitWoodwork(goalProbability, match.WeatherCondition, random))
+        if (ShouldHitWoodwork(shotFlight, match.WeatherCondition, random))
         {
             var reboundOutcome = ChooseWoodworkReboundOutcome(random);
             matchLog.AddEvent(eventFactory.CreateWoodwork(minute, attackingTeam, shooter, reboundOutcome, random));
@@ -3676,7 +3722,7 @@ public class MatchEngine
             return defendingTeam;
         }
 
-        var wasSaved = IsSaved(defendingTeam, shooter, chanceType, random);
+        var wasSaved = shotFlight.IsOnTarget && IsSaved(defendingTeam, shooter, chanceType, random);
         if (wasSaved)
         {
             Player? goalkeeper = null;
@@ -4392,24 +4438,7 @@ public class MatchEngine
 
     private static bool IsSubstitutionStoppageEvent(EventType? eventType)
     {
-        return eventType is EventType.Halftime
-            or EventType.Injury
-            or EventType.Foul
-            or EventType.PenaltyDecision
-            or EventType.PenaltyTaker
-            or EventType.Penalty
-            or EventType.Offside
-            or EventType.CornerKick
-            or EventType.SetPieceDanger
-            or EventType.Goal
-            or EventType.WonderGoal
-            or EventType.VarCheck
-            or EventType.VarDecision
-            or EventType.YellowCard
-            or EventType.RedCard
-            or EventType.RefereeControversy
-            or EventType.Confrontation
-            or EventType.TimeWasting;
+        return SubstitutionStoppageService.CanMakeSubstitution(eventType);
     }
 
     private static void RegisterConfrontation(MatchSimulationState simulationState, int minute)
@@ -4550,16 +4579,9 @@ public class MatchEngine
         return defender.Morale < 45 ? "frustration" : "late tackle";
     }
 
-    private static bool ShouldHitWoodwork(double goalProbability, WeatherCondition weatherCondition, Random random)
+    private static bool ShouldHitWoodwork(ShotFlight shotFlight, WeatherCondition weatherCondition, Random random)
     {
-        var weatherBonus = weatherCondition switch
-        {
-            WeatherCondition.Storm => 0.015,
-            WeatherCondition.Windy or WeatherCondition.HeavyRain => 0.01,
-            _ => 0.0
-        };
-        var probability = Math.Clamp(0.035 + goalProbability * 0.20 + weatherBonus, 0.035, 0.10);
-        return random.NextDouble() < probability;
+        return random.NextDouble() < BallFlightModel.GetWoodworkProbability(shotFlight, weatherCondition);
     }
 
     private static string ChooseWoodworkReboundOutcome(Random random)
@@ -5255,7 +5277,9 @@ public class MatchEngine
         var directPlayBonus = Math.Max(0, attackingTeam.Tactics.Tempo - 65) * 0.003;
 
         var chanceProbability = Math.Clamp(
-            (0.15 + attackBalance * 0.30 + directPlayBonus + GetProbabilitySwing(random, 0.05)) *
+            // A slightly higher chance volume pairs with spatial shot error, producing more
+            // attempts without restoring the old, unrealistically high conversion rate.
+            (0.22 + attackBalance * 0.30 + directPlayBonus + GetProbabilitySwing(random, 0.05)) *
                 attackFlowModifier * defendingProfile.ExposureAfterPress,
             0.08,
             0.58);
@@ -6006,8 +6030,11 @@ public class MatchEngine
         };
         var tacticalModifier = _tacticalImpactCalculator.GetFoulModifier(defendingTeam);
         var venueModifier = HomeAwayAdvantageService.GetModifier(match, defendingTeam).FoulRiskModifier;
+        var mentalModifier = simulationState.Options.EnableMentalSystem
+            ? GetActivePitchPlayers(defendingTeam).Select(EmotionService.GetFoulRiskModifier).DefaultIfEmpty(1.0).Average()
+            : 1.0;
         var foulProbability = Math.Clamp(
-            (MatchConstants.BaseFoulChancePerAttack + aggressionBonus + rivalryBonus + tensionBonus + weatherBonus + (foulPressure / 400.0) + GetProbabilitySwing(random, 0.03)) * tacticalModifier * venueModifier,
+            (MatchConstants.BaseFoulChancePerAttack + aggressionBonus + rivalryBonus + tensionBonus + weatherBonus + (foulPressure / 400.0) + GetProbabilitySwing(random, 0.03)) * tacticalModifier * venueModifier * mentalModifier,
             0.05,
             IsMatchTense(simulationState, minute)
                 ? 0.46
@@ -6056,7 +6083,8 @@ public class MatchEngine
         var venueModifier = defendingTeam is null
             ? 1.0
             : HomeAwayAdvantageService.GetModifier(simulationState.Match, defendingTeam).YellowRiskModifier;
-        return random.NextDouble() < Math.Clamp((baseChance + traitBonus + tensionBonus + persistentFoulingBonus) * venueModifier, 0.0, 0.88);
+        var mentalModifier = simulationState.Options.EnableMentalSystem ? EmotionService.GetFoulRiskModifier(defender) : 1.0;
+        return random.NextDouble() < Math.Clamp((baseChance + traitBonus + tensionBonus + persistentFoulingBonus) * venueModifier * mentalModifier, 0.0, 0.88);
     }
 
     private static FoulContext CreateFoulContext(
@@ -6848,6 +6876,7 @@ public class MatchEngine
         if (options.EnableDynamicFatigue)
         {
             _fatigueService.ApplyMinuteFatigue(team, match);
+            ApplyWeatherFatiguePressure(team, match);
             ApplyVenueFatiguePressure(team, match);
             ApplySecondWindIfNeeded(team, match);
             ApplyExtraTimeFatiguePressure(team, match, options);
@@ -6891,6 +6920,28 @@ public class MatchEngine
             var lowStaminaPressure = player.Stamina < 50 ? 0.16 : player.Stamina < 65 ? 0.10 : 0.06;
             player.Stamina = Math.Max(0.0, player.Stamina - lowStaminaPressure * GetPositionFatiguePressureMultiplier(player));
             player.LiveMatchModifier = Math.Clamp(player.LiveMatchModifier - 0.0015, 0.70, 1.15);
+        }
+    }
+
+    private static void ApplyWeatherFatiguePressure(Team team, Match match)
+    {
+        var extraLoss = match.WeatherCondition switch
+        {
+            WeatherCondition.HeavyRain => 0.030,
+            WeatherCondition.Storm => 0.024,
+            WeatherCondition.Snow => 0.040,
+            WeatherCondition.Rainy => 0.012,
+            WeatherCondition.Hot => 0.036,
+            WeatherCondition.Cold => -0.006,
+            _ => 0.0
+        };
+
+        foreach (var player in GetActivePitchPlayers(team))
+        {
+            player.Stamina = Math.Clamp(
+                player.Stamina - extraLoss * GetPositionFatiguePressureMultiplier(player),
+                0.0,
+                100.0);
         }
     }
 
@@ -7023,6 +7074,28 @@ public class MatchEngine
         match.AwayStats.Passes = EstimatePasses(match.AwayTeam, match.AwayStats.PossessionPercentage);
         match.HomeStats.PassAccuracyPercentage = EstimatePassAccuracy(match, match.HomeTeam);
         match.AwayStats.PassAccuracyPercentage = EstimatePassAccuracy(match, match.AwayTeam);
+        SetPassPhysics(match.HomeStats, BallFlightModel.EstimateAveragePass(match.HomeTeam, match.WeatherCondition));
+        SetPassPhysics(match.AwayStats, BallFlightModel.EstimateAveragePass(match.AwayTeam, match.WeatherCondition));
+    }
+
+    private static void SetPassPhysics(MatchTeamStats stats, PassFlight passFlight)
+    {
+        stats.AveragePassLengthMeters = Math.Round(passFlight.DistanceMeters, 2);
+        stats.AveragePassSpeedMetersPerSecond = Math.Round(passFlight.InitialSpeedMetersPerSecond, 2);
+    }
+
+    private static void RecordShotPhysics(MatchTeamStats stats, ShotFlight shotFlight)
+    {
+        var previousSamples = stats.ShotPhysicsSamples;
+        stats.ShotPhysicsSamples++;
+        stats.AverageShotDistanceMeters = RunningAverage(stats.AverageShotDistanceMeters, previousSamples, shotFlight.DistanceMeters);
+        stats.AverageShotAngleDegrees = RunningAverage(stats.AverageShotAngleDegrees, previousSamples, shotFlight.AngleDegrees);
+        stats.AverageShotSpeedMetersPerSecond = RunningAverage(stats.AverageShotSpeedMetersPerSecond, previousSamples, shotFlight.InitialSpeedMetersPerSecond);
+    }
+
+    private static double RunningAverage(double currentAverage, int previousSamples, double value)
+    {
+        return Math.Round((currentAverage * previousSamples + value) / (previousSamples + 1), 3);
     }
 
     private static int EstimatePasses(Team team, double possessionPercentage)

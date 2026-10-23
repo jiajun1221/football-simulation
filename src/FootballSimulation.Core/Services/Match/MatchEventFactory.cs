@@ -595,6 +595,8 @@ public class MatchEventFactory
 
         var matchEvent = CreateEvent(minute, EventType.Shot, description, attacker.Name, GetAssistCandidateName(attacker, playmaker), triggeredTrait: triggeredTrait);
         matchEvent.ShotClassification = ClassifyShot(chanceType, description);
+        matchEvent.IsSetPieceShot = chanceType.Contains("corner", StringComparison.OrdinalIgnoreCase) ||
+            chanceType.Contains("free-kick", StringComparison.OrdinalIgnoreCase);
         ApplyAttackNarrative(matchEvent, narrative);
         matchEvent.AttackSequenceStep = narrative is null ? 0 : 5;
         return matchEvent;
@@ -1064,6 +1066,7 @@ public class MatchEventFactory
 
         var matchEvent = CreateEvent(minute, EventType.Shot, description, taker.Name, triggeredTrait: triggeredTrait);
         matchEvent.ShotClassification = ShotClassification.FreeKick;
+        matchEvent.IsSetPieceShot = true;
         return matchEvent;
     }
 

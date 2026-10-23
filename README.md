@@ -33,6 +33,10 @@ Open PowerShell in the repository root (`C:\Users\jchng\football-simulation`) an
 dotnet run --project .\src\FootballSimulation.Wpf\FootballSimulation.Wpf.csproj
 ```
 
+The mental and dressing-room simulation is enabled by default. To disable it for a run, set
+`FOOTBALLSIM_MENTAL_SYSTEM=0` before starting the application. With the flag disabled, the Morale tab
+is hidden and its match hooks do not consume random values or apply simulation modifiers.
+
 The WPF game window should open automatically.
 
 ## Run from Visual Studio

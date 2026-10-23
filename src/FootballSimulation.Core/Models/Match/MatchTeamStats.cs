@@ -13,4 +13,10 @@ public class MatchTeamStats
     public double ExpectedGoals { get; set; }
     public int Passes { get; set; }
     public double PassAccuracyPercentage { get; set; }
+    public double AveragePassLengthMeters { get; set; }
+    public double AveragePassSpeedMetersPerSecond { get; set; }
+    public double AverageShotDistanceMeters { get; set; }
+    public double AverageShotAngleDegrees { get; set; }
+    public double AverageShotSpeedMetersPerSecond { get; set; }
+    public int ShotPhysicsSamples { get; set; }
 }

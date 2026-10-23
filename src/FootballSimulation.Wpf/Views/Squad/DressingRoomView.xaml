@@ -1,0 +1,310 @@
+<UserControl x:Class="FootballSimulation.Wpf.Views.DressingRoomView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:FootballSimulation.Wpf.Controls">
+    <UserControl.Resources>
+        <Style x:Key="MoraleCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource AppCardBackground}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="Padding" Value="14" />
+        </Style>
+        <Style x:Key="SectionTitleStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+        <Style x:Key="MutedTextStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource AppMutedTextBrush}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style x:Key="OverviewLabelStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource AppMutedTextBrush}" />
+            <Setter Property="FontSize" Value="10" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style x:Key="OverviewValueStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+            <Setter Property="FontSize" Value="19" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+        <Style x:Key="MoraleGridStyle" TargetType="DataGrid">
+            <Setter Property="AutoGenerateColumns" Value="False" />
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="HeadersVisibility" Value="Column" />
+            <Setter Property="GridLinesVisibility" Value="Horizontal" />
+            <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource AppBorderBrush}" />
+            <Setter Property="VerticalGridLinesBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="RowHeight" Value="31" />
+            <Setter Property="ColumnHeaderHeight" Value="34" />
+            <Setter Property="CanUserAddRows" Value="False" />
+            <Setter Property="CanUserDeleteRows" Value="False" />
+            <Setter Property="CanUserReorderColumns" Value="False" />
+            <Setter Property="SelectionMode" Value="Single" />
+            <Setter Property="SelectionUnit" Value="FullRow" />
+            <Setter Property="AlternationCount" Value="2" />
+            <Setter Property="RowStyle">
+                <Setter.Value>
+                    <Style TargetType="DataGridRow">
+                        <Setter Property="Cursor" Value="Hand" />
+                        <Setter Property="Background" Value="{DynamicResource AppCardBackground}" />
+                        <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}" />
+                        <Setter Property="BorderThickness" Value="0,0,0,1" />
+                        <Style.Triggers>
+                            <Trigger Property="AlternationIndex" Value="1">
+                                <Setter Property="Background" Value="{DynamicResource TableAlternateRowBackground}" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#E0F2FE" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#DBEAFE" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <DataTemplate x:Key="PlayerNameTemplate">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" IsHitTestVisible="False">
+                <controls:FlagBadge FlagSource="{Binding NationalityFlagImagePath}"
+                                    ToolTip="{Binding NationalityName}"
+                                    Width="22" Height="14" Margin="0,0,7,0" />
+                <TextBlock Text="{Binding Name}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate x:Key="ArchetypeBadgeTemplate">
+            <Border Background="{Binding ArchetypeBadgeBackground}" CornerRadius="8" Padding="7,2"
+                    HorizontalAlignment="Left" VerticalAlignment="Center" IsHitTestVisible="False">
+                <TextBlock Text="{Binding Archetype}" Foreground="{Binding ArchetypeBadgeForeground}" FontSize="10" FontWeight="SemiBold" />
+            </Border>
+        </DataTemplate>
+        <DataTemplate x:Key="MoodBadgeTemplate">
+            <Border Background="{Binding MoodBadgeBackground}" CornerRadius="8" Padding="7,2"
+                    HorizontalAlignment="Left" VerticalAlignment="Center" IsHitTestVisible="False">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding MoodFace}" FontSize="10" Margin="0,0,4,0" />
+                    <TextBlock Text="{Binding Mood}" Foreground="{Binding MoodBadgeForeground}" FontSize="10" FontWeight="SemiBold" />
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+        <DataTemplate x:Key="EmotionBadgeTemplate">
+            <Border Background="{Binding EmotionBadgeBackground}" CornerRadius="8" Padding="7,2"
+                    HorizontalAlignment="Left" VerticalAlignment="Center" IsHitTestVisible="False">
+                <StackPanel Orientation="Horizontal">
+                    <Grid Width="12" Height="12" Margin="0,0,4,0" VerticalAlignment="Center">
+                        <Path Data="{Binding EmotionIconData}" Stroke="{Binding EmotionBadgeForeground}"
+                              StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                              StrokeLineJoin="Round" Stretch="Uniform" />
+                        <TextBlock Text="{Binding EmotionSymbol}" Foreground="{Binding EmotionBadgeForeground}"
+                                   FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Grid>
+                    <TextBlock Text="{Binding KeyEmotion}" Foreground="{Binding EmotionBadgeForeground}" FontSize="10" FontWeight="SemiBold" />
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+        <DataTemplate x:Key="FlaggedPlayerTemplate">
+            <StackPanel Orientation="Horizontal" Margin="0,2" IsHitTestVisible="False">
+                <controls:FlagBadge FlagSource="{Binding FlagImagePath}" ToolTip="{Binding NationalityName}"
+                                    Width="20" Height="13" Margin="0,0,6,0" VerticalAlignment="Center"
+                                    Visibility="{Binding FlagVisibility}" />
+                <TextBlock Text="{Binding Name}" Foreground="{DynamicResource AppTextBrush}"
+                           FontSize="11" TextWrapping="Wrap" VerticalAlignment="Center" />
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate x:Key="CliqueTemplate">
+            <StackPanel Margin="0,2,0,7">
+                <TextBlock Text="{Binding Name}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextBrush}" />
+                <ItemsControl ItemsSource="{Binding Members}" ItemTemplate="{StaticResource FlaggedPlayerTemplate}" Margin="8,2,0,0" />
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate x:Key="ChemistryTemplate">
+            <Grid Margin="0,2,0,7">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <ContentControl Content="{Binding Player}" ContentTemplate="{StaticResource FlaggedPlayerTemplate}" />
+                <TextBlock Grid.Column="1" Text=":" Margin="1,0,5,0" VerticalAlignment="Center"
+                           FontWeight="SemiBold" Visibility="{Binding PairVisibility}" />
+                <TextBlock Grid.Column="2" Text="{Binding Description}" Style="{StaticResource MutedTextStyle}" VerticalAlignment="Center" />
+            </Grid>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <Grid Background="{DynamicResource AppPageBackground}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="0,0,0,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Style="{StaticResource MoraleCardStyle}" Margin="0,0,8,0">
+                <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="TEAM HARMONY" Style="{StaticResource OverviewLabelStyle}" />
+                        <TextBlock x:Name="HarmonyText" Style="{StaticResource OverviewValueStyle}" />
+                    </StackPanel>
+                    <TextBlock Grid.Column="1" Text="🤝" FontSize="20" VerticalAlignment="Center" Opacity="0.75" />
+                </Grid>
+            </Border>
+            <Border Grid.Column="1" Style="{StaticResource MoraleCardStyle}" Margin="0,0,8,0">
+                <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="SQUAD HAPPINESS" Style="{StaticResource OverviewLabelStyle}" />
+                        <TextBlock x:Name="HappinessText" Style="{StaticResource OverviewValueStyle}" />
+                    </StackPanel>
+                    <TextBlock Grid.Column="1" Text="♥" FontSize="21" VerticalAlignment="Center" Opacity="0.75" />
+                </Grid>
+            </Border>
+            <Border Grid.Column="2" Style="{StaticResource MoraleCardStyle}" Margin="0,0,8,0">
+                <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="ATMOSPHERE" Style="{StaticResource OverviewLabelStyle}" />
+                        <TextBlock x:Name="AtmosphereText" Style="{StaticResource OverviewValueStyle}" />
+                    </StackPanel>
+                    <TextBlock Grid.Column="1" Text="☁" FontSize="22" VerticalAlignment="Center" Opacity="0.75" />
+                </Grid>
+            </Border>
+            <Border Grid.Column="3" Style="{StaticResource MoraleCardStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="RECENT EVENT" Style="{StaticResource OverviewLabelStyle}" />
+                        <TextBlock x:Name="RecentEventText" Foreground="{DynamicResource AppTextBrush}" FontSize="11"
+                                   FontWeight="SemiBold" TextWrapping="Wrap" MaxHeight="32" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                    <TextBlock Grid.Column="1" Text="●" FontSize="15" VerticalAlignment="Center" Opacity="0.45" Margin="6,0,0,0" />
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="55*" />
+                <ColumnDefinition Width="45*" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Style="{StaticResource MoraleCardStyle}" Margin="0,0,10,0" Padding="0">
+                <Grid>
+                    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                    <StackPanel Margin="14,12,14,10">
+                        <TextBlock Text="Squad morale" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" />
+                        <TextBlock Text="Select a player to view their personality and relationships" Style="{StaticResource MutedTextStyle}" Margin="0,3,0,0" />
+                    </StackPanel>
+                    <DataGrid x:Name="PlayersGrid" Grid.Row="1" Style="{StaticResource MoraleGridStyle}"
+                              SelectionChanged="PlayersGrid_SelectionChanged"
+                              MouseLeftButtonUp="PlayersGrid_MouseLeftButtonUp">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="Player" CellTemplate="{StaticResource PlayerNameTemplate}" Width="*" MinWidth="120" />
+                            <DataGridTemplateColumn Header="Archetype" CellTemplate="{StaticResource ArchetypeBadgeTemplate}" Width="140" />
+                            <DataGridTemplateColumn Header="Key emotion" CellTemplate="{StaticResource EmotionBadgeTemplate}" Width="105" />
+                            <DataGridTemplateColumn Header="Mood" CellTemplate="{StaticResource MoodBadgeTemplate}" Width="105" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+
+            <ScrollViewer x:Name="DetailsScrollViewer" Grid.Column="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <StackPanel>
+                    <Border Style="{StaticResource MoraleCardStyle}" Margin="0,0,0,10">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <controls:FlagBadge x:Name="DetailFlagBadge" Width="25" Height="17" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                <TextBlock x:Name="DetailNameText" Grid.Column="1" FontSize="19" FontWeight="Bold"
+                                           Foreground="{DynamicResource AppTextBrush}" VerticalAlignment="Center"
+                                           TextTrimming="CharacterEllipsis" />
+                                <Border x:Name="DetailEmotionIconBorder" Grid.Column="2" Width="28" Height="28" CornerRadius="14"
+                                        Margin="10,0,0,0" VerticalAlignment="Center">
+                                    <Grid Width="15" Height="15" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Path x:Name="DetailEmotionIconPath" StrokeThickness="2" StrokeStartLineCap="Round"
+                                              StrokeEndLineCap="Round" StrokeLineJoin="Round" Stretch="Uniform" />
+                                        <TextBlock x:Name="DetailEmotionIconText" FontSize="14" FontWeight="Bold"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Grid>
+                                </Border>
+                                <Border x:Name="DetailMoodFaceBorder" Grid.Column="3" Width="36" Height="36" CornerRadius="18"
+                                        Margin="6,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock x:Name="DetailMoodFaceText" FontSize="21" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                            </Grid>
+                            <StackPanel Margin="0,2,0,10">
+                                <WrapPanel VerticalAlignment="Center">
+                                    <Border x:Name="DetailArchetypeBadgeBorder" CornerRadius="8" Padding="7,2" Margin="0,0,5,2">
+                                        <TextBlock x:Name="DetailArchetypeBadgeText" FontSize="10" FontWeight="SemiBold" />
+                                    </Border>
+                                    <TextBlock x:Name="DetailSecondaryTagText" Style="{StaticResource MutedTextStyle}"
+                                               VerticalAlignment="Center" Margin="0,0,0,2" />
+                                </WrapPanel>
+                                <TextBlock x:Name="PersonalityText" Style="{StaticResource MutedTextStyle}" Margin="0,1,0,0" />
+                            </StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                                    <TextBlock Text="Close friends" Style="{StaticResource SectionTitleStyle}" />
+                                    <ItemsControl x:Name="FriendsList" ItemTemplate="{StaticResource FlaggedPlayerTemplate}" Margin="0,0,0,13" />
+                                    <TextBlock Text="Rivals" Style="{StaticResource SectionTitleStyle}" />
+                                    <ItemsControl x:Name="RivalsList" ItemTemplate="{StaticResource FlaggedPlayerTemplate}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="Mentor" Style="{StaticResource SectionTitleStyle}" />
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,13">
+                                        <controls:FlagBadge x:Name="MentorFlagBadge" Width="20" Height="13" Margin="0,0,6,0" VerticalAlignment="Center" />
+                                        <TextBlock x:Name="MentorText" Style="{StaticResource MutedTextStyle}" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                    <TextBlock Text="Recent mood changes" Style="{StaticResource SectionTitleStyle}" />
+                                    <ItemsControl x:Name="MoodChangesList" />
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <StackPanel Margin="0,0,0,10">
+                        <Border Style="{StaticResource MoraleCardStyle}" Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock Text="Chemistry hints" Style="{StaticResource SectionTitleStyle}" />
+                                <ItemsControl x:Name="ChemistryList" ItemTemplate="{StaticResource ChemistryTemplate}" />
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource MoraleCardStyle}">
+                            <StackPanel>
+                                <TextBlock Text="Cliques" Style="{StaticResource SectionTitleStyle}" />
+                                <ItemsControl x:Name="CliquesList" ItemTemplate="{StaticResource CliqueTemplate}" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
+
+            <Border x:Name="StateMessageBorder" Grid.ColumnSpan="2" Background="{DynamicResource AppPanelBackground}" BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="1" CornerRadius="12" Padding="28" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <StackPanel>
+                    <TextBlock Text="●" FontSize="18" HorizontalAlignment="Center" Margin="0,0,0,8" Opacity="0.45" />
+                    <TextBlock x:Name="StateMessageText" Text="Loading dressing room..." FontSize="15" FontWeight="SemiBold" TextAlignment="Center" />
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

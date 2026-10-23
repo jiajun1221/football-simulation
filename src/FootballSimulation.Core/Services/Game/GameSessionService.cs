@@ -13,6 +13,7 @@ public class GameSessionService
     private readonly PlayerGrowthService _playerGrowthService = new();
     private readonly YouthAcademyService _youthAcademyService = new();
     private readonly YouthScoutService _youthScoutService = new();
+    private readonly DressingRoomService _dressingRoomService = new();
 
     public GameSessionService()
         : this(new LeagueEngine())
@@ -162,6 +163,10 @@ public class GameSessionService
         }
 
         _youthScoutService.AdvanceScoutingAfterCompletedCalendarSlot(league, completedCalendarRound);
+        if (MentalSystemSettings.IsEnabled)
+        {
+            _dressingRoomService.AdvanceCalendarSlot(league, completedCalendarRound, completedMatches);
+        }
     }
 
     private void ApplyGrowthForCompletedMatches(IEnumerable<Match> matches)
@@ -200,7 +205,8 @@ public class GameSessionService
         return new MatchSimulationOptions
         {
             HumanControlledTeamName = selectedTeam.Name,
-            PreserveMatchStartStamina = true
+            PreserveMatchStartStamina = true,
+            EnableMentalSystem = MentalSystemSettings.IsEnabled
         };
     }
 }

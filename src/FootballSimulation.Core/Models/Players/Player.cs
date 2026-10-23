@@ -92,6 +92,7 @@ public class Player : INotifyPropertyChanged
 
     public int Morale { get; set; } = 50;
     public List<PlayerTrait> Traits { get; set; } = [];
+    public PlayerMentalState MentalState { get; set; } = new();
     public int Pace { get; set; }
     public int Shooting { get; set; }
     public int Dribbling { get; set; }
